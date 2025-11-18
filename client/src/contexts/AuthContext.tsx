@@ -34,12 +34,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     await new Promise(resolve => setTimeout(resolve, 500));
     
+    let tier: UserTier = "gold";
+    let company = "Demo Company";
+    
+    if (email.includes("free")) {
+      tier = "free";
+    } else if (email.includes("entry")) {
+      tier = "entry";
+    } else if (email.includes("platinum")) {
+      tier = "platinum";
+    }
+    
     const mockUser: User = {
-      id: "user-1",
+      id: "user-" + Date.now(),
       email,
-      name: email.split("@")[0],
-      company: "Innovatr",
-      tier: email.includes("free") ? "free" : "gold",
+      name: email.split("@")[0].charAt(0).toUpperCase() + email.split("@")[0].slice(1),
+      company,
+      tier,
     };
     
     setUser(mockUser);

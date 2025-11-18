@@ -13,14 +13,10 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useLocation } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
 import PortalLayout from "./PortalLayout";
 
 // Mock data - would come from API in production
-const mockMemberData = {
-  name: "Richard",
-  company: "Innovatr",
-  tier: "Gold" as const,
-};
 
 const mockCredits = {
   basicRemaining: 7,
@@ -69,19 +65,20 @@ const mockDeals = [
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
 
   const basicPercentage = (mockCredits.basicRemaining / mockCredits.basicTotal) * 100;
   const proPercentage = (mockCredits.proRemaining / mockCredits.proTotal) * 100;
 
   return (
-    <PortalLayout memberData={mockMemberData}>
+    <PortalLayout>
       <div className="p-6 max-w-7xl mx-auto space-y-6">
         {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-serif font-bold mb-2">
-            Welcome back, {mockMemberData.name}
+        <div className="mb-8" data-testid="section-welcome">
+          <h1 className="text-4xl font-serif font-bold mb-2" data-testid="text-welcome-name">
+            Welcome back, {user?.name}
           </h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-muted-foreground" data-testid="text-welcome-subtitle">
             Your research command centre
           </p>
         </div>
@@ -151,12 +148,12 @@ export default function Dashboard() {
             {/* Credit Summary Widget */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2" data-testid="text-credits-title">
                   <Sparkles className="w-5 h-5 text-primary" />
                   Your Research Credits
                 </CardTitle>
-                <CardDescription>
-                  Remaining balance as a {mockMemberData.tier} Member
+                <CardDescription data-testid="text-credits-description">
+                  Remaining balance as a {user?.tier?.toUpperCase()} Member
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
