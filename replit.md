@@ -60,6 +60,43 @@ Preferred communication style: Simple, everyday language.
 - **Image Assets**: Stored in `/attached_assets`, referenced via Vite's asset handling.
 - **Email/Communication**: Contact form exists, but backend email sending is not implemented.
 
+## Visual Design Updates (November 2025)
+
+**Background Images:**
+The website now features strategic background images for a modern, tech-forward aesthetic:
+
+1. **Hero Section:**
+   - Colorful light trails background (infinity pattern)
+   - Blur + scale effect for depth
+   - Dark gradient overlay ensures white text legibility
+   - Premium, innovative visual impact
+
+2. **Our Difference Section (01):**
+   - Blue neon LED lights background
+   - 15% opacity with gradient blend
+   - Subtle tech aesthetic without overwhelming feature cards
+   - Panel size updated to "25M panel size" (was "SA Insights")
+
+3. **The Proof Section (03):**
+   - Blue concentric circles background
+   - 8% opacity with soft blur
+   - Maintains focus on Vimeo video and content
+
+**Design Principles:**
+- Low opacity (8-15%) to maintain usability
+- Gradient overlays for seamless blending
+- Text legibility prioritized
+- Modern, innovative look aligned with www.innovatr.co.za
+
+## Dashboard Video (Entry Membership)
+
+**Location:** Entry Membership checkout page (`/checkout/membership-entry`)
+- Vimeo video ID: 1138121972
+- Shows private research dashboard in action
+- Positioned below "What's Included" list
+- Responsive 16:9 aspect ratio
+- Data-testid: "video-dashboard-entry"
+
 ## Upsiide Demo Video (The Proof Section)
 
 The Methodology Section (03 - The Proof) includes an embedded Vimeo video showcasing the Upsiide demo:
@@ -68,21 +105,18 @@ The Methodology Section (03 - The Proof) includes an embedded Vimeo video showca
 - Embedded Vimeo player using iframe
 - Video ID: 1138122776
 - Full-width responsive player in 16:9 aspect ratio
-- Autoplay enabled with mute on load
-- Loops continuously for better engagement
+- **Click-to-play:** Video does NOT autoplay (user must click to start)
+- Professional Vimeo player interface with full controls
 - Clean embed with title, byline, and portrait disabled
 
 **User Experience:**
-- Video loads and autoplays immediately when section is visible
-- Starts muted (users can unmute with player controls)
-- Loops continuously
+- Video requires user interaction to play (no autoplay)
 - Professional Vimeo player interface with full controls
 - Works seamlessly across all devices and browsers
 - No login required - publicly accessible
-- No upload or manual management required
 
 **Technical Details:**
 - Uses Vimeo's player.vimeo.com embed URL
-- Parameters: `autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0`
+- Parameters: `badge=0&autopause=0&player_id=0&app_id=58479`
 - Fully accessible with proper iframe attributes
 - Data-testid: "video-upsiide-vimeo"
