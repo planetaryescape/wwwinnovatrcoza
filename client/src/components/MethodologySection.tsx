@@ -1,18 +1,29 @@
 import { Card } from "@/components/ui/card";
 import { Sparkles, TrendingUp, MessageSquare, BarChart3, Zap, Clock } from "lucide-react";
+import neonLightsBackground from "@assets/pexels-chris-f-8344064_1763492180742.jpeg";
+import circlesBackground from "@assets/pexels-pixabay-247676_1763492180745.jpeg";
 
 const features = [
   { icon: Clock, label: "SPEED", subtitle: "24hr Turn-Around" },
   { icon: Zap, label: "EASY", subtitle: "Automated Briefing" },
   { icon: TrendingUp, label: "SMART", subtitle: "Quant + AI Qual" },
-  { icon: BarChart3, label: "LOCAL", subtitle: "SA Insights" },
+  { icon: BarChart3, label: "LOCAL", subtitle: "25M panel size" },
 ];
 
 export default function MethodologySection() {
 
   return (
-    <section className="py-20 bg-muted/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-20 relative overflow-hidden">
+      <div 
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ 
+          backgroundImage: `url(${neonLightsBackground})`,
+          opacity: 0.15
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
+      
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-4">
           <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
             01 — Our Difference
@@ -42,30 +53,42 @@ export default function MethodologySection() {
           ))}
         </div>
 
-        <div className="bg-card border border-card-border rounded-lg p-8 md:p-12">
-          <div className="text-center mb-4">
-            <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
-              03 — The Proof
-            </div>
-          </div>
-          <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6 text-center">
-            Don't Guess. Test.
-          </h2>
-          <p className="text-lg text-muted-foreground text-center max-w-2xl mx-auto mb-8">
-            Partnering with Upsiide we have made rapid testing truly AGILE
-          </p>
+        <div className="relative bg-card border border-card-border rounded-lg p-8 md:p-12 overflow-hidden">
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ 
+              backgroundImage: `url(${circlesBackground})`,
+              filter: 'blur(1px)',
+              opacity: 0.08
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-card/80 to-card" />
           
-          <div className="relative aspect-video rounded-lg overflow-hidden bg-muted/50 border border-border">
-            <iframe
-              src="https://player.vimeo.com/video/1138122776?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
-              className="w-full h-full absolute top-0 left-0"
-              frameBorder="0"
-              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-              data-testid="video-upsiide-vimeo"
-              title="UpsiideSalesVideo-Main"
-            />
+          <div className="relative z-10">
+            <div className="text-center mb-4">
+              <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
+                03 — The Proof
+              </div>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6 text-center">
+              Don't Guess. Test.
+            </h2>
+            <p className="text-lg text-muted-foreground text-center max-w-2xl mx-auto mb-8">
+              Partnering with Upsiide we have made rapid testing truly AGILE
+            </p>
+            
+            <div className="relative aspect-video rounded-lg overflow-hidden bg-muted/50 border border-border">
+              <iframe
+                src="https://player.vimeo.com/video/1138122776?badge=0&autopause=0&player_id=0&app_id=58479"
+                className="w-full h-full absolute top-0 left-0"
+                frameBorder="0"
+                allow="fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+                data-testid="video-upsiide-vimeo"
+                title="UpsiideSalesVideo-Main"
+              />
+            </div>
           </div>
         </div>
       </div>
