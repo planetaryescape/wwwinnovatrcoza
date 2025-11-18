@@ -19,8 +19,8 @@ export default function MethodologySection() {
         </div>
 
         <div className="text-center mb-16">
-          <h2 className="text-5xl font-serif font-bold mb-6">
-            Turning local insights into fast decision making
+          <h2 className="text-5xl font-serif font-bold mb-6 max-w-4xl mx-auto leading-tight">
+            Turning local insights into<br />fast decision making
           </h2>
           <p className="text-xl text-muted-foreground">
             We do the work fast, you make the decisions easily
@@ -51,7 +51,7 @@ export default function MethodologySection() {
             </div>
           </div>
           <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6 text-center">
-            Be sure it sells before it hits the shelves.
+            Don't Guess. Test.
           </h2>
           <p className="text-lg text-muted-foreground text-center max-w-2xl mx-auto mb-8">
             Partnering with Upsiide we have made rapid testing truly AGILE

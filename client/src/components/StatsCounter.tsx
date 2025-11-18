@@ -9,7 +9,7 @@ const stats: Stat[] = [
   { value: "200+", label: "Studies" },
   { value: "10+", label: "Markets" },
   { value: "10+", label: "Industries" },
-  { value: "45,000+", label: "Consumer Responses" },
+  { value: "45k+", label: "Consumer Responses" },
   { value: "50%", label: "YoY Growth" },
 ];
 
@@ -65,7 +65,11 @@ export default function StatsCounter() {
           {stats.map((stat, index) => (
             <div key={index} className="text-center" data-testid={`stat-${index}`}>
               <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
-                {stat.value.includes("+") ? (
+                {stat.value.includes("k+") ? (
+                  <>
+                    <AnimatedNumber target={parseInt(stat.value)} />k+
+                  </>
+                ) : stat.value.includes("+") ? (
                   <>
                     <AnimatedNumber target={parseInt(stat.value)} />+
                   </>

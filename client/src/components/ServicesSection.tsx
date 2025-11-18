@@ -7,7 +7,7 @@ const services = [
     number: "1",
     title: "Innovatr Test24 Basic",
     description: "24hr Pay Per Idea Quant Testing",
-    price: "R10,000 / idea",
+    price: "R5,000 / idea",
     features: [
       "Lite Testing (x100 consumers)",
       "Automated briefing & reporting",
@@ -19,7 +19,7 @@ const services = [
     number: "2",
     title: "Innovatr Test24 Pro",
     description: "24hr Custom Quant & AI Qual",
-    price: "From R50,000 / study",
+    price: "From R45,000 / study",
     features: [
       "Full Testing (+100)",
       "Custom Audience",

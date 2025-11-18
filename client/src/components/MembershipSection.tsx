@@ -16,8 +16,8 @@ const membershipPlans = [
     features: [
       "Trends Report Access",
       "Discounted Research",
-      "Test24 Basic (R5,000 per idea)",
-      "Test24 Pro (R45,000 per study)",
+      "Test24 Basic: R5,000 per idea",
+      "Test24 Pro: R45,000 per study",
       "Private Dashboard Access",
     ],
     value: null,
