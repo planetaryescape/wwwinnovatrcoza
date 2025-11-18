@@ -22,9 +22,6 @@ export default function MethodologySection() {
           <h2 className="text-5xl font-serif font-bold mb-6 max-w-4xl mx-auto leading-tight">
             Turning local insights into<br />fast decision making
           </h2>
-          <p className="text-xl text-muted-foreground">
-            We do the work fast, you make the decisions easily
-          </p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
