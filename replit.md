@@ -67,7 +67,7 @@ The Methodology Section (03 - The Proof) includes an Upsiide demo video upload f
 **Functionality:**
 - Drag-and-drop or click-to-browse file upload
 - Supports video formats: MP4, WebM, MOV, etc.
-- Maximum file size: 100MB
+- Maximum file size: 150MB
 - Client-side validation for file type and size
 - Video preview with HTML5 video player controls
 - Remove video button to replace or delete uploaded content

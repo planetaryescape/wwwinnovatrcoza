@@ -29,11 +29,11 @@ export default function MethodologySection() {
       return;
     }
 
-    const maxSize = 100 * 1024 * 1024;
+    const maxSize = 150 * 1024 * 1024;
     if (file.size > maxSize) {
       toast({
         title: "File too large",
-        description: "Please upload a video smaller than 100MB",
+        description: "Please upload a video smaller than 150MB",
         variant: "destructive",
       });
       return;
@@ -184,7 +184,7 @@ export default function MethodologySection() {
                     Choose Video File
                   </Button>
                   <p className="text-xs text-muted-foreground mt-3">
-                    Supported formats: MP4, WebM, MOV (max 100MB)
+                    Supported formats: MP4, WebM, MOV (max 150MB)
                   </p>
                 </div>
               </div>
