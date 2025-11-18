@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Check, Star, ShoppingCart } from "lucide-react";
 import { useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const entryFeatures = [
   "Trends Report Access",
@@ -16,21 +16,24 @@ const entryFeatures = [
 
 export default function CheckoutMembershipEntry() {
   const [, setLocation] = useLocation();
+  const [paymentType, setPaymentType] = useState<"monthly" | "annual">("annual");
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const handleCheckout = () => {
-    console.log("Proceeding to checkout with Entry membership");
+    console.log(`Proceeding to checkout with Entry membership - ${paymentType} payment`);
   };
 
   const formatPrice = (price: number) => {
     return `R${price.toLocaleString()}`;
   };
 
+  const monthlyPrice = 5000;
   const annualPrice = 60000;
   const monthlyEquivalent = 5000;
+  const totalDueToday = paymentType === "monthly" ? monthlyPrice : annualPrice;
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -54,13 +57,92 @@ export default function CheckoutMembershipEntry() {
                 </div>
                 <div>
                   <h1 className="text-4xl font-serif font-bold">Entry Membership</h1>
-                  <p className="text-muted-foreground">Annual Plan</p>
+                  <p className="text-muted-foreground">
+                    {paymentType === "monthly" ? "Monthly Plan" : "Annual Plan"}
+                  </p>
                 </div>
               </div>
               <p className="text-lg">
                 For startups & small teams seeking affordable research insights
               </p>
             </div>
+
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="text-xl">Choose Your Payment Option</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <button
+                    onClick={() => setPaymentType("monthly")}
+                    className={`border-2 rounded-lg p-6 text-left transition-all hover-elevate active-elevate-2 ${
+                      paymentType === "monthly"
+                        ? "border-primary bg-primary/5"
+                        : "border-border"
+                    }`}
+                    data-testid="button-payment-monthly"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold text-lg">Monthly</h3>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                        paymentType === "monthly" ? "border-primary" : "border-muted-foreground"
+                      }`}>
+                        {paymentType === "monthly" && (
+                          <div className="w-3 h-3 rounded-full bg-primary" />
+                        )}
+                      </div>
+                    </div>
+                    <div className="mb-2">
+                      <span className="text-3xl font-bold text-primary">
+                        {formatPrice(monthlyPrice)}
+                      </span>
+                      <span className="text-muted-foreground ml-1">/month</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Flexible monthly billing • Cancel anytime
+                    </p>
+                  </button>
+
+                  <button
+                    onClick={() => setPaymentType("annual")}
+                    className={`border-2 rounded-lg p-6 text-left transition-all hover-elevate active-elevate-2 ${
+                      paymentType === "annual"
+                        ? "border-primary bg-primary/5"
+                        : "border-border"
+                    }`}
+                    data-testid="button-payment-annual"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold text-lg">Annual</h3>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                        paymentType === "annual" ? "border-primary" : "border-muted-foreground"
+                      }`}>
+                        {paymentType === "annual" && (
+                          <div className="w-3 h-3 rounded-full bg-primary" />
+                        )}
+                      </div>
+                    </div>
+                    <div className="mb-2">
+                      <span className="text-3xl font-bold text-primary">
+                        {formatPrice(annualPrice)}
+                      </span>
+                      <span className="text-muted-foreground ml-1">/year</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      One payment • Full year access
+                    </p>
+                  </button>
+                </div>
+
+                {paymentType === "annual" && (
+                  <div className="mt-4 bg-accent/10 border border-accent/20 rounded-lg p-4">
+                    <p className="text-sm font-medium text-accent">
+                      Save with annual billing - just {formatPrice(monthlyEquivalent)}/month equivalent
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
             <Card className="mb-6">
               <CardHeader>
@@ -121,25 +203,54 @@ export default function CheckoutMembershipEntry() {
                   <h3 className="font-semibold mb-2">Selected Plan</h3>
                   <div className="bg-muted/50 rounded-lg p-4">
                     <p className="font-medium">Entry Membership</p>
-                    <p className="text-sm text-muted-foreground mt-1">Annual billing</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {paymentType === "monthly" ? "Monthly billing" : "Annual billing"}
+                    </p>
                   </div>
                 </div>
 
                 <div className="space-y-2 pt-4 border-t">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Annual Price</span>
-                    <span data-testid="text-annual-price">{formatPrice(annualPrice)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Monthly Equivalent</span>
-                    <span className="text-accent">{formatPrice(monthlyEquivalent)}/month</span>
-                  </div>
-                  <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                    <span>Total Due Today</span>
-                    <span className="text-primary" data-testid="text-total">
-                      {formatPrice(annualPrice)}
-                    </span>
-                  </div>
+                  {paymentType === "monthly" ? (
+                    <>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Monthly Price</span>
+                        <span data-testid="text-monthly-price" className="font-semibold">
+                          {formatPrice(monthlyPrice)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Total for 12 months</span>
+                        <span className="text-accent" data-testid="text-12-month-total">
+                          {formatPrice(monthlyPrice * 12)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-lg font-bold pt-2 border-t">
+                        <span>Due Today</span>
+                        <span className="text-primary" data-testid="text-total">
+                          {formatPrice(totalDueToday)}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Annual Price</span>
+                        <span data-testid="text-annual-price" className="font-semibold">
+                          {formatPrice(annualPrice)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Monthly Equivalent</span>
+                        <span className="text-accent">{formatPrice(monthlyPrice)}/month</span>
+                      </div>
+                      <div className="flex justify-between text-lg font-bold pt-2 border-t">
+                        <span>Total Due Today</span>
+                        <span className="text-primary" data-testid="text-total">
+                          {formatPrice(totalDueToday)}
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <Button
@@ -153,7 +264,9 @@ export default function CheckoutMembershipEntry() {
 
                 <div className="text-center pt-4 border-t space-y-2">
                   <p className="text-xs text-muted-foreground">
-                    Billed annually • Renews automatically
+                    {paymentType === "monthly"
+                      ? "Billed monthly • Cancel anytime"
+                      : "Billed annually • Renews automatically"}
                   </p>
                   <p className="text-xs text-primary font-medium">
                     Start saving on research today
