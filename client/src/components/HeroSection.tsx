@@ -27,11 +27,8 @@ export default function HeroSection() {
         <h1 className="text-6xl sm:text-7xl lg:text-8xl font-serif font-bold text-white mb-4 tracking-tight leading-tight">
           Launch Better Innovation
         </h1>
-        <p className="text-2xl sm:text-3xl text-white/90 mb-8 font-light">
+        <p className="text-2xl sm:text-3xl text-white/90 mb-12 font-light">
           Smart Research in 24hrs
-        </p>
-        <p className="text-lg sm:text-xl text-white/80 mb-12 max-w-3xl mx-auto font-light">
-          Bringing Big Ideas to life with in-house Data, Design and Testing.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
