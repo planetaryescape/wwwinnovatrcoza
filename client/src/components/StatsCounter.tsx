@@ -1,0 +1,87 @@
+import { useEffect, useState, useRef } from "react";
+
+interface Stat {
+  value: string;
+  label: string;
+}
+
+const stats: Stat[] = [
+  { value: "200+", label: "Studies" },
+  { value: "10+", label: "Markets" },
+  { value: "10+", label: "Industries" },
+  { value: "45,000+", label: "Consumer Responses" },
+  { value: "50%", label: "YoY Growth" },
+];
+
+function AnimatedNumber({ target, suffix = "" }: { target: number; suffix?: string }) {
+  const [count, setCount] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !hasAnimated) {
+          setHasAnimated(true);
+          const duration = 2000;
+          const steps = 60;
+          const increment = target / steps;
+          let current = 0;
+
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+              setCount(target);
+              clearInterval(timer);
+            } else {
+              setCount(Math.floor(current));
+            }
+          }, duration / steps);
+
+          return () => clearInterval(timer);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [target, hasAnimated]);
+
+  return <span ref={ref}>{count}{suffix}</span>;
+}
+
+export default function StatsCounter() {
+  return (
+    <section className="py-16 bg-muted/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <p className="text-center text-sm text-muted-foreground mb-8 uppercase tracking-wider">
+          Brands who trust Innovatr
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+          {stats.map((stat, index) => (
+            <div key={index} className="text-center" data-testid={`stat-${index}`}>
+              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
+                {stat.value.includes("+") ? (
+                  <>
+                    <AnimatedNumber target={parseInt(stat.value)} />+
+                  </>
+                ) : stat.value.includes("%") ? (
+                  <>
+                    <AnimatedNumber target={parseInt(stat.value)} />%
+                  </>
+                ) : (
+                  stat.value
+                )}
+              </div>
+              <div className="text-sm text-muted-foreground">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
