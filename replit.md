@@ -68,18 +68,21 @@ The Methodology Section (03 - The Proof) includes an embedded Vimeo video showca
 - Embedded Vimeo player using iframe
 - Video ID: 1138122776
 - Full-width responsive player in 16:9 aspect ratio
-- Standard Vimeo player controls (play, pause, volume, fullscreen)
-- Allows autoplay, fullscreen, and picture-in-picture
+- Autoplay enabled with mute on load
+- Loops continuously for better engagement
 - Clean embed with title, byline, and portrait disabled
 
 **User Experience:**
-- Video loads immediately on page load
-- Professional Vimeo player interface
+- Video loads and autoplays immediately when section is visible
+- Starts muted (users can unmute with player controls)
+- Loops continuously
+- Professional Vimeo player interface with full controls
 - Works seamlessly across all devices and browsers
+- No login required - publicly accessible
 - No upload or manual management required
 
 **Technical Details:**
 - Uses Vimeo's player.vimeo.com embed URL
-- Configured with custom parameters for clean presentation
+- Parameters: `autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0`
 - Fully accessible with proper iframe attributes
-- Data-testid attribute for testing purposes
+- Data-testid: "video-upsiide-vimeo"
