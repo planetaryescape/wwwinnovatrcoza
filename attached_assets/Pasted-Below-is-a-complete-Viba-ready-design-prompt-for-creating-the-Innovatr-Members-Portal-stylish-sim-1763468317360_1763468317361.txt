@@ -1,0 +1,323 @@
+Below is a complete Viba-ready design prompt for creating the Innovatr Members Portal — stylish, simple, personalised, value-led, and engagement-driven.
+You can copy/paste this directly into your platform.
+
+✅ VIBA DESIGN PROMPT — INNOVATR MEMBERS PORTAL
+
+PROJECT: Design a modern, intuitive, personalised Members Portal for Innovatr.
+USERS: Innovation teams, corporate marketers, founders, agencies, and insights professionals who have purchased a membership (Entry, Gold, Platinum).
+
+GOAL: Deliver a seamless, personalised experience that helps members:
+• Discover relevant trends & insights
+• Launch new briefs instantly
+• Manage and top up research credits
+• Access past research results
+• Unlock exclusive member-only value
+• Increase ongoing engagement
+
+🎨 OVERALL PORTAL STYLE & UX
+
+Premium SaaS dashboard look: bright white, charcoal, and neon highlight accents aligned to Innovatr brand.
+
+Minimalist, distraction-free interface with large cards, spacious layout, clean typography.
+
+Personalised welcome panel at the top: “Welcome back, [Name]” + membership tier badge (Entry / Gold / Platinum).
+
+Sticky left-hand navigation with icons for each section.
+
+Use micro-animations and progress indicators (e.g., credit usage bars).
+
+Mobile-responsive.
+
+Intuitive, very fast to navigate, “1-click access” to all core actions.
+
+🧭 PORTAL STRUCTURE & PAGES
+
+Design the portal with the following primary sections:
+
+1. Home Dashboard (Personalised Overview)
+
+Purpose: A personalised value snapshot.
+
+Components to include:
+
+A. Member Profile Capsule
+
+Name
+
+Company
+
+Membership Tier (Entry / Gold / Platinum)
+
+Benefits summary
+
+Progress indicators (e.g., Basic ideas used / remaining)
+
+B. “Your Quick Actions” Row (CTA Squares)
+
+Launch New Test24 Brief
+
+Download Latest Trend Reports
+
+Buy More Research Credits
+
+View Past Studies
+
+Each CTA uses vibrant icon-based tiles.
+
+C. Personalised Recommendations Feed
+
+Auto-curated based on industry and past interactions:
+
+Industry-specific trends
+
+Competitor alerts
+
+Suggested topics to test next
+
+New monthly reports
+
+Use a dynamic card carousel.
+
+D. Credit Summary Widget
+
+Real-time:
+
+Credits remaining
+
+Expiry (if applicable)
+
+Suggested top-up bundles
+
+One-click “Top Up” button
+
+E. Member Deals Box
+
+Monthly discounts
+
+Early access offers
+
+Bonus reports
+
+Exclusive bundles for members
+
+Clear CTA: Explore Deals
+
+2. Trend & Insights Library
+
+Goal: Give members access to local, industry-relevant intelligence tied to their profile.
+
+Required Features:
+
+Personalised filter: auto-show industry-related reports first
+
+Search bar (topic, category, trend type, market)
+
+Sort options: newest, most downloaded, recommended
+
+Report Cards:
+
+Title
+
+Summary
+
+Date
+
+Download button
+
+Tag system (Category: Beverage / Retail / Innovation / Youth / Design etc.)
+
+Monthly new report indicator (“NEW” badge)
+
+Bookmarking/favourite reports
+
+Optional: “Based on your industry, we recommend:” row.
+
+3. Launch a New Brief (Briefing Forms)
+
+Goal: Allow members to launch new Test24 Basic or Pro studies instantly.
+
+Design Requirements:
+
+Two big cards: Test24 Basic or Test24 Pro
+
+Simple guided form:
+
+Select product type
+
+Upload ideas (text, image, video)
+
+Select target audience
+
+Add competitor concepts (optional)
+
+Add research questions (if Pro)
+
+Confirm and launch
+
+Auto-save drafts
+
+Confirmation screen showing:
+
+Estimated turnaround time (24hr)
+
+Credit cost
+
+Status tracker (“In Field → Processing → Ready”)
+
+UX Tone:
+
+Fast, lightweight, “three steps & done” feel.
+
+4. Credits & Billing Section
+
+Goal: Transparency and control over credit usage.
+
+Features:
+
+Current credit balance (Basic Credits + Pro Credits)
+
+Animated progress bars (used / available)
+
+Membership discounts automatically displayed
+
+Purchase buttons:
+
+Buy Basic Credit Packs
+
+Buy Pro Credit Packs
+
+Auto-renew toggle (optional)
+
+Billing history table
+
+VAT invoices downloadable
+
+Payment method management
+
+UX:
+
+Clean, easy, highly visual.
+
+5. Past Research Dashboard
+
+Goal: Give members instant access to their full testing history.
+
+Features:
+
+List and grid view options
+
+Filters: date, brand, category, product type, score, Test24 Basic vs Pro
+
+Each Study Card includes:
+
+Study title
+
+Date
+
+Performance highlights (top-line metric snapshot)
+
+“Open Dashboard” button
+
+“Download Full Report” button
+
+For Pro studies:
+
+AI Qual video snippet previews
+
+“View VOC Library” button
+
+Detail Page:
+
+A beautiful, clean results page displaying:
+
+Idea ranking
+
+Market simulator
+
+Emotional/attitudinal diagnostics
+
+Quadrant chart
+
+Theme summaries
+
+Verbatims
+
+Export options (PDF, PPTX)
+
+6. Member-Only Deals Area
+
+Goal: Encourage upsell & ongoing engagement.
+
+Features:
+
+Monthly discount cards (e.g., “Buy 3 ideas, get 1 free”)
+
+Bundle upgrades (Gold → Platinum)
+
+Limited-time offers
+
+Exclusive trend reports
+
+Design as promotional tiles with strong visual identity.
+
+7. Settings / Profile
+
+Update profile
+
+Change industry preference (affects trend recommendations)
+
+Notification preferences
+
+Team access (add/remove users)
+
+Integrations (optional future)
+
+🧩 CROSS-FUNCTIONAL FEATURES
+1. Personalisation Engine
+
+Every page should adapt based on:
+
+Member tier
+
+Industry
+
+Past tests
+
+Download behaviour
+
+Portal activity
+
+2. Engagement Nudges
+
+“You have unused credits”
+
+“A new trend report is available in your industry”
+
+“Your brief draft is waiting to be completed”
+
+“3 ideas from competitors are trending in your market”
+
+3. Gamified Value Meter (Optional)
+
+Shows how much value the member has unlocked this year.
+
+📱 VISUAL STYLE GUIDELINES
+
+Crisp SaaS aesthetic
+
+High contrast with neon accent highlights
+
+Rounded corner tiles
+
+Micro shadows for depth
+
+Simple, generous spacing
+
+Modern iconography
+
+No clutter — always 1 primary action per screen
+
+🎯 OVERALL FEEL
+
+The portal should feel like a smart research command centre — personalised, powerful, and effortless.
+Fast decisions. Smart insights. Total control.

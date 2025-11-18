@@ -14,6 +14,13 @@ import CheckoutProMembers from "@/pages/CheckoutProMembers";
 import CheckoutMembershipEntry from "@/pages/CheckoutMembershipEntry";
 import CheckoutMembershipGold from "@/pages/CheckoutMembershipGold";
 import CheckoutMembershipPlatinum from "@/pages/CheckoutMembershipPlatinum";
+import Dashboard from "@/pages/portal/Dashboard";
+import TrendsInsights from "@/pages/portal/TrendsInsights";
+import LaunchBrief from "@/pages/portal/LaunchBrief";
+import CreditsAndBilling from "@/pages/portal/CreditsAndBilling";
+import PastResearch from "@/pages/portal/PastResearch";
+import MemberDeals from "@/pages/portal/MemberDeals";
+import Settings from "@/pages/portal/Settings";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -30,6 +37,13 @@ function Router() {
       <Route path="/checkout/membership-entry" component={CheckoutMembershipEntry} />
       <Route path="/checkout/membership-gold" component={CheckoutMembershipGold} />
       <Route path="/checkout/membership-platinum" component={CheckoutMembershipPlatinum} />
+      <Route path="/portal" component={Dashboard} />
+      <Route path="/portal/trends" component={TrendsInsights} />
+      <Route path="/portal/launch" component={LaunchBrief} />
+      <Route path="/portal/credits" component={CreditsAndBilling} />
+      <Route path="/portal/research" component={PastResearch} />
+      <Route path="/portal/deals" component={MemberDeals} />
+      <Route path="/portal/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>
   );

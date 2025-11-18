@@ -16,7 +16,7 @@ Preferred communication style: Simple, everyday language.
 
 **Framework**: React 18 with TypeScript, using Vite as the build tool and development server.
 
-**Routing**: Wouter is used for client-side routing, providing a lightweight alternative to React Router. The application supports multiple routes including the home page, service detail pages (Test24 Basic, Test24 Pro, Innovatr Consult), and checkout flows for both pay-as-you-go and membership options.
+**Routing**: Wouter is used for client-side routing, providing a lightweight alternative to React Router. The application supports multiple routes including the home page, service detail pages (Test24 Basic, Test24 Pro, Innovatr Consult), checkout flows for both pay-as-you-go and membership options, and a comprehensive members portal with dashboard, trends library, research management, credits, and settings.
 
 **State Management**: TanStack Query (React Query) v5 handles server state management, API calls, and caching. Local component state is managed with React hooks (useState, useEffect).
 
@@ -77,3 +77,107 @@ Preferred communication style: Simple, everyday language.
 **Environment Configuration**: Requires DATABASE_URL environment variable for database connections. Additional environment variables likely needed for Stripe keys and other third-party integrations.
 
 **Replit Integration**: Includes Replit-specific development plugins for runtime error overlay, cartographer (code navigation), and dev banner when running in Replit environment.
+
+## Members Portal
+
+The application now includes a comprehensive, personalized members portal designed as a premium SaaS dashboard experience. The portal provides authenticated members with tools to manage research, view insights, and engage with the platform.
+
+### Portal Architecture
+
+**Layout Structure**: The portal uses a persistent sidebar navigation layout built with Shadcn's sidebar primitives. The layout includes a member profile capsule showing name, company, and membership tier (Entry/Gold/Platinum), plus navigation to all portal sections.
+
+**Portal Routes**: All portal pages are mounted under `/portal/*` routes and share a common PortalLayout component that provides consistent navigation and branding.
+
+**Mock Authentication**: Currently uses mock member data (hardcoded in component state) as full authentication integration is pending. In production, member data would come from session/auth context.
+
+### Portal Sections
+
+1. **Dashboard** (`/portal`):
+   - Personalized welcome with member tier badge
+   - Quick action cards for launching studies, accessing trends, buying credits, and viewing past research
+   - Credit summary widget with progress bars for Test24 Basic and Pro credits
+   - Personalized recommendations feed curated by industry
+   - Member deals box with exclusive offers and expiry countdown
+   - Activity stats showing studies completed, reports downloaded, and value unlocked
+
+2. **Trends & Insights Library** (`/portal/trends`):
+   - Searchable, filterable library of industry trend reports
+   - Category and sorting filters (newest, most downloaded)
+   - Personalized recommendations based on member industry
+   - Bookmark system for saving favorite reports
+   - Download buttons for PDF reports
+   - "NEW" badges for recently published content
+
+3. **Launch New Brief** (`/portal/launch`):
+   - Guided briefing form for Test24 Basic and Pro studies
+   - Two-step flow: Select study type → Complete brief form
+   - Form fields: product name, category, description, target audience, research questions (Pro only)
+   - File upload for supporting assets (images, videos, documents)
+   - Real-time credit cost calculator showing member pricing
+   - Auto-save drafts functionality (stubbed)
+
+4. **Credits & Billing** (`/portal/credits`):
+   - Visual credit balance display with progress bars
+   - Test24 Basic and Pro credit tracking separately
+   - Credit purchase cards showing member discounts (up to 55% off)
+   - Billing history table with downloadable invoices
+   - Payment method management
+   - Expiry warnings for unused credits
+
+5. **Past Research Dashboard** (`/portal/research`):
+   - Toggle between grid and list view modes
+   - Filters: search, category, study type (Basic vs Pro)
+   - Study cards showing score, category, date, and top findings
+   - Color-coded performance scores (green 80+, accent 70-79, orange <70)
+   - Actions: View detailed results, Download/Export report
+   - AI qual video previews for Pro studies (stubbed)
+
+6. **Member Deals** (`/portal/deals`):
+   - Exclusive member-only promotional offers
+   - Limited-time deal cards with savings amounts and expiry countdown
+   - Monthly perks section (free reports, beta access, consultation credits)
+   - "Coming Soon" preview of future benefits
+   - CTA to upgrade membership tier or purchase credits
+
+7. **Settings** (`/portal/settings`):
+   - Profile information editor (name, email, company, job title)
+   - Industry selection (affects trend recommendations)
+   - Notification preferences with toggles for reports, credits, studies, deals
+   - Team access management (invite/remove users)
+   - Security settings (password change)
+
+### Portal Design System
+
+**Visual Style**: Matches the main site's premium SaaS aesthetic with bright white backgrounds, charcoal text, and neon accent highlights. Uses the same Tailwind color tokens and Shadcn components.
+
+**Navigation Pattern**: Sticky sidebar with icon-based menu items. Each item highlights when active (using wouter's current location). Profile capsule at top shows tier badge with color coding (Platinum=primary, Gold=accent, Entry=muted).
+
+**Interaction Design**: Hover-elevate and active-elevate-2 utility classes for interactive cards. Progress bars for credit usage. Badge system for status indicators (NEW, LIMITED TIME, etc).
+
+**Data Visualization**: Progress components for credit consumption, color-coded scores for research performance, and visual stat counters for engagement metrics.
+
+**Responsive Behavior**: Sidebar collapses on mobile. All grids stack to single column. Tables remain scrollable. Toggle controls adapt to touch.
+
+### Mock Data Structure
+
+All portal pages currently use hardcoded mock data for demonstration:
+- Member profile: Richard @ Innovatr, Gold tier
+- Credits: 7/10 Basic, 1/2 Pro remaining
+- Past studies: 6 completed research projects with scores 68-85
+- Trend reports: 5 industry reports across categories
+- Billing history: 3 past invoices
+- Deals: 3 exclusive offers + 3 monthly perks
+
+In production, all data would come from API endpoints backed by the database.
+
+### Future Enhancements
+
+- Real authentication/session management integration
+- API endpoints for all portal data (credits, studies, reports, billing)
+- WebSocket or polling for real-time study status updates
+- Enhanced analytics dashboard with charts (using Recharts)
+- Team collaboration features (shared studies, comments)
+- Integration with external services (export to PowerPoint, email delivery)
+- Gamification elements (achievement badges, value meter)
+
+**Current State**: All portal pages are fully designed and functional with mock data. Ready for backend API integration once authentication system is implemented.
