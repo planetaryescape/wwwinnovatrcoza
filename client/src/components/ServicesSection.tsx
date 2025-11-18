@@ -3,23 +3,11 @@ import { TrendingUp, Zap, Target, Rocket } from "lucide-react";
 
 const services = [
   {
-    icon: TrendingUp,
-    number: "1",
-    title: "Innovatr Intelligence",
-    description: "Bi-weekly insights, trends and reports",
-    price: "R5,000 / month",
-    features: [
-      "Monitor trends & competitor launch alerts",
-      "Opportunity identification",
-      "Bi-weekly curated insights",
-    ],
-  },
-  {
     icon: Zap,
-    number: "2",
+    number: "1",
     title: "Innovatr Test24 Basic",
     description: "24hr Pay Per Idea Quant Testing",
-    price: "R5,000 / idea",
+    price: "R10,000 / idea",
     features: [
       "Lite Testing (x100 consumers)",
       "Automated briefing & reporting",
@@ -28,7 +16,7 @@ const services = [
   },
   {
     icon: Target,
-    number: "3",
+    number: "2",
     title: "Innovatr Test24 Pro",
     description: "24hr Custom Quant & AI Qual",
     price: "From R50,000 / study",
@@ -36,6 +24,18 @@ const services = [
       "Full Testing (+100)",
       "Custom Audience",
       "Quant + AI Qual",
+    ],
+  },
+  {
+    icon: TrendingUp,
+    number: "3",
+    title: "Innovatr Intelligence",
+    description: "Bi-weekly insights, trends and reports",
+    price: "R5,000 / month",
+    features: [
+      "Monitor trends & competitor launch alerts",
+      "Opportunity identification",
+      "Bi-weekly curated insights",
     ],
   },
   {

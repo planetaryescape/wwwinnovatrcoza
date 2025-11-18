@@ -15,7 +15,7 @@ export default function PromoBanner() {
             <div>
               <h3 className="text-2xl font-serif font-bold mb-1">Limited Time Offer</h3>
               <p className="text-accent-foreground/90 text-lg">
-                Run 2 Test24 Basic Ideas, Get 1 Free
+                First Test24 basic idea on us.
               </p>
             </div>
           </div>

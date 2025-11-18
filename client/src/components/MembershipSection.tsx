@@ -12,7 +12,7 @@ const membershipPlans = [
     monthly: "R5k/month",
     badge: null,
     description: "For startups & small teams",
-    savings: "Save up to 50%",
+    savings: "Save up to 40%",
     features: [
       "Trends Report Access",
       "Discounted Research",
@@ -79,7 +79,7 @@ export default function MembershipSection() {
           {membershipPlans.map((plan, index) => (
             <Card 
               key={index}
-              className={`hover-elevate transition-all duration-300 relative ${
+              className={`hover-elevate transition-all duration-300 relative flex flex-col ${
                 plan.badge ? 'border-primary shadow-lg' : ''
               }`}
               data-testid={`membership-card-${index}`}
@@ -108,8 +108,8 @@ export default function MembershipSection() {
                   <div className="text-sm font-semibold text-accent mt-2">{plan.value}</div>
                 )}
               </CardHeader>
-              <CardContent className="space-y-6">
-                <ul className="space-y-3">
+              <CardContent className="space-y-6 flex flex-col flex-1">
+                <ul className="space-y-3 flex-1">
                   {plan.features.map((feature, fIndex) => (
                     <li key={fIndex} className="flex items-start gap-3">
                       <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
@@ -118,7 +118,7 @@ export default function MembershipSection() {
                   ))}
                 </ul>
                 <Button 
-                  className="w-full" 
+                  className="w-full mt-auto" 
                   size="lg"
                   variant={plan.badge ? "default" : "outline"}
                   onClick={() => handleBecomeMember(plan.name)}
