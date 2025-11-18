@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Check, Zap, Target } from "lucide-react";
+import { useLocation } from "wouter";
 
 const pricingPlans = {
   payg: [
@@ -71,9 +72,22 @@ const pricingPlans = {
 
 export default function PricingSection() {
   const [activeTab, setActiveTab] = useState("payg");
+  const [, setLocation] = useLocation();
   
-  const handleBuyNow = (plan: string) => {
-    console.log(`Buy ${plan} clicked`);
+  const handleBuyNow = (planName: string) => {
+    if (activeTab === "payg") {
+      if (planName === "Test24 Basic") {
+        setLocation("/checkout/basic-payg");
+      } else if (planName === "Test24 Pro") {
+        setLocation("/checkout/pro-payg");
+      }
+    } else {
+      if (planName === "Test24 Basic") {
+        setLocation("/checkout/basic-members");
+      } else if (planName === "Test24 Pro") {
+        setLocation("/checkout/pro-members");
+      }
+    }
   };
 
   return (
