@@ -17,12 +17,12 @@ export default function Home() {
       <HeroSection />
       <StatsCounter />
       <TrustBar />
+      <MethodologySection />
       <div id="services">
         <ServicesSection />
       </div>
       <PricingSection />
       <MembershipSection />
-      <MethodologySection />
       <PromoBanner />
       <div id="contact">
         <ContactSection />

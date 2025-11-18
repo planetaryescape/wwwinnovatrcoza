@@ -14,7 +14,7 @@ export default function MethodologySection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-4">
           <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
-            02 — Our Difference
+            01 — Our Difference
           </div>
         </div>
 
