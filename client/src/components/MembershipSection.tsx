@@ -41,7 +41,7 @@ const membershipPlans = [
       "x10 Test24 Basic ideas / year",
       "x2 Test24 Pro Studies / year",
     ],
-    value: "~R200k value",
+    value: "~R260k value",
   },
   {
     name: "Platinum",
@@ -60,7 +60,7 @@ const membershipPlans = [
       "x3 Test24 Pro Studies / year",
       "Dedicated Insights Support",
     ],
-    value: "~R300k value",
+    value: "~R360k value",
   },
 ];
 

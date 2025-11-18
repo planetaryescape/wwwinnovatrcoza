@@ -31,9 +31,9 @@ export default function CheckoutMembershipPlatinum() {
   };
 
   const entryPrice = 60000;
-  const platinumUpgrade = 135000;
-  const totalPrice = 195000;
-  const totalValue = 300000;
+  const platinumUpgrade = 195000;
+  const totalPrice = 255000;
+  const totalValue = 360000;
   const savings = totalValue - totalPrice;
 
   return (
@@ -105,7 +105,7 @@ export default function CheckoutMembershipPlatinum() {
                         <li>• 15 Basic credits included</li>
                         <li>• 3 Pro studies included</li>
                         <li>• Dedicated support team</li>
-                        <li>• ~R300k total value</li>
+                        <li>• ~R360k total value</li>
                       </ul>
                     </div>
                   </div>

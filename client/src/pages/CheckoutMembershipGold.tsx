@@ -29,9 +29,9 @@ export default function CheckoutMembershipGold() {
   };
 
   const entryPrice = 60000;
-  const goldUpgrade = 60000;
-  const totalPrice = 120000;
-  const totalValue = 200000;
+  const goldUpgrade = 120000;
+  const totalPrice = 180000;
+  const totalValue = 260000;
   const savings = totalValue - totalPrice;
 
   return (
@@ -101,7 +101,7 @@ export default function CheckoutMembershipGold() {
                       <ul className="space-y-1 text-sm text-muted-foreground">
                         <li>• 10 Basic credits included</li>
                         <li>• 2 Pro studies included</li>
-                        <li>• ~R200k total value</li>
+                        <li>• ~R260k total value</li>
                       </ul>
                     </div>
                   </div>
