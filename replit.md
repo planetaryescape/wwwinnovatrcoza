@@ -153,7 +153,7 @@ Users can claim a R10,000 Test24 Basic coupon by providing their name and email 
 
 **Frontend:**
 - Route: `/claim-coupon`
-- Background: Colorful light trails image with blur and dark overlay
+- Background: Futuristic road with neon light trails (blue, purple, pink) with blur and dark overlay (Picture 1_1763494967673.jpg)
 - Form Fields: Name and Email with validation
 - Success State: Displays generated coupon code with copy-to-clipboard functionality
 - Call-to-Action: Accessible from "Limited Time Offer" banner on home page

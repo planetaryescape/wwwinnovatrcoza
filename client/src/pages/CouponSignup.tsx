@@ -11,7 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Gift, CheckCircle2, Copy, ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
-import coverImage from "@assets/Cover Image_1763494014651.png";
+import coverImage from "@assets/Picture 1_1763494967673.jpg";
 
 export default function CouponSignup() {
   const [, setLocation] = useLocation();
