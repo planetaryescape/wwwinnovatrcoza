@@ -146,28 +146,6 @@ export default function MembershipSection() {
                     </li>
                   ))}
                 </ul>
-                
-                {plan.name === "Entry" && (
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-semibold">See Your Private Dashboard in Action</h4>
-                    <div style={{ padding: "56.25% 0 0 0", position: "relative" }}>
-                      <iframe
-                        src="https://player.vimeo.com/video/1138121972?badge=0&autopause=0&player_id=0&app_id=58479"
-                        style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          width: "100%",
-                          height: "100%"
-                        }}
-                        allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
-                        title="Private Research Dashboard Demo"
-                        data-testid="video-dashboard-entry"
-                      />
-                    </div>
-                  </div>
-                )}
-                
                 <Button 
                   className="w-full mt-auto" 
                   size="lg"

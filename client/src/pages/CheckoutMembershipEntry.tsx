@@ -177,7 +177,7 @@ export default function CheckoutMembershipEntry() {
               <CardHeader>
                 <CardTitle className="text-xl">What's Included</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-4">
                   {entryFeatures.map((feature, index) => (
                     <div key={index} className="flex gap-3">
@@ -185,6 +185,25 @@ export default function CheckoutMembershipEntry() {
                       <span className="text-sm">{feature}</span>
                     </div>
                   ))}
+                </div>
+                
+                <div className="space-y-3 pt-4 border-t">
+                  <h4 className="font-semibold">See Your Private Dashboard in Action</h4>
+                  <div style={{ padding: "56.25% 0 0 0", position: "relative" }}>
+                    <iframe
+                      src="https://player.vimeo.com/video/1138121972?badge=0&autopause=0&player_id=0&app_id=58479"
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%"
+                      }}
+                      allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
+                      title="Private Research Dashboard Demo"
+                      data-testid="video-dashboard-entry"
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
