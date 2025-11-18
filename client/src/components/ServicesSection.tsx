@@ -1,5 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, Zap, Target, Rocket } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { TrendingUp, Zap, Target, Rocket, ArrowRight } from "lucide-react";
+import { Link } from "wouter";
 
 const services = [
   {
@@ -8,6 +10,7 @@ const services = [
     title: "Innovatr Test24 Basic",
     description: "24hr Pay Per Idea Quant Testing",
     price: "R5,000 / idea",
+    link: "/test24-basic",
     features: [
       "Lite Testing (x100 consumers)",
       "Automated briefing & reporting",
@@ -20,6 +23,7 @@ const services = [
     title: "Innovatr Test24 Pro",
     description: "24hr Custom Quant & AI Qual",
     price: "From R45,000 / study",
+    link: "/test24-pro",
     features: [
       "Full Testing (+100)",
       "Custom Audience",
@@ -32,6 +36,7 @@ const services = [
     title: "Innovatr Intelligence",
     description: "Bi-weekly insights, trends and reports",
     price: "R5,000 / month",
+    link: null,
     features: [
       "Monitor trends & competitor launch alerts",
       "Opportunity identification",
@@ -44,6 +49,7 @@ const services = [
     title: "Innovatr Consult",
     description: "Enterprise Level Strategic Problem Solving",
     price: "Custom Pricing",
+    link: "/innovatr-consult",
     features: [
       "Idea to Market Consulting",
       "Strategy, Design, Testing & Go to Market",
@@ -79,7 +85,7 @@ export default function ServicesSection() {
                 <CardDescription className="text-base">{service.description}</CardDescription>
                 <div className="text-lg font-bold text-primary pt-2">{service.price}</div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 <ul className="space-y-2">
                   {service.features.map((feature, fIndex) => (
                     <li key={fIndex} className="flex items-start gap-2 text-sm">
@@ -88,6 +94,18 @@ export default function ServicesSection() {
                     </li>
                   ))}
                 </ul>
+                {service.link && (
+                  <Link href={service.link}>
+                    <Button 
+                      variant="outline" 
+                      className="w-full group"
+                      data-testid={`button-learn-more-${index}`}
+                    >
+                      Learn More
+                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
+                )}
               </CardContent>
             </Card>
           ))}
