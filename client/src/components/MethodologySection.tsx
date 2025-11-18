@@ -14,7 +14,7 @@ export default function MethodologySection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-4">
           <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
-            03 — Our Difference
+            02 — Our Difference
           </div>
         </div>
 
@@ -47,7 +47,7 @@ export default function MethodologySection() {
         <div className="bg-card border border-card-border rounded-lg p-8 md:p-12">
           <div className="text-center mb-4">
             <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
-              04 — The Proof
+              03 — The Proof
             </div>
           </div>
           <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6 text-center">
