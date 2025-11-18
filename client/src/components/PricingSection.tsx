@@ -1,32 +1,34 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check } from "lucide-react";
+import { Check, Zap, Target } from "lucide-react";
 
 const payAsYouGoPlans = [
   {
     name: "Test24 Basic",
-    price: "R10,000",
+    icon: Zap,
+    price: "R5,000",
     unit: "per idea",
-    description: "Perfect for quick idea validation",
+    description: "24hr Pay Per Idea Testing",
     features: [
-      "Lite quant testing",
-      "100 consumer reach",
+      "Lite quant testing (100 consumers)",
       "Automated briefing",
       "24hr report delivery",
-      "Pay only when you need it",
+      "Simple, affordable",
+      "Pay only when you test",
     ],
   },
   {
     name: "Test24 Pro",
+    icon: Target,
     price: "R50,000",
     unit: "per study",
-    description: "Enterprise-grade research",
+    description: "Custom Quant & AI Qual",
     features: [
       "Custom audiences",
       "Full quant surveys (10-15 min)",
       "100+ AI Qual VOC videos",
       "Strategic recommendations",
-      "Comprehensive insights",
+      "Enterprise-grade insights",
     ],
   },
 ];
@@ -40,9 +42,9 @@ export default function PricingSection() {
     <section id="pricing" className="py-20 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4">Pay-As-You-Go</h2>
+          <h2 className="text-5xl font-serif font-bold mb-4">Pay-As-You-Go</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Flexible pricing for one-off research needs
+            Flexible pricing. No commitment.
           </p>
         </div>
 
@@ -54,7 +56,10 @@ export default function PricingSection() {
               data-testid={`payg-card-${index}`}
             >
               <CardHeader>
-                <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                <div className="w-12 h-12 mb-4 rounded-md bg-primary/10 flex items-center justify-center">
+                  <plan.icon className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
                 <CardDescription className="text-base">{plan.description}</CardDescription>
                 <div className="mt-4">
                   <span className="text-4xl font-bold text-primary">{plan.price}</span>

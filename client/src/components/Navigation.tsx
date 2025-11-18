@@ -29,35 +29,35 @@ export default function Navigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-12">
-            <a href="/" className="text-2xl font-bold text-primary" data-testid="link-logo">
+            <a href="/" className="text-2xl font-serif font-bold text-primary" data-testid="link-logo">
               Innovatr
             </a>
             
             <div className="hidden md:flex items-center gap-8">
               <button 
                 onClick={() => scrollToSection('services')}
-                className="text-foreground hover:text-primary transition-colors"
+                className={`transition-colors ${isScrolled ? 'text-foreground hover:text-primary' : 'text-white hover:text-primary'}`}
                 data-testid="nav-services"
               >
                 Services
               </button>
               <button 
                 onClick={() => scrollToSection('pricing')}
-                className="text-foreground hover:text-primary transition-colors"
+                className={`transition-colors ${isScrolled ? 'text-foreground hover:text-primary' : 'text-white hover:text-primary'}`}
                 data-testid="nav-pricing"
               >
                 Pricing
               </button>
               <button 
                 onClick={() => scrollToSection('membership')}
-                className="text-foreground hover:text-primary transition-colors"
+                className={`transition-colors ${isScrolled ? 'text-foreground hover:text-primary' : 'text-white hover:text-primary'}`}
                 data-testid="nav-membership"
               >
                 Membership
               </button>
               <button 
                 onClick={() => scrollToSection('contact')}
-                className="text-foreground hover:text-primary transition-colors"
+                className={`transition-colors ${isScrolled ? 'text-foreground hover:text-primary' : 'text-white hover:text-primary'}`}
                 data-testid="nav-contact"
               >
                 Contact
@@ -68,21 +68,16 @@ export default function Navigation() {
           <div className="hidden md:flex items-center gap-4">
             <Button 
               variant="outline"
-              onClick={() => scrollToSection('pricing')}
+              onClick={() => scrollToSection('contact')}
               data-testid="nav-button-test"
+              className={!isScrolled ? 'border-white/30 text-white hover:bg-white/10' : ''}
             >
-              Run a Test
-            </Button>
-            <Button 
-              onClick={() => scrollToSection('membership')}
-              data-testid="nav-button-membership"
-            >
-              Membership Plans
+              Get in Touch
             </Button>
           </div>
 
           <button
-            className="md:hidden"
+            className={`md:hidden ${!isScrolled ? 'text-white' : ''}`}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             data-testid="button-mobile-menu"
           >
@@ -118,19 +113,12 @@ export default function Navigation() {
             >
               Contact
             </button>
-            <div className="pt-3 space-y-2">
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => scrollToSection('pricing')}
-              >
-                Run a Test
-              </Button>
+            <div className="pt-3">
               <Button 
                 className="w-full"
-                onClick={() => scrollToSection('membership')}
+                onClick={() => scrollToSection('contact')}
               >
-                Membership Plans
+                Get in Touch
               </Button>
             </div>
           </div>

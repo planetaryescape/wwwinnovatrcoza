@@ -1,42 +1,42 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check } from "lucide-react";
+import { Check, Crown, Star, Gem } from "lucide-react";
 
 const membershipPlans = [
   {
-    name: "Entry Membership",
+    name: "Entry",
+    icon: Star,
     price: "R60k",
     period: "per year",
     monthly: "R5k/month",
     badge: null,
-    description: "Perfect for startups and small teams",
-    savings: "Save up to 50% on research",
+    description: "For startups & small teams",
+    savings: "Save up to 50%",
     features: [
-      "Unlimited Trend Reports (growing monthly)",
+      "Unlimited Trend Reports",
       "Test24 Basic: R5k per idea (50% off)",
       "Test24 Pro: R45k per study (10% off)",
-      "Private Dashboard Access",
-      "Personal Member Portal",
+      "Private Dashboard",
+      "Member Portal Access",
       "Submit briefs directly",
-      "Buy research credits",
-      "Instant access to reports",
-      "View past results",
+      "Instant report access",
     ],
     value: null,
   },
   {
-    name: "Gold Membership",
+    name: "Gold",
+    icon: Crown,
     price: "R120k",
     period: "per year",
     monthly: null,
     badge: "Most Popular",
-    description: "Best for growing businesses",
-    savings: "Up to R200k value",
+    description: "For growing businesses",
+    savings: "Best for scale",
     features: [
       "Everything in Entry",
       "10 Test24 Basic ideas included",
-      "1 dedicated insights expert",
+      "Dedicated insights expert",
       "Priority support",
       "Quarterly strategy sessions",
       "Custom trend reports",
@@ -44,18 +44,19 @@ const membershipPlans = [
     value: "~R200k value",
   },
   {
-    name: "Platinum Membership",
+    name: "Platinum",
+    icon: Gem,
     price: "R195k",
     period: "per year",
     monthly: null,
     badge: "Best Value",
     description: "Enterprise-level insights",
-    savings: "Up to R300k value",
+    savings: "Maximum value",
     features: [
       "Everything in Entry",
       "15 Test24 Basic ideas included",
       "3x Test24 Pro studies included",
-      "1 dedicated insights expert",
+      "Dedicated insights expert",
       "White-glove support",
       "Monthly strategy sessions",
       "Custom research design",
@@ -73,12 +74,12 @@ export default function MembershipSection() {
     <section id="membership" className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4">Membership Plans</h2>
+          <h2 className="text-5xl font-serif font-bold mb-4">Membership Plans</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-4">
-            Unlock up to 40% savings with a membership
+            Scale your research. Save up to 50%.
           </p>
-          <Badge variant="secondary" className="text-base px-4 py-2">
-            Members save up to 40% on research
+          <Badge variant="secondary" className="text-base px-4 py-2 bg-accent text-accent-foreground">
+            Members unlock unlimited insights
           </Badge>
         </div>
 
@@ -99,7 +100,10 @@ export default function MembershipSection() {
                 </div>
               )}
               <CardHeader className="pt-8">
-                <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                <div className="w-12 h-12 mb-4 rounded-md bg-primary/10 flex items-center justify-center">
+                  <plan.icon className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
                 <CardDescription className="text-base">{plan.description}</CardDescription>
                 <div className="mt-4">
                   <span className="text-4xl font-bold text-primary">{plan.price}</span>
@@ -109,7 +113,7 @@ export default function MembershipSection() {
                   )}
                 </div>
                 {plan.value && (
-                  <div className="text-sm font-semibold text-primary mt-2">{plan.value}</div>
+                  <div className="text-sm font-semibold text-accent mt-2">{plan.value}</div>
                 )}
               </CardHeader>
               <CardContent className="space-y-6">
