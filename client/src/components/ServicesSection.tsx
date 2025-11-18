@@ -36,7 +36,7 @@ const services = [
     title: "Innovatr Intelligence",
     description: "Bi-weekly insights, trends and reports",
     price: "R5,000 / month",
-    link: null,
+    link: "/innovatr-intelligence",
     features: [
       "Monitor trends & competitor launch alerts",
       "Opportunity identification",
