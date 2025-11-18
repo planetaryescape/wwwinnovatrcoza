@@ -9,6 +9,8 @@ const membershipPlans = [
     name: "Entry",
     icon: Star,
     price: "R60k",
+    priceBreakdown: null,
+    totalPrice: "R60k",
     period: "per year",
     monthly: "R5k/month",
     badge: null,
@@ -26,7 +28,9 @@ const membershipPlans = [
   {
     name: "Gold",
     icon: Crown,
-    price: "R120k",
+    price: "R180k",
+    priceBreakdown: "Entry (R60k) + Gold (R120k)",
+    totalPrice: "R180k",
     period: "per year",
     monthly: null,
     badge: "Most Popular",
@@ -42,7 +46,9 @@ const membershipPlans = [
   {
     name: "Platinum",
     icon: Gem,
-    price: "R195k",
+    price: "R255k",
+    priceBreakdown: "Entry (R60k) + Platinum (R195k)",
+    totalPrice: "R255k",
     period: "per year",
     monthly: null,
     badge: "Best Value",
@@ -107,10 +113,24 @@ export default function MembershipSection() {
                 <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
                 <CardDescription className="text-base">{plan.description}</CardDescription>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-primary">{plan.price}</span>
-                  <span className="text-muted-foreground ml-2">{plan.period}</span>
-                  {plan.monthly && (
-                    <div className="text-sm text-muted-foreground mt-1">{plan.monthly}</div>
+                  {plan.priceBreakdown ? (
+                    <div className="space-y-2">
+                      <div className="text-sm text-muted-foreground">
+                        {plan.priceBreakdown}
+                      </div>
+                      <div>
+                        <span className="text-4xl font-bold text-primary">{plan.totalPrice}</span>
+                        <span className="text-muted-foreground ml-2">{plan.period}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <span className="text-4xl font-bold text-primary">{plan.price}</span>
+                      <span className="text-muted-foreground ml-2">{plan.period}</span>
+                      {plan.monthly && (
+                        <div className="text-sm text-muted-foreground mt-1">{plan.monthly}</div>
+                      )}
+                    </div>
                   )}
                 </div>
                 {plan.value && (
