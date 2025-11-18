@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Crown, Star, Gem } from "lucide-react";
+import { useLocation } from "wouter";
 
 const membershipPlans = [
   {
@@ -58,8 +59,16 @@ const membershipPlans = [
 ];
 
 export default function MembershipSection() {
-  const handleBecomeMember = (plan: string) => {
-    console.log(`Become ${plan} member clicked`);
+  const [, setLocation] = useLocation();
+
+  const handleBecomeMember = (planName: string) => {
+    if (planName === "Entry") {
+      setLocation("/checkout/membership-entry");
+    } else if (planName === "Gold") {
+      setLocation("/checkout/membership-gold");
+    } else if (planName === "Platinum") {
+      setLocation("/checkout/membership-platinum");
+    }
   };
 
   return (

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Check, Zap, ShoppingCart } from "lucide-react";
 import { useLocation } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const creditPackages = [
   {
@@ -41,6 +41,10 @@ const features = [
 export default function CheckoutBasicPAYG() {
   const [, setLocation] = useLocation();
   const [selectedPackage, setSelectedPackage] = useState("10x");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleCheckout = () => {
     console.log("Proceeding to checkout with package:", selectedPackage);

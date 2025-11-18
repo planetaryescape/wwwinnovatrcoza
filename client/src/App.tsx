@@ -11,6 +11,9 @@ import CheckoutBasicPAYG from "@/pages/CheckoutBasicPAYG";
 import CheckoutProPAYG from "@/pages/CheckoutProPAYG";
 import CheckoutBasicMembers from "@/pages/CheckoutBasicMembers";
 import CheckoutProMembers from "@/pages/CheckoutProMembers";
+import CheckoutMembershipEntry from "@/pages/CheckoutMembershipEntry";
+import CheckoutMembershipGold from "@/pages/CheckoutMembershipGold";
+import CheckoutMembershipPlatinum from "@/pages/CheckoutMembershipPlatinum";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -24,6 +27,9 @@ function Router() {
       <Route path="/checkout/pro-payg" component={CheckoutProPAYG} />
       <Route path="/checkout/basic-members" component={CheckoutBasicMembers} />
       <Route path="/checkout/pro-members" component={CheckoutProMembers} />
+      <Route path="/checkout/membership-entry" component={CheckoutMembershipEntry} />
+      <Route path="/checkout/membership-gold" component={CheckoutMembershipGold} />
+      <Route path="/checkout/membership-platinum" component={CheckoutMembershipPlatinum} />
       <Route component={NotFound} />
     </Switch>
   );

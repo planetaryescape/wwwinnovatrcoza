@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Check, Rocket, ShoppingCart, Star } from "lucide-react";
 import { useLocation } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const features = [
   "24hr Turnaround",
@@ -23,6 +23,10 @@ export default function CheckoutProMembers() {
   const pricePerStudy = 45000;
   const regularPrice = 50000;
   const discount = 10;
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleCheckout = () => {
     console.log("Proceeding to checkout with quantity:", quantity);
@@ -68,7 +72,7 @@ export default function CheckoutProMembers() {
               </p>
               <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
                 <p className="text-sm font-medium">
-                  🎉 Save {discount}% with member pricing - {formatPrice(regularPrice - pricePerStudy)} off each study!
+                  Save {discount}% with member pricing - {formatPrice(regularPrice - pricePerStudy)} off each study
                 </p>
               </div>
             </div>
@@ -122,7 +126,7 @@ export default function CheckoutProMembers() {
                   {savings > 0 && (
                     <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
                       <p className="text-sm font-medium text-accent">
-                        💰 You're saving {formatPrice(savings)} with member pricing!
+                        You're saving {formatPrice(savings)} with member pricing
                       </p>
                     </div>
                   )}

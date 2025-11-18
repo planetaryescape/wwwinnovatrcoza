@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, Check, Rocket, ShoppingCart, Users } from "lucide-react";
 import { useLocation } from "wouter";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 const reachPricing = [
   { reach: 100, price: 50000, label: "100 Consumers" },
@@ -26,6 +26,10 @@ export default function CheckoutProPAYG() {
   const [, setLocation] = useLocation();
   const [quantity, setQuantity] = useState(1);
   const [selectedReach, setSelectedReach] = useState(100);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleCheckout = () => {
     console.log("Proceeding to checkout:", { quantity, reach: selectedReach, totalConsumers, finalTotal });

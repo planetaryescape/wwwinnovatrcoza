@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Check, Zap, ShoppingCart, Star } from "lucide-react";
 import { useLocation } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const creditPackages = [
   {
@@ -44,6 +44,10 @@ export default function CheckoutBasicMembers() {
   const [, setLocation] = useLocation();
   const [selectedPackage, setSelectedPackage] = useState("10x");
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const handleCheckout = () => {
     console.log("Proceeding to checkout with package:", selectedPackage);
   };
@@ -82,7 +86,7 @@ export default function CheckoutBasicMembers() {
               </div>
               <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 mb-6">
                 <p className="text-sm font-medium">
-                  🎉 You're getting member rates - save up to 50% on every credit!
+                  You're getting member rates - save up to 50% on every credit
                 </p>
               </div>
             </div>
