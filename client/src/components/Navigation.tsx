@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -66,6 +67,7 @@ export default function Navigation() {
           </div>
 
           <div className="hidden md:flex items-center gap-4">
+            <ThemeToggle />
             <Button 
               variant="outline"
               onClick={() => scrollToSection('contact')}
