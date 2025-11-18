@@ -57,13 +57,14 @@ export default function MethodologySection() {
           
           <div className="relative aspect-video rounded-lg overflow-hidden bg-muted/50 border border-border">
             <iframe
-              src="https://player.vimeo.com/video/1138122776?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0"
-              className="w-full h-full"
+              src="https://player.vimeo.com/video/1138122776?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1"
+              className="w-full h-full absolute top-0 left-0"
               frameBorder="0"
-              allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
+              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
               data-testid="video-upsiide-vimeo"
-              title="Upsiide Demo Video"
+              title="UpsiideSalesVideo-Main"
             />
           </div>
         </div>
