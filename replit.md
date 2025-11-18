@@ -59,3 +59,42 @@ Preferred communication style: Simple, everyday language.
 - **UI Animations**: Intersection Observer API for scroll-triggered animations; CSS transitions and Tailwind utilities for micro-interactions.
 - **Image Assets**: Stored in `/attached_assets`, referenced via Vite's asset handling.
 - **Email/Communication**: Contact form exists, but backend email sending is not implemented.
+
+## Video Upload Feature (The Proof Section)
+
+The Methodology Section (03 - The Proof) includes an Upsiide demo video upload feature:
+
+**Functionality:**
+- Drag-and-drop or click-to-browse file upload
+- Supports video formats: MP4, WebM, MOV, etc.
+- Maximum file size: 100MB
+- Client-side validation for file type and size
+- Video preview with HTML5 video player controls
+- Remove video button to replace or delete uploaded content
+
+**User Experience:**
+- Upload area displays when no video is present
+- Visual feedback during drag-over state
+- Toast notifications for success/error states
+- Full-width video player in 16:9 aspect ratio
+- Video controls include play, pause, volume, fullscreen
+- Video persists only during current page session (resets on page reload)
+
+**Technical Implementation:**
+- Uses `URL.createObjectURL()` for client-side video preview
+- No server upload required for basic functionality
+- Properly revokes object URLs to prevent memory leaks
+- Video must be re-uploaded after page reload
+
+**Limitations:**
+- Video does NOT persist across page reloads (session-only)
+- Does not persist across different devices/browsers
+- Not suitable for production without backend storage
+- User must re-upload video if they refresh the page
+
+**Future Enhancements:**
+- Server-side video upload to cloud storage (S3, Cloudflare R2)
+- Video transcoding and optimization
+- Multiple video uploads with gallery
+- Admin panel for managing video content
+- CDN integration for better performance
