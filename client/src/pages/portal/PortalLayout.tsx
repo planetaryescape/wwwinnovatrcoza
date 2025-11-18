@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -25,6 +25,8 @@ import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useAuth } from "@/contexts/AuthContext";
+import FreeTierPortal from "./FreeTierPortal";
 
 const menuItems = [
   {
@@ -66,33 +68,36 @@ const menuItems = [
 
 interface PortalLayoutProps {
   children: React.ReactNode;
-  memberData?: {
-    name: string;
-    company: string;
-    tier: "Entry" | "Gold" | "Platinum";
-  };
 }
 
-export default function PortalLayout({ children, memberData }: PortalLayoutProps) {
+export default function PortalLayout({ children }: PortalLayoutProps) {
   const [location, setLocation] = useLocation();
+  const { user, logout, isAuthenticated, isMember } = useAuth();
 
-  // Mock member data - in production this would come from auth/session
-  const member = memberData || {
-    name: "Richard",
-    company: "Innovatr",
-    tier: "Gold" as const,
-  };
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setLocation("/");
+    }
+  }, [isAuthenticated, setLocation]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  if (!isMember) {
+    return <FreeTierPortal />;
+  }
 
   const handleLogout = () => {
-    // Navigate back to home page
+    logout();
     setLocation("/");
   };
 
   const getTierColor = (tier: string) => {
     switch (tier) {
-      case "Platinum":
+      case "platinum":
         return "bg-primary text-primary-foreground";
-      case "Gold":
+      case "gold":
         return "bg-accent text-accent-foreground";
       default:
         return "bg-muted text-muted-foreground";
@@ -112,22 +117,28 @@ export default function PortalLayout({ children, memberData }: PortalLayoutProps
             <SidebarGroup>
               <div className="px-4 py-4 border-b">
                 <div className="flex items-center gap-3 mb-3">
-                  <a href="/" className="text-xl font-serif font-bold text-primary">
+                  <button 
+                    onClick={() => setLocation("/")}
+                    className="text-xl font-serif font-bold text-primary"
+                    data-testid="link-sidebar-logo"
+                  >
                     Innovatr
-                  </a>
+                  </button>
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{member.name}</p>
-                  <p className="text-xs text-muted-foreground mb-2">{member.company}</p>
-                  <Badge className={`${getTierColor(member.tier)} text-xs`}>
-                    {member.tier} Member
+                  <p className="text-sm font-medium" data-testid="text-member-name">{user?.name}</p>
+                  <p className="text-xs text-muted-foreground mb-2" data-testid="text-member-company">
+                    {user?.company || user?.email}
+                  </p>
+                  <Badge 
+                    className={`${getTierColor(user?.tier || 'entry')} text-xs`}
+                    data-testid={`badge-member-tier-${user?.tier}`}
+                  >
+                    {user?.tier?.toUpperCase()} Member
                   </Badge>
                 </div>
               </div>
-            </SidebarGroup>
-
-            <SidebarGroup>
-              <SidebarGroupLabel>Portal Menu</SidebarGroupLabel>
+              <SidebarGroupLabel data-testid="label-portal-menu">Portal Menu</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {menuItems.map((item) => (
@@ -135,12 +146,12 @@ export default function PortalLayout({ children, memberData }: PortalLayoutProps
                       <SidebarMenuButton
                         asChild
                         isActive={location === item.url}
-                        data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, "-")}`}
+                        data-testid={`menu-item-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
                       >
-                        <a href={item.url}>
-                          <item.icon className="w-4 h-4" />
+                        <button onClick={() => setLocation(item.url)}>
+                          <item.icon className="h-4 w-4" />
                           <span>{item.title}</span>
-                        </a>
+                        </button>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
@@ -148,28 +159,26 @@ export default function PortalLayout({ children, memberData }: PortalLayoutProps
               </SidebarGroupContent>
             </SidebarGroup>
 
-            <SidebarGroup className="mt-auto">
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton onClick={handleLogout} data-testid="button-logout">
-                      <LogOut className="w-4 h-4" />
-                      <span>Log Out</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+            <div className="mt-auto p-4 border-t">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={handleLogout}
+                data-testid="button-sidebar-logout"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
+            </div>
           </SidebarContent>
         </Sidebar>
 
         <div className="flex flex-col flex-1">
-          <header className="flex items-center justify-between p-4 border-b bg-background">
+          <header className="flex items-center justify-between p-4 border-b">
             <SidebarTrigger data-testid="button-sidebar-toggle" />
             <ThemeToggle />
           </header>
-
-          <main className="flex-1 overflow-auto bg-muted/30">
+          <main className="flex-1 overflow-auto">
             {children}
           </main>
         </div>
