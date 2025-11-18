@@ -6,7 +6,7 @@ const payAsYouGoPlans = [
   {
     name: "Test24 Basic",
     icon: Zap,
-    price: "R5,000",
+    price: "R10,000",
     unit: "per idea",
     description: "24hr Pay Per Idea Testing",
     features: [
