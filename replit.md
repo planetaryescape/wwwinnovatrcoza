@@ -60,41 +60,26 @@ Preferred communication style: Simple, everyday language.
 - **Image Assets**: Stored in `/attached_assets`, referenced via Vite's asset handling.
 - **Email/Communication**: Contact form exists, but backend email sending is not implemented.
 
-## Video Upload Feature (The Proof Section)
+## Upsiide Demo Video (The Proof Section)
 
-The Methodology Section (03 - The Proof) includes an Upsiide demo video upload feature:
+The Methodology Section (03 - The Proof) includes an embedded Vimeo video showcasing the Upsiide demo:
 
-**Functionality:**
-- Drag-and-drop or click-to-browse file upload
-- Supports video formats: MP4, WebM, MOV, etc.
-- Maximum file size: 150MB
-- Client-side validation for file type and size
-- Video preview with HTML5 video player controls
-- Remove video button to replace or delete uploaded content
+**Implementation:**
+- Embedded Vimeo player using iframe
+- Video ID: 1138122776
+- Full-width responsive player in 16:9 aspect ratio
+- Standard Vimeo player controls (play, pause, volume, fullscreen)
+- Allows autoplay, fullscreen, and picture-in-picture
+- Clean embed with title, byline, and portrait disabled
 
 **User Experience:**
-- Upload area displays when no video is present
-- Visual feedback during drag-over state
-- Toast notifications for success/error states
-- Full-width video player in 16:9 aspect ratio
-- Video controls include play, pause, volume, fullscreen
-- Video persists only during current page session (resets on page reload)
+- Video loads immediately on page load
+- Professional Vimeo player interface
+- Works seamlessly across all devices and browsers
+- No upload or manual management required
 
-**Technical Implementation:**
-- Uses `URL.createObjectURL()` for client-side video preview
-- No server upload required for basic functionality
-- Properly revokes object URLs to prevent memory leaks
-- Video must be re-uploaded after page reload
-
-**Limitations:**
-- Video does NOT persist across page reloads (session-only)
-- Does not persist across different devices/browsers
-- Not suitable for production without backend storage
-- User must re-upload video if they refresh the page
-
-**Future Enhancements:**
-- Server-side video upload to cloud storage (S3, Cloudflare R2)
-- Video transcoding and optimization
-- Multiple video uploads with gallery
-- Admin panel for managing video content
-- CDN integration for better performance
+**Technical Details:**
+- Uses Vimeo's player.vimeo.com embed URL
+- Configured with custom parameters for clean presentation
+- Fully accessible with proper iframe attributes
+- Data-testid attribute for testing purposes
