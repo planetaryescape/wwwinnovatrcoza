@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import heroBackground from "@assets/Picture 1_1763495300266.jpg";
+import heroBackground from "@assets/Cover Image_1763495477591.jpg";
 
 export default function HeroSection() {
   const handleTestNow = () => {
@@ -20,12 +20,10 @@ export default function HeroSection() {
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{ 
-          backgroundImage: `url(${heroBackground})`,
-          filter: 'blur(2px)',
-          transform: 'scale(1.1)'
+          backgroundImage: `url(${heroBackground})`
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-black/40" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/30" />
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h1 className="text-6xl sm:text-7xl lg:text-8xl font-serif font-bold text-white mb-4 tracking-tight leading-tight">
