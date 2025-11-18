@@ -66,7 +66,7 @@ Preferred communication style: Simple, everyday language.
 The website now features strategic background images for a modern, tech-forward aesthetic:
 
 1. **Hero Section:**
-   - Colorful light trails background (infinity pattern)
+   - Futuristic road with neon light trails (blue, purple, pink) - Picture 1_1763495300266.jpg
    - Blur + scale effect for depth
    - Dark gradient overlay ensures white text legibility
    - Premium, innovative visual impact

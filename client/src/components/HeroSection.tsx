@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import heroBackground from "@assets/pexels-raphael-brasileiro-6047129_1763492180745.jpeg";
+import heroBackground from "@assets/Picture 1_1763495300266.jpg";
 
 export default function HeroSection() {
   const handleTestNow = () => {
