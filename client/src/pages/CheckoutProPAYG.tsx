@@ -9,8 +9,8 @@ import { useState, useMemo } from "react";
 
 const reachPricing = [
   { reach: 100, price: 50000, label: "100 Consumers" },
-  { reach: 200, price: 85000, label: "200 Consumers" },
-  { reach: 500, price: 180000, label: "500 Consumers" },
+  { reach: 200, price: 95000, label: "200 Consumers" },
+  { reach: 500, price: 225000, label: "500 Consumers" },
 ];
 
 const features = [
