@@ -1,0 +1,217 @@
+Below is a ready-to-copy “Vibe Coding Prompt” you can paste directly into Viba (or any no-code/AI website generator) to guide it in building a high-conversion website for Innovatr—fully reflecting the pitch deck, Test24 products, PAYG vs Membership pricing, benefits, portal features, and homepage flow you requested.
+
+✅ VIBA WEBSITE BUILD PROMPT — INNOVATR
+
+PROJECT: Build an engaging, modern, conversion-driven website for www.innovatr.co.za
+, an agile innovation and rapid-research agency.
+AUDIENCE:
+• Once-off customers wanting to purchase Test24 Basic or Test24 Pro
+• Members who want to join the Innovatr membership ecosystem
+• Corporates, agencies, founders, innovation leads, and insights teams
+CORE OFFER: 24hr Agile Research (Test24), In-house Design, Trend Monitoring, Growth Consulting.
+
+🎨 OVERALL VIBE & STYLE
+
+Tone: fast, modern, tech-forward, analytical, high-credibility, energetic.
+
+Aesthetic: clean white + charcoal base, neon accent colour (matching Innovatr palette).
+
+Use micro-animations: number counters, horizontal client logo scroll, subtle hover states.
+
+UX priority: clear, simple buying paths — “Pay Per Idea” vs “Become a Member”.
+
+Must feel like a premium SaaS platform, not an agency brochure.
+
+🏠 HOMEPAGE LAYOUT (TOP → BOTTOM)
+1. HERO SECTION — Lead Benefit Headline
+
+Large headline + CTA buttons.
+
+Headline Options:
+“Smart Research in 24 Hours.”
+“Test Ideas Today. Get Answers Tomorrow.”
+“Agile Insights. Zero Delay.”
+
+Subline:
+AI-powered, decision-centric testing. Local insights. Market-ready answers—all within 24 hours.
+
+Primary CTAs:
+• Run a Test Now
+• See Membership Plans
+
+Background visual: Motion graphic or quick video loop of swiping interactions (inspired by Upsiide).
+
+2. BUSINESS CLAIMS STRIP (Stats)
+
+Use animated counters.
+
++200 Studies
++10 Markets
++10 Industries
++45,000 Consumer Responses
+50% YoY Growth
+
+Place in a clean 4–5 column band.
+
+3. TRUST BAR — Client Logos (Scrolling Horizontally)
+
+Scrolling banner with logos:
+
+Heineken • Discovery Bank • Rain • DGB • PepsiCo • Tiger Brands • Mondelez • ooba
+
+Label: “Brands who trust Innovatr”
+
+4. SERVICES SECTION (from slide 18 + deck content)
+
+Innovatr Intelligence
+• Real-time AI-powered market, trend & competitor signals
+• Monthly curated reports
+• Downloadable trend reports (members)
+• “Ask Anything” research answers (coming soon)
+
+Innovatr Test24 Basic — 24hr Pay Per Idea Testing
+• Lite quant testing
+• X100 consumer reach
+• Automated briefing
+• 24hr report
+• Flexible, affordable pay-per-idea model
+
+Innovatr Test24 Pro — Enterprise Quant + AI Qual
+• Custom audiences
+• Full quant (10–15 min surveys)
+• +100 AI Qual VOC videos
+• Private dashboards (members)
+• Strategic recommendations
+
+Innovatr Consult — Growth Consulting
+• Portfolio strategy
+• Positioning
+• Ideation
+• Packaging & design
+• GTM planning
+
+Use dynamic cards with icons.
+
+5. TEST24 PLANS — Pricing + Comparison
+A. PAY-AS-YOU-GO (Once-Off Purchases)
+
+Test24 Basic: R10,000 per idea
+Test24 Pro: R50,000 per x100 study
+
+Add “What’s included” under each, using bullets from deck.
+
+B. MEMBERSHIP PLANS — Unlock up to 40% off
+
+Big white/grey card with three tiers.
+
+ENTRY MEMBERSHIP – R60k/year (R5k/month)
+
+Includes:
+• Unlimited Trend Reports (growing monthly)
+• Test24 Discounts
+ – Basic = R5k per idea
+ – Pro = R45k per x100 study
+• Private Dashboard Access
+• Personal Member Portal
+ – Submit briefs directly
+ – Buy research credits
+ – Instant access to reports
+ – View past results
+
+GOLD MEMBERSHIP – R120k/year
+
+• Everything in Entry
+• +10 Test24 Basic ideas
+• 1 dedicated insights expert
+• Up to ~R200k value
+
+PLATINUM MEMBERSHIP – R195k/year
+
+• Everything in Entry
+• +15 Test24 Basic ideas
+• 3x Test24 Pro studies
+• 1 dedicated insights expert
+• Up to ~R300k value
+
+C. Pricing Layout Requirements
+
+Side-by-side pricing cards with highlighted “Most Popular” and “Best Value” badges.
+
+CTA under each tier:
+• Become a Member
+• Buy Test24 Basic
+• Buy Test24 Pro
+
+Optional banner:
+“Members save up to 40% on research.”
+
+6. METHODOLOGY SECTION
+
+Two-column layout:
+
+Text Block:
+04 — The Proof
+Be sure it sells before it hits the shelves.
+Partnering with Upsiide, we’ve made rapid testing truly AGILE.
+Impulse-based testing. Trade-off decisions. AI-powered diagnostics.
+
+Right Side:
+Embedded Upsiide video (YouTube or MP4 autoplay muted).
+
+Add icons for:
+• Swipe Testing
+• Trade-off Pairs
+• AI Qual
+• Market Simulator
+• Private Dashboard
+
+7. PROMO TILE / MONTHLY DEALS
+
+Large banner that updates easily via CMS.
+
+Examples:
+• “This Month: Run 2 Test24 Basic Ideas, Get 1 Free”
+• “Launch Bundle: Save R10k on your first Test24 Pro”
+
+CTA: View Deals
+
+8. CONTACT SECTION
+
+Simple final band:
+
+• Inquiry form
+• Email: richard@innovatr.co.za
+
+• "Book a 30-min Demo" button
+• Footer with navigation + legal + Just Design Group mention.
+
+🔧 FUNCTIONAL REQUIREMENTS
+
+Ability to buy Test24 Basic/Pro online (checkout path).
+
+Ability to purchase membership plans from website.
+
+After membership purchase → automatically unlock new UX showing:
+• Member Portal Login
+• Access to Trend Library
+• Buy Research Credits
+• Submit Briefs
+• View Past Results
+
+CMS for updating promo deals.
+
+Video support (Upsiide demo).
+
+Smooth horizontal scrolling for client logos.
+
+Responsive on all devices.
+
+✨ TONE FOR ALL COPY
+
+Fast, confident, expert.
+
+Outcome-focused.
+
+No jargon unless strategic.
+
+Emphasise: Speed. AI intelligence. Affordability. Decision-centric. Local insight. 24hr delivery.
