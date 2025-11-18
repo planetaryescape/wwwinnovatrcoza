@@ -2,9 +2,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Building2, Sparkles, CheckCircle2 } from "lucide-react";
 import { useLocation } from "wouter";
+import { useEffect } from "react";
 
 export default function InnovatrConsultPage() {
   const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -47,13 +52,13 @@ export default function InnovatrConsultPage() {
                 <h3 className="font-semibold">Ideal For</h3>
               </div>
               <div className="flex flex-wrap gap-2">
-                <span className="px-3 py-1 bg-secondary/10 text-secondary-foreground rounded-full text-sm">
+                <span className="px-3 py-1 bg-secondary/10 text-foreground rounded-full text-sm">
                   Enterprise Teams
                 </span>
-                <span className="px-3 py-1 bg-secondary/10 text-secondary-foreground rounded-full text-sm">
+                <span className="px-3 py-1 bg-secondary/10 text-foreground rounded-full text-sm">
                   Corporate Brands
                 </span>
-                <span className="px-3 py-1 bg-secondary/10 text-secondary-foreground rounded-full text-sm">
+                <span className="px-3 py-1 bg-secondary/10 text-foreground rounded-full text-sm">
                   Large Agencies
                 </span>
               </div>

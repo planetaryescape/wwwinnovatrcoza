@@ -120,3 +120,40 @@ The Methodology Section (03 - The Proof) includes an embedded Vimeo video showca
 - Parameters: `badge=0&autopause=0&player_id=0&app_id=58479`
 - Fully accessible with proper iframe attributes
 - Data-testid: "video-upsiide-vimeo"
+
+## Service Detail Pages
+
+All offering detail pages (Test24 Basic, Test24 Pro, Innovatr Consult, Innovatr Intelligence) include:
+
+**Common Features:**
+- Auto-scroll to top on page load via `useEffect`
+- "Ideal For" section with black text (`text-foreground`) for improved readability
+- Consistent card-based layout with key features
+- Responsive design for all screen sizes
+
+**Embedded Videos:**
+- Test24 Basic: Respondent Experience (Vimeo ID: 1138122312)
+- Test24 Pro: Dashboard Experience (Vimeo ID: 1138121972)
+
+## Coupon Claim System
+
+**Overview:**
+Users can claim a R10,000 Test24 Basic coupon by providing their name and email via a dedicated signup page.
+
+**Database Schema:**
+- Table: `coupon_claims`
+- Fields: id, name, email, couponCode, claimedAt
+- Validation: Zod schema ensures valid name (min 2 chars) and email format
+
+**Backend Implementation:**
+- API Route: POST `/api/coupon-claims`
+- Storage: In-memory storage with methods: `createCouponClaim`, `getCouponClaimByEmail`
+- Coupon Code Format: `TEST24-XXXXXXXX` (8 random uppercase characters)
+- Duplicate Prevention: Existing email returns previously generated coupon
+
+**Frontend:**
+- Route: `/claim-coupon`
+- Background: Colorful light trails image with blur and dark overlay
+- Form Fields: Name and Email with validation
+- Success State: Displays generated coupon code with copy-to-clipboard functionality
+- Call-to-Action: Accessible from "Limited Time Offer" banner on home page

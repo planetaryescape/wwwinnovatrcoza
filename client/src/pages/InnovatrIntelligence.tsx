@@ -3,8 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Users, AlertCircle, Star, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
+import { useEffect } from "react";
 
 export default function InnovatrIntelligence() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -42,13 +47,13 @@ export default function InnovatrIntelligence() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary" className="text-sm px-4 py-2" data-testid="badge-consultants">
+                <Badge variant="secondary" className="text-sm px-4 py-2 text-foreground" data-testid="badge-consultants">
                   Consultants
                 </Badge>
-                <Badge variant="secondary" className="text-sm px-4 py-2" data-testid="badge-strategy-leads">
+                <Badge variant="secondary" className="text-sm px-4 py-2 text-foreground" data-testid="badge-strategy-leads">
                   Strategy Leads
                 </Badge>
-                <Badge variant="secondary" className="text-sm px-4 py-2" data-testid="badge-business-owners">
+                <Badge variant="secondary" className="text-sm px-4 py-2 text-foreground" data-testid="badge-business-owners">
                   Business Owners
                 </Badge>
               </div>

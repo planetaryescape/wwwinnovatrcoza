@@ -2,9 +2,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Users, Clock, CheckCircle2, Zap } from "lucide-react";
 import { useLocation } from "wouter";
+import { useEffect } from "react";
 
 export default function Test24BasicPage() {
   const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -47,13 +52,13 @@ export default function Test24BasicPage() {
                 <h3 className="font-semibold">Ideal For</h3>
               </div>
               <div className="flex flex-wrap gap-2">
-                <span className="px-3 py-1 bg-accent/10 text-accent-foreground rounded-full text-sm">
+                <span className="px-3 py-1 bg-accent/10 text-foreground rounded-full text-sm">
                   Agencies
                 </span>
-                <span className="px-3 py-1 bg-accent/10 text-accent-foreground rounded-full text-sm">
+                <span className="px-3 py-1 bg-accent/10 text-foreground rounded-full text-sm">
                   Product Leads
                 </span>
-                <span className="px-3 py-1 bg-accent/10 text-accent-foreground rounded-full text-sm">
+                <span className="px-3 py-1 bg-accent/10 text-foreground rounded-full text-sm">
                   Startups
                 </span>
               </div>
