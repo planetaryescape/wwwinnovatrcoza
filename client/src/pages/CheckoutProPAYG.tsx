@@ -98,8 +98,13 @@ export default function CheckoutProPAYG() {
               <CardContent>
                 <div className="space-y-6">
                   <div>
-                    <Label htmlFor="quantity">Number of Studies</Label>
-                    <div className="flex items-center gap-4 mt-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <Label htmlFor="quantity">Number of Studies</Label>
+                      <span className="text-sm text-primary font-medium">
+                        10% discount for 3 or more
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4">
                       <Button
                         variant="outline"
                         size="icon"
