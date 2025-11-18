@@ -25,7 +25,7 @@ export default function HeroSection() {
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h1 className="text-6xl sm:text-7xl lg:text-8xl font-serif font-bold text-white mb-6 tracking-tight leading-tight">
-          Idea to shelf.
+          Smart Research in 24hrs
         </h1>
         <p className="text-xl sm:text-2xl text-white/90 mb-12 max-w-3xl mx-auto font-light">
           Bringing Big Ideas to life with in-house Data, Design and Testing.
