@@ -124,6 +124,34 @@ export default function Test24BasicPage() {
           </CardContent>
         </Card>
 
+        <Card className="mb-12">
+          <CardContent className="pt-8">
+            <h2 className="text-3xl font-serif font-bold mb-4 text-center">
+              Respondent Experience Video
+            </h2>
+            <p className="text-lg text-muted-foreground text-center mb-6 max-w-2xl mx-auto">
+              See what consumers experience when answering a survey
+            </p>
+            <div style={{ padding: "56.25% 0 0 0", position: "relative" }}>
+              <iframe
+                src="https://player.vimeo.com/video/1138122312?badge=0&autopause=0&player_id=0&app_id=58479"
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%"
+                }}
+                allow="fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+                title="Respondent Experience - Upsiide Survey"
+                data-testid="video-respondent-experience"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg p-8 text-center">
           <h2 className="text-3xl font-serif font-bold mb-4">
             Ready to test your ideas?
