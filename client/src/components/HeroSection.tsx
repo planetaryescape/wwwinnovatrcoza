@@ -28,7 +28,7 @@ export default function HeroSection() {
           Launch Better Innovation
         </h1>
         <p className="text-2xl sm:text-3xl text-white/90 mb-12 font-light">
-          Smart Research in 24hrs
+          Smart, Affordable Research in 24hrs
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
