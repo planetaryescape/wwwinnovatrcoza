@@ -71,7 +71,7 @@ export default function ServicesSection() {
           {services.map((service, index) => (
             <Card 
               key={index} 
-              className="hover-elevate transition-all duration-300 relative overflow-hidden"
+              className="hover-elevate transition-all duration-300 relative overflow-hidden flex flex-col"
               data-testid={`service-card-${index}`}
             >
               <div className="absolute top-0 right-0 text-[120px] font-serif font-bold text-primary/5 leading-none p-4">
@@ -85,8 +85,8 @@ export default function ServicesSection() {
                 <CardDescription className="text-base">{service.description}</CardDescription>
                 <div className="text-lg font-bold text-primary pt-2">{service.price}</div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <ul className="space-y-2">
+              <CardContent className="flex flex-col flex-1 space-y-4">
+                <ul className="space-y-2 flex-1">
                   {service.features.map((feature, fIndex) => (
                     <li key={fIndex} className="flex items-start gap-2 text-sm">
                       <span className="text-primary mt-1">•</span>
