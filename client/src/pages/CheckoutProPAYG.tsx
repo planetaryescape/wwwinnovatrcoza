@@ -2,15 +2,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Check, Rocket, ShoppingCart } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ArrowLeft, Check, Rocket, ShoppingCart, Users } from "lucide-react";
 import { useLocation } from "wouter";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+
+const reachPricing = [
+  { reach: 100, price: 50000, label: "100 Consumers" },
+  { reach: 200, price: 85000, label: "200 Consumers" },
+  { reach: 500, price: 180000, label: "500 Consumers" },
+];
 
 const features = [
   "24hr Turnaround",
   "Custom audience, reach & question flexibility",
-  "+100 Consumer Reach, 10-15 min Survey",
-  "+100 AI Qual Voice of the Consumer Videos",
+  "Custom Consumer Reach per Study",
+  "AI Qual Voice of the Consumer Videos",
   "Robust Report with unlimited Filtering",
   "Strategic Recommendations from AI + Human Experts",
 ];
@@ -18,17 +25,41 @@ const features = [
 export default function CheckoutProPAYG() {
   const [, setLocation] = useLocation();
   const [quantity, setQuantity] = useState(1);
-  const pricePerStudy = 50000;
+  const [selectedReach, setSelectedReach] = useState(100);
 
   const handleCheckout = () => {
-    console.log("Proceeding to checkout with quantity:", quantity);
+    console.log("Proceeding to checkout:", { quantity, reach: selectedReach, totalConsumers, finalTotal });
   };
 
   const formatPrice = (price: number) => {
     return `R${price.toLocaleString()}`;
   };
 
-  const totalPrice = pricePerStudy * quantity;
+  const pricePerStudy = useMemo(() => {
+    const tier = reachPricing.find((r) => r.reach === selectedReach);
+    return tier?.price || reachPricing[0].price;
+  }, [selectedReach]);
+
+  const subtotal = useMemo(() => {
+    return pricePerStudy * quantity;
+  }, [pricePerStudy, quantity]);
+
+  const hasDiscount = quantity >= 3;
+  const discountAmount = useMemo(() => {
+    return hasDiscount ? subtotal * 0.1 : 0;
+  }, [hasDiscount, subtotal]);
+
+  const finalTotal = useMemo(() => {
+    return subtotal - discountAmount;
+  }, [subtotal, discountAmount]);
+
+  const totalConsumers = useMemo(() => {
+    return quantity * selectedReach;
+  }, [quantity, selectedReach]);
+
+  const pricePerConsumer = useMemo(() => {
+    return Math.round(pricePerStudy / selectedReach);
+  }, [pricePerStudy, selectedReach]);
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -62,10 +93,10 @@ export default function CheckoutProPAYG() {
 
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle className="text-xl">Select Quantity</CardTitle>
+                <CardTitle className="text-xl">Configure Your Study</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div>
                     <Label htmlFor="quantity">Number of Studies</Label>
                     <div className="flex items-center gap-4 mt-2">
@@ -96,24 +127,79 @@ export default function CheckoutProPAYG() {
                         +
                       </Button>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {formatPrice(pricePerStudy)} per study
+                  </div>
+
+                  <div>
+                    <Label>Reach per Study</Label>
+                    <RadioGroup
+                      value={selectedReach.toString()}
+                      onValueChange={(value) => setSelectedReach(parseInt(value))}
+                      className="mt-3 space-y-3"
+                    >
+                      {reachPricing.map((tier) => (
+                        <div
+                          key={tier.reach}
+                          className={`relative border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                            selectedReach === tier.reach
+                              ? "border-primary bg-primary/5"
+                              : "border-border hover-elevate"
+                          }`}
+                          onClick={() => setSelectedReach(tier.reach)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <RadioGroupItem
+                                value={tier.reach.toString()}
+                                id={`reach-${tier.reach}`}
+                                data-testid={`radio-reach-${tier.reach}`}
+                              />
+                              <div>
+                                <Label
+                                  htmlFor={`reach-${tier.reach}`}
+                                  className="cursor-pointer font-semibold"
+                                >
+                                  {tier.label}
+                                </Label>
+                                <p className="text-sm text-muted-foreground mt-0.5">
+                                  ~{formatPrice(Math.round(tier.price / tier.reach))} per consumer
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-xl font-bold text-primary">
+                                {formatPrice(tier.price)}
+                              </div>
+                              <div className="text-xs text-muted-foreground">per study</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </div>
+
+                  <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Users className="w-5 h-5 text-accent" />
+                      <p className="font-semibold text-accent">Total Consumers Reached</p>
+                    </div>
+                    <p className="text-3xl font-bold" data-testid="text-total-consumers">
+                      {totalConsumers.toLocaleString()}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {quantity} {quantity === 1 ? "study" : "studies"} × {selectedReach} consumers
                     </p>
                   </div>
 
-                  <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-                    <p className="text-sm font-medium">💡 Need multiple studies?</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Consider our membership plans for better rates and included credits
-                    </p>
-                    <Button
-                      variant="ghost"
-                      className="p-0 h-auto mt-2 hover:bg-transparent text-primary"
-                      onClick={() => setLocation("/#membership")}
-                    >
-                      View Membership Options →
-                    </Button>
-                  </div>
+                  {hasDiscount && (
+                    <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                      <p className="text-sm font-medium text-primary">
+                        Volume Discount Applied: 10% off for 3+ studies
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        You're saving {formatPrice(discountAmount)}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -145,12 +231,22 @@ export default function CheckoutProPAYG() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h3 className="font-semibold mb-2">Selected Service</h3>
-                  <div className="bg-muted/50 rounded-lg p-4">
-                    <p className="font-medium">Test24 Pro</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {quantity} {quantity === 1 ? "Study" : "Studies"}
-                    </p>
+                  <h3 className="font-semibold mb-2">Selected Configuration</h3>
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Studies</span>
+                      <span className="font-medium" data-testid="text-studies-count">{quantity}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Reach per Study</span>
+                      <span className="font-medium" data-testid="text-reach-per-study">{selectedReach}</span>
+                    </div>
+                    <div className="flex justify-between text-sm border-t pt-2">
+                      <span className="text-muted-foreground">Total Consumers</span>
+                      <span className="font-bold text-accent" data-testid="text-summary-total-consumers">
+                        {totalConsumers.toLocaleString()}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -159,12 +255,23 @@ export default function CheckoutProPAYG() {
                     <span className="text-muted-foreground">
                       {formatPrice(pricePerStudy)} × {quantity}
                     </span>
-                    <span>{formatPrice(totalPrice)}</span>
+                    <span data-testid="text-subtotal">{formatPrice(subtotal)}</span>
                   </div>
+                  {hasDiscount && (
+                    <div className="flex justify-between text-sm text-primary">
+                      <span>Volume Discount (10%)</span>
+                      <span data-testid="text-discount">-{formatPrice(discountAmount)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-lg font-bold pt-2 border-t">
                     <span>Total</span>
-                    <span className="text-primary">{formatPrice(totalPrice)}</span>
+                    <span className="text-primary" data-testid="text-final-total">
+                      {formatPrice(finalTotal)}
+                    </span>
                   </div>
+                  <p className="text-xs text-muted-foreground text-center pt-2">
+                    {formatPrice(Math.round(finalTotal / totalConsumers))} per consumer
+                  </p>
                 </div>
 
                 <Button
@@ -180,9 +287,11 @@ export default function CheckoutProPAYG() {
                   <p className="text-xs text-muted-foreground">
                     Secure payment processing
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Custom pricing for 10+ studies
-                  </p>
+                  {quantity < 3 && (
+                    <p className="text-xs text-accent mt-1 font-medium">
+                      Add {3 - quantity} more {3 - quantity === 1 ? "study" : "studies"} for 10% off
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
