@@ -23,6 +23,7 @@ import CreditsAndBilling from "@/pages/portal/CreditsAndBilling";
 import PastResearch from "@/pages/portal/PastResearch";
 import MemberDeals from "@/pages/portal/MemberDeals";
 import Settings from "@/pages/portal/Settings";
+import CouponSignup from "@/pages/CouponSignup";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -47,6 +48,7 @@ function Router() {
       <Route path="/portal/research" component={PastResearch} />
       <Route path="/portal/deals" component={MemberDeals} />
       <Route path="/portal/settings" component={Settings} />
+      <Route path="/claim-coupon" component={CouponSignup} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Gift } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function PromoBanner() {
-  const handleViewDeals = () => {
-    console.log("View Deals clicked");
+  const [, setLocation] = useLocation();
+
+  const handleClaimOffer = () => {
+    setLocation("/claim-coupon");
   };
 
   return (
@@ -23,7 +26,7 @@ export default function PromoBanner() {
             size="lg" 
             variant="secondary"
             className="bg-white text-foreground hover:bg-white/90"
-            onClick={handleViewDeals}
+            onClick={handleClaimOffer}
             data-testid="button-view-deals"
           >
             Claim Offer
