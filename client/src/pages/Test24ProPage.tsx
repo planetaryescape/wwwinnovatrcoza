@@ -150,7 +150,7 @@ export default function Test24ProPage() {
             </p>
             <div style={{ padding: "56.25% 0 0 0", position: "relative" }}>
               <iframe
-                src="https://player.vimeo.com/video/1138122312?badge=0&autopause=0&player_id=0&app_id=58479"
+                src="https://player.vimeo.com/video/1138121972?badge=0&autopause=0&player_id=0&app_id=58479"
                 style={{
                   position: "absolute",
                   top: 0,
@@ -161,7 +161,7 @@ export default function Test24ProPage() {
                 allow="fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
                 referrerPolicy="strict-origin-when-cross-origin"
                 allowFullScreen
-                title="Dashboard Experience - Filter and Explore Results"
+                title="Upsiide Sales Video - Dashboards"
                 data-testid="video-dashboard-experience"
               />
             </div>
