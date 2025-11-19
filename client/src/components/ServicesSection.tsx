@@ -66,7 +66,7 @@ export default function ServicesSection() {
             Idea to Market.
           </h2>
           <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
-            02 — Our Offering
+            03 — Our Offering
           </div>
         </div>
 

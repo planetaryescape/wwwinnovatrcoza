@@ -67,7 +67,7 @@ export default function MethodologySection() {
           <div className="relative z-10">
             <div className="text-center mb-4">
               <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
-                03 — The Proof
+                02 — The Proof
               </div>
             </div>
             <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6 text-center" style={{ color: '#4D5FF1' }}>
