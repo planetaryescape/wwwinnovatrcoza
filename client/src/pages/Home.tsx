@@ -7,6 +7,7 @@ import PricingSection from "@/components/PricingSection";
 import MembershipSection from "@/components/MembershipSection";
 import MethodologySection from "@/components/MethodologySection";
 import PromoBanner from "@/components/PromoBanner";
+import MailerSection from "@/components/MailerSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 
@@ -35,6 +36,7 @@ export default function Home() {
       <PricingSection />
       <MembershipSection />
       <PromoBanner />
+      <MailerSection />
       <div id="contact">
         <ContactSection />
       </div>
