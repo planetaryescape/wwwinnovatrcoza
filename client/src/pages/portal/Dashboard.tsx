@@ -11,10 +11,13 @@ import {
   Sparkles,
   Clock,
   AlertCircle,
+  Mail,
+  CreditCard,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import PortalLayout from "./PortalLayout";
+import LockedFeature from "@/components/LockedFeature";
 
 // Mock data - would come from API in production
 
@@ -65,7 +68,7 @@ const mockDeals = [
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
-  const { user } = useAuth();
+  const { user, isMember } = useAuth();
 
   const basicPercentage = (mockCredits.basicRemaining / mockCredits.basicTotal) * 100;
   const proPercentage = (mockCredits.proRemaining / mockCredits.proTotal) * 100;
@@ -75,235 +78,357 @@ export default function Dashboard() {
       <div className="p-6 max-w-7xl mx-auto space-y-6">
         {/* Welcome Section */}
         <div className="mb-8" data-testid="section-welcome">
-          <h1 className="text-4xl font-serif font-bold mb-2" data-testid="text-welcome-name">
-            Welcome back, {user?.name}
-          </h1>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-4xl font-serif font-bold" data-testid="text-welcome-name">
+              Welcome{isMember ? " back" : ""}, {user?.name}
+            </h1>
+            {!isMember && (
+              <Badge variant="secondary" className="text-sm" data-testid="badge-free-account">
+                Free Account
+              </Badge>
+            )}
+          </div>
           <p className="text-lg text-muted-foreground" data-testid="text-welcome-subtitle">
-            Your research command centre
+            {isMember ? "Your research command centre" : "You're exploring the Innovatr Portal"}
           </p>
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card
-            className="hover-elevate active-elevate-2 cursor-pointer border-primary/20"
-            onClick={() => setLocation("/portal/launch")}
-            data-testid="card-quick-action-launch"
-          >
-            <CardHeader>
-              <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center mb-3">
-                <FileText className="w-6 h-6 text-primary" />
-              </div>
-              <CardTitle className="text-lg">Launch New Brief</CardTitle>
-              <CardDescription>Start Test24 Basic or Pro</CardDescription>
-            </CardHeader>
-          </Card>
-
-          <Card
-            className="hover-elevate active-elevate-2 cursor-pointer border-accent/20"
-            onClick={() => setLocation("/portal/trends")}
-            data-testid="card-quick-action-trends"
-          >
-            <CardHeader>
-              <div className="w-12 h-12 rounded-md bg-accent/10 flex items-center justify-center mb-3">
-                <Download className="w-6 h-6 text-accent" />
-              </div>
-              <CardTitle className="text-lg">Latest Trends</CardTitle>
-              <CardDescription>Industry reports & insights</CardDescription>
-            </CardHeader>
-          </Card>
-
-          <Card
-            className="hover-elevate active-elevate-2 cursor-pointer"
-            onClick={() => setLocation("/portal/credits")}
-            data-testid="card-quick-action-credits"
-          >
-            <CardHeader>
-              <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center mb-3">
-                <ShoppingCart className="w-6 h-6 text-primary" />
-              </div>
-              <CardTitle className="text-lg">Buy Credits</CardTitle>
-              <CardDescription>Top up research credits</CardDescription>
-            </CardHeader>
-          </Card>
-
-          <Card
-            className="hover-elevate active-elevate-2 cursor-pointer"
-            onClick={() => setLocation("/portal/research")}
-            data-testid="card-quick-action-research"
-          >
-            <CardHeader>
-              <div className="w-12 h-12 rounded-md bg-accent/10 flex items-center justify-center mb-3">
-                <Archive className="w-6 h-6 text-accent" />
-              </div>
-              <CardTitle className="text-lg">Past Studies</CardTitle>
-              <CardDescription>View all research results</CardDescription>
-            </CardHeader>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Credits & Activity */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Credit Summary Widget */}
-            <Card>
+        {isMember ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <Card
+              className="hover-elevate active-elevate-2 cursor-pointer border-primary/20"
+              onClick={() => setLocation("/portal/launch")}
+              data-testid="card-quick-action-launch"
+            >
               <CardHeader>
-                <CardTitle className="flex items-center gap-2" data-testid="text-credits-title">
-                  <Sparkles className="w-5 h-5 text-primary" />
-                  Your Research Credits
-                </CardTitle>
-                <CardDescription data-testid="text-credits-description">
-                  Remaining balance as a {user?.tier?.toUpperCase()} Member
-                </CardDescription>
+                <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center mb-3">
+                  <FileText className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle className="text-lg">Launch New Brief</CardTitle>
+                <CardDescription>Start Test24 Basic or Pro</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Test24 Basic</span>
-                    <span className="text-sm text-muted-foreground">
-                      {mockCredits.basicRemaining} of {mockCredits.basicTotal} remaining
-                    </span>
-                  </div>
-                  <Progress value={basicPercentage} className="h-2" />
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Test24 Pro</span>
-                    <span className="text-sm text-muted-foreground">
-                      {mockCredits.proRemaining} of {mockCredits.proTotal} remaining
-                    </span>
-                  </div>
-                  <Progress value={proPercentage} className="h-2" />
-                </div>
-
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock className="w-4 h-4" />
-                  <span>Credits expire: {mockCredits.expiryDate}</span>
-                </div>
-
-                <div className="flex gap-3 pt-2">
-                  <Button
-                    className="flex-1"
-                    onClick={() => setLocation("/portal/credits")}
-                    data-testid="button-top-up"
-                  >
-                    Top Up Credits
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setLocation("/portal/launch")}
-                    data-testid="button-use-credit"
-                  >
-                    Use Credit
-                  </Button>
-                </div>
-              </CardContent>
             </Card>
 
-            {/* Personalized Recommendations Feed */}
-            <Card>
+            <Card
+              className="hover-elevate active-elevate-2 cursor-pointer border-accent/20"
+              onClick={() => setLocation("/portal/trends")}
+              data-testid="card-quick-action-trends"
+            >
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-accent" />
-                  Recommended for You
-                </CardTitle>
-                <CardDescription>
-                  Curated insights based on your industry
-                </CardDescription>
+                <div className="w-12 h-12 rounded-md bg-accent/10 flex items-center justify-center mb-3">
+                  <Download className="w-6 h-6 text-accent" />
+                </div>
+                <CardTitle className="text-lg">Latest Trends</CardTitle>
+                <CardDescription>Industry reports & insights</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {mockRecommendations.map((rec) => (
-                    <div
-                      key={rec.id}
-                      className="flex items-start gap-3 p-3 rounded-md hover-elevate active-elevate-2 cursor-pointer border"
-                      onClick={() => setLocation("/portal/trends")}
-                      data-testid={`recommendation-${rec.id}`}
+            </Card>
+
+            <Card
+              className="hover-elevate active-elevate-2 cursor-pointer"
+              onClick={() => setLocation("/portal/credits")}
+              data-testid="card-quick-action-credits"
+            >
+              <CardHeader>
+                <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center mb-3">
+                  <ShoppingCart className="w-6 h-6 text-primary" />
+                </div>
+                <CardTitle className="text-lg">Buy Credits</CardTitle>
+                <CardDescription>Top up research credits</CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card
+              className="hover-elevate active-elevate-2 cursor-pointer"
+              onClick={() => setLocation("/portal/research")}
+              data-testid="card-quick-action-research"
+            >
+              <CardHeader>
+                <div className="w-12 h-12 rounded-md bg-accent/10 flex items-center justify-center mb-3">
+                  <Archive className="w-6 h-6 text-accent" />
+                </div>
+                <CardTitle className="text-lg">Past Studies</CardTitle>
+                <CardDescription>View all research results</CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        ) : (
+          <div className="space-y-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card
+                className="hover-elevate active-elevate-2 cursor-pointer border-primary/20"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  setTimeout(() => setLocation("/"), 100);
+                }}
+                data-testid="card-quick-action-subscribe"
+              >
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center mb-3">
+                    <Mail className="w-6 h-6 text-primary" />
+                  </div>
+                  <CardTitle className="text-lg">Subscribe to Pulse Insights</CardTitle>
+                  <CardDescription>Free bi-weekly insights</CardDescription>
+                </CardHeader>
+              </Card>
+
+              <Card
+                className="hover-elevate active-elevate-2 cursor-pointer border-accent/20"
+                onClick={() => setLocation("/#pricing")}
+                data-testid="card-quick-action-payg"
+              >
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-md bg-accent/10 flex items-center justify-center mb-3">
+                    <CreditCard className="w-6 h-6 text-accent" />
+                  </div>
+                  <CardTitle className="text-lg">Run Test24 Basic</CardTitle>
+                  <CardDescription>R10,000 per idea</CardDescription>
+                </CardHeader>
+              </Card>
+
+              <Card
+                className="hover-elevate active-elevate-2 cursor-pointer"
+                onClick={() => setLocation("/#membership")}
+                data-testid="card-quick-action-membership"
+              >
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center mb-3">
+                    <Sparkles className="w-6 h-6 text-primary" />
+                  </div>
+                  <CardTitle className="text-lg">Browse Membership Plans</CardTitle>
+                  <CardDescription>Save up to 50%</CardDescription>
+                </CardHeader>
+              </Card>
+
+              <Card
+                className="hover-elevate active-elevate-2 cursor-pointer"
+                onClick={() => setLocation("/portal/trends")}
+                data-testid="card-quick-action-free-reports"
+              >
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-md bg-accent/10 flex items-center justify-center mb-3">
+                    <Download className="w-6 h-6 text-accent" />
+                  </div>
+                  <CardTitle className="text-lg">View Free Reports</CardTitle>
+                  <CardDescription>Limited preview access</CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
+
+            {/* Locked Value Cards for Free Users */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Unlock with Membership</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <LockedFeature
+                  title="Full Trend Library"
+                  description="Access unlimited industry reports and insights"
+                  customModalTitle="Unlock the Full Trend Library"
+                  customModalDescription="Get unlimited access to all industry reports, market trends, and consumer insights."
+                />
+                <LockedFeature
+                  title="Member Deals"
+                  description="Exclusive discounts and offers"
+                  customModalTitle="Unlock Member Deals"
+                  customModalDescription="Access exclusive deals and save up to 40% on research studies."
+                />
+                <LockedFeature
+                  title="Private Dashboard"
+                  description="Secure research results storage"
+                  customModalTitle="Unlock Private Dashboards"
+                  customModalDescription="Store and access all your research results in secure private dashboards."
+                />
+                <LockedFeature
+                  title="Personalised Recommendations"
+                  description="AI-powered insights for your industry"
+                  customModalTitle="Unlock Personalized Recommendations"
+                  customModalDescription="Get AI-powered trend recommendations tailored to your industry and business needs."
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isMember ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column - Credits & Activity */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Credit Summary Widget */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2" data-testid="text-credits-title">
+                    <Sparkles className="w-5 h-5 text-primary" />
+                    Your Research Credits
+                  </CardTitle>
+                  <CardDescription data-testid="text-credits-description">
+                    Remaining balance as a {user?.tier?.toUpperCase()} Member
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Test24 Basic</span>
+                      <span className="text-sm text-muted-foreground">
+                        {mockCredits.basicRemaining} of {mockCredits.basicTotal} remaining
+                      </span>
+                    </div>
+                    <Progress value={basicPercentage} className="h-2" />
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Test24 Pro</span>
+                      <span className="text-sm text-muted-foreground">
+                        {mockCredits.proRemaining} of {mockCredits.proTotal} remaining
+                      </span>
+                    </div>
+                    <Progress value={proPercentage} className="h-2" />
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Clock className="w-4 h-4" />
+                    <span>Credits expire: {mockCredits.expiryDate}</span>
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      className="flex-1"
+                      onClick={() => setLocation("/portal/credits")}
+                      data-testid="button-top-up"
                     >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="text-sm font-medium">{rec.title}</h4>
-                          {rec.isNew && (
-                            <Badge variant="secondary" className="text-xs">
-                              NEW
-                            </Badge>
-                          )}
+                      Top Up Credits
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setLocation("/portal/launch")}
+                      data-testid="button-use-credit"
+                    >
+                      Use Credit
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Personalized Recommendations Feed */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-accent" />
+                    Recommended for You
+                  </CardTitle>
+                  <CardDescription>
+                    Curated insights based on your industry
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {mockRecommendations.map((rec) => (
+                      <div
+                        key={rec.id}
+                        className="flex items-start gap-3 p-3 rounded-md hover-elevate active-elevate-2 cursor-pointer border"
+                        onClick={() => setLocation("/portal/trends")}
+                        data-testid={`recommendation-${rec.id}`}
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="text-sm font-medium">{rec.title}</h4>
+                            {rec.isNew && (
+                              <Badge variant="secondary" className="text-xs">
+                                NEW
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {rec.category} • {new Date(rec.date).toLocaleDateString()}
+                          </p>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          {rec.category} • {new Date(rec.date).toLocaleDateString()}
-                        </p>
+                        <Download className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                       </div>
-                      <Download className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right Column - Deals & Notifications */}
+            <div className="space-y-6">
+              {/* Member Deals Box */}
+              <Card className="border-primary">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-primary" />
+                    Member Deals
+                  </CardTitle>
+                  <CardDescription>Exclusive offers for you</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {mockDeals.map((deal, index) => (
+                    <div
+                      key={index}
+                      className="p-4 rounded-lg bg-accent/10 border border-accent/20"
+                      data-testid={`deal-${index}`}
+                    >
+                      <h4 className="font-semibold text-sm mb-1">{deal.title}</h4>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {deal.description}
+                      </p>
+                      <div className="flex items-center gap-2 text-xs text-accent">
+                        <AlertCircle className="w-3 h-3" />
+                        <span>Expires: {deal.expires}</span>
+                      </div>
                     </div>
                   ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
 
-          {/* Right Column - Deals & Notifications */}
-          <div className="space-y-6">
-            {/* Member Deals Box */}
-            <Card className="border-primary">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-primary" />
-                  Member Deals
-                </CardTitle>
-                <CardDescription>Exclusive offers for you</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {mockDeals.map((deal, index) => (
-                  <div
-                    key={index}
-                    className="p-4 rounded-lg bg-accent/10 border border-accent/20"
-                    data-testid={`deal-${index}`}
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setLocation("/portal/deals")}
+                    data-testid="button-explore-deals"
                   >
-                    <h4 className="font-semibold text-sm mb-1">{deal.title}</h4>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      {deal.description}
-                    </p>
-                    <div className="flex items-center gap-2 text-xs text-accent">
-                      <AlertCircle className="w-3 h-3" />
-                      <span>Expires: {deal.expires}</span>
-                    </div>
+                    Explore All Deals
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Quick Stats */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Your Activity</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Studies completed</span>
+                    <span className="text-lg font-bold">12</span>
                   </div>
-                ))}
-
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setLocation("/portal/deals")}
-                  data-testid="button-explore-deals"
-                >
-                  Explore All Deals
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Quick Stats */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Your Activity</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Studies completed</span>
-                  <span className="text-lg font-bold">12</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Reports downloaded</span>
-                  <span className="text-lg font-bold">28</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Value unlocked</span>
-                  <span className="text-lg font-bold text-primary">R240k</span>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Reports downloaded</span>
+                    <span className="text-lg font-bold">28</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Value unlocked</span>
+                    <span className="text-lg font-bold text-primary">R240k</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <LockedFeature title="Research Credits" description="Track and manage your Test24 credits. Members get exclusive discounts and credit packages." showButton={true}>
+              <div className="space-y-2 mt-4">
+                <Progress value={0} className="h-2" />
+                <p className="text-xs text-muted-foreground">Credits are exclusive to Innovatr Members</p>
+              </div>
+            </LockedFeature>
+
+            <LockedFeature title="Personalized Recommendations" description="Get AI-powered trend recommendations tailored to your industry and business needs." showButton={true}>
+              <div className="space-y-2 mt-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-12 bg-muted/20 rounded" />
+                ))}
+              </div>
+            </LockedFeature>
+          </div>
+        )}
       </div>
     </PortalLayout>
   );
