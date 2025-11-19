@@ -24,13 +24,10 @@ export default function MethodologySection() {
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-4">
+        <div className="text-center mb-16">
           <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
             01 — Our Difference
           </div>
-        </div>
-
-        <div className="text-center mb-16">
           <h2 className="text-5xl font-serif font-bold mb-6 max-w-4xl mx-auto leading-tight" style={{ color: '#4D5FF1' }}>
             Turning local insights into<br />fast decision making
           </h2>
@@ -65,14 +62,14 @@ export default function MethodologySection() {
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-card/80 to-card" />
           
           <div className="relative z-10">
-            <div className="text-center mb-4">
+            <div className="text-center mb-8">
               <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
                 02 — The Proof
               </div>
+              <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6" style={{ color: '#4D5FF1' }}>
+                Don't Guess. Test.
+              </h2>
             </div>
-            <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6 text-center" style={{ color: '#4D5FF1' }}>
-              Don't Guess. Test.
-            </h2>
             <p className="text-lg text-muted-foreground text-center max-w-2xl mx-auto mb-8">
               Partnering with Upsiide we have made rapid testing truly AGILE
             </p>
