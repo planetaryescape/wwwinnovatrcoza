@@ -183,18 +183,18 @@ export default function Test24ProPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg"
-              onClick={() => setLocation("/#pricing")}
+              asChild
               data-testid="button-get-started"
             >
-              Get Started
+              <a href="/#pricing">Get Started</a>
             </Button>
             <Button 
               size="lg"
               variant="outline"
-              onClick={() => setLocation("/#pricing")}
+              asChild
               data-testid="button-learn-more"
             >
-              Learn More
+              <a href="/#pricing">Learn More</a>
             </Button>
           </div>
         </div>
