@@ -121,7 +121,7 @@ export default function InnovatrIntelligence() {
                     size="lg" 
                     className="w-full sm:w-auto"
                   >
-                    <a href="/#pricing" data-testid="button-get-started">
+                    <a href="/#membership" data-testid="button-get-started">
                       Get Started
                     </a>
                   </Button>
