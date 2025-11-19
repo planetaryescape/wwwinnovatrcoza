@@ -70,29 +70,29 @@ export default function ServicesSection() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid md:grid-cols-2 gap-6">
           {services.map((service, index) => (
             <Card 
               key={index} 
               className="hover-elevate transition-all duration-300 relative overflow-hidden flex flex-col"
               data-testid={`service-card-${index}`}
             >
-              <div className="absolute top-0 right-0 text-[80px] font-serif font-bold text-primary/5 leading-none p-2">
+              <div className="absolute top-0 right-0 text-[120px] font-serif font-bold text-primary/5 leading-none p-4">
                 {service.number}
               </div>
-              <CardHeader className="pb-3">
-                <div className="w-10 h-10 mb-3 rounded-md bg-primary/10 flex items-center justify-center">
-                  <service.icon className="w-5 h-5 text-primary" />
+              <CardHeader>
+                <div className="w-12 h-12 mb-4 rounded-md bg-primary/10 flex items-center justify-center">
+                  <service.icon className="w-6 h-6 text-primary" />
                 </div>
-                <CardTitle className="text-lg font-serif leading-tight">{service.title}</CardTitle>
-                <CardDescription className="text-sm leading-snug">{service.description}</CardDescription>
-                <div className="text-base font-bold text-primary pt-1">{service.price}</div>
+                <CardTitle className="text-2xl font-serif">{service.title}</CardTitle>
+                <CardDescription className="text-base">{service.description}</CardDescription>
+                <div className="text-lg font-bold text-primary pt-2">{service.price}</div>
               </CardHeader>
-              <CardContent className="flex flex-col flex-1 space-y-3 pt-0">
-                <ul className="space-y-1.5 flex-1">
+              <CardContent className="flex flex-col flex-1 space-y-4">
+                <ul className="space-y-2 flex-1">
                   {service.features.map((feature, fIndex) => (
-                    <li key={fIndex} className="flex items-start gap-1.5 text-xs">
-                      <span className="text-primary mt-0.5">•</span>
+                    <li key={fIndex} className="flex items-start gap-2 text-sm">
+                      <span className="text-primary mt-1">•</span>
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -101,12 +101,11 @@ export default function ServicesSection() {
                   <Link href={service.link}>
                     <Button 
                       variant="outline" 
-                      size="sm"
                       className="w-full group"
                       data-testid={`button-learn-more-${index}`}
                     >
                       Learn More
-                      <ArrowRight className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
                 )}
