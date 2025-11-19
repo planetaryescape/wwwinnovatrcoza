@@ -18,6 +18,7 @@ import CheckoutMembershipGold from "@/pages/CheckoutMembershipGold";
 import CheckoutMembershipPlatinum from "@/pages/CheckoutMembershipPlatinum";
 import Dashboard from "@/pages/portal/Dashboard";
 import TrendsInsights from "@/pages/portal/TrendsInsights";
+import InsightDetail from "@/pages/portal/InsightDetail";
 import LaunchBrief from "@/pages/portal/LaunchBrief";
 import CreditsAndBilling from "@/pages/portal/CreditsAndBilling";
 import PastResearch from "@/pages/portal/PastResearch";
@@ -43,6 +44,7 @@ function Router() {
       <Route path="/checkout/membership-platinum" component={CheckoutMembershipPlatinum} />
       <Route path="/portal" component={Dashboard} />
       <Route path="/portal/trends" component={TrendsInsights} />
+      <Route path="/portal/insights/:slug" component={InsightDetail} />
       <Route path="/portal/launch" component={LaunchBrief} />
       <Route path="/portal/credits" component={CreditsAndBilling} />
       <Route path="/portal/research" component={PastResearch} />
