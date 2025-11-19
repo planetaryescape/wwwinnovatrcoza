@@ -1,0 +1,153 @@
+✅ VIBA QA & OPTIMISATION PROMPT — FULL WEBSITE REVIEW
+
+PROJECT: Conduct a full end-to-end review of the Innovatr website before live deployment.
+The goal is to ensure:
+	•	UX clarity
+	•	Simplicity
+	•	Smooth navigation
+	•	Correct button behaviour
+	•	Seamless page flow
+	•	Properly structured content
+	•	No dead ends
+	•	No missing CTAs
+	•	No placeholder elements
+	•	All locked/unlocked states function correctly
+	•	The site is ready for real integrations (payments + trend reports) but does not require them yet.
+
+⸻
+
+🧭 SCOPE OF THE REVIEW
+
+1. Review of FULL Website Flow
+
+The platform must inspect:
+	•	Homepage
+	•	Service pages
+	•	Test24 pricing section
+	•	Membership comparison & signup
+	•	User account creation
+	•	Free user portal entry
+	•	Member portal
+	•	Locked feature behaviour
+	•	Payment flow placeholders
+	•	Trend Library placeholders
+	•	Brief submission flow
+	•	Contact page
+	•	Mailer sign-up section
+
+Goal:
+Ensure every step of the user journey is logical, intuitive, and friction-free, both for once-off PAYG buyers and for members.
+
+⸻
+
+2. Review All Copy
+	•	Remove any unnecessary text
+	•	Keep language sharp, simple, and actionable
+	•	Ensure consistency in terminology (e.g., “Test24 Basic” vs “Basic”)
+	•	Eliminate duplication across sections
+	•	Ensure each page has a clear primary action (CTA)
+	•	Ensure tone matches the Innovatr brand — modern, clear, credible, speed-focused
+	•	Replace lorem ipsum or placeholders with simple guidance text until real content is uploaded
+
+Copy must help users navigate — not overwhelm them.
+
+⸻
+
+3. Validate All Buttons & CTAs
+
+Check that every button on the site:
+	•	Leads somewhere meaningful
+	•	Uses clear naming (e.g., “Run a Test”, “See Pricing”, “Become a Member”)
+	•	Is visually consistent
+	•	Has proper hover states
+	•	Does not break navigation
+	•	Does not incorrectly open locked content
+	•	Does not prematurely trigger real payment flows (placeholders only)
+
+For any future payment features, ensure:
+	•	Placeholder modals are in place
+	•	“Coming Soon” or “Payment Will Be Enabled at Launch” appears where needed
+	•	There is no risk of a user being directed to a non-functioning checkout
+
+⸻
+
+4. Validate Locked vs Unlocked Experiences
+
+For free users:
+	•	Full Trend Library should be visible but locked
+	•	Past Research Dashboard should be visible but locked
+	•	Member-only deals should appear blurred
+	•	Personalised recommendations should be hidden or greyed out
+	•	Upgrade prompts must appear consistently
+
+For members:
+	•	All locked items must open correctly
+	•	Trend library must be accessible
+	•	Brief submission must be functional
+	•	Credit top-ups must display as placeholders
+	•	Past research must show placeholder report cards
+	•	No broken areas or empty pages without explanation
+
+⸻
+
+5. Navigation Review
+
+Ensure the following:
+	•	Navigation bar uses minimal items
+	•	Everything can be reached in 2 clicks or fewer
+	•	The user always knows where they are
+	•	Footers link correctly
+	•	Breadcrumbs or consistent page titles reinforce orientation
+	•	Layout remains simple and uncluttered on mobile
+
+⸻
+
+6. Placeholder Content Check
+
+Before real content is uploaded, make sure:
+	•	Trend reports use dummy titles like “Trend Report Sample — Coming Soon”
+	•	Past research dashboards show dummy cards
+	•	Credit system shows generic placeholders
+	•	Member-only deals show blurred tiles
+	•	Payment checkout uses safe preview modals
+	•	No broken media elements or missing images
+
+⸻
+
+7. Mobile Responsiveness Review
+
+The system must check:
+	•	All text is readable
+	•	Buttons are correctly spaced
+	•	Cards stack beautifully
+	•	No horizontal scroll appears
+	•	Navigation collapses cleanly
+	•	All locked/unlocked states are still clear on mobile
+
+⸻
+
+🎨 DESIGN INTENT
+
+The final website must feel:
+	•	Simple
+	•	Clean
+	•	Easy to navigate
+	•	Fast
+	•	Professional
+	•	Zero friction
+	•	Zero confusion
+	•	Minimal text, maximum clarity
+	•	No redundancy
+	•	No unnecessary graphics or complexity
+
+⸻
+
+🎯 FINAL OBJECTIVE
+
+Produce a streamlined, error-free Innovatr website that is ready for:
+	•	Real payments to be plugged in
+	•	Real trend reports to be uploaded
+	•	Real customers to begin signing up
+	•	Members to immediately see the value of upgrading
+
+Focus entirely on UX clarity, smart flows, clean copy, and fully functional navigation.
