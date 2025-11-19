@@ -5,10 +5,14 @@ const clients = [
   "Discovery Bank",
   "Rain",
   "DGB",
-  "PepsiCo",
-  "Tiger Brands",
+  "Rugani Juice",
+  "Namibian Breweries",
   "Mondelez",
   "ooba",
+  "Revlon",
+  "Dairy Maid",
+  "Netflorist",
+  "KWV",
 ];
 
 export default function TrustBar() {
