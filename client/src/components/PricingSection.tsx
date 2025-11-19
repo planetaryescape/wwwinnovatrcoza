@@ -71,7 +71,7 @@ const pricingPlans = {
 };
 
 export default function PricingSection() {
-  const [activeTab, setActiveTab] = useState("payg");
+  const [activeTab, setActiveTab] = useState("members");
   const [, setLocation] = useLocation();
   
   const handleBuyNow = (planName: string) => {

@@ -155,6 +155,13 @@ All service detail pages feature consistent button navigation:
 - **Consult Page**: Gradient footer (coral #ED876E to blue #4D5FF1 at 10% opacity) with coral headline
 - **Intelligence Page**: Gradient footer (blue #4D5FF1 at 10-5% opacity) with blue headline, includes pricing (R5,000/month) and value proposition
 
+## Pricing Section
+
+**Default Tab Behavior:**
+- The pricing section defaults to the "Members" tab when users navigate to it
+- This applies whether users arrive via hash navigation (/#pricing) or scrolling
+- Members pricing shows discounted rates: Test24 Basic (R5,000) and Test24 Pro (R45,000)
+
 ## Member Credit Checkout Pages
 
 **Entry Plan Requirement:**
