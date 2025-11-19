@@ -60,6 +60,15 @@ Preferred communication style: Simple, everyday language.
 - **Image Assets**: Stored in `/attached_assets`, referenced via Vite's asset handling.
 - **Email/Communication**: Contact form exists, but backend email sending is not implemented.
 
+## Service Detail Color Schemes
+
+**Innovatr Consult Page:**
+- Primary Color: #ED876E (coral/salmon)
+- Used for: All headlines, icons, and accent elements
+- Icon backgrounds: rgba(237, 135, 110, 0.1-0.2) for subtle highlighting
+- Card borders and backgrounds incorporate the coral theme
+- Gradient footer blends coral with primary blue
+
 ## Visual Design Updates (November 2025)
 
 **Background Images:**
