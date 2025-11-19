@@ -33,20 +33,20 @@ export default function HeroSection() {
           Smart, Affordable Research in 24hrs
         </p>
         
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
           <Button 
-            size="lg" 
-            className="text-lg px-8 py-6 bg-primary hover:bg-primary/90 border border-primary-border backdrop-blur-sm"
+            size="default"
+            className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-primary hover:bg-primary/90 border border-primary-border backdrop-blur-sm w-full sm:w-auto"
             onClick={handleTestNow}
             data-testid="button-test-now"
           >
             Run a Test Now
-            <ArrowRight className="ml-2 h-5 w-5" />
+            <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
           <Button 
-            size="lg" 
+            size="default"
             variant="outline" 
-            className="text-lg px-8 py-6 bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20"
+            className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20 w-full sm:w-auto"
             onClick={handleMembership}
             data-testid="button-membership"
           >
