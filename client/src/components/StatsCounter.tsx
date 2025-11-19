@@ -11,7 +11,6 @@ const stats: Stat[] = [
   { value: "10+", label: "Markets" },
   { value: "10+", label: "Industries" },
   { value: "45k+", label: "Consumer Responses" },
-  { value: "50%", label: "YoY Growth" },
 ];
 
 function AnimatedNumber({ target, suffix = "" }: { target: number; suffix?: string }) {
@@ -65,7 +64,7 @@ export default function StatsCounter() {
         <div className="mb-12">
           <TrustBar />
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, index) => (
             <div key={index} className="text-center" data-testid={`stat-${index}`}>
               <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
