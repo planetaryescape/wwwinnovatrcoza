@@ -131,8 +131,8 @@ export default function InnovatrIntelligence() {
                     size="lg" 
                     className="w-full sm:w-auto bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
                   >
-                    <a href="/#contact" data-testid="button-contact-us">
-                      Contact Us
+                    <a href="/#membership" data-testid="button-learn-more">
+                      Learn More
                     </a>
                   </Button>
                 </div>

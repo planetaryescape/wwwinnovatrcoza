@@ -145,9 +145,11 @@ All offering detail pages (Test24 Basic, Test24 Pro, Innovatr Consult, Innovatr 
 - Test24 Pro: Dashboard Experience (Vimeo ID: 1138121972)
 
 **Navigation Updates:**
-- Test24 Basic/Pro "Get Started" buttons → Pricing section (/#pricing)
-- Innovatr Intelligence "Get Started" button → Membership section (/#membership)
-- Innovatr Consult "Get Started" button → Contact section (/#contact)
+All service detail pages feature consistent button navigation:
+- **Test24 Basic**: Both "Get Started" and "Learn More" buttons → Pricing section (/#pricing)
+- **Test24 Pro**: Both "Get Started" and "Learn More" buttons → Pricing section (/#pricing)
+- **Innovatr Intelligence**: Both "Get Started" and "Learn More" buttons → Membership section (/#membership)
+- **Innovatr Consult**: Both "Get Started" and "Learn More" buttons → Contact section (/#contact)
 
 ## Member Credit Checkout Pages
 

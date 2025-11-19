@@ -192,9 +192,9 @@ export default function Test24ProPage() {
               size="lg"
               variant="outline"
               onClick={() => setLocation("/#pricing")}
-              data-testid="button-view-pricing"
+              data-testid="button-learn-more"
             >
-              View Pricing
+              Learn More
             </Button>
           </div>
         </div>
