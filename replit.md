@@ -145,19 +145,28 @@ All offering detail pages (Test24 Basic, Test24 Pro, Innovatr Consult, Innovatr 
 **Entry Plan Requirement:**
 Both Test24 Basic Members and Test24 Pro Members checkout pages now enforce Entry Plan membership before allowing credit purchases:
 
-- **Location**: Positioned above credit selection on both `/checkout/basic-members` and `/checkout/pro-members` pages
-- **Visual Design**: Prominent card with primary border and background highlighting
-- **Entry Plan Details**:
-  - Annual: R60,000/year
-  - Monthly: R5,000/month
-- **Benefits Display**:
-  - Test24 Basic: 50% discount on all credits
-  - Test24 Pro: 10% discount on all studies
-  - Access to Trends Reports & Priority Support
-- **CTAs**:
-  - "Get Entry Plan" button → Links to `/checkout/membership-entry`
-  - "Learn More" button → Links to membership section (/#membership)
-- **Data-testids**: `button-get-entry-plan`, `button-learn-more-entry`
+- **Requirement Notice Card**:
+  - Location: Positioned above credit selection on both `/checkout/basic-members` and `/checkout/pro-members` pages
+  - Visual Design: Prominent card with primary border and background highlighting
+  - Entry Plan Details: Annual: R60,000/year or Monthly: R5,000/month
+  - Benefits Display:
+    - Test24 Basic: 50% discount on all credits
+    - Test24 Pro: 10% discount on all studies
+    - Access to Trends Reports & Priority Support
+  - CTAs:
+    - "Get Entry Plan" button → Links to `/checkout/membership-entry`
+    - "Learn More" button → Links to membership section (/#membership)
+  - Data-testids: `button-get-entry-plan`, `button-learn-more-entry`
+
+- **Shopping Cart Integration**:
+  - Entry Plan automatically included in order summary on both checkout pages
+  - Shopping cart displays two items:
+    1. Entry Membership (R60,000/year) - highlighted with primary background
+    2. Credits package or Pro studies - showing member pricing applied
+  - Total price calculation includes both Entry Plan (R60,000) + Credit/Study package cost
+  - **Test24 Basic Members**: Total = R60,000 + Credits package (e.g., 10x credits at R45,000 = R105,000 total)
+  - **Test24 Pro Members**: Total = R60,000 + Pro studies cost (e.g., 1 study at R45,000 = R105,000 total)
+  - Users purchase both together in one transaction, ensuring Entry Plan requirement is met
 
 ## Coupon Claim System
 

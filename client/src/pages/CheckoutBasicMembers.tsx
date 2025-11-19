@@ -240,38 +240,54 @@ export default function CheckoutBasicMembers() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h3 className="font-semibold mb-2">Selected Package</h3>
-                  <div className="bg-muted/50 rounded-lg p-4">
-                    <p className="font-medium">
-                      {creditPackages.find((p) => p.id === selectedPackage)?.credits}x Test24 Basic Credits
-                    </p>
-                    <div className="flex items-center gap-1 mt-1">
-                      <Star className="w-3 h-3 text-accent fill-accent" />
-                      <p className="text-sm text-accent font-medium">Member Pricing</p>
+                  <h3 className="font-semibold mb-3">Your Order</h3>
+                  
+                  <div className="space-y-3">
+                    <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="font-semibold">Entry Membership</p>
+                        <p className="font-bold text-primary">{formatPrice(60000)}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Annual plan - Required for member pricing</p>
+                    </div>
+
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="font-medium">
+                          {creditPackages.find((p) => p.id === selectedPackage)?.credits}x Test24 Basic Credits
+                        </p>
+                        <p className="font-bold">
+                          {formatPrice(
+                            creditPackages.find((p) => p.id === selectedPackage)?.price || 0
+                          )}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Star className="w-3 h-3 text-accent fill-accent" />
+                        <p className="text-xs text-accent font-medium">50% Member Discount Applied</p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-2 pt-4 border-t">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="text-muted-foreground">Entry Plan</span>
+                    <span>{formatPrice(60000)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Credits Package</span>
                     <span>
                       {formatPrice(
                         creditPackages.find((p) => p.id === selectedPackage)?.price || 0
                       )}
                     </span>
                   </div>
-                  <div className="flex justify-between text-sm text-accent">
-                    <span>
-                      Member Discount ({creditPackages.find((p) => p.id === selectedPackage)?.discount}%)
-                    </span>
-                    <span>Included</span>
-                  </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t">
                     <span>Total</span>
                     <span className="text-primary">
                       {formatPrice(
-                        creditPackages.find((p) => p.id === selectedPackage)?.price || 0
+                        60000 + (creditPackages.find((p) => p.id === selectedPackage)?.price || 0)
                       )}
                     </span>
                   </div>

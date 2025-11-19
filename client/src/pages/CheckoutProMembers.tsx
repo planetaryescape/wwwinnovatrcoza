@@ -328,54 +328,61 @@ export default function CheckoutProMembers() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h3 className="font-semibold mb-2">Selected Configuration</h3>
-                  <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Studies</span>
-                      <span className="font-medium" data-testid="text-studies-count">{quantity}</span>
+                  <h3 className="font-semibold mb-3">Your Order</h3>
+                  
+                  <div className="space-y-3">
+                    <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="font-semibold">Entry Membership</p>
+                        <p className="font-bold text-primary">{formatPrice(60000)}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Annual plan - Required for member pricing</p>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Reach per Study</span>
-                      <span className="font-medium" data-testid="text-reach-per-study">{selectedReach}</span>
-                    </div>
-                    <div className="flex justify-between text-sm border-t pt-2">
-                      <span className="text-muted-foreground">Total Consumers</span>
-                      <span className="font-bold text-accent" data-testid="text-summary-total-consumers">
-                        {totalConsumers.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 mt-2 pt-2 border-t">
-                      <Star className="w-3 h-3 text-accent fill-accent" />
-                      <p className="text-sm text-accent font-medium">Member Pricing</p>
+
+                    <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium">Test24 Pro Studies</p>
+                        <p className="font-bold">{formatPrice(finalTotal)}</p>
+                      </div>
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span>Studies</span>
+                        <span className="font-medium" data-testid="text-studies-count">{quantity}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span>Reach per Study</span>
+                        <span className="font-medium" data-testid="text-reach-per-study">{selectedReach}</span>
+                      </div>
+                      <div className="flex justify-between text-sm border-t pt-2">
+                        <span className="text-muted-foreground">Total Consumers</span>
+                        <span className="font-bold text-accent" data-testid="text-summary-total-consumers">
+                          {totalConsumers.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 mt-2 pt-2 border-t">
+                        <Star className="w-3 h-3 text-accent fill-accent" />
+                        <p className="text-xs text-accent font-medium">10% Member Discount Applied</p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-2 pt-4 border-t">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {formatPrice(pricePerStudy)} × {quantity}
-                    </span>
-                    <span data-testid="text-subtotal">{formatPrice(subtotal)}</span>
+                    <span className="text-muted-foreground">Entry Plan</span>
+                    <span>{formatPrice(60000)}</span>
                   </div>
-                  {hasVolumeDiscount && (
-                    <div className="flex justify-between text-sm text-primary">
-                      <span>Volume Discount (10%)</span>
-                      <span data-testid="text-volume-discount">-{formatPrice(volumeDiscountAmount)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-sm text-accent">
-                    <span>Member Savings</span>
-                    <span data-testid="text-member-savings">-{formatPrice(memberSavings)}</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Pro Studies ({quantity}x)</span>
+                    <span data-testid="text-subtotal">{formatPrice(finalTotal)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t">
                     <span>Total</span>
                     <span className="text-primary" data-testid="text-final-total">
-                      {formatPrice(finalTotal)}
+                      {formatPrice(60000 + finalTotal)}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground text-center pt-2">
-                    {formatPrice(Math.round(finalTotal / totalConsumers))} per consumer
+                    {formatPrice(Math.round((60000 + finalTotal) / totalConsumers))} per consumer (all studies combined)
                   </p>
                 </div>
 
