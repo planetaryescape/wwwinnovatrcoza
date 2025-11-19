@@ -62,6 +62,9 @@ export default function ServicesSection() {
     <section id="services" className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-4">
+          <h2 className="text-5xl font-serif font-bold mb-6" style={{ color: '#4D5FF1' }}>
+            idea to market
+          </h2>
           <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
             02 — Our Offering
           </div>
