@@ -107,38 +107,33 @@ export default function InnovatrIntelligence() {
             </CardContent>
           </Card>
 
-          <Card className="bg-primary text-primary-foreground">
-            <CardContent className="pt-6">
-              <div className="text-center space-y-4">
-                <div>
-                  <p className="text-sm uppercase tracking-wide mb-2">Pricing</p>
-                  <p className="text-4xl font-bold">R5,000 / month</p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Button 
-                    asChild
-                    variant="secondary" 
-                    size="lg" 
-                    className="w-full sm:w-auto"
-                  >
-                    <a href="/#membership" data-testid="button-get-started">
-                      Get Started
-                    </a>
-                  </Button>
-                  <Button 
-                    asChild
-                    variant="outline" 
-                    size="lg" 
-                    className="w-full sm:w-auto bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
-                  >
-                    <a href="/#membership" data-testid="button-learn-more">
-                      Learn More
-                    </a>
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="rounded-lg p-8 text-center" style={{ background: 'linear-gradient(to right, rgba(77, 95, 241, 0.1), rgba(77, 95, 241, 0.05))' }}>
+            <h2 className="text-3xl font-serif font-bold mb-2" style={{ color: '#4D5FF1' }}>
+              Ready to stay ahead of trends?
+            </h2>
+            <p className="text-sm uppercase tracking-wide text-muted-foreground mb-2">Pricing</p>
+            <p className="text-4xl font-bold mb-4" style={{ color: '#4D5FF1' }}>R5,000 / month</p>
+            <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
+              Get bi-weekly curated insights and access to 200+ AI-powered trend reports
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                size="lg"
+                asChild
+                data-testid="button-get-started"
+              >
+                <a href="/#membership">Get Started</a>
+              </Button>
+              <Button 
+                size="lg"
+                variant="outline"
+                asChild
+                data-testid="button-learn-more"
+              >
+                <a href="/#membership">Learn More</a>
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
