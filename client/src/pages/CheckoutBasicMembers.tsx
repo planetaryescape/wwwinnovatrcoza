@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Check, Zap, ShoppingCart, Star } from "lucide-react";
+import { ArrowLeft, Check, Zap, ShoppingCart, Star, AlertCircle } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
+import { Link } from "wouter";
 
 const creditPackages = [
   {
@@ -90,6 +91,54 @@ export default function CheckoutBasicMembers() {
                 </p>
               </div>
             </div>
+
+            <Card className="mb-6 border-primary">
+              <CardHeader className="bg-primary/5">
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-primary" />
+                  Entry Plan Required
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  <p className="text-sm">
+                    To access member pricing on Test24 Basic credits, you must first have an active Entry Membership plan.
+                  </p>
+                  <div className="bg-muted/50 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <h3 className="font-semibold">Entry Membership</h3>
+                        <p className="text-sm text-muted-foreground">Required for member pricing</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-primary">R60,000/year</div>
+                        <div className="text-xs text-muted-foreground">or R5,000/month</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3 pt-3 border-t">
+                      <Check className="w-4 h-4 text-primary" />
+                      <span>50% discount on all Test24 Basic credits</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+                      <Check className="w-4 h-4 text-primary" />
+                      <span>Access to Trends Reports & Priority Support</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <Button asChild variant="default" className="flex-1" data-testid="button-get-entry-plan">
+                      <Link href="/checkout/membership-entry">
+                        Get Entry Plan
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" className="flex-1" data-testid="button-learn-more-entry">
+                      <Link href="/#membership">
+                        Learn More
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             <Card className="mb-6">
               <CardHeader>

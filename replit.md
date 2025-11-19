@@ -135,6 +135,30 @@ All offering detail pages (Test24 Basic, Test24 Pro, Innovatr Consult, Innovatr 
 - Test24 Basic: Respondent Experience (Vimeo ID: 1138122312)
 - Test24 Pro: Dashboard Experience (Vimeo ID: 1138121972)
 
+**Navigation Updates:**
+- Test24 Basic/Pro "Get Started" buttons → Pricing section (/#pricing)
+- Innovatr Intelligence "Get Started" button → Membership section (/#membership)
+- Innovatr Consult "Get Started" button → Contact section (/#contact)
+
+## Member Credit Checkout Pages
+
+**Entry Plan Requirement:**
+Both Test24 Basic Members and Test24 Pro Members checkout pages now enforce Entry Plan membership before allowing credit purchases:
+
+- **Location**: Positioned above credit selection on both `/checkout/basic-members` and `/checkout/pro-members` pages
+- **Visual Design**: Prominent card with primary border and background highlighting
+- **Entry Plan Details**:
+  - Annual: R60,000/year
+  - Monthly: R5,000/month
+- **Benefits Display**:
+  - Test24 Basic: 50% discount on all credits
+  - Test24 Pro: 10% discount on all studies
+  - Access to Trends Reports & Priority Support
+- **CTAs**:
+  - "Get Entry Plan" button → Links to `/checkout/membership-entry`
+  - "Learn More" button → Links to membership section (/#membership)
+- **Data-testids**: `button-get-entry-plan`, `button-learn-more-entry`
+
 ## Coupon Claim System
 
 **Overview:**
