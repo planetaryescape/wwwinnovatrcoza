@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import TrustBar from "./TrustBar";
 
 interface Stat {
   value: string;
@@ -61,6 +62,9 @@ export default function StatsCounter() {
         <p className="text-center text-sm text-muted-foreground mb-8 uppercase tracking-wider">
           Brands who trust Innovatr
         </p>
+        <div className="mb-12">
+          <TrustBar />
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {stats.map((stat, index) => (
             <div key={index} className="text-center" data-testid={`stat-${index}`}>

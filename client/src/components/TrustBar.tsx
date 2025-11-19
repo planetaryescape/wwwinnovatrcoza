@@ -35,7 +35,7 @@ export default function TrustBar() {
   }, []);
 
   return (
-    <section className="py-12 border-y border-border overflow-hidden">
+    <div className="py-8 border-y border-border overflow-hidden">
       <div 
         ref={scrollRef}
         className="flex gap-12 items-center whitespace-nowrap overflow-hidden"
@@ -51,6 +51,6 @@ export default function TrustBar() {
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

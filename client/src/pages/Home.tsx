@@ -1,7 +1,6 @@
 import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
 import StatsCounter from "@/components/StatsCounter";
-import TrustBar from "@/components/TrustBar";
 import ServicesSection from "@/components/ServicesSection";
 import PricingSection from "@/components/PricingSection";
 import MembershipSection from "@/components/MembershipSection";
@@ -16,7 +15,6 @@ export default function Home() {
       <Navigation />
       <HeroSection />
       <StatsCounter />
-      <TrustBar />
       <MethodologySection />
       <div id="services">
         <ServicesSection />
