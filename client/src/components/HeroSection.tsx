@@ -26,10 +26,10 @@ export default function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/30" />
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 className="text-6xl sm:text-7xl lg:text-8xl font-serif font-bold text-white mb-4 tracking-tight leading-tight">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-white mb-4 tracking-tight leading-tight">
           Launch Better Innovation
         </h1>
-        <p className="text-2xl sm:text-3xl text-white/90 mb-12 font-light">
+        <p className="text-xl sm:text-2xl md:text-3xl text-white/90 mb-12 font-light">
           Smart, Affordable Research in 24hrs
         </p>
         

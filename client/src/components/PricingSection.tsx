@@ -97,7 +97,7 @@ export default function PricingSection() {
           <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
             04 — Pricing
           </div>
-          <h2 className="text-5xl font-serif font-bold mb-6" style={{ color: '#4D5FF1' }}>Flexible pricing for any business</h2>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6" style={{ color: '#4D5FF1' }}>Flexible pricing for any business</h2>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-5xl mx-auto">

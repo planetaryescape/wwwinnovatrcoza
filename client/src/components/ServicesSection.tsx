@@ -65,7 +65,7 @@ export default function ServicesSection() {
           <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
             03 — Our Offering
           </div>
-          <h2 className="text-5xl font-serif font-bold mb-6" style={{ color: '#4D5FF1' }}>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6" style={{ color: '#4D5FF1' }}>
             Test, Learn, Iterate.
           </h2>
         </div>

@@ -28,7 +28,7 @@ export default function MethodologySection() {
           <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
             01 — Our Difference
           </div>
-          <h2 className="text-5xl font-serif font-bold mb-6 max-w-4xl mx-auto leading-tight" style={{ color: '#4D5FF1' }}>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6 max-w-4xl mx-auto leading-tight" style={{ color: '#4D5FF1' }}>
             Turning local insights into<br />fast decision making
           </h2>
         </div>
@@ -66,7 +66,7 @@ export default function MethodologySection() {
               <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
                 02 — The Proof
               </div>
-              <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6" style={{ color: '#4D5FF1' }}>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6" style={{ color: '#4D5FF1' }}>
                 Don't Guess. Test.
               </h2>
             </div>
