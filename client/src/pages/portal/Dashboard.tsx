@@ -157,10 +157,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card
                 className="hover-elevate active-elevate-2 cursor-pointer border-primary/20"
-                onClick={() => {
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                  setTimeout(() => setLocation("/"), 100);
-                }}
+                onClick={() => setLocation("/#mailer")}
                 data-testid="card-quick-action-subscribe"
               >
                 <CardHeader>

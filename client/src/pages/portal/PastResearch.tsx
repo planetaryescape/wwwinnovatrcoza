@@ -10,8 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, FileText, Download, Eye, Grid3x3, List } from "lucide-react";
+import { Search, FileText, Download, Eye, Grid3x3, List, Lock } from "lucide-react";
 import PortalLayout from "./PortalLayout";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLocation } from "wouter";
+import LockedFeature from "@/components/LockedFeature";
 
 const mockStudies = [
   {
@@ -77,6 +80,8 @@ const mockStudies = [
 ];
 
 export default function PastResearch() {
+  const { isMember } = useAuth();
+  const [, setLocation] = useLocation();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
@@ -96,6 +101,55 @@ export default function PastResearch() {
     if (score >= 70) return "text-accent";
     return "text-orange-600";
   };
+
+  // Free users see locked state
+  if (!isMember) {
+    return (
+      <PortalLayout>
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-serif font-bold mb-2">Past Research</h1>
+              <p className="text-lg text-muted-foreground">
+                Access all your completed studies and insights
+              </p>
+            </div>
+            <Badge variant="secondary" className="text-sm" data-testid="badge-members-only">
+              Members Only
+            </Badge>
+          </div>
+
+          {/* Free User Message */}
+          <Card className="border-primary bg-primary/5">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <Lock className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="text-2xl font-semibold mb-3">Private Research Dashboard</h3>
+              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+                Securely store and access all your completed Test24 studies with full insights, recommendations, and downloadable reports. This feature is exclusive to Innovatr Members.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <Button size="lg" onClick={() => setLocation("/#membership")} data-testid="button-join-membership">
+                  Join as a Member
+                </Button>
+                <Button variant="outline" size="lg" onClick={() => setLocation("/#pricing")} data-testid="button-run-test">
+                  Run a Test24 Study
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Locked Features Preview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <LockedFeature title="Study Archive" description="Access all completed Test24 Basic and Pro studies with scores and findings" />
+            <LockedFeature title="Download Reports" description="Export full research reports and insights as PDFs for sharing and presentations" />
+            <LockedFeature title="Search & Filter" description="Find studies by category, type, date, or keywords with advanced filtering" />
+          </div>
+        </div>
+      </PortalLayout>
+    );
+  }
 
   return (
     <PortalLayout>

@@ -10,9 +10,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CreditCard, Download, Package, CheckCircle } from "lucide-react";
+import { CreditCard, Download, Package, CheckCircle, Lock } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { useLocation } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
+import LockedFeature from "@/components/LockedFeature";
 
 const mockCreditPackages = [
   {
@@ -71,6 +73,7 @@ const mockBillingHistory = [
 
 export default function CreditsAndBilling() {
   const [, setLocation] = useLocation();
+  const { isMember } = useAuth();
 
   const formatPrice = (amount: number) => {
     return `R${amount.toLocaleString()}`;
@@ -81,6 +84,55 @@ export default function CreditsAndBilling() {
 
   const basicPercentage = (basicCredits.remaining / basicCredits.total) * 100;
   const proPercentage = (proCredits.remaining / proCredits.total) * 100;
+
+  // Free users see locked state
+  if (!isMember) {
+    return (
+      <PortalLayout>
+        <div className="p-6 max-w-7xl mx-auto space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-serif font-bold mb-2">Credits & Billing</h1>
+              <p className="text-lg text-muted-foreground">
+                Manage your research credits and billing information
+              </p>
+            </div>
+            <Badge variant="secondary" className="text-sm" data-testid="badge-members-only">
+              Members Only
+            </Badge>
+          </div>
+
+          {/* Free User Message */}
+          <Card className="border-primary bg-primary/5">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <Lock className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="text-2xl font-semibold mb-3">Member Credits & Billing</h3>
+              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+                Track research credits, purchase discounted credit packs, and manage billing history. This feature is exclusive to Innovatr Members.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <Button size="lg" onClick={() => setLocation("/#membership")} data-testid="button-explore-plans">
+                  Explore Membership Plans
+                </Button>
+                <Button variant="outline" size="lg" onClick={() => setLocation("/#pricing")} data-testid="button-payg-pricing">
+                  View Pay-As-You-Go Pricing
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Locked Features Preview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <LockedFeature title="Credit Balance Tracking" description="Monitor Test24 Basic and Pro credits with visual progress bars and expiry dates" />
+            <LockedFeature title="Member Pricing Packs" description="Purchase discounted credit bundles with savings up to 55% off regular rates" />
+            <LockedFeature title="Billing History" description="Access invoices, download receipts, and track all membership transactions" />
+          </div>
+        </div>
+      </PortalLayout>
+    );
+  }
 
   return (
     <PortalLayout>

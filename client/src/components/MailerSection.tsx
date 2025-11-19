@@ -40,7 +40,7 @@ export default function MailerSection() {
   };
 
   return (
-    <section className="py-20 bg-muted/30">
+    <section id="mailer" className="py-20 bg-muted/30">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
