@@ -12,7 +12,9 @@ import {
   TrendingUp, 
   Zap, 
   Crown,
-  CheckCircle2
+  CheckCircle2,
+  ArrowLeft,
+  LogOut
 } from "lucide-react";
 import {
   Select,
@@ -23,7 +25,7 @@ import {
 } from "@/components/ui/select";
 
 export default function FreeTierPortal() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -102,18 +104,44 @@ export default function FreeTierPortal() {
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <div>
-              <h1 className="text-3xl font-serif font-bold text-foreground" data-testid="text-page-title">
-                Welcome, {user?.name}
-              </h1>
-              <p className="text-muted-foreground mt-1" data-testid="text-page-subtitle">
-                Free tier access to premium trend reports
-              </p>
+          <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
+            <div className="flex items-center gap-3 flex-wrap">
+              <Button
+                variant="ghost"
+                onClick={() => setLocation("/")}
+                data-testid="button-back-home"
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Home
+              </Button>
+              <div className="h-6 w-px bg-border hidden sm:block" />
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-serif font-bold text-foreground" data-testid="text-page-title">
+                  Welcome, {user?.name}
+                </h1>
+                <p className="text-muted-foreground mt-1 text-sm" data-testid="text-page-subtitle">
+                  Free tier access to premium trend reports
+                </p>
+              </div>
             </div>
-            <Badge variant="outline" className="text-sm" data-testid="badge-tier-free">
-              FREE TIER
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-sm" data-testid="badge-tier-free">
+                FREE TIER
+              </Badge>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  logout();
+                  setLocation("/");
+                }}
+                data-testid="button-logout-free"
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
 
