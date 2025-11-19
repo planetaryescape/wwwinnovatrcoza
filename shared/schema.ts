@@ -35,3 +35,18 @@ export const insertCouponClaimSchema = createInsertSchema(couponClaims).pick({
 
 export type InsertCouponClaim = z.infer<typeof insertCouponClaimSchema>;
 export type CouponClaim = typeof couponClaims.$inferSelect;
+
+export const mailerSubscriptions = pgTable("mailer_subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull().unique(),
+  subscribedAt: timestamp("subscribed_at").defaultNow().notNull(),
+});
+
+export const insertMailerSubscriptionSchema = createInsertSchema(mailerSubscriptions).pick({
+  email: true,
+}).extend({
+  email: z.string().email("Invalid email address"),
+});
+
+export type InsertMailerSubscription = z.infer<typeof insertMailerSubscriptionSchema>;
+export type MailerSubscription = typeof mailerSubscriptions.$inferSelect;

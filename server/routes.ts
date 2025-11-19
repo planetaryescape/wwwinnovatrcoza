@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertCouponClaimSchema } from "@shared/schema";
+import { insertCouponClaimSchema, insertMailerSubscriptionSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // put application routes here
@@ -21,6 +21,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const claim = await storage.createCouponClaim(validatedData);
       res.status(201).json(claim);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/mailer-subscriptions", async (req, res) => {
+    try {
+      const validatedData = insertMailerSubscriptionSchema.parse(req.body);
+      
+      const existingSubscription = await storage.getMailerSubscriptionByEmail(validatedData.email);
+      if (existingSubscription) {
+        return res.status(200).json({ message: "Already subscribed", subscription: existingSubscription });
+      }
+
+      const subscription = await storage.createMailerSubscription(validatedData);
+      res.status(201).json({ message: "Successfully subscribed to Pulse Insights", subscription });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }

@@ -1,0 +1,202 @@
+Below is a complete Viba-ready prompt for designing the Non-Paid User Experience + Locked Members Portal, including clear access rules, locked features, upgrade nudges, and a home-page mailer sign-up section.
+
+You can paste this directly into Viba.
+
+⸻
+
+✅ VIBA DESIGN PROMPT — NON-PAID USER EXPERIENCE + LOCKED PORTAL SYSTEM
+
+PROJECT: Build a seamless sign-up and restricted-access experience for non-paid users, allowing them to:
+• Sign up for bi-weekly mailers (Pulse Insights)
+• Create a free portal account
+• Access a limited / preview version of the Members Portal
+• See locked sections that become available once a membership is purchased
+• Receive upsell prompts that encourage upgrading
+
+This experience should feel friendly, modern, aspirational — encouraging non-members to see the value of upgrading.
+
+⸻
+
+🧭 KEY REQUIREMENTS
+
+Non-paid users must have access to:
+	•	Account creation/login
+	•	Members Portal (restricted version)
+	•	Dashboard preview with limited tiles
+	•	A small set of free insights (teaser content only)
+	•	Ability to:
+• subscribe to bi-weekly mailers
+• read select free reports
+• start a Test24 PAYG purchase (Basic or Pro)
+• view available memberships
+
+⸻
+
+Non-paid users must NOT have access to:
+
+(All these sections must appear locked, blurred, or greyed out.)
+	•	Full Trend Library
+	•	Unlimited Trend Reports
+	•	Member-only deals & discounts
+	•	Personalised recommendation engine
+	•	Full Past Research Dashboard
+	•	Credit balance + top-up system
+	•	Private Dashboards
+	•	Dedicated insights expert
+	•	Member-only pricing (Basic = R5k/idea, Pro = R45k/study)
+
+These features must show upgrade prompts, tooltips, and “Unlock with Membership” buttons.
+
+⸻
+
+🎨 OVERALL VIBE
+	•	Clean, modern SaaS design
+	•	Clear separation between Free and Member-Only
+	•	Friendly upgrade nudges (“You’re almost there…”)
+	•	Portal should feel valuable even in free mode
+	•	Maintain Innovatr brand consistency, neon accent + minimal layout
+
+⸻
+
+🏠 HOMEPAGE ADDITION — MAILER SIGN-UP SECTION
+
+Add a dedicated section near the bottom of the homepage:
+
+Section Title:
+
+Stay Ahead of the Shift
+
+Subline:
+
+Get free bi-weekly insights, market shifts, launches and trend analysis delivered to your inbox.
+
+CTA Field:
+
+Email input + button: “Subscribe to Pulse Insights”
+
+Additional note (small text):
+
+“Get early access to select trends and reports. Full library available with an Innovatr Membership.”
+
+⸻
+
+🧭 NON-PAID USER PORTAL STRUCTURE
+
+The Members Portal should detect user type (FREE vs MEMBER) and adjust automatically.
+
+⸻
+
+1. Free User Dashboard (Preview Mode)
+
+A. Welcome Panel
+
+“Welcome, [Name]. You’re exploring the Innovatr Portal.”
+Badge: Free Account
+
+B. Quick Actions Row
+	•	Subscribe to Pulse Insights (active)
+	•	Run Test24 Basic (R10k) (active)
+	•	Browse Membership Plans (active)
+	•	View Free Reports (active)
+
+C. Locked Value Cards (Greyed / Blurred):
+	•	“Full Trend Library — Locked”
+	•	“Member Deals — Locked”
+	•	“Private Dashboard — Locked”
+	•	“Personalised Recommendations — Locked”
+
+Each with CTA: Unlock with Membership
+
+D. Free Insights Teaser Section
+
+Show 2–3 free trend snapshots with blurred previews of additional reports.
+CTA: Unlock Full Library
+
+⸻
+
+2. Trend & Insights Library (Restricted)
+	•	Show only one free sample report per category.
+	•	All other reports greyed out with:
+“Members Only — Unlock to Download”
+	•	Keep filter/search active but results locked for non-members.
+
+⸻
+
+3. Launch a Brief (Active for Non-Paid)
+
+Non-members can launch Test24 using PAYG pricing:
+	•	Basic: R10k per idea
+	•	Pro: R50k per x100 study
+
+Membership discount pricing should not show until upgraded.
+
+After brief submission → portal prompts upgrade for:
+“Unlock private dashboards + research discounts with Membership.”
+
+⸻
+
+4. Past Research Dashboard (Locked)
+
+Non-paid users see:
+	•	“You have no research history”
+	•	Greyed out sample cards labelled “Member Feature”
+	•	CTA: Unlock Past Results with Membership
+
+⸻
+
+5. Credits & Billing (Locked)
+
+Non-paid users see:
+	•	Zero credits
+	•	Greyed out credit meter
+	•	Message: “Credits are exclusive to Innovatr Members.”
+	•	CTA: Become a Member to Unlock Discounts + Credits
+
+⸻
+
+6. Member Deals (Locked)
+
+Promo tiles are visible but blurred.
+Click → modal explaining:
+“Exclusive to Innovatr Members. Join to unlock up to 40% savings.”
+
+⸻
+
+🔐 HOW LOCKING BEHAVES
+	•	Grey overlay
+	•	Small lock icon corner label
+	•	Hovering displays tooltip: “Unlock with Membership”
+	•	CTA always available to redirect to Membership Plans
+
+⸻
+
+🎯 UPGRADE MECHANICS
+
+Whenever a non-paid user interacts with a locked feature, trigger a modal:
+
+Modal Title:
+“Unlock Full Innovatr Access”
+
+Text:
+Get unlimited trends, member pricing, private dashboards, research credits, and exclusive monthly deals.
+
+CTAs:
+	•	See Membership Plans
+	•	Continue Browsing
+
+⸻
+
+📱 RESPONSIVENESS
+
+Experience must remain clean and functional on mobile, with collapsible sections.
+
+⸻
+
+✨ FINAL GOAL
+
+Create a flawless system where:
+	•	Free users feel welcome
+	•	Paid members feel powerful
+	•	Locked features create desire to upgrade
+	•	Bi-weekly mailer sign-up is frictionless
+	•	Membership becomes the obvious next step
