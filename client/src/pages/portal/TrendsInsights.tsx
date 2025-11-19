@@ -45,8 +45,9 @@ export default function TrendsInsights() {
     return 0;
   });
 
-  // For free users, show only reports marked as free preview
-  const displayedReports = isMember ? sortedReports : sortedReports.filter(r => r.freePreview);
+  // For free users, separate free and locked reports
+  const freeReports = isMember ? sortedReports : sortedReports.filter(r => r.freePreview);
+  const lockedReports = isMember ? [] : sortedReports.filter(r => !r.freePreview);
 
   return (
     <PortalLayout>
@@ -153,7 +154,7 @@ export default function TrendsInsights() {
 
         {/* Reports Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayedReports.map((report) => (
+          {freeReports.map((report) => (
             <Card
               key={report.id}
               className="hover-elevate flex flex-col cursor-pointer"
@@ -222,8 +223,8 @@ export default function TrendsInsights() {
             </Card>
           ))}
 
-          {/* Locked Reports for Free Users */}
-          {!isMember && sortedReports.filter(r => !r.freePreview).slice(0, 3).map((report) => (
+          {/* Locked Reports for Free Users - Show ALL locked reports */}
+          {!isMember && lockedReports.map((report) => (
             <LockedFeature
               key={report.id}
               title={report.title}
