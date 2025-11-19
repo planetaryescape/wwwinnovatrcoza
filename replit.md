@@ -159,14 +159,28 @@ Both Test24 Basic Members and Test24 Pro Members checkout pages now enforce Entr
   - Data-testids: `button-get-entry-plan`, `button-learn-more-entry`
 
 - **Shopping Cart Integration**:
-  - Entry Plan automatically included in order summary on both checkout pages
-  - Shopping cart displays two items:
-    1. Entry Membership (R60,000/year) - highlighted with primary background
-    2. Credits package or Pro studies - showing member pricing applied
-  - Total price calculation includes both Entry Plan (R60,000) + Credit/Study package cost
-  - **Test24 Basic Members**: Total = R60,000 + Credits package (e.g., 10x credits at R45,000 = R105,000 total)
-  - **Test24 Pro Members**: Total = R60,000 + Pro studies cost (e.g., 1 study at R45,000 = R105,000 total)
-  - Users purchase both together in one transaction, ensuring Entry Plan requirement is met
+  - **New Member Flow** (default):
+    - Entry Plan automatically included in order summary
+    - Shopping cart displays two items:
+      1. Entry Membership (R60,000/year) - highlighted with primary background, labeled "One-time fee for 12 months"
+      2. Credits package or Pro studies - showing member pricing applied
+    - Total = R60,000 + Credits/Studies cost
+    - Example (Test24 Basic): R60,000 + 10x credits (R45,000) = R105,000 total
+    - Example (Test24 Pro): R60,000 + 1 study (R45,000) = R105,000 total
+  
+  - **Existing Member Flow** (checkbox enabled):
+    - Checkbox: "I already have an active Entry Plan membership" (data-testid: `checkbox-has-entry-plan`)
+    - When checked, Entry Plan fee is removed from cart (R0)
+    - Shopping cart shows "Active Entry Membership" badge instead of Entry Plan charge
+    - Total = Credits/Studies cost only (no Entry Plan fee)
+    - Message displayed: "No Entry Plan fee - You're already a member!"
+    - Existing members continue to receive member discounts (50% for Basic, 10% for Pro)
+  
+  - **Business Logic**:
+    - Entry Plan is a **one-time annual membership** valid for 12 months
+    - After initial purchase, members only pay for credits/studies at discounted rates
+    - No recurring Entry Plan charges for existing members buying additional credits
+    - Checkbox allows existing members to opt out of Entry Plan charge
 
 ## Coupon Claim System
 

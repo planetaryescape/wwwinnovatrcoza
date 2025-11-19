@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Check, Zap, ShoppingCart, Star, AlertCircle } from "lucide-react";
+import { ArrowLeft, Check, Zap, ShoppingCart, Star, AlertCircle, Info } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const creditPackages = [
   {
@@ -44,18 +45,23 @@ const features = [
 export default function CheckoutBasicMembers() {
   const [, setLocation] = useLocation();
   const [selectedPackage, setSelectedPackage] = useState("10x");
+  const [hasEntryPlan, setHasEntryPlan] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const handleCheckout = () => {
-    console.log("Proceeding to checkout with package:", selectedPackage);
+    console.log("Proceeding to checkout with package:", selectedPackage, "Has Entry Plan:", hasEntryPlan);
   };
 
   const formatPrice = (price: number) => {
     return `R${price.toLocaleString()}`;
   };
+
+  const entryPlanCost = hasEntryPlan ? 0 : 60000;
+  const creditsCost = creditPackages.find((p) => p.id === selectedPackage)?.price || 0;
+  const grandTotal = entryPlanCost + creditsCost;
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -96,46 +102,78 @@ export default function CheckoutBasicMembers() {
               <CardHeader className="bg-primary/5">
                 <CardTitle className="text-xl flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-primary" />
-                  Entry Plan Required
+                  Entry Plan Membership
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6">
                 <div className="space-y-4">
                   <p className="text-sm">
-                    To access member pricing on Test24 Basic credits, you must first have an active Entry Membership plan.
+                    To access member pricing on Test24 Basic credits, you need an active Entry Membership plan.
                   </p>
-                  <div className="bg-muted/50 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div>
-                        <h3 className="font-semibold">Entry Membership</h3>
-                        <p className="text-sm text-muted-foreground">Required for member pricing</p>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-primary">R60,000/year</div>
-                        <div className="text-xs text-muted-foreground">or R5,000/month</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3 pt-3 border-t">
-                      <Check className="w-4 h-4 text-primary" />
-                      <span>50% discount on all Test24 Basic credits</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
-                      <Check className="w-4 h-4 text-primary" />
-                      <span>Access to Trends Reports & Priority Support</span>
+                  
+                  <div className="flex items-start gap-3 p-4 bg-accent/10 border border-accent/20 rounded-lg">
+                    <Checkbox 
+                      id="has-entry-plan" 
+                      checked={hasEntryPlan}
+                      onCheckedChange={(checked) => setHasEntryPlan(checked as boolean)}
+                      data-testid="checkbox-has-entry-plan"
+                    />
+                    <div className="flex-1">
+                      <label 
+                        htmlFor="has-entry-plan" 
+                        className="text-sm font-medium cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        I already have an active Entry Plan membership
+                      </label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Check this if you purchased an Entry Plan within the last 12 months
+                      </p>
                     </div>
                   </div>
-                  <div className="flex gap-3">
-                    <Button asChild variant="default" className="flex-1" data-testid="button-get-entry-plan">
-                      <Link href="/checkout/membership-entry">
-                        Get Entry Plan
-                      </Link>
-                    </Button>
-                    <Button asChild variant="outline" className="flex-1" data-testid="button-learn-more-entry">
-                      <Link href="/#membership">
-                        Learn More
-                      </Link>
-                    </Button>
-                  </div>
+
+                  {!hasEntryPlan && (
+                    <>
+                      <div className="bg-muted/50 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h3 className="font-semibold">Entry Membership</h3>
+                            <p className="text-sm text-muted-foreground">One-time annual fee</p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-primary">R60,000/year</div>
+                            <div className="text-xs text-muted-foreground">or R5,000/month</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3 pt-3 border-t">
+                          <Check className="w-4 h-4 text-primary" />
+                          <span>50% discount on all Test24 Basic credits</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+                          <Check className="w-4 h-4 text-primary" />
+                          <span>Access to Trends Reports & Priority Support</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <Button asChild variant="outline" className="flex-1" data-testid="button-learn-more-entry">
+                          <Link href="/#membership">
+                            Learn More About Entry Plan
+                          </Link>
+                        </Button>
+                      </div>
+                    </>
+                  )}
+
+                  {hasEntryPlan && (
+                    <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Info className="w-5 h-5 text-primary" />
+                        <p className="font-semibold text-primary">Existing Member</p>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        You'll only be charged for the credits. Your Entry Plan membership remains active and you'll continue to enjoy 50% member discounts.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -243,13 +281,25 @@ export default function CheckoutBasicMembers() {
                   <h3 className="font-semibold mb-3">Your Order</h3>
                   
                   <div className="space-y-3">
-                    <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="font-semibold">Entry Membership</p>
-                        <p className="font-bold text-primary">{formatPrice(60000)}</p>
+                    {!hasEntryPlan && (
+                      <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="font-semibold">Entry Membership</p>
+                          <p className="font-bold text-primary">{formatPrice(60000)}</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Annual plan - One-time fee for 12 months</p>
                       </div>
-                      <p className="text-xs text-muted-foreground">Annual plan - Required for member pricing</p>
-                    </div>
+                    )}
+
+                    {hasEntryPlan && (
+                      <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Check className="w-4 h-4 text-accent" />
+                          <p className="font-semibold text-accent">Active Entry Membership</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Enjoying 50% member discount on all credits</p>
+                      </div>
+                    )}
 
                     <div className="bg-muted/50 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-1">
@@ -257,9 +307,7 @@ export default function CheckoutBasicMembers() {
                           {creditPackages.find((p) => p.id === selectedPackage)?.credits}x Test24 Basic Credits
                         </p>
                         <p className="font-bold">
-                          {formatPrice(
-                            creditPackages.find((p) => p.id === selectedPackage)?.price || 0
-                          )}
+                          {formatPrice(creditsCost)}
                         </p>
                       </div>
                       <div className="flex items-center gap-1">
@@ -271,26 +319,27 @@ export default function CheckoutBasicMembers() {
                 </div>
 
                 <div className="space-y-2 pt-4 border-t">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Entry Plan</span>
-                    <span>{formatPrice(60000)}</span>
-                  </div>
+                  {!hasEntryPlan && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Entry Plan (12 months)</span>
+                      <span>{formatPrice(60000)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Credits Package</span>
-                    <span>
-                      {formatPrice(
-                        creditPackages.find((p) => p.id === selectedPackage)?.price || 0
-                      )}
-                    </span>
+                    <span>{formatPrice(creditsCost)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t">
                     <span>Total</span>
-                    <span className="text-primary">
-                      {formatPrice(
-                        60000 + (creditPackages.find((p) => p.id === selectedPackage)?.price || 0)
-                      )}
+                    <span className="text-primary" data-testid="text-grand-total">
+                      {formatPrice(grandTotal)}
                     </span>
                   </div>
+                  {hasEntryPlan && (
+                    <p className="text-xs text-accent text-center pt-2 font-medium">
+                      No Entry Plan fee - You're already a member!
+                    </p>
+                  )}
                 </div>
 
                 <Button
