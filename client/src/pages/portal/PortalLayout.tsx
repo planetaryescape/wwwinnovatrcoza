@@ -69,7 +69,7 @@ const menuItems = [
     title: "Settings",
     url: "/portal/settings",
     icon: Settings,
-    lockedForFree: true,
+    lockedForFree: false,
   },
 ];
 

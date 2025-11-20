@@ -102,54 +102,8 @@ export default function PastResearch() {
     return "text-orange-600";
   };
 
-  // Free users see locked state
-  if (!isMember) {
-    return (
-      <PortalLayout>
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-serif font-bold mb-2">Past Research</h1>
-              <p className="text-lg text-muted-foreground">
-                Access all your completed studies and insights
-              </p>
-            </div>
-            <Badge variant="secondary" className="text-sm" data-testid="badge-members-only">
-              Members Only
-            </Badge>
-          </div>
-
-          {/* Free User Message */}
-          <Card className="border-primary bg-primary/5">
-            <CardContent className="p-8 text-center">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <Lock className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-2xl font-semibold mb-3">Private Research Dashboard</h3>
-              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                Securely store and access all your completed Test24 studies with full insights, recommendations, and downloadable reports. This feature is exclusive to Innovatr Members.
-              </p>
-              <div className="flex gap-3 justify-center">
-                <Button size="lg" onClick={() => setLocation("/#membership")} data-testid="button-join-membership">
-                  Join as a Member
-                </Button>
-                <Button variant="outline" size="lg" onClick={() => setLocation("/#pricing")} data-testid="button-run-test">
-                  Run a Test24 Study
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Locked Features Preview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <LockedFeature title="Study Archive" description="Access all completed Test24 Basic and Pro studies with scores and findings" />
-            <LockedFeature title="Download Reports" description="Export full research reports and insights as PDFs for sharing and presentations" />
-            <LockedFeature title="Search & Filter" description="Find studies by category, type, date, or keywords with advanced filtering" />
-          </div>
-        </div>
-      </PortalLayout>
-    );
-  }
+  // Show banner for free users
+  const showLockedBanner = !isMember;
 
   return (
     <PortalLayout>
@@ -180,6 +134,28 @@ export default function PastResearch() {
             </Button>
           </div>
         </div>
+
+        {/* Free User Banner */}
+        {showLockedBanner && (
+          <Card className="border-primary bg-primary/5">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Lock className="w-6 h-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold mb-2">Private Research Dashboard - Members Only</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Securely store and access all your completed Test24 studies with full insights, recommendations, and downloadable reports. This feature is exclusive to Innovatr Members.
+                  </p>
+                  <Button onClick={() => setLocation("/#membership")} data-testid="button-upgrade-membership">
+                    Join as a Member
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Filters */}
         <Card>
