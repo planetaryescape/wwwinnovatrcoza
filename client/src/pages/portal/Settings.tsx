@@ -11,12 +11,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { User, Building2, Bell, Shield, Users } from "lucide-react";
+import { User, Building2, Bell, Shield, Users, Lock } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLocation } from "wouter";
+import { Badge } from "@/components/ui/badge";
+import LockedFeature from "@/components/LockedFeature";
 
 export default function Settings() {
   const { toast } = useToast();
+  const { isMember } = useAuth();
+  const [, setLocation] = useLocation();
 
   const handleSaveProfile = () => {
     toast({
@@ -31,6 +37,55 @@ export default function Settings() {
       description: "Your notification preferences have been updated.",
     });
   };
+
+  // Free users see locked state
+  if (!isMember) {
+    return (
+      <PortalLayout>
+        <div className="p-6 max-w-5xl mx-auto space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-serif font-bold mb-2">Settings</h1>
+              <p className="text-lg text-muted-foreground">
+                Manage your account and preferences
+              </p>
+            </div>
+            <Badge variant="secondary" className="text-sm" data-testid="badge-members-only">
+              Members Only
+            </Badge>
+          </div>
+
+          {/* Free User Message */}
+          <Card className="border-primary bg-primary/5">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <Lock className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="text-2xl font-semibold mb-3">Advanced Settings</h3>
+              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+                Manage your team members, notification preferences, integrations, and account settings. This feature is exclusive to Innovatr Members.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <Button size="lg" onClick={() => setLocation("/#membership")} data-testid="button-join-membership">
+                  Join as a Member
+                </Button>
+                <Button variant="outline" size="lg" onClick={() => setLocation("/portal/trends")} data-testid="button-view-trends">
+                  View Trends Library
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Locked Features Preview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <LockedFeature title="Team Management" description="Add and manage team members with role-based access control" />
+            <LockedFeature title="Advanced Notifications" description="Customize email and push notifications for research updates and insights" />
+            <LockedFeature title="API Integrations" description="Connect with your existing tools and workflows via secure API access" />
+          </div>
+        </div>
+      </PortalLayout>
+    );
+  }
 
   return (
     <PortalLayout>
