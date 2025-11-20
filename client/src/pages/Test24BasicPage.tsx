@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Users, Clock, CheckCircle2, Zap } from "lucide-react";
+import { ArrowLeft, Users, Clock, CheckCircle2, Zap, Target } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 
@@ -65,7 +65,7 @@ export default function Test24BasicPage() {
             </CardContent>
           </Card>
 
-          <Card className="md:col-span-2 bg-primary/5 border-primary/20">
+          <Card className="bg-primary/5 border-primary/20">
             <CardContent className="pt-6">
               <h3 className="font-semibold mb-2 flex items-center gap-2">
                 <Zap className="w-5 h-5 text-primary" />
@@ -74,6 +74,33 @@ export default function Test24BasicPage() {
               <p className="text-muted-foreground">
                 Teams wanting faster concept testing with flexibility to only pay per idea you want to test - flexibility & affordability unlocked
               </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-muted/30">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Target className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold">Utilised For</h3>
+              </div>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">•</span>
+                  <span>Fast creative checks</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">•</span>
+                  <span>Quick design validation</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">•</span>
+                  <span>Early stage concept screening</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">•</span>
+                  <span>Rapid decision support</span>
+                </li>
+              </ul>
             </CardContent>
           </Card>
         </div>
@@ -156,6 +183,43 @@ export default function Test24BasicPage() {
             </div>
           </CardContent>
         </Card>
+
+        <div className="mb-12">
+          <h2 className="text-3xl font-serif font-bold mb-4">
+            When to use Test24 Basic
+          </h2>
+          <p className="text-lg text-muted-foreground mb-6">
+            Perfect for the moments when you need a fast signal, a simple yes or no, or a quick comparison before you invest more time or budget.
+          </p>
+          
+          <h3 className="text-xl font-semibold mb-4">Typical Basic use cases</h3>
+          <ul className="space-y-3 mb-6">
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+              <span className="text-muted-foreground">Testing a social media post before launch</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+              <span className="text-muted-foreground">Checking two packaging designs or thumbnails</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+              <span className="text-muted-foreground">Quick validation of a new product name</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+              <span className="text-muted-foreground">Understanding which claim or benefit feels strongest</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+              <span className="text-muted-foreground">Early concept screening for rough ideas or low fidelity designs</span>
+            </li>
+          </ul>
+          
+          <p className="text-lg font-medium text-accent">
+            Short, sharp, and made for speed.
+          </p>
+        </div>
 
         <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg p-8 text-center">
           <h2 className="text-3xl font-serif font-bold mb-4">

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Building2, Rocket, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Building2, Rocket, CheckCircle2, Target } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 
@@ -65,7 +65,7 @@ export default function Test24ProPage() {
             </CardContent>
           </Card>
 
-          <Card className="md:col-span-2 bg-primary/5 border-primary/20">
+          <Card className="bg-primary/5 border-primary/20">
             <CardContent className="pt-6">
               <h3 className="font-semibold mb-2 flex items-center gap-2">
                 <Rocket className="w-5 h-5 text-primary" />
@@ -74,6 +74,33 @@ export default function Test24ProPage() {
               <p className="text-muted-foreground">
                 24hr Quant Validation with Qual Empathy at Scale with full flexibility - at price points unheard of
               </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-muted/30">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Target className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold">Utilised For</h3>
+              </div>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">•</span>
+                  <span>Deep quant validation</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">•</span>
+                  <span>Behavioural testing with full diagnostics</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">•</span>
+                  <span>Decision making for product, brand, and creative investments</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">•</span>
+                  <span>Market ready research with AI Qual included</span>
+                </li>
+              </ul>
             </CardContent>
           </Card>
         </div>
@@ -172,6 +199,43 @@ export default function Test24ProPage() {
             </div>
           </CardContent>
         </Card>
+
+        <div className="mb-12">
+          <h2 className="text-3xl font-serif font-bold mb-4">
+            When to use Test24 Pro
+          </h2>
+          <p className="text-lg text-muted-foreground mb-6">
+            Best for when you need structure, statistical confidence, full audience tailoring, and a report that can land with leadership or guide a major business decision.
+          </p>
+          
+          <h3 className="text-xl font-semibold mb-4">Typical Pro use cases</h3>
+          <ul className="space-y-3 mb-6">
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              <span className="text-muted-foreground">Brand health audit for your full portfolio</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              <span className="text-muted-foreground">Testing a full creative route or campaign territory</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              <span className="text-muted-foreground">Validation of new product concepts across multiple audiences</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              <span className="text-muted-foreground">Understanding messaging or benefit ladders at scale</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              <span className="text-muted-foreground">Pre launch testing for a major pack redesign or product relaunch</span>
+            </li>
+          </ul>
+          
+          <p className="text-lg font-medium text-primary">
+            Comprehensive, enterprise grade, and designed for bigger decisions.
+          </p>
+        </div>
 
         <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg p-8 text-center">
           <h2 className="text-3xl font-serif font-bold mb-4">
