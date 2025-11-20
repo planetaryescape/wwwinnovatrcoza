@@ -13,7 +13,6 @@ import {
 import { Search, Download, Bookmark, BookmarkCheck, Filter, Lock, FileText } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { useAuth } from "@/contexts/AuthContext";
-import LockedFeature from "@/components/LockedFeature";
 import { useLocation, Link } from "wouter";
 import reportsData from "@/data/reports.json";
 
