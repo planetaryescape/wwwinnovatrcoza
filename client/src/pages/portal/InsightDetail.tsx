@@ -2,15 +2,17 @@ import { useRoute, useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Download, ArrowLeft, Calendar, Briefcase } from "lucide-react";
+import { Download, ArrowLeft, Calendar, Briefcase, Lock } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import reportsData from "@/data/reports.json";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export default function InsightDetail() {
   const [, params] = useRoute("/portal/insights/:slug");
   const [, setLocation] = useLocation();
   const { isMember } = useAuth();
+  const { toast } = useToast();
 
   const report = reportsData.find((r) => r.slug === params?.slug);
 
@@ -35,34 +37,24 @@ export default function InsightDetail() {
     );
   }
 
-  // Non-members can only view reports marked as free preview
-  if (!isMember && !report.freePreview) {
-    return (
-      <PortalLayout>
-        <div className="p-6 max-w-4xl mx-auto">
-          <Card className="border-primary bg-primary/5">
-            <CardContent className="p-12 text-center">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <Download className="w-8 h-8 text-primary" />
-              </div>
-              <h2 className="text-2xl font-serif font-bold mb-4">Members-Only Content</h2>
-              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                This report is exclusive to Innovatr Members. Join now to access our full library of industry reports, market trends, and consumer insights.
-              </p>
-              <div className="flex gap-3 justify-center">
-                <Button size="lg" onClick={() => setLocation("/#membership")} data-testid="button-join-now">
-                  Join Membership
-                </Button>
-                <Button variant="outline" size="lg" onClick={() => setLocation("/portal/trends")} data-testid="button-back-library">
-                  Back to Library
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </PortalLayout>
-    );
-  }
+  // Determine if download is locked for this user
+  const isDownloadLocked = !isMember && !report.freePreview;
+
+  const handleDownload = () => {
+    if (isDownloadLocked) {
+      toast({
+        title: "Download Locked",
+        description: "Upgrade to a membership plan to download this report.",
+        variant: "destructive",
+      });
+      return;
+    }
+    // Handle actual download logic here
+    toast({
+      title: "Download Started",
+      description: "Your report is being downloaded.",
+    });
+  };
 
   return (
     <PortalLayout>
@@ -119,18 +111,34 @@ export default function InsightDetail() {
         </Card>
 
         {/* Download CTA */}
-        <Card className="bg-accent/10">
+        <Card className={isDownloadLocked ? "bg-muted/30 border-muted" : "bg-accent/10"}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h3 className="font-semibold mb-1">Download Full Report</h3>
                 <p className="text-sm text-muted-foreground">
-                  Get the complete PDF with all insights and data
+                  {isDownloadLocked 
+                    ? "Upgrade to membership to download this report" 
+                    : "Get the complete PDF with all insights and data"}
                 </p>
               </div>
-              <Button size="lg" data-testid="button-download-pdf">
-                <Download className="w-4 h-4 mr-2" />
-                Download PDF
+              <Button 
+                size="lg" 
+                data-testid="button-download-pdf"
+                onClick={handleDownload}
+                variant={isDownloadLocked ? "outline" : "default"}
+              >
+                {isDownloadLocked ? (
+                  <>
+                    <Lock className="w-4 h-4 mr-2" />
+                    Locked
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-2" />
+                    Download PDF
+                  </>
+                )}
               </Button>
             </div>
           </CardContent>
@@ -163,13 +171,31 @@ export default function InsightDetail() {
         </div>
 
         {/* Footer CTA */}
-        <Card className="bg-primary/5 border-primary">
+        <Card className={isDownloadLocked ? "bg-muted/30 border-muted" : "bg-primary/5 border-primary"}>
           <CardContent className="p-8 text-center">
-            <h3 className="text-2xl font-serif font-bold mb-3">Chat soon!</h3>
-            <p className="text-lg font-semibold text-primary mb-6">Innovatr Intelligence</p>
-            <Button size="lg" data-testid="button-download-footer">
-              <Download className="w-4 h-4 mr-2" />
-              Download Full Report
+            <h3 className="text-2xl font-serif font-bold mb-3">
+              {isDownloadLocked ? "Upgrade to Download" : "Chat soon!"}
+            </h3>
+            <p className="text-lg font-semibold mb-6" style={{color: isDownloadLocked ? 'inherit' : '#4D5FF1'}}>
+              {isDownloadLocked ? "Become a Member to Download All Reports" : "Innovatr Intelligence"}
+            </p>
+            <Button 
+              size="lg" 
+              data-testid="button-download-footer"
+              onClick={isDownloadLocked ? () => setLocation("/#membership") : handleDownload}
+              variant={isDownloadLocked ? "default" : "default"}
+            >
+              {isDownloadLocked ? (
+                <>
+                  <Lock className="w-4 h-4 mr-2" />
+                  Upgrade to Download
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Full Report
+                </>
+              )}
             </Button>
           </CardContent>
         </Card>

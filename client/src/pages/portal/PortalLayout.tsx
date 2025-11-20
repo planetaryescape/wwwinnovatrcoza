@@ -20,49 +20,56 @@ import {
   Gift,
   Settings,
   LogOut,
+  Lock,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
-import FreeTierPortal from "./FreeTierPortal";
 
 const menuItems = [
   {
     title: "Dashboard",
     url: "/portal",
     icon: LayoutDashboard,
+    lockedForFree: true,
   },
   {
     title: "Trends & Insights",
     url: "/portal/trends",
     icon: TrendingUp,
+    lockedForFree: false,
   },
   {
     title: "Launch New Brief",
     url: "/portal/launch",
     icon: FileText,
+    lockedForFree: false,
   },
   {
     title: "Credits & Billing",
     url: "/portal/credits",
     icon: CreditCard,
+    lockedForFree: false,
   },
   {
     title: "Past Research",
     url: "/portal/research",
     icon: Archive,
+    lockedForFree: true,
   },
   {
     title: "Member Deals",
     url: "/portal/deals",
     icon: Gift,
+    lockedForFree: true,
   },
   {
     title: "Settings",
     url: "/portal/settings",
     icon: Settings,
+    lockedForFree: true,
   },
 ];
 
@@ -84,13 +91,16 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
     return null;
   }
 
-  if (!isMember) {
-    return <FreeTierPortal />;
-  }
-
   const handleLogout = () => {
     logout();
     setLocation("/");
+  };
+
+  const handleMenuClick = (url: string, lockedForFree: boolean) => {
+    if (!isMember && lockedForFree) {
+      return;
+    }
+    setLocation(url);
   };
 
   const getTierColor = (tier: string) => {
@@ -131,30 +141,39 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                     {user?.company || user?.email}
                   </p>
                   <Badge 
-                    className={`${getTierColor(user?.tier || 'entry')} text-xs`}
-                    data-testid={`badge-member-tier-${user?.tier}`}
+                    className={`${isMember ? getTierColor(user?.tier || 'entry') : 'bg-muted text-muted-foreground'} text-xs`}
+                    data-testid={`badge-member-tier-${user?.tier || 'free'}`}
                   >
-                    {user?.tier?.toUpperCase()} Member
+                    {isMember ? `${user?.tier?.toUpperCase()} Member` : 'FREE TIER'}
                   </Badge>
                 </div>
               </div>
               <SidebarGroupLabel data-testid="label-portal-menu">Portal Menu</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {menuItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={location === item.url}
-                        data-testid={`menu-item-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
-                      >
-                        <button onClick={() => setLocation(item.url)}>
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </button>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
+                  {menuItems.map((item) => {
+                    const isLocked = !isMember && item.lockedForFree;
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={location === item.url}
+                          data-testid={`menu-item-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+                          className={isLocked ? 'opacity-60' : ''}
+                        >
+                          <button 
+                            onClick={() => handleMenuClick(item.url, item.lockedForFree)}
+                            disabled={isLocked}
+                            className="w-full"
+                          >
+                            <item.icon className="h-4 w-4" />
+                            <span className="flex-1 text-left">{item.title}</span>
+                            {isLocked && <Lock className="h-3 w-3 ml-auto text-muted-foreground" />}
+                          </button>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>

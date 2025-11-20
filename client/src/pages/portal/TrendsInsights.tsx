@@ -45,9 +45,8 @@ export default function TrendsInsights() {
     return 0;
   });
 
-  // For free users, separate free and locked reports
-  const freeReports = isMember ? sortedReports : sortedReports.filter(r => r.freePreview);
-  const lockedReports = isMember ? [] : sortedReports.filter(r => !r.freePreview);
+  // All users can view all reports, but free users can only download free ones
+  const allReports = sortedReports;
 
   return (
     <PortalLayout>
@@ -139,9 +138,9 @@ export default function TrendsInsights() {
                   <Lock className="w-6 h-6 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold mb-2">Unlock the Full Trends Library</h3>
+                  <h3 className="text-lg font-semibold mb-2">Download All Reports with Membership</h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Preview 1 free report. Get unlimited access to all industry reports, market trends, and consumer insights with any Innovatr Membership.
+                    You can view all reports, but only download 1 free report. Upgrade to download all industry reports, market trends, and consumer insights.
                   </p>
                   <Button onClick={() => setLocation("/#membership")} data-testid="button-upgrade-membership">
                     Explore Membership Plans
@@ -152,98 +151,85 @@ export default function TrendsInsights() {
           </Card>
         )}
 
-        {/* Reports Grid */}
+        {/* Reports Grid - All users can view all reports */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {freeReports.map((report) => (
-            <Card
-              key={report.id}
-              className="hover-elevate flex flex-col cursor-pointer"
-              data-testid={`report-card-${report.id}`}
-            >
-              <Link href={`/portal/insights/${report.slug}`} className="flex flex-col flex-1">
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex gap-2">
-                      <Badge variant="secondary">{report.category}</Badge>
-                      <Badge variant="outline" className="text-xs">{report.industry}</Badge>
+          {allReports.map((report) => {
+            const isLocked = !isMember && !report.freePreview;
+            return (
+              <Card
+                key={report.id}
+                className="hover-elevate flex flex-col cursor-pointer"
+                data-testid={`report-card-${report.id}`}
+              >
+                <Link href={`/portal/insights/${report.slug}`} className="flex flex-col flex-1">
+                  <CardHeader>
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex gap-2">
+                        <Badge variant="secondary">{report.category}</Badge>
+                        <Badge variant="outline" className="text-xs">{report.industry}</Badge>
+                        {isLocked && (
+                          <Badge variant="outline" className="text-xs flex items-center gap-1">
+                            <Lock className="w-3 h-3" />
+                            Download Locked
+                          </Badge>
+                        )}
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleBookmark(report.id);
+                        }}
+                        className="text-muted-foreground hover:text-accent transition-colors"
+                        data-testid={`button-bookmark-${report.id}`}
+                      >
+                        {bookmarkedReports.includes(report.id) ? (
+                          <BookmarkCheck className="w-4 h-4 fill-current" />
+                        ) : (
+                          <Bookmark className="w-4 h-4" />
+                        )}
+                      </button>
                     </div>
-                    <button
+                    <CardTitle className="text-lg flex items-start gap-2">
+                      <FileText className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                      <span>
+                        {report.title}
+                        {report.isNew && (
+                          <Badge variant="default" className="text-xs ml-2">
+                            NEW
+                          </Badge>
+                        )}
+                      </span>
+                    </CardTitle>
+                    <CardDescription className="line-clamp-3">{report.teaser}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="mt-auto">
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {report.tags.map((tag, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
+                      <span>{new Date(report.date).toLocaleDateString()}</span>
+                    </div>
+                    <Button 
+                      className="w-full" 
+                      data-testid={`button-view-${report.id}`}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        toggleBookmark(report.id);
                       }}
-                      className="text-muted-foreground hover:text-accent transition-colors"
-                      data-testid={`button-bookmark-${report.id}`}
                     >
-                      {bookmarkedReports.includes(report.id) ? (
-                        <BookmarkCheck className="w-4 h-4 fill-current" />
-                      ) : (
-                        <Bookmark className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
-                  <CardTitle className="text-lg flex items-start gap-2">
-                    <FileText className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                    <span>
-                      {report.title}
-                      {report.isNew && (
-                        <Badge variant="default" className="text-xs ml-2">
-                          NEW
-                        </Badge>
-                      )}
-                    </span>
-                  </CardTitle>
-                  <CardDescription className="line-clamp-3">{report.teaser}</CardDescription>
-                </CardHeader>
-                <CardContent className="mt-auto">
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {report.tags.map((tag, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
-                    <span>{new Date(report.date).toLocaleDateString()}</span>
-                  </div>
-                  <Button 
-                    className="w-full" 
-                    data-testid={`button-view-${report.id}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    Read Full Report
-                  </Button>
-                </CardContent>
-              </Link>
-            </Card>
-          ))}
-
-          {/* Locked Reports for Free Users - Show ALL locked reports */}
-          {!isMember && lockedReports.map((report) => (
-            <LockedFeature
-              key={report.id}
-              title={report.title}
-              description={`${report.category} • ${report.industry} • ${new Date(report.date).toLocaleDateString()}`}
-              customModalTitle="Unlock Full Trends Library"
-              customModalDescription="Get unlimited access to all industry reports, market trends, and consumer insights."
-            >
-              <div className="mt-4 space-y-2">
-                <div className="flex flex-wrap gap-1">
-                  {report.tags.map((tag, index) => (
-                    <Badge key={index} variant="outline" className="text-xs opacity-50">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-                <p className="text-sm text-muted-foreground opacity-50 line-clamp-2">{report.teaser}</p>
-              </div>
-            </LockedFeature>
-          ))}
+                      <FileText className="w-4 h-4 mr-2" />
+                      Read Full Report
+                    </Button>
+                  </CardContent>
+                </Link>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </PortalLayout>
