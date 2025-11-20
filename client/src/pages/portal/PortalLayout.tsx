@@ -96,10 +96,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
     setLocation("/");
   };
 
-  const handleMenuClick = (url: string, lockedForFree: boolean) => {
-    if (!isMember && lockedForFree) {
-      return;
-    }
+  const handleMenuClick = (url: string) => {
     setLocation(url);
   };
 
@@ -159,11 +156,9 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                           asChild
                           isActive={location === item.url}
                           data-testid={`menu-item-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
-                          className={isLocked ? 'opacity-60' : ''}
                         >
                           <button 
-                            onClick={() => handleMenuClick(item.url, item.lockedForFree)}
-                            disabled={isLocked}
+                            onClick={() => handleMenuClick(item.url)}
                             className="w-full"
                           >
                             <item.icon className="h-4 w-4" />

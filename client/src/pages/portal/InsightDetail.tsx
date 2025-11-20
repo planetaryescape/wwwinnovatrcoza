@@ -42,11 +42,7 @@ export default function InsightDetail() {
 
   const handleDownload = () => {
     if (isDownloadLocked) {
-      toast({
-        title: "Download Locked",
-        description: "Upgrade to a membership plan to download this report.",
-        variant: "destructive",
-      });
+      setLocation("/#membership");
       return;
     }
     // Handle actual download logic here
