@@ -86,11 +86,11 @@ export default function ServicesSection() {
               className="hover-elevate transition-all duration-300 relative overflow-hidden flex flex-col"
               data-testid={`service-card-${index}`}
             >
-              <div className="absolute top-0 right-0 text-[120px] font-serif font-bold opacity-5 leading-none p-4" style={{ color: service.color }}>
+              <div className="absolute top-0 right-0 text-[120px] font-serif font-bold leading-none p-4" style={{ color: service.color, opacity: index === 2 ? 0.15 : 0.05 }}>
                 {service.number}
               </div>
               {service.isNew && (
-                <div className="absolute top-4 left-4 z-10">
+                <div className="absolute top-4 right-4 z-10">
                   <Badge 
                     className="font-semibold text-xs px-2 py-1"
                     style={{ backgroundColor: service.color, color: 'white' }}
