@@ -85,49 +85,77 @@ export default function CreditsAndBilling() {
   const basicPercentage = (basicCredits.remaining / basicCredits.total) * 100;
   const proPercentage = (proCredits.remaining / proCredits.total) * 100;
 
-  // Free users see locked state
+  // Free users can access this page to purchase memberships/credits
   if (!isMember) {
     return (
       <PortalLayout>
         <div className="p-6 max-w-7xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-serif font-bold mb-2">Credits & Billing</h1>
+              <h1 className="text-4xl font-serif font-bold mb-2">Purchase Membership & Credits</h1>
               <p className="text-lg text-muted-foreground">
-                Manage your research credits and billing information
+                Upgrade your account and unlock exclusive features
               </p>
             </div>
-            <Badge variant="secondary" className="text-sm" data-testid="badge-members-only">
-              Members Only
+            <Badge variant="secondary" className="text-sm" data-testid="badge-free-tier">
+              Free Tier
             </Badge>
           </div>
 
-          {/* Free User Message */}
+          {/* Membership Purchase CTA */}
           <Card className="border-primary bg-primary/5">
-            <CardContent className="p-8 text-center">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <Lock className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-2xl font-semibold mb-3">Member Credits & Billing</h3>
-              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                Track research credits, purchase discounted credit packs, and manage billing history. This feature is exclusive to Innovatr Members.
-              </p>
-              <div className="flex gap-3 justify-center">
-                <Button size="lg" onClick={() => setLocation("/#membership")} data-testid="button-explore-plans">
-                  Explore Membership Plans
-                </Button>
-                <Button variant="outline" size="lg" onClick={() => setLocation("/#pricing")} data-testid="button-payg-pricing">
-                  View Pay-As-You-Go Pricing
-                </Button>
+            <CardContent className="p-8">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <CreditCard className="w-6 h-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-semibold mb-3">Become an Innovatr Member</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Unlock discounted Test24 credits, access the full trends library, member deals, and priority support. Choose from Entry, Gold, or Platinum tiers.
+                  </p>
+                  <div className="flex gap-3">
+                    <Button size="lg" onClick={() => setLocation("/#membership")} data-testid="button-explore-plans">
+                      View Membership Plans
+                    </Button>
+                    <Button variant="outline" size="lg" onClick={() => setLocation("/#pricing")} data-testid="button-payg-pricing">
+                      Pay-As-You-Go Pricing
+                    </Button>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Locked Features Preview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <LockedFeature title="Credit Balance Tracking" description="Monitor Test24 Basic and Pro credits with visual progress bars and expiry dates" />
-            <LockedFeature title="Member Pricing Packs" description="Purchase discounted credit bundles with savings up to 55% off regular rates" />
-            <LockedFeature title="Billing History" description="Access invoices, download receipts, and track all membership transactions" />
+          {/* Benefits Preview */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">What You'll Get with Membership</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <h4 className="font-semibold mb-2">Discounted Credits</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Save up to 55% on Test24 Basic and Pro research credits
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <h4 className="font-semibold mb-2">Full Trends Library</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Download all industry reports and market insights
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <h4 className="font-semibold mb-2">Member Deals</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Access exclusive offers and bundle packages
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </PortalLayout>
