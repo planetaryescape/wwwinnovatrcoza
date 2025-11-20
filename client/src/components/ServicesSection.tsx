@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Zap, Target, Rocket, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 
@@ -16,6 +17,8 @@ const services = [
       "Automated briefing & reporting",
       "24hr turnaround",
     ],
+    color: "#ED876E",
+    isNew: true,
   },
   {
     icon: Target,
@@ -29,6 +32,8 @@ const services = [
       "Custom Audience",
       "Quant + AI Qual",
     ],
+    color: "#4D5FF1",
+    isNew: false,
   },
   {
     icon: TrendingUp,
@@ -42,6 +47,8 @@ const services = [
       "Opportunity identification",
       "Bi-weekly curated insights",
     ],
+    color: "#D4B7F7",
+    isNew: true,
   },
   {
     icon: Rocket,
@@ -54,6 +61,8 @@ const services = [
       "Idea to Market Consulting",
       "Strategy, Design, Testing & Go to Market",
     ],
+    color: "#4D5FF1",
+    isNew: false,
   },
 ];
 
@@ -77,22 +86,38 @@ export default function ServicesSection() {
               className="hover-elevate transition-all duration-300 relative overflow-hidden flex flex-col"
               data-testid={`service-card-${index}`}
             >
-              <div className="absolute top-0 right-0 text-[120px] font-serif font-bold text-primary/5 leading-none p-4">
+              <div className="absolute top-0 right-0 text-[120px] font-serif font-bold opacity-5 leading-none p-4" style={{ color: service.color }}>
                 {service.number}
               </div>
-              <CardHeader>
-                <div className="w-12 h-12 mb-4 rounded-md bg-primary/10 flex items-center justify-center">
-                  <service.icon className="w-6 h-6 text-primary" />
+              {service.isNew && (
+                <div className="absolute top-4 left-4 z-10">
+                  <Badge 
+                    className="font-semibold text-xs px-2 py-1"
+                    style={{ backgroundColor: service.color, color: 'white' }}
+                    data-testid={`badge-new-${index}`}
+                  >
+                    NEW
+                  </Badge>
                 </div>
-                <CardTitle className="text-2xl font-serif">{service.title}</CardTitle>
+              )}
+              <CardHeader>
+                <div 
+                  className="w-12 h-12 mb-4 rounded-md flex items-center justify-center"
+                  style={{ backgroundColor: `${service.color}15` }}
+                >
+                  <service.icon className="w-6 h-6" style={{ color: service.color }} />
+                </div>
+                <CardTitle className="text-2xl font-serif" style={{ color: service.color }}>
+                  {service.title}
+                </CardTitle>
                 <CardDescription className="text-base">{service.description}</CardDescription>
-                <div className="text-lg font-bold text-primary pt-2">{service.price}</div>
+                <div className="text-lg font-bold pt-2" style={{ color: service.color }}>{service.price}</div>
               </CardHeader>
               <CardContent className="flex flex-col flex-1 space-y-4">
                 <ul className="space-y-2 flex-1">
                   {service.features.map((feature, fIndex) => (
                     <li key={fIndex} className="flex items-start gap-2 text-sm">
-                      <span className="text-primary mt-1">•</span>
+                      <span className="mt-1" style={{ color: service.color }}>•</span>
                       <span>{feature}</span>
                     </li>
                   ))}
