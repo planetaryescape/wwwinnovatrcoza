@@ -122,7 +122,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/webhooks/payfast", async (req, res) => {
     try {
-      await paymentService.handleWebhook("payfast", req.body, req.headers as Record<string, string>);
+      const rawBody = (req as any).rawBody || req.body;
+      await paymentService.handleWebhook("payfast", rawBody, req.headers as Record<string, string>);
       res.status(200).send("OK");
     } catch (error: any) {
       console.error("PayFast webhook error:", error);
@@ -132,7 +133,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/webhooks/zapper", async (req, res) => {
     try {
-      await paymentService.handleWebhook("zapper", req.body, req.headers as Record<string, string>);
+      const rawBody = (req as any).rawBody || JSON.stringify(req.body);
+      await paymentService.handleWebhook("zapper", rawBody, req.headers as Record<string, string>);
       res.status(200).send("OK");
     } catch (error: any) {
       console.error("Zapper webhook error:", error);
@@ -142,7 +144,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/webhooks/applepay", async (req, res) => {
     try {
-      await paymentService.handleWebhook("applepay", req.body, req.headers as Record<string, string>);
+      const rawBody = (req as any).rawBody || JSON.stringify(req.body);
+      await paymentService.handleWebhook("applepay", rawBody, req.headers as Record<string, string>);
       res.status(200).send("OK");
     } catch (error: any) {
       console.error("Apple Pay webhook error:", error);

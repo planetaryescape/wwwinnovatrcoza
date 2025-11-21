@@ -14,7 +14,17 @@ app.use(express.json({
     req.rawBody = buf;
   }
 }));
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ 
+  extended: false,
+  verify: (req, _res, buf) => {
+    req.rawBody = buf;
+  }
+}));
+
+app.post("/api/webhooks/:provider", express.raw({ type: "application/x-www-form-urlencoded", limit: "1mb" }), (req, res, next) => {
+  req.rawBody = req.body;
+  next();
+});
 
 app.use((req, res, next) => {
   const start = Date.now();

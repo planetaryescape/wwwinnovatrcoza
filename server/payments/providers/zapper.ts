@@ -87,7 +87,7 @@ export class ZapperProvider implements PaymentProvider {
       const expectedSignature = crypto
         .createHmac("sha256", this.config.apiKey)
         .update(bodyString)
-        .digest("hex");
+        .digest("base64");
       
       verified = signature === expectedSignature;
     }

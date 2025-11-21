@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import type { PaymentProvider, CheckoutPayload, PaymentConfig } from "../types";
 import type { Order, PaymentIntent, InsertPaymentIntent } from "@shared/schema";
+import { isValidPayFastIp } from "../utils";
 
 export class PayFastProvider implements PaymentProvider {
   readonly key = "payfast";
@@ -106,19 +107,8 @@ export class PayFastProvider implements PaymentProvider {
     const calculatedSignature = this.generateSignature(data);
     const verified = receivedSignature === calculatedSignature;
 
-    const validIps = [
-      "197.97.145.144",
-      "41.74.179.194", 
-      "41.74.179.202",
-      "41.74.179.210",
-      "41.74.179.218",
-      "41.74.179.226",
-      "41.74.179.234",
-      "196.33.176.0/23",
-    ];
-
-    const sourceIp = headers["x-forwarded-for"]?.split(",")[0] || headers["x-real-ip"];
-    const ipVerified = sourceIp && validIps.some(ip => sourceIp.startsWith(ip.split("/")[0]));
+    const sourceIp = (headers["x-forwarded-for"] as string)?.split(",")[0].trim() || (headers["x-real-ip"] as string);
+    const ipVerified = isValidPayFastIp(sourceIp);
 
     return {
       intentId: data.m_payment_id,
