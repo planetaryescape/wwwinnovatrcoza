@@ -15,7 +15,6 @@ Preferred communication style: Simple, everyday language.
 - **UI Components**: Shadcn/ui (Radix UI) for accessible components in a "New York" style.
 - **Styling**: Tailwind CSS v3 with custom design tokens, supporting light/dark themes, using Roboto and DM Serif Display fonts.
 - **Design Principles**: Conversion-optimized with clear CTAs, minimal friction, and a premium aesthetic using neon accents, white backgrounds, and charcoal text. Features strategic background images and embedded videos for enhanced visuals.
-- **Editorial Brushstroke System**: Premium, modern SVG brushstroke accents inspired by editorial brands (Multiverse, Jenna Kutcher). Thick, confident strokes with soft edges and brush textures add personality without reducing clarity. Placement rules: bold brushstrokes ONLY in negative space (hero sections, large whitespace); subtle, faint strokes for section labels and stats; NEVER on pricing cards, feature lists, CTAs, or dense content. Primary color: Innovatr blue (#0033FF); accents: soft coral (#FF7A59), muted amber (#FCD87C). Opacity: 35-60% (80% in hero). Features gentle opacity hover animation and mobile responsiveness.
 
 ### Backend
 - **Server**: Express.js with Node.js and TypeScript for API routes and static asset serving.

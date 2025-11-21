@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Zap, Target, Rocket, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
-import { ArcBrush, SectionLabelBrush } from "@/components/Brushstrokes";
 
 const services = [
   {
@@ -72,29 +71,11 @@ export default function ServicesSection() {
     <section id="services" className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider relative inline-block">
-            <span className="relative z-10">03 — Our Offering</span>
-            <SectionLabelBrush 
-              className="absolute left-1/2 -translate-x-1/2 top-0 hidden sm:block" 
-              color="#0033FF" 
-              opacity={0.35}
-              width={300}
-              height={32}
-            />
+          <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
+            03 — Our Offering
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6 relative inline-block" style={{ color: '#4D5FF1' }}>
-            Test, Learn,{" "}
-            <span className="relative inline-block">
-              <span className="relative z-10">Iterate</span>
-              <ArcBrush 
-                className="absolute -left-4 -bottom-3" 
-                color="#0033FF" 
-                opacity={0.6}
-                width={220}
-                height={55}
-              />
-            </span>
-            .
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6" style={{ color: '#4D5FF1' }}>
+            Test, Learn, Iterate.
           </h2>
         </div>
 
@@ -129,12 +110,8 @@ export default function ServicesSection() {
                 <CardTitle className="text-2xl font-serif" style={{ color: service.color }}>
                   {service.title}
                 </CardTitle>
-                <CardDescription className="text-base">
-                  {service.description}
-                </CardDescription>
-                <div className="text-lg font-bold pt-2" style={{ color: service.color }}>
-                  {service.price}
-                </div>
+                <CardDescription className="text-base">{service.description}</CardDescription>
+                <div className="text-lg font-bold pt-2" style={{ color: service.color }}>{service.price}</div>
               </CardHeader>
               <CardContent className="flex flex-col flex-1 space-y-4">
                 <ul className="space-y-2 flex-1">

@@ -285,11 +285,4 @@
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
   }
-
-  /* Editorial Brushstroke Styles - Mobile Responsiveness */
-  @media (max-width: 640px) {
-    .brushstroke-mobile-scale {
-      transform: scale(0.75);
-    }
-  }
 }

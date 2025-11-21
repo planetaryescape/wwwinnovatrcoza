@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import TrustBar from "./TrustBar";
-import { HorizontalBrush } from "@/components/Brushstrokes";
 
 interface Stat {
   value: string;
@@ -65,14 +64,7 @@ export default function StatsCounter() {
         <div className="mb-12">
           <TrustBar />
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 relative">
-          <HorizontalBrush 
-            className="absolute -bottom-8 left-1/2 -translate-x-1/2 hidden md:block" 
-            color="#FF7A59" 
-            opacity={0.35}
-            width={500}
-            height={40}
-          />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, index) => (
             <div key={index} className="text-center" data-testid={`stat-${index}`}>
               <div className="text-3xl md:text-4xl font-bold text-primary mb-2">

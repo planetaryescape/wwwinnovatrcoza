@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { CircleBrush } from "@/components/Brushstrokes";
 
 export default function MailerSection() {
   const [email, setEmail] = useState("");
@@ -47,18 +46,8 @@ export default function MailerSection() {
           <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
             <Mail className="w-8 h-8 text-primary" />
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-4 relative inline-block" style={{ color: '#4D5FF1' }}>
-            Stay Ahead of the{" "}
-            <span className="relative inline-block">
-              <span className="relative z-10">Shift</span>
-              <CircleBrush 
-                className="absolute -left-3 -top-2" 
-                color="#0033FF" 
-                opacity={0.8}
-                width={200}
-                height={90}
-              />
-            </span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-4" style={{ color: '#4D5FF1' }}>
+            Stay Ahead of the Shift
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
             Get free bi-weekly insights, market shifts, launches and trend analysis delivered to your inbox.
