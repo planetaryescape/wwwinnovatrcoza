@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import TrustBar from "./TrustBar";
+import { SubtleUnderline } from "@/components/Scribbles";
 
 interface Stat {
   value: string;
@@ -64,7 +65,12 @@ export default function StatsCounter() {
         <div className="mb-12">
           <TrustBar />
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 relative">
+          <SubtleUnderline 
+            className="absolute -bottom-4 left-0 right-0 scribble-subtle" 
+            color="#B8E6B8" 
+            opacity={0.4} 
+          />
           {stats.map((stat, index) => (
             <div key={index} className="text-center" data-testid={`stat-${index}`}>
               <div className="text-3xl md:text-4xl font-bold text-primary mb-2">

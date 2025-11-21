@@ -1,12 +1,23 @@
+import { SquiggleScribble } from "@/components/Scribbles";
+
 export default function Footer() {
   return (
     <footer className="border-t border-border py-12 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
-          <div>
+          <div className="relative">
             <h3 className="font-bold text-lg mb-4">Innovatr</h3>
             <p className="text-sm text-muted-foreground">
-              Smart Research in 24 Hours. AI-powered insights for decision-makers.
+              Smart Research in 24 Hours.{" "}
+              <span className="relative inline-block">
+                AI-powered insights
+                <SquiggleScribble 
+                  className="absolute -bottom-1 -right-6 scribble-subtle" 
+                  color="#4D5FF1" 
+                  opacity={0.3} 
+                />
+              </span>
+              {" "}for decision-makers.
             </p>
           </div>
           

@@ -15,6 +15,7 @@ Preferred communication style: Simple, everyday language.
 - **UI Components**: Shadcn/ui (Radix UI) for accessible components in a "New York" style.
 - **Styling**: Tailwind CSS v3 with custom design tokens, supporting light/dark themes, using Roboto and DM Serif Display fonts.
 - **Design Principles**: Conversion-optimized with clear CTAs, minimal friction, and a premium aesthetic using neon accents, white backgrounds, and charcoal text. Features strategic background images and embedded videos for enhanced visuals.
+- **Scribble Design System**: Hand-drawn style SVG accent elements that add personality while maintaining premium feel. Includes circles, underlines, arrows, squiggles, highlighters, stars, and brackets. Bold scribbles in hero and Test24 sections, subtle accents elsewhere. Features hover wiggle animation for playful interactivity. Color palette includes coral (#ED876E), sky blue (#87CEEB), soft yellow (#FFF59D), and mint green (#B8E6B8).
 
 ### Backend
 - **Server**: Express.js with Node.js and TypeScript for API routes and static asset serving.
