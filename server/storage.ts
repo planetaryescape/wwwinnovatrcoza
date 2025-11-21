@@ -119,8 +119,14 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const now = new Date();
     const order: Order = {
-      ...insertOrder,
       id,
+      userId: insertOrder.userId ?? null,
+      amount: insertOrder.amount,
+      currency: insertOrder.currency ?? "ZAR",
+      purchaseType: insertOrder.purchaseType,
+      status: insertOrder.status ?? "pending",
+      customerName: insertOrder.customerName ?? null,
+      customerEmail: insertOrder.customerEmail,
       createdAt: now,
       updatedAt: now,
     };
@@ -142,8 +148,13 @@ export class MemStorage implements IStorage {
   async createOrderItem(insertItem: InsertOrderItem): Promise<OrderItem> {
     const id = randomUUID();
     const item: OrderItem = {
-      ...insertItem,
       id,
+      orderId: insertItem.orderId,
+      type: insertItem.type,
+      referenceId: insertItem.referenceId ?? null,
+      quantity: insertItem.quantity ?? 1,
+      unitAmount: insertItem.unitAmount,
+      description: insertItem.description ?? null,
     };
     this.orderItems.set(id, item);
     return item;
@@ -159,10 +170,14 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const now = new Date();
     const intent: PaymentIntent = {
-      ...insertIntent,
       id,
+      status: insertIntent.status ?? "pending",
       createdAt: now,
       updatedAt: now,
+      orderId: insertIntent.orderId,
+      providerKey: insertIntent.providerKey,
+      providerIntentId: insertIntent.providerIntentId ?? null,
+      metadata: insertIntent.metadata ?? {},
     };
     this.paymentIntents.set(id, intent);
     return intent;
@@ -188,9 +203,13 @@ export class MemStorage implements IStorage {
   async createPaymentEvent(insertEvent: InsertPaymentEvent): Promise<PaymentEvent> {
     const id = randomUUID();
     const event: PaymentEvent = {
-      ...insertEvent,
       id,
       createdAt: new Date(),
+      intentId: insertEvent.intentId,
+      providerEventId: insertEvent.providerEventId ?? null,
+      eventType: insertEvent.eventType,
+      payload: insertEvent.payload,
+      verifiedSignature: insertEvent.verifiedSignature ?? false,
     };
     this.paymentEvents.set(id, event);
     return event;

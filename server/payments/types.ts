@@ -23,19 +23,19 @@ export interface PaymentProvider {
 }
 
 export interface PaymentConfig {
-  payfast: {
+  payfast?: {
     merchantId: string;
     merchantKey: string;
-    passphrase: string;
+    passphrase?: string;
     sandbox: boolean;
   };
-  zapper: {
+  zapper?: {
     merchantId: string;
     siteId: string;
     apiKey: string;
     sandbox: boolean;
   };
-  applePay: {
+  applePay?: {
     merchantId: string;
     provider: "payfast" | "paystack";
   };

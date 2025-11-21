@@ -16,6 +16,8 @@ import CheckoutProMembers from "@/pages/CheckoutProMembers";
 import CheckoutMembershipEntry from "@/pages/CheckoutMembershipEntry";
 import CheckoutMembershipGold from "@/pages/CheckoutMembershipGold";
 import CheckoutMembershipPlatinum from "@/pages/CheckoutMembershipPlatinum";
+import CheckoutPage from "@/pages/CheckoutPage";
+import PaymentReturn from "@/pages/PaymentReturn";
 import Dashboard from "@/pages/portal/Dashboard";
 import TrendsInsights from "@/pages/portal/TrendsInsights";
 import InsightDetail from "@/pages/portal/InsightDetail";
@@ -42,6 +44,9 @@ function Router() {
       <Route path="/checkout/membership-entry" component={CheckoutMembershipEntry} />
       <Route path="/checkout/membership-gold" component={CheckoutMembershipGold} />
       <Route path="/checkout/membership-platinum" component={CheckoutMembershipPlatinum} />
+      <Route path="/checkout" component={CheckoutPage} />
+      <Route path="/payment/return" component={PaymentReturn} />
+      <Route path="/payment/cancel" component={PaymentReturn} />
       <Route path="/portal" component={Dashboard} />
       <Route path="/portal/trends" component={TrendsInsights} />
       <Route path="/portal/insights/:slug" component={InsightDetail} />
