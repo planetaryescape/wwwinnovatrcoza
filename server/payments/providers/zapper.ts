@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import type { PaymentProvider, CheckoutPayload, PaymentConfig } from "../types";
 import type { Order, PaymentIntent } from "@shared/schema";
 
@@ -78,7 +79,18 @@ export class ZapperProvider implements PaymentProvider {
   }> {
     const body = typeof rawBody === "string" ? JSON.parse(rawBody) : JSON.parse(rawBody.toString("utf-8"));
 
-    const verified = true;
+    const signature = headers["x-zapper-signature"] || headers["X-Zapper-Signature"];
+    let verified = false;
+
+    if (signature && this.config.apiKey) {
+      const bodyString = typeof rawBody === "string" ? rawBody : rawBody.toString("utf-8");
+      const expectedSignature = crypto
+        .createHmac("sha256", this.config.apiKey)
+        .update(bodyString)
+        .digest("hex");
+      
+      verified = signature === expectedSignature;
+    }
 
     return {
       intentId: body.reference || body.merchantReference,

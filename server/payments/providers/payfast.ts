@@ -31,9 +31,11 @@ export class PayFastProvider implements PaymentProvider {
         }
       });
 
-    const paramString = params.toString();
-    const passphrase = this.config.passphrase;
-    const signatureString = `${paramString}&passphrase=${encodeURIComponent(passphrase)}`;
+    let signatureString = params.toString();
+    
+    if (this.config.passphrase) {
+      signatureString += `&passphrase=${encodeURIComponent(this.config.passphrase)}`;
+    }
     
     return crypto.createHash("md5").update(signatureString).digest("hex");
   }

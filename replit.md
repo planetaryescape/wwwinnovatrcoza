@@ -43,6 +43,31 @@ Preferred communication style: Simple, everyday language.
 - **Sections**: Dashboard, Trends & Insights Library, Launch New Brief, Credits & Billing, Past Research Dashboard, Member Deals, Settings.
 - **Trends & Insights Library**: Dynamic content from Innovatr Intelligence blog posts (`reports.json`) with search, filtering, and sorting. Features free content gating and upgrade prompts.
 
+### Payment Gateway System
+- **Architecture**: Multi-provider payment system supporting South African gateways (PayFast, Zapper, Apple Pay)
+- **Provider Interface**: Unified `PaymentProvider` interface with implementations for each gateway
+- **Payment Service**: `PaymentService` orchestrates provider selection, payment intent creation, checkout payload generation, and webhook handling
+- **Database Schema**: 
+  - `orders`: Store order details (amount, currency, customer info, status)
+  - `order_items`: Line items for each order (type, quantity, amount, description)
+  - `payment_intents`: Track payment attempts with provider-specific metadata
+  - `payment_events`: Log webhook events for audit trail
+- **Supported Providers**:
+  - **PayFast**: Primary South African gateway supporting credit/debit cards, instant EFT, and more. Form-based redirect flow with MD5 signature verification
+  - **Zapper**: Mobile-first South African payment platform with QR codes and card payments. REST API integration with webhook validation
+  - **Apple Pay**: Delegates to PayFast for processing while providing Apple Pay UX. Requires merchant domain verification file
+- **Checkout Flow**:
+  1. Create order with items via `/api/orders`
+  2. Create payment intent via `/api/payment-intents` with selected provider
+  3. Retrieve checkout payload via `/api/payment-intents/:id/checkout`
+  4. Redirect user to provider (PayFast form POST, Zapper QR/redirect, Apple Pay session)
+  5. Provider processes payment and sends webhook to `/api/webhooks/{provider}`
+  6. User returns to `/payment/return` with status
+- **Webhook Security**: Each provider validates webhooks using signatures (PayFast MD5, Zapper HMAC) and/or IP whitelisting
+- **Environment Variables**: See `.env.example` for required PayFast, Zapper, and Apple Pay credentials
+- **Storage Interface**: Extended with payment CRUD methods (createOrder, createPaymentIntent, updateOrder, etc.)
+- **Checkout UI**: `/checkout` page with payment method selection, order summary, and secure payment processing
+
 ### Build and Deployment
 - **Development**: `npm run dev` starts Express with Vite.
 - **Production**: Vite builds client, esbuild builds server into `/dist`.
@@ -55,7 +80,7 @@ Preferred communication style: Simple, everyday language.
 - **Coupon Claim System**: Users can claim a R10,000 Test24 Basic coupon via a dedicated `/claim-coupon` page by providing name and email. The system generates unique coupon codes and prevents duplicate claims from the same email.
 
 ## External Dependencies
-- **Payment Processing**: Stripe integration prepared with `@stripe/react-stripe-js` and `@stripe/stripe-js`.
+- **Payment Processing**: South African payment gateways (PayFast, Zapper, Apple Pay) with multi-provider architecture. Stripe integration also prepared with `@stripe/react-stripe-js` and `@stripe/stripe-js` for international payments.
 - **UI Animations**: Intersection Observer API for scroll animations, CSS transitions, and Tailwind utilities.
 - **Image Assets**: Stored in `/attached_assets` and referenced via Vite.
 - **Video Embeds**: Vimeo for embedding demo and informational videos.
