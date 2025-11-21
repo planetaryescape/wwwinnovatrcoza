@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Zap, Target, Rocket, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
-import { UnderlineScribble, SquiggleScribble, HighlighterScribble, ArrowScribble, StarScribble, BracketScribble } from "@/components/Scribbles";
+import { ArcBrush, SectionLabelBrush } from "@/components/Brushstrokes";
 
 const services = [
   {
@@ -72,25 +72,26 @@ export default function ServicesSection() {
     <section id="services" className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
-            03 — Our Offering
+          <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider relative inline-block">
+            <span className="relative z-10">03 — Our Offering</span>
+            <SectionLabelBrush 
+              className="absolute left-1/2 -translate-x-1/2 top-0 hidden sm:block" 
+              color="#0033FF" 
+              opacity={0.35}
+              width={300}
+              height={32}
+            />
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6 relative inline-block" style={{ color: '#4D5FF1' }}>
+            Test, Learn,{" "}
             <span className="relative inline-block">
-              <span className="relative">Test</span>
-              <SquiggleScribble 
-                className="absolute -top-8 -right-4 scribble-wiggle" 
-                color="#4D5FF1" 
-                opacity={0.7} 
-              />
-            </span>
-            , Learn,{" "}
-            <span className="relative inline-block scribble-bold">
               <span className="relative z-10">Iterate</span>
-              <UnderlineScribble 
-                className="absolute -bottom-2 left-0 right-0" 
-                color="#87CEEB" 
-                opacity={1} 
+              <ArcBrush 
+                className="absolute -left-4 -bottom-3" 
+                color="#0033FF" 
+                opacity={0.6}
+                width={220}
+                height={55}
               />
             </span>
             .
@@ -128,56 +129,19 @@ export default function ServicesSection() {
                 <CardTitle className="text-2xl font-serif" style={{ color: service.color }}>
                   {service.title}
                 </CardTitle>
-                <CardDescription className="text-base relative">
-                  {index === 1 && (
-                    <>
-                      <BracketScribble 
-                        className="absolute -left-3 top-0 bottom-0 w-6" 
-                        color="#4D5FF1" 
-                        opacity={0.6} 
-                      />
-                      <BracketScribble 
-                        className="absolute -right-3 top-0 bottom-0 w-6 scale-x-[-1]" 
-                        color="#4D5FF1" 
-                        opacity={0.6} 
-                      />
-                    </>
-                  )}
+                <CardDescription className="text-base">
                   {service.description}
                 </CardDescription>
-                <div className="text-lg font-bold pt-2 relative inline-block" style={{ color: service.color }}>
-                  {index === 0 && (
-                    <HighlighterScribble 
-                      className="scribble-bold" 
-                      color="#FFF59D" 
-                      opacity={0.4} 
-                    />
-                  )}
-                  <span className="relative z-10">{service.price}</span>
+                <div className="text-lg font-bold pt-2" style={{ color: service.color }}>
+                  {service.price}
                 </div>
               </CardHeader>
               <CardContent className="flex flex-col flex-1 space-y-4">
                 <ul className="space-y-2 flex-1">
                   {service.features.map((feature, fIndex) => (
-                    <li key={fIndex} className="flex items-start gap-2 text-sm relative">
+                    <li key={fIndex} className="flex items-start gap-2 text-sm">
                       <span className="mt-1" style={{ color: service.color }}>•</span>
-                      <span className="relative">
-                        {index === 0 && fIndex === 2 && (
-                          <ArrowScribble 
-                            className="absolute -left-12 -top-2 scribble-bold" 
-                            color="#ED876E" 
-                            opacity={0.8} 
-                          />
-                        )}
-                        {index === 1 && fIndex === 2 && (
-                          <StarScribble 
-                            className="absolute -left-8 -top-1 scribble-bold" 
-                            color="#ED876E" 
-                            opacity={0.9} 
-                          />
-                        )}
-                        {feature}
-                      </span>
+                      <span>{feature}</span>
                     </li>
                   ))}
                 </ul>

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import TrustBar from "./TrustBar";
-import { SubtleUnderline } from "@/components/Scribbles";
+import { HorizontalBrush } from "@/components/Brushstrokes";
 
 interface Stat {
   value: string;
@@ -66,10 +66,12 @@ export default function StatsCounter() {
           <TrustBar />
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 relative">
-          <SubtleUnderline 
-            className="absolute -bottom-4 left-0 right-0 scribble-subtle" 
-            color="#B8E6B8" 
-            opacity={0.4} 
+          <HorizontalBrush 
+            className="absolute -bottom-8 left-1/2 -translate-x-1/2 hidden md:block" 
+            color="#FF7A59" 
+            opacity={0.35}
+            width={500}
+            height={40}
           />
           {stats.map((stat, index) => (
             <div key={index} className="text-center" data-testid={`stat-${index}`}>

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { CircleScribble, ArrowScribble } from "@/components/Scribbles";
+import { CircleBrush } from "@/components/Brushstrokes";
 
 export default function MailerSection() {
   const [email, setEmail] = useState("");
@@ -49,12 +49,14 @@ export default function MailerSection() {
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-4 relative inline-block" style={{ color: '#4D5FF1' }}>
             Stay Ahead of the{" "}
-            <span className="relative inline-block scribble-hero">
+            <span className="relative inline-block">
               <span className="relative z-10">Shift</span>
-              <CircleScribble 
-                className="absolute -inset-2 scribble-wiggle" 
-                color="#ED876E" 
-                opacity={1} 
+              <CircleBrush 
+                className="absolute -left-3 -top-2" 
+                color="#0033FF" 
+                opacity={0.8}
+                width={200}
+                height={90}
               />
             </span>
           </h2>
@@ -74,12 +76,7 @@ export default function MailerSection() {
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="max-w-md mx-auto relative">
-            <ArrowScribble 
-              className="hidden sm:block absolute -top-12 right-8 scribble-wiggle" 
-              color="#4D5FF1" 
-              opacity={0.9} 
-            />
+          <form onSubmit={handleSubmit} className="max-w-md mx-auto">
             <div className="flex flex-col sm:flex-row gap-3">
               <Input
                 type="email"
