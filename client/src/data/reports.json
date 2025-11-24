@@ -1,5 +1,155 @@
 [
   {
+    "id": 8,
+    "category": "Insights",
+    "industry": "Financial Services",
+    "date": "2025-11-14",
+    "title": "Banking Monogamy Is Dead",
+    "teaser": "South Africans are no longer loyal to a single bank. They mix and match accounts, chasing better value, digital convenience, and trust. Loyalty is no longer assumed. It is earned in real time.",
+    "slug": "banking-monogamy-dead",
+    "pdfPath": "/assets/reports/banking-monogamy-dead.pdf",
+    "tags": ["Financial Services", "Consumer Loyalty", "Digital Banking"],
+    "isNew": true,
+    "freePreview": true,
+    "content": {
+      "intro": "South Africans are breaking up with their banks. Most no longer rely on one provider but instead spread their money across different accounts to get better features, rates, and experiences. Our latest Innovatr research shows that 67% of customers under 40 already use two or more banks or fintech providers. 58% say they would switch their main bank after just one poor service experience. And nearly 45% believe all banks offer basically the same products.",
+      "sections": [
+        {
+          "heading": "Why It Is Happening",
+          "body": "Banking has gone fully digital and deeply pragmatic. Opening a new account now takes minutes, so the effort to 'shop around' has disappeared. Fintechs have raised expectations with zero fees, sleek design, and smart tools that make people feel in control.\n\nEconomic pressure is another driver. Consumers want every rand to stretch further, using one account for the lowest fees, another for rewards, and another for smart savings."
+        },
+        {
+          "heading": "What It Means for Banks and Fintechs",
+          "body": "Differentiate with purpose: When 45% think every bank is the same, clarity is everything. Show real value, not empty promises.\n\nProtect every moment: One bad experience can end a relationship. Train teams for empathy, fix digital friction fast, and follow up proactively.\n\nLean into the multi-bank reality: Consumers will use several providers anyway. Make your app easy to integrate, simple to connect, and rewarding to keep."
+        },
+        {
+          "heading": "The Takeaway",
+          "body": "Loyalty is no longer a lifetime contract. It is a daily decision based on ease, transparency, and emotional connection. The brands that thrive will be the ones that prove their worth every time a customer logs in."
+        }
+      ]
+    }
+  },
+  {
+    "id": 9,
+    "category": "Launch",
+    "industry": "On-Demand Services",
+    "date": "2025-11-12",
+    "title": "The Race for Instant Gratification",
+    "teaser": "South Africans are embracing instant everything. From groceries to gifts, they want it now — not later. Convenience is no longer a perk. It is the price of entry.",
+    "slug": "race-instant-gratification",
+    "pdfPath": "/assets/reports/race-instant-gratification.pdf",
+    "tags": ["On-Demand Services", "Consumer Behaviour", "Convenience"],
+    "isNew": true,
+    "freePreview": true,
+    "content": {
+      "intro": "South Africans can now have almost anything delivered in under an hour. From groceries to coffee to last-minute gifts, services like Checkers Sixty60, Mr D, and Pick n Pay asap! have turned convenience into expectation.\n\nInnovatr research shows that 61% of consumers choose brands that make life easier, even if they cost more. 55% say time saved is as valuable as money saved.",
+      "sections": [
+        {
+          "heading": "Value-Per-Minute Thinking",
+          "body": "People are no longer buying products. They are buying time, control, and peace of mind. Fast service now communicates empathy. The quicker a brand responds, the more consumers feel understood.\n\nToday, loyalty is no longer tied to stores. It is tied to the services that remove friction and restore calm."
+        },
+        {
+          "heading": "What It Means for Brands",
+          "body": "Treat time as emotional currency: Speed is no longer just efficiency. It signals respect and care.\n\nDesign for friction-free living: Every step should feel effortless, from checkout to delivery to returns.\n\nBuild trust through reliability: Loyalty follows confidence. Deliver consistently, communicate clearly, and show up fast when it matters."
+        },
+        {
+          "heading": "The Takeaway",
+          "body": "Instant gratification has become South Africa's new comfort zone. The brands that thrive will be those that save time, ease stress, and make people feel in control."
+        }
+      ]
+    }
+  },
+  {
+    "id": 10,
+    "category": "Launch",
+    "industry": "Food & Subscription Services",
+    "date": "2025-11-09",
+    "title": "From Meal Kits to Snack Boxes",
+    "teaser": "South Africans are not just cooking anymore — they are managing mealtimes. Meal kits and snack boxes offer control, calm, and confidence in the chaos of daily life.",
+    "slug": "meal-kits-snack-boxes",
+    "pdfPath": "/assets/reports/meal-kits-snack-boxes.pdf",
+    "tags": ["Food", "Subscription Services", "Consumer Trends"],
+    "isNew": true,
+    "freePreview": true,
+    "content": {
+      "intro": "A new kind of home cooking has taken hold in South Africa's fast-paced cities. People are not just preparing dinner. They are managing it.\n\nMeal and snack subscriptions like UCook, Daily Dish, and Munchbox have turned cooking into something smarter and more intentional. Innovatr research shows that 67% of South Africans want to feel in control of what they eat even when they lack time to plan.",
+      "sections": [
+        {
+          "heading": "Control Meets Convenience",
+          "body": "62% want convenience that still feels like effort made, and 58% feel proud and organised when cooking from a kit.\n\nSnack subscriptions offer the same comfort. 71% of working South Africans say they struggle with snack guilt. These curated boxes transform that guilt into permission."
+        },
+        {
+          "heading": "The Price of Peace of Mind",
+          "body": "74% say they would rather pay slightly more if it saves time each week. Consumers are paying a bit more to buy back time, peace of mind, and structure.\n\nConvenience now equals confidence."
+        },
+        {
+          "heading": "What It Means for Brands",
+          "body": "Design for control: Consumers want to feel capable, not catered to.\n\nCelebrate effort made easy: Let convenience feel earned and emotionally rewarding.\n\nBuild calm into every interaction: Predictability and reliability now drive loyalty more than novelty."
+        }
+      ]
+    }
+  },
+  {
+    "id": 11,
+    "category": "Launch",
+    "industry": "Research & Insight Technology",
+    "date": "2025-11-06",
+    "title": "Introducing AI Qual: Get to the Why Faster",
+    "teaser": "What if you could uncover the 'why' behind your data in hours, not weeks? AI Qual is our new breakthrough tool that makes qualitative research faster, smarter, and beautifully scalable.",
+    "slug": "ai-qual-breakthrough",
+    "pdfPath": "/assets/reports/ai-qual-breakthrough.pdf",
+    "tags": ["Research Technology", "AI", "Innovation"],
+    "isNew": true,
+    "freePreview": false,
+    "content": {
+      "intro": "For years, qualitative research has been rich in insight but slow to deliver. The process was powerful, but the pace was painful. AI Qual changes that.\n\nThis upcoming addition to the Innovatr suite brings human understanding and artificial intelligence together, turning open responses and transcripts into clear, visual, decision-ready stories.",
+      "sections": [
+        {
+          "heading": "How It Works",
+          "body": "Upload: Add transcripts or open-ended responses from video, audio, or text.\n\nAnalyse: Our language models tag every quote with themes, emotions, and tension points.\n\nVisualise: See your findings appear instantly with word clouds, theme maps, and quoteboards.\n\nExplore: Dive into any theme or quote to hear the raw voice of your audience."
+        },
+        {
+          "heading": "Why It Matters",
+          "body": "Speed and Scale: AI Qual processes hundreds of responses in seconds. What once took weeks now takes days.\n\nVisual Clarity: Insights are brought to life through automatic visuals. Complex data becomes easy to grasp and easy to share.\n\nStrategic Impact: AI Qual is built for more than research. Insights can now move straight from research into action."
+        },
+        {
+          "heading": "Coming Soon",
+          "body": "AI Qual will soon join Innovatr's suite of insight tools. It will integrate directly into Storyteller and UpSiide, creating one connected space for both qualitative and quantitative findings.\n\nThe future of insight is not just faster. It is clearer, more human, and ready to inspire creativity at scale."
+        }
+      ]
+    }
+  },
+  {
+    "id": 12,
+    "category": "Insights",
+    "industry": "Multiple",
+    "date": "2025-11-04",
+    "title": "Fairness Is the New Flex",
+    "teaser": "In a world where 'cheap' feels suspicious and 'fine print' feels like betrayal, fairness has quietly become South Africa's new status symbol. Transparent beats trendy and trust is the real luxury.",
+    "slug": "fairness-new-flex",
+    "pdfPath": "/assets/reports/fairness-new-flex.pdf",
+    "tags": ["Consumer Trends", "Trust", "Transparency"],
+    "isNew": true,
+    "freePreview": true,
+    "content": {
+      "intro": "When 'cheap' stops feeling smart: For years, price was power. But as South Africans weather another year of cost of living strain, the currency of trust has overtaken the currency of discount. Our recent Innovatr research shows that transparency, clarity, and perceived fairness now drive stronger emotional connection than low price alone.",
+      "sections": [
+        {
+          "heading": "The Price of Clarity",
+          "body": "South Africans are not just cost sensitive, they are clarity sensitive. Across categories, our testing shows fairness cues outperform discounting by a meaningful margin.\n\nIn telecoms, transparent data bundles with clear terms scored up to 12 points higher on commitment than cheaper, catch-ridden deals. In FMCG, plain label honesty beat vague health claims by a wide gap."
+        },
+        {
+          "heading": "The Emotional Economy of Fair",
+          "body": "Why does fairness matter so much right now? Because it restores a sense of control in a world where everything else feels unpredictable.\n\nWhen load shedding hits or petrol prices spike, a fair brand offers psychological stability. It does exactly what it says it will. Word of mouth built on fairness travels faster and lasts longer than any seasonal campaign."
+        },
+        {
+          "heading": "What Consumers Believe",
+          "body": "Consumers are tired of 'specials' with asterisks. They are asking a simpler question: Do I believe you?\n\nWhen the answer is yes, when a brand promises 'no expiry,' 'no hidden fees,' or 'what you see is what you get,' people are willing to pay a little more.\n\nFairness has become the new flex, a quiet form of empowerment that says, I know exactly what I am getting and that makes me feel in control."
+        }
+      ]
+    }
+  },
+  {
     "id": 1,
     "category": "Insights",
     "industry": "FMCG / Food",
