@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileText, Zap, CheckCircle, Upload, ArrowRight, FileUp, X } from "lucide-react";
+import { FileText, Zap, CheckCircle, Upload, ArrowRight, FileUp, X, Download } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { useToast } from "@/hooks/use-toast";
 
@@ -334,6 +334,42 @@ export default function LaunchBrief() {
               <p className="text-sm text-muted-foreground">
                 Your full report arrives in just <strong>24 hours</strong>, packed with clear, actionable insights.
               </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Download Demo Materials Section */}
+        <Card className={selectedBrief === "basic" ? "bg-accent/5 border-accent/20" : "bg-primary/5 border-primary/20"}>
+          <CardHeader>
+            <CardTitle className="text-2xl">Download Demo Materials</CardTitle>
+            <CardDescription>
+              See what your {selectedBrief === "basic" ? "report and questionnaire" : "report"} will look like
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className={selectedBrief === "basic" ? "grid sm:grid-cols-2 gap-4" : "flex justify-start"}>
+              <a
+                href={`/assets/reports/Test24-${selectedBrief === "basic" ? "Basic" : "Pro"}-Demo.pdf`}
+                download
+                data-testid={`button-download-demo-report-${selectedBrief}`}
+              >
+                <Button variant="outline" className="w-full">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Demo Report
+                </Button>
+              </a>
+              {selectedBrief === "basic" && (
+                <a
+                  href="/assets/reports/Test24-Basic-Questionnaire.docx"
+                  download
+                  data-testid="button-download-demo-questionnaire"
+                >
+                  <Button variant="outline" className="w-full">
+                    <Download className="w-4 h-4 mr-2" />
+                    Download Demo Questionnaire
+                  </Button>
+                </a>
+              )}
             </div>
           </CardContent>
         </Card>
