@@ -21,6 +21,7 @@ import {
   Settings,
   LogOut,
   Lock,
+  Shield,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
@@ -34,42 +35,56 @@ const menuItems = [
     url: "/portal",
     icon: LayoutDashboard,
     lockedForFree: true,
+    adminOnly: false,
   },
   {
     title: "Trends & Insights",
     url: "/portal/trends",
     icon: TrendingUp,
     lockedForFree: false,
+    adminOnly: false,
   },
   {
     title: "Launch New Brief",
     url: "/portal/launch",
     icon: FileText,
     lockedForFree: false,
+    adminOnly: false,
   },
   {
     title: "Credits & Billing",
     url: "/portal/credits",
     icon: CreditCard,
     lockedForFree: false,
+    adminOnly: false,
   },
   {
     title: "Past Research",
     url: "/portal/research",
     icon: Archive,
     lockedForFree: true,
+    adminOnly: false,
   },
   {
     title: "Member Deals",
     url: "/portal/deals",
     icon: Gift,
     lockedForFree: true,
+    adminOnly: false,
+  },
+  {
+    title: "Admin",
+    url: "/portal/admin",
+    icon: Shield,
+    lockedForFree: false,
+    adminOnly: true,
   },
   {
     title: "Settings",
     url: "/portal/settings",
     icon: Settings,
     lockedForFree: false,
+    adminOnly: false,
   },
 ];
 
@@ -79,7 +94,7 @@ interface PortalLayoutProps {
 
 export default function PortalLayout({ children }: PortalLayoutProps) {
   const [location, setLocation] = useLocation();
-  const { user, logout, isAuthenticated, isMember } = useAuth();
+  const { user, logout, isAuthenticated, isMember, isAdmin } = useAuth();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -149,6 +164,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {menuItems.map((item) => {
+                    if (item.adminOnly && !isAdmin) return null;
                     const isLocked = !isMember && item.lockedForFree;
                     return (
                       <SidebarMenuItem key={item.title}>

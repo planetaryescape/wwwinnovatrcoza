@@ -6,12 +6,27 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
   password: text("password").notNull(),
+  name: text("name"),
+  company: text("company"),
+  membershipTier: varchar("membership_tier", { length: 20 }).notNull().default("FREE"),
+  status: varchar("status", { length: 20 }).notNull().default("ACTIVE"),
+  creditsBasic: integer("credits_basic").notNull().default(0),
+  creditsPro: integer("credits_pro").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastLoginAt: timestamp("last_login_at"),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  lastLoginAt: true,
+}).extend({
+  email: z.string().email("Invalid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  name: z.string().optional(),
+  membershipTier: z.enum(["FREE", "GOLD"]).default("FREE"),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

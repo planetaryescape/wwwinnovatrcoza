@@ -5,6 +5,11 @@ import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSch
 import { PaymentService } from "./payments/service";
 import type { PaymentConfig } from "./payments/types";
 
+// Helper to check if user is admin
+const isAdminUser = (email?: string) => {
+  return email === "hannah@innovatr.co.za" || email === "richard@innovatr.co.za";
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // put application routes here
   // prefix all routes with /api
@@ -149,6 +154,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).send("OK");
     } catch (error: any) {
       console.error("Apple Pay webhook error:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Admin API endpoints
+  app.get("/api/admin/users", async (req, res) => {
+    try {
+      // In a real app, check session/auth header
+      // For now, just return all users
+      const users = await storage.getAllUsers();
+      // Don't expose passwords
+      const safeUsers = users.map(({ password, ...rest }) => rest);
+      res.json(safeUsers);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/admin/users/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { membershipTier, status, creditsBasic, creditsPro } = req.body;
+      
+      const user = await storage.getUser(id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      await storage.updateUser(id, {
+        membershipTier: membershipTier || user.membershipTier,
+        status: status || user.status,
+        creditsBasic: creditsBasic !== undefined ? creditsBasic : user.creditsBasic,
+        creditsPro: creditsPro !== undefined ? creditsPro : user.creditsPro,
+      });
+
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/admin/overview", async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      const freeCount = users.filter(u => u.membershipTier === "FREE").length;
+      const goldCount = users.filter(u => u.membershipTier === "GOLD").length;
+      
+      res.json({
+        totalUsers: users.length,
+        freeMembers: freeCount,
+        goldMembers: goldCount,
+        timestamp: new Date(),
+      });
+    } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
   });

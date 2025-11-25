@@ -1,0 +1,299 @@
+You are editing my Innovatr membership portal app that is already running in this Replit.
+
+Context and goals:
+
+There is a public marketing site with a “Login” and “Member Portal”.
+
+Inside the portal there is a sidebar with items like:
+
+Dashboard
+
+Trends & Insights
+
+Launch New Brief
+
+Credits & Billing
+
+Past Research
+
+Member Deals
+
+Settings
+
+There is already a database backing the Trends & Insights reports and trends library.
+
+Membership tiers are currently hard coded for demo purposes. I want to move towards a real Free / Gold system.
+
+I want a simple admin backend that only two emails can access: hannah@innovatr.co.za and richard@innovatr.co.za.
+
+Please implement the following changes, step by step, without breaking the existing portal UX.
+
+1. Fix login behaviour and membership logic
+
+Find the existing authentication implementation and login / signup handlers.
+
+Ensure that:
+
+After a successful login or signup, the user is redirected to the portal dashboard (for example /portal) rather than staying on the public homepage.
+
+Introduce a proper membershipTier field on the user model (in the DB or user store), with allowed values:
+
+"FREE"
+
+"GOLD"
+
+Change the sign up logic so that new accounts default to membershipTier = "FREE".
+
+When an existing “Gold member” demo behaviour is present, please replace this with a real lookup of membershipTier instead of hard coding gold.
+
+Add a derived isAdmin flag:
+
+If the user’s email is hannah@innovatr.co.za or richard@innovatr.co.za, set isAdmin = true, else false.
+
+If the underlying user model supports an isAdmin field already, reuse it.
+
+2. Add admin route and sidebar entry
+
+In the portal layout / router, create a new protected route at /portal/admin.
+
+Only allow access when the user is authenticated and isAdmin is true.
+
+If the user is not admin, redirect them back to /portal (dashboard).
+
+In the portal sidebar, add a new menu item called Admin between Member Deals and Settings.
+
+Only render this item when isAdmin is true.
+
+The /portal/admin page must reuse the same shell layout (logo, left sidebar, header) so it looks consistent with the rest of the portal.
+
+3. Admin page layout with tabs
+
+Inside /portal/admin, create a tabbed interface with these tabs:
+
+Overview
+
+Users
+
+Reports
+
+Deals
+
+Use the existing design system (fonts, cards, spacing) so that the Admin page feels native to the rest of the portal.
+
+4. Admin / Users tab
+
+If there is already a users table / user model in the database, use it. Otherwise create a table or model roughly like:
+
+id
+
+name
+
+email
+
+companyId (nullable)
+
+membershipTier (FREE or GOLD)
+
+status (ACTIVE or SUSPENDED)
+
+creditsBasic (number)
+
+creditsPro (number)
+
+createdAt
+
+lastLoginAt
+
+Create API endpoints with admin protection:
+
+GET /api/admin/users
+
+Returns a list of all users with the fields above.
+
+PATCH /api/admin/users/:id
+
+Allows updating membershipTier, status, creditsBasic, and creditsPro.
+
+All of these endpoints must:
+
+Check the current authenticated user.
+
+Return HTTP 403 if the current user is not admin.
+
+Build the Users tab UI:
+
+On load, call GET /api/admin/users.
+
+Show a table with columns: Name, Email, Company, Membership, Status, Basic Credits, Pro Credits, Created, Last Login.
+
+Add a search box that filters users by name or email on the client side.
+
+Add a filter dropdown for membership tier.
+
+Allow inline editing of:
+
+membershipTier via dropdown.
+
+status via dropdown.
+
+creditsBasic and creditsPro via input.
+
+On change, call the PATCH endpoint and show a small success or error message.
+
+5. Admin / Reports tab
+
+The portal already uses a database or service to power the Trends & Insights library. Please:
+
+Locate the existing reports / trends model and reuse that instead of creating a new one.
+
+Create admin-protected endpoints:
+
+GET /api/admin/reports
+
+Returns all reports with relevant fields (id, title, category, industry, date, teaser, access level, tags, pdfUrl, createdAt, updatedAt, status).
+
+POST /api/admin/reports
+
+Creates a new report.
+
+PATCH /api/admin/reports/:id
+
+Updates an existing report.
+
+DELETE /api/admin/reports/:id
+
+Archives or soft deletes a report.
+
+All these endpoints must only be callable by admin users.
+
+Extend or confirm that the report model contains an accessLevel field with one of:
+
+"FREE" – visible to non logged in users
+
+"MEMBERS" – visible to any logged in member
+
+"GOLD" – visible only to Gold members and admins
+
+Update the public Trends & Insights library code so that it checks accessLevel and the current user’s membership tier before showing a report.
+
+Build the Reports tab UI:
+
+Table of reports with columns: Title, Category, Industry, Date, Access Level, Status.
+
+Button Add new report that opens a form to create a report.
+
+Clicking on a row opens an edit form for that report.
+
+The form should allow editing at least: Title, Category, Industry, Date, Teaser, Access Level, Tags, PDF link.
+
+6. Admin / Deals tab
+
+Create a deals model or table similar to:
+
+id
+
+title
+
+description
+
+companyId (nullable; when null, applies to all companies)
+
+membershipTier (ANY, FREE, GOLD)
+
+validFrom (date)
+
+validTo (nullable date)
+
+isActive (boolean)
+
+dealType (string enum like CREDIT_DISCOUNT, PACKAGE, NOTE)
+
+createdAt
+
+Create admin-protected endpoints:
+
+GET /api/admin/deals
+
+POST /api/admin/deals
+
+PATCH /api/admin/deals/:id
+
+DELETE /api/admin/deals/:id (soft delete or mark inactive)
+
+Build the Deals tab UI:
+
+Table of deals with columns: Title, Company (or “All”), Tier, Valid From, Valid To, Status.
+
+Button to add a new deal with a form for the fields above.
+
+Ability to edit or deactivate existing deals.
+
+Update the existing Member Deals page in the normal portal:
+
+Fetch active deals from a public endpoint like GET /api/member/deals.
+
+That endpoint must return:
+
+All deals where:
+
+isActive = true
+
+validFrom <= today
+
+validTo is null or >= today
+
+membershipTier is "ANY" or matches the current user’s tier
+
+companyId is null or matches the current user’s company
+
+Render these deals using the existing visual style.
+
+7. Admin / Overview tab
+
+Create a lightweight summary endpoint, GET /api/admin/overview, that returns:
+
+List of companies with:
+
+Company name
+
+Number of users
+
+Membership tier (or most common tier)
+
+Total Basic credits used / remaining
+
+Total Pro credits used / remaining
+
+Last activity date
+
+Implement a simple cards or table view in the Overview tab that surfaces:
+
+“Top 5 most active companies”
+
+“Companies with low credits remaining”
+
+Basic counts like:
+
+Total users
+
+Total Free members
+
+Total Gold members
+
+8. General requirements
+
+Do not break any existing member or non member flows.
+
+Keep TypeScript types consistent with the rest of the project.
+
+Add basic loading and error states in the Admin pages similar to the rest of the UI.
+
+When you are finished, please summarise:
+
+Which files were changed or created.
+
+How to run the app locally.
+
+How to log in as an admin for testing.
+
+PROMPT END

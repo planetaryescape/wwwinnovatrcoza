@@ -22,7 +22,10 @@ import { randomUUID } from "crypto";
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: string, updates: Partial<User>): Promise<void>;
   createCouponClaim(claim: InsertCouponClaim): Promise<CouponClaim>;
   getCouponClaimByEmail(email: string): Promise<CouponClaim | undefined>;
   createMailerSubscription(subscription: InsertMailerSubscription): Promise<MailerSubscription>;
@@ -72,11 +75,42 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.email === email,
+    );
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
+    const now = new Date();
+    const user: User = {
+      id,
+      username: insertUser.username,
+      email: insertUser.email,
+      password: insertUser.password,
+      name: insertUser.name ?? null,
+      company: insertUser.company ?? null,
+      membershipTier: insertUser.membershipTier ?? "FREE",
+      status: insertUser.status ?? "ACTIVE",
+      creditsBasic: insertUser.creditsBasic ?? 0,
+      creditsPro: insertUser.creditsPro ?? 0,
+      createdAt: now,
+      lastLoginAt: null,
+    };
     this.users.set(id, user);
     return user;
+  }
+
+  async updateUser(id: string, updates: Partial<User>): Promise<void> {
+    const user = this.users.get(id);
+    if (user) {
+      this.users.set(id, { ...user, ...updates });
+    }
   }
 
   async createCouponClaim(insertClaim: InsertCouponClaim): Promise<CouponClaim> {
