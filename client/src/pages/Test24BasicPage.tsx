@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Users, Clock, CheckCircle2, Zap, Target } from "lucide-react";
+import { ArrowLeft, Users, Clock, CheckCircle2, Zap, Target, Download } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 
@@ -152,6 +152,39 @@ export default function Test24BasicPage() {
                   <p className="text-sm text-muted-foreground">Actionable insights delivered on time</p>
                 </div>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="mb-12 bg-accent/5 border-accent/20">
+          <CardContent className="pt-8">
+            <h2 className="text-2xl font-serif font-bold mb-2 text-center">
+              Download Demo Materials
+            </h2>
+            <p className="text-center text-muted-foreground mb-6">
+              See what your reports and questionnaire will look like
+            </p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <a
+                href="/assets/reports/Test24-Basic-Demo.pdf"
+                download
+                data-testid="button-download-demo-report"
+              >
+                <Button variant="outline" className="w-full">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Demo Report
+                </Button>
+              </a>
+              <a
+                href="/assets/reports/Test24-Basic-Questionnaire.docx"
+                download
+                data-testid="button-download-demo-questionnaire"
+              >
+                <Button variant="outline" className="w-full">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Demo Questionnaire
+                </Button>
+              </a>
             </div>
           </CardContent>
         </Card>

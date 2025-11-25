@@ -15,7 +15,7 @@ export class ZapperProvider implements PaymentProvider {
   }
 
   private getBaseUrl(): string {
-    return this.config.sandbox
+    return this.config?.sandbox
       ? "https://sandbox.zapper.com/api/v1"
       : "https://api.zapper.com/v1";
   }
@@ -25,11 +25,11 @@ export class ZapperProvider implements PaymentProvider {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${this.config.apiKey}`,
+        "Authorization": `Bearer ${this.config?.apiKey}`,
       },
       body: JSON.stringify({
-        merchantId: this.config.merchantId,
-        merchantSiteId: this.config.siteId,
+        merchantId: this.config?.merchantId,
+        merchantSiteId: this.config?.siteId,
         amount: parseFloat(order.amount),
         currency: order.currency,
         reference: order.id,
@@ -82,7 +82,7 @@ export class ZapperProvider implements PaymentProvider {
     const signature = headers["x-zapper-signature"] || headers["X-Zapper-Signature"];
     let verified = false;
 
-    if (signature && this.config.apiKey) {
+    if (signature && this.config?.apiKey) {
       const bodyString = typeof rawBody === "string" ? rawBody : rawBody.toString("utf-8");
       const expectedSignature = crypto
         .createHmac("sha256", this.config.apiKey)
@@ -103,7 +103,7 @@ export class ZapperProvider implements PaymentProvider {
   async checkPaymentStatus(invoiceId: string): Promise<string> {
     const response = await fetch(`${this.getBaseUrl()}/invoice/${invoiceId}/status`, {
       headers: {
-        "Authorization": `Bearer ${this.config.apiKey}`,
+        "Authorization": `Bearer ${this.config?.apiKey}`,
       },
     });
 

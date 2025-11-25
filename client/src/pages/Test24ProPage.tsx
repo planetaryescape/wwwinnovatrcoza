@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Building2, Rocket, CheckCircle2, Target } from "lucide-react";
+import { ArrowLeft, Building2, Rocket, CheckCircle2, Target, Download } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 
@@ -168,6 +168,30 @@ export default function Test24ProPage() {
                   <p className="text-sm text-muted-foreground">Actionable insights backed by expertise</p>
                 </div>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="mb-12 bg-primary/5 border-primary/20">
+          <CardContent className="pt-8">
+            <h2 className="text-2xl font-serif font-bold mb-2 text-center">
+              Download Demo Report
+            </h2>
+            <p className="text-center text-muted-foreground mb-6">
+              See what your Pro report will look like
+            </p>
+            <div className="flex justify-center">
+              <a
+                href="/assets/reports/Test24-Pro-Demo.pdf"
+                download
+                data-testid="button-download-demo-report"
+                className="w-full sm:w-auto"
+              >
+                <Button variant="outline" className="w-full">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Demo Report
+                </Button>
+              </a>
             </div>
           </CardContent>
         </Card>

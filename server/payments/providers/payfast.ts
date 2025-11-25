@@ -16,7 +16,7 @@ export class PayFastProvider implements PaymentProvider {
   }
 
   private getBaseUrl(): string {
-    return this.config.sandbox
+    return this.config?.sandbox
       ? "https://sandbox.payfast.co.za/eng/process"
       : "https://www.payfast.co.za/eng/process";
   }
@@ -34,7 +34,7 @@ export class PayFastProvider implements PaymentProvider {
 
     let signatureString = params.toString();
     
-    if (this.config.passphrase) {
+    if (this.config?.passphrase) {
       signatureString += `&passphrase=${encodeURIComponent(this.config.passphrase)}`;
     }
     
@@ -48,8 +48,8 @@ export class PayFastProvider implements PaymentProvider {
       providerIntentId: order.id,
       status: "pending",
       metadata: {
-        merchantId: this.config.merchantId,
-        sandbox: this.config.sandbox,
+        merchantId: this.config?.merchantId,
+        sandbox: this.config?.sandbox,
         items,
       },
     };
@@ -61,8 +61,8 @@ export class PayFastProvider implements PaymentProvider {
     const notifyUrl = `${process.env.REPLIT_DOMAIN || "http://localhost:5000"}/api/webhooks/payfast`;
 
     const formData = {
-      merchant_id: this.config.merchantId,
-      merchant_key: this.config.merchantKey,
+      merchant_id: this.config?.merchantId,
+      merchant_key: this.config?.merchantKey,
       return_url: returnUrl,
       cancel_url: cancelUrl,
       notify_url: notifyUrl,

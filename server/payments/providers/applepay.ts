@@ -14,10 +14,10 @@ export class ApplePayProvider implements PaymentProvider {
   constructor(config: PaymentConfig["applePay"], payfastConfig: PaymentConfig["payfast"]) {
     this.config = config;
     
-    if (config.provider === "payfast") {
+    if (config?.provider === "payfast") {
       this.delegateProvider = new PayFastProvider(payfastConfig);
     } else {
-      throw new Error(`Apple Pay provider ${config.provider} not yet implemented`);
+      throw new Error(`Apple Pay provider ${config?.provider} not yet implemented`);
     }
   }
 
@@ -29,8 +29,8 @@ export class ApplePayProvider implements PaymentProvider {
       providerKey: this.key,
       metadata: {
         ...metadata,
-        applePayMerchantId: this.config.merchantId,
-        delegateProvider: this.config.provider,
+        applePayMerchantId: this.config?.merchantId,
+        delegateProvider: this.config?.provider,
       },
     };
   }
@@ -39,7 +39,7 @@ export class ApplePayProvider implements PaymentProvider {
     return {
       type: "applepay",
       data: {
-        merchantId: this.config.merchantId,
+        merchantId: this.config?.merchantId,
         countryCode: "ZA",
         currencyCode: order.currency,
         total: {
