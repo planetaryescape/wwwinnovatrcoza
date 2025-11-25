@@ -198,15 +198,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/overview", async (req, res) => {
     try {
       const users = await storage.getAllUsers();
-      const freeCount = users.filter(u => u.membershipTier === "FREE").length;
-      const goldCount = users.filter(u => u.membershipTier === "GOLD").length;
+      const starterCount = users.filter(u => u.membershipTier === "STARTER").length;
+      const growthCount = users.filter(u => u.membershipTier === "GROWTH").length;
+      const scaleCount = users.filter(u => u.membershipTier === "SCALE").length;
       
       res.json({
         totalUsers: users.length,
-        freeMembers: freeCount,
-        goldMembers: goldCount,
+        starterMembers: starterCount,
+        growthMembers: growthCount,
+        scaleMembers: scaleCount,
+        activeDeals: 0,
         timestamp: new Date(),
       });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Reports endpoints
+  app.get("/api/admin/reports", async (req, res) => {
+    try {
+      const reports = await storage.getAllReports();
+      res.json(reports);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/admin/reports", async (req, res) => {
+    try {
+      const report = await storage.createReport(req.body);
+      res.status(201).json(report);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/admin/reports/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const report = await storage.getReport(id);
+      if (!report) {
+        return res.status(404).json({ error: "Report not found" });
+      }
+      await storage.updateReport(id, req.body);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Deals endpoints
+  app.get("/api/admin/deals", async (req, res) => {
+    try {
+      const deals = await storage.getAllDeals();
+      res.json(deals);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/admin/deals", async (req, res) => {
+    try {
+      const deal = await storage.createDeal(req.body);
+      res.status(201).json(deal);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/admin/deals/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deal = await storage.getDeal(id);
+      if (!deal) {
+        return res.status(404).json({ error: "Deal not found" });
+      }
+      await storage.updateDeal(id, req.body);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/member/deals", async (req, res) => {
+    try {
+      const deals = await storage.getAllDeals();
+      res.json(deals);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }

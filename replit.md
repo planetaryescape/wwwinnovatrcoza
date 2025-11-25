@@ -34,14 +34,24 @@ Preferred communication style: Simple, everyday language.
 - **Validation**: Zod schemas integrated with React Hook Form and Drizzle ORM.
 
 ### Authentication & Authorization
-- **Authentication**: `AuthContext` manages user state (persisted in `localStorage`) with login, signup, and logout. Supports `free`, `entry`, `gold`, and `platinum` user tiers.
-- **Access Control**: Free users access limited content (`FreeTierPortal`); Paid members access a full 7-section portal.
+- **Authentication**: `AuthContext` manages user state (persisted in `localStorage`) with login, signup, and logout.
+- **Membership Tiers**: Three membership tiers for logged-in users:
+  - **STARTER**: Free tier for new signups and basic members
+  - **GROWTH**: Mid-tier membership with enhanced features
+  - **SCALE**: Premium tier with full feature access
+- **Admin Access**: Users with hannah@innovatr.co.za or richard@innovatr.co.za email addresses automatically get admin access to `/portal/admin`
+- **Access Control**: Starter members access limited content; Growth and Scale members access full portal features. Admin users have unrestricted access to all functionality and admin tools.
 
 ### Members Portal
 - **Purpose**: Personalized dashboard for authenticated members to manage research, view insights, and engage.
-- **Layout**: Persistent sidebar navigation.
-- **Sections**: Dashboard, Trends & Insights Library, Launch New Brief, Credits & Billing, Past Research Dashboard, Member Deals, Settings.
-- **Trends & Insights Library**: Dynamic content from Innovatr Intelligence blog posts (`reports.json`) with search, filtering, and sorting. Features free content gating and upgrade prompts.
+- **Layout**: Persistent sidebar navigation with collapsible menu.
+- **Member Sections**: Dashboard, Trends & Insights Library, Launch New Brief, Credits & Billing, Past Research Dashboard, Member Deals, Settings.
+- **Admin Section** (admin users only): Admin Dashboard with tabs for:
+  - **Overview**: System metrics (Total Users, Starter/Growth/Scale member counts, Active Deals)
+  - **Users**: User management table with search, tier filtering, and membership/credits display
+  - **Reports**: List of all research reports with access level control
+  - **Deals**: Promotional deals management and member deal targeting
+- **Trends & Insights Library**: Dynamic content from Innovatr Intelligence blog posts (`reports.json`) with search, filtering, and sorting. Features access level gating (PUBLIC, STARTER, GROWTH, SCALE) and upgrade prompts.
 
 ### Payment Gateway System
 - **Architecture**: Multi-provider payment system supporting South African gateways (PayFast, Zapper, Apple Pay)
@@ -78,6 +88,38 @@ Preferred communication style: Simple, everyday language.
 - **Pricing Section**: Defaults to "Members" tab, showing discounted rates for Test24 Basic (R5,000) and Test24 Pro (R45,000).
 - **Member Credit Checkout**: Enforces Entry Plan membership requirement for credit purchases. Displays a notice card, automatically includes Entry Plan in the cart for new members, and allows existing members to opt out of the Entry Plan charge via a checkbox while retaining discounts. Entry Plan is a one-time annual fee.
 - **Coupon Claim System**: Users can claim a R10,000 Test24 Basic coupon via a dedicated `/claim-coupon` page by providing name and email. The system generates unique coupon codes and prevents duplicate claims from the same email.
+- **Admin Portal**: Full administrative dashboard allowing admins to:
+  - View system-wide metrics and user distribution
+  - Manage user accounts and membership tiers
+  - Control report access levels (PUBLIC, STARTER, GROWTH, SCALE)
+  - Create and manage promotional deals with tier/user targeting
+  - Monitor system health and user engagement
+
+## Admin System
+
+### Admin Detection
+Users with these emails automatically become admins:
+- hannah@innovatr.co.za
+- richard@innovatr.co.za
+
+Admins can access `/portal/admin` and all admin API endpoints.
+
+### Admin API Endpoints
+- `GET /api/admin/overview` - System metrics (total users, member counts by tier, active deals)
+- `GET /api/admin/users` - List all users with full details
+- `PATCH /api/admin/users/:id` - Update user membership tier, status, or credits
+- `GET /api/admin/reports` - List all reports
+- `POST /api/admin/reports` - Create new report
+- `PATCH /api/admin/reports/:id` - Update report (including access level)
+- `GET /api/admin/deals` - List all deals
+- `POST /api/admin/deals` - Create new deal
+- `PATCH /api/admin/deals/:id` - Update deal
+- `GET /api/member/deals` - List applicable deals for logged-in user (filtered by tier and validity)
+
+### Data Models
+- **Users**: id, username, email, password, name, company, membershipTier, status, creditsBasic, creditsPro, createdAt, lastLoginAt
+- **Reports**: id, title, category, industry, date, teaser, accessLevel (PUBLIC|STARTER|GROWTH|SCALE), isArchived, createdAt, updatedAt
+- **Deals**: id, title, description, originalPrice, discountedPrice, creditsIncluded, targetTiers (array), validFrom, validTo, isActive, createdAt, updatedAt
 
 ## External Dependencies
 - **Payment Processing**: South African payment gateways (PayFast, Zapper, Apple Pay) with multi-provider architecture. Stripe integration also prepared with `@stripe/react-stripe-js` and `@stripe/stripe-js` for international payments.

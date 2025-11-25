@@ -1,15 +1,16 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
 import PortalLayout from "./PortalLayout";
+import AdminOverview from "./AdminOverview";
+import AdminUsers from "./AdminUsers";
+import AdminReports from "./AdminReports";
+import AdminDeals from "./AdminDeals";
 
 export default function AdminPortal() {
   const [, setLocation] = useLocation();
   const { isAdmin, isAuthenticated } = useAuth();
-  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
@@ -24,7 +25,7 @@ export default function AdminPortal() {
 
   return (
     <PortalLayout>
-      <div className="p-6 max-w-6xl mx-auto space-y-6">
+      <div className="p-6 max-w-7xl mx-auto space-y-6">
         <div>
           <h1 className="text-4xl font-serif font-bold mb-2">Admin Dashboard</h1>
           <p className="text-lg text-muted-foreground">
@@ -41,77 +42,19 @@ export default function AdminPortal() {
           </TabsList>
 
           <TabsContent value="overview">
-            <Card>
-              <CardHeader>
-                <CardTitle>System Overview</CardTitle>
-                <CardDescription>High-level system statistics and health</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-4 border rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">Total Users</p>
-                    <p className="text-2xl font-bold">–</p>
-                  </div>
-                  <div className="p-4 border rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">Free Members</p>
-                    <p className="text-2xl font-bold">–</p>
-                  </div>
-                  <div className="p-4 border rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">Gold Members</p>
-                    <p className="text-2xl font-bold">–</p>
-                  </div>
-                  <div className="p-4 border rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">Active Deals</p>
-                    <p className="text-2xl font-bold">–</p>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground mt-6">
-                  Overview stats coming soon. Navigate to Users, Reports, or Deals tabs to manage content.
-                </p>
-              </CardContent>
-            </Card>
+            <AdminOverview />
           </TabsContent>
 
           <TabsContent value="users">
-            <Card>
-              <CardHeader>
-                <CardTitle>Users Management</CardTitle>
-                <CardDescription>Manage user accounts, memberships, and credits</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Users management interface coming soon.
-                </p>
-              </CardContent>
-            </Card>
+            <AdminUsers />
           </TabsContent>
 
           <TabsContent value="reports">
-            <Card>
-              <CardHeader>
-                <CardTitle>Reports Management</CardTitle>
-                <CardDescription>Create, edit, and manage research reports</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Reports management interface coming soon.
-                </p>
-              </CardContent>
-            </Card>
+            <AdminReports />
           </TabsContent>
 
           <TabsContent value="deals">
-            <Card>
-              <CardHeader>
-                <CardTitle>Deals Management</CardTitle>
-                <CardDescription>Create and manage member deals and promotions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Deals management interface coming soon.
-                </p>
-              </CardContent>
-            </Card>
+            <AdminDeals />
           </TabsContent>
         </Tabs>
       </div>

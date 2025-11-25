@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
 export type UserTier = "free" | "entry" | "gold" | "platinum";
-export type MembershipTier = "FREE" | "GOLD";
+export type MembershipTier = "STARTER" | "GROWTH" | "SCALE";
 
 export interface User {
   id: string;
@@ -39,18 +39,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await new Promise(resolve => setTimeout(resolve, 500));
     
     let tier: UserTier = "gold";
-    let membershipTier: MembershipTier = "GOLD";
+    let membershipTier: MembershipTier = "GROWTH";
     let company = "Demo Company";
     
     if (email.includes("free")) {
       tier = "free";
-      membershipTier = "FREE";
+      membershipTier = "STARTER";
     } else if (email.includes("entry")) {
       tier = "entry";
-      membershipTier = "FREE";
+      membershipTier = "STARTER";
     } else if (email.includes("platinum")) {
       tier = "platinum";
-      membershipTier = "GOLD";
+      membershipTier = "SCALE";
     }
     
     const isAdmin = email === "hannah@innovatr.co.za" || email === "richard@innovatr.co.za";
@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       name,
       tier: "free",
-      membershipTier: "FREE",
+      membershipTier: "STARTER",
       isAdmin,
     };
     

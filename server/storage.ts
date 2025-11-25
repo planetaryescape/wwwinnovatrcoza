@@ -13,6 +13,10 @@ import {
   type InsertPaymentIntent,
   type PaymentEvent,
   type InsertPaymentEvent,
+  type Report,
+  type InsertReport,
+  type Deal,
+  type InsertDeal,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -44,6 +48,16 @@ export interface IStorage {
   
   createPaymentEvent(event: InsertPaymentEvent): Promise<PaymentEvent>;
   getPaymentEvents(intentId: string): Promise<PaymentEvent[]>;
+
+  createReport(report: InsertReport): Promise<Report>;
+  getReport(id: string): Promise<Report | undefined>;
+  getAllReports(): Promise<Report[]>;
+  updateReport(id: string, updates: Partial<Report>): Promise<void>;
+
+  createDeal(deal: InsertDeal): Promise<Deal>;
+  getDeal(id: string): Promise<Deal | undefined>;
+  getAllDeals(): Promise<Deal[]>;
+  updateDeal(id: string, updates: Partial<Deal>): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -54,6 +68,8 @@ export class MemStorage implements IStorage {
   private orderItems: Map<string, OrderItem>;
   private paymentIntents: Map<string, PaymentIntent>;
   private paymentEvents: Map<string, PaymentEvent>;
+  private reports: Map<string, Report>;
+  private deals: Map<string, Deal>;
 
   constructor() {
     this.users = new Map();
@@ -63,6 +79,8 @@ export class MemStorage implements IStorage {
     this.orderItems = new Map();
     this.paymentIntents = new Map();
     this.paymentEvents = new Map();
+    this.reports = new Map();
+    this.deals = new Map();
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -95,7 +113,7 @@ export class MemStorage implements IStorage {
       password: insertUser.password,
       name: insertUser.name ?? null,
       company: insertUser.company ?? null,
-      membershipTier: insertUser.membershipTier ?? "FREE",
+      membershipTier: insertUser.membershipTier ?? "STARTER",
       status: insertUser.status ?? "ACTIVE",
       creditsBasic: insertUser.creditsBasic ?? 0,
       creditsPro: insertUser.creditsPro ?? 0,
@@ -253,6 +271,76 @@ export class MemStorage implements IStorage {
     return Array.from(this.paymentEvents.values()).filter(
       (event) => event.intentId === intentId,
     );
+  }
+
+  async createReport(insertReport: InsertReport): Promise<Report> {
+    const id = randomUUID();
+    const now = new Date();
+    const report: Report = {
+      id,
+      title: insertReport.title,
+      category: insertReport.category,
+      industry: insertReport.industry ?? null,
+      date: insertReport.date ?? now,
+      teaser: insertReport.teaser ?? null,
+      accessLevel: insertReport.accessLevel ?? "PUBLIC",
+      isArchived: insertReport.isArchived ?? false,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.reports.set(id, report);
+    return report;
+  }
+
+  async getReport(id: string): Promise<Report | undefined> {
+    return this.reports.get(id);
+  }
+
+  async getAllReports(): Promise<Report[]> {
+    return Array.from(this.reports.values());
+  }
+
+  async updateReport(id: string, updates: Partial<Report>): Promise<void> {
+    const report = this.reports.get(id);
+    if (report) {
+      this.reports.set(id, { ...report, ...updates, updatedAt: new Date() });
+    }
+  }
+
+  async createDeal(insertDeal: InsertDeal): Promise<Deal> {
+    const id = randomUUID();
+    const now = new Date();
+    const deal: Deal = {
+      id,
+      title: insertDeal.title,
+      description: insertDeal.description ?? null,
+      originalPrice: insertDeal.originalPrice ?? null,
+      discountedPrice: insertDeal.discountedPrice ?? null,
+      creditsIncluded: insertDeal.creditsIncluded ?? 0,
+      targetTiers: insertDeal.targetTiers ?? [],
+      validFrom: insertDeal.validFrom,
+      validTo: insertDeal.validTo ?? null,
+      isActive: insertDeal.isActive ?? true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.deals.set(id, deal);
+    return deal;
+  }
+
+  async getDeal(id: string): Promise<Deal | undefined> {
+    return this.deals.get(id);
+  }
+
+  async getAllDeals(): Promise<Deal[]> {
+    return Array.from(this.deals.values());
+  }
+
+  async updateDeal(id: string, updates: Partial<Deal>): Promise<void> {
+    const deal = this.deals.get(id);
+    if (deal) {
+      this.deals.set(id, { ...deal, ...updates, updatedAt: new Date() });
+    }
   }
 }
 

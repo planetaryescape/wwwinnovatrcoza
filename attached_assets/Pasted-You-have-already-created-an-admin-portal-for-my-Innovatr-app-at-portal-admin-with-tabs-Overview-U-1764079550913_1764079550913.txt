@@ -1,0 +1,502 @@
+You have already created an admin portal for my Innovatr app at /portal/admin with tabs: Overview, Users, Reports, and **Deals`. These tabs currently show placeholder content.
+
+Please complete the full admin backend, connect all tabs to live data, and implement all required logic using the same design system as the existing member portal.
+
+1. Membership and Access Model
+
+We now have:
+
+A general free user state (public / not logged in).
+
+Three named membership tiers for logged-in users:
+
+Tier 1 → SCALE
+
+Tier 2 → GROWTH
+
+Tier 3 → STARTER
+
+Starter is a free membership tier (logged in, but free)
+
+I like the word “Starter” instead of “Free” for the tier name
+
+1.1 User model
+
+Update the user model so that logged-in members have:
+
+membershipTier: "STARTER" | "GROWTH" | "SCALE"
+
+New sign-ups should default to:
+
+membershipTier = "STARTER"
+
+Non-logged-in visitors are just treated as “no user” but can still see public content (see reports access below).
+
+1.2 Admin users
+
+Continue to treat these emails as admins:
+
+hannah@innovatr.co.za
+
+richard@innovatr.co.za
+
+Admins:
+
+Can access /portal/admin
+
+Can see and edit all users, reports, and deals
+
+Automatically have access to all tiers and content
+
+2. Overview Tab
+
+Backend:
+
+Ensure /api/admin/overview returns at least:
+
+totalUsers
+
+starterMembers
+
+growthMembers
+
+scaleMembers
+
+activeDeals
+
+Frontend:
+
+Replace placeholder text with 4 metric cards:
+
+Total Users
+
+Starter Members
+
+Growth Members
+
+Scale Members
+
+(You can show Active Deals as a badge or 4th/5th card)
+
+Fetch from /api/admin/overview on mount
+
+Add loading and error states
+
+Use the existing Innovatr card and typography styles
+
+3. Users Tab – Full Admin User Management
+3.1 Backend
+
+Implement or confirm admin-only endpoints:
+
+GET /api/admin/users
+
+PATCH /api/admin/users/:id
+
+All admin endpoints must:
+
+Require authentication
+
+Check that the current user is admin
+
+Return 403 if not admin
+
+User model should include:
+
+id
+
+name
+
+email
+
+company or companyId
+
+membershipTier ("STARTER" | "GROWTH" | "SCALE")
+
+status ("ACTIVE" | "SUSPENDED")
+
+creditsBasic
+
+creditsPro
+
+createdAt
+
+lastLoginAt
+
+3.2 Frontend
+
+Replace the “coming soon” content with a full management table:
+
+Columns:
+
+Name
+
+Email
+
+Company
+
+Membership Tier (Starter / Growth / Scale)
+
+Status
+
+Basic Credits
+
+Pro Credits
+
+Created
+
+Last Login
+
+Features:
+
+Search bar that filters by name or email (client side is fine)
+
+Filter dropdown for tier (All / Starter / Growth / Scale)
+
+Inline editing:
+
+Membership tier (dropdown)
+
+Status (dropdown)
+
+Credits basic & pro (number inputs)
+
+On edit, call PATCH /api/admin/users/:id with the changed fields
+
+Show success or error feedback using the existing design language
+
+4. Reports Tab – Upload and Manage Trends & Reports
+
+The Reports tab will be the place where I upload and manage all trends, CLT reports, Launch pieces, IRL pieces, etc.
+
+4.1 Access model for reports
+
+Introduce an accessLevel field on each report.
+
+Allowed values:
+
+"PUBLIC" – visible to anyone (free public user, not logged in)
+
+"STARTER" – visible to logged-in Starter, Growth, and Scale members
+
+"GROWTH" – visible only to Growth and Scale members
+
+"SCALE" – visible only to Scale members
+
+Admins can see all access levels
+
+4.2 Backend
+
+Create admin-only endpoints:
+
+GET /api/admin/reports
+
+POST /api/admin/reports
+
+PATCH /api/admin/reports/:id
+
+DELETE /api/admin/reports/:id (soft delete / archive)
+
+Use the existing database that powers the Trends & Insights Library; do not duplicate data sources.
+
+Report model should support:
+
+id
+
+title
+
+category
+(for example: Insights, Launch, Trends, IRL, Product Update)
+
+type
+(for example: FMCG, Banking, Mobility, Food, etc.)
+
+topics (string array)
+
+previewText
+(the short teaser text used in the card view)
+
+industry
+
+date
+
+body
+(the full “blog-style” content shown on the report page)
+
+accessLevel ("PUBLIC" | "STARTER" | "GROWTH" | "SCALE")
+
+pdfUrl
+(link to the downloadable PDF report)
+
+tags
+
+createdAt
+
+updatedAt
+
+isArchived (boolean)
+
+4.3 Frontend – Admin Reports Tab
+
+Replace the placeholder with:
+
+Reports table
+
+Columns:
+
+Title
+
+Category
+
+Type
+
+Topics (shortened)
+
+Access level
+
+Status (Active / Archived)
+
+Date
+
+Add report form
+
+Fields:
+
+Title
+
+Category
+
+Type
+
+Topics (comma-separated, converted to array)
+
+Card view / preview text
+
+Industry
+
+Date
+
+Access level (checkboxes or a select for PUBLIC / Starter / Growth / Scale)
+
+Blog body (multiline or rich text)
+
+PDF field (URL input or upload depending on existing infra)
+
+Tags
+
+On submit, call POST /api/admin/reports
+
+Edit existing report
+
+Clicking a row opens the same form, prefilled
+
+Updates saved via PATCH /api/admin/reports/:id
+
+Archive
+
+Button or menu per row that marks isArchived true via DELETE or PATCH
+
+Archived reports should not appear in the member library by default
+
+4.4 Frontend – Member Library Integration
+
+Update the public Trends & Insights Library so that:
+
+It filters visible reports based on:
+
+accessLevel
+
+Whether the user is:
+
+public (not logged in)
+
+Starter
+
+Growth
+
+Scale
+
+Admin
+
+Card view uses:
+
+Category
+
+Type
+
+Topics
+
+Preview text
+
+Access label if useful (for example “Growth only”)
+
+5. Deals Tab – Custom Deals and Pricing Logic
+
+The Deals tab should let me create specific offers, control pricing, and choose who can see them.
+
+5.1 Backend – Deal model and endpoints
+
+Create a Deal model with at least:
+
+id
+
+title
+
+description
+
+headlineOffer
+(for example: “5 Test24 credits for R40k”)
+
+originalPrice
+(for example: 50000 for R50k)
+
+discountedPrice
+(for example: 40000 for R40k)
+
+discountPercent
+(can be computed server-side from original vs discounted)
+
+creditsIncluded
+(number of credits in the bundle)
+
+targetUserIds (array of user IDs this deal is specifically for)
+
+targetTiers (array of membership tiers: "STARTER" | "GROWTH" | "SCALE")
+
+validFrom
+
+validTo
+
+isActive
+
+createdAt
+
+Admin endpoints:
+
+GET /api/admin/deals
+
+POST /api/admin/deals
+
+PATCH /api/admin/deals/:id
+
+DELETE /api/admin/deals/:id (soft delete or mark isActive = false)
+
+Member endpoint:
+
+GET /api/member/deals
+
+GET /api/member/deals should return only deals where:
+
+isActive = true
+
+Today is between validFrom and validTo (or validTo is null)
+
+AND ( user’s id is in targetUserIds OR user’s membershipTier is in targetTiers )
+
+5.2 Frontend – Admin Deals Tab
+
+Replace the placeholder with:
+
+Deals table
+
+Columns:
+
+Title
+
+Discount (show discountPercent or “R50k → R40k”)
+
+Credits included
+
+Target (tiers / specific users)
+
+Valid from
+
+Valid to
+
+Active toggle
+
+Create / Edit deal form
+
+Fields:
+
+Title
+
+Description
+
+Headline offer
+
+Original price
+
+Discounted price
+
+Credits included
+
+Multi-select:
+
+Target tiers (Starter, Growth, Scale)
+
+Target specific users (list from Users)
+
+Valid from
+
+Valid to
+
+Active toggle
+
+On submit, call POST or PATCH as appropriate
+
+Compute and display discount percentage when prices are entered
+
+5.3 Frontend – Member Deals Page
+
+Update the existing “Member Deals” page so that:
+
+It fetches from GET /api/member/deals
+
+It only shows deals that apply to the logged-in user based on:
+
+targetUserIds
+
+targetTiers
+
+It uses the same card styling as current deals
+
+If there are no deals, show a friendly empty state
+
+6. Admin Protection and UX
+
+The Admin sidebar item and /portal/admin must only be visible and accessible to admin users.
+
+Non-admin users:
+
+Must not see the Admin tab
+
+Must be redirected away from /portal/admin
+
+Must receive 403 if they attempt to call any /api/admin/* endpoints
+
+Keep TypeScript types and file structure consistent with the existing project.
+
+Remove all “coming soon” placeholder text and replace with working implementations.
+
+7. Final Summary
+
+When all work is complete, please provide a short summary in the Replit response:
+
+Files created and modified
+
+How to run and test locally
+
+How to:
+
+Log in as an admin
+
+Create / edit a report
+
+Control which tiers and users can access a report
+
+Create / edit a deal
+
+Assign deals to users or tiers
+
+Test visibility for public, Starter, Growth, and Scale users
