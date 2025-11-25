@@ -17,7 +17,7 @@ import { useLocation, Link } from "wouter";
 import reportsData from "@/data/reports.json";
 
 export default function TrendsInsights() {
-  const { isMember } = useAuth();
+  const { isMember, membershipTier } = useAuth();
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -32,11 +32,23 @@ export default function TrendsInsights() {
     }
   };
 
-  const filteredReports = reportsData.filter((report) => {
+  // Determine user's access level
+  const getUserAccessTiers = () => {
+    if (!isMember) return ["PUBLIC"];
+    if (membershipTier === "SCALE") return ["PUBLIC", "STARTER", "GROWTH", "SCALE"];
+    if (membershipTier === "GROWTH") return ["PUBLIC", "STARTER", "GROWTH"];
+    return ["PUBLIC", "STARTER"];
+  };
+
+  const accessibleTiers = getUserAccessTiers();
+
+  const filteredReports = reportsData.filter((report: any) => {
     const matchesSearch = report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       report.teaser.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "all" || report.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const accessLevel = report.accessLevel || "PUBLIC";
+    const isAccessible = accessibleTiers.includes(accessLevel);
+    return matchesSearch && matchesCategory && isAccessible;
   });
 
   const sortedReports = [...filteredReports].sort((a, b) => {
@@ -44,7 +56,6 @@ export default function TrendsInsights() {
     return 0;
   });
 
-  // All users can view all reports, but free users can only download free ones
   const allReports = sortedReports;
 
   return (

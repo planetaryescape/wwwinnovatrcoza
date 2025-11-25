@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import reportsData from "@/data/reports.json";
+import NewReportModal from "./NewReportModal";
 
 export default function AdminReports() {
-  const [reports] = useState(reportsData);
+  const [reports, setReports] = useState(reportsData);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const getAccessColor = (level?: string) => {
     switch (level) {
@@ -16,17 +20,28 @@ export default function AdminReports() {
     }
   };
 
+  const handleRefresh = () => {
+    // In a real app, refetch from API
+    setReports(reportsData);
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-serif font-bold mb-2">Reports Management</h2>
-        <p className="text-muted-foreground">Manage research reports and access levels</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-serif font-bold mb-2">Reports Management</h2>
+          <p className="text-muted-foreground">Manage research reports and access levels</p>
+        </div>
+        <Button onClick={() => setModalOpen(true)} data-testid="button-new-trend">
+          <Plus className="w-4 h-4 mr-2" />
+          New Trend / Mailer
+        </Button>
       </div>
 
       <Card>
         <CardContent className="pt-6">
           <div className="space-y-4 max-h-96 overflow-y-auto">
-            {reports.map((report) => (
+            {reports.map((report: any) => (
               <div key={report.id} className="border-b pb-4 last:border-b-0" data-testid={`report-item-${report.id}`}>
                 <div className="flex justify-between items-start gap-4">
                   <div className="flex-1 min-w-0">
@@ -46,6 +61,8 @@ export default function AdminReports() {
           <p className="text-xs text-muted-foreground mt-4">Total: {reports.length} reports</p>
         </CardContent>
       </Card>
+
+      <NewReportModal open={modalOpen} onOpenChange={setModalOpen} onSuccess={handleRefresh} />
     </div>
   );
 }

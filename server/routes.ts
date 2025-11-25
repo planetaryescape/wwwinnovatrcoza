@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemSchema } from "@shared/schema";
+import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemSchema, insertReportSchema } from "@shared/schema";
 import { PaymentService } from "./payments/service";
 import type { PaymentConfig } from "./payments/types";
 
@@ -227,7 +227,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/reports", async (req, res) => {
     try {
-      const report = await storage.createReport(req.body);
+      const validatedData = insertReportSchema.parse(req.body);
+      const report = await storage.createReport(validatedData);
       res.status(201).json(report);
     } catch (error: any) {
       res.status(400).json({ error: error.message });

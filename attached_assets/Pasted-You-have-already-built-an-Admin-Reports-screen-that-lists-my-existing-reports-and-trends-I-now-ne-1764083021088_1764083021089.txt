@@ -1,0 +1,84 @@
+You have already built an Admin → Reports screen that lists my existing reports and trends. I now need a proper “New Trend / Mailer” upload flow so I can publish my Innovatr Intelligence pieces bi-weekly.
+
+Please do the following:
+
+In the Admin → Reports tab, add a primary button at the top right called “New Trend / Mailer”.
+
+When I click it, open a modal or side drawer with a form containing these fields:
+
+title (text)
+
+category (select: Insights, Launch, IRL, Update, Other)
+
+industry (text or select)
+
+topics (comma-separated text that you convert to a string array)
+
+previewText (short teaser for the card)
+
+date (date picker, default to today)
+
+accessLevel (radio or select with: PUBLIC, STARTER, GROWTH, SCALE)
+
+body (multiline text area for the full mailer content)
+
+pdfUrl (optional text input for a downloadable PDF link)
+
+On submit:
+
+Validate required fields: title, category, previewText, accessLevel, date.
+
+Call POST /api/admin/reports with a new report object using these fields.
+
+Close the modal on success and refresh the list of reports so the new trend appears.
+
+In the backend:
+
+If POST /api/admin/reports does not yet exist, create it as an admin-only endpoint that:
+
+Generates a unique id slug from the title.
+
+Saves title, category, industry, topics, previewText, date, accessLevel, body, pdfUrl, plus timestamps and isArchived = false.
+
+Returns the new report in the response.
+
+Ensure that only admin users can call this endpoint, and return 403 for non admins.
+
+Make sure the existing Trends & Insights Library uses these same fields:
+
+Card view should use title, category, industry, previewText, date.
+
+Visibility must respect accessLevel and the logged-in user’s tier:
+
+PUBLIC → everyone
+
+STARTER → Starter, Growth and Scale
+
+GROWTH → Growth and Scale
+
+SCALE → Scale only
+
+Keep the UI styling consistent with the portal (same fonts, spacing and buttons) and add basic loading / error states for the form.
+
+How you’ll use it once that’s in:
+
+Go to Admin → Reports
+
+Click New Trend / Mailer
+
+Paste:
+
+Card text (category, preview, etc.)
+
+Body (your mailer text)
+
+Choose accessLevel based on whether it is public, free member, or paid
+
+Save
+
+Check Trends & Insights as:
+
+Logged-out user
+
+Starter / Growth / Scale test accounts
+to see which cards appear where.

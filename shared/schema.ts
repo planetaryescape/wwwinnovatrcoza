@@ -151,6 +151,9 @@ export const reports = pgTable("reports", {
   industry: text("industry"),
   date: timestamp("date").defaultNow().notNull(),
   teaser: text("teaser"),
+  topics: text("topics").array().default([]),
+  body: text("body"),
+  pdfUrl: text("pdf_url"),
   accessLevel: varchar("access_level", { length: 20 }).notNull().default("PUBLIC"),
   isArchived: boolean("is_archived").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -161,6 +164,12 @@ export const insertReportSchema = createInsertSchema(reports).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  title: z.string().min(1, "Title is required"),
+  category: z.string().min(1, "Category is required"),
+  teaser: z.string().min(1, "Preview text is required"),
+  accessLevel: z.enum(["PUBLIC", "STARTER", "GROWTH", "SCALE"]),
+  date: z.date(),
 });
 
 export type InsertReport = z.infer<typeof insertReportSchema>;

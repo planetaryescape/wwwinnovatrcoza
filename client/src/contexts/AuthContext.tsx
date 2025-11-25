@@ -21,6 +21,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isMember: boolean;
   isAdmin: boolean;
+  membershipTier?: MembershipTier;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -95,9 +96,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAuthenticated = user !== null;
   const isMember = user !== null && user.tier !== "free";
   const isAdmin = user?.isAdmin ?? false;
+  const membershipTier = user?.membershipTier;
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, isAuthenticated, isMember, isAdmin }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, isAuthenticated, isMember, isAdmin, membershipTier }}>
       {children}
     </AuthContext.Provider>
   );
