@@ -79,8 +79,12 @@ const upcomingDeals = [
 
 export default function MemberDeals() {
   const [, setLocation] = useLocation();
-  const { isMember } = useAuth();
+  const { isMember, membershipTier } = useAuth();
   const showLockedBanner = !isMember;
+
+  // TODO: Fetch from /api/member/deals and filter by membership tier
+  // For now, using mock data from exclusiveDeals
+  const displayDeals = exclusiveDeals;
 
   return (
     <PortalLayout>
@@ -121,7 +125,7 @@ export default function MemberDeals() {
         <div>
           <h2 className="text-2xl font-serif font-bold mb-4">Exclusive Member Offers</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {exclusiveDeals.map((deal) => (
+            {displayDeals.map((deal) => (
               <Card
                 key={deal.id}
                 className="border-primary hover-elevate relative overflow-hidden"

@@ -1,0 +1,399 @@
+You have already built an Admin Dashboard at /portal/admin with tabs:
+
+Overview
+
+Users
+
+Reports (now working with a “New Trend / Mailer” modal)
+
+Deals (currently empty)
+
+Please now complete the Users and Deals tabs so that:
+
+I can manage memberships and credits from the Users tab
+
+I can create and manage custom deals from the Deals tab
+
+Changes apply immediately to the logged-in experience
+
+The UI matches the style and behaviour of the existing Reports management
+
+1. User model and roles
+
+Update the user model to support:
+
+id
+
+name
+
+email
+
+company or companyId
+
+membershipTier – one of "STARTER" | "GROWTH" | "SCALE"
+
+status – "ACTIVE" | "SUSPENDED"
+
+creditsBasic – number
+
+creditsPro – number
+
+role – "ADMIN" | "DEAL_ADMIN | "MEMBER"
+
+ADMIN = Innovatr core team
+
+DEAL_ADMIN = partner / wholesaler level user who can manage deals (see below)
+
+MEMBER = normal user
+
+createdAt
+
+lastLoginAt
+
+Keep the existing logic for full admins:
+
+Users with email hannah@innovatr.co.za or richard@innovatr.co.za must always be treated as role = "ADMIN" and have full access to /portal/admin.
+
+2. Users tab – management UI and API
+2.1 Backend
+
+Ensure or create these admin-only endpoints:
+
+GET /api/admin/users
+
+Returns all users with the fields above.
+
+POST /api/admin/users
+
+Creates a new user record and returns it.
+
+Accepts: name, email, company/companyId, membershipTier, status, role, creditsBasic, creditsPro.
+
+You can generate a placeholder password or a “pending invite” status internally if needed.
+
+PATCH /api/admin/users/:id
+
+Updates membershipTier, status, role, creditsBasic, creditsPro, and company/companyId.
+
+All /api/admin/users* endpoints must:
+
+Require authentication
+
+Check role === "ADMIN" (do not allow DEAL_ADMIN or MEMBER to use them)
+
+Return 403 for non-admins
+
+2.2 Frontend – Users tab
+
+On the Users tab in the admin dashboard:
+
+Replace the “Loading users…” placeholder with:
+
+A search + filter row (already visible)
+
+Below that, a table of users
+
+Add a primary button: “New User” on the right of the “Users Management” section header.
+
+New User modal:
+
+Opens when I click “New User”
+
+Fields:
+
+Name (optional)
+
+Email (required)
+
+Company (text input or select, depending on your current data)
+
+Membership tier (select: Starter, Growth, Scale)
+
+Role (select: Admin, Deal Admin, Member – default Member)
+
+Status (default Active)
+
+Credits Basic
+
+Credits Pro
+
+On submit:
+
+Call POST /api/admin/users
+
+Close on success and refresh the users list
+
+Show errors if validation fails
+
+User table:
+
+Columns:
+
+Name
+
+Email
+
+Company
+
+Membership Tier
+
+Role
+
+Status
+
+Basic credits
+
+Pro credits
+
+Created
+
+Last login
+
+Features:
+
+Search input filters by name or email (client side is fine)
+
+Dropdown filter for tier (All Tiers / Starter / Growth / Scale)
+
+Inline editing:
+
+Membership tier is a dropdown (Starter / Growth / Scale)
+
+Role is a dropdown (Admin / Deal Admin / Member)
+
+Status is a dropdown (Active / Suspended)
+
+Basic and Pro credits are number inputs
+
+When a field is changed, call PATCH /api/admin/users/:id with just the changed fields.
+
+Show a small “Saved” or “Error updating user” message.
+
+Immediate membership effect:
+
+Make sure that after updating membershipTier for a user, the tier is reflected immediately on subsequent API calls. This will be used later by the reports and deals visibility logic, so there must not be any caching that requires a restart.
+
+3. Deals model, API and permissions
+
+We already have an empty Deals tab. Now implement:
+
+3.1 Deal model
+
+Create a Deal model in the storage layer with at least:
+
+id
+
+title
+
+description
+
+headlineOffer – short display text, e.g. “5 Test24 Basic credits for R40k”
+
+originalPrice – number (e.g. 50000 for R50k)
+
+discountedPrice – number (e.g. 40000 for R40k)
+
+discountPercent – number (can be computed automatically from original vs discounted)
+
+creditsIncluded – number (how many credits the deal bundles)
+
+targetTierKeys – array of membership tiers: "STARTER" | "GROWTH" | "SCALE" (can be empty)
+
+targetUserIds – array of specific user IDs (can be empty)
+
+ownerCompanyId – optional; if present, indicates this deal belongs to a specific company (for future wholesaler scenarios)
+
+createdByUserId
+
+validFrom – date
+
+validTo – date or null
+
+isActive – boolean
+
+createdAt
+
+Rules:
+
+A deal is visible to a member if:
+
+isActive = true
+
+validFrom <= today
+
+validTo is null or >= today
+
+AND (
+
+their id is in targetUserIds, OR
+
+their membershipTier is in targetTierKeys
+)
+
+3.2 Backend endpoints
+
+Create these endpoints:
+
+Admin
+
+GET /api/admin/deals
+
+Returns all deals, with sufficient fields to show in the admin table.
+
+POST /api/admin/deals
+
+Creates a new deal.
+
+Only users with role = "ADMIN" or "DEAL_ADMIN" may create.
+
+If role = "DEAL_ADMIN", automatically set ownerCompanyId to that user’s company, and restrict any targeting logic as described below.
+
+PATCH /api/admin/deals/:id
+
+Updates deal fields.
+
+ADMIN can update any fields.
+
+DEAL_ADMIN can only update deals where ownerCompanyId matches their own company; they may not change ownerCompanyId.
+
+DELETE /api/admin/deals/:id
+
+Soft delete: set isActive = false.
+
+Member
+
+GET /api/member/deals
+
+Uses the visibility rules above to only return deals relevant to the current user.
+
+All admin endpoints must verify the user is authenticated and has role = "ADMIN" or role = "DEAL_ADMIN" as appropriate.
+
+4. Deals tab – admin UI
+
+On the Deals tab in /portal/admin:
+
+Add a primary button “New Deal” on the top right (similar style to “New Trend / Mailer”).
+
+Below the header, render a table of deals with columns:
+
+Title
+
+Headline offer
+
+Discount (for example “R50k → R40k (20%)”)
+
+Credits included
+
+Target tiers (e.g. Starter, Growth)
+
+Target users (show count, e.g. “3 users”)
+
+Valid from
+
+Valid to
+
+Status (Active / Inactive)
+
+New Deal modal:
+
+Fields:
+
+Title (required)
+
+Headline offer (required)
+
+Description (optional long text)
+
+Original price (number)
+
+Discounted price (number)
+
+When both original and discounted are filled, compute discountPercent and show it in the UI.
+
+Credits included (number)
+
+Target tiers (multi-select: Starter, Growth, Scale)
+
+Target users (multi-select using the users list)
+
+Valid from (date, default today)
+
+Valid to (optional date)
+
+Active toggle (default true)
+
+Behaviour:
+
+On submit, call POST /api/admin/deals.
+
+If the user is ADMIN, allow all targeting options.
+
+If the user is DEAL_ADMIN, restrict:
+
+ownerCompanyId must be their own company (set server-side).
+
+The list of target users should only include users from their company.
+
+Close the modal on success and refresh the deals table.
+
+Edit / deactivate deal:
+
+Clicking a row or an “Edit” icon opens the same modal with existing values.
+
+Changes are saved via PATCH /api/admin/deals/:id.
+
+Add a simple “Deactivate” or toggle that flips isActive to false.
+
+5. Member Deals page integration
+
+Update the member-facing Member Deals page so that:
+
+It calls GET /api/member/deals.
+
+It displays deal cards using:
+
+Title
+
+Headline offer
+
+Short description
+
+Discount and credits information.
+
+If no deals apply to the user, show a friendly “No deals available for you right now” empty state.
+
+Make sure that:
+
+Starter members only see deals where:
+
+Their ID is targeted, or
+
+targetTierKeys includes "STARTER".
+
+Growth members see deals for "GROWTH" plus "STARTER" plus any specific deals targeted to them.
+
+Scale members see all deals targeted at "SCALE" plus lower tiers plus user-specific ones.
+
+6. General requirements
+
+Do not break existing functionality for Overview and Reports.
+
+Keep all TypeScript types consistent with the current project.
+
+Follow the same visual style (cards, buttons, typography, spacing) as the Reports and Trends & Insights sections.
+
+Ensure all admin routes correctly enforce role-based access.
+
+At the end, please summarise:
+
+The key files created and changed.
+
+How to:
+
+Create a new user and set membership tier and role.
+
+Upgrade a member from Starter to Growth or Scale.
+
+Create a new deal and target it to specific tiers or users.
+
+Test visibility from a normal member account.

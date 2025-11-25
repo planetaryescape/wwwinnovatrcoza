@@ -12,6 +12,7 @@ export const users = pgTable("users", {
   company: text("company"),
   membershipTier: varchar("membership_tier", { length: 20 }).notNull().default("STARTER"),
   status: varchar("status", { length: 20 }).notNull().default("ACTIVE"),
+  role: varchar("role", { length: 20 }).notNull().default("MEMBER"),
   creditsBasic: integer("credits_basic").notNull().default(0),
   creditsPro: integer("credits_pro").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -24,9 +25,10 @@ export const insertUserSchema = createInsertSchema(users).omit({
   lastLoginAt: true,
 }).extend({
   email: z.string().email("Invalid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters").optional(),
   name: z.string().optional(),
   membershipTier: z.enum(["STARTER", "GROWTH", "SCALE"]).default("STARTER"),
+  role: z.enum(["ADMIN", "DEAL_ADMIN", "MEMBER"]).default("MEMBER"),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -180,10 +182,15 @@ export const deals = pgTable("deals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
   description: text("description"),
+  headlineOffer: text("headline_offer"),
   originalPrice: decimal("original_price", { precision: 10, scale: 2 }),
   discountedPrice: decimal("discounted_price", { precision: 10, scale: 2 }),
+  discountPercent: integer("discount_percent").default(0),
   creditsIncluded: integer("credits_included").notNull().default(0),
-  targetTiers: text("target_tiers").array().default([]),
+  targetTierKeys: text("target_tier_keys").array().default([]),
+  targetUserIds: text("target_user_ids").array().default([]),
+  ownerCompanyId: varchar("owner_company_id"),
+  createdByUserId: varchar("created_by_user_id").notNull(),
   validFrom: timestamp("valid_from").notNull(),
   validTo: timestamp("valid_to"),
   isActive: boolean("is_active").notNull().default(true),
@@ -195,6 +202,10 @@ export const insertDealSchema = createInsertSchema(deals).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  title: z.string().min(1, "Title is required"),
+  headlineOffer: z.string().optional(),
+  createdByUserId: z.string(),
 });
 
 export type InsertDeal = z.infer<typeof insertDealSchema>;

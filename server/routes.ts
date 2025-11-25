@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemSchema, insertReportSchema } from "@shared/schema";
+import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemSchema, insertReportSchema, insertDealSchema } from "@shared/schema";
 import { PaymentService } from "./payments/service";
 import type { PaymentConfig } from "./payments/types";
 
@@ -172,10 +172,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/admin/users", async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/admin/users", async (req, res) => {
+    try {
+      const user = await storage.createUser(req.body);
+      res.status(201).json(user);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   app.patch("/api/admin/users/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const { membershipTier, status, creditsBasic, creditsPro } = req.body;
+      const { membershipTier, status, role, creditsBasic, creditsPro } = req.body;
       
       const user = await storage.getUser(id);
       if (!user) {
@@ -185,6 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateUser(id, {
         membershipTier: membershipTier || user.membershipTier,
         status: status || user.status,
+        role: role || user.role,
         creditsBasic: creditsBasic !== undefined ? creditsBasic : user.creditsBasic,
         creditsPro: creditsPro !== undefined ? creditsPro : user.creditsPro,
       });
@@ -261,7 +280,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/deals", async (req, res) => {
     try {
-      const deal = await storage.createDeal(req.body);
+      const validatedData = insertDealSchema.parse(req.body);
+      const deal = await storage.createDeal(validatedData);
       res.status(201).json(deal);
     } catch (error: any) {
       res.status(400).json({ error: error.message });

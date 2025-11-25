@@ -9,7 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Edit2 } from "lucide-react";
+import { Search, Plus } from "lucide-react";
+import NewUserModal from "./NewUserModal";
 
 interface AdminUser {
   id: string;
@@ -17,6 +18,7 @@ interface AdminUser {
   email: string;
   company: string | null;
   membershipTier: string;
+  role: string;
   status: string;
   creditsBasic: number;
   creditsPro: number;
@@ -31,6 +33,7 @@ export default function AdminUsers() {
   const [tierFilter, setTierFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -65,11 +68,51 @@ export default function AdminUsers() {
     setFilteredUsers(filtered);
   }, [users, search, tierFilter]);
 
+  const handleRefresh = () => {
+    fetchUsers();
+  };
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/admin/users");
+      if (!res.ok) throw new Error("Failed to fetch users");
+      const data = await res.json();
+      setUsers(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load users");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateUser = async (userId: string, updates: Partial<AdminUser>) => {
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+
+      if (!res.ok) throw new Error("Failed to update user");
+
+      setUsers(users.map((u) => (u.id === userId ? { ...u, ...updates } : u)));
+    } catch (err) {
+      console.error("Error updating user:", err);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-serif font-bold mb-2">Users Management</h2>
-        <p className="text-muted-foreground">Manage user accounts and memberships</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-serif font-bold mb-2">Users Management</h2>
+          <p className="text-muted-foreground">Manage user accounts and memberships</p>
+        </div>
+        <Button onClick={() => setModalOpen(true)} data-testid="button-new-user">
+          <Plus className="w-4 h-4 mr-2" />
+          New User
+        </Button>
       </div>
 
       {error && (
@@ -127,6 +170,7 @@ export default function AdminUsers() {
                     <th className="text-left py-2 px-2">Name</th>
                     <th className="text-left py-2 px-2">Email</th>
                     <th className="text-left py-2 px-2">Tier</th>
+                    <th className="text-left py-2 px-2">Role</th>
                     <th className="text-left py-2 px-2">Status</th>
                     <th className="text-left py-2 px-2">Basic Credits</th>
                     <th className="text-left py-2 px-2">Pro Credits</th>
@@ -138,10 +182,78 @@ export default function AdminUsers() {
                     <tr key={user.id} className="border-b hover:bg-muted/50" data-testid={`row-user-${user.id}`}>
                       <td className="py-2 px-2">{user.name || "—"}</td>
                       <td className="py-2 px-2 text-xs">{user.email}</td>
-                      <td className="py-2 px-2"><span className="text-xs px-2 py-1 bg-primary/10 rounded">{user.membershipTier}</span></td>
-                      <td className="py-2 px-2"><span className="text-xs px-2 py-1 bg-success/10 rounded">{user.status}</span></td>
-                      <td className="py-2 px-2">{user.creditsBasic}</td>
-                      <td className="py-2 px-2">{user.creditsPro}</td>
+                      <td className="py-2 px-2">
+                        <Select
+                          value={user.membershipTier}
+                          onValueChange={(val) =>
+                            handleUpdateUser(user.id, { membershipTier: val })
+                          }
+                        >
+                          <SelectTrigger className="h-8 text-xs" data-testid={`select-tier-${user.id}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="STARTER">Starter</SelectItem>
+                            <SelectItem value="GROWTH">Growth</SelectItem>
+                            <SelectItem value="SCALE">Scale</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="py-2 px-2">
+                        <Select
+                          value={user.role}
+                          onValueChange={(val) =>
+                            handleUpdateUser(user.id, { role: val })
+                          }
+                        >
+                          <SelectTrigger className="h-8 text-xs" data-testid={`select-role-${user.id}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="MEMBER">Member</SelectItem>
+                            <SelectItem value="DEAL_ADMIN">Deal Admin</SelectItem>
+                            <SelectItem value="ADMIN">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="py-2 px-2">
+                        <Select
+                          value={user.status}
+                          onValueChange={(val) =>
+                            handleUpdateUser(user.id, { status: val })
+                          }
+                        >
+                          <SelectTrigger className="h-8 text-xs" data-testid={`select-status-${user.id}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="ACTIVE">Active</SelectItem>
+                            <SelectItem value="SUSPENDED">Suspended</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
+                      <td className="py-2 px-2">
+                        <Input
+                          type="number"
+                          value={user.creditsBasic}
+                          onChange={(e) =>
+                            handleUpdateUser(user.id, { creditsBasic: parseInt(e.target.value) })
+                          }
+                          className="h-8 text-xs w-16"
+                          data-testid={`input-basic-credits-${user.id}`}
+                        />
+                      </td>
+                      <td className="py-2 px-2">
+                        <Input
+                          type="number"
+                          value={user.creditsPro}
+                          onChange={(e) =>
+                            handleUpdateUser(user.id, { creditsPro: parseInt(e.target.value) })
+                          }
+                          className="h-8 text-xs w-16"
+                          data-testid={`input-pro-credits-${user.id}`}
+                        />
+                      </td>
                       <td className="py-2 px-2 text-xs">{new Date(user.createdAt).toLocaleDateString()}</td>
                     </tr>
                   ))}
@@ -151,6 +263,8 @@ export default function AdminUsers() {
           )}
         </CardContent>
       </Card>
+
+      <NewUserModal open={modalOpen} onOpenChange={setModalOpen} onSuccess={handleRefresh} />
     </div>
   );
 }
