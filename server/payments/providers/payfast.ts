@@ -32,26 +32,34 @@ export class PayFastProvider implements PaymentProvider {
   }
 
   private generateSignature(data: Record<string, any>): string {
-    // Generate signature exactly as PayFast expects - without sorting
+    // Generate signature exactly as PayFast expects
+    // Build string in order: key=encodedvalue&key2=encodedvalue2...&passphrase=encodedpassphrase
     let pfOutput = "";
     
     for (let key in data) {
       if (data.hasOwnProperty(key)) {
-        if (data[key] !== "") {
-          pfOutput += `${key}=${encodeURIComponent(String(data[key]).trim()).replace(/%20/g, "+")}&`;
+        const value = String(data[key]).trim();
+        // Only add non-empty values
+        if (value !== "") {
+          const encoded = encodeURIComponent(value).replace(/%20/g, "+");
+          pfOutput += `${key}=${encoded}&`;
         }
       }
     }
 
-    // Remove last ampersand
+    // Remove trailing ampersand
     let getString = pfOutput.slice(0, -1);
     
     const credentials = this.getCredentials();
     if (credentials.passphrase) {
-      getString += `&passphrase=${encodeURIComponent(credentials.passphrase.trim()).replace(/%20/g, "+")}`;
+      const encodedPassphrase = encodeURIComponent(credentials.passphrase.trim()).replace(/%20/g, "+");
+      getString += `&passphrase=${encodedPassphrase}`;
     }
 
-    return crypto.createHash("md5").update(getString).digest("hex");
+    const hash = crypto.createHash("md5").update(getString).digest("hex");
+    console.log("Signature string:", getString);
+    console.log("MD5 hash:", hash);
+    return hash;
   }
 
   async createPaymentIntent(order: Order, items: any[]): Promise<any> {
@@ -90,16 +98,20 @@ export class PayFastProvider implements PaymentProvider {
       cancel_url: cancelUrl,
       notify_url: notifyUrl,
       amount: amountStr,
-      item_name: order.purchaseType || "",
-      item_description: `Innovatr ${order.purchaseType}` || "",
-      email_address: order.customerEmail || "",
+      item_name: (order.purchaseType || "").trim(),
+      item_description: (`Innovatr ${order.purchaseType}` || "").trim(),
+      email_address: (order.customerEmail || "").trim(),
       name_first: (order.customerName?.split(" ")[0] || "").trim(),
       name_last: (order.customerName?.split(" ").slice(1).join(" ") || "").trim(),
-      m_payment_id: String(order.id),
+      m_payment_id: String(order.id).trim(),
       email_confirmation: "1",
     };
 
+    console.log("=== PayFast Form Data ===");
+    console.log(JSON.stringify(formData, null, 2));
     const signature = this.generateSignature(formData);
+    console.log("Generated signature:", signature);
+    console.log("========================");
 
     return {
       type: "form",
