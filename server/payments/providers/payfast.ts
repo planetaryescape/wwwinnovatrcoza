@@ -16,18 +16,8 @@ export class PayFastProvider implements PaymentProvider {
   }
 
   private getCredentials() {
-    const isSandbox = this.config?.sandbox ?? true;
-    
-    // If separate sandbox/production credentials are configured, use them
-    if (isSandbox && this.config?.sandboxMerchantId) {
-      return {
-        merchantId: this.config.sandboxMerchantId,
-        merchantKey: this.config.sandboxMerchantKey || "",
-        passphrase: this.config.sandboxPassphrase,
-      };
-    }
-    
-    // Otherwise use the main credentials
+    // Return the credentials that were passed in
+    // (they're already environment-specific from routes.ts)
     return {
       merchantId: this.config?.merchantId || "",
       merchantKey: this.config?.merchantKey || "",
