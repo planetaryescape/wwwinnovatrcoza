@@ -120,7 +120,8 @@ export default function OrderFormDialog({
     onError: (error: any) => {
       toast({
         title: "Payment Failed",
-        description: error.message || "Failed to initiate payment. Please try again.",
+        description:
+          error.message || "Failed to initiate payment. Please try again.",
         variant: "destructive",
       });
     },
@@ -128,8 +129,12 @@ export default function OrderFormDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!customerName.trim() || !customerEmail.trim() || !customerCompany.trim()) {
+
+    if (
+      !customerName.trim() ||
+      !customerEmail.trim() ||
+      !customerCompany.trim()
+    ) {
       toast({
         title: "Missing Information",
         description: "Please fill in your name, company, and email address.",
@@ -150,8 +155,12 @@ export default function OrderFormDialog({
 
   const handlePayOnline = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!customerName.trim() || !customerEmail.trim() || !customerCompany.trim()) {
+
+    if (
+      !customerName.trim() ||
+      !customerEmail.trim() ||
+      !customerCompany.trim()
+    ) {
       toast({
         title: "Missing Information",
         description: "Please fill in your name, company, and email address.",
@@ -195,10 +204,19 @@ export default function OrderFormDialog({
         <DialogContent className="sm:max-w-md">
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <CheckCircle2 className="w-16 h-16 text-green-500 mb-4" />
-            <DialogTitle className="text-2xl mb-2">Quote Request Received!</DialogTitle>
+            <DialogTitle className="text-2xl mb-2">
+              Quote Request Received!
+            </DialogTitle>
             <DialogDescription className="text-base mb-6">
-              Thank you for your inquiry from <span className="font-medium text-foreground">{customerCompany}</span>. Our team will review it and contact you at{" "}
-              <span className="font-medium text-foreground">{customerEmail}</span> to discuss your order and payment options.
+              Thank you for your inquiry from{" "}
+              <span className="font-medium text-foreground">
+                {customerCompany}
+              </span>
+              . Our team will review it and contact you at{" "}
+              <span className="font-medium text-foreground">
+                {customerEmail}
+              </span>{" "}
+              to discuss your order and payment options.
             </DialogDescription>
             <Button onClick={handleClose} data-testid="button-close-success">
               Back to Home
@@ -215,10 +233,11 @@ export default function OrderFormDialog({
         <DialogHeader>
           <DialogTitle>Complete Your Order</DialogTitle>
           <DialogDescription>
-            Enter your details below and our team will contact you to process your payment.
+            Enter your details below and our team will contact you to process
+            your payment.
           </DialogDescription>
         </DialogHeader>
-        
+
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="customerName">Full Name</Label>
@@ -231,7 +250,7 @@ export default function OrderFormDialog({
               data-testid="input-customer-name"
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="customerEmail">Email Address</Label>
             <Input
@@ -261,7 +280,9 @@ export default function OrderFormDialog({
             <h4 className="font-semibold text-sm">Order Summary</h4>
             {orderItems.map((item, index) => (
               <div key={index} className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{item.description}</span>
+                <span className="text-muted-foreground">
+                  {item.description}
+                </span>
                 <span>x{item.quantity}</span>
               </div>
             ))}
@@ -276,15 +297,21 @@ export default function OrderFormDialog({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={createInquiryMutation.isPending || initiatePaymentMutation.isPending}
+              disabled={
+                createInquiryMutation.isPending ||
+                initiatePaymentMutation.isPending
+              }
               data-testid="button-cancel-order"
             >
               Cancel
             </Button>
             <Button
-              type="submit"
-              variant="outline"
-              disabled={createInquiryMutation.isPending || initiatePaymentMutation.isPending}
+              type="button"
+              onClick={handleSubmit}
+              disabled={
+                createInquiryMutation.isPending ||
+                initiatePaymentMutation.isPending
+              }
               data-testid="button-submit-order"
             >
               {createInquiryMutation.isPending ? (
@@ -296,7 +323,7 @@ export default function OrderFormDialog({
                 "Place Order"
               )}
             </Button>
-            <Button
+            {/* <Button
               type="button"
               onClick={handlePayOnline}
               disabled={createInquiryMutation.isPending || initiatePaymentMutation.isPending}
@@ -313,12 +340,12 @@ export default function OrderFormDialog({
                   Pay Online
                 </>
               )}
-            </Button>
+            </Button> */}
           </div>
 
-          <p className="text-xs text-muted-foreground text-center">
+          {/* <p className="text-xs text-muted-foreground text-center">
             Choose "Place Order" for manual payment coordination or "Pay Online" to pay securely with PayFast.
-          </p>
+          </p> */}
         </form>
       </DialogContent>
     </Dialog>
