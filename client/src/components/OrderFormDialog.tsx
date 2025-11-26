@@ -56,20 +56,33 @@ export default function OrderFormDialog({
       amount: string;
       items: OrderItem[];
     }) => {
-      const response = await apiRequest("POST", "/api/inquiries", data);
+      const response = await apiRequest("POST", "/api/manual-orders", {
+        customerName: data.customerName,
+        customerEmail: data.customerEmail,
+        customerCompany: data.customerCompany,
+        purchaseType: data.purchaseType,
+        amount: data.amount,
+        currency: "ZAR",
+        items: data.items.map((item) => ({
+          type: item.type,
+          description: item.description,
+          quantity: item.quantity,
+          unitAmount: item.unitAmount,
+        })),
+      });
       return response.json();
     },
     onSuccess: () => {
       setIsSuccess(true);
       toast({
-        title: "Inquiry Submitted Successfully",
-        description: "Our team will contact you shortly to discuss your order.",
+        title: "Order Placed Successfully",
+        description: "Thank you! Our team will contact you shortly to process payment.",
       });
       onSuccess?.();
     },
     onError: (error: any) => {
       toast({
-        title: "Inquiry Failed",
+        title: "Order Failed",
         description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });

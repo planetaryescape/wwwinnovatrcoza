@@ -113,6 +113,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Manual order endpoint: creates order immediately and sends emails
+  app.post("/api/manual-orders", async (req, res) => {
+    try {
+      const { customerName, customerEmail, customerCompany, amount, currency, purchaseType, items } = req.body;
+
+      // Create order with "pending" status (awaiting manual payment processing)
+      const validatedOrder = insertOrderSchema.parse({
+        customerName,
+        customerEmail,
+        customerCompany,
+        amount,
+        currency: currency || "ZAR",
+        purchaseType,
+        status: "pending",
+      });
+
+      const order = await storage.createOrder(validatedOrder);
+
+      // Create order items
+      const validatedItems = items?.map((item: any) => insertOrderItemWithoutOrderIdSchema.parse(item)) || [];
+      for (const itemData of validatedItems) {
+        await storage.createOrderItem({
+          ...itemData,
+          orderId: order.id,
+        });
+      }
+
+      // Send admin email notification
+      try {
+        await sendAdminOrderNotification({
+          customerName: order.customerName || "Unknown",
+          customerEmail: order.customerEmail || "No email provided",
+          orderDescription: order.purchaseType || "Order placed",
+          orderTotal: `R${Number(order.amount).toLocaleString()}`,
+          orderItems: validatedItems.map((item) => ({
+            type: item.type,
+            description: item.description || "",
+            quantity: item.quantity,
+          })),
+        });
+      } catch (emailError) {
+        console.error("Failed to send admin email notification:", emailError);
+      }
+
+      // Send customer order confirmation email
+      try {
+        await sendCustomerOrderConfirmation({
+          customerName: order.customerName || "Valued Customer",
+          customerEmail: order.customerEmail,
+          customerCompany: order.customerCompany || "Your Company",
+          orderDescription: order.purchaseType || "Order",
+          orderTotal: `R${Number(order.amount).toLocaleString()}`,
+          orderItems: validatedItems.map((item) => ({
+            type: item.type,
+            description: item.description || "",
+            quantity: item.quantity,
+          })),
+        });
+      } catch (emailError) {
+        console.error("Failed to send customer order confirmation:", emailError);
+      }
+
+      res.status(201).json(order);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   app.post("/api/payment-intents", async (req, res) => {
     try {
       const { orderId, items, providerKey } = req.body;
