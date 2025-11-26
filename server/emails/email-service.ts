@@ -114,7 +114,7 @@ export async function sendAdminOrderNotification(orderData: {
 
     const response = await resend.emails.send({
       from: fromEmail,
-      to: adminEmail,
+      to: adminEmails,
       subject: `New Order from ${orderData.customerName}`,
       html: emailHtml,
     });
