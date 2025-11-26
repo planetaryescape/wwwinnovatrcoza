@@ -18,12 +18,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // use storage to perform CRUD operations on the storage interface
   // e.g. storage.insertUser(user) or storage.getUserByUsername(username)
 
+  // Determine PayFast credentials - support both generic and sandbox/production-specific
+  const isSandbox = process.env.PAYFAST_SANDBOX === "true";
+  const payfastMerchantId = isSandbox 
+    ? process.env.PAYFAST_SANDBOX_MERCHANT_ID || process.env.PAYFAST_MERCHANT_ID
+    : process.env.PAYFAST_PRODUCTION_MERCHANT_ID || process.env.PAYFAST_MERCHANT_ID;
+  const payfastMerchantKey = isSandbox
+    ? process.env.PAYFAST_SANDBOX_MERCHANT_KEY || process.env.PAYFAST_MERCHANT_KEY
+    : process.env.PAYFAST_PRODUCTION_MERCHANT_KEY || process.env.PAYFAST_MERCHANT_KEY;
+  const payfastPassphrase = isSandbox
+    ? process.env.PAYFAST_SANDBOX_PASSPHRASE || process.env.PAYFAST_PASSPHRASE
+    : process.env.PAYFAST_PRODUCTION_PASSPHRASE || process.env.PAYFAST_PASSPHRASE;
+
   const paymentConfig: PaymentConfig = {
-    payfast: process.env.PAYFAST_MERCHANT_ID ? {
-      merchantId: process.env.PAYFAST_MERCHANT_ID,
-      merchantKey: process.env.PAYFAST_MERCHANT_KEY!,
-      passphrase: process.env.PAYFAST_PASSPHRASE,
-      sandbox: process.env.PAYFAST_SANDBOX === "true",
+    payfast: payfastMerchantId ? {
+      merchantId: payfastMerchantId,
+      merchantKey: payfastMerchantKey!,
+      passphrase: payfastPassphrase,
+      sandbox: isSandbox,
     } : undefined,
     zapper: process.env.ZAPPER_MERCHANT_ID ? {
       merchantId: process.env.ZAPPER_MERCHANT_ID,
