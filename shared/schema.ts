@@ -77,6 +77,7 @@ export const orders = pgTable("orders", {
   status: varchar("status", { length: 20 }).notNull().default("pending"),
   customerName: text("customer_name"),
   customerEmail: text("customer_email").notNull(),
+  customerCompany: text("customer_company"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

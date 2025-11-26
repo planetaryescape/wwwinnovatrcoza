@@ -43,6 +43,7 @@ export default function OrderFormDialog({
   const { toast } = useToast();
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+  const [customerCompany, setCustomerCompany] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
   const createOrderMutation = useMutation({
@@ -70,10 +71,10 @@ export default function OrderFormDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!customerName.trim() || !customerEmail.trim()) {
+    if (!customerName.trim() || !customerEmail.trim() || !customerCompany.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please fill in your name and email address.",
+        description: "Please fill in your name, company, and email address.",
         variant: "destructive",
       });
       return;
@@ -83,6 +84,7 @@ export default function OrderFormDialog({
       order: {
         customerName,
         customerEmail,
+        customerCompany,
         amount: totalAmount.toString(),
         currency: "ZAR",
         purchaseType,
@@ -100,6 +102,7 @@ export default function OrderFormDialog({
     setIsSuccess(false);
     setCustomerName("");
     setCustomerEmail("");
+    setCustomerCompany("");
   };
 
   const formatPrice = (price: number) => {
@@ -114,7 +117,7 @@ export default function OrderFormDialog({
             <CheckCircle2 className="w-16 h-16 text-green-500 mb-4" />
             <DialogTitle className="text-2xl mb-2">Order Received!</DialogTitle>
             <DialogDescription className="text-base mb-6">
-              Thank you for your order. Our team will review it and contact you at{" "}
+              Thank you for your order from <span className="font-medium text-foreground">{customerCompany}</span>. Our team will review it and contact you at{" "}
               <span className="font-medium text-foreground">{customerEmail}</span> to complete the payment process.
             </DialogDescription>
             <Button onClick={handleClose} data-testid="button-close-success">
@@ -159,6 +162,18 @@ export default function OrderFormDialog({
               onChange={(e) => setCustomerEmail(e.target.value)}
               required
               data-testid="input-customer-email"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="customerCompany">Company Name</Label>
+            <Input
+              id="customerCompany"
+              placeholder="Enter your company name"
+              value={customerCompany}
+              onChange={(e) => setCustomerCompany(e.target.value)}
+              required
+              data-testid="input-customer-company"
             />
           </div>
 
