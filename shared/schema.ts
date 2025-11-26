@@ -132,7 +132,6 @@ export const orderItems = pgTable("order_items", {
   referenceId: varchar("reference_id"),
   quantity: integer("quantity").notNull().default(1),
   unitAmount: decimal("unit_amount", { precision: 10, scale: 2 }).notNull(),
-  customerCompany: text("company_name"),
   description: text("description"),
 });
 
