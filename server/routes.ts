@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemWithoutOrderIdSchema, insertReportSchema, insertDealSchema } from "@shared/schema";
+import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemWithoutOrderIdSchema, insertReportSchema, insertDealSchema, insertInquirySchema } from "@shared/schema";
 import { PaymentService } from "./payments/service";
 import type { PaymentConfig } from "./payments/types";
 import { sendAdminOrderNotification, sendCustomerOrderConfirmation } from "./emails/email-service";
@@ -85,44 +85,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Send admin email notification for manual processing
-      try {
-        await sendAdminOrderNotification({
-          customerName: validatedOrder.customerName || "Unknown",
-          customerEmail: validatedOrder.customerEmail || "No email provided",
-          orderDescription: validatedOrder.purchaseType || "Order placed via checkout",
-          orderTotal: `R${Number(validatedOrder.amount).toLocaleString()}`,
-          orderItems: validatedItems.map((item: any) => ({
-            type: item.type,
-            description: item.description,
-            quantity: item.quantity,
-          })),
-        });
-      } catch (emailError) {
-        console.error("Failed to send admin email notification:", emailError);
-        // Don't fail the order creation if email fails
-      }
-
-      // Send customer order confirmation email
-      try {
-        await sendCustomerOrderConfirmation({
-          customerName: validatedOrder.customerName || "Valued Customer",
-          customerEmail: validatedOrder.customerEmail,
-          customerCompany: validatedOrder.customerCompany || "Your Company",
-          orderDescription: validatedOrder.purchaseType || "Order",
-          orderTotal: `R${Number(validatedOrder.amount).toLocaleString()}`,
-          orderItems: validatedItems.map((item: any) => ({
-            type: item.type,
-            description: item.description,
-            quantity: item.quantity,
-          })),
-        });
-      } catch (emailError) {
-        console.error("Failed to send customer order confirmation:", emailError);
-        // Don't fail the order creation if email fails
-      }
-
       res.status(201).json(order);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/inquiries", async (req, res) => {
+    try {
+      const validatedInquiry = insertInquirySchema.parse(req.body);
+      const inquiry = await storage.createInquiry(validatedInquiry);
+      res.status(201).json(inquiry);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
@@ -167,6 +140,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const rawBody = (req as any).rawBody || req.body;
       await paymentService.handleWebhook("payfast", rawBody, req.headers as Record<string, string>);
+      
+      // Extract payment data and send emails on successful payment
+      const result = await new PayFastProvider(paymentConfig.payfast!).handleWebhook(rawBody, req.headers as Record<string, string>);
+      
+      if (result.verified && result.status === "succeeded") {
+        const intent = await storage.getPaymentIntentByProviderIntentId(result.intentId);
+        if (intent) {
+          const order = await storage.getOrder(intent.orderId);
+          if (order) {
+            const items = await storage.getOrderItems(order.id);
+            
+            // Send admin email notification
+            try {
+              await sendAdminOrderNotification({
+                customerName: order.customerName || "Unknown",
+                customerEmail: order.customerEmail || "No email provided",
+                orderDescription: order.purchaseType || "Order placed via checkout",
+                orderTotal: `R${Number(order.amount).toLocaleString()}`,
+                orderItems: items.map((item) => ({
+                  type: item.type,
+                  description: item.description,
+                  quantity: item.quantity,
+                })),
+              });
+            } catch (emailError) {
+              console.error("Failed to send admin email notification:", emailError);
+            }
+
+            // Send customer order confirmation email
+            try {
+              await sendCustomerOrderConfirmation({
+                customerName: order.customerName || "Valued Customer",
+                customerEmail: order.customerEmail,
+                customerCompany: order.customerCompany || "Your Company",
+                orderDescription: order.purchaseType || "Order",
+                orderTotal: `R${Number(order.amount).toLocaleString()}`,
+                orderItems: items.map((item) => ({
+                  type: item.type,
+                  description: item.description,
+                  quantity: item.quantity,
+                })),
+              });
+            } catch (emailError) {
+              console.error("Failed to send customer order confirmation:", emailError);
+            }
+          }
+        }
+      }
+      
       res.status(200).send("OK");
     } catch (error: any) {
       console.error("PayFast webhook error:", error);
