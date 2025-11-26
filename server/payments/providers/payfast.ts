@@ -70,9 +70,14 @@ export class PayFastProvider implements PaymentProvider {
   }
 
   async getCheckoutPayload(intent: PaymentIntent, order: Order): Promise<CheckoutPayload> {
-    const returnUrl = `${process.env.REPLIT_DOMAIN || "http://localhost:5000"}/payment/return`;
-    const cancelUrl = `${process.env.REPLIT_DOMAIN || "http://localhost:5000"}/payment/cancel`;
-    const notifyUrl = `${process.env.REPLIT_DOMAIN || "http://localhost:5000"}/api/webhooks/payfast`;
+    // Build base URL - use REPLIT_DOMAIN if available, otherwise localhost
+    const baseUrl = process.env.REPLIT_DOMAIN 
+      ? `https://${process.env.REPLIT_DOMAIN}`
+      : "http://localhost:5000";
+    
+    const returnUrl = `${baseUrl}/payment/return`;
+    const cancelUrl = `${baseUrl}/payment/cancel`;
+    const notifyUrl = `${baseUrl}/api/webhooks/payfast`;
     const credentials = this.getCredentials();
 
     // Ensure amount is a string and properly formatted
