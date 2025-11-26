@@ -36,11 +36,17 @@ export class PayFastProvider implements PaymentProvider {
     const keys = Object.keys(data).sort();
     let pfOutput = "";
     
+    console.log("=== PayFast Signature Generation Debug ===");
+    console.log("Sorted keys:", keys);
+    console.log("Data object:", data);
+    
     for (const key of keys) {
       if (data.hasOwnProperty(key)) {
         const value = String(data[key]).trim();
         if (value !== "") {
-          pfOutput += `${key}=${encodeURIComponent(value).replace(/%20/g, "+")}&`;
+          const encoded = encodeURIComponent(value).replace(/%20/g, "+");
+          console.log(`  ${key}: "${value}" -> encoded: "${encoded}"`);
+          pfOutput += `${key}=${encoded}&`;
         }
       }
     }
@@ -50,10 +56,17 @@ export class PayFastProvider implements PaymentProvider {
     
     const credentials = this.getCredentials();
     if (credentials.passphrase) {
-      getString += `&passphrase=${encodeURIComponent(credentials.passphrase.trim()).replace(/%20/g, "+")}`;
+      const encodedPassphrase = encodeURIComponent(credentials.passphrase.trim()).replace(/%20/g, "+");
+      console.log(`  passphrase: "${credentials.passphrase.trim()}" -> encoded: "${encodedPassphrase}"`);
+      getString += `&passphrase=${encodedPassphrase}`;
     }
 
-    return crypto.createHash("md5").update(getString).digest("hex");
+    console.log("Final signature string:", getString);
+    const signature = crypto.createHash("md5").update(getString).digest("hex");
+    console.log("Generated MD5 signature:", signature);
+    console.log("========================================\n");
+
+    return signature;
   }
 
   async createPaymentIntent(order: Order, items: any[]): Promise<any> {
@@ -98,9 +111,17 @@ export class PayFastProvider implements PaymentProvider {
       email_confirmation: "1",
     };
 
-    console.log("Generating signature for formData:", formData);
+    console.log("\n=== PayFast Checkout Form Data ===");
+    console.log("Merchant ID:", credentials.merchantId);
+    console.log("Merchant Key:", credentials.merchantKey);
+    console.log("Sandbox Mode:", this.config?.sandbox);
+    console.log("Amount:", amountStr);
+    console.log("Order ID:", order.id);
+    console.log("Customer Email:", order.customerEmail);
+    console.log("Customer Name:", order.customerName);
+    console.log("Form Data:", formData);
     const signature = this.generateSignature(formData);
-    console.log("Generated signature:", signature);
+    console.log("Final Form Data with signature:", { ...formData, signature });
 
     return {
       type: "form",
@@ -118,6 +139,9 @@ export class PayFastProvider implements PaymentProvider {
     verified: boolean;
   }> {
     const body = typeof rawBody === "string" ? rawBody : rawBody.toString("utf-8");
+    console.log("\n=== PayFast Webhook Received ===");
+    console.log("Raw body:", body);
+    
     const params = new URLSearchParams(body);
     const data: Record<string, string> = {};
     
@@ -126,10 +150,15 @@ export class PayFastProvider implements PaymentProvider {
     });
 
     const receivedSignature = data.signature;
+    console.log("Received signature:", receivedSignature);
+    
     delete data.signature;
+    console.log("Data for signature verification:", data);
 
     const calculatedSignature = this.generateSignature(data);
     const verified = receivedSignature === calculatedSignature;
+    console.log("Signature match:", verified);
+    console.log("===============================\n");
 
     const sourceIp = (headers["x-forwarded-for"] as string)?.split(",")[0].trim() || (headers["x-real-ip"] as string);
     const ipVerified = isValidPayFastIp(sourceIp);
