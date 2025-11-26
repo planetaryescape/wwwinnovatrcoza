@@ -70,16 +70,8 @@ export class PayFastProvider implements PaymentProvider {
   }
 
   async getCheckoutPayload(intent: PaymentIntent, order: Order): Promise<CheckoutPayload> {
-    // Build base URL - use environment domain if available
-    const domain = process.env.REPLIT_DOMAIN || process.env.REPL_DOMAIN || process.env.REPL_SLUG;
-    const baseUrl = domain 
-      ? `https://${domain}`
-      : "http://localhost:5000";
-    
-    console.log("REPLIT_DOMAIN:", process.env.REPLIT_DOMAIN);
-    console.log("REPL_DOMAIN:", process.env.REPL_DOMAIN);
-    console.log("REPL_SLUG:", process.env.REPL_SLUG);
-    console.log("Final baseUrl:", baseUrl);
+    // Build base URL - use DEV_URL environment variable, fall back to localhost
+    const baseUrl = process.env.DEV_URL || "http://localhost:5000";
     
     const returnUrl = `${baseUrl}/payment/return`;
     const cancelUrl = `${baseUrl}/payment/cancel`;
