@@ -148,7 +148,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           customerCompany: order.customerCompany || "Company Not Provided",
           orderDescription: order.purchaseType || "Order placed",
           orderTotal: `R${Number(order.amount).toLocaleString()}`,
-          orderItems: validatedItems.map((item) => ({
+          orderItems: validatedItems.map((item: any) => ({
             type: item.type,
             description: item.description || "",
             quantity: item.quantity,
@@ -166,7 +166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           customerCompany: order.customerCompany || "Your Company",
           orderDescription: order.purchaseType || "Order",
           orderTotal: `R${Number(order.amount).toLocaleString()}`,
-          orderItems: validatedItems.map((item) => ({
+          orderItems: validatedItems.map((item: any) => ({
             type: item.type,
             description: item.description || "",
             quantity: item.quantity,
