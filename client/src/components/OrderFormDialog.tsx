@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import {
@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2, CheckCircle2, CreditCard } from "lucide-react";
 
 interface OrderItem {
   type: string;
@@ -45,6 +45,7 @@ export default function OrderFormDialog({
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerCompany, setCustomerCompany] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const createOrderMutation = useMutation({
     mutationFn: async (data: { order: any; items: OrderItem[] }) => {
@@ -63,6 +64,60 @@ export default function OrderFormDialog({
       toast({
         title: "Order Failed",
         description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const initiatePaymentMutation = useMutation({
+    mutationFn: async (data: { order: any; items: OrderItem[] }) => {
+      // First create the order
+      const orderResponse = await apiRequest("POST", "/api/orders", data);
+      const order = await orderResponse.json();
+
+      // Then create payment intent
+      const intentResponse = await apiRequest("POST", "/api/payment-intents", {
+        orderId: order.id,
+        items: data.items,
+        providerKey: "payfast",
+      });
+      const intent = await intentResponse.json();
+
+      // Get checkout payload
+      const checkoutResponse = await apiRequest("GET", `/api/payment-intents/${intent.id}/checkout`, undefined);
+      const checkout = await checkoutResponse.json();
+
+      return { order, intent, checkout };
+    },
+    onSuccess: (data) => {
+      // Auto-submit PayFast form
+      const { checkout } = data;
+      if (checkout.type === "form" && checkout.data) {
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = checkout.data.action;
+
+        Object.entries(checkout.data.fields).forEach(([key, value]) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = key;
+          input.value = String(value);
+          form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+      } else {
+        toast({
+          title: "Payment Initiated",
+          description: "Redirecting to PayFast...",
+        });
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Failed to initiate payment. Please try again.",
         variant: "destructive",
       });
     },
@@ -89,6 +144,32 @@ export default function OrderFormDialog({
         currency: "ZAR",
         purchaseType,
         status: "pending",
+      },
+      items: orderItems,
+    });
+  };
+
+  const handlePayOnline = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!customerName.trim() || !customerEmail.trim() || !customerCompany.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in your name, company, and email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    initiatePaymentMutation.mutate({
+      order: {
+        customerName,
+        customerEmail,
+        customerCompany,
+        amount: totalAmount.toString(),
+        currency: "ZAR",
+        purchaseType,
+        status: "processing",
       },
       items: orderItems,
     });
@@ -139,7 +220,7 @@ export default function OrderFormDialog({
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="customerName">Full Name</Label>
             <Input
@@ -191,21 +272,20 @@ export default function OrderFormDialog({
             </div>
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="flex-1"
-              disabled={createOrderMutation.isPending}
+              disabled={createOrderMutation.isPending || initiatePaymentMutation.isPending}
               data-testid="button-cancel-order"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="flex-1"
-              disabled={createOrderMutation.isPending}
+              variant="outline"
+              disabled={createOrderMutation.isPending || initiatePaymentMutation.isPending}
               data-testid="button-submit-order"
             >
               {createOrderMutation.isPending ? (
@@ -217,10 +297,28 @@ export default function OrderFormDialog({
                 "Place Order"
               )}
             </Button>
+            <Button
+              type="button"
+              onClick={handlePayOnline}
+              disabled={createOrderMutation.isPending || initiatePaymentMutation.isPending}
+              data-testid="button-pay-online"
+            >
+              {initiatePaymentMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Pay Online
+                </>
+              )}
+            </Button>
           </div>
 
           <p className="text-xs text-muted-foreground text-center">
-            Our team will contact you within 24 hours to process your payment securely.
+            Choose "Place Order" for manual payment or "Pay Online" to pay securely with PayFast.
           </p>
         </form>
       </DialogContent>
