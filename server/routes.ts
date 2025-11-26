@@ -269,6 +269,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/admin/orders/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      const order = await storage.getOrder(id);
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      const validStatuses = ["pending", "processing", "completed", "failed"];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` });
+      }
+
+      await storage.updateOrder(id, { status });
+      const updatedOrder = await storage.getOrder(id);
+      res.json(updatedOrder);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Reports endpoints
   app.get("/api/admin/reports", async (req, res) => {
     try {

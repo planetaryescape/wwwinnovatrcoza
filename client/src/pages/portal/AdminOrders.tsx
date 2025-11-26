@@ -50,6 +50,7 @@ export default function AdminOrders() {
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -113,6 +114,30 @@ export default function AdminOrders() {
   const handleViewOrder = (order: AdminOrder) => {
     setSelectedOrder(order);
     setDetailsOpen(true);
+  };
+
+  const handleUpdateStatus = async (orderId: string, newStatus: string) => {
+    try {
+      setUpdatingStatus(true);
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update order status");
+
+      const updatedOrder = await res.json();
+      setOrders(orders.map(o => o.id === orderId ? { ...updatedOrder, items: o.items } : o));
+      
+      if (selectedOrder?.id === orderId) {
+        setSelectedOrder({ ...updatedOrder, items: selectedOrder.items });
+      }
+    } catch (err) {
+      console.error("Error updating status:", err);
+    } finally {
+      setUpdatingStatus(false);
+    }
   };
 
   return (
@@ -256,17 +281,25 @@ export default function AdminOrders() {
 
                 <div>
                   <h4 className="font-semibold mb-2">Order Information</h4>
-                  <div className="space-y-1 text-sm">
+                  <div className="space-y-3 text-sm">
                     <p>
                       <span className="text-muted-foreground">Purchase Type:</span>{" "}
                       {selectedOrder.purchaseType}
                     </p>
-                    <p>
-                      <span className="text-muted-foreground">Status:</span>{" "}
-                      <Badge variant={getStatusBadge(selectedOrder.status)}>
-                        {selectedOrder.status}
-                      </Badge>
-                    </p>
+                    <div>
+                      <label className="text-muted-foreground text-xs mb-1 block">Status</label>
+                      <Select value={selectedOrder.status} onValueChange={(status) => handleUpdateStatus(selectedOrder.id, status)} disabled={updatingStatus}>
+                        <SelectTrigger className="w-40" data-testid={`select-order-status-${selectedOrder.id}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="processing">Processing</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="failed">Failed</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <p>
                       <span className="text-muted-foreground">Date:</span>{" "}
                       {formatDate(selectedOrder.createdAt)}
