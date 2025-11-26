@@ -115,7 +115,7 @@ export async function sendAdminOrderNotification(orderData: {
     `;
 
     const response = await resend.emails.send({
-      from: fromEmail,
+      from: `Innovatr <${fromEmail}>`,
       to: adminEmails,
       subject: `New Order from ${orderData.customerName}`,
       html: emailHtml,
@@ -320,7 +320,7 @@ export async function sendCustomerOrderConfirmation(orderData: {
     `;
 
     const response = await resend.emails.send({
-      from: fromEmail,
+      from: `Innovatr <${fromEmail}>`,
       to: [orderData.customerEmail],
       subject: `Order Confirmation - ${orderData.orderDescription}`,
       html: emailHtml,
