@@ -32,12 +32,15 @@ export class PayFastProvider implements PaymentProvider {
   }
 
   private generateSignature(data: Record<string, any>): string {
-    // Generate signature exactly as PayFast expects
+    // Generate signature exactly as PayFast expects - with specific key ordering
+    const keys = Object.keys(data).sort();
     let pfOutput = "";
-    for (let key in data) {
+    
+    for (const key of keys) {
       if (data.hasOwnProperty(key)) {
-        if (data[key] !== "") {
-          pfOutput += `${key}=${encodeURIComponent(String(data[key]).trim()).replace(/%20/g, "+")}&`;
+        const value = String(data[key]).trim();
+        if (value !== "") {
+          pfOutput += `${key}=${encodeURIComponent(value).replace(/%20/g, "+")}&`;
         }
       }
     }
@@ -74,23 +77,30 @@ export class PayFastProvider implements PaymentProvider {
     const notifyUrl = `${process.env.REPLIT_DOMAIN || "http://localhost:5000"}/api/webhooks/payfast`;
     const credentials = this.getCredentials();
 
+    // Ensure amount is a string and properly formatted
+    const amountStr = typeof order.amount === "number" 
+      ? (order.amount as number).toFixed(2)
+      : String(order.amount);
+
     const formData = {
       merchant_id: credentials.merchantId,
       merchant_key: credentials.merchantKey,
       return_url: returnUrl,
       cancel_url: cancelUrl,
       notify_url: notifyUrl,
-      amount: order.amount,
-      item_name: order.purchaseType,
-      item_description: `Innovatr ${order.purchaseType}`,
-      email_address: order.customerEmail,
-      name_first: order.customerName?.split(" ")[0] || "",
-      name_last: order.customerName?.split(" ").slice(1).join(" ") || "",
-      m_payment_id: order.id,
+      amount: amountStr,
+      item_name: order.purchaseType || "",
+      item_description: `Innovatr ${order.purchaseType}` || "",
+      email_address: order.customerEmail || "",
+      name_first: (order.customerName?.split(" ")[0] || "").trim(),
+      name_last: (order.customerName?.split(" ").slice(1).join(" ") || "").trim(),
+      m_payment_id: String(order.id),
       email_confirmation: "1",
     };
 
+    console.log("Generating signature for formData:", formData);
     const signature = this.generateSignature(formData);
+    console.log("Generated signature:", signature);
 
     return {
       type: "form",
