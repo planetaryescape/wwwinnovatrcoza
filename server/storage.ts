@@ -195,6 +195,7 @@ export class MemStorage implements IStorage {
         status: insertOrder.status ?? "pending",
         customerName: insertOrder.customerName ?? null,
         customerEmail: insertOrder.customerEmail,
+        customerCompany: insertOrder.customerCompany ?? null,
         createdAt: now,
         updatedAt: now,
       })

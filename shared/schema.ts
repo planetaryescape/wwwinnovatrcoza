@@ -1,16 +1,29 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, decimal, jsonb, boolean } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  varchar,
+  timestamp,
+  integer,
+  decimal,
+  jsonb,
+  boolean,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   name: text("name"),
   company: text("company"),
-  membershipTier: varchar("membership_tier", { length: 20 }).notNull().default("STARTER"),
+  membershipTier: varchar("membership_tier", { length: 20 })
+    .notNull()
+    .default("STARTER"),
   status: varchar("status", { length: 20 }).notNull().default("ACTIVE"),
   role: varchar("role", { length: 20 }).notNull().default("MEMBER"),
   creditsBasic: integer("credits_basic").notNull().default(0),
@@ -19,57 +32,76 @@ export const users = pgTable("users", {
   lastLoginAt: timestamp("last_login_at"),
 });
 
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  createdAt: true,
-  lastLoginAt: true,
-}).extend({
-  email: z.string().email("Invalid email"),
-  password: z.string().min(6, "Password must be at least 6 characters").optional(),
-  name: z.string().optional(),
-  membershipTier: z.enum(["STARTER", "GROWTH", "SCALE"]).default("STARTER"),
-  role: z.enum(["ADMIN", "DEAL_ADMIN", "MEMBER"]).default("MEMBER"),
-});
+export const insertUserSchema = createInsertSchema(users)
+  .omit({
+    id: true,
+    createdAt: true,
+    lastLoginAt: true,
+  })
+  .extend({
+    email: z.string().email("Invalid email"),
+    password: z
+      .string()
+      .min(6, "Password must be at least 6 characters")
+      .optional(),
+    name: z.string().optional(),
+    membershipTier: z.enum(["STARTER", "GROWTH", "SCALE"]).default("STARTER"),
+    role: z.enum(["ADMIN", "DEAL_ADMIN", "MEMBER"]).default("MEMBER"),
+  });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
 export const couponClaims = pgTable("coupon_claims", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   email: text("email").notNull(),
   couponCode: text("coupon_code").notNull(),
   claimedAt: timestamp("claimed_at").defaultNow().notNull(),
 });
 
-export const insertCouponClaimSchema = createInsertSchema(couponClaims).pick({
-  name: true,
-  email: true,
-}).extend({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-});
+export const insertCouponClaimSchema = createInsertSchema(couponClaims)
+  .pick({
+    name: true,
+    email: true,
+  })
+  .extend({
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    email: z.string().email("Invalid email address"),
+  });
 
 export type InsertCouponClaim = z.infer<typeof insertCouponClaimSchema>;
 export type CouponClaim = typeof couponClaims.$inferSelect;
 
 export const mailerSubscriptions = pgTable("mailer_subscriptions", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   email: text("email").notNull().unique(),
   subscribedAt: timestamp("subscribed_at").defaultNow().notNull(),
 });
 
-export const insertMailerSubscriptionSchema = createInsertSchema(mailerSubscriptions).pick({
-  email: true,
-}).extend({
-  email: z.string().email("Invalid email address"),
-});
+export const insertMailerSubscriptionSchema = createInsertSchema(
+  mailerSubscriptions,
+)
+  .pick({
+    email: true,
+  })
+  .extend({
+    email: z.string().email("Invalid email address"),
+  });
 
-export type InsertMailerSubscription = z.infer<typeof insertMailerSubscriptionSchema>;
+export type InsertMailerSubscription = z.infer<
+  typeof insertMailerSubscriptionSchema
+>;
 export type MailerSubscription = typeof mailerSubscriptions.$inferSelect;
 
 export const orders = pgTable("orders", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   userId: varchar("user_id"),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   currency: varchar("currency", { length: 3 }).notNull().default("ZAR"),
@@ -92,12 +124,15 @@ export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type Order = typeof orders.$inferSelect;
 
 export const orderItems = pgTable("order_items", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   orderId: varchar("order_id").notNull(),
   type: varchar("type", { length: 50 }).notNull(),
   referenceId: varchar("reference_id"),
   quantity: integer("quantity").notNull().default(1),
   unitAmount: decimal("unit_amount", { precision: 10, scale: 2 }).notNull(),
+  customerCompany: text("company_name"),
   description: text("description"),
 });
 
@@ -105,17 +140,23 @@ export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
   id: true,
 });
 
-export const insertOrderItemWithoutOrderIdSchema = createInsertSchema(orderItems).omit({
+export const insertOrderItemWithoutOrderIdSchema = createInsertSchema(
+  orderItems,
+).omit({
   id: true,
   orderId: true,
 });
 
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
-export type InsertOrderItemWithoutOrderId = z.infer<typeof insertOrderItemWithoutOrderIdSchema>;
+export type InsertOrderItemWithoutOrderId = z.infer<
+  typeof insertOrderItemWithoutOrderIdSchema
+>;
 export type OrderItem = typeof orderItems.$inferSelect;
 
 export const paymentIntents = pgTable("payment_intents", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   orderId: varchar("order_id").notNull(),
   providerKey: varchar("provider_key", { length: 20 }).notNull(),
   providerIntentId: text("provider_intent_id"),
@@ -125,7 +166,9 @@ export const paymentIntents = pgTable("payment_intents", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertPaymentIntentSchema = createInsertSchema(paymentIntents).omit({
+export const insertPaymentIntentSchema = createInsertSchema(
+  paymentIntents,
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -135,7 +178,9 @@ export type InsertPaymentIntent = z.infer<typeof insertPaymentIntentSchema>;
 export type PaymentIntent = typeof paymentIntents.$inferSelect;
 
 export const paymentEvents = pgTable("payment_events", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   intentId: varchar("intent_id").notNull(),
   providerEventId: text("provider_event_id"),
   eventType: varchar("event_type", { length: 50 }).notNull(),
@@ -154,7 +199,9 @@ export type PaymentEvent = typeof paymentEvents.$inferSelect;
 
 // Reports schema
 export const reports = pgTable("reports", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
   category: varchar("category", { length: 50 }).notNull(),
   industry: text("industry"),
@@ -163,30 +210,36 @@ export const reports = pgTable("reports", {
   topics: text("topics").array().default([]),
   body: text("body"),
   pdfUrl: text("pdf_url"),
-  accessLevel: varchar("access_level", { length: 20 }).notNull().default("PUBLIC"),
+  accessLevel: varchar("access_level", { length: 20 })
+    .notNull()
+    .default("PUBLIC"),
   isArchived: boolean("is_archived").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertReportSchema = createInsertSchema(reports).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-}).extend({
-  title: z.string().min(1, "Title is required"),
-  category: z.string().min(1, "Category is required"),
-  teaser: z.string().min(1, "Preview text is required"),
-  accessLevel: z.enum(["PUBLIC", "STARTER", "GROWTH", "SCALE"]),
-  date: z.date(),
-});
+export const insertReportSchema = createInsertSchema(reports)
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    title: z.string().min(1, "Title is required"),
+    category: z.string().min(1, "Category is required"),
+    teaser: z.string().min(1, "Preview text is required"),
+    accessLevel: z.enum(["PUBLIC", "STARTER", "GROWTH", "SCALE"]),
+    date: z.date(),
+  });
 
 export type InsertReport = z.infer<typeof insertReportSchema>;
 export type Report = typeof reports.$inferSelect;
 
 // Deals schema
 export const deals = pgTable("deals", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
   description: text("description"),
   headlineOffer: text("headline_offer"),
@@ -205,21 +258,25 @@ export const deals = pgTable("deals", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertDealSchema = createInsertSchema(deals).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-}).extend({
-  title: z.string().min(1, "Title is required"),
-  headlineOffer: z.string().optional(),
-  createdByUserId: z.string(),
-});
+export const insertDealSchema = createInsertSchema(deals)
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    title: z.string().min(1, "Title is required"),
+    headlineOffer: z.string().optional(),
+    createdByUserId: z.string(),
+  });
 
 export type InsertDeal = z.infer<typeof insertDealSchema>;
 export type Deal = typeof deals.$inferSelect;
 
 export const inquiries = pgTable("inquiries", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   customerName: text("customer_name").notNull(),
   customerEmail: text("customer_email").notNull(),
   customerCompany: text("customer_company").notNull(),
