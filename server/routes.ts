@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemWithoutOrderIdSchema, insertReportSchema, insertDealSchema } from "@shared/schema";
 import { PaymentService } from "./payments/service";
 import type { PaymentConfig } from "./payments/types";
-import { sendAdminOrderNotification } from "./emails/email-service";
+import { sendAdminOrderNotification, sendCustomerOrderConfirmation } from "./emails/email-service";
 
 // Helper to check if user is admin
 const isAdminUser = (email?: string) => {
@@ -100,6 +100,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       } catch (emailError) {
         console.error("Failed to send admin email notification:", emailError);
+        // Don't fail the order creation if email fails
+      }
+
+      // Send customer order confirmation email
+      try {
+        await sendCustomerOrderConfirmation({
+          customerName: validatedOrder.customerName || "Valued Customer",
+          customerEmail: validatedOrder.customerEmail,
+          customerCompany: validatedOrder.customerCompany || "Your Company",
+          orderDescription: validatedOrder.purchaseType || "Order",
+          orderTotal: `R${Number(validatedOrder.amount).toLocaleString()}`,
+          orderItems: validatedItems.map((item: any) => ({
+            type: item.type,
+            description: item.description,
+            quantity: item.quantity,
+          })),
+        });
+      } catch (emailError) {
+        console.error("Failed to send customer order confirmation:", emailError);
         // Don't fail the order creation if email fails
       }
 

@@ -125,3 +125,208 @@ export async function sendAdminOrderNotification(orderData: {
     throw error;
   }
 }
+
+export async function sendCustomerOrderConfirmation(orderData: {
+  customerName: string;
+  customerEmail: string;
+  customerCompany: string;
+  orderDescription: string;
+  orderTotal: string;
+  orderItems: any[];
+}) {
+  try {
+    const resend = await getResendClient();
+    const fromEmail = await getFromEmail();
+
+    const itemsHtml = orderData.orderItems
+      .map(
+        (item) =>
+          `
+          <tr style="border-bottom: 1px solid #e8ecf1;">
+            <td style="padding: 12px 0; text-align: left;">${item.description || item.type}</td>
+            <td style="padding: 12px 0; text-align: center;">x${item.quantity}</td>
+          </tr>
+        `,
+      )
+      .join("");
+
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+              color: #1a202c; 
+              background-color: #f7fafc;
+              line-height: 1.6;
+            }
+            .container { 
+              max-width: 600px; 
+              margin: 0 auto; 
+              background-color: #ffffff;
+              border-radius: 8px;
+              overflow: hidden;
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              padding: 40px 20px;
+              text-align: center;
+            }
+            .header h1 {
+              margin: 0;
+              font-size: 28px;
+              font-weight: 700;
+            }
+            .content { 
+              padding: 40px 20px;
+            }
+            .section {
+              margin-bottom: 30px;
+            }
+            .section h2 {
+              font-size: 18px;
+              font-weight: 600;
+              color: #2d3748;
+              margin: 0 0 15px 0;
+              border-bottom: 2px solid #667eea;
+              padding-bottom: 10px;
+            }
+            .info-box {
+              background-color: #f7fafc;
+              border-left: 4px solid #667eea;
+              padding: 15px;
+              margin-bottom: 15px;
+              border-radius: 4px;
+            }
+            .info-row {
+              margin: 10px 0;
+              display: flex;
+              justify-content: space-between;
+            }
+            .label {
+              font-weight: 600;
+              color: #4a5568;
+            }
+            .value {
+              color: #2d3748;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 15px 0;
+            }
+            table td {
+              padding: 12px 0;
+              text-align: left;
+            }
+            .total-row {
+              font-size: 20px;
+              font-weight: 700;
+              color: #667eea;
+              border-top: 2px solid #e2e8f0;
+              padding-top: 15px;
+              margin-top: 15px;
+            }
+            .cta-box {
+              background-color: #edf2f7;
+              border-radius: 6px;
+              padding: 20px;
+              text-align: center;
+              margin: 25px 0;
+            }
+            .cta-text {
+              color: #4a5568;
+              font-size: 14px;
+            }
+            .footer {
+              background-color: #f7fafc;
+              padding: 20px;
+              text-align: center;
+              border-top: 1px solid #e2e8f0;
+              font-size: 12px;
+              color: #718096;
+            }
+            .footer a {
+              color: #667eea;
+              text-decoration: none;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Order Confirmed ✓</h1>
+            </div>
+            
+            <div class="content">
+              <p style="font-size: 16px; margin: 0 0 20px 0;">Hello ${orderData.customerName},</p>
+              <p style="color: #4a5568; margin: 0 0 25px 0;">Thank you for your order! We've received your request and our team will be in touch shortly to process your payment and complete your order.</p>
+
+              <div class="section">
+                <h2>Order Summary</h2>
+                <div class="info-box">
+                  <div class="info-row">
+                    <span class="label">Company:</span>
+                    <span class="value">${orderData.customerCompany}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="label">Package:</span>
+                    <span class="value">${orderData.orderDescription}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="section">
+                <h2>Order Details</h2>
+                <table>
+                  <thead>
+                    <tr style="border-bottom: 2px solid #667eea; color: #4a5568;">
+                      <th style="text-align: left; padding: 12px 0; font-weight: 600;">Item</th>
+                      <th style="text-align: center; padding: 12px 0; font-weight: 600;">Quantity</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${itemsHtml}
+                  </tbody>
+                </table>
+                <div class="total-row">
+                  <div style="display: flex; justify-content: space-between;">
+                    <span>Total Amount:</span>
+                    <span>${orderData.orderTotal}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cta-box">
+                <p class="cta-text">Our team will contact you at <strong>${orderData.customerEmail}</strong> within 24 hours to process your payment and finalize your order.</p>
+              </div>
+
+              <p style="color: #718096; font-size: 14px; margin: 20px 0 0 0;">If you have any questions, please don't hesitate to reach out to our support team.</p>
+            </div>
+
+            <div class="footer">
+              <p style="margin: 0;">© ${new Date().getFullYear()} Test24. All rights reserved.</p>
+              <p style="margin: 5px 0 0 0;">This is an automated confirmation email. Please do not reply to this message.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const response = await resend.emails.send({
+      from: fromEmail,
+      to: [orderData.customerEmail],
+      subject: `Order Confirmation - ${orderData.orderDescription}`,
+      html: emailHtml,
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Failed to send customer order confirmation:", error);
+    throw error;
+  }
+}
