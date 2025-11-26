@@ -2,7 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Check, Gem, ShoppingCart, Star } from "lucide-react";
 import { useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import OrderFormDialog from "@/components/OrderFormDialog";
 
 const platinumFeatures = [
   "Everything in Entry membership",
@@ -17,13 +18,14 @@ const platinumFeatures = [
 
 export default function CheckoutMembershipPlatinum() {
   const [, setLocation] = useLocation();
+  const [showOrderForm, setShowOrderForm] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const handleCheckout = () => {
-    console.log("Proceeding to checkout with Platinum membership");
+    setShowOrderForm(true);
   };
 
   const formatPrice = (price: number) => {
@@ -218,6 +220,27 @@ export default function CheckoutMembershipPlatinum() {
           </div>
         </div>
       </div>
+
+      <OrderFormDialog
+        open={showOrderForm}
+        onOpenChange={setShowOrderForm}
+        orderItems={[
+          {
+            type: "membership",
+            description: "Entry Membership (Annual)",
+            quantity: 1,
+            unitAmount: String(entryPrice),
+          },
+          {
+            type: "membership_upgrade",
+            description: "Platinum Tier Upgrade (15x Basic + 3x Pro)",
+            quantity: 1,
+            unitAmount: String(platinumUpgrade),
+          },
+        ]}
+        totalAmount={totalPrice}
+        purchaseType="Platinum Membership (Annual)"
+      />
     </div>
   );
 }

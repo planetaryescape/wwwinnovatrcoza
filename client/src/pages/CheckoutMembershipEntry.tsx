@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Check, Star, ShoppingCart } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
+import OrderFormDialog from "@/components/OrderFormDialog";
 
 const entryFeatures = [
   "Trends Report Access",
@@ -17,13 +18,14 @@ const entryFeatures = [
 export default function CheckoutMembershipEntry() {
   const [, setLocation] = useLocation();
   const [paymentType, setPaymentType] = useState<"monthly" | "annual">("annual");
+  const [showOrderForm, setShowOrderForm] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const handleCheckout = () => {
-    console.log(`Proceeding to checkout with Entry membership - ${paymentType} payment`);
+    setShowOrderForm(true);
   };
 
   const formatPrice = (price: number) => {
@@ -296,6 +298,21 @@ export default function CheckoutMembershipEntry() {
           </div>
         </div>
       </div>
+
+      <OrderFormDialog
+        open={showOrderForm}
+        onOpenChange={setShowOrderForm}
+        orderItems={[
+          {
+            type: "membership",
+            description: `Entry Membership (${paymentType === "monthly" ? "Monthly" : "Annual"})`,
+            quantity: 1,
+            unitAmount: String(totalDueToday),
+          },
+        ]}
+        totalAmount={totalDueToday}
+        purchaseType={`Entry Membership (${paymentType === "monthly" ? "Monthly" : "Annual"})`}
+      />
     </div>
   );
 }

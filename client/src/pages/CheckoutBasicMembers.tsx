@@ -5,29 +5,25 @@ import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Checkbox } from "@/components/ui/checkbox";
+import OrderFormDialog from "@/components/OrderFormDialog";
 
 const creditPackages = [
   {
     id: "1x",
     credits: 1,
     price: 5000,
-    discount: 50,
     popular: false,
   },
   {
     id: "10x",
     credits: 10,
-    price: 45000,
-    originalPrice: 50000,
-    discount: 10,
+    price: 50000,
     popular: true,
   },
   {
     id: "20x",
     credits: 20,
-    price: 85000,
-    originalPrice: 100000,
-    discount: 15,
+    price: 100000,
     popular: false,
   },
 ];
@@ -38,7 +34,7 @@ const features = [
   "X100 Consumer Reach, 5min Survey",
   "Automated brief upload portal saving you time",
   "Final Reports emailed 24hrs later",
-  "Member discount included",
+  "R5,000 per idea member rate",
   "Priority support",
 ];
 
@@ -46,14 +42,31 @@ export default function CheckoutBasicMembers() {
   const [, setLocation] = useLocation();
   const [selectedPackage, setSelectedPackage] = useState("10x");
   const [hasEntryPlan, setHasEntryPlan] = useState(false);
+  const [showOrderForm, setShowOrderForm] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const handleCheckout = () => {
-    console.log("Proceeding to checkout with package:", selectedPackage, "Has Entry Plan:", hasEntryPlan);
+    setShowOrderForm(true);
   };
+
+  const selectedPkg = creditPackages.find((p) => p.id === selectedPackage);
+  const orderItems = [
+    ...(hasEntryPlan ? [] : [{
+      type: "membership",
+      description: "Entry Membership (Annual)",
+      quantity: 1,
+      unitAmount: "60000",
+    }]),
+    {
+      type: "credits_basic",
+      description: `${selectedPkg?.credits}x Test24 Basic Credits`,
+      quantity: selectedPkg?.credits || 1,
+      unitAmount: "5000",
+    },
+  ];
 
   const formatPrice = (price: number) => {
     return `R${price.toLocaleString()}`;
@@ -93,7 +106,7 @@ export default function CheckoutBasicMembers() {
               </div>
               <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 mb-6">
                 <p className="text-sm font-medium">
-                  You're getting member rates - save up to 50% on every credit
+                  You're getting member rates - R5,000 per idea
                 </p>
               </div>
             </div>
@@ -146,7 +159,7 @@ export default function CheckoutBasicMembers() {
                         </div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3 pt-3 border-t">
                           <Check className="w-4 h-4 text-primary" />
-                          <span>50% discount on all Test24 Basic credits</span>
+                          <span>R5,000 per idea member rate</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
                           <Check className="w-4 h-4 text-primary" />
@@ -170,7 +183,7 @@ export default function CheckoutBasicMembers() {
                         <p className="font-semibold text-primary">Existing Member</p>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        You'll only be charged for the credits. Your Entry Plan membership remains active and you'll continue to enjoy 50% member discounts.
+                        You'll only be charged for the credits. Your Entry Plan membership remains active and you'll continue to enjoy member rates.
                       </p>
                     </div>
                   )}
@@ -221,7 +234,7 @@ export default function CheckoutBasicMembers() {
                               {pkg.credits}x Idea Credit{pkg.credits > 1 ? "s" : ""}
                             </h3>
                             <p className="text-sm text-accent font-semibold">
-                              {pkg.discount}% Member Discount
+                              Member Pricing
                             </p>
                           </div>
                         </div>
@@ -236,11 +249,6 @@ export default function CheckoutBasicMembers() {
                         <div className="text-2xl font-bold text-primary">
                           {formatPrice(pkg.price)}
                         </div>
-                        {pkg.originalPrice && (
-                          <div className="text-sm text-muted-foreground line-through">
-                            {formatPrice(pkg.originalPrice)}
-                          </div>
-                        )}
                         <div className="text-xs text-muted-foreground mt-1">
                           {formatPrice(Math.round(pkg.price / pkg.credits))} per credit
                         </div>
@@ -297,7 +305,7 @@ export default function CheckoutBasicMembers() {
                           <Check className="w-4 h-4 text-accent" />
                           <p className="font-semibold text-accent">Active Entry Membership</p>
                         </div>
-                        <p className="text-xs text-muted-foreground">Enjoying 50% member discount on all credits</p>
+                        <p className="text-xs text-muted-foreground">Enjoying R5,000 per idea member rate</p>
                       </div>
                     )}
 
@@ -312,7 +320,7 @@ export default function CheckoutBasicMembers() {
                       </div>
                       <div className="flex items-center gap-1">
                         <Star className="w-3 h-3 text-accent fill-accent" />
-                        <p className="text-xs text-accent font-medium">50% Member Discount Applied</p>
+                        <p className="text-xs text-accent font-medium">Member Rate Applied</p>
                       </div>
                     </div>
                   </div>
@@ -364,6 +372,14 @@ export default function CheckoutBasicMembers() {
           </div>
         </div>
       </div>
+
+      <OrderFormDialog
+        open={showOrderForm}
+        onOpenChange={setShowOrderForm}
+        orderItems={orderItems}
+        totalAmount={grandTotal}
+        purchaseType="Test24 Basic Credits (Member)"
+      />
     </div>
   );
 }

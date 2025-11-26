@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Check, Zap, ShoppingCart } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
+import OrderFormDialog from "@/components/OrderFormDialog";
 
 const creditPackages = [
   {
@@ -41,14 +42,26 @@ const features = [
 export default function CheckoutBasicPAYG() {
   const [, setLocation] = useLocation();
   const [selectedPackage, setSelectedPackage] = useState("10x");
+  const [showOrderForm, setShowOrderForm] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const handleCheckout = () => {
-    console.log("Proceeding to checkout with package:", selectedPackage);
+    setShowOrderForm(true);
   };
+
+  const selectedPkg = creditPackages.find((p) => p.id === selectedPackage);
+  const totalAmount = selectedPkg?.price || 0;
+  const orderItems = [
+    {
+      type: "credits_basic",
+      description: `${selectedPkg?.credits}x Test24 Basic Credits (Pay As You Go)`,
+      quantity: selectedPkg?.credits || 1,
+      unitAmount: String(totalAmount / (selectedPkg?.credits || 1)),
+    },
+  ];
 
   const formatPrice = (price: number) => {
     return `R${price.toLocaleString()}`;
@@ -246,6 +259,14 @@ export default function CheckoutBasicPAYG() {
           </div>
         </div>
       </div>
+
+      <OrderFormDialog
+        open={showOrderForm}
+        onOpenChange={setShowOrderForm}
+        orderItems={orderItems}
+        totalAmount={totalAmount}
+        purchaseType="Test24 Basic Credits (Pay As You Go)"
+      />
     </div>
   );
 }

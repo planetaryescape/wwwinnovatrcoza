@@ -1,9 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemSchema, insertReportSchema, insertDealSchema } from "@shared/schema";
+import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemWithoutOrderIdSchema, insertReportSchema, insertDealSchema } from "@shared/schema";
 import { PaymentService } from "./payments/service";
 import type { PaymentConfig } from "./payments/types";
+import { sendAdminOrderNotification } from "./emails/email-service";
 
 // Helper to check if user is admin
 const isAdminUser = (email?: string) => {
@@ -73,7 +74,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/orders", async (req, res) => {
     try {
       const validatedOrder = insertOrderSchema.parse(req.body.order);
-      const validatedItems = req.body.items?.map((item: any) => insertOrderItemSchema.parse(item)) || [];
+      const validatedItems = req.body.items?.map((item: any) => insertOrderItemWithoutOrderIdSchema.parse(item)) || [];
 
       const order = await storage.createOrder(validatedOrder);
       
@@ -82,6 +83,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ...itemData,
           orderId: order.id,
         });
+      }
+
+      // Send admin email notification for manual processing
+      try {
+        await sendAdminOrderNotification({
+          customerName: validatedOrder.customerName || "Unknown",
+          customerEmail: validatedOrder.customerEmail || "No email provided",
+          orderDescription: validatedOrder.purchaseType || "Order placed via checkout",
+          orderTotal: `R${Number(validatedOrder.amount).toLocaleString()}`,
+          orderItems: validatedItems.map((item: any) => ({
+            type: item.type,
+            description: item.description,
+            quantity: item.quantity,
+          })),
+        });
+      } catch (emailError) {
+        console.error("Failed to send admin email notification:", emailError);
+        // Don't fail the order creation if email fails
       }
 
       res.status(201).json(order);

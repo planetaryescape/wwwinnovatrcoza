@@ -6,6 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, Check, Rocket, ShoppingCart, Users } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useMemo, useEffect } from "react";
+import OrderFormDialog from "@/components/OrderFormDialog";
 
 const reachPricing = [
   { reach: 100, price: 50000, label: "100 Consumers" },
@@ -26,13 +27,14 @@ export default function CheckoutProPAYG() {
   const [, setLocation] = useLocation();
   const [quantity, setQuantity] = useState(1);
   const [selectedReach, setSelectedReach] = useState(100);
+  const [showOrderForm, setShowOrderForm] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const handleCheckout = () => {
-    console.log("Proceeding to checkout:", { quantity, reach: selectedReach, totalConsumers, finalTotal });
+    setShowOrderForm(true);
   };
 
   const formatPrice = (price: number) => {
@@ -307,6 +309,21 @@ export default function CheckoutProPAYG() {
           </div>
         </div>
       </div>
+
+      <OrderFormDialog
+        open={showOrderForm}
+        onOpenChange={setShowOrderForm}
+        orderItems={[
+          {
+            type: "study_pro",
+            description: `${quantity}x Test24 Pro Study (${selectedReach} consumers each)`,
+            quantity: quantity,
+            unitAmount: String(pricePerStudy),
+          },
+        ]}
+        totalAmount={finalTotal}
+        purchaseType="Test24 Pro Study (Pay As You Go)"
+      />
     </div>
   );
 }

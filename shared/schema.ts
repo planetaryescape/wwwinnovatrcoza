@@ -104,7 +104,13 @@ export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
   id: true,
 });
 
+export const insertOrderItemWithoutOrderIdSchema = createInsertSchema(orderItems).omit({
+  id: true,
+  orderId: true,
+});
+
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
+export type InsertOrderItemWithoutOrderId = z.infer<typeof insertOrderItemWithoutOrderIdSchema>;
 export type OrderItem = typeof orderItems.$inferSelect;
 
 export const paymentIntents = pgTable("payment_intents", {

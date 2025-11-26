@@ -7,7 +7,7 @@ const features = [
   { icon: Clock, label: "SPEED", subtitle: "24hr Turn-Around" },
   { icon: Zap, label: "EASY", subtitle: "Automated Briefing" },
   { icon: TrendingUp, label: "SMART", subtitle: "Quant + AI Qual" },
-  { icon: BarChart3, label: "LOCAL", subtitle: "25M panel size" },
+  { icon: BarChart3, label: "+25 MARKETS", subtitle: "44M panel" },
 ];
 
 export default function MethodologySection() {

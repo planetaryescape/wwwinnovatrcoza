@@ -2,7 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Check, Crown, ShoppingCart, Star } from "lucide-react";
 import { useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import OrderFormDialog from "@/components/OrderFormDialog";
 
 const goldFeatures = [
   "Everything in Entry membership",
@@ -15,13 +16,14 @@ const goldFeatures = [
 
 export default function CheckoutMembershipGold() {
   const [, setLocation] = useLocation();
+  const [showOrderForm, setShowOrderForm] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const handleCheckout = () => {
-    console.log("Proceeding to checkout with Gold membership");
+    setShowOrderForm(true);
   };
 
   const formatPrice = (price: number) => {
@@ -210,6 +212,27 @@ export default function CheckoutMembershipGold() {
           </div>
         </div>
       </div>
+
+      <OrderFormDialog
+        open={showOrderForm}
+        onOpenChange={setShowOrderForm}
+        orderItems={[
+          {
+            type: "membership",
+            description: "Entry Membership (Annual)",
+            quantity: 1,
+            unitAmount: String(entryPrice),
+          },
+          {
+            type: "membership_upgrade",
+            description: "Gold Tier Upgrade (10x Basic + 2x Pro)",
+            quantity: 1,
+            unitAmount: String(goldUpgrade),
+          },
+        ]}
+        totalAmount={totalPrice}
+        purchaseType="Gold Membership (Annual)"
+      />
     </div>
   );
 }

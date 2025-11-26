@@ -121,7 +121,19 @@ Admins can access `/portal/admin` and all admin API endpoints.
 - **Reports**: id, title, category, industry, date, teaser, accessLevel (PUBLIC|STARTER|GROWTH|SCALE), isArchived, createdAt, updatedAt
 - **Deals**: id, title, description, originalPrice, discountedPrice, creditsIncluded, targetTiers (array), validFrom, validTo, isActive, createdAt, updatedAt
 
+### Email Notifications
+- **Service**: Resend for email delivery (via Replit's integration system)
+- **Functionality**: Admin notifications when orders are placed
+- **Configuration**: Set `ADMIN_EMAILS` environment variable with comma-separated admin email addresses (e.g., "admin1@example.com,admin2@example.com")
+- **Implementation**: `server/emails/email-service.ts` handles HTML email formatting and delivery
+
+### Order Checkout Flow
+- **OrderFormDialog**: Reusable dialog component capturing customer name and email before order submission
+- **Manual Processing**: Orders are stored in the database and trigger admin email notifications for manual payment processing
+- **Integrated Pages**: All checkout pages (Test24 Basic/Pro PAYG, Test24 Basic/Pro Members, Entry/Gold/Platinum Memberships) use the OrderFormDialog
+
 ## External Dependencies
+- **Email Service**: Resend for transactional emails (admin order notifications)
 - **Payment Processing**: South African payment gateways (PayFast, Zapper, Apple Pay) with multi-provider architecture. Stripe integration also prepared with `@stripe/react-stripe-js` and `@stripe/stripe-js` for international payments.
 - **UI Animations**: Intersection Observer API for scroll animations, CSS transitions, and Tailwind utilities.
 - **Image Assets**: Stored in `/attached_assets` and referenced via Vite.

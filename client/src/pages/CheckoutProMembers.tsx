@@ -8,6 +8,7 @@ import { useLocation } from "wouter";
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "wouter";
 import { Checkbox } from "@/components/ui/checkbox";
+import OrderFormDialog from "@/components/OrderFormDialog";
 
 const reachPricing = [
   { reach: 100, memberPrice: 45000, regularPrice: 50000, label: "100 Consumers" },
@@ -31,13 +32,14 @@ export default function CheckoutProMembers() {
   const [quantity, setQuantity] = useState(1);
   const [selectedReach, setSelectedReach] = useState(100);
   const [hasEntryPlan, setHasEntryPlan] = useState(false);
+  const [showOrderForm, setShowOrderForm] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const handleCheckout = () => {
-    console.log("Proceeding to checkout:", { quantity, reach: selectedReach, totalConsumers, finalTotal, hasEntryPlan });
+    setShowOrderForm(true);
   };
 
   const formatPrice = (price: number) => {
@@ -471,6 +473,27 @@ export default function CheckoutProMembers() {
           </div>
         </div>
       </div>
+
+      <OrderFormDialog
+        open={showOrderForm}
+        onOpenChange={setShowOrderForm}
+        orderItems={[
+          ...(hasEntryPlan ? [] : [{
+            type: "membership",
+            description: "Entry Membership (Annual)",
+            quantity: 1,
+            unitAmount: "60000",
+          }]),
+          {
+            type: "study_pro",
+            description: `${quantity}x Test24 Pro Study (${selectedReach} consumers each)`,
+            quantity: quantity,
+            unitAmount: String(pricePerStudy),
+          },
+        ]}
+        totalAmount={grandTotal}
+        purchaseType="Test24 Pro Study (Member)"
+      />
     </div>
   );
 }
