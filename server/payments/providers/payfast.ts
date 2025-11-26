@@ -16,8 +16,6 @@ export class PayFastProvider implements PaymentProvider {
   }
 
   private getCredentials() {
-    // Return the credentials that were passed in
-    // (they're already environment-specific from routes.ts)
     return {
       merchantId: this.config?.merchantId || "",
       merchantKey: this.config?.merchantKey || "",
@@ -31,35 +29,57 @@ export class PayFastProvider implements PaymentProvider {
       : "https://www.payfast.co.za/eng/process";
   }
 
+  private getValidationUrl(): string {
+    return this.config?.sandbox
+      ? "https://sandbox.payfast.co.za/eng/query/validate"
+      : "https://www.payfast.co.za/eng/query/validate";
+  }
+
   private generateSignature(data: Record<string, any>): string {
-    // Generate signature exactly as PayFast expects
-    // Build string in order: key=encodedvalue&key2=encodedvalue2...&passphrase=encodedpassphrase
-    let pfOutput = "";
-    
-    for (let key in data) {
-      if (data.hasOwnProperty(key)) {
+    // Delete any existing signature fields first
+    delete data["signature"];
+    delete data["pf_signature"];
+
+    // CRITICAL: Sort keys alphabetically as PayFast expects
+    const sortedKeys = Object.keys(data).sort();
+
+    // Build signature string from sorted keys
+    const signatureString = sortedKeys
+      .map((key) => {
         const value = String(data[key]).trim();
-        // Only add non-empty values
-        if (value !== "") {
-          const encoded = encodeURIComponent(value).replace(/%20/g, "+");
-          pfOutput += `${key}=${encoded}&`;
-        }
-      }
-    }
+        if (value === "") return null;
+        return `${key}=${encodeURIComponent(value).replace(/%20/g, "+")}`;
+      })
+      .filter(Boolean)
+      .join("&");
 
-    // Remove trailing ampersand
-    let getString = pfOutput.slice(0, -1);
-    
+    // Append passphrase if configured
     const credentials = this.getCredentials();
-    if (credentials.passphrase) {
-      const encodedPassphrase = encodeURIComponent(credentials.passphrase.trim()).replace(/%20/g, "+");
-      getString += `&passphrase=${encodedPassphrase}`;
-    }
+    const finalString = credentials.passphrase
+      ? signatureString + `&passphrase=${encodeURIComponent(credentials.passphrase.trim()).replace(/%20/g, "+")}`
+      : signatureString;
 
-    const hash = crypto.createHash("md5").update(getString).digest("hex");
-    console.log("Signature string:", getString);
+    const hash = crypto.createHash("md5").update(finalString).digest("hex");
+    console.log("Signature string:", finalString);
     console.log("MD5 hash:", hash);
     return hash;
+  }
+
+  private async verifyWithPayFastServer(postedData: Record<string, any>): Promise<boolean> {
+    try {
+      const response = await fetch(this.getValidationUrl(), {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(postedData).toString(),
+      });
+
+      const result = await response.text();
+      console.log("PayFast server validation response:", result);
+      return result === "VALID";
+    } catch (error) {
+      console.error("PayFast server validation failed:", error);
+      return false;
+    }
   }
 
   async createPaymentIntent(order: Order, items: any[]): Promise<any> {
@@ -78,7 +98,6 @@ export class PayFastProvider implements PaymentProvider {
   }
 
   async getCheckoutPayload(intent: PaymentIntent, order: Order): Promise<CheckoutPayload> {
-    // Build base URL - use DEV_URL environment variable, fall back to localhost
     const baseUrl = process.env.DEV_URL || "http://localhost:5000";
     
     const returnUrl = `${baseUrl}/payment/return`;
@@ -86,12 +105,12 @@ export class PayFastProvider implements PaymentProvider {
     const notifyUrl = `${baseUrl}/api/webhooks/payfast`;
     const credentials = this.getCredentials();
 
-    // Ensure amount is a string and properly formatted
     const amountStr = typeof order.amount === "number" 
       ? (order.amount as number).toFixed(2)
       : String(order.amount);
 
-    const formData = {
+    // Build form data in a specific order (will be sorted by generateSignature)
+    const formData: Record<string, string> = {
       merchant_id: credentials.merchantId,
       merchant_key: credentials.merchantKey,
       return_url: returnUrl,
@@ -107,9 +126,19 @@ export class PayFastProvider implements PaymentProvider {
       email_confirmation: "1",
     };
 
+    // Remove empty values
+    Object.keys(formData).forEach((key) => {
+      if (formData[key] === "") {
+        delete formData[key];
+      }
+    });
+
     console.log("=== PayFast Form Data ===");
     console.log(JSON.stringify(formData, null, 2));
-    const signature = this.generateSignature(formData);
+    
+    // Generate signature (this will sort keys internally)
+    const signature = this.generateSignature({ ...formData });
+    
     console.log("Generated signature:", signature);
     console.log("========================");
 
@@ -136,20 +165,54 @@ export class PayFastProvider implements PaymentProvider {
       data[key] = value;
     });
 
-    const receivedSignature = data.signature;
-    delete data.signature;
+    console.log("=== PayFast Webhook Received ===");
+    console.log("Raw data:", JSON.stringify(data, null, 2));
 
-    const calculatedSignature = this.generateSignature(data);
-    const verified = receivedSignature === calculatedSignature;
+    // Get the received signature (could be 'signature' or 'pf_signature')
+    const receivedSignature = data.signature || data.pf_signature;
+    
+    if (!receivedSignature) {
+      console.error("No signature found in webhook data");
+      return {
+        intentId: data.m_payment_id || "",
+        status: "failed",
+        eventType: "payment.invalid_signature",
+        verified: false,
+      };
+    }
 
+    // Create a copy for signature calculation (without signature fields)
+    const dataForSignature = { ...data };
+    delete dataForSignature.signature;
+    delete dataForSignature.pf_signature;
+
+    // Calculate expected signature
+    const calculatedSignature = this.generateSignature({ ...dataForSignature });
+    const signatureValid = receivedSignature === calculatedSignature;
+
+    console.log("Received signature:", receivedSignature);
+    console.log("Calculated signature:", calculatedSignature);
+    console.log("Signature valid:", signatureValid);
+
+    // Verify IP address
     const sourceIp = (headers["x-forwarded-for"] as string)?.split(",")[0].trim() || (headers["x-real-ip"] as string);
     const ipVerified = isValidPayFastIp(sourceIp);
+    console.log("Source IP:", sourceIp);
+    console.log("IP verified:", ipVerified);
+
+    // Verify with PayFast server (critical security step)
+    const serverValid = await this.verifyWithPayFastServer(data);
+    console.log("Server validation:", serverValid);
+
+    const fullyVerified = signatureValid && ipVerified && serverValid;
+    console.log("Fully verified:", fullyVerified);
+    console.log("================================");
 
     return {
       intentId: data.m_payment_id,
       status: data.payment_status === "COMPLETE" ? "succeeded" : "failed",
       eventType: `payment.${data.payment_status?.toLowerCase()}`,
-      verified: verified && !!ipVerified,
+      verified: fullyVerified,
     };
   }
 
