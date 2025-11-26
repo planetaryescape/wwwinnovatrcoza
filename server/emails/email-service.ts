@@ -309,7 +309,7 @@ export async function sendCustomerOrderConfirmation(orderData: {
             </div>
 
             <div class="footer">
-              <p style="margin: 0;">© ${new Date().getFullYear()} Test24. All rights reserved.</p>
+              <p style="margin: 0;">© ${new Date().getFullYear()} Innovatr. All rights reserved.</p>
               <p style="margin: 5px 0 0 0;">This is an automated confirmation email. Please do not reply to this message.</p>
             </div>
           </div>
