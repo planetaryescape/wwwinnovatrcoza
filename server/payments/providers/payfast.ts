@@ -32,24 +32,25 @@ export class PayFastProvider implements PaymentProvider {
   }
 
   private generateSignature(data: Record<string, any>): string {
-    const params = new URLSearchParams();
-    const credentials = this.getCredentials();
-    
-    Object.keys(data)
-      .sort()
-      .forEach(key => {
-        if (key !== "signature" && data[key] !== "") {
-          params.append(key, String(data[key]));
+    // Generate signature exactly as PayFast expects
+    let pfOutput = "";
+    for (let key in data) {
+      if (data.hasOwnProperty(key)) {
+        if (data[key] !== "") {
+          pfOutput += `${key}=${encodeURIComponent(String(data[key]).trim()).replace(/%20/g, "+")}&`;
         }
-      });
-
-    let signatureString = params.toString();
-    
-    if (credentials.passphrase) {
-      signatureString += `&passphrase=${encodeURIComponent(credentials.passphrase)}`;
+      }
     }
+
+    // Remove last ampersand
+    let getString = pfOutput.slice(0, -1);
     
-    return crypto.createHash("md5").update(signatureString).digest("hex");
+    const credentials = this.getCredentials();
+    if (credentials.passphrase) {
+      getString += `&passphrase=${encodeURIComponent(credentials.passphrase.trim()).replace(/%20/g, "+")}`;
+    }
+
+    return crypto.createHash("md5").update(getString).digest("hex");
   }
 
   async createPaymentIntent(order: Order, items: any[]): Promise<any> {
