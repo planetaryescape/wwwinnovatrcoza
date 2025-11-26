@@ -145,6 +145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await sendAdminOrderNotification({
           customerName: order.customerName || "Unknown",
           customerEmail: order.customerEmail || "No email provided",
+          customerCompany: order.customerCompany || "Company Not Provided",
           orderDescription: order.purchaseType || "Order placed",
           orderTotal: `R${Number(order.amount).toLocaleString()}`,
           orderItems: validatedItems.map((item) => ({
@@ -256,6 +257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             await sendAdminOrderNotification({
               customerName: order.customerName || "Unknown",
               customerEmail: order.customerEmail || "No email provided",
+              customerCompany: order.customerCompany || "Company Not Provided",
               orderDescription: order.purchaseType || "Order placed via checkout",
               orderTotal: `R${Number(order.amount).toLocaleString()}`,
               orderItems: items.map((item) => ({

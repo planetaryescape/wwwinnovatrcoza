@@ -62,6 +62,7 @@ function getAdminEmails(): string[] {
 export async function sendAdminOrderNotification(orderData: {
   customerName: string;
   customerEmail: string;
+  customerCompany: string;
   orderDescription: string;
   orderTotal: string;
   orderItems: any[];
@@ -98,6 +99,7 @@ export async function sendAdminOrderNotification(orderData: {
             <h2>New Order Received</h2>
             <div class="details">
               <div class="detail-row"><span class="label">Customer Name:</span> ${orderData.customerName}</div>
+              <div class="detail-row"><span class="label">Customer Company:</span> ${orderData.customerCompany}</div>
               <div class="detail-row"><span class="label">Customer Email:</span> ${orderData.customerEmail}</div>
               <div class="detail-row"><span class="label">Order Total:</span> ${orderData.orderTotal}</div>
               <div class="detail-row"><span class="label">Description:</span> ${orderData.orderDescription}</div>
