@@ -293,7 +293,7 @@ export default function OrderFormDialog({
                   Submitting...
                 </>
               ) : (
-                "Request Quote"
+                "Place Order"
               )}
             </Button>
             <Button
@@ -317,7 +317,7 @@ export default function OrderFormDialog({
           </div>
 
           <p className="text-xs text-muted-foreground text-center">
-            Choose "Request Quote" for manual payment coordination or "Pay Online" to pay securely with PayFast.
+            Choose "Place Order" for manual payment coordination or "Pay Online" to pay securely with PayFast.
           </p>
         </form>
       </DialogContent>
