@@ -17,8 +17,11 @@ import {
   type InsertReport,
   type Deal,
   type InsertDeal,
+  type Inquiry,
+  type InsertInquiry,
   orders,
   orderItems,
+  inquiries,
 } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { db } from "./db";
@@ -63,6 +66,9 @@ export interface IStorage {
   getDeal(id: string): Promise<Deal | undefined>;
   getAllDeals(): Promise<Deal[]>;
   updateDeal(id: string, updates: Partial<Deal>): Promise<void>;
+
+  createInquiry(inquiry: InsertInquiry): Promise<Inquiry>;
+  getAllInquiries(): Promise<Inquiry[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -75,6 +81,7 @@ export class MemStorage implements IStorage {
   private paymentEvents: Map<string, PaymentEvent>;
   private reports: Map<string, Report>;
   private deals: Map<string, Deal>;
+  private inquiriesMap: Map<string, Inquiry>;
 
   constructor() {
     this.users = new Map();
@@ -86,6 +93,7 @@ export class MemStorage implements IStorage {
     this.paymentEvents = new Map();
     this.reports = new Map();
     this.deals = new Map();
+    this.inquiriesMap = new Map();
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -362,6 +370,28 @@ export class MemStorage implements IStorage {
     if (deal) {
       this.deals.set(id, { ...deal, ...updates, updatedAt: new Date() });
     }
+  }
+
+  async createInquiry(insertInquiry: InsertInquiry): Promise<Inquiry> {
+    const id = randomUUID();
+    const result = await db
+      .insert(inquiries)
+      .values({
+        id,
+        customerName: insertInquiry.customerName,
+        customerEmail: insertInquiry.customerEmail,
+        customerCompany: insertInquiry.customerCompany,
+        purchaseType: insertInquiry.purchaseType,
+        amount: insertInquiry.amount,
+        items: insertInquiry.items,
+        createdAt: new Date(),
+      })
+      .returning();
+    return result[0];
+  }
+
+  async getAllInquiries(): Promise<Inquiry[]> {
+    return db.select().from(inquiries);
   }
 }
 

@@ -47,22 +47,29 @@ export default function OrderFormDialog({
   const [isSuccess, setIsSuccess] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const createOrderMutation = useMutation({
-    mutationFn: async (data: { order: any; items: OrderItem[] }) => {
-      const response = await apiRequest("POST", "/api/orders", data);
+  const createInquiryMutation = useMutation({
+    mutationFn: async (data: {
+      customerName: string;
+      customerEmail: string;
+      customerCompany: string;
+      purchaseType: string;
+      amount: string;
+      items: OrderItem[];
+    }) => {
+      const response = await apiRequest("POST", "/api/inquiries", data);
       return response.json();
     },
     onSuccess: () => {
       setIsSuccess(true);
       toast({
-        title: "Order Submitted Successfully",
-        description: "Our team will contact you shortly to process your order.",
+        title: "Inquiry Submitted Successfully",
+        description: "Our team will contact you shortly to discuss your order.",
       });
       onSuccess?.();
     },
     onError: (error: any) => {
       toast({
-        title: "Order Failed",
+        title: "Inquiry Failed",
         description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
@@ -71,23 +78,19 @@ export default function OrderFormDialog({
 
   const initiatePaymentMutation = useMutation({
     mutationFn: async (data: { order: any; items: OrderItem[] }) => {
-      // First create the order
-      const orderResponse = await apiRequest("POST", "/api/orders", data);
-      const order = await orderResponse.json();
-
-      // Then create payment intent
-      const intentResponse = await apiRequest("POST", "/api/payment-intents", {
-        orderId: order.id,
+      // Create payment checkout directly - order will be created on successful payment
+      const response = await apiRequest("POST", "/api/payment/checkout", {
+        customerName: data.order.customerName,
+        customerEmail: data.order.customerEmail,
+        customerCompany: data.order.customerCompany,
+        amount: data.order.amount,
+        currency: data.order.currency,
+        purchaseType: data.order.purchaseType,
         items: data.items,
         providerKey: "payfast",
       });
-      const intent = await intentResponse.json();
-
-      // Get checkout payload
-      const checkoutResponse = await apiRequest("GET", `/api/payment-intents/${intent.id}/checkout`, undefined);
-      const checkout = await checkoutResponse.json();
-
-      return { order, intent, checkout };
+      const checkout = await response.json();
+      return { checkout };
     },
     onSuccess: (data) => {
       // Auto-submit PayFast form
@@ -135,16 +138,12 @@ export default function OrderFormDialog({
       return;
     }
 
-    createOrderMutation.mutate({
-      order: {
-        customerName,
-        customerEmail,
-        customerCompany,
-        amount: totalAmount.toString(),
-        currency: "ZAR",
-        purchaseType,
-        status: "pending",
-      },
+    createInquiryMutation.mutate({
+      customerName,
+      customerEmail,
+      customerCompany,
+      purchaseType,
+      amount: totalAmount.toString(),
       items: orderItems,
     });
   };
@@ -196,10 +195,10 @@ export default function OrderFormDialog({
         <DialogContent className="sm:max-w-md">
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <CheckCircle2 className="w-16 h-16 text-green-500 mb-4" />
-            <DialogTitle className="text-2xl mb-2">Order Received!</DialogTitle>
+            <DialogTitle className="text-2xl mb-2">Quote Request Received!</DialogTitle>
             <DialogDescription className="text-base mb-6">
-              Thank you for your order from <span className="font-medium text-foreground">{customerCompany}</span>. Our team will review it and contact you at{" "}
-              <span className="font-medium text-foreground">{customerEmail}</span> to complete the payment process.
+              Thank you for your inquiry from <span className="font-medium text-foreground">{customerCompany}</span>. Our team will review it and contact you at{" "}
+              <span className="font-medium text-foreground">{customerEmail}</span> to discuss your order and payment options.
             </DialogDescription>
             <Button onClick={handleClose} data-testid="button-close-success">
               Back to Home
@@ -277,7 +276,7 @@ export default function OrderFormDialog({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={createOrderMutation.isPending || initiatePaymentMutation.isPending}
+              disabled={createInquiryMutation.isPending || initiatePaymentMutation.isPending}
               data-testid="button-cancel-order"
             >
               Cancel
@@ -285,22 +284,22 @@ export default function OrderFormDialog({
             <Button
               type="submit"
               variant="outline"
-              disabled={createOrderMutation.isPending || initiatePaymentMutation.isPending}
+              disabled={createInquiryMutation.isPending || initiatePaymentMutation.isPending}
               data-testid="button-submit-order"
             >
-              {createOrderMutation.isPending ? (
+              {createInquiryMutation.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Submitting...
                 </>
               ) : (
-                "Place Order"
+                "Request Quote"
               )}
             </Button>
             <Button
               type="button"
               onClick={handlePayOnline}
-              disabled={createOrderMutation.isPending || initiatePaymentMutation.isPending}
+              disabled={createInquiryMutation.isPending || initiatePaymentMutation.isPending}
               data-testid="button-pay-online"
             >
               {initiatePaymentMutation.isPending ? (
@@ -318,7 +317,7 @@ export default function OrderFormDialog({
           </div>
 
           <p className="text-xs text-muted-foreground text-center">
-            Choose "Place Order" for manual payment or "Pay Online" to pay securely with PayFast.
+            Choose "Request Quote" for manual payment coordination or "Pay Online" to pay securely with PayFast.
           </p>
         </form>
       </DialogContent>
