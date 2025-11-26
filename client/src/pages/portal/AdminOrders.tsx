@@ -32,6 +32,7 @@ interface AdminOrder {
   id: string;
   customerName: string | null;
   customerEmail: string;
+  customerCompany: string | null;
   amount: string;
   currency: string;
   purchaseType: string;
@@ -194,6 +195,9 @@ export default function AdminOrders() {
                       Customer: {order.customerName || "Unknown"} ({order.customerEmail})
                     </p>
                     <p className="text-sm text-muted-foreground">
+                      Company: {order.customerCompany || "N/A"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
                       Purchase: {order.purchaseType}
                     </p>
                     <p className="text-sm text-muted-foreground">
@@ -242,6 +246,10 @@ export default function AdminOrders() {
                     <p>
                       <span className="text-muted-foreground">Email:</span>{" "}
                       {selectedOrder.customerEmail}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">Company:</span>{" "}
+                      {selectedOrder.customerCompany || "N/A"}
                     </p>
                   </div>
                 </div>
