@@ -253,6 +253,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Orders endpoints
+  app.get("/api/admin/orders", async (req, res) => {
+    try {
+      const orders = await storage.getAllOrders();
+      const ordersWithItems = await Promise.all(
+        orders.map(async (order) => ({
+          ...order,
+          items: await storage.getOrderItems(order.id),
+        }))
+      );
+      res.json(ordersWithItems);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Reports endpoints
   app.get("/api/admin/reports", async (req, res) => {
     try {
