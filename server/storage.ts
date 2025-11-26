@@ -17,7 +17,11 @@ import {
   type InsertReport,
   type Deal,
   type InsertDeal,
+  orders,
+  orderItems,
 } from "@shared/schema";
+import { eq } from "drizzle-orm";
+import { db } from "./db";
 import { randomUUID } from "crypto";
 
 // modify the interface with any CRUD methods
@@ -171,52 +175,55 @@ export class MemStorage implements IStorage {
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
     const id = randomUUID();
     const now = new Date();
-    const order: Order = {
-      id,
-      userId: insertOrder.userId ?? null,
-      amount: insertOrder.amount,
-      currency: insertOrder.currency ?? "ZAR",
-      purchaseType: insertOrder.purchaseType,
-      status: insertOrder.status ?? "pending",
-      customerName: insertOrder.customerName ?? null,
-      customerEmail: insertOrder.customerEmail,
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.orders.set(id, order);
-    return order;
+    const result = await db
+      .insert(orders)
+      .values({
+        id,
+        userId: insertOrder.userId ?? null,
+        amount: insertOrder.amount,
+        currency: insertOrder.currency ?? "ZAR",
+        purchaseType: insertOrder.purchaseType,
+        status: insertOrder.status ?? "pending",
+        customerName: insertOrder.customerName ?? null,
+        customerEmail: insertOrder.customerEmail,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
+    return result[0];
   }
 
   async getOrder(id: string): Promise<Order | undefined> {
-    return this.orders.get(id);
+    const result = await db.select().from(orders).where(eq(orders.id, id));
+    return result[0];
   }
 
   async updateOrder(id: string, updates: Partial<Order>): Promise<void> {
-    const order = this.orders.get(id);
-    if (order) {
-      this.orders.set(id, { ...order, ...updates, updatedAt: new Date() });
-    }
+    await db
+      .update(orders)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(orders.id, id));
   }
 
   async createOrderItem(insertItem: InsertOrderItem): Promise<OrderItem> {
     const id = randomUUID();
-    const item: OrderItem = {
-      id,
-      orderId: insertItem.orderId,
-      type: insertItem.type,
-      referenceId: insertItem.referenceId ?? null,
-      quantity: insertItem.quantity ?? 1,
-      unitAmount: insertItem.unitAmount,
-      description: insertItem.description ?? null,
-    };
-    this.orderItems.set(id, item);
-    return item;
+    const result = await db
+      .insert(orderItems)
+      .values({
+        id,
+        orderId: insertItem.orderId,
+        type: insertItem.type,
+        referenceId: insertItem.referenceId ?? null,
+        quantity: insertItem.quantity ?? 1,
+        unitAmount: insertItem.unitAmount,
+        description: insertItem.description ?? null,
+      })
+      .returning();
+    return result[0];
   }
 
   async getOrderItems(orderId: string): Promise<OrderItem[]> {
-    return Array.from(this.orderItems.values()).filter(
-      (item) => item.orderId === orderId,
-    );
+    return db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
   }
 
   async createPaymentIntent(insertIntent: InsertPaymentIntent): Promise<PaymentIntent> {
