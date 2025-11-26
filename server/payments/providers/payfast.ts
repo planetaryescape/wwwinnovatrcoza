@@ -15,6 +15,26 @@ export class PayFastProvider implements PaymentProvider {
     this.config = config;
   }
 
+  private getCredentials() {
+    const isSandbox = this.config?.sandbox ?? true;
+    
+    // If separate sandbox/production credentials are configured, use them
+    if (isSandbox && this.config?.sandboxMerchantId) {
+      return {
+        merchantId: this.config.sandboxMerchantId,
+        merchantKey: this.config.sandboxMerchantKey || "",
+        passphrase: this.config.sandboxPassphrase,
+      };
+    }
+    
+    // Otherwise use the main credentials
+    return {
+      merchantId: this.config?.merchantId || "",
+      merchantKey: this.config?.merchantKey || "",
+      passphrase: this.config?.passphrase,
+    };
+  }
+
   private getBaseUrl(): string {
     return this.config?.sandbox
       ? "https://sandbox.payfast.co.za/eng/process"
@@ -23,6 +43,7 @@ export class PayFastProvider implements PaymentProvider {
 
   private generateSignature(data: Record<string, any>): string {
     const params = new URLSearchParams();
+    const credentials = this.getCredentials();
     
     Object.keys(data)
       .sort()
@@ -34,21 +55,22 @@ export class PayFastProvider implements PaymentProvider {
 
     let signatureString = params.toString();
     
-    if (this.config?.passphrase) {
-      signatureString += `&passphrase=${encodeURIComponent(this.config.passphrase)}`;
+    if (credentials.passphrase) {
+      signatureString += `&passphrase=${encodeURIComponent(credentials.passphrase)}`;
     }
     
     return crypto.createHash("md5").update(signatureString).digest("hex");
   }
 
   async createPaymentIntent(order: Order, items: any[]): Promise<any> {
+    const credentials = this.getCredentials();
     return {
       orderId: order.id,
       providerKey: this.key,
       providerIntentId: order.id,
       status: "pending",
       metadata: {
-        merchantId: this.config?.merchantId,
+        merchantId: credentials.merchantId,
         sandbox: this.config?.sandbox,
         items,
       },
@@ -59,10 +81,11 @@ export class PayFastProvider implements PaymentProvider {
     const returnUrl = `${process.env.REPLIT_DOMAIN || "http://localhost:5000"}/payment/return`;
     const cancelUrl = `${process.env.REPLIT_DOMAIN || "http://localhost:5000"}/payment/cancel`;
     const notifyUrl = `${process.env.REPLIT_DOMAIN || "http://localhost:5000"}/api/webhooks/payfast`;
+    const credentials = this.getCredentials();
 
     const formData = {
-      merchant_id: this.config?.merchantId,
-      merchant_key: this.config?.merchantKey,
+      merchant_id: credentials.merchantId,
+      merchant_key: credentials.merchantKey,
       return_url: returnUrl,
       cancel_url: cancelUrl,
       notify_url: notifyUrl,

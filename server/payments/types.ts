@@ -28,6 +28,9 @@ export interface PaymentConfig {
     merchantKey: string;
     passphrase?: string;
     sandbox: boolean;
+    sandboxMerchantId?: string;
+    sandboxMerchantKey?: string;
+    sandboxPassphrase?: string;
   };
   zapper?: {
     merchantId: string;
