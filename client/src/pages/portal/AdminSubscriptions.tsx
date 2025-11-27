@@ -74,6 +74,11 @@ export default function AdminSubscriptions() {
       filtered = filtered.filter((s) => s.status === statusFilter);
     }
 
+    // Sort by most recent first
+    filtered = [...filtered].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
     setFilteredSubscriptions(filtered);
   }, [subscriptions, search, statusFilter]);
 

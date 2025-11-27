@@ -84,6 +84,11 @@ export default function AdminOrders() {
       filtered = filtered.filter((o) => o.status === statusFilter);
     }
 
+    // Sort by most recent first
+    filtered = [...filtered].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
     setFilteredOrders(filtered);
   }, [orders, search, statusFilter]);
 
