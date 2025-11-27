@@ -471,12 +471,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const growthCount = users.filter(u => u.membershipTier === "GROWTH").length;
       const scaleCount = users.filter(u => u.membershipTier === "SCALE").length;
       
+      // Get active subscriptions count
+      const subscriptions = await storage.getAllSubscriptions();
+      const activeSubscriptions = subscriptions.filter(s => s.status === "active").length;
+      
       res.json({
         totalUsers: users.length,
         starterMembers: starterCount,
         growthMembers: growthCount,
         scaleMembers: scaleCount,
         activeDeals: 0,
+        activeSubscriptions,
         timestamp: new Date(),
       });
     } catch (error: any) {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, TrendingUp } from "lucide-react";
+import { Users, TrendingUp, RefreshCw } from "lucide-react";
 
 interface OverviewStats {
   totalUsers: number;
@@ -9,6 +9,7 @@ interface OverviewStats {
   growthMembers: number;
   scaleMembers: number;
   activeDeals: number;
+  activeSubscriptions: number;
 }
 
 export default function AdminOverview() {
@@ -28,6 +29,7 @@ export default function AdminOverview() {
           growthMembers: data.growthMembers || 0,
           scaleMembers: data.scaleMembers || 0,
           activeDeals: data.activeDeals || 0,
+          activeSubscriptions: data.activeSubscriptions || 0,
         });
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
@@ -67,11 +69,12 @@ export default function AdminOverview() {
         </Card>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <MetricCard label="Total Users" value={stats?.totalUsers || 0} />
         <MetricCard label="Starter Members" value={stats?.starterMembers || 0} />
         <MetricCard label="Growth Members" value={stats?.growthMembers || 0} />
         <MetricCard label="Scale Members" value={stats?.scaleMembers || 0} />
+        <MetricCard label="Active Subscriptions" value={stats?.activeSubscriptions || 0} />
         <MetricCard label="Active Deals" value={stats?.activeDeals || 0} />
       </div>
     </div>

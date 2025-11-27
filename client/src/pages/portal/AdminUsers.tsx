@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -9,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, RefreshCw } from "lucide-react";
 import NewUserModal from "./NewUserModal";
 
 interface AdminUser {
@@ -26,9 +27,19 @@ interface AdminUser {
   lastLoginAt: string | null;
 }
 
+interface Subscription {
+  id: string;
+  customerEmail: string;
+  planType: string;
+  status: string;
+  cyclesCompleted: number;
+  cyclesTotal: number;
+}
+
 export default function AdminUsers() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<AdminUser[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [search, setSearch] = useState("");
   const [tierFilter, setTierFilter] = useState("all");
   const [loading, setLoading] = useState(true);
@@ -36,20 +47,32 @@ export default function AdminUsers() {
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch("/api/admin/users");
-        if (!res.ok) throw new Error("Failed to fetch users");
-        const data = await res.json();
-        setUsers(data);
+        const [usersRes, subsRes] = await Promise.all([
+          fetch("/api/admin/users"),
+          fetch("/api/admin/subscriptions"),
+        ]);
+        if (!usersRes.ok) throw new Error("Failed to fetch users");
+        const usersData = await usersRes.json();
+        setUsers(usersData);
+        
+        if (subsRes.ok) {
+          const subsData = await subsRes.json();
+          setSubscriptions(subsData);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load users");
       } finally {
         setLoading(false);
       }
     };
-    fetchUsers();
+    fetchData();
   }, []);
+
+  const getUserSubscription = (email: string) => {
+    return subscriptions.find((s) => s.customerEmail === email && s.status === "active");
+  };
 
   useEffect(() => {
     let filtered = users;
@@ -69,16 +92,24 @@ export default function AdminUsers() {
   }, [users, search, tierFilter]);
 
   const handleRefresh = () => {
-    fetchUsers();
+    fetchData();
   };
 
-  const fetchUsers = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/admin/users");
-      if (!res.ok) throw new Error("Failed to fetch users");
-      const data = await res.json();
-      setUsers(data);
+      const [usersRes, subsRes] = await Promise.all([
+        fetch("/api/admin/users"),
+        fetch("/api/admin/subscriptions"),
+      ]);
+      if (!usersRes.ok) throw new Error("Failed to fetch users");
+      const usersData = await usersRes.json();
+      setUsers(usersData);
+      
+      if (subsRes.ok) {
+        const subsData = await subsRes.json();
+        setSubscriptions(subsData);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load users");
     } finally {
@@ -170,6 +201,7 @@ export default function AdminUsers() {
                     <th className="text-left py-2 px-2">Name</th>
                     <th className="text-left py-2 px-2">Email</th>
                     <th className="text-left py-2 px-2">Tier</th>
+                    <th className="text-left py-2 px-2">Subscription</th>
                     <th className="text-left py-2 px-2">Role</th>
                     <th className="text-left py-2 px-2">Status</th>
                     <th className="text-left py-2 px-2">Basic Credits</th>
@@ -198,6 +230,20 @@ export default function AdminUsers() {
                             <SelectItem value="SCALE">Scale</SelectItem>
                           </SelectContent>
                         </Select>
+                      </td>
+                      <td className="py-2 px-2">
+                        {(() => {
+                          const sub = getUserSubscription(user.email);
+                          if (sub) {
+                            return (
+                              <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-xs">
+                                <RefreshCw className="w-3 h-3 mr-1" />
+                                {sub.cyclesCompleted}/{sub.cyclesTotal}
+                              </Badge>
+                            );
+                          }
+                          return <span className="text-muted-foreground text-xs">—</span>;
+                        })()}
                       </td>
                       <td className="py-2 px-2">
                         <Select
