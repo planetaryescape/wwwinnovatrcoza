@@ -79,20 +79,18 @@ export class PayFastProvider implements PaymentProvider {
   }
 
   // Build param string from PayFast data (for ITN validation)
-  // Keys must be sorted ALPHABETICALLY, excludes empty values and signature
+  // Uses ORIGINAL ORDER from PayFast (not sorted), excludes signature
+  // INCLUDES empty values (unlike checkout signature)
   private buildParamString(pfData: Record<string, any>): string {
     const parts: string[] = [];
     
-    // Sort keys alphabetically as per PayFast ITN documentation
-    const sortedKeys = Object.keys(pfData).sort();
-    
-    for (const key of sortedKeys) {
+    // Use original key order as received from PayFast
+    for (const key of Object.keys(pfData)) {
       if (key === "signature") continue;
       
-      const value = String(pfData[key] ?? "").trim();
-      if (value !== "") {
-        parts.push(`${key}=${this.pfEncode(value)}`);
-      }
+      // Include ALL values, even empty ones (per PayFast PHP sample)
+      const value = String(pfData[key] ?? "");
+      parts.push(`${key}=${encodeURIComponent(value).replace(/%20/g, "+")}`);
     }
     
     return parts.join("&");
