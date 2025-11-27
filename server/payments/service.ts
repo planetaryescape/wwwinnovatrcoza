@@ -187,8 +187,8 @@ export class PaymentService {
     // Parse payload - handle JSON, URL-encoded, or already-parsed object
     let payload: Record<string, any>;
     if (typeof rawBody === "object" && !Buffer.isBuffer(rawBody)) {
-      // Already parsed object
-      payload = rawBody as Record<string, any>;
+      // Already parsed object - convert to plain object (multer returns [Object: null prototype])
+      payload = { ...rawBody as Record<string, any> };
     } else {
       const bodyStr = typeof rawBody === "string" ? rawBody : rawBody.toString();
       try {
