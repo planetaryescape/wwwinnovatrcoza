@@ -78,32 +78,53 @@ export class PayFastProvider implements PaymentProvider {
       .replace(/\)/g, "%29"); // encode )
   }
 
-  private generateSignature(data: Record<string, any>, forWebhook: boolean = false): string {
-    // Delete any existing signature fields first
+  // Build param string from PayFast data (for ITN validation)
+  // Uses original order from PayFast, excludes empty values and signature
+  private buildParamString(pfData: Record<string, any>): string {
+    const parts: string[] = [];
+    
+    for (const key of Object.keys(pfData)) {
+      if (key === "signature") continue;
+      
+      const value = String(pfData[key] ?? "").trim();
+      if (value !== "") {
+        parts.push(`${key}=${this.pfEncode(value)}`);
+      }
+    }
+    
+    return parts.join("&");
+  }
+
+  // Validate ITN signature from PayFast
+  private pfValidSignature(pfData: Record<string, any>, pfParamString: string, pfPassphrase: string | null = null): boolean {
+    let tempParamString = pfParamString;
+    
+    if (pfPassphrase !== null) {
+      tempParamString += `&passphrase=${encodeURIComponent(pfPassphrase.trim()).replace(/%20/g, "+")}`;
+    }
+
+    const signature = crypto.createHash("md5").update(tempParamString).digest("hex");
+    
+    console.log("ITN Param string:", tempParamString);
+    console.log("Calculated signature:", signature);
+    console.log("Received signature:", pfData["signature"]);
+    
+    return pfData["signature"] === signature;
+  }
+
+  // Generate signature for outgoing checkout requests (uses PayFast's field order)
+  private generateCheckoutSignature(data: Record<string, any>): string {
     const dataCopy = { ...data };
     delete dataCopy["signature"];
-    delete dataCopy["pf_signature"];
 
-    let signatureParts: string[] = [];
+    const signatureParts: string[] = [];
 
-    if (forWebhook) {
-      // For ITN validation: use the ORIGINAL ORDER PayFast sent the data
-      // JavaScript objects preserve insertion order for string keys (ES2015+)
-      // EXCLUDE empty values as per PayFast documentation
-      for (const key of Object.keys(dataCopy)) {
-        const value = String(dataCopy[key] ?? "").trim();
+    // Use PayFast's specific field order, exclude empty values
+    for (const key of PAYFAST_FIELD_ORDER) {
+      if (key in dataCopy) {
+        const value = String(dataCopy[key]).trim();
         if (value !== "") {
           signatureParts.push(`${key}=${this.pfEncode(value)}`);
-        }
-      }
-    } else {
-      // For outgoing checkout requests: use PayFast's specific field order, exclude empty values
-      for (const key of PAYFAST_FIELD_ORDER) {
-        if (key in dataCopy) {
-          const value = String(dataCopy[key]).trim();
-          if (value !== "") {
-            signatureParts.push(`${key}=${this.pfEncode(value)}`);
-          }
         }
       }
     }
@@ -204,7 +225,7 @@ export class PayFastProvider implements PaymentProvider {
     console.log(JSON.stringify(formData, null, 2));
     
     // Generate signature using PayFast's field order
-    const signature = this.generateSignature({ ...formData }, false);
+    const signature = this.generateCheckoutSignature({ ...formData });
     
     console.log("Generated signature:", signature);
     console.log("========================");
@@ -243,10 +264,8 @@ export class PayFastProvider implements PaymentProvider {
     console.log("Raw data:", JSON.stringify(data, null, 2));
     console.log("Key order received:", Object.keys(data).join(", "));
 
-    // Get the received signature (could be 'signature' or 'pf_signature')
-    const receivedSignature = data.signature || data.pf_signature;
-    
-    if (!receivedSignature) {
+    // Get the received signature
+    if (!data.signature) {
       console.error("No signature found in webhook data");
       return {
         intentId: data.m_payment_id || "",
@@ -256,17 +275,11 @@ export class PayFastProvider implements PaymentProvider {
       };
     }
 
-    // Create a copy for signature calculation (without signature fields)
-    const dataForSignature = { ...data };
-    delete dataForSignature.signature;
-    delete dataForSignature.pf_signature;
+    // Build param string and validate signature using dedicated function
+    const pfParamString = this.buildParamString(data);
+    const credentials = this.getCredentials();
+    const signatureValid = this.pfValidSignature(data, pfParamString, credentials.passphrase || null);
 
-    // Calculate expected signature (for webhooks, use received field order)
-    const calculatedSignature = this.generateSignature(dataForSignature, true);
-    const signatureValid = receivedSignature === calculatedSignature;
-
-    console.log("Received signature:", receivedSignature);
-    console.log("Calculated signature:", calculatedSignature);
     console.log("Signature valid:", signatureValid);
 
     // Verify IP address
