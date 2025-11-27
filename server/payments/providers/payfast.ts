@@ -79,8 +79,7 @@ export class PayFastProvider implements PaymentProvider {
   }
 
   // Build param string from PayFast data (for ITN validation)
-  // Uses ORIGINAL ORDER from PayFast (not sorted), excludes signature
-  // INCLUDES empty values (unlike checkout signature)
+  // Uses ORIGINAL ORDER from PayFast (not sorted), excludes signature and empty values
   private buildParamString(pfData: Record<string, any>): string {
     const parts: string[] = [];
     
@@ -88,8 +87,10 @@ export class PayFastProvider implements PaymentProvider {
     for (const key of Object.keys(pfData)) {
       if (key === "signature") continue;
       
-      // Include ALL values, even empty ones (per PayFast PHP sample)
-      const value = String(pfData[key] ?? "");
+      const value = String(pfData[key] ?? "").trim();
+      // Exclude empty values
+      if (value === "") continue;
+      
       parts.push(`${key}=${encodeURIComponent(value).replace(/%20/g, "+")}`);
     }
     
