@@ -146,6 +146,11 @@ export class MemStorage implements IStorage {
       role: (insertUser.role as any) ?? "MEMBER",
       creditsBasic: insertUser.creditsBasic ?? 0,
       creditsPro: insertUser.creditsPro ?? 0,
+      totalSpend: "0",
+      firstProjectDate: null,
+      lastProjectDate: null,
+      lastActivityDate: null,
+      internalNotes: null,
       createdAt: now,
       lastLoginAt: null,
     };
@@ -319,18 +324,33 @@ export class MemStorage implements IStorage {
   async createReport(insertReport: InsertReport): Promise<Report> {
     const id = randomUUID();
     const now = new Date();
+    const slug = insertReport.slug ?? insertReport.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const report: Report = {
       id,
       title: insertReport.title,
+      slug,
       category: insertReport.category,
       industry: insertReport.industry ?? null,
       date: insertReport.date ?? now,
-      teaser: insertReport.teaser ?? null,
+      previewText: insertReport.previewText ?? null,
+      bodyContent: insertReport.bodyContent ?? null,
       topics: insertReport.topics ?? [],
-      body: insertReport.body ?? null,
+      tags: insertReport.tags ?? [],
       pdfUrl: insertReport.pdfUrl ?? null,
-      accessLevel: insertReport.accessLevel ?? "PUBLIC",
+      accessLevel: insertReport.accessLevel ?? "public",
+      allowedTiers: insertReport.allowedTiers ?? [],
+      creditType: insertReport.creditType ?? "none",
+      creditCost: insertReport.creditCost ?? 0,
+      isFeatured: insertReport.isFeatured ?? false,
+      status: insertReport.status ?? "published",
+      publishAt: insertReport.publishAt ?? null,
+      unpublishAt: insertReport.unpublishAt ?? null,
+      viewCount: 0,
+      uniqueViewCount: 0,
+      downloadCount: 0,
+      upgradeInfluenceScore: 0,
       isArchived: insertReport.isArchived ?? false,
+      lastUpdatedBy: insertReport.lastUpdatedBy ?? null,
       createdAt: now,
       updatedAt: now,
     };

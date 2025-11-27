@@ -28,6 +28,11 @@ export const users = pgTable("users", {
   role: varchar("role", { length: 20 }).notNull().default("MEMBER"),
   creditsBasic: integer("credits_basic").notNull().default(0),
   creditsPro: integer("credits_pro").notNull().default(0),
+  totalSpend: decimal("total_spend", { precision: 10, scale: 2 }).default("0"),
+  firstProjectDate: timestamp("first_project_date"),
+  lastProjectDate: timestamp("last_project_date"),
+  lastActivityDate: timestamp("last_activity_date"),
+  internalNotes: text("internal_notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at"),
 });
@@ -196,23 +201,37 @@ export const insertPaymentEventSchema = createInsertSchema(paymentEvents).omit({
 export type InsertPaymentEvent = z.infer<typeof insertPaymentEventSchema>;
 export type PaymentEvent = typeof paymentEvents.$inferSelect;
 
-// Reports schema
+// Reports schema - Extended for full content management
 export const reports = pgTable("reports", {
   id: varchar("id")
     .primaryKey()
     .default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
+  slug: text("slug").unique(),
   category: varchar("category", { length: 50 }).notNull(),
   industry: text("industry"),
   date: timestamp("date").defaultNow().notNull(),
-  teaser: text("teaser"),
+  previewText: text("preview_text"),
+  bodyContent: text("body_content"),
   topics: text("topics").array().default([]),
-  body: text("body"),
+  tags: text("tags").array().default([]),
   pdfUrl: text("pdf_url"),
   accessLevel: varchar("access_level", { length: 20 })
     .notNull()
-    .default("PUBLIC"),
+    .default("public"),
+  allowedTiers: text("allowed_tiers").array().default([]),
+  creditType: varchar("credit_type", { length: 20 }).default("none"),
+  creditCost: integer("credit_cost").default(0),
+  isFeatured: boolean("is_featured").notNull().default(false),
+  status: varchar("status", { length: 20 }).notNull().default("published"),
+  publishAt: timestamp("publish_at"),
+  unpublishAt: timestamp("unpublish_at"),
+  viewCount: integer("view_count").notNull().default(0),
+  uniqueViewCount: integer("unique_view_count").notNull().default(0),
+  downloadCount: integer("download_count").notNull().default(0),
+  upgradeInfluenceScore: integer("upgrade_influence_score").notNull().default(0),
   isArchived: boolean("is_archived").notNull().default(false),
+  lastUpdatedBy: varchar("last_updated_by"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -222,13 +241,19 @@ export const insertReportSchema = createInsertSchema(reports)
     id: true,
     createdAt: true,
     updatedAt: true,
+    viewCount: true,
+    uniqueViewCount: true,
+    downloadCount: true,
+    upgradeInfluenceScore: true,
   })
   .extend({
     title: z.string().min(1, "Title is required"),
-    category: z.string().min(1, "Category is required"),
-    teaser: z.string().min(1, "Preview text is required"),
-    accessLevel: z.enum(["PUBLIC", "STARTER", "GROWTH", "SCALE"]),
-    date: z.date(),
+    category: z.enum(["Insights", "Launch", "Inside", "IRL"]),
+    previewText: z.string().optional(),
+    accessLevel: z.enum(["public", "member", "tier", "paid"]).default("public"),
+    creditType: z.enum(["none", "basic", "pro"]).default("none"),
+    status: z.enum(["draft", "scheduled", "published", "archived"]).default("published"),
+    date: z.date().optional(),
   });
 
 export type InsertReport = z.infer<typeof insertReportSchema>;
