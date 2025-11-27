@@ -1,11 +1,13 @@
 import { useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Download, ArrowLeft, Calendar, Briefcase } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Download, ArrowLeft, Calendar, Briefcase, Lock, Crown, CreditCard, LogIn } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { Link } from "wouter";
 import reportsData from "@/data/reports.json";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const categoryCoverImages: Record<string, string> = {
   insights: "/assets/covers/insights-cover.png",
@@ -41,6 +43,9 @@ interface ReportSection {
   body: string;
 }
 
+type AccessLevel = "public" | "member" | "tier" | "paid";
+type CreditType = "none" | "basic" | "pro";
+
 interface Report {
   id: number;
   category: string;
@@ -53,10 +58,86 @@ interface Report {
   pdfPath: string;
   tags: string[];
   isNew: boolean;
+  accessLevel?: AccessLevel;
+  allowedTiers?: string[];
+  creditType?: CreditType;
+  creditCost?: number;
   content?: {
     intro: string;
     sections: ReportSection[];
   };
+}
+
+interface AccessCheckResult {
+  hasAccess: boolean;
+  reason: "public" | "member" | "tier_allowed" | "credits_available" | 
+          "not_logged_in" | "membership_required" | "tier_required" | "credits_required";
+  message?: string;
+}
+
+function checkReportAccess(
+  report: Report,
+  user: { membershipTier?: string; creditsBasic?: number; creditsPro?: number } | null
+): AccessCheckResult {
+  const accessLevel = report.accessLevel || "public";
+  
+  if (accessLevel === "public") {
+    return { hasAccess: true, reason: "public" };
+  }
+  
+  if (!user) {
+    return { hasAccess: false, reason: "not_logged_in", message: "Sign in to access this content" };
+  }
+  
+  if (accessLevel === "member") {
+    return { hasAccess: true, reason: "member" };
+  }
+  
+  if (accessLevel === "tier") {
+    const allowedTiers = report.allowedTiers || [];
+    const userTier = user.membershipTier || "STARTER";
+    
+    const tierHierarchy = ["STARTER", "GROWTH", "SCALE"];
+    const userTierIndex = tierHierarchy.indexOf(userTier);
+    
+    const hasAccess = allowedTiers.some(tier => {
+      const requiredTierIndex = tierHierarchy.indexOf(tier);
+      return userTierIndex >= requiredTierIndex;
+    });
+    
+    if (hasAccess) {
+      return { hasAccess: true, reason: "tier_allowed" };
+    }
+    
+    return { 
+      hasAccess: false, 
+      reason: "tier_required", 
+      message: `Upgrade to ${allowedTiers[0]} or higher to access this content` 
+    };
+  }
+  
+  if (accessLevel === "paid") {
+    const creditType = report.creditType || "basic";
+    const creditCost = report.creditCost || 1;
+    
+    if (creditType === "none") {
+      return { hasAccess: true, reason: "credits_available" };
+    }
+    
+    const userCredits = creditType === "basic" ? (user.creditsBasic || 0) : (user.creditsPro || 0);
+    
+    if (userCredits >= creditCost) {
+      return { hasAccess: true, reason: "credits_available" };
+    }
+    
+    return { 
+      hasAccess: false, 
+      reason: "credits_required", 
+      message: `This report requires ${creditCost} ${creditType === "basic" ? "Basic" : "Pro"} credit${creditCost > 1 ? "s" : ""}` 
+    };
+  }
+  
+  return { hasAccess: true, reason: "public" };
 }
 
 function RelatedReportCard({ report }: { report: Report }) {
@@ -91,18 +172,141 @@ function RelatedReportCard({ report }: { report: Report }) {
   );
 }
 
+function AccessPaywall({ 
+  accessResult, 
+  report,
+  onLogin,
+  onUpgrade,
+  onPurchaseCredits
+}: { 
+  accessResult: AccessCheckResult;
+  report: Report;
+  onLogin: () => void;
+  onUpgrade: () => void;
+  onPurchaseCredits: () => void;
+}) {
+  const getIcon = () => {
+    switch (accessResult.reason) {
+      case "not_logged_in":
+        return <LogIn className="w-8 h-8 text-[#0033A0]" />;
+      case "tier_required":
+        return <Crown className="w-8 h-8 text-[#0033A0]" />;
+      case "credits_required":
+        return <CreditCard className="w-8 h-8 text-[#0033A0]" />;
+      default:
+        return <Lock className="w-8 h-8 text-[#0033A0]" />;
+    }
+  };
+
+  const getAction = () => {
+    switch (accessResult.reason) {
+      case "not_logged_in":
+        return (
+          <Button 
+            onClick={onLogin}
+            className="rounded-full"
+            style={{ backgroundColor: '#0033A0' }}
+            data-testid="button-login-access"
+          >
+            <LogIn className="w-4 h-4 mr-2" />
+            Sign In to Continue
+          </Button>
+        );
+      case "tier_required":
+        return (
+          <Button 
+            onClick={onUpgrade}
+            className="rounded-full"
+            style={{ backgroundColor: '#0033A0' }}
+            data-testid="button-upgrade-tier"
+          >
+            <Crown className="w-4 h-4 mr-2" />
+            Upgrade Membership
+          </Button>
+        );
+      case "credits_required":
+        return (
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button 
+              onClick={onPurchaseCredits}
+              className="rounded-full"
+              style={{ backgroundColor: '#0033A0' }}
+              data-testid="button-purchase-credits"
+            >
+              <CreditCard className="w-4 h-4 mr-2" />
+              Purchase Credits
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={onUpgrade}
+              className="rounded-full border-[#0033A0] text-[#0033A0]"
+              data-testid="button-upgrade-for-credits"
+            >
+              <Crown className="w-4 h-4 mr-2" />
+              Upgrade for More Credits
+            </Button>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Card className="border-2 border-[#0033A0]/20 bg-gradient-to-br from-blue-50 to-white">
+      <CardContent className="p-8 text-center">
+        <div className="w-16 h-16 rounded-full bg-[#0033A0]/10 flex items-center justify-center mx-auto mb-4">
+          {getIcon()}
+        </div>
+        <h3 
+          className="text-xl font-bold mb-2 text-gray-900"
+          style={{ fontFamily: 'DM Serif Display, serif' }}
+        >
+          {accessResult.reason === "not_logged_in" 
+            ? "Members-Only Content"
+            : accessResult.reason === "tier_required"
+            ? "Premium Content"
+            : "Credits Required"
+          }
+        </h3>
+        <p className="text-gray-600 mb-6 max-w-md mx-auto">
+          {accessResult.message}
+        </p>
+        {getAction()}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function InsightDetail() {
   const [, params] = useRoute("/portal/insights/:slug");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
 
   const report = (reportsData as Report[]).find((r) => r.slug === params?.slug);
+
+  const accessResult = report 
+    ? checkReportAccess(report, user as { membershipTier?: string; creditsBasic?: number; creditsPro?: number } | null)
+    : { hasAccess: true, reason: "public" as const };
 
   const relatedReports = report 
     ? (reportsData as Report[])
         .filter((r) => r.id !== report.id && (r.category === report.category || r.tags.some(t => report.tags.includes(t))))
         .slice(0, 3)
     : [];
+
+  const handleLogin = () => {
+    setLocation("/login");
+  };
+
+  const handleUpgrade = () => {
+    setLocation("/portal/billing");
+  };
+
+  const handlePurchaseCredits = () => {
+    setLocation("/portal/billing");
+  };
 
   if (!report) {
     return (
@@ -230,70 +434,90 @@ export default function InsightDetail() {
             ))}
           </div>
 
-          {report.pdfPath && (
-            <Button 
-              size="lg"
-              onClick={handleDownload}
-              className="rounded-full mb-8"
-              style={{ backgroundColor: '#0033A0' }}
-              data-testid="button-download-pdf"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Download full report
-            </Button>
-          )}
-
-          <div className="border-b border-gray-100 mb-8" />
-
           <p className="text-lg text-gray-700 leading-relaxed mb-8">
             {report.teaser}
           </p>
 
-          {report.content && (
-            <article className="prose prose-lg max-w-none">
-              <div className="text-gray-700 leading-relaxed whitespace-pre-line mb-10">
-                {report.content.intro}
+          {!accessResult.hasAccess ? (
+            <div className="my-8">
+              <AccessPaywall 
+                accessResult={accessResult}
+                report={report}
+                onLogin={handleLogin}
+                onUpgrade={handleUpgrade}
+                onPurchaseCredits={handlePurchaseCredits}
+              />
+              
+              <div className="mt-8 pt-8 border-t border-gray-100">
+                <p className="text-sm text-gray-500 text-center">
+                  The full content is available to members with appropriate access level.
+                </p>
               </div>
+            </div>
+          ) : (
+            <>
+              {report.pdfPath && (
+                <Button 
+                  size="lg"
+                  onClick={handleDownload}
+                  className="rounded-full mb-8"
+                  style={{ backgroundColor: '#0033A0' }}
+                  data-testid="button-download-pdf"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download full report
+                </Button>
+              )}
 
-              {report.content.sections.map((section, index) => (
-                <div key={index} className="mb-10">
-                  {index > 0 && <hr className="border-gray-100 my-10" />}
-                  <h2 
-                    className="text-2xl font-bold mb-4 text-gray-900"
+              <div className="border-b border-gray-100 mb-8" />
+
+              {report.content && (
+                <article className="prose prose-lg max-w-none">
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-line mb-10">
+                    {report.content.intro}
+                  </div>
+
+                  {report.content.sections.map((section, index) => (
+                    <div key={index} className="mb-10">
+                      {index > 0 && <hr className="border-gray-100 my-10" />}
+                      <h2 
+                        className="text-2xl font-bold mb-4 text-gray-900"
+                        style={{ fontFamily: 'DM Serif Display, serif' }}
+                      >
+                        {section.heading}
+                      </h2>
+                      <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                        {section.body}
+                      </div>
+                    </div>
+                  ))}
+                </article>
+              )}
+
+              {report.pdfPath && (
+                <div className="mt-12 pt-8 border-t border-gray-100 text-center">
+                  <h3 
+                    className="text-2xl font-bold mb-2 text-gray-900"
                     style={{ fontFamily: 'DM Serif Display, serif' }}
                   >
-                    {section.heading}
-                  </h2>
-                  <div className="text-gray-700 leading-relaxed whitespace-pre-line">
-                    {section.body}
-                  </div>
+                    Get the full story
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    Download the complete report with all insights, data, and strategic recommendations.
+                  </p>
+                  <Button 
+                    size="lg"
+                    onClick={handleDownload}
+                    className="rounded-full"
+                    style={{ backgroundColor: '#0033A0' }}
+                    data-testid="button-download-footer"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Download full report
+                  </Button>
                 </div>
-              ))}
-            </article>
-          )}
-
-          {report.pdfPath && (
-            <div className="mt-12 pt-8 border-t border-gray-100 text-center">
-              <h3 
-                className="text-2xl font-bold mb-2 text-gray-900"
-                style={{ fontFamily: 'DM Serif Display, serif' }}
-              >
-                Get the full story
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Download the complete report with all insights, data, and strategic recommendations.
-              </p>
-              <Button 
-                size="lg"
-                onClick={handleDownload}
-                className="rounded-full"
-                style={{ backgroundColor: '#0033A0' }}
-                data-testid="button-download-footer"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Download full report
-              </Button>
-            </div>
+              )}
+            </>
           )}
 
           {relatedReports.length > 0 && (

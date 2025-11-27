@@ -9,10 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Crown, CreditCard } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { Link } from "wouter";
 import reportsData from "@/data/reports.json";
+import { useAuth } from "@/contexts/AuthContext";
 
 const categoryCoverImages: Record<string, string> = {
   insights: "/assets/covers/insights-cover.png",
@@ -43,6 +44,8 @@ function getCategoryStyle(category: string) {
   return categoryColors[key] || categoryColors.insights;
 }
 
+type AccessLevel = "public" | "member" | "tier" | "paid";
+
 interface Report {
   id: number;
   category: string;
@@ -55,9 +58,58 @@ interface Report {
   pdfPath: string;
   tags: string[];
   isNew: boolean;
+  accessLevel?: AccessLevel;
+  allowedTiers?: string[];
+  creditType?: string;
+  creditCost?: number;
 }
 
-function ReportCard({ report }: { report: Report }) {
+function getAccessIndicator(report: Report, userTier?: string) {
+  const accessLevel = report.accessLevel || "public";
+  
+  if (accessLevel === "public") {
+    return null;
+  }
+  
+  if (accessLevel === "member") {
+    return (
+      <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 shadow-sm" title="Members only">
+        <Lock className="w-3.5 h-3.5 text-gray-600" />
+      </div>
+    );
+  }
+  
+  if (accessLevel === "tier") {
+    const allowedTiers = report.allowedTiers || [];
+    const tierHierarchy = ["STARTER", "GROWTH", "SCALE"];
+    const userTierIndex = userTier ? tierHierarchy.indexOf(userTier) : -1;
+    
+    const hasAccess = allowedTiers.some(tier => {
+      const requiredTierIndex = tierHierarchy.indexOf(tier);
+      return userTierIndex >= requiredTierIndex;
+    });
+    
+    if (!hasAccess) {
+      return (
+        <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 shadow-sm" title={`${allowedTiers[0]}+ tier required`}>
+          <Crown className="w-3.5 h-3.5 text-[#0033A0]" />
+        </div>
+      );
+    }
+  }
+  
+  if (accessLevel === "paid") {
+    return (
+      <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 shadow-sm" title="Credits required">
+        <CreditCard className="w-3.5 h-3.5 text-[#0033A0]" />
+      </div>
+    );
+  }
+  
+  return null;
+}
+
+function ReportCard({ report, userTier }: { report: Report; userTier?: string }) {
   const formattedDate = new Date(report.date).toLocaleDateString('en-GB', {
     day: '2-digit',
     month: '2-digit',
@@ -66,6 +118,7 @@ function ReportCard({ report }: { report: Report }) {
 
   const categoryStyle = getCategoryStyle(report.category);
   const coverImage = getCoverImage(report.category);
+  const accessIndicator = getAccessIndicator(report, userTier);
 
   return (
     <Link href={`/portal/insights/${report.slug}`}>
@@ -104,6 +157,7 @@ function ReportCard({ report }: { report: Report }) {
             alt={report.category}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
+          {accessIndicator}
         </div>
         
         <div className="p-4 flex flex-col flex-1">
@@ -151,6 +205,8 @@ export default function TrendsInsights() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [showAll, setShowAll] = useState(false);
+  const { user } = useAuth();
+  const userTier = user?.membershipTier;
 
   const filteredAndSortedReports = useMemo(() => {
     let filtered = (reportsData as Report[]).filter((report) => {
@@ -247,7 +303,7 @@ export default function TrendsInsights() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {displayedReports.map((report) => (
-              <ReportCard key={report.id} report={report as Report} />
+              <ReportCard key={report.id} report={report as Report} userTier={userTier} />
             ))}
           </div>
 
