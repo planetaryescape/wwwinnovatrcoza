@@ -99,6 +99,7 @@ export default function OrderFormDialog({
         const form = document.createElement("form");
         form.method = "POST";
         form.action = checkout.data.action;
+        form.target = "_blank"; // Open in new tab to avoid iframe restrictions
 
         Object.entries(checkout.data.fields).forEach(([key, value]) => {
           const input = document.createElement("input");
@@ -110,6 +111,13 @@ export default function OrderFormDialog({
 
         document.body.appendChild(form);
         form.submit();
+        
+        // Close dialog after redirecting
+        onOpenChange(false);
+        toast({
+          title: "Payment Window Opened",
+          description: "Complete your payment in the new tab.",
+        });
       } else {
         toast({
           title: "Payment Initiated",
