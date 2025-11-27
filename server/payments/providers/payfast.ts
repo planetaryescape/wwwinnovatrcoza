@@ -39,32 +39,6 @@ const PAYFAST_FIELD_ORDER = [
   "cycles",
 ];
 
-// ITN (webhook) response field order as PayFast sends them
-const PAYFAST_ITN_FIELD_ORDER = [
-  "m_payment_id",
-  "pf_payment_id",
-  "payment_status",
-  "item_name",
-  "item_description",
-  "amount_gross",
-  "amount_fee",
-  "amount_net",
-  "custom_str1",
-  "custom_str2",
-  "custom_str3",
-  "custom_str4",
-  "custom_str5",
-  "custom_int1",
-  "custom_int2",
-  "custom_int3",
-  "custom_int4",
-  "custom_int5",
-  "name_first",
-  "name_last",
-  "email_address",
-  "merchant_id",
-];
-
 export class PayFastProvider implements PaymentProvider {
   readonly key = "payfast";
   readonly name = "PayFast";
@@ -113,15 +87,15 @@ export class PayFastProvider implements PaymentProvider {
     let signatureParts: string[] = [];
 
     if (forWebhook) {
-      // For webhook/ITN validation: use PayFast's ITN field order, include all values (even empty)
-      for (const key of PAYFAST_ITN_FIELD_ORDER) {
-        if (key in dataCopy) {
-          const value = String(dataCopy[key] ?? "");
-          signatureParts.push(`${key}=${this.pfEncode(value)}`);
-        }
+      // For ITN validation: PayFast sends payload in alphabetical order
+      // Generate signature in same alphabetical order, include all values (even empty)
+      const sortedKeys = Object.keys(dataCopy).sort();
+      for (const key of sortedKeys) {
+        const value = String(dataCopy[key] ?? "");
+        signatureParts.push(`${key}=${this.pfEncode(value)}`);
       }
     } else {
-      // For outgoing requests: use PayFast's specific field order, exclude empty values
+      // For outgoing checkout requests: use PayFast's specific field order, exclude empty values
       for (const key of PAYFAST_FIELD_ORDER) {
         if (key in dataCopy) {
           const value = String(dataCopy[key]).trim();
