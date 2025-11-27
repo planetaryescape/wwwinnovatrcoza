@@ -278,44 +278,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const existingSubscription = await storage.getSubscriptionByToken(subscriptionData.token);
           
           if (existingSubscription) {
-            // Update existing subscription with new payment
-            const cyclesCompleted = (existingSubscription.cyclesCompleted || 0) + 1;
-            const nextBillingDate = new Date();
-            nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
-            
-            await storage.updateSubscription(existingSubscription.id, {
-              cyclesCompleted,
-              nextBillingDate,
-              status: cyclesCompleted >= existingSubscription.cyclesTotal ? "completed" : "active",
-            });
-            
-            console.log("Subscription updated - Cycles completed:", cyclesCompleted);
-          } else if (eventType === "subscription.created" && intent) {
-            // Create new subscription record
+            // Update existing subscription with new payment (only for subsequent payments, not first)
+            if (eventType === "subscription.payment") {
+              const cyclesCompleted = (existingSubscription.cyclesCompleted || 0) + 1;
+              const nextBillingDate = new Date();
+              nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+              
+              await storage.updateSubscription(existingSubscription.id, {
+                cyclesCompleted,
+                nextBillingDate,
+                status: cyclesCompleted >= existingSubscription.cyclesTotal ? "completed" : "active",
+              });
+              
+              console.log("Subscription updated - Cycles completed:", cyclesCompleted);
+            }
+          } else if (intent) {
+            // Create new subscription record on first payment or subscription.created event
             const metadata = intent.metadata as Record<string, any> | null;
             const pendingOrder = metadata?.pendingOrder as Record<string, any> | undefined;
+            const subscriptionOptions = metadata?.subscriptionOptions as Record<string, any> | undefined;
             
             const nextBillingDate = new Date();
             nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
             
-            await storage.createSubscription({
+            const newSubscription = await storage.createSubscription({
               userId: pendingOrder?.userId || null,
               payfastToken: subscriptionData.token,
               customerName: subscriptionData.customerName || pendingOrder?.customerName || "Unknown",
               customerEmail: subscriptionData.customerEmail || pendingOrder?.customerEmail || "",
               customerCompany: pendingOrder?.customerCompany || null,
               planType: pendingOrder?.purchaseType || "entry_membership",
-              amount: String(subscriptionData.amount || pendingOrder?.recurringAmount || 5000),
+              amount: String(subscriptionData.amount || pendingOrder?.recurringAmount || subscriptionOptions?.recurringAmount || 5000),
               currency: "ZAR",
-              frequency: 3, // Monthly
-              cyclesTotal: 12, // 12 months
+              frequency: subscriptionOptions?.frequency || 3, // Monthly
+              cyclesTotal: subscriptionOptions?.cycles || 12, // 12 months
               cyclesCompleted: 1, // First payment just completed
               status: "active",
               nextBillingDate,
               startDate: new Date(),
             });
             
-            console.log("New subscription created for:", subscriptionData.customerEmail);
+            console.log("New subscription created:", newSubscription.id, "for:", subscriptionData.customerEmail || pendingOrder?.customerEmail);
           }
         } else if (eventType === "subscription.cancelled") {
           // Handle subscription cancellation
