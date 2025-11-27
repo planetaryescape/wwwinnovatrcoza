@@ -79,14 +79,11 @@ export class PayFastProvider implements PaymentProvider {
   }
 
   // Build param string from PayFast data (for ITN validation)
-  // Sort alphabetically (multer reorganizes order), excludes signature and empty values
+  // Uses original order, excludes signature and empty values
   private buildParamString(pfData: Record<string, any>): string {
     const parts: string[] = [];
     
-    // Sort keys alphabetically (required because multer reorganizes POST data order)
-    const sortedKeys = Object.keys(pfData).sort();
-    
-    for (const key of sortedKeys) {
+    for (const key of Object.keys(pfData)) {
       if (key === "signature") continue;
       
       const value = String(pfData[key] ?? "").trim();
