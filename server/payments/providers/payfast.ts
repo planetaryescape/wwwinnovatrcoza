@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import type { PaymentProvider, CheckoutPayload, PaymentConfig } from "../types";
 import type { Order, PaymentIntent, InsertPaymentIntent } from "@shared/schema";
-import { isValidPayFastIp } from "../utils";
+import { isValidPayFastIp, PAYFAST_VALID_HOSTS } from "../utils";
 
 // PayFast requires fields in this SPECIFIC ORDER for checkout form (not alphabetical!)
 // This is the order defined in PayFast's attributes documentation
@@ -124,15 +124,25 @@ export class PayFastProvider implements PaymentProvider {
 
   private async verifyWithPayFastServer(postedData: Record<string, any>): Promise<boolean> {
     try {
-      const response = await fetch(this.getValidationUrl(), {
+      const validationUrl = this.getValidationUrl();
+      const urlObj = new URL(validationUrl);
+      
+      // Verify we're calling a valid PayFast host
+      if (!PAYFAST_VALID_HOSTS.includes(urlObj.hostname)) {
+        console.error("Invalid PayFast validation host:", urlObj.hostname);
+        return false;
+      }
+
+      const response = await fetch(validationUrl, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams(postedData).toString(),
       });
 
       const result = await response.text();
-      console.log("PayFast server validation response:", result);
-      return result === "VALID";
+      console.log("PayFast server validation URL:", validationUrl);
+      console.log("PayFast server validation response:", result.trim());
+      return result.trim() === "VALID";
     } catch (error) {
       console.error("PayFast server validation failed:", error);
       return false;

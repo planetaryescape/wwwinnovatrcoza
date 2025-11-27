@@ -21,6 +21,19 @@ export function checkCidr(ip: string, cidr: string): boolean {
   return (networkNum & mask) === (ipNum & mask);
 }
 
+// Valid PayFast hosts for validation
+export const PAYFAST_VALID_HOSTS = [
+  'www.payfast.co.za',
+  'sandbox.payfast.co.za',
+  'w1w.payfast.co.za',
+  'w2w.payfast.co.za'
+];
+
+export function isValidPayFastHost(host?: string): boolean {
+  if (!host) return false;
+  return PAYFAST_VALID_HOSTS.includes(host.toLowerCase());
+}
+
 export function isValidPayFastIp(ip?: string): boolean {
   if (!ip) return false;
 
