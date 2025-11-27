@@ -8,9 +8,9 @@ interface Stat {
 
 const stats: Stat[] = [
   { value: "200+", label: "Studies" },
-  { value: "10+", label: "Markets" },
+  { value: "25+", label: "Markets" },
+  { value: "44M+", label: "Panel" },
   { value: "10+", label: "Industries" },
-  { value: "45k+", label: "Consumer Responses" },
 ];
 
 function AnimatedNumber({ target, suffix = "" }: { target: number; suffix?: string }) {
@@ -68,7 +68,11 @@ export default function StatsCounter() {
           {stats.map((stat, index) => (
             <div key={index} className="text-center" data-testid={`stat-${index}`}>
               <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
-                {stat.value.includes("k+") ? (
+                {stat.value.includes("M+") ? (
+                  <>
+                    <AnimatedNumber target={parseInt(stat.value)} />M+
+                  </>
+                ) : stat.value.includes("k+") ? (
                   <>
                     <AnimatedNumber target={parseInt(stat.value)} />k+
                   </>
