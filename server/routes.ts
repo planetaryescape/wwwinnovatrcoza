@@ -255,7 +255,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // With multer, form fields are in req.body as an object
       const formData = req.body;
       
-      const { intent, orderCreated } = await paymentService.handleWebhook("payfast", formData, req.headers as Record<string, string>);
+      const { intent, orderCreated, subscriptionData, eventType } = await paymentService.handleWebhook("payfast", formData, req.headers as Record<string, string>);
+      
+      // Handle subscription events
+      if (subscriptionData?.token && eventType) {
+        console.log("=== Processing Subscription Event ===");
+        console.log("Event Type:", eventType);
+        console.log("Token:", subscriptionData.token);
+        
+        if (eventType === "subscription.created" || eventType === "subscription.payment") {
+          // Check if subscription already exists
+          const existingSubscription = await storage.getSubscriptionByToken(subscriptionData.token);
+          
+          if (existingSubscription) {
+            // Update existing subscription with new payment
+            const cyclesCompleted = (existingSubscription.cyclesCompleted || 0) + 1;
+            const nextBillingDate = new Date();
+            nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+            
+            await storage.updateSubscription(existingSubscription.id, {
+              cyclesCompleted,
+              nextBillingDate,
+              status: cyclesCompleted >= existingSubscription.cyclesTotal ? "completed" : "active",
+            });
+            
+            console.log("Subscription updated - Cycles completed:", cyclesCompleted);
+          } else if (eventType === "subscription.created" && intent) {
+            // Create new subscription record
+            const metadata = intent.metadata as Record<string, any> | null;
+            const pendingOrder = metadata?.pendingOrder as Record<string, any> | undefined;
+            
+            const nextBillingDate = new Date();
+            nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+            
+            await storage.createSubscription({
+              userId: pendingOrder?.userId || null,
+              payfastToken: subscriptionData.token,
+              customerName: subscriptionData.customerName || pendingOrder?.customerName || "Unknown",
+              customerEmail: subscriptionData.customerEmail || pendingOrder?.customerEmail || "",
+              customerCompany: pendingOrder?.customerCompany || null,
+              planType: pendingOrder?.purchaseType || "entry_membership",
+              amount: String(subscriptionData.amount || pendingOrder?.recurringAmount || 5000),
+              currency: "ZAR",
+              frequency: 3, // Monthly
+              cyclesTotal: 12, // 12 months
+              cyclesCompleted: 1, // First payment just completed
+              status: "active",
+              nextBillingDate,
+              startDate: new Date(),
+            });
+            
+            console.log("New subscription created for:", subscriptionData.customerEmail);
+          }
+        } else if (eventType === "subscription.cancelled") {
+          // Handle subscription cancellation
+          const existingSubscription = await storage.getSubscriptionByToken(subscriptionData.token);
+          if (existingSubscription) {
+            await storage.updateSubscription(existingSubscription.id, {
+              status: "cancelled",
+              cancelledAt: new Date(),
+            });
+            console.log("Subscription cancelled:", existingSubscription.id);
+          }
+        }
+        
+        console.log("=====================================");
+      }
       
       // Send emails only after successful payment and order creation
       if (intent && orderCreated) {
@@ -517,6 +582,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const deals = await storage.getAllDeals();
       res.json(deals);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Subscription management endpoints
+  app.get("/api/admin/subscriptions", async (req, res) => {
+    try {
+      const subscriptions = await storage.getAllSubscriptions();
+      res.json(subscriptions);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/admin/subscriptions/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const subscription = await storage.getSubscription(id);
+      if (!subscription) {
+        return res.status(404).json({ error: "Subscription not found" });
+      }
+      res.json(subscription);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/admin/subscriptions/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const subscription = await storage.getSubscription(id);
+      if (!subscription) {
+        return res.status(404).json({ error: "Subscription not found" });
+      }
+      await storage.updateSubscription(id, req.body);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // User subscription endpoints (for viewing own subscriptions)
+  app.get("/api/subscriptions/email/:email", async (req, res) => {
+    try {
+      const { email } = req.params;
+      const subscriptions = await storage.getSubscriptionsByEmail(email);
+      res.json(subscriptions);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/subscriptions/user/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const subscriptions = await storage.getSubscriptionsByUserId(userId);
+      res.json(subscriptions);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Cancel subscription endpoint
+  app.post("/api/subscriptions/:id/cancel", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const subscription = await storage.getSubscription(id);
+      if (!subscription) {
+        return res.status(404).json({ error: "Subscription not found" });
+      }
+      
+      // Update subscription status to cancelled
+      await storage.updateSubscription(id, {
+        status: "cancelled",
+        cancelledAt: new Date(),
+      });
+      
+      // Note: In production, you would also need to cancel with PayFast API
+      // using the subscription token to stop future billing
+      console.log(`Subscription ${id} marked as cancelled. PayFast token: ${subscription.payfastToken}`);
+      
+      res.json({ success: true, message: "Subscription cancelled successfully" });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }

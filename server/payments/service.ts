@@ -171,7 +171,20 @@ export class PaymentService {
     providerKey: string,
     rawBody: string | Buffer | Record<string, any>,
     headers: Record<string, string>
-  ): Promise<{ intent: PaymentIntent | null; orderCreated: boolean }> {
+  ): Promise<{ 
+    intent: PaymentIntent | null; 
+    orderCreated: boolean;
+    subscriptionData?: {
+      token?: string;
+      billingDate?: string;
+      cyclesCompleted?: number;
+      cyclesRemaining?: number;
+      amount?: number;
+      customerEmail?: string;
+      customerName?: string;
+    };
+    eventType?: string;
+  }> {
     const provider = this.getProvider(providerKey);
     if (!provider) {
       throw new Error(`Payment provider ${providerKey} not available`);
@@ -310,6 +323,14 @@ export class PaymentService {
       }
     }
 
-    return { intent, orderCreated };
+    // Return subscription data if available (from PayFast provider)
+    const subscriptionData = (result as any).subscriptionData;
+
+    return { 
+      intent, 
+      orderCreated,
+      subscriptionData,
+      eventType: result.eventType,
+    };
   }
 }

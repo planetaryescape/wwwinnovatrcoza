@@ -184,7 +184,13 @@ export class PayFastProvider implements PaymentProvider {
     };
   }
 
-  async getCheckoutPayload(intent: PaymentIntent, order: Order): Promise<CheckoutPayload> {
+  async getCheckoutPayload(intent: PaymentIntent, order: Order, subscriptionOptions?: {
+    subscriptionType?: number;  // 1 = subscription, 2 = ad-hoc agreement
+    frequency?: number;         // 3 = Monthly, 4 = Quarterly, 5 = Biannually, 6 = Annually
+    cycles?: number;            // Number of billing cycles (0 = indefinite)
+    billingDate?: number;       // Day of month for billing (1-28)
+    recurringAmount?: number;   // Amount for recurring payments
+  }): Promise<CheckoutPayload> {
     const baseUrl = process.env.DEV_URL || "http://localhost:5000";
     
     const returnUrl = `${baseUrl}/payment/return`;
@@ -213,6 +219,39 @@ export class PayFastProvider implements PaymentProvider {
       email_confirmation: "1",
     };
 
+    // Add subscription fields if this is a recurring payment
+    if (subscriptionOptions) {
+      // subscription_type: 1 = subscription (fixed recurring), 2 = ad-hoc agreement
+      if (subscriptionOptions.subscriptionType !== undefined) {
+        formData.subscription_type = String(subscriptionOptions.subscriptionType);
+      }
+      
+      // frequency: 3=Monthly, 4=Quarterly, 5=Biannually, 6=Annually
+      if (subscriptionOptions.frequency !== undefined) {
+        formData.frequency = String(subscriptionOptions.frequency);
+      }
+      
+      // cycles: number of billing cycles (0 = indefinite)
+      if (subscriptionOptions.cycles !== undefined) {
+        formData.cycles = String(subscriptionOptions.cycles);
+      }
+      
+      // billing_date: day of month (1-28) when billing occurs
+      if (subscriptionOptions.billingDate !== undefined) {
+        formData.billing_date = String(subscriptionOptions.billingDate);
+      }
+      
+      // recurring_amount: amount for each recurring payment
+      if (subscriptionOptions.recurringAmount !== undefined) {
+        formData.recurring_amount = subscriptionOptions.recurringAmount.toFixed(2);
+      }
+
+      console.log("=== Subscription Payment ===");
+      console.log("Type:", subscriptionOptions.subscriptionType === 1 ? "Fixed Subscription" : "Ad-hoc Agreement");
+      console.log("Frequency:", subscriptionOptions.frequency === 3 ? "Monthly" : subscriptionOptions.frequency);
+      console.log("Cycles:", subscriptionOptions.cycles);
+    }
+
     // Remove empty values
     Object.keys(formData).forEach((key) => {
       if (formData[key] === "") {
@@ -234,6 +273,7 @@ export class PayFastProvider implements PaymentProvider {
       data: {
         action: this.getBaseUrl(),
         fields: { ...formData, signature },
+        isSubscription: !!subscriptionOptions,
       },
     };
   }
@@ -243,6 +283,15 @@ export class PayFastProvider implements PaymentProvider {
     status: string;
     eventType: string;
     verified: boolean;
+    subscriptionData?: {
+      token?: string;
+      billingDate?: string;
+      cyclesCompleted?: number;
+      cyclesRemaining?: number;
+      amount?: number;
+      customerEmail?: string;
+      customerName?: string;
+    };
   }> {
     let data: Record<string, string> = {};
     
@@ -301,14 +350,68 @@ export class PayFastProvider implements PaymentProvider {
     
     console.log("Sandbox mode:", isSandbox);
     console.log("Fully verified:", fullyVerified);
+
+    // Detect subscription events
+    // PayFast sends token when a subscription is created or when a recurring payment is processed
+    const isSubscription = !!data.token;
+    let eventType = `payment.${data.payment_status?.toLowerCase()}`;
+    
+    // Determine specific subscription event type
+    if (isSubscription) {
+      // Check if this is a subscription creation (first payment) or recurring payment
+      const billingDate = data.billing_date;
+      
+      if (data.payment_status === "COMPLETE") {
+        // If token is present and this is a complete payment, it's either:
+        // - subscription.created (first successful payment with token generation)
+        // - subscription.payment (recurring payment)
+        // We can check item_name or custom fields to determine which
+        eventType = billingDate ? "subscription.payment" : "subscription.created";
+      } else if (data.payment_status === "CANCELLED") {
+        eventType = "subscription.cancelled";
+      }
+      
+      console.log("=== Subscription Event ===");
+      console.log("Token:", data.token);
+      console.log("Billing Date:", billingDate);
+      console.log("Event Type:", eventType);
+    }
+
     console.log("================================");
 
-    return {
+    const result: {
+      intentId: string;
+      status: string;
+      eventType: string;
+      verified: boolean;
+      subscriptionData?: {
+        token?: string;
+        billingDate?: string;
+        cyclesCompleted?: number;
+        cyclesRemaining?: number;
+        amount?: number;
+        customerEmail?: string;
+        customerName?: string;
+      };
+    } = {
       intentId: data.m_payment_id,
       status: data.payment_status === "COMPLETE" ? "succeeded" : "failed",
-      eventType: `payment.${data.payment_status?.toLowerCase()}`,
+      eventType,
       verified: fullyVerified,
     };
+
+    // Include subscription data if this is a subscription event
+    if (isSubscription) {
+      result.subscriptionData = {
+        token: data.token,
+        billingDate: data.billing_date,
+        amount: data.amount_gross ? parseFloat(data.amount_gross) : undefined,
+        customerEmail: data.email_address,
+        customerName: data.name_first ? `${data.name_first} ${data.name_last || ""}`.trim() : undefined,
+      };
+    }
+
+    return result;
   }
 
   async refund(intentId: string, amount?: number): Promise<void> {
