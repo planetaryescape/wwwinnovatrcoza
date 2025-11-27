@@ -79,17 +79,15 @@ export class PayFastProvider implements PaymentProvider {
   }
 
   // Build param string from PayFast data (for ITN validation)
-  // Uses original order, excludes signature and empty values
+  // Uses original order, excludes only signature field, INCLUDES empty values
   private buildParamString(pfData: Record<string, any>): string {
     const parts: string[] = [];
     
     for (const key of Object.keys(pfData)) {
       if (key === "signature") continue;
       
-      const value = String(pfData[key] ?? "").trim();
-      // Exclude empty values
-      if (value === "") continue;
-      
+      const value = String(pfData[key] ?? "");
+      // INCLUDE empty values (do NOT skip them)
       parts.push(`${key}=${this.pfEncode(value)}`);
     }
     
