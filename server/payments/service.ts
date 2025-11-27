@@ -272,6 +272,8 @@ export class PaymentService {
           metadata: { ...metadata, isPending: false, actualOrderId: order.id },
         });
 
+        // Update local intent object with real order ID for return
+        intent.orderId = order.id;
         orderCreated = true;
       } else {
         // Legacy flow - update existing order
