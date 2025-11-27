@@ -71,6 +71,13 @@ export class PayFastProvider implements PaymentProvider {
       : "https://www.payfast.co.za/eng/query/validate";
   }
 
+  private pfEncode(value: string): string {
+    return encodeURIComponent(value.trim())
+      .replace(/%20/g, "+")   // spaces -> +
+      .replace(/\(/g, "%28")  // encode (
+      .replace(/\)/g, "%29"); // encode )
+  }
+
   private generateSignature(data: Record<string, any>, forWebhook: boolean = false): string {
     // Delete any existing signature fields first
     const dataCopy = { ...data };
@@ -85,7 +92,7 @@ export class PayFastProvider implements PaymentProvider {
       for (const key of Object.keys(dataCopy)) {
         const value = String(dataCopy[key]).trim();
         if (value !== "") {
-          signatureParts.push(`${key}=${encodeURIComponent(value).replace(/%20/g, "+")}`);
+          signatureParts.push(`${key}=${this.pfEncode(value)}`);
         }
       }
     } else {
@@ -94,7 +101,7 @@ export class PayFastProvider implements PaymentProvider {
         if (key in dataCopy) {
           const value = String(dataCopy[key]).trim();
           if (value !== "") {
-            signatureParts.push(`${key}=${encodeURIComponent(value).replace(/%20/g, "+")}`);
+            signatureParts.push(`${key}=${this.pfEncode(value)}`);
           }
         }
       }
@@ -105,7 +112,7 @@ export class PayFastProvider implements PaymentProvider {
     // Append passphrase if configured
     const credentials = this.getCredentials();
     if (credentials.passphrase) {
-      signatureString += `&passphrase=${encodeURIComponent(credentials.passphrase.trim()).replace(/%20/g, "+")}`;
+      signatureString += `&passphrase=${this.pfEncode(credentials.passphrase)}`;
     }
 
     const hash = crypto.createHash("md5").update(signatureString).digest("hex");
