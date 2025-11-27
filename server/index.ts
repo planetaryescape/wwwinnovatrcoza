@@ -21,11 +21,6 @@ app.use(express.urlencoded({
   }
 }));
 
-app.post("/api/webhooks/:provider", express.raw({ type: "application/x-www-form-urlencoded", limit: "1mb" }), (req, res, next) => {
-  req.rawBody = req.body;
-  next();
-});
-
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
