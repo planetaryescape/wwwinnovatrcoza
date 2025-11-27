@@ -24,10 +24,10 @@ interface OrderItem {
 
 interface SubscriptionOptions {
   enabled: boolean;
-  subscriptionType?: number;  // 1 = fixed subscription
-  frequency?: number;         // 3 = Monthly
-  cycles?: number;            // Number of billing cycles
-  recurringAmount?: number;   // Amount per billing cycle
+  subscriptionType?: number; // 1 = fixed subscription
+  frequency?: number; // 3 = Monthly
+  cycles?: number; // Number of billing cycles
+  recurringAmount?: number; // Amount per billing cycle
 }
 
 interface OrderFormDialogProps {
@@ -87,7 +87,11 @@ export default function OrderFormDialog({
   });
 
   const initiatePaymentMutation = useMutation({
-    mutationFn: async (data: { order: any; items: OrderItem[]; subscription?: SubscriptionOptions }) => {
+    mutationFn: async (data: {
+      order: any;
+      items: OrderItem[];
+      subscription?: SubscriptionOptions;
+    }) => {
       // Create payment checkout directly - order will be created on successful payment
       const requestBody: Record<string, any> = {
         customerName: data.order.customerName,
@@ -99,18 +103,23 @@ export default function OrderFormDialog({
         items: data.items,
         providerKey: "payfast",
       };
-      
+
       // Add subscription options if this is a recurring payment
       if (data.subscription?.enabled) {
         requestBody.subscription = {
           subscriptionType: data.subscription.subscriptionType || 1,
           frequency: data.subscription.frequency || 3, // Monthly
           cycles: data.subscription.cycles || 12, // 12 months default
-          recurringAmount: data.subscription.recurringAmount || Number(data.order.amount),
+          recurringAmount:
+            data.subscription.recurringAmount || Number(data.order.amount),
         };
       }
-      
-      const response = await apiRequest("POST", "/api/payment/checkout", requestBody);
+
+      const response = await apiRequest(
+        "POST",
+        "/api/payment/checkout",
+        requestBody,
+      );
       const checkout = await response.json();
       return { checkout, isSubscription: data.subscription?.enabled };
     },
@@ -133,12 +142,14 @@ export default function OrderFormDialog({
 
         document.body.appendChild(form);
         form.submit();
-        
+
         // Close dialog after redirecting
         onOpenChange(false);
         toast({
-          title: isSubscription ? "Subscription Payment Started" : "Payment Window Opened",
-          description: isSubscription 
+          title: isSubscription
+            ? "Subscription Payment Started"
+            : "Payment Window Opened",
+          description: isSubscription
             ? "Complete your subscription setup in the new tab."
             : "Complete your payment in the new tab.",
         });
@@ -338,7 +349,7 @@ export default function OrderFormDialog({
             >
               Cancel
             </Button>
-            <Button
+            {/* <Button
               type="button"
               onClick={handleSubmit}
               disabled={
@@ -355,7 +366,7 @@ export default function OrderFormDialog({
               ) : (
                 "Place Order"
               )}
-            </Button>
+            </Button> */}
             <Button
               type="button"
               onClick={handlePayOnline}

@@ -1,0 +1,540 @@
+You are updating only the Trends and Insights section inside the Innovatr Members Portal.
+
+Your job is to rebuild this section so that it:
+
+Uses the Innovatr brand palette only
+
+Looks clean, white and research driven
+
+Shows larger cards with cover images in a two column grid
+
+Uses a bi weekly publishing cadence across all content
+
+Renders full posts using the existing Innovatr Intelligence articles
+
+Follow every step below exactly.
+
+1. BRAND AND COLOUR SYSTEM
+
+Lock the UI to the Innovatr palette.
+
+Primary UI
+
+Background: #FFFFFF
+
+Primary text: very dark grey or #000000
+
+Primary accent: Innovatr Blue #0033A0
+
+Primary buttons:
+
+Solid Innovatr Blue with white text, or
+
+White with a blue outline and blue text
+
+Secondary accents
+Use these only for small elements, never as full page backgrounds:
+
+Lavender from the Insights artwork
+
+Soft peach from the Launch artwork
+
+Soft coral from the Launch artwork
+
+Purple blue tone from Innovatr creative
+
+Secondary accents can only appear in:
+
+Category cover images
+
+Tag pills
+
+Small dividers or very thin lines
+
+The overall page must still feel mostly white with Innovatr Blue as the main accent.
+
+Typography
+
+Headings and titles: DM Serif Display
+
+Body text, labels, metadata, buttons: Roboto
+
+Use generous line height and a calm, minimal look. No heavy blocks of colour behind text.
+
+2. CATEGORY TO COVER IMAGE MAPPING
+
+Use category based cover images for every card and every full post.
+
+Map categories to images like this:
+
+Insights → /assets/covers/insights.png
+
+Inside → /assets/covers/inside.png
+
+Launch → /assets/covers/launch.png
+
+IRL → /assets/covers/irl.png
+
+Rules:
+
+Each card must show its coverImage at the top.
+
+On the detail page, use the same coverImage as a full width hero image above the title.
+
+3. DATA FILE: /data/reports.json
+
+Create a file at /data/reports.json.
+
+It must export exactly the JSON array shown below.
+Do not change the IDs, dates, titles, slugs, tags or paths.
+
+The dates are already set up as a bi weekly cadence starting in November 2025 and stepping back roughly nine months.
+
+[
+  {
+    "id": 1,
+    "category": "Insights",
+    "industry": "FMCG / Food",
+    "date": "2025-11-18",
+    "title": "Cutting Back, But Not on Snacks: The New Non-Negotiable Treat",
+    "teaser": "Even as prices climb South Africans are holding onto their treat fund because small daily indulgences have become emotional essentials.",
+    "slug": "cutting-back-but-not-on-snacks",
+    "coverImage": "/assets/covers/insights.png",
+    "pdfPath": "/assets/reports/cutting-back-but-not-on-snacks.pdf",
+    "tags": ["FMCG", "Snacking", "Consumer Behaviour", "Emotional Economy"],
+    "isNew": true
+  },
+  {
+    "id": 2,
+    "category": "Insights",
+    "industry": "Financial Services",
+    "date": "2025-11-04",
+    "title": "Banking Monogamy Is Dead",
+    "teaser": "South Africans are mixing and matching banks using multiple providers for better value convenience and trust.",
+    "slug": "banking-monogamy-is-dead",
+    "coverImage": "/assets/covers/insights.png",
+    "pdfPath": "/assets/reports/banking-monogamy-is-dead.pdf",
+    "tags": ["Financial Services", "Consumer Loyalty", "Digital Banking"],
+    "isNew": true
+  },
+  {
+    "id": 3,
+    "category": "Insights",
+    "industry": "Food",
+    "date": "2025-10-21",
+    "title": "From Vegan to Vital: The Protein Comeback",
+    "teaser": "Vegan fatigue is real and protein is back as South Africans swap ideology for food that delivers energy confidence and results.",
+    "slug": "from-vegan-to-vital-the-protein-comeback",
+    "coverImage": "/assets/covers/insights.png",
+    "pdfPath": "/assets/reports/from-vegan-to-vital-the-protein-comeback.pdf",
+    "tags": ["Food", "Protein", "Health Trends", "Consumer Insights"],
+    "isNew": false
+  },
+  {
+    "id": 4,
+    "category": "Insights",
+    "industry": "Beverages",
+    "date": "2025-10-07",
+    "title": "The Moderation Movement: How Drinking Culture Is Growing Up",
+    "teaser": "Drinking culture is maturing as South Africans choose mindful balance over excess and treat moderation as a new status symbol.",
+    "slug": "the-moderation-movement",
+    "coverImage": "/assets/covers/insights.png",
+    "pdfPath": "/assets/reports/the-moderation-movement.pdf",
+    "tags": ["Beverages", "Moderation", "Health and Wellness"],
+    "isNew": false
+  },
+  {
+    "id": 5,
+    "category": "Launch",
+    "industry": "Food & Beverage",
+    "date": "2025-09-23",
+    "title": "The Oat-Based Breakfast Revolution",
+    "teaser": "A ready to drink oat breakfast is turning hectic mornings into portable functional and emotionally satisfying rituals.",
+    "slug": "the-oat-based-breakfast-revolution",
+    "coverImage": "/assets/covers/launch.png",
+    "pdfPath": "/assets/reports/the-oat-based-breakfast-revolution.pdf",
+    "tags": ["Launch", "Functional Food", "Breakfast", "Beverages"],
+    "isNew": false
+  },
+  {
+    "id": 6,
+    "category": "Inside",
+    "industry": "All",
+    "date": "2025-09-09",
+    "title": "Predicting Choice Before It Happens",
+    "teaser": "The Market Share Simulator models how people choose between ideas in real competitive moments using behavioural Test24 data.",
+    "slug": "predicting-choice-before-it-happens",
+    "coverImage": "/assets/covers/inside.png",
+    "pdfPath": "/assets/reports/predicting-choice-before-it-happens.pdf",
+    "tags": ["Tools", "Market Share Simulator", "Behavioural Data"],
+    "isNew": false
+  },
+  {
+    "id": 7,
+    "category": "Insights",
+    "industry": "All",
+    "date": "2025-08-26",
+    "title": "Insights That Speak for Themselves",
+    "teaser": "Storyteller turns complex research outputs into simple visual narratives so every result becomes a clear decision ready story.",
+    "slug": "insights-that-speak-for-themselves",
+    "coverImage": "/assets/covers/insights.png",
+    "pdfPath": "/assets/reports/insights-that-speak-for-themselves.pdf",
+    "tags": ["Storyteller", "Insight Communication", "Data Storytelling"],
+    "isNew": false
+  },
+  {
+    "id": 8,
+    "category": "Launch",
+    "industry": "Food",
+    "date": "2025-08-12",
+    "title": "Cadbury Pocket-Sized Joy",
+    "teaser": "Cadbury Pocket Sized Joy is a small format chocolate that delivers feel good permission to treat moments on the move.",
+    "slug": "cadbury-pocket-sized-joy",
+    "coverImage": "/assets/covers/launch.png",
+    "pdfPath": "/assets/reports/cadbury-pocket-sized-joy.pdf",
+    "tags": ["Confectionery", "Format Innovation", "Micro Indulgence"],
+    "isNew": false
+  },
+  {
+    "id": 9,
+    "category": "Launch",
+    "industry": "On-Demand Services",
+    "date": "2025-07-29",
+    "title": "The Race for Instant Gratification",
+    "teaser": "On demand platforms are teaching South Africans to value time saved as much as money pushing convenience into emotional territory.",
+    "slug": "the-race-for-instant-gratification",
+    "coverImage": "/assets/covers/launch.png",
+    "pdfPath": "/assets/reports/the-race-for-instant-gratification.pdf",
+    "tags": ["On Demand", "Convenience", "Customer Experience"],
+    "isNew": false
+  },
+  {
+    "id": 10,
+    "category": "Launch",
+    "industry": "Food & Subscription Services",
+    "date": "2025-07-15",
+    "title": "From Meal Kits to Snack Boxes",
+    "teaser": "Meal and snack subscriptions are giving South Africans control calm and confidence in how they manage mealtimes.",
+    "slug": "from-meal-kits-to-snack-boxes",
+    "coverImage": "/assets/covers/launch.png",
+    "pdfPath": "/assets/reports/from-meal-kits-to-snack-boxes.pdf",
+    "tags": ["Subscription Services", "Food", "Convenience"],
+    "isNew": false
+  },
+  {
+    "id": 11,
+    "category": "Inside",
+    "industry": "Research and Insight Technology",
+    "date": "2025-07-01",
+    "title": "Introducing AI Qual: Get to the Why Faster",
+    "teaser": "AI Qual turns open responses into clear visual stories so teams can uncover the why behind the data in hours not weeks.",
+    "slug": "introducing-ai-qual-get-to-the-why-faster",
+    "coverImage": "/assets/covers/inside.png",
+    "pdfPath": "/assets/reports/introducing-ai-qual-get-to-the-why-faster.pdf",
+    "tags": ["AI Qual", "Qualitative Insight", "Research Tech"],
+    "isNew": false
+  },
+  {
+    "id": 12,
+    "category": "Insights",
+    "industry": "Cross-Category",
+    "date": "2025-06-17",
+    "title": "Fairness Is the New Flex",
+    "teaser": "In a cost of living crunch transparent and fair offers have become a new status symbol that beats pure discounting.",
+    "slug": "fairness-is-the-new-flex",
+    "coverImage": "/assets/covers/insights.png",
+    "pdfPath": "/assets/reports/fairness-is-the-new-flex.pdf",
+    "tags": ["Fairness", "Pricing", "Trust"],
+    "isNew": false
+  },
+  {
+    "id": 13,
+    "category": "Insights",
+    "industry": "Cross-Category",
+    "date": "2025-06-03",
+    "title": "Believability Is the New Branding",
+    "teaser": "Over polished brands are losing power while sincere believable and slightly imperfect brands are gaining emotional trust.",
+    "slug": "believability-is-the-new-branding",
+    "coverImage": "/assets/covers/insights.png",
+    "pdfPath": "/assets/reports/believability-is-the-new-branding.pdf",
+    "tags": ["Branding", "Authenticity", "Trust"],
+    "isNew": false
+  },
+  {
+    "id": 14,
+    "category": "Launch",
+    "industry": "Cross-Category",
+    "date": "2025-05-20",
+    "title": "Simplicity Has Status",
+    "teaser": "Complexity now feels exhausting and simplicity in design pricing and experience has become a modern marker of quality.",
+    "slug": "simplicity-has-status",
+    "coverImage": "/assets/covers/launch.png",
+    "pdfPath": "/assets/reports/simplicity-has-status.pdf",
+    "tags": ["Simplicity", "Customer Experience", "Design"],
+    "isNew": false
+  },
+  {
+    "id": 15,
+    "category": "IRL",
+    "industry": "Cross-Category / Culture",
+    "date": "2025-05-06",
+    "title": "The Return of Local Logic",
+    "teaser": "Local flavour humour and storytelling now outperform global templates as South Africans reward brands that feel familiar.",
+    "slug": "the-return-of-local-logic",
+    "coverImage": "/assets/covers/irl.png",
+    "pdfPath": "/assets/reports/the-return-of-local-logic.pdf",
+    "tags": ["Local Culture", "Brand Localisation", "Trust"],
+    "isNew": false
+  },
+  {
+    "id": 16,
+    "category": "IRL",
+    "industry": "Cross-Category / Services",
+    "date": "2025-04-22",
+    "title": "The Human Subscription",
+    "teaser": "Subscriptions that remember respond and reward with human touches enjoy far higher retention than cold automation.",
+    "slug": "the-human-subscription",
+    "coverImage": "/assets/covers/irl.png",
+    "pdfPath": "/assets/reports/the-human-subscription.pdf",
+    "tags": ["Subscriptions", "Customer Loyalty", "Personalisation"],
+    "isNew": false
+  },
+  {
+    "id": 17,
+    "category": "IRL",
+    "industry": "Cross-Category / Culture",
+    "date": "2025-04-08",
+    "title": "The Quiet Luxury of Calm",
+    "teaser": "Calm has become a new status symbol as South Africans seek brands that reduce stress and offer dependable peace of mind.",
+    "slug": "the-quiet-luxury-of-calm",
+    "coverImage": "/assets/covers/irl.png",
+    "pdfPath": "/assets/reports/the-quiet-luxury-of-calm.pdf",
+    "tags": ["Calm Economy", "Wellbeing", "Lifestyle"],
+    "isNew": false
+  },
+  {
+    "id": 18,
+    "category": "IRL",
+    "industry": "Cross-Category / Culture",
+    "date": "2025-03-25",
+    "title": "The Return of the Third Place",
+    "teaser": "Coffee shops shisanyamas and shared spaces are resurging as South Africans look for real world third places to belong.",
+    "slug": "the-return-of-the-third-place",
+    "coverImage": "/assets/covers/irl.png",
+    "pdfPath": "/assets/reports/the-return-of-the-third-place.pdf",
+    "tags": ["Third Place", "Community", "Hybrid Work"],
+    "isNew": false
+  },
+  {
+    "id": 19,
+    "category": "IRL",
+    "industry": "Cross-Category / Services",
+    "date": "2025-03-11",
+    "title": "The Rise of the Micro-Errand Economy",
+    "teaser": "On demand helpers and delivery services are creating a micro errand economy where people happily outsource daily schlep.",
+    "slug": "the-rise-of-the-micro-errand-economy",
+    "coverImage": "/assets/covers/irl.png",
+    "pdfPath": "/assets/reports/the-rise-of-the-micro-errand-economy.pdf",
+    "tags": ["Convenience", "Gig Economy", "On Demand"],
+    "isNew": false
+  },
+  {
+    "id": 20,
+    "category": "IRL",
+    "industry": "Cross-Category / Products",
+    "date": "2025-02-25",
+    "title": "The Emotional Upgrade",
+    "teaser": "When products feel emotionally uplifting they now win over purely functional offers as people shop for feelings not specs.",
+    "slug": "the-emotional-upgrade",
+    "coverImage": "/assets/covers/irl.png",
+    "pdfPath": "/assets/reports/the-emotional-upgrade.pdf",
+    "tags": ["Emotional Economy", "Brand Strategy", "Consumer Behaviour"],
+    "isNew": false
+  },
+  {
+    "id": 21,
+    "category": "IRL",
+    "industry": "Cross-Category / Culture",
+    "date": "2025-02-11",
+    "title": "Local Humour as Currency",
+    "teaser": "Local humour slang and satire have become cultural currency and brands that speak it fluently earn massive engagement.",
+    "slug": "local-humour-as-currency",
+    "coverImage": "/assets/covers/irl.png",
+    "pdfPath": "/assets/reports/local-humour-as-currency.pdf",
+    "tags": ["Humour", "Local Culture", "Engagement"],
+    "isNew": false
+  }
+]
+
+
+Sort the grid view by date descending by default.
+
+4. CARD GRID LAYOUT
+
+Create a reusable ReportCard component and an InsightsGrid view that reads from /data/reports.json.
+
+Card content
+
+Each card must show:
+
+Cover image (full width, fixed height around 200px)
+
+Category and industry row (small labels)
+
+Title (DM Serif Display, about 22 to 24 px)
+
+Date (small, muted text)
+
+Teaser (two lines maximum)
+
+CTA row: text button Read full issue with a simple arrow icon
+
+Card layout
+
+White background
+
+Soft shadow
+
+Medium rounded corners, with the image clipped to the same radius at the top
+
+Internal padding about 18 to 20 px
+
+Two cards per row on desktop
+
+One card per row on mobile
+
+Spacing between cards about 24 px horizontally and vertically
+
+Hover behaviour
+
+Slight elevation and stronger shadow
+
+Very small translateY lift
+
+Cursor pointer over the entire card
+
+Clicking anywhere in the card navigates to /insights/{slug}
+
+Badges and tags
+
+If isNew is true, render a small pill badge “NEW” in Innovatr Blue
+
+Optionally render tags as small rounded pills near the bottom using secondary accent colours with blue text
+
+5. “SHOW ALL” BEHAVIOUR
+
+On the main Trends and Insights landing page:
+
+Initially render the six most recent posts by date
+
+Under the grid, centre a button labelled Show all reports
+
+When clicked, reveal the full list in the same grid layout
+
+Button can toggle to Show less if you want, collapsing back to the first six
+
+6. SEARCH AND FILTER BAR
+
+Keep the existing search and filter idea but make it cleaner and tighter.
+
+Search input filters by title, teaser, and tags
+
+Category dropdown: All, Insights, Launch, Inside, IRL
+
+Sort dropdown: Newest first, Oldest first, A to Z
+
+UI rules:
+
+Slim height
+
+Rounded pill style for inputs
+
+Light grey outlines with blue focus state
+
+Tight vertical spacing so the bar does not feel oversized
+
+7. FULL POST PAGE LAYOUT
+
+For each report, create a route at /insights/{slug}.
+
+Use the existing article bodies from the Innovatr Intelligence documents for the main content, matching them by title and slug exactly
+
+Hero section
+
+Full width cover image from coverImage
+
+No rounded corners in the hero
+
+Category and date in a small row above the main heading
+
+Title in DM Serif Display, about 40 to 44 px
+
+Intro strapline or the first one to two sentences in Roboto directly under the heading
+
+Vertical padding reduced by about 50 percent compared to your current build
+
+Body
+
+Constrain text to a max width of around 720 to 760 px
+
+Centre the content column
+
+Use clear hierarchy: H2 and H3 for sections, regular paragraphs for body
+
+Add subtle section dividers (thin light grey lines) between major sections
+
+Maintain your Innovatr tone and spacing, no extra decorative elements
+
+CTA
+
+In the hero or near the top of the article, include a primary button:
+
+Label: Download full report
+
+Link target: pdfPath from the JSON
+
+Keep one more Download PDF CTA at the bottom of the article
+
+Mobile
+
+Hero image height around 220 to 260 px
+
+Content padding 18 to 22 px
+
+Typography scales down slightly but keeps hierarchy
+
+8. IMPLEMENTATION NOTES
+
+All cards and routes must be generated dynamically from /data/reports.json.
+
+When a new report is added in future, Hannah only needs to:
+
+Add a new object to reports.json
+
+Upload the matching PDF to /assets/reports
+
+Ensure the slug matches the file name
+
+No code changes should be needed for new content.
+
+9. SUCCESS CHECKLIST
+
+You are done when:
+
+The Trends and Insights landing page shows a clean white and blue Innovatr layout with two cards across.
+
+Each card displays the correct cover, date, title, teaser, NEW badge and tags from reports.json.
+
+The Show all reports button expands the grid to reveal every post.
+
+Clicking a card opens /insights/{slug} with:
+
+Full width hero image
+
+Category, date and title
+
+Full article body from the Innovatr documents
+
+A working Download full report button using pdfPath
+
+The entire experience feels premium, minimal and editorial with the Innovatr palette locked.
