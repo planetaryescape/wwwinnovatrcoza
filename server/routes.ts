@@ -243,7 +243,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/webhooks/payfast", async (req, res) => {
     try {
+      console.log("=== Webhook Debug ===");
+      console.log("Content-Type:", req.headers["content-type"]);
+      console.log("req.rawBody type:", typeof (req as any).rawBody);
+      console.log("req.rawBody:", (req as any).rawBody);
+      console.log("req.body type:", typeof req.body);
+      console.log("req.body:", req.body);
+      
       const rawBody = (req as any).rawBody || req.body;
+      console.log("Using rawBody type:", typeof rawBody);
+      console.log("Using rawBody:", rawBody);
+      
       const { intent, orderCreated } = await paymentService.handleWebhook("payfast", rawBody, req.headers as Record<string, string>);
       
       // Send emails only after successful payment and order creation
