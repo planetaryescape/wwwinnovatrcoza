@@ -87,16 +87,15 @@ export class PayFastProvider implements PaymentProvider {
     let signatureParts: string[] = [];
 
     if (forWebhook) {
-      // For webhook validation, use the order fields were received
-      // (iterate object keys in their original order)
-      for (const key of Object.keys(dataCopy)) {
-        const value = String(dataCopy[key]).trim();
-        if (value !== "") {
-          signatureParts.push(`${key}=${this.pfEncode(value)}`);
-        }
+      // For webhook/ITN validation: sort keys alphabetically and include empty values
+      const sortedKeys = Object.keys(dataCopy).sort();
+      for (const key of sortedKeys) {
+        const value = String(dataCopy[key] ?? "").trim();
+        // Include all fields, even empty ones (as key=)
+        signatureParts.push(`${key}=${this.pfEncode(value)}`);
       }
     } else {
-      // For outgoing requests, use PayFast's specific field order
+      // For outgoing requests: use PayFast's specific field order, exclude empty values
       for (const key of PAYFAST_FIELD_ORDER) {
         if (key in dataCopy) {
           const value = String(dataCopy[key]).trim();
