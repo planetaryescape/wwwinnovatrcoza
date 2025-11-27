@@ -207,20 +207,26 @@ export class PayFastProvider implements PaymentProvider {
     };
   }
 
-  async handleWebhook(rawBody: string | Buffer, headers: Record<string, string>): Promise<{
+  async handleWebhook(rawBody: string | Buffer | Record<string, any>, headers: Record<string, string>): Promise<{
     intentId: string;
     status: string;
     eventType: string;
     verified: boolean;
   }> {
-    const body = typeof rawBody === "string" ? rawBody : rawBody.toString("utf-8");
-    const params = new URLSearchParams(body);
-    const data: Record<string, string> = {};
+    let data: Record<string, string> = {};
     
-    // Preserve the order of fields as received
-    params.forEach((value, key) => {
-      data[key] = value;
-    });
+    // Handle different input types
+    if (typeof rawBody === "object" && !Buffer.isBuffer(rawBody)) {
+      // Already parsed object
+      data = rawBody as Record<string, string>;
+    } else {
+      // String or Buffer - parse as URL-encoded
+      const body = typeof rawBody === "string" ? rawBody : rawBody.toString("utf-8");
+      const params = new URLSearchParams(body);
+      params.forEach((value, key) => {
+        data[key] = value;
+      });
+    }
 
     console.log("=== PayFast Webhook Received ===");
     console.log("Raw data:", JSON.stringify(data, null, 2));

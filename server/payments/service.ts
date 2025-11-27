@@ -169,7 +169,7 @@ export class PaymentService {
 
   async handleWebhook(
     providerKey: string,
-    rawBody: string | Buffer,
+    rawBody: string | Buffer | Record<string, any>,
     headers: Record<string, string>
   ): Promise<{ intent: PaymentIntent | null; orderCreated: boolean }> {
     const provider = this.getProvider(providerKey);
@@ -184,14 +184,19 @@ export class PaymentService {
       throw new Error("Payment intent not found");
     }
 
-    // Parse payload - handle both JSON and URL-encoded data
+    // Parse payload - handle JSON, URL-encoded, or already-parsed object
     let payload: Record<string, any>;
-    const bodyStr = typeof rawBody === "string" ? rawBody : rawBody.toString();
-    try {
-      payload = JSON.parse(bodyStr);
-    } catch {
-      // If not JSON, parse as URL-encoded (PayFast uses this format)
-      payload = Object.fromEntries(new URLSearchParams(bodyStr));
+    if (typeof rawBody === "object" && !Buffer.isBuffer(rawBody)) {
+      // Already parsed object
+      payload = rawBody as Record<string, any>;
+    } else {
+      const bodyStr = typeof rawBody === "string" ? rawBody : rawBody.toString();
+      try {
+        payload = JSON.parse(bodyStr);
+      } catch {
+        // If not JSON, parse as URL-encoded (PayFast uses this format)
+        payload = Object.fromEntries(new URLSearchParams(bodyStr));
+      }
     }
 
     const event: InsertPaymentEvent = {

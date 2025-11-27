@@ -13,7 +13,7 @@ export interface PaymentProvider {
 
   createPaymentIntent(order: Order, items: any[]): Promise<PaymentIntent>;
   getCheckoutPayload(intent: PaymentIntent, order: Order): Promise<CheckoutPayload>;
-  handleWebhook(rawBody: string | Buffer, headers: Record<string, string>): Promise<{
+  handleWebhook(rawBody: string | Buffer | Record<string, any>, headers: Record<string, string>): Promise<{
     intentId: string;
     status: string;
     eventType: string;
