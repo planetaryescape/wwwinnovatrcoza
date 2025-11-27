@@ -225,7 +225,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Order will be created on successful payment webhook
   app.post("/api/payment/checkout", async (req, res) => {
     try {
-      const { customerName, customerEmail, customerCompany, amount, currency, purchaseType, items, providerKey } = req.body;
+      const { customerName, customerEmail, customerCompany, amount, currency, purchaseType, items, providerKey, subscription } = req.body;
       
       // Store order data in payment intent metadata for later creation
       const pendingOrderData = {
@@ -236,9 +236,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currency: currency || "ZAR",
         purchaseType,
         items,
+        recurringAmount: subscription?.recurringAmount,
       };
 
-      const checkout = await paymentService.createCheckoutWithPendingOrder(pendingOrderData, providerKey || "payfast");
+      const checkout = await paymentService.createCheckoutWithPendingOrder(
+        pendingOrderData, 
+        providerKey || "payfast",
+        subscription ? {
+          subscriptionType: subscription.subscriptionType || 1,
+          frequency: subscription.frequency || 3,
+          cycles: subscription.cycles || 12,
+          recurringAmount: subscription.recurringAmount,
+        } : undefined
+      );
       res.status(201).json(checkout);
     } catch (error: any) {
       res.status(400).json({ error: error.message });

@@ -121,8 +121,16 @@ export class PaymentService {
       currency: string;
       purchaseType: string;
       items: any[];
+      recurringAmount?: number;
     },
-    providerKey: string = "payfast"
+    providerKey: string = "payfast",
+    subscriptionOptions?: {
+      subscriptionType?: number;
+      frequency?: number;
+      cycles?: number;
+      recurringAmount?: number;
+      billingDate?: number;
+    }
   ) {
     const provider = this.getProvider(providerKey);
     if (!provider) {
@@ -147,22 +155,24 @@ export class PaymentService {
       updatedAt: new Date(),
     };
 
-    // Store pending order data in payment intent metadata
+    // Store pending order data in payment intent metadata (including subscription info)
     const insertIntent: InsertPaymentIntent = {
       orderId: pendingId, // Use pending ID, will be updated on success
       providerKey: providerKey,
       providerIntentId: pendingId,
       status: "pending",
       metadata: {
-        pendingOrder: pendingOrderData,
+        pendingOrder: { ...pendingOrderData, isSubscription: !!subscriptionOptions },
         isPending: true,
+        subscriptionOptions,
       } as Record<string, unknown>,
     };
 
     const intent = await this.storage.createPaymentIntent(insertIntent);
 
-    // Get checkout payload using mock order
-    const checkoutPayload = await provider.getCheckoutPayload(intent, mockOrder);
+    // Get checkout payload using mock order, passing subscription options if present
+    // PayFast provider accepts subscription options as third parameter
+    const checkoutPayload = await (provider as any).getCheckoutPayload(intent, mockOrder, subscriptionOptions);
 
     return checkoutPayload;
   }

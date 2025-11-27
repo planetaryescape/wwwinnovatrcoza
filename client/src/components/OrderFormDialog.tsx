@@ -22,6 +22,14 @@ interface OrderItem {
   unitAmount: string;
 }
 
+interface SubscriptionOptions {
+  enabled: boolean;
+  subscriptionType?: number;  // 1 = fixed subscription
+  frequency?: number;         // 3 = Monthly
+  cycles?: number;            // Number of billing cycles
+  recurringAmount?: number;   // Amount per billing cycle
+}
+
 interface OrderFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -29,6 +37,7 @@ interface OrderFormDialogProps {
   totalAmount: number;
   purchaseType: string;
   onSuccess?: () => void;
+  subscriptionOptions?: SubscriptionOptions;
 }
 
 export default function OrderFormDialog({
@@ -38,6 +47,7 @@ export default function OrderFormDialog({
   totalAmount,
   purchaseType,
   onSuccess,
+  subscriptionOptions,
 }: OrderFormDialogProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -77,9 +87,9 @@ export default function OrderFormDialog({
   });
 
   const initiatePaymentMutation = useMutation({
-    mutationFn: async (data: { order: any; items: OrderItem[] }) => {
+    mutationFn: async (data: { order: any; items: OrderItem[]; subscription?: SubscriptionOptions }) => {
       // Create payment checkout directly - order will be created on successful payment
-      const response = await apiRequest("POST", "/api/payment/checkout", {
+      const requestBody: Record<string, any> = {
         customerName: data.order.customerName,
         customerEmail: data.order.customerEmail,
         customerCompany: data.order.customerCompany,
@@ -88,13 +98,25 @@ export default function OrderFormDialog({
         purchaseType: data.order.purchaseType,
         items: data.items,
         providerKey: "payfast",
-      });
+      };
+      
+      // Add subscription options if this is a recurring payment
+      if (data.subscription?.enabled) {
+        requestBody.subscription = {
+          subscriptionType: data.subscription.subscriptionType || 1,
+          frequency: data.subscription.frequency || 3, // Monthly
+          cycles: data.subscription.cycles || 12, // 12 months default
+          recurringAmount: data.subscription.recurringAmount || Number(data.order.amount),
+        };
+      }
+      
+      const response = await apiRequest("POST", "/api/payment/checkout", requestBody);
       const checkout = await response.json();
-      return { checkout };
+      return { checkout, isSubscription: data.subscription?.enabled };
     },
     onSuccess: (data) => {
       // Auto-submit PayFast form
-      const { checkout } = data;
+      const { checkout, isSubscription } = data;
       if (checkout.type === "form" && checkout.data) {
         const form = document.createElement("form");
         form.method = "POST";
@@ -115,8 +137,10 @@ export default function OrderFormDialog({
         // Close dialog after redirecting
         onOpenChange(false);
         toast({
-          title: "Payment Window Opened",
-          description: "Complete your payment in the new tab.",
+          title: isSubscription ? "Subscription Payment Started" : "Payment Window Opened",
+          description: isSubscription 
+            ? "Complete your subscription setup in the new tab."
+            : "Complete your payment in the new tab.",
         });
       } else {
         toast({
@@ -188,6 +212,7 @@ export default function OrderFormDialog({
         status: "processing",
       },
       items: orderItems,
+      subscription: subscriptionOptions,
     });
   };
 

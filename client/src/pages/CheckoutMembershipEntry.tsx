@@ -312,6 +312,13 @@ export default function CheckoutMembershipEntry() {
         ]}
         totalAmount={totalDueToday}
         purchaseType={`Entry Membership (${paymentType === "monthly" ? "Monthly" : "Annual"})`}
+        subscriptionOptions={paymentType === "monthly" ? {
+          enabled: true,
+          subscriptionType: 1, // Fixed subscription
+          frequency: 3, // Monthly
+          cycles: 12, // 12 months
+          recurringAmount: monthlyPrice, // R5,000 per month
+        } : undefined}
       />
     </div>
   );
