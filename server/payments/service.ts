@@ -212,8 +212,6 @@ export class PaymentService {
     let orderCreated = false;
 
     if (result.verified && result.status === "succeeded") {
-      await this.storage.updatePaymentIntent(intent.id, { status: "succeeded" });
-      
       // Check if this is a pending order that needs to be created
       const metadata = intent.metadata as Record<string, unknown> | null;
       if (metadata?.isPending && metadata?.pendingOrder) {
@@ -226,6 +224,25 @@ export class PaymentService {
           purchaseType: string;
           items: any[];
         };
+
+        // SECURITY CHECK: Validate payment amount matches expected amount
+        const expectedAmount = parseFloat(pendingOrder.amount);
+        const paidAmount = parseFloat(payload.amount_gross || "0");
+        const amountValid = Math.abs(expectedAmount - paidAmount) <= 0.01;
+        
+        console.log("=== Payment Amount Validation ===");
+        console.log("Expected amount:", expectedAmount);
+        console.log("Paid amount (amount_gross):", paidAmount);
+        console.log("Amount valid:", amountValid);
+        console.log("================================");
+
+        if (!amountValid) {
+          console.error("Payment amount mismatch! Expected:", expectedAmount, "Received:", paidAmount);
+          await this.storage.updatePaymentIntent(intent.id, { status: "failed" });
+          throw new Error(`Payment amount mismatch: expected ${expectedAmount}, received ${paidAmount}`);
+        }
+
+        await this.storage.updatePaymentIntent(intent.id, { status: "succeeded" });
 
         // NOW create the actual order
         const order = await this.storage.createOrder({
@@ -258,6 +275,28 @@ export class PaymentService {
         orderCreated = true;
       } else {
         // Legacy flow - update existing order
+        const existingOrder = await this.storage.getOrder(intent.orderId);
+        if (existingOrder) {
+          // Validate payment amount for existing orders too
+          const expectedAmount = parseFloat(String(existingOrder.amount));
+          const paidAmount = parseFloat(payload.amount_gross || "0");
+          const amountValid = Math.abs(expectedAmount - paidAmount) <= 0.01;
+          
+          console.log("=== Payment Amount Validation (Legacy) ===");
+          console.log("Expected amount:", expectedAmount);
+          console.log("Paid amount (amount_gross):", paidAmount);
+          console.log("Amount valid:", amountValid);
+          console.log("==========================================");
+
+          if (!amountValid) {
+            console.error("Payment amount mismatch! Expected:", expectedAmount, "Received:", paidAmount);
+            await this.storage.updatePaymentIntent(intent.id, { status: "failed" });
+            await this.storage.updateOrder(intent.orderId, { status: "failed" });
+            throw new Error(`Payment amount mismatch: expected ${expectedAmount}, received ${paidAmount}`);
+          }
+        }
+        
+        await this.storage.updatePaymentIntent(intent.id, { status: "succeeded" });
         await this.storage.updateOrder(intent.orderId, { status: "completed" });
       }
     } else if (result.verified && result.status === "failed") {
