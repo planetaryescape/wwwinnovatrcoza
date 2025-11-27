@@ -323,10 +323,13 @@ export default function OrderFormDialog({
                 "Place Order"
               )}
             </Button>
-            {/* <Button
+            <Button
               type="button"
               onClick={handlePayOnline}
-              disabled={createInquiryMutation.isPending || initiatePaymentMutation.isPending}
+              disabled={
+                createInquiryMutation.isPending ||
+                initiatePaymentMutation.isPending
+              }
               data-testid="button-pay-online"
             >
               {initiatePaymentMutation.isPending ? (
@@ -340,7 +343,7 @@ export default function OrderFormDialog({
                   Pay Online
                 </>
               )}
-            </Button> */}
+            </Button>
           </div>
 
           {/* <p className="text-xs text-muted-foreground text-center">

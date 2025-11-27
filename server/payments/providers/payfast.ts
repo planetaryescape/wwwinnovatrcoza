@@ -3,6 +3,42 @@ import type { PaymentProvider, CheckoutPayload, PaymentConfig } from "../types";
 import type { Order, PaymentIntent, InsertPaymentIntent } from "@shared/schema";
 import { isValidPayFastIp } from "../utils";
 
+// PayFast requires fields in this SPECIFIC ORDER (not alphabetical!)
+// This is the order defined in PayFast's attributes documentation
+const PAYFAST_FIELD_ORDER = [
+  "merchant_id",
+  "merchant_key",
+  "return_url",
+  "cancel_url",
+  "notify_url",
+  "name_first",
+  "name_last",
+  "email_address",
+  "cell_number",
+  "m_payment_id",
+  "amount",
+  "item_name",
+  "item_description",
+  "custom_int1",
+  "custom_int2",
+  "custom_int3",
+  "custom_int4",
+  "custom_int5",
+  "custom_str1",
+  "custom_str2",
+  "custom_str3",
+  "custom_str4",
+  "custom_str5",
+  "email_confirmation",
+  "confirmation_address",
+  "payment_method",
+  "subscription_type",
+  "billing_date",
+  "recurring_amount",
+  "frequency",
+  "cycles",
+];
+
 export class PayFastProvider implements PaymentProvider {
   readonly key = "payfast";
   readonly name = "PayFast";
@@ -35,32 +71,45 @@ export class PayFastProvider implements PaymentProvider {
       : "https://www.payfast.co.za/eng/query/validate";
   }
 
-  private generateSignature(data: Record<string, any>): string {
+  private generateSignature(data: Record<string, any>, forWebhook: boolean = false): string {
     // Delete any existing signature fields first
-    delete data["signature"];
-    delete data["pf_signature"];
+    const dataCopy = { ...data };
+    delete dataCopy["signature"];
+    delete dataCopy["pf_signature"];
 
-    // CRITICAL: Sort keys alphabetically as PayFast expects
-    const sortedKeys = Object.keys(data).sort();
+    let signatureParts: string[] = [];
 
-    // Build signature string from sorted keys
-    const signatureString = sortedKeys
-      .map((key) => {
-        const value = String(data[key]).trim();
-        if (value === "") return null;
-        return `${key}=${encodeURIComponent(value).replace(/%20/g, "+")}`;
-      })
-      .filter(Boolean)
-      .join("&");
+    if (forWebhook) {
+      // For webhook validation, use the order fields were received
+      // (iterate object keys in their original order)
+      for (const key of Object.keys(dataCopy)) {
+        const value = String(dataCopy[key]).trim();
+        if (value !== "") {
+          signatureParts.push(`${key}=${encodeURIComponent(value).replace(/%20/g, "+")}`);
+        }
+      }
+    } else {
+      // For outgoing requests, use PayFast's specific field order
+      for (const key of PAYFAST_FIELD_ORDER) {
+        if (key in dataCopy) {
+          const value = String(dataCopy[key]).trim();
+          if (value !== "") {
+            signatureParts.push(`${key}=${encodeURIComponent(value).replace(/%20/g, "+")}`);
+          }
+        }
+      }
+    }
+
+    let signatureString = signatureParts.join("&");
 
     // Append passphrase if configured
     const credentials = this.getCredentials();
-    const finalString = credentials.passphrase
-      ? signatureString + `&passphrase=${encodeURIComponent(credentials.passphrase.trim()).replace(/%20/g, "+")}`
-      : signatureString;
+    if (credentials.passphrase) {
+      signatureString += `&passphrase=${encodeURIComponent(credentials.passphrase.trim()).replace(/%20/g, "+")}`;
+    }
 
-    const hash = crypto.createHash("md5").update(finalString).digest("hex");
-    console.log("Signature string:", finalString);
+    const hash = crypto.createHash("md5").update(signatureString).digest("hex");
+    console.log("Signature string:", signatureString);
     console.log("MD5 hash:", hash);
     return hash;
   }
@@ -109,20 +158,20 @@ export class PayFastProvider implements PaymentProvider {
       ? (order.amount as number).toFixed(2)
       : String(order.amount);
 
-    // Build form data in a specific order (will be sorted by generateSignature)
+    // Build form data in PayFast's required order
     const formData: Record<string, string> = {
       merchant_id: credentials.merchantId,
       merchant_key: credentials.merchantKey,
       return_url: returnUrl,
       cancel_url: cancelUrl,
       notify_url: notifyUrl,
+      name_first: (order.customerName?.split(" ")[0] || "").trim(),
+      name_last: (order.customerName?.split(" ").slice(1).join(" ") || "").trim(),
+      email_address: (order.customerEmail || "").trim(),
+      m_payment_id: String(order.id).trim(),
       amount: amountStr,
       item_name: (order.purchaseType || "").trim(),
       item_description: (`Innovatr ${order.purchaseType}` || "").trim(),
-      email_address: (order.customerEmail || "").trim(),
-      name_first: (order.customerName?.split(" ")[0] || "").trim(),
-      name_last: (order.customerName?.split(" ").slice(1).join(" ") || "").trim(),
-      m_payment_id: String(order.id).trim(),
       email_confirmation: "1",
     };
 
@@ -136,8 +185,8 @@ export class PayFastProvider implements PaymentProvider {
     console.log("=== PayFast Form Data ===");
     console.log(JSON.stringify(formData, null, 2));
     
-    // Generate signature (this will sort keys internally)
-    const signature = this.generateSignature({ ...formData });
+    // Generate signature using PayFast's field order
+    const signature = this.generateSignature({ ...formData }, false);
     
     console.log("Generated signature:", signature);
     console.log("========================");
@@ -161,6 +210,7 @@ export class PayFastProvider implements PaymentProvider {
     const params = new URLSearchParams(body);
     const data: Record<string, string> = {};
     
+    // Preserve the order of fields as received
     params.forEach((value, key) => {
       data[key] = value;
     });
@@ -186,8 +236,8 @@ export class PayFastProvider implements PaymentProvider {
     delete dataForSignature.signature;
     delete dataForSignature.pf_signature;
 
-    // Calculate expected signature
-    const calculatedSignature = this.generateSignature({ ...dataForSignature });
+    // Calculate expected signature (for webhooks, use received field order)
+    const calculatedSignature = this.generateSignature(dataForSignature, true);
     const signatureValid = receivedSignature === calculatedSignature;
 
     console.log("Received signature:", receivedSignature);
