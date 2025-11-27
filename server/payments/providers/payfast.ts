@@ -88,11 +88,13 @@ export class PayFastProvider implements PaymentProvider {
 
     if (forWebhook) {
       // For ITN validation: PayFast sends payload in alphabetical order
-      // Generate signature in same alphabetical order, include all values (even empty)
+      // Generate signature in same alphabetical order, EXCLUDE empty values
       const sortedKeys = Object.keys(dataCopy).sort();
       for (const key of sortedKeys) {
-        const value = String(dataCopy[key] ?? "");
-        signatureParts.push(`${key}=${this.pfEncode(value)}`);
+        const value = String(dataCopy[key] ?? "").trim();
+        if (value !== "") {
+          signatureParts.push(`${key}=${this.pfEncode(value)}`);
+        }
       }
     } else {
       // For outgoing checkout requests: use PayFast's specific field order, exclude empty values
