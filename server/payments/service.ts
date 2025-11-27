@@ -184,11 +184,21 @@ export class PaymentService {
       throw new Error("Payment intent not found");
     }
 
+    // Parse payload - handle both JSON and URL-encoded data
+    let payload: Record<string, any>;
+    const bodyStr = typeof rawBody === "string" ? rawBody : rawBody.toString();
+    try {
+      payload = JSON.parse(bodyStr);
+    } catch {
+      // If not JSON, parse as URL-encoded (PayFast uses this format)
+      payload = Object.fromEntries(new URLSearchParams(bodyStr));
+    }
+
     const event: InsertPaymentEvent = {
       intentId: intent.id,
       providerEventId: result.intentId,
       eventType: result.eventType,
-      payload: typeof rawBody === "string" ? JSON.parse(rawBody) : JSON.parse(rawBody.toString()),
+      payload,
       verifiedSignature: result.verified,
     };
 

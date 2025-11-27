@@ -21,6 +21,8 @@ import {
   type InsertInquiry,
   orders,
   orderItems,
+  paymentIntents,
+  paymentEvents,
   inquiries,
 } from "@shared/schema";
 import { eq } from "drizzle-orm";
@@ -243,56 +245,62 @@ export class MemStorage implements IStorage {
   async createPaymentIntent(insertIntent: InsertPaymentIntent): Promise<PaymentIntent> {
     const id = randomUUID();
     const now = new Date();
-    const intent: PaymentIntent = {
-      id,
-      status: insertIntent.status ?? "pending",
-      createdAt: now,
-      updatedAt: now,
-      orderId: insertIntent.orderId,
-      providerKey: insertIntent.providerKey,
-      providerIntentId: insertIntent.providerIntentId ?? null,
-      metadata: insertIntent.metadata ?? {},
-    };
-    this.paymentIntents.set(id, intent);
-    return intent;
+    const result = await db
+      .insert(paymentIntents)
+      .values({
+        id,
+        orderId: insertIntent.orderId,
+        providerKey: insertIntent.providerKey,
+        providerIntentId: insertIntent.providerIntentId ?? null,
+        status: insertIntent.status ?? "pending",
+        metadata: insertIntent.metadata ?? {},
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
+    return result[0];
   }
 
   async getPaymentIntent(id: string): Promise<PaymentIntent | undefined> {
-    return this.paymentIntents.get(id);
+    const result = await db.select().from(paymentIntents).where(eq(paymentIntents.id, id));
+    return result[0];
   }
 
   async getPaymentIntentByProviderIntentId(providerIntentId: string): Promise<PaymentIntent | undefined> {
-    return Array.from(this.paymentIntents.values()).find(
-      (intent) => intent.providerIntentId === providerIntentId,
-    );
+    const result = await db
+      .select()
+      .from(paymentIntents)
+      .where(eq(paymentIntents.providerIntentId, providerIntentId));
+    return result[0];
   }
 
   async updatePaymentIntent(id: string, updates: Partial<PaymentIntent>): Promise<void> {
-    const intent = this.paymentIntents.get(id);
-    if (intent) {
-      this.paymentIntents.set(id, { ...intent, ...updates, updatedAt: new Date() });
-    }
+    await db
+      .update(paymentIntents)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(paymentIntents.id, id));
   }
 
   async createPaymentEvent(insertEvent: InsertPaymentEvent): Promise<PaymentEvent> {
     const id = randomUUID();
-    const event: PaymentEvent = {
-      id,
-      createdAt: new Date(),
-      intentId: insertEvent.intentId,
-      providerEventId: insertEvent.providerEventId ?? null,
-      eventType: insertEvent.eventType,
-      payload: insertEvent.payload,
-      verifiedSignature: insertEvent.verifiedSignature ?? false,
-    };
-    this.paymentEvents.set(id, event);
-    return event;
+    const now = new Date();
+    const result = await db
+      .insert(paymentEvents)
+      .values({
+        id,
+        intentId: insertEvent.intentId,
+        providerEventId: insertEvent.providerEventId ?? null,
+        eventType: insertEvent.eventType,
+        payload: insertEvent.payload,
+        verifiedSignature: insertEvent.verifiedSignature ?? false,
+        createdAt: now,
+      })
+      .returning();
+    return result[0];
   }
 
   async getPaymentEvents(intentId: string): Promise<PaymentEvent[]> {
-    return Array.from(this.paymentEvents.values()).filter(
-      (event) => event.intentId === intentId,
-    );
+    return db.select().from(paymentEvents).where(eq(paymentEvents.intentId, intentId));
   }
 
   async createReport(insertReport: InsertReport): Promise<Report> {
