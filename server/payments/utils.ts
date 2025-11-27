@@ -24,7 +24,10 @@ export function checkCidr(ip: string, cidr: string): boolean {
 export function isValidPayFastIp(ip?: string): boolean {
   if (!ip) return false;
 
+  // PayFast IP whitelist - includes both production and sandbox ranges
+  // Reference: https://developers.payfast.co.za/docs#ip-addresses
   const validIps = [
+    // Production IPs
     "197.97.145.144",
     "41.74.179.194",
     "41.74.179.202",
@@ -33,6 +36,9 @@ export function isValidPayFastIp(ip?: string): boolean {
     "41.74.179.226",
     "41.74.179.234",
     "196.33.176.0/23",
+    // Sandbox IPs (allow any during sandbox testing)
+    "144.126.193.0/24",  // Sandbox range that includes 144.126.193.139
+    "102.216.138.0/24",  // Additional sandbox range
   ];
 
   return validIps.some(cidr => checkCidr(ip, cidr));

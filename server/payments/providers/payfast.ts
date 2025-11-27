@@ -231,6 +231,7 @@ export class PayFastProvider implements PaymentProvider {
 
     console.log("=== PayFast Webhook Received ===");
     console.log("Raw data:", JSON.stringify(data, null, 2));
+    console.log("Key order received:", Object.keys(data).join(", "));
 
     // Get the received signature (could be 'signature' or 'pf_signature')
     const receivedSignature = data.signature || data.pf_signature;
