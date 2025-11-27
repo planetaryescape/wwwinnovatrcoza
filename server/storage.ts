@@ -19,11 +19,14 @@ import {
   type InsertDeal,
   type Inquiry,
   type InsertInquiry,
+  type Subscription,
+  type InsertSubscription,
   orders,
   orderItems,
   paymentIntents,
   paymentEvents,
   inquiries,
+  subscriptions,
 } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { db } from "./db";
@@ -71,6 +74,14 @@ export interface IStorage {
 
   createInquiry(inquiry: InsertInquiry): Promise<Inquiry>;
   getAllInquiries(): Promise<Inquiry[]>;
+
+  createSubscription(subscription: InsertSubscription): Promise<Subscription>;
+  getSubscription(id: string): Promise<Subscription | undefined>;
+  getSubscriptionByToken(token: string): Promise<Subscription | undefined>;
+  getSubscriptionsByEmail(email: string): Promise<Subscription[]>;
+  getSubscriptionsByUserId(userId: string): Promise<Subscription[]>;
+  updateSubscription(id: string, updates: Partial<Subscription>): Promise<void>;
+  getAllSubscriptions(): Promise<Subscription[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -84,6 +95,7 @@ export class MemStorage implements IStorage {
   private reports: Map<string, Report>;
   private deals: Map<string, Deal>;
   private inquiriesMap: Map<string, Inquiry>;
+  private subscriptionsMap: Map<string, Subscription>;
 
   constructor() {
     this.users = new Map();
@@ -96,6 +108,7 @@ export class MemStorage implements IStorage {
     this.reports = new Map();
     this.deals = new Map();
     this.inquiriesMap = new Map();
+    this.subscriptionsMap = new Map();
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -401,6 +414,37 @@ export class MemStorage implements IStorage {
 
   async getAllInquiries(): Promise<Inquiry[]> {
     return db.select().from(inquiries);
+  }
+
+  async createSubscription(insertSubscription: InsertSubscription): Promise<Subscription> {
+    const [subscription] = await db.insert(subscriptions).values(insertSubscription).returning();
+    return subscription;
+  }
+
+  async getSubscription(id: string): Promise<Subscription | undefined> {
+    const [subscription] = await db.select().from(subscriptions).where(eq(subscriptions.id, id));
+    return subscription;
+  }
+
+  async getSubscriptionByToken(token: string): Promise<Subscription | undefined> {
+    const [subscription] = await db.select().from(subscriptions).where(eq(subscriptions.payfastToken, token));
+    return subscription;
+  }
+
+  async getSubscriptionsByEmail(email: string): Promise<Subscription[]> {
+    return db.select().from(subscriptions).where(eq(subscriptions.customerEmail, email));
+  }
+
+  async getSubscriptionsByUserId(userId: string): Promise<Subscription[]> {
+    return db.select().from(subscriptions).where(eq(subscriptions.userId, userId));
+  }
+
+  async updateSubscription(id: string, updates: Partial<Subscription>): Promise<void> {
+    await db.update(subscriptions).set({ ...updates, updatedAt: new Date() }).where(eq(subscriptions.id, id));
+  }
+
+  async getAllSubscriptions(): Promise<Subscription[]> {
+    return db.select().from(subscriptions);
   }
 }
 

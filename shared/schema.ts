@@ -292,3 +292,36 @@ export const insertInquirySchema = createInsertSchema(inquiries).omit({
 
 export type InsertInquiry = z.infer<typeof insertInquirySchema>;
 export type Inquiry = typeof inquiries.$inferSelect;
+
+export const subscriptions = pgTable("subscriptions", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id"),
+  payfastToken: text("payfast_token").unique(),
+  customerName: text("customer_name").notNull(),
+  customerEmail: text("customer_email").notNull(),
+  customerCompany: text("customer_company"),
+  planType: varchar("plan_type", { length: 50 }).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).notNull().default("ZAR"),
+  frequency: integer("frequency").notNull().default(3),
+  cyclesTotal: integer("cycles_total").notNull().default(12),
+  cyclesCompleted: integer("cycles_completed").notNull().default(0),
+  status: varchar("status", { length: 20 }).notNull().default("pending"),
+  nextBillingDate: timestamp("next_billing_date"),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  cancelledAt: timestamp("cancelled_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+export type Subscription = typeof subscriptions.$inferSelect;
