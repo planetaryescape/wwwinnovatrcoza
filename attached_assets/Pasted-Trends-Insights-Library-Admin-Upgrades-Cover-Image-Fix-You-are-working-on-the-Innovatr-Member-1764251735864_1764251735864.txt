@@ -1,0 +1,703 @@
+Trends & Insights Library + Admin Upgrades + Cover Image Fix
+
+You are working on the Innovatr Members Portal.
+There are two main areas to update:
+
+Member side: Trends & Insights Library and individual report pages
+
+Admin side: Admin Dashboard (Reports, Users, Exports)
+
+Keep the existing overall structure, routing and frameworks.
+You are not redesigning the whole app, only upgrading these specific sections.
+
+0. BRAND & STYLE RULES (HARD LOCK)
+
+Follow these rules everywhere you touch:
+
+Overall feel: clean, light, white, editorial, premium
+
+No dark theme and no cluttered elements
+
+Colours
+
+Primary brand blue: #0033A0
+
+Primary background: white
+
+Primary text colour: existing near-black in the project (do not change)
+
+Accent colours (use sparingly, not as main backgrounds):
+
+Soft lilac (from existing Innovatr graphics)
+
+Soft peach
+
+Soft coral
+
+Soft mid-blue
+
+Use accents only for:
+
+Category labels
+
+Small chips / tags
+
+Hover states
+
+Graphical details
+
+Buttons, links and key UI elements should use the existing Innovatr blue system.
+
+Typography
+
+Keep the current font stack already used in the portal
+
+Titles: DM Serif Display (or whatever current display serif is)
+
+Body: existing sans serif (Roboto or equivalent)
+
+No new fonts, no extra weight noise.
+
+1. STATIC ASSETS & COVER IMAGES
+
+The portal uses category-based cover images for Insights IRL Inside Launch.
+
+Detect static directory automatically
+
+If /public exists and is used for favicon or logo, use /public
+
+Else if /static exists and is used for assets, use /static
+
+Use whichever directory is already referenced for global logos / favicons
+
+Name this folder ASSET_ROOT in your comments, but do not rename actual folders.
+
+Create (or ensure) a covers subfolder under the chosen static directory:
+
+ASSET_ROOT/covers/
+
+
+Place these four files there and reference them exactly by these names
+(assume they already exist in the project, you are wiring them up):
+
+insights-cover.png (Innovatr Insights abstract blobs image)
+
+irl-cover.png (Innovatr IRL wave image)
+
+inside-cover.png (Innovatr Inside blue room image)
+
+launch-cover.png (Innovatr Launch arrows image)
+
+Create a mapping in the Trends & Insights front-end code:
+
+const categoryCoverImages: Record<string, string> = {
+  insights: "/covers/insights-cover.png",
+  irl: "/covers/irl-cover.png",
+  inside: "/covers/inside-cover.png",
+  launch: "/covers/launch-cover.png",
+};
+
+
+Normalise category keys before lookup:
+
+Take the report category string from the data / admin ("Insights", "Launch", "IRL", "Inside" etc.)
+
+Trim spaces, convert to lowercase
+
+Map "innovatr insights" or "insights" → insights
+
+Map "innovatr irl" or "irl" → irl
+
+Map "innovatr inside" or "inside" → inside
+
+Map "innovatr launch" or "launch" → launch
+
+Bug fix requirement:
+
+Right now, “Insights” covers are not showing. Your implementation must fix this by:
+
+Ensuring the actual source path used in React/Vue/Next matches the static directory
+
+Making the img / background-image source for:
+
+The card cover on the library grid, and
+
+The hero header on the report detail page
+
+Both should use the same categoryCoverImages mapping.
+
+2. DATA MODELS (SOURCE OF TRUTH)
+
+Standardise data models for reports and users.
+
+2.1 Report
+
+Use a central Report model / collection, used by both Admin and the member library:
+
+type AccessLevel = "public" | "member" | "tier" | "paid";
+type CreditType = "none" | "basic" | "pro";
+
+interface Report {
+  id: string;
+  title: string;
+  slug: string;              // unique URL slug
+  category: "Insights" | "Launch" | "Inside" | "IRL";
+  industry: string;
+  date: string;              // ISO yyyy-mm-dd; shown on cards
+  previewText: string;       // teaser text for card
+  bodyContent: string;       // full mailer body (HTML or markdown)
+  topics: string[];          // from topics input
+  tags: string[];            // additional tags if needed
+  accessLevel: AccessLevel;
+  allowedTiers: string[];    // when accessLevel = "tier"
+  creditType: CreditType;    // when accessLevel = "paid"
+  creditCost: number;        // when accessLevel = "paid"
+  isFeatured: boolean;
+  status: "draft" | "scheduled" | "published" | "archived";
+
+  publishAt?: string | null;   // optional scheduled publish datetime
+  unpublishAt?: string | null; // optional unpublish datetime
+
+  pdfUrl?: string | null;
+
+  // performance metrics
+  viewCount: number;
+  uniqueViewCount: number;
+  downloadCount: number;
+  upgradeInfluenceScore: number;  // simple numeric score or count
+
+  createdAt: string;
+  updatedAt: string;
+  lastUpdatedBy?: string;
+}
+
+2.2 User / Member profile
+
+Extend the existing user model with:
+
+interface MemberProfile {
+  id: string;
+  name: string;
+  email: string;
+  company?: string;
+  membershipTier: "STARTER" | "GROWTH" | "SCALE" | string;
+  status: "active" | "paused" | "cancelled";
+  basicCredits: number;
+  proCredits: number;
+
+  totalSpend: number;         // lifetime revenue
+  firstProjectDate?: string;
+  lastProjectDate?: string;
+  lastActivityDate?: string;
+
+  internalNotes?: string;
+
+  // History data (can be joined or denormalised)
+  reportHistory?: Array<{
+    reportId: string;
+    title: string;
+    accessedAt: string;
+  }>;
+
+  dealsApplied?: Array<{
+    dealId: string;
+    title: string;
+    appliedAt: string;
+  }>;
+}
+
+
+Do not break existing authentication. Extend the current store or schema instead of replacing it.
+
+3. TRENDS & INSIGHTS LIBRARY (MEMBER SIDE)
+3.1 Layout
+
+Keep the main heading “Trends & Insights Library”.
+
+Underneath, the search + filters row stays, but cards layout needs to change.
+
+Grid
+
+Desktop:
+
+2 columns of cards
+
+3 rows visible by default (6 cards)
+
+“Show all” button or “Load more” underneath that reveals the full set
+
+Tablet:
+
+2 columns where possible, otherwise 1 clean column
+
+Mobile:
+
+1 column
+
+Cards should be slightly larger than current, with:
+
+Top: category chips (e.g. “Insights”, “FMCG / Food”)
+
+Then: cover image (use categoryCoverImages mapping)
+
+Then: title
+
+Then: short preview text
+
+Bottom: tags (chips) + date + CTA button “Read full issue” or “Read full report”
+
+Use existing card border radius and shadow style, keep it light and tidy, not heavy.
+
+3.2 Card content
+
+Each card should show:
+
+Category chips:
+
+Primary category: Insights / Launch / Inside / IRL
+
+Secondary industry chip (e.g. FMCG / Food; Financial Services; Beverage)
+
+Cover image:
+
+Use a rectangular card top image
+
+Source is categoryCoverImages[normalisedCategory]
+
+Title:
+
+Exact report.title
+
+Preview text:
+
+Use report.previewText directly (do not cut random body text)
+
+Limit to 2–3 lines with ellipsis if needed
+
+Tags:
+
+Show up to 3 tags / topics as chips (e.g. “Consumer Behaviour”, “Emotional Economy”)
+
+Footer:
+
+Date (formatted as dd/mm/yyyy) from report.date
+
+Button: “Read full issue” that routes to the report detail page.
+
+3.3 Fake bi-weekly dates
+
+For existing seeded reports, if they do not yet have a date:
+
+Sort them by their current order or ID (stable order)
+
+Assign dates going backwards every 2 weeks from the most recent one.
+
+Example for 12 reports:
+
+Most recent: 18/11/2025
+
+Then 04/11/2025
+
+Then 21/10/2025
+
+etc.
+
+Ensure this step only fills missing date values and does not overwrite dates that already exist.
+
+3.4 Filters and search
+
+Existing search and filters should stay but use the structured fields:
+
+Search bar: full-text across title, previewText, bodyContent, topics and tags
+
+Category dropdown: filters by category
+
+Sort dropdown: Newest first / Oldest first
+
+Keep it performant and debounced.
+
+4. REPORT DETAIL PAGE (MEMBER SIDE)
+
+On the report detail page (/portal/insights/[slug] or equivalent):
+
+Hero section
+
+Full-width hero using the report’s category cover image as background
+
+Overlay gradient if needed to keep title legible
+
+Show:
+
+Category chips
+
+Title
+
+Date and industry
+
+This should replace the current large grey / blank header.
+
+Download and metadata bar
+
+Keep the “Download full report” button if pdfUrl exists
+
+Show the tags and topics below the hero in a neat row of chips
+
+Respect access rules (see section 6).
+
+Body content
+
+Reduce left/right padding so content feels more like a modern article, not a huge white slab
+
+Use bodyContent in a readable column width
+
+Headings, paragraphs, bullet lists styled cleanly and consistently
+
+Related content (optional)
+
+At bottom, show 2–3 related reports in mini-card format:
+
+Same category or shared tags
+
+Link back into the same library
+
+5. ACCESS & PAYWALL LOGIC (MEMBER SIDE)
+
+Use the Report data to control access:
+
+Public (accessLevel === "public")
+
+Anyone can see the card, detail page and download
+
+No login required
+
+Member only (accessLevel === "member")
+
+Card visible to everyone
+
+Non-logged users clicking the card should get a login / sign-up prompt instead of content
+
+Logged-in members see the full report and download at 0 credits
+
+Tier gated (accessLevel === "tier")
+
+Only users whose membershipTier is in allowedTiers can access
+
+Others see a friendly message:
+
+Example: “Available on Growth and Scale memberships”
+
+Provide a CTA to upgrade
+
+Paid (accessLevel === "paid")
+
+Card visible to all members
+
+Show pill “Paid” plus small text like “1 Basic credit” or “2 Pro credits” from creditType and creditCost
+
+On access:
+
+If member has enough credits, decrement their credit wallet and log a “report order”
+
+If not, show a message and CTA to upgrade or buy more credits
+
+Performance tracking
+
+Whenever a report detail page is successfully shown, increment viewCount
+
+Track unique views by user ID → increment uniqueViewCount only the first time
+
+When a PDF download is clicked, increment downloadCount
+
+Upgrade influence
+
+When a member upgrades their tier or buys a significant credit bundle, inspect their most recently viewed reports and increment upgradeInfluenceScore for those reports.
+
+This can be simple: increment by 1 for the last 3 reports they viewed before upgrade.
+
+6. ADMIN → REPORTS
+
+Upgrade the Reports tab so Hannah can fully manage reports.
+
+6.1 Reports list
+
+Replace the simple list with a table:
+
+Columns:
+
+Title (clickable link to edit)
+
+Category
+
+Industry
+
+Date
+
+Access (badge: PUBLIC / MEMBER / TIER / PAID)
+
+Status (Draft / Scheduled / Published / Archived)
+
+Performance (e.g. 128 views · 47 downloads)
+
+Quick actions: Edit · View on site
+
+Above the table:
+
+Search input
+
+Filters: Category, Access, Status
+
+Sort: Newest / Oldest
+
+Quick actions
+
+Clicking the Access pill opens a small menu to switch between Public / Member / Tier / Paid
+
+Clicking the Status pill opens a small menu: Draft / Scheduled / Published / Archived
+
+For each row, a “View on site” link opens the public report detail page in a new tab.
+
+All quick changes should save asynchronously and show a small toast.
+
+6.2 Edit / Create Report modal
+
+Use a single component for New Trend / Mailer and Edit Report.
+
+Sections and fields:
+
+Basics
+
+Title
+
+Slug (read-only by default; small “Edit” link)
+
+Category (Insights / Launch / Inside / IRL)
+
+Industry
+
+Date picker
+
+Content
+
+Preview Text (short card teaser)
+
+Body Content (large text area or editor)
+
+Topics & Tags
+
+Topics input (comma separated → topics[])
+
+Tags input (optional, comma separated → tags[])
+
+Access
+
+Access Level radio buttons: Public / Member / Tier gated / Paid
+
+If Tier gated:
+
+Checkboxes for Starter / Growth / Scale → allowedTiers
+
+If Paid:
+
+Credit type: Basic / Pro
+
+Credit cost: numeric input
+
+Visibility & Scheduling
+
+Status: Draft / Scheduled / Published / Archived
+
+Publish at: datetime picker (optional)
+
+If set in the future, status should become Scheduled automatically
+
+Unpublish at: datetime picker (optional)
+
+After this date, status becomes Archived and report is hidden from library
+
+Downloads
+
+PDF URL
+
+Meta
+
+Read-only labels: Created at, Updated at, Last updated by
+
+Buttons:
+
+Save changes (primary)
+
+Cancel
+
+View on site (secondary)
+
+6.3 Scheduling behaviour
+
+If status = "scheduled" and publishAt is in the future:
+
+Hide report from library until that time
+
+When publishAt passes:
+
+Flip status to published and show in library
+
+If unpublishAt is set and in the past:
+
+Set status to archived and hide from library
+
+Make sure the scheduler is implemented in a way compatible with the stack (either background cron, interval check on read, or on-demand update when admin logs in).
+
+7. ADMIN → USERS (USER PROFILES)
+
+Keep the Users table simple but add a User Profile view.
+
+7.1 Users table
+
+Columns:
+
+Name
+
+Company
+
+Email
+
+Tier
+
+Status
+
+Total spend
+
+Last activity
+
+Row click opens the detailed User Profile.
+
+7.2 User Profile view / drawer
+
+Sections:
+
+Overview
+
+Name, email, company
+
+Tier and status (editable dropdowns)
+
+Basic credits and Pro credits (editable numeric inputs)
+
+Total spend
+
+First project date
+
+Last project date
+
+Last activity date
+
+Saving changes should update the member record and keep it in sync with subscriptions.
+
+Activity
+
+Timeline of key events (most recent first)
+
+e.g.
+
+“Viewed Banking Monogamy Is Dead”
+
+“Downloaded Protein Over Principle”
+
+“Upgraded to Growth tier”
+
+Reports accessed
+
+Table with last ~10 accessed reports:
+
+Date
+
+Report title
+
+Category
+
+Deals & perks
+
+List of deals applied: title and applied date
+
+Button “Apply deal to this user” that opens a dropdown of existing deals and stores the association
+
+Internal notes
+
+Large text area stored as internalNotes
+
+Not visible anywhere on the member side.
+
+8. EXPORTS
+
+Add an Export dropdown in Admin (top right or similar):
+
+Export Users (CSV)
+
+Export Reports (CSV)
+
+Export Report Performance (CSV)
+
+Users CSV should include:
+
+Name, email, company, tier, status, totalSpend, lastActivityDate, firstProjectDate, lastProjectDate, basicCredits, proCredits
+
+Reports CSV should include:
+
+Title, slug, category, industry, date, accessLevel, creditType, creditCost, status, isFeatured
+
+Report Performance CSV should include:
+
+Title, slug, viewCount, uniqueViewCount, downloadCount, upgradeInfluenceScore
+
+Exports can be generated from the current in-memory or database state and downloaded directly from the browser.
+
+9. IMPLEMENTATION NOTES
+
+Do not remove or break any existing API endpoints; extend them
+
+Keep components modular:
+
+ReportList, ReportEditModal, ReportPerformancePanel, UserProfileDrawer etc.
+
+Respect existing design tokens and spacing scale; make things cleaner, not busier
+
+All new strings and labels should be simple and professional
+
+No extra animations or experimental UI patterns.
+
+10. FINAL TEST CHECKLIST
+
+Before you finish, confirm the following manually:
+
+Trends & Insights library shows 2 columns on desktop, 3 rows then “Show all”.
+
+Each card shows correct title, preview text, category chips, tags, date and correct cover image.
+
+Cover images for Insights, IRL, Inside, Launch all show correctly both on cards and on the report detail header.
+
+Report detail page hero uses the right cover image, and padding on body content feels tighter and editorial.
+
+Access rules (Public, Member, Tier, Paid) behave as expected for logged-out and logged-in members.
+
+In Admin → Reports, you can:
+
+Search, filter and sort
+
+Edit a report (title, category, preview, body, tags, access, credits, PDF URL)
+
+Schedule publish / unpublish
+
+See basic performance metrics
+
+Jump to “View on site”
+
+In Admin → Users, clicking a user shows:
+
+Overview with tier, status, credits and spend
+
+Recent report activity
+
+Deals applied and internal notes
+
+Export buttons download valid CSVs for Users, Reports and Report Performance.
+
+Implement all of the above in the existing codebase now.

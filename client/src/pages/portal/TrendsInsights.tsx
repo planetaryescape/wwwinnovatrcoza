@@ -14,6 +14,35 @@ import PortalLayout from "./PortalLayout";
 import { Link } from "wouter";
 import reportsData from "@/data/reports.json";
 
+const categoryCoverImages: Record<string, string> = {
+  insights: "/assets/covers/insights-cover.png",
+  irl: "/assets/covers/irl-cover.png",
+  inside: "/assets/covers/inside-cover.png",
+  launch: "/assets/covers/launch-cover.png",
+};
+
+function normalizeCategoryKey(category: string): string {
+  const normalized = category.toLowerCase().trim().replace("innovatr ", "");
+  return normalized;
+}
+
+function getCoverImage(category: string): string {
+  const key = normalizeCategoryKey(category);
+  return categoryCoverImages[key] || categoryCoverImages.insights;
+}
+
+const categoryColors: Record<string, { bg: string; text: string }> = {
+  insights: { bg: "bg-blue-50", text: "text-[#0033A0]" },
+  launch: { bg: "bg-orange-50", text: "text-orange-700" },
+  inside: { bg: "bg-violet-50", text: "text-violet-700" },
+  irl: { bg: "bg-rose-50", text: "text-rose-700" },
+};
+
+function getCategoryStyle(category: string) {
+  const key = normalizeCategoryKey(category);
+  return categoryColors[key] || categoryColors.insights;
+}
+
 interface Report {
   id: number;
   category: string;
@@ -29,47 +58,55 @@ interface Report {
 }
 
 function ReportCard({ report }: { report: Report }) {
-  const formattedDate = new Date(report.date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
+  const formattedDate = new Date(report.date).toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
   });
+
+  const categoryStyle = getCategoryStyle(report.category);
+  const coverImage = getCoverImage(report.category);
 
   return (
     <Link href={`/portal/insights/${report.slug}`}>
       <article 
-        className="group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 hover:-translate-y-1"
+        className="group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 hover:-translate-y-1 flex flex-col h-full"
         data-testid={`report-card-${report.id}`}
       >
-        <div className="relative h-48 overflow-hidden">
+        <div className="p-4 pb-0">
+          <div className="flex items-center gap-2 mb-3 flex-wrap">
+            <Badge 
+              className={`${categoryStyle.bg} ${categoryStyle.text} text-xs font-medium px-2.5 py-1 border-0`}
+            >
+              {report.category}
+            </Badge>
+            <Badge 
+              variant="secondary"
+              className="text-xs px-2.5 py-1 bg-gray-100 text-gray-600"
+            >
+              {report.industry}
+            </Badge>
+            {report.isNew && (
+              <Badge 
+                className="text-white text-xs font-medium px-2 py-1"
+                style={{ backgroundColor: '#0033A0' }}
+                data-testid={`badge-new-${report.id}`}
+              >
+                NEW
+              </Badge>
+            )}
+          </div>
+        </div>
+
+        <div className="relative h-44 mx-4 rounded-lg overflow-hidden">
           <img
-            src={report.coverImage}
+            src={coverImage}
             alt={report.category}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
-          {report.isNew && (
-            <Badge 
-              className="absolute top-3 right-3 text-white text-xs font-medium px-2 py-1"
-              style={{ backgroundColor: '#0033A0' }}
-              data-testid={`badge-new-${report.id}`}
-            >
-              NEW
-            </Badge>
-          )}
         </div>
         
-        <div className="p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <span 
-              className="text-xs font-medium uppercase tracking-wide"
-              style={{ color: '#0033A0' }}
-            >
-              {report.category}
-            </span>
-            <span className="text-gray-300">|</span>
-            <span className="text-xs text-gray-500">{report.industry}</span>
-          </div>
-          
+        <div className="p-4 flex flex-col flex-1">
           <h3 
             className="font-serif text-xl leading-tight mb-2 text-gray-900 group-hover:text-[#0033A0] transition-colors line-clamp-2"
             style={{ fontFamily: 'DM Serif Display, serif' }}
@@ -77,9 +114,7 @@ function ReportCard({ report }: { report: Report }) {
             {report.title}
           </h3>
           
-          <p className="text-sm text-gray-500 mb-3">{formattedDate}</p>
-          
-          <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 mb-4">
+          <p className="text-sm text-gray-600 leading-relaxed line-clamp-3 mb-4 flex-1">
             {report.teaser}
           </p>
           
@@ -88,19 +123,22 @@ function ReportCard({ report }: { report: Report }) {
               <Badge 
                 key={index} 
                 variant="secondary" 
-                className="text-xs px-2 py-0.5 bg-gray-100 text-[#0033A0] hover:bg-gray-200"
+                className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 hover:bg-gray-200"
               >
                 {tag}
               </Badge>
             ))}
           </div>
           
-          <div 
-            className="flex items-center gap-1 text-sm font-medium transition-colors"
-            style={{ color: '#0033A0' }}
-          >
-            <span>Read full issue</span>
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+            <span className="text-sm text-gray-500">{formattedDate}</span>
+            <div 
+              className="flex items-center gap-1 text-sm font-medium transition-colors"
+              style={{ color: '#0033A0' }}
+            >
+              <span>Read full issue</span>
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            </div>
           </div>
         </div>
       </article>
@@ -151,7 +189,7 @@ export default function TrendsInsights() {
               className="text-4xl md:text-5xl font-bold mb-3 text-gray-900"
               style={{ fontFamily: 'DM Serif Display, serif' }}
             >
-              Trends & Insights
+              Trends & Insights Library
             </h1>
             <p className="text-lg text-gray-600" style={{ fontFamily: 'Roboto, sans-serif' }}>
               Fresh perspectives on South African consumer behaviour, market shifts, and innovation opportunities.
