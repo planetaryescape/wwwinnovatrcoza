@@ -31,7 +31,7 @@ function getCoverImage(category: string): string {
 }
 
 const categoryColors: Record<string, { bg: string; text: string }> = {
-  insights: { bg: "bg-blue-50", text: "text-[#0033A0]" },
+  insights: { bg: "bg-blue-50", text: "text-[#5B6EF7]" },
   launch: { bg: "bg-orange-50", text: "text-orange-700" },
   inside: { bg: "bg-violet-50", text: "text-violet-700" },
   irl: { bg: "bg-rose-50", text: "text-rose-700" },
@@ -165,7 +165,7 @@ function RelatedReportCard({ report }: { report: Report }) {
             {report.category}
           </Badge>
           <h4 
-            className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-[#0033A0] transition-colors"
+            className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-[#5B6EF7] transition-colors"
             style={{ fontFamily: 'DM Serif Display, serif' }}
           >
             {report.title}
@@ -192,13 +192,13 @@ function AccessPaywall({
   const getIcon = () => {
     switch (accessResult.reason) {
       case "not_logged_in":
-        return <LogIn className="w-8 h-8 text-[#0033A0]" />;
+        return <LogIn className="w-8 h-8 text-[#5B6EF7]" />;
       case "tier_required":
-        return <Crown className="w-8 h-8 text-[#0033A0]" />;
+        return <Crown className="w-8 h-8 text-[#5B6EF7]" />;
       case "credits_required":
-        return <CreditCard className="w-8 h-8 text-[#0033A0]" />;
+        return <CreditCard className="w-8 h-8 text-[#5B6EF7]" />;
       default:
-        return <Lock className="w-8 h-8 text-[#0033A0]" />;
+        return <Lock className="w-8 h-8 text-[#5B6EF7]" />;
     }
   };
 
@@ -209,7 +209,7 @@ function AccessPaywall({
           <Button 
             onClick={onLogin}
             className="rounded-full"
-            style={{ backgroundColor: '#0033A0' }}
+            style={{ backgroundColor: '#5B6EF7' }}
             data-testid="button-login-access"
           >
             <LogIn className="w-4 h-4 mr-2" />
@@ -221,7 +221,7 @@ function AccessPaywall({
           <Button 
             onClick={onUpgrade}
             className="rounded-full"
-            style={{ backgroundColor: '#0033A0' }}
+            style={{ backgroundColor: '#5B6EF7' }}
             data-testid="button-upgrade-tier"
           >
             <Crown className="w-4 h-4 mr-2" />
@@ -234,7 +234,7 @@ function AccessPaywall({
             <Button 
               onClick={onPurchaseCredits}
               className="rounded-full"
-              style={{ backgroundColor: '#0033A0' }}
+              style={{ backgroundColor: '#5B6EF7' }}
               data-testid="button-purchase-credits"
             >
               <CreditCard className="w-4 h-4 mr-2" />
@@ -243,7 +243,7 @@ function AccessPaywall({
             <Button 
               variant="outline"
               onClick={onUpgrade}
-              className="rounded-full border-[#0033A0] text-[#0033A0]"
+              className="rounded-full border-[#5B6EF7] text-[#5B6EF7]"
               data-testid="button-upgrade-for-credits"
             >
               <Crown className="w-4 h-4 mr-2" />
@@ -257,9 +257,9 @@ function AccessPaywall({
   };
 
   return (
-    <Card className="border-2 border-[#0033A0]/20 bg-gradient-to-br from-blue-50 to-white">
+    <Card className="border-2 border-[#5B6EF7]/20 bg-gradient-to-br from-blue-50 to-white">
       <CardContent className="p-8 text-center">
-        <div className="w-16 h-16 rounded-full bg-[#0033A0]/10 flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 rounded-full bg-[#5B6EF7]/10 flex items-center justify-center mx-auto mb-4">
           {getIcon()}
         </div>
         <h3 
@@ -329,7 +329,7 @@ export default function InsightDetail() {
             <Button 
               onClick={() => setLocation("/portal/trends")} 
               className="rounded-full"
-              style={{ backgroundColor: '#0033A0' }}
+              style={{ backgroundColor: '#5B6EF7' }}
               data-testid="button-back-library"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -396,7 +396,7 @@ export default function InsightDetail() {
                 {report.isNew && (
                   <Badge 
                     className="text-white text-xs font-medium px-2 py-1"
-                    style={{ backgroundColor: '#0033A0' }}
+                    style={{ backgroundColor: '#5B6EF7' }}
                   >
                     NEW
                   </Badge>
@@ -465,7 +465,7 @@ export default function InsightDetail() {
                   size="lg"
                   onClick={handleDownload}
                   className="rounded-full mb-8"
-                  style={{ backgroundColor: '#0033A0' }}
+                  style={{ backgroundColor: '#5B6EF7' }}
                   data-testid="button-download-pdf"
                 >
                   <Download className="w-4 h-4 mr-2" />
@@ -513,7 +513,7 @@ export default function InsightDetail() {
                     size="lg"
                     onClick={handleDownload}
                     className="rounded-full"
-                    style={{ backgroundColor: '#0033A0' }}
+                    style={{ backgroundColor: '#5B6EF7' }}
                     data-testid="button-download-footer"
                   >
                     <Download className="w-4 h-4 mr-2" />
@@ -544,7 +544,7 @@ export default function InsightDetail() {
             <Button
               variant="outline"
               onClick={() => setLocation("/portal/trends")}
-              className="rounded-full border-[#0033A0] text-[#0033A0] hover:bg-[#0033A0] hover:text-white"
+              className="rounded-full border-[#5B6EF7] text-[#5B6EF7] hover:bg-[#5B6EF7] hover:text-white"
               data-testid="button-back-footer"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />

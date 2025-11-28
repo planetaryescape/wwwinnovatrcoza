@@ -37,7 +37,7 @@ function getCoverImage(category: string): string {
 }
 
 const categoryColors: Record<string, { bg: string; text: string }> = {
-  insights: { bg: "bg-blue-50", text: "text-[#0033A0]" },
+  insights: { bg: "bg-blue-50", text: "text-[#5B6EF7]" },
   launch: { bg: "bg-orange-50", text: "text-orange-700" },
   inside: { bg: "bg-violet-50", text: "text-violet-700" },
   irl: { bg: "bg-rose-50", text: "text-rose-700" },
@@ -100,7 +100,7 @@ function getAccessIndicator(report: Report, userTier?: string) {
     if (!hasAccess) {
       return (
         <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 shadow-sm" title={`${allowedTiers[0]}+ tier required`}>
-          <Crown className="w-3.5 h-3.5 text-[#0033A0]" />
+          <Crown className="w-3.5 h-3.5 text-[#5B6EF7]" />
         </div>
       );
     }
@@ -109,7 +109,7 @@ function getAccessIndicator(report: Report, userTier?: string) {
   if (accessLevel === "paid") {
     return (
       <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 shadow-sm" title="Credits required">
-        <CreditCard className="w-3.5 h-3.5 text-[#0033A0]" />
+        <CreditCard className="w-3.5 h-3.5 text-[#5B6EF7]" />
       </div>
     );
   }
@@ -150,7 +150,7 @@ function ReportCard({ report, userTier }: { report: Report; userTier?: string })
             {report.isNew && (
               <Badge 
                 className="text-white text-xs font-medium px-2 py-1"
-                style={{ backgroundColor: '#0033A0' }}
+                style={{ backgroundColor: '#5B6EF7' }}
                 data-testid={`badge-new-${report.id}`}
               >
                 NEW
@@ -170,7 +170,7 @@ function ReportCard({ report, userTier }: { report: Report; userTier?: string })
         
         <div className="p-4 flex flex-col flex-1">
           <h3 
-            className="font-serif text-xl leading-tight mb-2 text-gray-900 group-hover:text-[#0033A0] transition-colors line-clamp-2"
+            className="font-serif text-xl leading-tight mb-2 text-gray-900 group-hover:text-[#5B6EF7] transition-colors line-clamp-2"
             style={{ fontFamily: 'DM Serif Display, serif' }}
           >
             {report.title}
@@ -196,7 +196,7 @@ function ReportCard({ report, userTier }: { report: Report; userTier?: string })
             <span className="text-sm text-gray-500">{formattedDate}</span>
             <div 
               className="flex items-center gap-1 text-sm font-medium transition-colors"
-              style={{ color: '#0033A0' }}
+              style={{ color: '#5B6EF7' }}
             >
               <span>Read full issue</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -267,7 +267,7 @@ export default function TrendsInsights() {
                 placeholder="Search by title, topic, or tag..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-10 rounded-full border-gray-200 focus:border-[#0033A0] focus:ring-[#0033A0]"
+                className="pl-10 h-10 rounded-full border-gray-200 focus:border-[#5B6EF7] focus:ring-[#5B6EF7]"
                 data-testid="input-search-reports"
               />
             </div>
@@ -338,7 +338,7 @@ export default function TrendsInsights() {
                 variant="outline"
                 size="lg"
                 onClick={() => setShowAll(true)}
-                className="rounded-full px-8 border-[#0033A0] text-[#0033A0] hover:bg-[#0033A0] hover:text-white"
+                className="rounded-full px-8 border-[#5B6EF7] text-[#5B6EF7] hover:bg-[#5B6EF7] hover:text-white"
                 data-testid="button-show-all"
               >
                 Show all reports
@@ -353,7 +353,7 @@ export default function TrendsInsights() {
                 variant="outline"
                 size="lg"
                 onClick={() => setShowAll(false)}
-                className="rounded-full px-8 border-[#0033A0] text-[#0033A0] hover:bg-[#0033A0] hover:text-white"
+                className="rounded-full px-8 border-[#5B6EF7] text-[#5B6EF7] hover:bg-[#5B6EF7] hover:text-white"
                 data-testid="button-show-less"
               >
                 Show less
