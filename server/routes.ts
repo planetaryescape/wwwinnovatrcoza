@@ -916,6 +916,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate sample invoice PDF for preview
+  app.post("/api/invoice/sample", async (req, res) => {
+    try {
+      const { customerName, customerEmail, customerCompany, businessRegNumber, vatNumber, orderItems, totalAmount } = req.body;
+      
+      // Generate sample invoice number
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const sampleInvoiceNumber = `INV-${year}${month}${day}-SAMPLE`;
+
+      const invoicePdf = await generateInvoicePdf({
+        invoiceNumber: sampleInvoiceNumber,
+        invoiceDate: now,
+        customerName: customerName || "Sample Customer",
+        customerEmail: customerEmail || "sample@example.com",
+        customerCompany: customerCompany || "Sample Company (Pty) Ltd",
+        businessRegNumber: businessRegNumber || "2024/123456/07",
+        vatNumber: vatNumber || "4123456789",
+        orderItems: orderItems || [
+          { type: "membership", description: "Entry Membership", quantity: 1, unitAmount: "5000" },
+          { type: "addon", description: "Premium Support", quantity: 1, unitAmount: "2000" },
+        ],
+        currency: "ZAR",
+      });
+
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `inline; filename="Innovatr-Sample-Invoice-${sampleInvoiceNumber}.pdf"`);
+      res.send(invoicePdf);
+    } catch (error: any) {
+      console.error("Sample invoice generation error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

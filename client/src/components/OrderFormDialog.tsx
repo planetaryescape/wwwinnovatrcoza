@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Loader2, CheckCircle2, CreditCard, FileText } from "lucide-react";
+import { Loader2, CheckCircle2, CreditCard, FileText, Eye } from "lucide-react";
 
 interface OrderItem {
   type: string;
@@ -59,6 +59,7 @@ export default function OrderFormDialog({
   const [businessRegNumber, setBusinessRegNumber] = useState("");
   const [vatNumber, setVatNumber] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
   const createInquiryMutation = useMutation({
@@ -266,6 +267,48 @@ export default function OrderFormDialog({
     return `R${price.toLocaleString()}`;
   };
 
+  const handlePreviewInvoice = async () => {
+    setIsGeneratingPreview(true);
+    try {
+      const response = await fetch("/api/invoice/sample", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: customerName || "Sample Customer",
+          customerEmail: customerEmail || "sample@example.com",
+          customerCompany: customerCompany || "Sample Company (Pty) Ltd",
+          businessRegNumber: businessRegNumber || "2024/123456/07",
+          vatNumber: vatNumber || "4123456789",
+          orderItems: orderItems.length > 0 ? orderItems : [
+            { type: "membership", description: "Sample Membership", quantity: 1, unitAmount: "5000" },
+          ],
+          totalAmount,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to generate invoice preview");
+      }
+      
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      
+      toast({
+        title: "Invoice Preview Generated",
+        description: "The sample invoice has opened in a new tab.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Preview Failed",
+        description: error.message || "Failed to generate invoice preview.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingPreview(false);
+    }
+  };
+
   if (isSuccess) {
     return (
       <Dialog open={open} onOpenChange={handleClose}>
@@ -386,6 +429,27 @@ export default function OrderFormDialog({
                     data-testid="input-vat-number"
                   />
                 </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePreviewInvoice}
+                  disabled={isGeneratingPreview}
+                  className="w-full"
+                  data-testid="button-preview-invoice"
+                >
+                  {isGeneratingPreview ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Generating Preview...
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="w-4 h-4 mr-2" />
+                      Preview Sample Invoice
+                    </>
+                  )}
+                </Button>
               </div>
             )}
           </div>
