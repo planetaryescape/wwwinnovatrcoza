@@ -1,0 +1,277 @@
+PROJECT
+Update the Innovatr Trends & Insights portal so that:
+
+All report content, series and display categories match the attached “Reports and Content.docx” master document. This document is the single source of truth.
+
+Selected Innovatr IRL issues have working downloadable PDF reports, using the existing /assets/reports/... pattern that the codebase already expects.
+
+Each report has both:
+
+an internal series label: IRL, Insights, Launch, Inside
+
+one or more display categories for the front end: Food, Bev, Alcohol, Banking, Services, Beauty, FMCG, All
+
+Only reports with a publish date on or before 2025 11 28 are treated as live in the public Trends & Insights library. Everything dated after that is scheduled and should only be visible in admin.
+
+Do not redesign the site. Keep the current layout, typography and card design. Only change the data model, data file and detail components where necessary.
+
+CONTEXT FROM EXISTING CODE
+
+From the current project:
+
+There is no /public/assets/reports folder yet, but
+client/src/data/reports.json already refers to paths like /assets/reports/insights-that-speak-for-themselves.pdf.
+
+Components use:
+
+report.pdfPath in the Trends & Insights and InsightDetail pages
+
+pdfUrl in admin forms (ReportEditorModal and NewReportModal)
+
+App Storage and /api/files/* routes exist, but are already integrated and should not be removed.
+
+Use this existing design:
+
+Local static PDFs live at /assets/reports/... in the built site
+
+pdfPath points there from client/src/data/reports.json
+
+pdfUrl can still be used by admin, but does not need to be changed for this task unless required.
+
+OBJECTIVES
+
+Synchronise report metadata with “Reports and Content.docx” for the full library:
+
+For every report in client/src/data/reports.json:
+
+Ensure title matches the master document.
+
+Ensure teaser (card text) matches the card view copy from the master document.
+
+Ensure series is correctly set to one of: IRL, Insights, Launch, Inside based on the master document.
+
+Ensure displayCategories is an array using these values only:
+["Food", "Bev", "Alcohol", "Banking", "Services", "Beauty", "FMCG", "All"].
+
+Ensure publishDate matches the schedule defined in the master document. If a report does not yet have a date in the document, assign a future Tuesday date in sequence after the dated items.
+
+Derive a status field from publishDate:
+
+status: "live" if publishDate is on or before 2025 11 28
+
+status: "scheduled" if publishDate is after 2025 11 28
+
+Use the following series assignment as a guide, with the master document as the authority if there is any conflict:
+
+IRL
+Fairness Is the New Flex
+The Age of Effortless
+Believability Is the New Branding
+Indulgence Without Guilt
+Simplicity Has Status
+The Return of Local Logic
+The Human Subscription
+The Return of the Third Place
+
+Insights
+Banking Monogamy Is Dead
+The New Non Negotiable Treat
+From Vegan to Vital
+The Moderation Movement
+The Quiet Luxury of Calm
+The Rise of the Micro Errand Economy
+The Emotional Upgrade
+Local Humour as Currency
+Volume Is Out. Value Is In
+Affordable Indulgence
+Gen Z Drinks Less But Demands More
+
+Launch
+Cadbury Pocket Sized Joy
+Oat Based Breakfast Revolution
+Race for Instant Gratification
+Snack Box and Meal Kit launches
+Functional Booze
+Wine Without Bottles
+Craft Cues
+
+Inside
+AI Qual
+Storyteller
+Market Share Simulator
+
+For displayCategories, use the logic from the document and the topic of each report. If anything is missing, assign categories by topic, for example:
+
+Food: food, meals, breakfast, kits, snack boxes
+
+Bev: non alcoholic beverages and drinks
+
+Alcohol: alcoholic drinks and launches
+
+Banking: anything about banks, accounts, money tools
+
+Services: telco, delivery, research tools, platforms, subscriptions and general services
+
+Beauty: beauty, personal care, calm or self care products
+
+FMCG: packaged goods, snacks, confectionery, grocery items, everyday brands
+
+All: internal Innovatr tools or any report you want discoverable under a broad filter
+
+Align the data model so each report entry in client/src/data/reports.json contains at least:
+
+id or slug (existing)
+
+title
+
+teaser
+
+series
+
+displayCategories: string[]
+
+publishDate
+
+status: "live" | "scheduled"
+
+pdfPath?: string
+
+hasDownload?: boolean
+
+Do not remove existing fields such as tags or slugs. Only extend.
+
+Implement downloadable PDFs for these five IRL reports using the existing /assets/reports pattern and the attached PDFs:
+
+Fairness Is the New Flex
+
+Believability Is the New Branding
+
+Indulgence Without Guilt
+
+Simplicity Has Status
+
+The Age Of Effortless
+
+FILE PLACEMENT FOR PDFs
+
+Create the folder client/public/assets/reports if it does not already exist. This matches the paths currently referenced in client/src/data/reports.json.
+
+Move or copy the five attached IRL PDF files into that folder with exactly these filenames:
+
+innovatr-irl-fairness-flex.pdf
+
+innovatr-irl-believability-is-the-new-branding.pdf
+
+innovatr-irl-indulgence-without-guilt.pdf
+
+innovatr-irl-simplicity-has-status.pdf
+
+innovatr-irl-the-age-of-effortless.pdf
+
+Also check if the original PDFs or related docs for these existing references are present in attached_assets:
+
+insights-that-speak-for-themselves.pdf
+
+cutting-back-but-not-on-snacks.pdf
+
+Test24-Pro-Demo.pdf
+
+Test24-Basic-Demo.pdf
+
+Test24-Basic-Questionnaire.docx
+
+If you find them in attached_assets, copy them into client/public/assets/reports using the filenames already referenced in the code. If any are missing, create simple placeholder files with those names so existing links no longer break.
+
+Update the pdfPath fields in client/src/data/reports.json for the five IRL reports so they point to these new files:
+
+Fairness Is the New Flex
+
+pdfPath: /assets/reports/innovatr-irl-fairness-flex.pdf
+
+hasDownload: true
+
+Believability Is the New Branding
+
+pdfPath: /assets/reports/innovatr-irl-believability-is-the-new-branding.pdf
+
+hasDownload: true
+
+Indulgence Without Guilt
+
+pdfPath: /assets/reports/innovatr-irl-indulgence-without-guilt.pdf
+
+hasDownload: true
+
+Simplicity Has Status
+
+pdfPath: /assets/reports/innovatr-irl-simplicity-has-status.pdf
+
+hasDownload: true
+
+The Age Of Effortless
+
+pdfPath: /assets/reports/innovatr-irl-the-age-of-effortless.pdf
+
+hasDownload: true
+
+For all other reports, either omit pdfPath and hasDownload or set hasDownload to false.
+
+Do not change the App Storage logic or the /api/files/* route. Leave pdfUrl in the database schema as is. For now the public side should rely on pdfPath, while admin can continue to use pdfUrl for future uploads if needed.
+
+UI BEHAVIOUR
+
+Trends & Insights listing page (client/src/pages/portal/TrendsInsights.tsx):
+
+Filter the list so that only reports with status === "live" are shown to public users.
+
+If there is an admin view or query parameter for internal use, allow that view to display both live and scheduled reports, with a visible status badge.
+
+Insight / Report detail page (client/src/pages/portal/InsightDetail.tsx or equivalent):
+
+If report.pdfPath exists and hasDownload is true, render a prominent primary button near the top of the content with copy similar to:
+Download full IRL report
+
+Clicking the button should call window.open(report.pdfPath, "_blank") as already implemented.
+
+If pdfPath is missing or hasDownload is false, do not render the download button and keep the layout unchanged.
+
+Keep all styling consistent with the existing design system. Use the current primary button component and colours. Do not introduce new visual patterns.
+
+TESTING
+
+Run the project locally.
+
+Open the Trends & Insights page as a public user and confirm that:
+
+Only reports with status: "live" appear in the grid.
+
+Titles, teasers, series labels and dates match the content in “Reports and Content.docx”.
+
+Open each of the five IRL detail pages and confirm that:
+
+The “Download full IRL report” button appears.
+
+The button opens the correct PDF from /assets/reports/....
+
+Open admin or portal views where scheduled content should show and confirm that scheduled items are clearly marked and not visible to public users unless explicitly allowed.
+
+Verify that any existing references to:
+
+/assets/reports/insights-that-speak-for-themselves.pdf
+
+/assets/reports/cutting-back-but-not-on-snacks.pdf
+
+/assets/reports/Test24-Pro-Demo.pdf
+
+/assets/reports/Test24-Basic-Demo.pdf
+
+/assets/reports/Test24-Basic-Questionnaire.docx
+now resolve correctly, either to real content from attached_assets or to the placeholder files you created.
+
+Commit only the necessary changes to:
+
+client/src/data/reports.json
+
+Any updated portal pages or components
+
+New files in client/public/assets/reports

@@ -53,13 +53,18 @@ type AccessLevel = "public" | "member" | "tier" | "paid";
 interface Report {
   id: number;
   category: string;
+  series?: string;
+  displayCategories?: string[];
   industry: string;
   date: string;
+  publishDate?: string;
+  status?: "live" | "scheduled";
   title: string;
   teaser: string;
   slug: string;
   coverImage: string;
   pdfPath: string | null;
+  hasDownload?: boolean;
   tags: string[];
   isNew: boolean;
   accessLevel?: string;
@@ -255,6 +260,10 @@ export default function TrendsInsights() {
 
   const filteredAndSortedReports = useMemo(() => {
     let filtered = (reportsData as Report[]).filter((report) => {
+      // Only show live reports to public users (status must be "live" or undefined for backwards compatibility)
+      const isLive = !report.status || report.status === "live";
+      if (!isLive) return false;
+      
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch = 
         report.title.toLowerCase().includes(searchLower) ||

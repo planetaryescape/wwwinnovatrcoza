@@ -53,13 +53,18 @@ type CreditType = "none" | "basic" | "pro";
 interface Report {
   id: number;
   category: string;
+  series?: string;
+  displayCategories?: string[];
   industry: string;
   date: string;
+  publishDate?: string;
+  status?: "live" | "scheduled";
   title: string;
   teaser: string;
   slug: string;
   coverImage: string;
   pdfPath: string | null;
+  hasDownload?: boolean;
   tags: string[];
   isNew: boolean;
   accessLevel?: string;
@@ -388,6 +393,7 @@ export default function InsightDetail() {
   }
 
   const handleDownload = () => {
+    if (!report.pdfPath) return;
     toast({
       title: "Download Started",
       description: "Your report is being downloaded.",
@@ -487,6 +493,34 @@ export default function InsightDetail() {
           <p className="text-lg text-gray-700 leading-relaxed mb-8">
             {report.teaser}
           </p>
+
+          {report.hasDownload && report.pdfPath && (
+            <div className="mb-8 p-6 bg-gradient-to-r from-rose-50 to-white rounded-lg border border-rose-100">
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <div className="flex-1 text-center sm:text-left">
+                  <h3 
+                    className="text-xl font-bold text-gray-900 mb-1"
+                    style={{ fontFamily: 'DM Serif Display, serif' }}
+                  >
+                    Download full IRL report
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    Get the complete research with all diagnostics, stats and charts
+                  </p>
+                </div>
+                <Button 
+                  size="lg"
+                  onClick={handleDownload}
+                  className="rounded-full whitespace-nowrap"
+                  style={{ backgroundColor: '#5B6EF7' }}
+                  data-testid="button-download-irl"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download PDF
+                </Button>
+              </div>
+            </div>
+          )}
 
           {!accessResult.hasAccess ? (
             <div className="my-8">
