@@ -32,19 +32,19 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#about" className="hover:text-primary transition-colors">About Us</a></li>
+              {/* <li><a href="#about" className="hover:text-primary transition-colors">About Us</a></li> */}
               <li><a href="#contact" className="hover:text-primary transition-colors">Contact</a></li>
-              <li><a href="#privacy" className="hover:text-primary transition-colors">Privacy Policy</a></li>
-              <li><a href="#terms" className="hover:text-primary transition-colors">Terms of Service</a></li>
+              {/* <li><a href="#privacy" className="hover:text-primary transition-colors">Privacy Policy</a></li>
+              <li><a href="#terms" className="hover:text-primary transition-colors">Terms of Service</a></li> */}
             </ul>
           </div>
         </div>
         
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
           <p>© 2024 Innovatr. All rights reserved.</p>
-          <p>
+          {/* <p>
             Powered by <span className="text-primary font-semibold">Just Design Group</span>
-          </p>
+          </p> */}
         </div>
       </div>
     </footer>
