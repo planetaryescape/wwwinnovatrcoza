@@ -70,3 +70,6 @@ integrations = ["javascript_mem_db:1.0.0", "javascript_stripe:1.0.0", "resend:1.
 
 [userenv.shared]
 DEV_URL = "https://b10ca654-ef82-4605-a864-72371f27268f-00-1proe9ll7b5k0.kirk.replit.dev"
+
+[objectStorage]
+defaultBucketID = "replit-objstore-c87ea3ed-b8b8-4f41-a0ea-456a5c4c2139"
