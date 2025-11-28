@@ -6,9 +6,24 @@ import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSch
 import { PaymentService } from "./payments/service";
 import type { PaymentConfig } from "./payments/types";
 import { sendAdminOrderNotification, sendCustomerOrderConfirmation, sendContactFormMessage } from "./emails/email-service";
+import { uploadFile, downloadFile, deleteFile, listFiles, fileExists } from "./app-storage";
 
 // Multer for handling multipart/form-data (PayFast webhooks)
 const upload = multer();
+
+// Multer for file uploads with memory storage
+const fileUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Invalid file type. Only JPEG, PNG, WebP, GIF, and PDF files are allowed."));
+    }
+  },
+});
 
 // Helper to check if user is admin
 const isAdminUser = (email?: string) => {
@@ -716,6 +731,141 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, message: "Subscription cancelled successfully" });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
+    }
+  });
+
+  // File upload endpoints for App Storage
+  app.post("/api/upload/thumbnail", fileUpload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      const allowedImageTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+      if (!allowedImageTypes.includes(req.file.mimetype)) {
+        return res.status(400).json({ error: "Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed." });
+      }
+
+      const ext = req.file.originalname.split(".").pop() || "jpg";
+      const timestamp = Date.now();
+      const fileName = `thumbnails/${timestamp}-${Math.random().toString(36).substring(7)}.${ext}`;
+
+      const result = await uploadFile(req.file.buffer, fileName);
+
+      if (result.ok && result.path) {
+        res.json({ 
+          success: true, 
+          path: result.path,
+          url: `/api/files/${result.path}`
+        });
+      } else {
+        res.status(500).json({ error: result.error || "Upload failed" });
+      }
+    } catch (error: any) {
+      console.error("Thumbnail upload error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/upload/pdf", fileUpload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      if (req.file.mimetype !== "application/pdf") {
+        return res.status(400).json({ error: "Invalid file type. Only PDF files are allowed." });
+      }
+
+      const timestamp = Date.now();
+      const originalName = req.file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
+      const fileName = `pdfs/${timestamp}-${originalName}`;
+
+      const result = await uploadFile(req.file.buffer, fileName);
+
+      if (result.ok && result.path) {
+        res.json({ 
+          success: true, 
+          path: result.path,
+          url: `/api/files/${result.path}`
+        });
+      } else {
+        res.status(500).json({ error: result.error || "Upload failed" });
+      }
+    } catch (error: any) {
+      console.error("PDF upload error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Serve files from App Storage
+  app.get("/api/files/*", async (req, res) => {
+    try {
+      const filePath = (req.params as Record<string, string>)[0];
+      
+      if (!filePath) {
+        return res.status(400).json({ error: "File path required" });
+      }
+
+      const exists = await fileExists(filePath);
+      if (!exists) {
+        return res.status(404).json({ error: "File not found" });
+      }
+
+      const fileBuffer = await downloadFile(filePath);
+      if (!fileBuffer) {
+        return res.status(500).json({ error: "Failed to download file" });
+      }
+
+      // Set content type based on file extension
+      const ext = filePath.split(".").pop()?.toLowerCase();
+      const contentTypes: Record<string, string> = {
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        png: "image/png",
+        gif: "image/gif",
+        webp: "image/webp",
+        pdf: "application/pdf",
+      };
+
+      res.setHeader("Content-Type", contentTypes[ext || ""] || "application/octet-stream");
+      res.setHeader("Cache-Control", "public, max-age=31536000");
+      res.send(fileBuffer);
+    } catch (error: any) {
+      console.error("File serve error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Delete file from App Storage (admin only)
+  app.delete("/api/files/*", async (req, res) => {
+    try {
+      const filePath = (req.params as Record<string, string>)[0];
+      
+      if (!filePath) {
+        return res.status(400).json({ error: "File path required" });
+      }
+
+      const success = await deleteFile(filePath);
+      if (success) {
+        res.json({ success: true });
+      } else {
+        res.status(500).json({ error: "Failed to delete file" });
+      }
+    } catch (error: any) {
+      console.error("File delete error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // List files in App Storage
+  app.get("/api/admin/files", async (req, res) => {
+    try {
+      const prefix = req.query.prefix as string | undefined;
+      const files = await listFiles(prefix);
+      res.json({ files });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
     }
   });
 
