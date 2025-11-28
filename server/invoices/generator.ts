@@ -80,7 +80,7 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
       // Add logo image
       const logoPath = path.join(process.cwd(), "client/public/Innovatr_logo-01.png");
       if (fs.existsSync(logoPath)) {
-        doc.image(logoPath, 50, 40, { width: 120 });
+        doc.image(logoPath, 50, 40, { width: 100 });
       } else {
         // Fallback to text if logo not found
         doc
@@ -90,28 +90,14 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
           .text("INNOVATR", 50, 50);
       }
 
-      // Company details
-      doc
-        .fillColor(textColor)
-        .fontSize(9)
-        .font("Helvetica-Bold")
-        .text("Innovatr (Pty) Ltd.", 50, 95);
-      
-      doc
-        .fillColor(mutedColor)
-        .fontSize(8)
-        .font("Helvetica")
-        .text("Workshop 17, Hyde Park Corner, JHB, 2196", 50, 107)
-        .text("VAT No: 4030317293", 50, 118);
-
-      // TAX INVOICE header - positioned to the right, with proper spacing
+      // TAX INVOICE header - positioned to the right
       doc
         .fillColor(primaryColor)
         .fontSize(22)
         .font("Helvetica-Bold")
         .text("TAX INVOICE", 350, 45, { align: "right", width: 195 });
 
-      // Invoice details - below the TAX INVOICE text with proper spacing
+      // Invoice details - below the TAX INVOICE text
       doc
         .fillColor(textColor)
         .fontSize(10)
@@ -128,33 +114,59 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
           { align: "right", width: 195 }
         );
 
-      const billingTop = 145;
-
+      const billingTop = 130;
+      
+      // Company details (From) - left column
       doc
         .fillColor(primaryColor)
         .fontSize(12)
         .font("Helvetica-Bold")
-        .text("Bill To:", 50, billingTop);
+        .text("From:", 50, billingTop);
 
       doc
         .fillColor(textColor)
         .fontSize(10)
         .font("Helvetica-Bold")
-        .text(data.customerCompany, 50, billingTop + 20);
+        .text("Innovatr (Pty) Ltd.", 50, billingTop + 18);
+      
+      doc
+        .fillColor(mutedColor)
+        .fontSize(9)
+        .font("Helvetica")
+        .text("Workshop 17, Hyde Park Corner", 50, billingTop + 32)
+        .text("JHB, 2196", 50, billingTop + 44)
+        .text("VAT No: 4030317293", 50, billingTop + 56);
+
+      // Bill To - right column (same row as From)
+      doc
+        .fillColor(primaryColor)
+        .fontSize(12)
+        .font("Helvetica-Bold")
+        .text("Bill To:", 300, billingTop);
 
       doc
-        .font("Helvetica")
-        .text(data.customerName, 50, billingTop + 35)
-        .text(data.customerEmail, 50, billingTop + 50);
+        .fillColor(textColor)
+        .fontSize(10)
+        .font("Helvetica-Bold")
+        .text(data.customerCompany, 300, billingTop + 18);
 
+      doc
+        .fillColor(mutedColor)
+        .fontSize(9)
+        .font("Helvetica")
+        .text(data.customerName, 300, billingTop + 32)
+        .text(data.customerEmail, 300, billingTop + 44);
+
+      let billToOffset = 56;
       if (data.businessRegNumber) {
-        doc.text(`Reg No: ${data.businessRegNumber}`, 50, billingTop + 65);
+        doc.text(`Reg No: ${data.businessRegNumber}`, 300, billingTop + billToOffset);
+        billToOffset += 12;
       }
       if (data.vatNumber) {
-        doc.text(`VAT No: ${data.vatNumber}`, 50, billingTop + (data.businessRegNumber ? 80 : 65));
+        doc.text(`VAT No: ${data.vatNumber}`, 300, billingTop + billToOffset);
       }
 
-      const tableTop = 250;
+      const tableTop = 220;
       const colItem = 50;
       const colQty = 300;
       const colPrice = 350;
