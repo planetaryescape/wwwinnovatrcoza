@@ -149,9 +149,9 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
 
       const tableTop = 250;
       const colItem = 50;
-      const colQty = 340;
-      const colPrice = 400;
-      const colTotal = 480;
+      const colQty = 300;
+      const colPrice = 350;
+      const colTotal = 440;
 
       doc
         .fillColor("#f0f0f0")
@@ -192,8 +192,8 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
       doc.strokeColor("#e0e0e0").moveTo(45, yPos).lineTo(550, yPos).stroke();
 
       yPos += 15;
-      const labelX = 380;
-      const valueX = 480;
+      const labelX = 340;
+      const valueX = 440;
 
       doc
         .fillColor(textColor)
@@ -217,23 +217,24 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
         .text("Total:", labelX, yPos)
         .text(formatCurrency(total, data.currency), valueX, yPos);
 
-      // Compact footer - positioned after the totals with some spacing
-      yPos += 40;
-      
-      doc.strokeColor("#e0e0e0").moveTo(50, yPos).lineTo(550, yPos).stroke();
+      // Footer at bottom of page
+      const pageHeight = doc.page.height;
+      const footerTop = pageHeight - 70;
+
+      doc.strokeColor("#e0e0e0").moveTo(50, footerTop).lineTo(550, footerTop).stroke();
 
       doc
         .fillColor(mutedColor)
         .fontSize(8)
         .font("Helvetica")
-        .text("Thank you for your business! This is a computer-generated invoice and is valid without a signature.", 50, yPos + 10, {
+        .text("Thank you for your business! This is a computer-generated invoice and is valid without a signature.", 50, footerTop + 10, {
           align: "center",
           width: 500,
         })
         .text(
           "For questions, please contact richard@innovatr.co.za",
           50,
-          yPos + 22,
+          footerTop + 22,
           { align: "center", width: 500 }
         );
 
