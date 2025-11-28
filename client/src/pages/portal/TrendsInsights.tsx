@@ -15,12 +15,13 @@ import { Link } from "wouter";
 import reportsData from "@/data/reports.json";
 import { useAuth } from "@/contexts/AuthContext";
 import insightsCover from "@assets/insights-cover_1764321138388.png";
+import launchCover from "@assets/launch-cover_1764321333472.png";
 
 const categoryCoverImages: Record<string, string> = {
   insights: insightsCover,
   irl: "/assets/covers/irl-cover.png",
   inside: "/assets/covers/inside-cover.png",
-  launch: "/assets/covers/launch-cover.png",
+  launch: launchCover,
 };
 
 function normalizeCategoryKey(category: string): string {
