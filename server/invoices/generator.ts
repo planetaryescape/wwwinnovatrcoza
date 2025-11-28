@@ -1,4 +1,6 @@
 import PDFDocument from "pdfkit";
+import path from "path";
+import fs from "fs";
 
 interface OrderItem {
   type: string;
@@ -75,42 +77,51 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
       const textColor = "#333333";
       const mutedColor = "#666666";
 
-      doc
-        .fillColor(primaryColor)
-        .fontSize(28)
-        .font("Helvetica-Bold")
-        .text("INNOVATR", 50, 50);
+      // Add logo image
+      const logoPath = path.join(process.cwd(), "client/public/Innovatr_logo-01.png");
+      if (fs.existsSync(logoPath)) {
+        doc.image(logoPath, 50, 40, { width: 120 });
+      } else {
+        // Fallback to text if logo not found
+        doc
+          .fillColor(primaryColor)
+          .fontSize(28)
+          .font("Helvetica-Bold")
+          .text("INNOVATR", 50, 50);
+      }
 
       doc
         .fillColor(mutedColor)
         .fontSize(10)
         .font("Helvetica")
-        .text("Digital Innovation Solutions", 50, 82)
-        .text("South Africa", 50, 95);
+        .text("Digital Innovation Solutions", 50, 100)
+        .text("South Africa", 50, 113);
 
+      // TAX INVOICE header - positioned to the right, with proper spacing
       doc
         .fillColor(primaryColor)
-        .fontSize(24)
+        .fontSize(22)
         .font("Helvetica-Bold")
-        .text("TAX INVOICE", 400, 50, { align: "right" });
+        .text("TAX INVOICE", 350, 45, { align: "right", width: 195 });
 
+      // Invoice details - below the TAX INVOICE text with proper spacing
       doc
         .fillColor(textColor)
         .fontSize(10)
         .font("Helvetica")
-        .text(`Invoice #: ${data.invoiceNumber}`, 400, 80, { align: "right" })
+        .text(`Invoice #: ${data.invoiceNumber}`, 350, 75, { align: "right", width: 195 })
         .text(
           `Date: ${data.invoiceDate.toLocaleDateString("en-ZA", {
             year: "numeric",
             month: "long",
             day: "numeric",
           })}`,
-          400,
-          95,
-          { align: "right" }
+          350,
+          90,
+          { align: "right", width: 195 }
         );
 
-      const billingTop = 150;
+      const billingTop = 140;
 
       doc
         .fillColor(primaryColor)
@@ -136,7 +147,7 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
         doc.text(`VAT No: ${data.vatNumber}`, 50, billingTop + (data.businessRegNumber ? 80 : 65));
       }
 
-      const tableTop = 260;
+      const tableTop = 250;
       const colItem = 50;
       const colQty = 340;
       const colPrice = 400;
