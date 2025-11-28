@@ -119,17 +119,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/contact", async (req, res) => {
     try {
-      const { name, email, company, message } = req.body;
+      const { z } = await import("zod");
       
-      if (!name || !email || !message) {
-        return res.status(400).json({ error: "Name, email, and message are required" });
-      }
+      const contactSchema = z.object({
+        name: z.string().min(1, "Name is required").max(100, "Name is too long"),
+        email: z.string().email("Please provide a valid email address"),
+        company: z.string().max(100, "Company name is too long").optional().default(""),
+        message: z.string().min(10, "Message must be at least 10 characters").max(5000, "Message is too long"),
+      });
 
-      await sendContactFormMessage({ name, email, company: company || "", message });
+      const validated = contactSchema.parse(req.body);
+
+      await sendContactFormMessage({
+        name: validated.name,
+        email: validated.email,
+        company: validated.company,
+        message: validated.message,
+      });
       
       res.status(200).json({ success: true, message: "Message sent successfully" });
     } catch (error: any) {
       console.error("Contact form error:", error);
+      if (error.name === "ZodError") {
+        const firstError = error.errors?.[0]?.message || "Invalid input";
+        return res.status(400).json({ error: firstError });
+      }
       res.status(500).json({ error: "Failed to send message. Please try again later." });
     }
   });

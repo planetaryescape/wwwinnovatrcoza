@@ -3,10 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Mail, Calendar, MessageSquare } from "lucide-react";
+import { Mail, Calendar, MessageSquare, Loader2, CheckCircle } from "lucide-react";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ContactSection() {
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -14,13 +18,56 @@ export default function ContactSection() {
     message: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Contact form submitted:", formData);
+    
+    if (!formData.name || !formData.email || !formData.message) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in your name, email, and message.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send message");
+      }
+
+      setIsSubmitted(true);
+      setFormData({ name: "", email: "", company: "", message: "" });
+      toast({
+        title: "Message Sent",
+        description: "Thank you! We'll get back to you soon.",
+      });
+      
+      setTimeout(() => setIsSubmitted(false), 5000);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleBookDemo = () => {
-    console.log("Book demo clicked");
+    window.open("https://calendly.com/innovatr", "_blank");
   };
 
   return (
@@ -85,8 +132,25 @@ export default function ContactSection() {
                     data-testid="input-message"
                   />
                 </div>
-                <Button type="submit" className="w-full" data-testid="button-submit-contact">
-                  Send Message
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  data-testid="button-submit-contact"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Sending...
+                    </>
+                  ) : isSubmitted ? (
+                    <>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Sent!
+                    </>
+                  ) : (
+                    "Send Message"
+                  )}
                 </Button>
               </form>
             </CardContent>

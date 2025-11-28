@@ -128,6 +128,17 @@ export async function sendAdminOrderNotification(orderData: {
   }
 }
 
+function escapeHtml(text: string): string {
+  const htmlEscapes: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  };
+  return text.replace(/[&<>"']/g, (char) => htmlEscapes[char] || char);
+}
+
 export async function sendContactFormMessage(contactData: {
   name: string;
   email: string;
@@ -138,6 +149,11 @@ export async function sendContactFormMessage(contactData: {
     const resend = await getResendClient();
     const fromEmail = await getFromEmail();
     const adminEmails = getAdminEmails();
+
+    const safeName = escapeHtml(contactData.name);
+    const safeEmail = escapeHtml(contactData.email);
+    const safeCompany = escapeHtml(contactData.company || "Not provided");
+    const safeMessage = escapeHtml(contactData.message);
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -165,12 +181,12 @@ export async function sendContactFormMessage(contactData: {
           <div class="container">
             <h2>New Contact Form Submission</h2>
             <div class="details">
-              <div class="detail-row"><span class="label">Name:</span> ${contactData.name}</div>
-              <div class="detail-row"><span class="label">Email:</span> ${contactData.email}</div>
-              <div class="detail-row"><span class="label">Company:</span> ${contactData.company || "Not provided"}</div>
+              <div class="detail-row"><span class="label">Name:</span> ${safeName}</div>
+              <div class="detail-row"><span class="label">Email:</span> ${safeEmail}</div>
+              <div class="detail-row"><span class="label">Company:</span> ${safeCompany}</div>
             </div>
             <h3>Message:</h3>
-            <div class="message-box">${contactData.message}</div>
+            <div class="message-box">${safeMessage}</div>
             <p style="margin-top: 20px; color: #666; font-size: 12px;">
               <em>This message was sent via the contact form on the Innovatr website.</em>
             </p>
