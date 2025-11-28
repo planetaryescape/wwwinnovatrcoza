@@ -1,0 +1,148 @@
+PROJECT
+Update the Innovatr Trends & Insights portal so that selected Innovatr IRL issues have downloadable PDF reports, based on the attached “Reports and Content.docx” master document and the five attached IRL PDFs.
+
+You are working in the existing Innovatr portal codebase that already has:
+
+A Trends & Insights listing page (card grid)
+
+Individual report detail pages
+
+A data source for reports (for example /data/reports.json or similar)
+
+Do not redesign the site. Keep all styling, typography and card layout exactly as it is now. Only extend the data and components so that IRL issues can expose a “Download full report” button that links to the attached PDFs.
+
+OBJECTIVE
+
+Read the attached “Reports and Content.docx” so you understand the full list of reports, titles, categories, tags and dates.
+
+Add download support for five Innovatr IRL issues that already exist as full PDFs:
+
+Innovatr IRL X Fairness Flex
+
+Innovatr IRL X Believability Is The New Branding
+
+Innovatr IRL X Indulgence Without Guilt
+
+Innovatr IRL X Simplicity Has Status
+
+Innovatr IRL X The Age Of Effortless
+
+For these five issues only, visitors must be able to click a clear call to action on the report detail page and download the corresponding PDF.
+
+Use the content and schedule in “Reports and Content.docx” for titles, teasers, categories and dates so everything stays consistent with the library.
+
+DATA MODEL UPDATES
+
+Locate the central data file or source used to render the Trends & Insights cards and detail pages. This is most likely a JSON file such as /data/reports.json, but if it is different, use whatever the current project uses.
+
+Extend the report type with a new optional field:
+
+pdfPath: string or null
+
+hasDownload: boolean (optional convenience flag)
+
+For all existing reports, keep their data unchanged unless noted below.
+
+For the five IRL issues listed in the OBJECTIVE section, add the pdfPath and hasDownload fields using these paths (you will place the PDFs in the matching folder in the public assets):
+
+Fairness Is the New Flex
+
+pdfPath: /downloads/innovatr-irl-fairness-flex.pdf
+
+hasDownload: true
+
+Believability Is the New Branding
+
+pdfPath: /downloads/innovatr-irl-believability-is-the-new-branding.pdf
+
+hasDownload: true
+
+Indulgence Without Guilt
+
+pdfPath: /downloads/innovatr-irl-indulgence-without-guilt.pdf
+
+hasDownload: true
+
+Simplicity Has Status
+
+pdfPath: /downloads/innovatr-irl-simplicity-has-status.pdf
+
+hasDownload: true
+
+The Age Of Effortless
+
+pdfPath: /downloads/innovatr-irl-the-age-of-effortless.pdf
+
+hasDownload: true
+
+Use “Reports and Content.docx” to double check that the titles, categories, tags and publish dates for these five IRL issues match the latest content. If the doc and the codebase disagree, treat the doc as the source of truth and update the JSON so that:
+
+Titles and teasers match the latest wording in the doc
+
+Category/series for these five issues is set to the IRL label used elsewhere in the site
+
+Tags reflect the themes listed in the doc (for example “Culture”, “Consumer Behaviour”, “Experience” etc)
+
+FILE PLACEMENT
+
+Create a public/downloads or equivalent static folder (if one does not exist yet).
+
+Place the five attached PDFs into that folder with these filenames:
+
+innovatr-irl-fairness-flex.pdf
+
+innovatr-irl-believability-is-the-new-branding.pdf
+
+innovatr-irl-indulgence-without-guilt.pdf
+
+innovatr-irl-simplicity-has-status.pdf
+
+innovatr-irl-the-age-of-effortless.pdf
+
+Ensure the build system and hosting setup serve files from this folder so that the pdfPath links resolve correctly.
+
+UI BEHAVIOUR
+
+Do not change the layout of the main Trends & Insights grid. No extra buttons on the cards are needed.
+
+On the individual report detail page component, detect when hasDownload is true and pdfPath is present.
+
+In that case, render a prominent download call to action near the top of the report content, for example:
+
+A single primary button saying “Download full IRL report”
+
+Clicking the button should download or open the PDF in a new tab using the pdfPath link
+
+Make sure the button styling fits the existing Innovatr design system. Reuse the existing primary button component and colours already defined in the project.
+
+If hasDownload is false or pdfPath is null, do not render the button and keep the current layout unchanged.
+
+ACCESS CONTROL AND ANALYTICS
+
+Keep access the same as the rest of the Trends & Insights library. If these IRL issues are currently public, the PDFs should also be publicly accessible. Do not add new authentication logic.
+
+If there is an existing analytics or tracking wrapper for important buttons, apply the same tracking to the new download button so that clicks on the five IRL downloads can be measured.
+
+Name the event something like irl_report_download and include the report title or slug as metadata, matching whatever event naming convention is already used.
+
+CLEANUP AND TESTING
+
+Run the project locally.
+
+Visit each of the five IRL report pages and confirm:
+
+The copy, category, tags and date match the “Reports and Content.docx” document.
+
+The “Download full IRL report” button appears and links to the correct PDF.
+
+The PDFs open and display properly.
+
+Confirm that all other reports behave exactly as before and that no new button appears where pdfPath is not set.
+
+Commit only the necessary changes to:
+
+The data file for reports
+
+The report detail component
+
+The public downloads folder or equivalent asset path
