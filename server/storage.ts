@@ -337,6 +337,7 @@ export class MemStorage implements IStorage {
       topics: insertReport.topics ?? [],
       tags: insertReport.tags ?? [],
       pdfUrl: insertReport.pdfUrl ?? null,
+      thumbnailUrl: insertReport.thumbnailUrl ?? null,
       accessLevel: insertReport.accessLevel ?? "public",
       allowedTiers: insertReport.allowedTiers ?? [],
       creditType: insertReport.creditType ?? "none",

@@ -216,6 +216,7 @@ export const reports = pgTable("reports", {
   topics: text("topics").array().default([]),
   tags: text("tags").array().default([]),
   pdfUrl: text("pdf_url"),
+  thumbnailUrl: text("thumbnail_url"),
   accessLevel: varchar("access_level", { length: 20 })
     .notNull()
     .default("public"),
