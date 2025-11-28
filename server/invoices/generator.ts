@@ -114,7 +114,7 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
           { align: "right", width: 195 }
         );
 
-      const billingTop = 130;
+      const billingTop = 180;
       
       // Company details (From) - left column
       doc
@@ -166,7 +166,7 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
         doc.text(`VAT No: ${data.vatNumber}`, 300, billingTop + billToOffset);
       }
 
-      const tableTop = 220;
+      const tableTop = 270;
       const colItem = 50;
       const colQty = 300;
       const colPrice = 350;
