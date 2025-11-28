@@ -15,7 +15,7 @@ import { Link } from "wouter";
 import reportsData from "@/data/reports.json";
 import { useAuth } from "@/contexts/AuthContext";
 import insightsCover from "@assets/insights-cover_1764321138388.png";
-import launchCover from "@assets/launch-cover_1764321333472.png";
+import launchCover from "@assets/launch-cover_1764321848244.png";
 import insideCover from "@assets/inside-cover_1764321472939.png";
 
 const categoryCoverImages: Record<string, string> = {
