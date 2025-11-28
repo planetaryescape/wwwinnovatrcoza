@@ -21,10 +21,10 @@ export default function ContactSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.email || !formData.message) {
+    if (!formData.name || !formData.email || !formData.company || !formData.message) {
       toast({
         title: "Missing Information",
-        description: "Please fill in your name, email, and message.",
+        description: "Please fill in all required fields.",
         variant: "destructive",
       });
       return;
@@ -67,7 +67,7 @@ export default function ContactSection() {
   };
 
   const handleBookDemo = () => {
-    window.open("https://calendly.com/innovatr", "_blank");
+    window.open("https://calendly.com/richard-1220", "_blank");
   };
 
   return (
@@ -91,17 +91,18 @@ export default function ContactSection() {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label htmlFor="name">Name</Label>
+                  <Label htmlFor="name">Name <span className="text-destructive">*</span></Label>
                   <Input
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Your name"
                     data-testid="input-name"
+                    required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
                   <Input
                     id="email"
                     type="email"
@@ -109,20 +110,22 @@ export default function ContactSection() {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="your@email.com"
                     data-testid="input-email"
+                    required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="company">Company</Label>
+                  <Label htmlFor="company">Company <span className="text-destructive">*</span></Label>
                   <Input
                     id="company"
                     value={formData.company}
                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                     placeholder="Your company"
                     data-testid="input-company"
+                    required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="message">Message</Label>
+                  <Label htmlFor="message">Message <span className="text-destructive">*</span></Label>
                   <Textarea
                     id="message"
                     value={formData.message}
@@ -130,6 +133,7 @@ export default function ContactSection() {
                     placeholder="Tell us about your innovation challenge"
                     rows={4}
                     data-testid="input-message"
+                    required
                   />
                 </div>
                 <Button 

@@ -124,7 +124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const contactSchema = z.object({
         name: z.string().min(1, "Name is required").max(100, "Name is too long"),
         email: z.string().email("Please provide a valid email address"),
-        company: z.string().max(100, "Company name is too long").optional().default(""),
+        company: z.string().min(1, "Company is required").max(100, "Company name is too long"),
         message: z.string().min(10, "Message must be at least 10 characters").max(5000, "Message is too long"),
       });
 
