@@ -58,12 +58,16 @@ interface Report {
   pdfUrl: string | null;
   topics: string[] | null;
   body: string | null;
+  content: { intro: string; sections: { heading: string; body: string }[] } | null;
   accessLevel: string;
-  allowedTiers?: string[] | null;
-  creditType?: string | null;
-  creditCost?: number | null;
-  status?: string;
-  isArchived?: boolean;
+  allowedTiers: string[] | null;
+  creditType: string | null;
+  creditCost: number | null;
+  status: string;
+  isArchived: boolean;
+  isFeatured: boolean;
+  viewCount: number;
+  downloadCount: number;
 }
 
 function getAccessIndicator(report: Report, userTier?: string) {

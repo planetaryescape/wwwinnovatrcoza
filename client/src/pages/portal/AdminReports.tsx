@@ -57,13 +57,15 @@ interface ReportData {
   slug: string | null;
   topics: string[] | null;
   body: string | null;
+  content: { intro: string; sections: { heading: string; body: string }[] } | null;
   thumbnailUrl: string | null;
   pdfUrl: string | null;
   accessLevel: string;
   status: string;
   isArchived: boolean;
-  viewCount?: number;
-  downloadCount?: number;
+  isFeatured: boolean;
+  viewCount: number;
+  downloadCount: number;
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {

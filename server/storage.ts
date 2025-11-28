@@ -27,6 +27,7 @@ import {
   paymentEvents,
   inquiries,
   subscriptions,
+  reports,
 } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { db } from "./db";
@@ -323,19 +324,18 @@ export class MemStorage implements IStorage {
 
   async createReport(insertReport: InsertReport): Promise<Report> {
     const id = randomUUID();
-    const now = new Date();
     const slug = insertReport.slug ?? insertReport.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const report: Report = {
+    const [report] = await db.insert(reports).values({
       id,
       title: insertReport.title,
       slug,
       category: insertReport.category,
       industry: insertReport.industry ?? null,
-      date: insertReport.date ?? now,
-      previewText: insertReport.previewText ?? null,
-      bodyContent: insertReport.bodyContent ?? null,
+      date: insertReport.date ?? new Date(),
+      teaser: insertReport.teaser ?? null,
+      body: insertReport.body ?? null,
+      content: insertReport.content ?? null,
       topics: insertReport.topics ?? [],
-      tags: insertReport.tags ?? [],
       pdfUrl: insertReport.pdfUrl ?? null,
       thumbnailUrl: insertReport.thumbnailUrl ?? null,
       accessLevel: insertReport.accessLevel ?? "public",
@@ -344,34 +344,22 @@ export class MemStorage implements IStorage {
       creditCost: insertReport.creditCost ?? 0,
       isFeatured: insertReport.isFeatured ?? false,
       status: insertReport.status ?? "published",
-      publishAt: insertReport.publishAt ?? null,
-      unpublishAt: insertReport.unpublishAt ?? null,
-      viewCount: 0,
-      uniqueViewCount: 0,
-      downloadCount: 0,
-      upgradeInfluenceScore: 0,
       isArchived: insertReport.isArchived ?? false,
-      lastUpdatedBy: insertReport.lastUpdatedBy ?? null,
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.reports.set(id, report);
+    }).returning();
     return report;
   }
 
   async getReport(id: string): Promise<Report | undefined> {
-    return this.reports.get(id);
+    const [report] = await db.select().from(reports).where(eq(reports.id, id));
+    return report;
   }
 
   async getAllReports(): Promise<Report[]> {
-    return Array.from(this.reports.values());
+    return db.select().from(reports);
   }
 
   async updateReport(id: string, updates: Partial<Report>): Promise<void> {
-    const report = this.reports.get(id);
-    if (report) {
-      this.reports.set(id, { ...report, ...updates, updatedAt: new Date() });
-    }
+    await db.update(reports).set({ ...updates, updatedAt: new Date() }).where(eq(reports.id, id));
   }
 
   async createDeal(insertDeal: InsertDeal): Promise<Deal> {

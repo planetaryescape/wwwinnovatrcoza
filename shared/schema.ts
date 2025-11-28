@@ -201,20 +201,20 @@ export const insertPaymentEventSchema = createInsertSchema(paymentEvents).omit({
 export type InsertPaymentEvent = z.infer<typeof insertPaymentEventSchema>;
 export type PaymentEvent = typeof paymentEvents.$inferSelect;
 
-// Reports schema - Extended for full content management
+// Reports schema - Aligned with reports.json structure
 export const reports = pgTable("reports", {
   id: varchar("id")
     .primaryKey()
     .default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
-  slug: text("slug").unique(),
+  slug: text("slug"),
   category: varchar("category", { length: 50 }).notNull(),
   industry: text("industry"),
   date: timestamp("date").defaultNow().notNull(),
-  previewText: text("preview_text"),
-  bodyContent: text("body_content"),
+  teaser: text("teaser"),
+  body: text("body"),
+  content: jsonb("content"),
   topics: text("topics").array().default([]),
-  tags: text("tags").array().default([]),
   pdfUrl: text("pdf_url"),
   thumbnailUrl: text("thumbnail_url"),
   accessLevel: varchar("access_level", { length: 20 })
@@ -225,14 +225,9 @@ export const reports = pgTable("reports", {
   creditCost: integer("credit_cost").default(0),
   isFeatured: boolean("is_featured").notNull().default(false),
   status: varchar("status", { length: 20 }).notNull().default("published"),
-  publishAt: timestamp("publish_at"),
-  unpublishAt: timestamp("unpublish_at"),
   viewCount: integer("view_count").notNull().default(0),
-  uniqueViewCount: integer("unique_view_count").notNull().default(0),
   downloadCount: integer("download_count").notNull().default(0),
-  upgradeInfluenceScore: integer("upgrade_influence_score").notNull().default(0),
   isArchived: boolean("is_archived").notNull().default(false),
-  lastUpdatedBy: varchar("last_updated_by"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -243,14 +238,12 @@ export const insertReportSchema = createInsertSchema(reports)
     createdAt: true,
     updatedAt: true,
     viewCount: true,
-    uniqueViewCount: true,
     downloadCount: true,
-    upgradeInfluenceScore: true,
   })
   .extend({
     title: z.string().min(1, "Title is required"),
     category: z.enum(["Insights", "Launch", "Inside", "IRL"]),
-    previewText: z.string().optional(),
+    teaser: z.string().optional(),
     accessLevel: z.enum(["public", "member", "tier", "paid"]).default("public"),
     creditType: z.enum(["none", "basic", "pro"]).default("none"),
     status: z.enum(["draft", "scheduled", "published", "archived"]).default("published"),
