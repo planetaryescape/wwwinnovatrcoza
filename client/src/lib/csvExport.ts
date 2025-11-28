@@ -115,7 +115,7 @@ export function exportReportsToCSV(reports: any[]): void {
     date: report.date,
     viewCount: report.viewCount || 0,
     downloadCount: report.downloadCount || 0,
-    tags: Array.isArray(report.tags) ? report.tags.join('; ') : '',
+    topics: Array.isArray(report.topics) ? report.topics.join('; ') : (Array.isArray(report.tags) ? report.tags.join('; ') : ''),
     teaser: report.teaser || '',
   }));
 
@@ -131,7 +131,7 @@ export function exportReportsToCSV(reports: any[]): void {
       'Date',
       'Views',
       'Downloads',
-      'Tags',
+      'Topics',
       'Preview Text',
     ],
   });

@@ -32,14 +32,15 @@ import {
   Pencil, 
   Archive, 
   Eye,
-  Calendar,
   Download,
   TrendingUp,
   FileText,
   Clock,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Loader2
 } from "lucide-react";
-import reportsData from "@/data/reports.json";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import ReportEditorModal from "./ReportEditorModal";
 import { exportReportsToCSV, exportPerformanceToCSV } from "@/lib/csvExport";
 
@@ -47,17 +48,20 @@ type StatusType = "draft" | "scheduled" | "published" | "archived" | "all";
 type AccessLevel = "public" | "member" | "tier" | "paid" | "all";
 
 interface ReportData {
-  id: number;
+  id: string;
   title: string;
   category: string;
-  industry: string;
+  industry: string | null;
   date: string;
-  teaser: string;
-  slug: string;
-  tags: string[];
-  isNew: boolean;
-  accessLevel?: string;
-  status?: string;
+  teaser: string | null;
+  slug: string | null;
+  topics: string[] | null;
+  body: string | null;
+  thumbnailUrl: string | null;
+  pdfUrl: string | null;
+  accessLevel: string;
+  status: string;
+  isArchived: boolean;
   viewCount?: number;
   downloadCount?: number;
 }
@@ -84,13 +88,25 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function AdminReports() {
-  const [reports, setReports] = useState<ReportData[]>(reportsData as ReportData[]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusType>("all");
   const [accessFilter, setAccessFilter] = useState<AccessLevel>("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<ReportData | null>(null);
+
+  const { data: reports = [], isLoading, error } = useQuery<ReportData[]>({
+    queryKey: ['/api/admin/reports'],
+  });
+
+  const archiveMutation = useMutation({
+    mutationFn: async (reportId: string) => {
+      return apiRequest('PATCH', `/api/admin/reports/${reportId}`, { isArchived: true });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/reports'] });
+    },
+  });
 
   const categories = useMemo(() => 
     Array.from(new Set(reports.map(r => r.category))),
@@ -101,7 +117,7 @@ export default function AdminReports() {
     return reports.filter((report) => {
       const matchesSearch = 
         report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        report.teaser.toLowerCase().includes(searchQuery.toLowerCase());
+        (report.teaser?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
       
       const reportStatus = report.status || "published";
       const matchesStatus = statusFilter === "all" || reportStatus === statusFilter;
@@ -117,7 +133,7 @@ export default function AdminReports() {
 
   const stats = useMemo(() => ({
     total: reports.length,
-    published: reports.filter(r => (r.status || "published") === "published").length,
+    published: reports.filter(r => r.status === "published").length,
     draft: reports.filter(r => r.status === "draft").length,
     scheduled: reports.filter(r => r.status === "scheduled").length,
   }), [reports]);
@@ -132,14 +148,12 @@ export default function AdminReports() {
     setModalOpen(true);
   };
 
-  const handleArchive = (reportId: number) => {
-    setReports(reports.map(r => 
-      r.id === reportId ? { ...r, status: "archived" } : r
-    ));
+  const handleArchive = (reportId: string) => {
+    archiveMutation.mutate(reportId);
   };
 
   const handleRefresh = () => {
-    setReports(reportsData as ReportData[]);
+    queryClient.invalidateQueries({ queryKey: ['/api/admin/reports'] });
     setModalOpen(false);
     setSelectedReport(null);
   };
@@ -151,6 +165,23 @@ export default function AdminReports() {
       year: 'numeric'
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-[#0033A0]" />
+        <span className="ml-3 text-gray-600">Loading reports...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-red-600 text-lg">Failed to load reports. Please try again later.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

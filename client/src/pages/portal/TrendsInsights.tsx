@@ -9,10 +9,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Crown, CreditCard } from "lucide-react";
+import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Crown, CreditCard, Loader2 } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { Link } from "wouter";
-import reportsData from "@/data/reports.json";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 
 const categoryCoverImages: Record<string, string> = {
@@ -47,21 +47,23 @@ function getCategoryStyle(category: string) {
 type AccessLevel = "public" | "member" | "tier" | "paid";
 
 interface Report {
-  id: number;
+  id: string;
   category: string;
-  industry: string;
+  industry: string | null;
   date: string;
   title: string;
-  teaser: string;
-  slug: string;
-  coverImage: string;
-  pdfPath: string;
-  tags: string[];
-  isNew: boolean;
-  accessLevel?: AccessLevel;
-  allowedTiers?: string[];
-  creditType?: string;
-  creditCost?: number;
+  teaser: string | null;
+  slug: string | null;
+  thumbnailUrl: string | null;
+  pdfUrl: string | null;
+  topics: string[] | null;
+  body: string | null;
+  accessLevel: string;
+  allowedTiers?: string[] | null;
+  creditType?: string | null;
+  creditCost?: number | null;
+  status?: string;
+  isArchived?: boolean;
 }
 
 function getAccessIndicator(report: Report, userTier?: string) {
@@ -117,8 +119,16 @@ function ReportCard({ report, userTier }: { report: Report; userTier?: string })
   });
 
   const categoryStyle = getCategoryStyle(report.category);
-  const coverImage = getCoverImage(report.category);
+  const coverImage = report.thumbnailUrl || getCoverImage(report.category);
   const accessIndicator = getAccessIndicator(report, userTier);
+  const tags = report.topics || [];
+  
+  const isNew = () => {
+    const reportDate = new Date(report.date);
+    const twoWeeksAgo = new Date();
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+    return reportDate >= twoWeeksAgo;
+  };
 
   return (
     <Link href={`/portal/insights/${report.slug}`}>
@@ -133,13 +143,15 @@ function ReportCard({ report, userTier }: { report: Report; userTier?: string })
             >
               {report.category}
             </Badge>
-            <Badge 
-              variant="secondary"
-              className="text-xs px-2.5 py-1 bg-gray-100 text-gray-600"
-            >
-              {report.industry}
-            </Badge>
-            {report.isNew && (
+            {report.industry && (
+              <Badge 
+                variant="secondary"
+                className="text-xs px-2.5 py-1 bg-gray-100 text-gray-600"
+              >
+                {report.industry}
+              </Badge>
+            )}
+            {isNew() && (
               <Badge 
                 className="text-white text-xs font-medium px-2 py-1"
                 style={{ backgroundColor: '#0033A0' }}
@@ -173,7 +185,7 @@ function ReportCard({ report, userTier }: { report: Report; userTier?: string })
           </p>
           
           <div className="flex flex-wrap gap-1.5 mb-4">
-            {report.tags.slice(0, 3).map((tag, index) => (
+            {tags.slice(0, 3).map((tag, index) => (
               <Badge 
                 key={index} 
                 variant="secondary" 
@@ -208,13 +220,18 @@ export default function TrendsInsights() {
   const { user } = useAuth();
   const userTier = user?.membershipTier;
 
+  const { data: reports = [], isLoading, error } = useQuery<Report[]>({
+    queryKey: ['/api/reports'],
+  });
+
   const filteredAndSortedReports = useMemo(() => {
-    let filtered = (reportsData as Report[]).filter((report) => {
+    let filtered = reports.filter((report) => {
       const searchLower = searchQuery.toLowerCase();
+      const tags = report.topics || [];
       const matchesSearch = 
         report.title.toLowerCase().includes(searchLower) ||
-        report.teaser.toLowerCase().includes(searchLower) ||
-        report.tags.some(tag => tag.toLowerCase().includes(searchLower));
+        (report.teaser?.toLowerCase().includes(searchLower) ?? false) ||
+        tags.some(tag => tag.toLowerCase().includes(searchLower));
       const matchesCategory = selectedCategory === "all" || report.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
@@ -231,10 +248,39 @@ export default function TrendsInsights() {
           return 0;
       }
     });
-  }, [searchQuery, selectedCategory, sortBy]);
+  }, [reports, searchQuery, selectedCategory, sortBy]);
 
   const displayedReports = showAll ? filteredAndSortedReports : filteredAndSortedReports.slice(0, 6);
   const hasMoreReports = filteredAndSortedReports.length > 6;
+
+  if (isLoading) {
+    return (
+      <PortalLayout>
+        <div className="min-h-screen bg-white">
+          <div className="max-w-6xl mx-auto px-6 py-8">
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 animate-spin text-[#0033A0]" />
+              <span className="ml-3 text-gray-600">Loading reports...</span>
+            </div>
+          </div>
+        </div>
+      </PortalLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <PortalLayout>
+        <div className="min-h-screen bg-white">
+          <div className="max-w-6xl mx-auto px-6 py-8">
+            <div className="text-center py-20">
+              <p className="text-red-600 text-lg">Failed to load reports. Please try again later.</p>
+            </div>
+          </div>
+        </div>
+      </PortalLayout>
+    );
+  }
 
   return (
     <PortalLayout>
@@ -303,7 +349,7 @@ export default function TrendsInsights() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {displayedReports.map((report) => (
-              <ReportCard key={report.id} report={report as Report} userTier={userTier} />
+              <ReportCard key={report.id} report={report} userTier={userTier} />
             ))}
           </div>
 

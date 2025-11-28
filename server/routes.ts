@@ -574,6 +574,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public reports endpoint (for member portal)
+  app.get("/api/reports", async (req, res) => {
+    try {
+      const reports = await storage.getAllReports();
+      // Filter to only published, non-archived reports for public access
+      const publicReports = reports.filter(r => 
+        r.status === "published" && !r.isArchived
+      );
+      res.json(publicReports);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Reports endpoints
   app.get("/api/admin/reports", async (req, res) => {
     try {
