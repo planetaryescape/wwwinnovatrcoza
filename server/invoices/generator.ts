@@ -17,6 +17,7 @@ interface InvoiceData {
   customerCompany: string;
   businessRegNumber?: string;
   vatNumber?: string;
+  companyAddress?: string;
   orderItems: OrderItem[];
   currency: string;
 }
@@ -71,14 +72,19 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
       doc.on("end", () => resolve(Buffer.concat(chunks)));
       doc.on("error", reject);
 
-      const { subtotal, vatAmount, total } = calculateInvoiceTotals(data.orderItems);
+      const { subtotal, vatAmount, total } = calculateInvoiceTotals(
+        data.orderItems,
+      );
 
       const primaryColor = "#667eea";
       const textColor = "#333333";
       const mutedColor = "#666666";
 
       // Add logo image
-      const logoPath = path.join(process.cwd(), "client/public/Innovatr_logo-01.png");
+      const logoPath = path.join(
+        process.cwd(),
+        "client/public/Innovatr_logo-01.png",
+      );
       if (fs.existsSync(logoPath)) {
         doc.image(logoPath, 50, 40, { width: 100 });
       } else {
@@ -102,7 +108,10 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
         .fillColor(textColor)
         .fontSize(10)
         .font("Helvetica")
-        .text(`Invoice #: ${data.invoiceNumber}`, 350, 75, { align: "right", width: 195 })
+        .text(`Invoice #: ${data.invoiceNumber}`, 350, 75, {
+          align: "right",
+          width: 195,
+        })
         .text(
           `Date: ${data.invoiceDate.toLocaleDateString("en-ZA", {
             year: "numeric",
@@ -111,11 +120,11 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
           })}`,
           350,
           90,
-          { align: "right", width: 195 }
+          { align: "right", width: 195 },
         );
 
-      const billingTop = 180;
-      
+      const billingTop = 130;
+
       // Company details (From) - left column
       doc
         .fillColor(primaryColor)
@@ -128,7 +137,7 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
         .fontSize(10)
         .font("Helvetica-Bold")
         .text("Innovatr (Pty) Ltd.", 50, billingTop + 18);
-      
+
       doc
         .fillColor(mutedColor)
         .fontSize(9)
@@ -154,12 +163,21 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
         .fillColor(mutedColor)
         .fontSize(9)
         .font("Helvetica")
-        .text(data.customerName, 300, billingTop + 32)
-        .text(data.customerEmail, 300, billingTop + 44);
+        .text(data.customerName, 300, billingTop + 32);
 
-      let billToOffset = 56;
+      let billToOffset = 44;
+      if (data.companyAddress) {
+        doc.text(data.companyAddress, 300, billingTop + billToOffset);
+        billToOffset += 12;
+      }
+      doc.text(data.customerEmail, 300, billingTop + billToOffset);
+      billToOffset += 12;
       if (data.businessRegNumber) {
-        doc.text(`Reg No: ${data.businessRegNumber}`, 300, billingTop + billToOffset);
+        doc.text(
+          `Reg No: ${data.businessRegNumber}`,
+          300,
+          billingTop + billToOffset,
+        );
         billToOffset += 12;
       }
       if (data.vatNumber) {
@@ -194,14 +212,21 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
         const description = item.description || item.type;
 
         if (index % 2 === 1) {
-          doc.fillColor("#f9f9f9").rect(45, yPos - 5, 505, 20).fill();
+          doc
+            .fillColor("#f9f9f9")
+            .rect(45, yPos - 5, 505, 20)
+            .fill();
         }
 
         doc
           .fillColor(textColor)
           .text(description, colItem, yPos, { width: 280 })
           .text(String(item.quantity), colQty, yPos)
-          .text(formatCurrency(Number(item.unitAmount), data.currency), colPrice, yPos)
+          .text(
+            formatCurrency(Number(item.unitAmount), data.currency),
+            colPrice,
+            yPos,
+          )
           .text(formatCurrency(lineTotal, data.currency), colTotal, yPos);
 
         yPos += 25;
@@ -227,7 +252,11 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
         .text(formatCurrency(vatAmount, data.currency), valueX, yPos);
 
       yPos += 25;
-      doc.strokeColor("#e0e0e0").moveTo(labelX, yPos - 5).lineTo(550, yPos - 5).stroke();
+      doc
+        .strokeColor("#e0e0e0")
+        .moveTo(labelX, yPos - 5)
+        .lineTo(550, yPos - 5)
+        .stroke();
 
       doc
         .fillColor(primaryColor)
@@ -239,14 +268,14 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
       // Bank details section
       yPos += 40;
       doc.strokeColor("#e0e0e0").moveTo(50, yPos).lineTo(250, yPos).stroke();
-      
+
       yPos += 10;
       doc
         .fillColor(primaryColor)
         .fontSize(10)
         .font("Helvetica-Bold")
         .text("Banking Details", 50, yPos);
-      
+
       yPos += 15;
       doc
         .fillColor(textColor)
@@ -260,21 +289,30 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
       const pageHeight = doc.page.height;
       const footerTop = pageHeight - 80;
 
-      doc.strokeColor("#e0e0e0").moveTo(50, footerTop).lineTo(550, footerTop).stroke();
+      doc
+        .strokeColor("#e0e0e0")
+        .moveTo(50, footerTop)
+        .lineTo(550, footerTop)
+        .stroke();
 
       doc
         .fillColor(mutedColor)
         .fontSize(8)
         .font("Helvetica")
-        .text("Thank you for your business! This is a computer-generated invoice and is valid without a signature.", 50, footerTop + 10, {
-          align: "center",
-          width: 500,
-        })
+        .text(
+          "Thank you for your business! This is a computer-generated invoice and is valid without a signature.",
+          50,
+          footerTop + 10,
+          {
+            align: "center",
+            width: 500,
+          },
+        )
         .text(
           "For questions, please contact richard@innovatr.co.za",
           50,
           footerTop + 22,
-          { align: "center", width: 500 }
+          { align: "center", width: 500 },
         );
 
       doc.end();

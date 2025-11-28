@@ -125,6 +125,7 @@ export class PaymentService {
       invoiceRequested?: boolean;
       businessRegNumber?: string | null;
       vatNumber?: string | null;
+      companyAddress?: string | null;
     },
     providerKey: string = "payfast",
     subscriptionOptions?: {
@@ -157,6 +158,7 @@ export class PaymentService {
       invoiceRequested: pendingOrderData.invoiceRequested || false,
       businessRegNumber: pendingOrderData.businessRegNumber || null,
       vatNumber: pendingOrderData.vatNumber || null,
+      companyAddress: pendingOrderData.companyAddress || null,
       invoiceNumber: null,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -262,6 +264,7 @@ export class PaymentService {
           invoiceRequested?: boolean;
           businessRegNumber?: string;
           vatNumber?: string;
+          companyAddress?: string;
         };
 
         // SECURITY CHECK: Validate payment amount matches expected amount
@@ -313,6 +316,7 @@ export class PaymentService {
           invoiceRequested: pendingOrder.invoiceRequested || false,
           businessRegNumber: pendingOrder.businessRegNumber || null,
           vatNumber: pendingOrder.vatNumber || null,
+          companyAddress: pendingOrder.companyAddress || null,
           invoiceNumber,
         });
 

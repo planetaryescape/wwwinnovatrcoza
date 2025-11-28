@@ -58,6 +58,7 @@ export default function OrderFormDialog({
   const [invoiceRequested, setInvoiceRequested] = useState(false);
   const [businessRegNumber, setBusinessRegNumber] = useState("");
   const [vatNumber, setVatNumber] = useState("");
+  const [companyAddress, setCompanyAddress] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -100,6 +101,7 @@ export default function OrderFormDialog({
         invoiceRequested: boolean;
         businessRegNumber?: string;
         vatNumber?: string;
+        companyAddress?: string;
       };
     }) => {
       // Create payment checkout directly - order will be created on successful payment
@@ -119,6 +121,7 @@ export default function OrderFormDialog({
         requestBody.invoiceRequested = true;
         requestBody.businessRegNumber = data.invoiceData.businessRegNumber;
         requestBody.vatNumber = data.invoiceData.vatNumber;
+        requestBody.companyAddress = data.invoiceData.companyAddress;
       }
 
       // Add subscription options if this is a recurring payment
@@ -246,6 +249,7 @@ export default function OrderFormDialog({
             invoiceRequested: true,
             businessRegNumber: businessRegNumber.trim() || undefined,
             vatNumber: vatNumber.trim() || undefined,
+            companyAddress: companyAddress.trim() || undefined,
           }
         : undefined,
     });
@@ -263,6 +267,7 @@ export default function OrderFormDialog({
     setInvoiceRequested(false);
     setBusinessRegNumber("");
     setVatNumber("");
+    setCompanyAddress("");
   };
 
   const formatPrice = (price: number) => {
@@ -281,6 +286,7 @@ export default function OrderFormDialog({
           customerCompany: customerCompany || "Sample Company (Pty) Ltd",
           businessRegNumber: businessRegNumber || "2024/123456/07",
           vatNumber: vatNumber || "4123456789",
+          companyAddress: companyAddress || "123 Sample Street, City, 1234",
           orderItems:
             orderItems.length > 0
               ? orderItems
@@ -441,6 +447,16 @@ export default function OrderFormDialog({
                     value={vatNumber}
                     onChange={(e) => setVatNumber(e.target.value)}
                     data-testid="input-vat-number"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="companyAddress">Company Address</Label>
+                  <Input
+                    id="companyAddress"
+                    placeholder="e.g., 123 Main Street, City, 1234"
+                    value={companyAddress}
+                    onChange={(e) => setCompanyAddress(e.target.value)}
+                    data-testid="input-company-address"
                   />
                 </div>
                 <Button

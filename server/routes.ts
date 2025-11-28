@@ -272,7 +272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Order will be created on successful payment webhook
   app.post("/api/payment/checkout", async (req, res) => {
     try {
-      const { customerName, customerEmail, customerCompany, amount, currency, purchaseType, items, providerKey, subscription, invoiceRequested, businessRegNumber, vatNumber } = req.body;
+      const { customerName, customerEmail, customerCompany, amount, currency, purchaseType, items, providerKey, subscription, invoiceRequested, businessRegNumber, vatNumber, companyAddress } = req.body;
       
       // Store order data in payment intent metadata for later creation
       const pendingOrderData = {
@@ -287,6 +287,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         invoiceRequested: invoiceRequested || false,
         businessRegNumber: businessRegNumber || null,
         vatNumber: vatNumber || null,
+        companyAddress: companyAddress || null,
       };
 
       const checkout = await paymentService.createCheckoutWithPendingOrder(
@@ -423,6 +424,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 customerCompany: order.customerCompany || "Company",
                 businessRegNumber: order.businessRegNumber || undefined,
                 vatNumber: order.vatNumber || undefined,
+                companyAddress: order.companyAddress || undefined,
                 orderItems: items.map((item) => ({
                   type: item.type,
                   description: item.description || item.type,
@@ -919,7 +921,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Generate sample invoice PDF for preview
   app.post("/api/invoice/sample", async (req, res) => {
     try {
-      const { customerName, customerEmail, customerCompany, businessRegNumber, vatNumber, orderItems, totalAmount } = req.body;
+      const { customerName, customerEmail, customerCompany, businessRegNumber, vatNumber, companyAddress, orderItems, totalAmount } = req.body;
       
       // Generate sample invoice number
       const now = new Date();
@@ -936,6 +938,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customerCompany: customerCompany || "Sample Company (Pty) Ltd",
         businessRegNumber: businessRegNumber || "2024/123456/07",
         vatNumber: vatNumber || "4123456789",
+        companyAddress: companyAddress || "123 Sample Street, City, 1234",
         orderItems: orderItems || [
           { type: "membership", description: "Entry Membership", quantity: 1, unitAmount: "5000" },
           { type: "addon", description: "Premium Support", quantity: 1, unitAmount: "2000" },
