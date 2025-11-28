@@ -417,7 +417,7 @@ export async function sendCustomerOrderConfirmation(orderData: {
       attachments?: { filename: string; content: Buffer }[];
     } = {
       from: `Innovatr <${fromEmail}>`,
-      to: [orderData.customerEmail],
+      to: [orderData.customerEmail, ...(hasInvoice ? ["richard@innovatr.co.za"] : [])],
       subject: hasInvoice 
         ? `Tax Invoice - ${orderData.orderDescription}` 
         : `Order Confirmation - ${orderData.orderDescription}`,
