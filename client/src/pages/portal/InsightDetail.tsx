@@ -59,10 +59,10 @@ interface Report {
   teaser: string;
   slug: string;
   coverImage: string;
-  pdfPath: string;
+  pdfPath: string | null;
   tags: string[];
   isNew: boolean;
-  accessLevel?: AccessLevel;
+  accessLevel?: string;
   allowedTiers?: string[];
   creditType?: CreditType;
   creditCost?: number;
@@ -83,18 +83,64 @@ function checkReportAccess(
   report: Report,
   user: { membershipTier?: string; creditsBasic?: number; creditsPro?: number } | null
 ): AccessCheckResult {
-  const accessLevel = report.accessLevel || "public";
+  const accessLevel = report.accessLevel || "PUBLIC";
   
-  if (accessLevel === "public") {
+  if (accessLevel === "PUBLIC" || accessLevel === "public") {
     return { hasAccess: true, reason: "public" };
   }
   
   if (!user) {
-    return { hasAccess: false, reason: "not_logged_in", message: "Sign in to access this content" };
+    return { hasAccess: false, reason: "not_logged_in", message: "Sign in to access this members-only content" };
   }
   
-  if (accessLevel === "member") {
-    return { hasAccess: true, reason: "member" };
+  if (accessLevel === "STARTER" || accessLevel === "member") {
+    const userTier = user.membershipTier || "STARTER";
+    const tierHierarchy = ["STARTER", "GROWTH", "SCALE"];
+    const userTierIndex = tierHierarchy.indexOf(userTier);
+    
+    if (userTierIndex >= 0) {
+      return { hasAccess: true, reason: "member" };
+    }
+    
+    return { 
+      hasAccess: false, 
+      reason: "membership_required", 
+      message: "Become a member to access this content" 
+    };
+  }
+  
+  if (accessLevel === "GROWTH") {
+    const userTier = user.membershipTier || "STARTER";
+    const tierHierarchy = ["STARTER", "GROWTH", "SCALE"];
+    const userTierIndex = tierHierarchy.indexOf(userTier);
+    const requiredTierIndex = tierHierarchy.indexOf("GROWTH");
+    
+    if (userTierIndex >= requiredTierIndex) {
+      return { hasAccess: true, reason: "tier_allowed" };
+    }
+    
+    return { 
+      hasAccess: false, 
+      reason: "tier_required", 
+      message: "Upgrade to Growth or higher to access this content" 
+    };
+  }
+  
+  if (accessLevel === "SCALE") {
+    const userTier = user.membershipTier || "STARTER";
+    const tierHierarchy = ["STARTER", "GROWTH", "SCALE"];
+    const userTierIndex = tierHierarchy.indexOf(userTier);
+    const requiredTierIndex = tierHierarchy.indexOf("SCALE");
+    
+    if (userTierIndex >= requiredTierIndex) {
+      return { hasAccess: true, reason: "tier_allowed" };
+    }
+    
+    return { 
+      hasAccess: false, 
+      reason: "tier_required", 
+      message: "Upgrade to Scale to access this content" 
+    };
   }
   
   if (accessLevel === "tier") {
@@ -460,21 +506,6 @@ export default function InsightDetail() {
             </div>
           ) : (
             <>
-              {report.pdfPath && (
-                <Button 
-                  size="lg"
-                  onClick={handleDownload}
-                  className="rounded-full mb-8"
-                  style={{ backgroundColor: '#5B6EF7' }}
-                  data-testid="button-download-pdf"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Download full report
-                </Button>
-              )}
-
-              <div className="border-b border-gray-100 mb-8" />
-
               {report.content && (
                 <article className="prose prose-lg max-w-none">
                   <div className="text-gray-700 leading-relaxed whitespace-pre-line mb-10">
@@ -504,10 +535,10 @@ export default function InsightDetail() {
                     className="text-2xl font-bold mb-2 text-gray-900"
                     style={{ fontFamily: 'DM Serif Display, serif' }}
                   >
-                    Get the full story
+                    Go deeper with the full report
                   </h3>
                   <p className="text-gray-600 mb-6">
-                    Download the complete report with all insights, data, and strategic recommendations.
+                    This article gives you the full story. If you need all diagnostics, numbers, and charts, download the full research report.
                   </p>
                   <Button 
                     size="lg"

@@ -1,0 +1,261 @@
+You are updating my existing Innovatr “Trends & Insights” member portal and admin dashboard in this Replit project.
+
+GENERAL RULES
+- Do NOT redesign the whole site. Work with the current structure and components and only make the specific changes below.
+- Keep everything light, clean, editorial and white-based. Absolutely no dark-mode or “DarkMatter” style.
+- Keep all typography exactly as is: DM Serif Display for headings and Roboto for body copy and UI.
+- Hard-lock the Innovatr brand palette:
+  - Primary: Innovatr Blue #0033A0 (buttons, key CTAs, selected states).
+  - Neutrals: white backgrounds, very light greys only for dividers and cards.
+  - Text: near-black or dark navy, high contrast, no low-contrast grey text.
+- Extra accent colours can ONLY be soft, light versions similar to:
+  - A soft lavender
+  - A warm peach
+  - A muted coral
+  - A gentle periwinkle
+  Use them sparingly for tags, subtle badges, or tiny highlights. Do not change the primary brand feel which is white + Innovatr Blue.
+- Do not change any copy text yourself. Where content comes from my documents, use it exactly as written (no new hyphens / dashes).
+- Keep the layout responsive and as close as possible to what exists now.
+
+FILES WITH CONTENT
+- In the project files there is a document called something like:
+  - “Innovatr Intelligence.docx” and/or “Innovatr Intellegence content .docx”.
+- Treat those documents as the SINGLE SOURCE OF TRUTH for all mailer / report content.
+- For each article, use the full body text exactly as written between its title heading and the next article heading. Do not shorten, paraphrase, or summarise.
+
+PART 1: TRENDS & INSIGHTS DETAIL PAGES
+
+1. HERO AREA CHANGES
+- On every Trends & Insights detail page (e.g. /portal/insights/[slug]):
+  - Keep: category pill(s), industry, date, title, and tags near the top.
+  - KEEP the large category hero image at the top (Insights / IRL / Inside / Launch).
+  - Remove any “Download full report” button from the hero / top section.
+- The hero should feel like the start of a full story, not like a teaser plus a report.
+
+2. FULL ARTICLE BODY
+- For each piece, replace the current body on the detail page with the COMPLETE version from the content document.
+- Preserve headings inside the article (e.g. “What is happening”, “Why it matters” etc.) as real HTML headings and paragraphs.
+- Preserve paragraphs and spacing so it reads like a proper longform story.
+- Do not automatically truncate anything.
+- Do not introduce hyphens or dashes into the copy.
+
+3. BOTTOM CTA SECTION (REPORT DOWNLOAD)
+- At the bottom of each detail page, keep ONE call-to-action block with the download button.
+- Change the structure to:
+
+  Heading: “Go deeper with the full report”
+  Subcopy: A short line such as:
+    “This article gives you the full story. If you need all diagnostics, numbers, and charts, download the full research report.”
+  Button: “Download full report”
+
+- Only show this CTA and button for pieces that actually have a linked report (see list under “Pieces with reports” below).
+- For pieces without a report, do NOT show any download CTA at the bottom.
+
+4. HERO CATEGORY BACKGROUND IMAGES
+- Ensure category hero images are mapped correctly based on the article category:
+  - Category “Insights” → use the Insights cover image file:
+      insights-cover.png (Innovatr Insights hero)
+  - Category “IRL” → use:
+      irl-cover.png (Innovatr IRL hero)
+  - Category “Inside” → use:
+      inside-cover.png (Innovatr Inside hero)
+  - Category “Launch” → use:
+      launch-cover.png (Innovatr Launch hero)
+- When you see one of these categories on an article, render the corresponding hero image automatically. No hardcoding per slug.
+
+PART 2: CONTENT SETUP FOR ALL MAILERS
+
+Use the content document as the source for the following articles. Titles and categories:
+
+PIECES WITH REPORTS (FREE ACCESS FOR NOW)
+These must:
+- Have full article body from the document.
+- Have a PDF / report URL field wired up.
+- Show the “Go deeper with the full report” CTA and button at the bottom.
+- Be accessible to Free users (and also to members).
+- Be published first in the schedule list.
+
+1) Storyteller
+   - Label: “Innovatr Insights: Storyteller”
+   - Category: Insights
+   - Industry: ALL
+   - Title: “Insights That Speak for Themselves”
+   - CTA on card view: “Download full report”
+   - Access level: PUBLIC / FREE
+
+2) Cutting Back, But Not on Snacks
+   - Label: “Innovatr Insights: The new Non-Negotiable Treat”
+   - Category: Insights
+   - Industry: FMCG / Food
+   - Title: “Cutting Back, But Not on Snacks: The New Non-Negotiable Treat”
+   - CTA on card view: “Download full report”
+   - Access level: PUBLIC / FREE
+
+3) The Oat-Based Breakfast Revolution
+   - Category: Launch
+   - Industry: Food & Beverage
+   - Title: “The Oat-Based Breakfast Revolution”
+   - CTA: “Download full report”
+   - Access level: PUBLIC / FREE
+
+4) From Vegan to Vital: The Protein Comeback
+   - Category: Insights
+   - Industry: Food
+   - Title: “From Vegan to Vital: The Protein Comeback”
+   - CTA: “Download full report”
+   - Access level: PUBLIC / FREE
+
+5) Cadbury Pocket-Sized Joy
+   - Category: Launch
+   - Industry: Food
+   - Title: “Cadbury Pocket-Sized Joy”
+   - CTA: “Download full report”
+   - Access level: PUBLIC / FREE
+
+6) Market Share Simulator
+   - Label: “Innovatr Inside: Market Share Simulator”
+   - Category: Inside
+   - Industry: ALL
+   - Title: “Predicting Choice Before It Happens”
+   - CTA: “Download full report”
+   - Access level: PUBLIC / FREE
+
+ALL OTHER PIECES (MEMBERS ONLY FOR NOW)
+The following pieces should:
+- Use their full article bodies from the document.
+- Use the teaser / card view text from the document.
+- Have a card CTA of “Read full issue”.
+- Not show a PDF download CTA at the bottom (unless a report URL clearly exists in the file; by default assume no).
+- Be MEMBERS-ONLY content (Free users see the card but it’s locked; members can open).
+
+Titles and categories (all content in the document):
+
+- “Banking Monogamy Is Dead” (Innovatr Insights, Financial Services)
+- “The Moderation Movement: How Drinking Culture Is Growing Up” (Innovatr Insights, Beverages)
+- “The Race for Instant Gratification” (Innovatr Insights, On-Demand Services)
+- “From Meal Kits to Snack Boxes” (Innovatr Insights, Food & Subscription Services)
+- “Introducing AI Qual: Get to the Why Faster” (Innovatr Inside / Launch, Research and Insight Technology)
+- “Fairness Is the New Flex” (Innovatr Insights)
+- “Believability Is the New Branding” (Innovatr Insights)
+- “Simplicity Has Status” (Innovatr Launch)
+- “The Return of Local Logic” (Innovatr IRL)
+- “The Human Subscription” (Innovatr IRL)
+- “The Quiet Luxury of Calm” (Innovatr Insights)
+- “The Return of the Third Place” (Innovatr IRL)
+- “The Rise of the Micro-Errand Economy” (Innovatr Insights)
+- “The Emotional Upgrade” (Innovatr Insights)
+- “Local Humour as Currency” (Innovatr IRL)
+
+For each of these, pull:
+- Category
+- Industry (where stated)
+- Teaser
+- Full body
+
+from the content document and populate the portal accordingly.
+
+PART 3: DATES, SCHEDULING, AND ORDER
+
+I want a bi-weekly release rhythm starting in August 2025. Use the following schedule. If the date is in the past relative to “today”, the article should be published. If the date is in the future, the article should be created with status = SCHEDULED and only go live on that date.
+
+Use YYYY/MM/DD format for the admin “Date” field.
+
+Assign dates as follows:
+
+1) 2025/08/01 – “Insights That Speak for Themselves” (Storyteller) – PUBLIC
+2) 2025/08/15 – “Cutting Back, But Not on Snacks: The New Non-Negotiable Treat” – PUBLIC
+3) 2025/08/29 – “The Oat-Based Breakfast Revolution” – PUBLIC
+4) 2025/09/12 – “From Vegan to Vital: The Protein Comeback” – PUBLIC
+5) 2025/09/26 – “Cadbury Pocket-Sized Joy” – PUBLIC
+6) 2025/10/10 – “Predicting Choice Before It Happens” (Market Share Simulator) – PUBLIC
+
+7) 2025/10/24 – “Banking Monogamy Is Dead” – MEMBERS
+8) 2025/11/07 – “The Race for Instant Gratification” – MEMBERS
+9) 2025/11/21 – “From Meal Kits to Snack Boxes” – MEMBERS
+10) 2025/12/05 – “The Moderation Movement: How Drinking Culture Is Growing Up” – MEMBERS
+11) 2025/12/19 – “Introducing AI Qual: Get to the Why Faster” – MEMBERS
+12) 2026/01/02 – “Fairness Is the New Flex” – MEMBERS
+13) 2026/01/16 – “Believability Is the New Branding” – MEMBERS
+14) 2026/01/30 – “Simplicity Has Status” – MEMBERS
+15) 2026/02/13 – “The Return of Local Logic” – MEMBERS
+16) 2026/02/27 – “The Human Subscription” – MEMBERS
+17) 2026/03/13 – “The Quiet Luxury of Calm” – MEMBERS
+18) 2026/03/27 – “The Return of the Third Place” – MEMBERS
+19) 2026/04/10 – “The Rise of the Micro-Errand Economy” – MEMBERS
+20) 2026/04/24 – “The Emotional Upgrade” – MEMBERS
+21) 2026/05/08 – “Local Humour as Currency” – MEMBERS
+
+Behaviour:
+- Trend library listing should sort by date (newest first).
+- Free users:
+  - Can open and read all PUBLIC pieces (the first six).
+  - Can see MEMBERS-ONLY cards but they are visually “locked” with a small padlock and a short line such as “Members only – unlock with a membership”.
+  - Clicking a locked piece should open an upgrade / sign-in flow, not the full article.
+- Members:
+  - Can open all pieces.
+  - See no lock on any article.
+
+Scheduled pieces:
+- If today’s date is before the article date:
+  - Do not show the article in the public Trends & Insights listing.
+  - In the admin, show it with status “Scheduled” and its future date.
+- On and after the article date:
+  - Treat it as Published and visible in the listing.
+
+PART 4: ADMIN PORTAL IMPROVEMENTS
+
+In the Admin → Reports section:
+
+1. EDIT EXISTING REPORT / MAILER
+- Allow me to click any row (or an “Edit” button) to open a full edit view for that article.
+- In the edit view I must be able to:
+  - Change title
+  - Change category (Insights / IRL / Inside / Launch)
+  - Change industry
+  - Change date
+  - Edit teaser / preview text
+  - Edit topics / tags
+  - Edit the full body content (textarea or rich text, but store as markdown or HTML)
+  - Set Access Level:
+      - “Public (Free)” or
+      - “Members only”
+  - Add or change the PDF / report URL (optional)
+  - Set status: Draft / Scheduled / Published
+- Make sure that changes here immediately update the front-end views.
+
+2. SIMPLE PERFORMANCE VIEW BY REPORT
+- Still under Admin → Reports, add a small “Performance” column that displays:
+  - Total detail page views for that article.
+  - Total report downloads (where a PDF URL exists).
+- Store counts in a simple way (e.g. increment when a detail page is loaded and when the download button is clicked).
+- Clicking into a report’s edit view can show a small “Performance” panel summarising:
+  - Views
+  - Downloads
+
+3. USERS MANAGEMENT DETAIL VIEW
+- In Admin → Users:
+  - Keep the existing list.
+  - When I click on a user, open a detail panel or page that shows:
+    - Name, email, company, membership tier, status.
+    - Total spend (sum of their orders).
+    - Last research date (most recent order / credit usage).
+    - A simple timeline of their orders / credits used.
+    - A free-form “Internal notes” area I can edit and save.
+    - A way to manually apply a deal or promotion to this user (e.g. “Add X free Basic credits”, or “Apply 10% discount once-off to next order”).
+- Do not change any payment gateway integrations; just reflect what already exists.
+
+FINAL CHECK
+- Keep the current nav structure, logo, and overall layout.
+- Confirm that:
+  - Category hero images show correctly.
+  - Detail pages show full longform content with no top download button.
+  - Bottom CTA only appears where there is a report and uses the new wording.
+  - Dates match the schedule list above.
+  - Access levels (Public vs Members) behave as described.
+  - Admin edit tools work for past and future articles.
+
+Once everything above is implemented, run the app and check two example articles end-to-end:
+- One PUBLIC report article (for example, “Cutting Back, But Not on Snacks”).
+- One MEMBERS-ONLY article (for example, “Fairness Is the New Flex”).
+
+Make sure the behaviour matches exactly what I described.

@@ -59,10 +59,10 @@ interface Report {
   teaser: string;
   slug: string;
   coverImage: string;
-  pdfPath: string;
+  pdfPath: string | null;
   tags: string[];
   isNew: boolean;
-  accessLevel?: AccessLevel;
+  accessLevel?: string;
   allowedTiers?: string[];
   creditType?: string;
   creditCost?: number;
@@ -72,19 +72,52 @@ interface Report {
   };
 }
 
-function getAccessIndicator(report: Report, userTier?: string) {
-  const accessLevel = report.accessLevel || "public";
+function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: boolean) {
+  const accessLevel = report.accessLevel || "PUBLIC";
   
-  if (accessLevel === "public") {
+  if (accessLevel === "PUBLIC" || accessLevel === "public") {
     return null;
   }
   
-  if (accessLevel === "member") {
-    return (
-      <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 shadow-sm" title="Members only">
-        <Lock className="w-3.5 h-3.5 text-gray-600" />
-      </div>
-    );
+  if (accessLevel === "STARTER" || accessLevel === "member") {
+    if (!isLoggedIn) {
+      return (
+        <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 shadow-sm" title="Members only">
+          <Lock className="w-3.5 h-3.5 text-gray-600" />
+        </div>
+      );
+    }
+    return null;
+  }
+  
+  if (accessLevel === "GROWTH") {
+    const tierHierarchy = ["STARTER", "GROWTH", "SCALE"];
+    const userTierIndex = userTier ? tierHierarchy.indexOf(userTier) : -1;
+    const requiredTierIndex = tierHierarchy.indexOf("GROWTH");
+    
+    if (!isLoggedIn || userTierIndex < requiredTierIndex) {
+      return (
+        <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 shadow-sm" title="Growth+ tier required">
+          <Crown className="w-3.5 h-3.5 text-[#5B6EF7]" />
+        </div>
+      );
+    }
+    return null;
+  }
+  
+  if (accessLevel === "SCALE") {
+    const tierHierarchy = ["STARTER", "GROWTH", "SCALE"];
+    const userTierIndex = userTier ? tierHierarchy.indexOf(userTier) : -1;
+    const requiredTierIndex = tierHierarchy.indexOf("SCALE");
+    
+    if (!isLoggedIn || userTierIndex < requiredTierIndex) {
+      return (
+        <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 shadow-sm" title="Scale tier required">
+          <Crown className="w-3.5 h-3.5 text-[#5B6EF7]" />
+        </div>
+      );
+    }
+    return null;
   }
   
   if (accessLevel === "tier") {
@@ -117,7 +150,7 @@ function getAccessIndicator(report: Report, userTier?: string) {
   return null;
 }
 
-function ReportCard({ report, userTier }: { report: Report; userTier?: string }) {
+function ReportCard({ report, userTier, isLoggedIn }: { report: Report; userTier?: string; isLoggedIn?: boolean }) {
   const formattedDate = new Date(report.date).toLocaleDateString('en-GB', {
     day: '2-digit',
     month: '2-digit',
@@ -126,7 +159,11 @@ function ReportCard({ report, userTier }: { report: Report; userTier?: string })
 
   const categoryStyle = getCategoryStyle(report.category);
   const coverImage = getCoverImage(report.category);
-  const accessIndicator = getAccessIndicator(report, userTier);
+  const accessIndicator = getAccessIndicator(report, userTier, isLoggedIn);
+  
+  const accessLevel = report.accessLevel || "PUBLIC";
+  const isPublicWithPdf = (accessLevel === "PUBLIC" || accessLevel === "public") && report.pdfPath;
+  const ctaText = isPublicWithPdf ? "Download full report" : "Read full issue";
 
   return (
     <Link href={`/portal/insights/${report.slug}`}>
@@ -198,7 +235,7 @@ function ReportCard({ report, userTier }: { report: Report; userTier?: string })
               className="flex items-center gap-1 text-sm font-medium transition-colors"
               style={{ color: '#5B6EF7' }}
             >
-              <span>Read full issue</span>
+              <span>{ctaText}</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </div>
           </div>
@@ -311,7 +348,7 @@ export default function TrendsInsights() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {displayedReports.map((report) => (
-              <ReportCard key={report.id} report={report} userTier={userTier} />
+              <ReportCard key={report.id} report={report} userTier={userTier} isLoggedIn={!!user} />
             ))}
           </div>
 
