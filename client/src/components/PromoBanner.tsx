@@ -25,7 +25,7 @@ export default function PromoBanner() {
           <Button 
             size="lg" 
             variant="secondary"
-            className="bg-white text-foreground hover:bg-white/90"
+            className="bg-white hover:bg-white/90 text-[#141414]"
             onClick={handleClaimOffer}
             data-testid="button-view-deals"
           >

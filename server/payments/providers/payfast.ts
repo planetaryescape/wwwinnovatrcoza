@@ -191,7 +191,7 @@ export class PayFastProvider implements PaymentProvider {
     billingDate?: number;       // Day of month for billing (1-28)
     recurringAmount?: number;   // Amount for recurring payments
   }): Promise<CheckoutPayload> {
-    const baseUrl = process.env.DEV_URL || "http://localhost:5000";
+    const baseUrl = process.env.REPL_URL || process.env.DEV_URL || "http://localhost:5000";
     
     const returnUrl = `${baseUrl}/payment/return`;
     const cancelUrl = `${baseUrl}/payment/cancel`;
