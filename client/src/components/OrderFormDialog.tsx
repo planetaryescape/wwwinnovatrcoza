@@ -241,11 +241,13 @@ export default function OrderFormDialog({
       },
       items: orderItems,
       subscription: subscriptionOptions,
-      invoiceData: invoiceRequested ? {
-        invoiceRequested: true,
-        businessRegNumber: businessRegNumber.trim() || undefined,
-        vatNumber: vatNumber.trim() || undefined,
-      } : undefined,
+      invoiceData: invoiceRequested
+        ? {
+            invoiceRequested: true,
+            businessRegNumber: businessRegNumber.trim() || undefined,
+            vatNumber: vatNumber.trim() || undefined,
+          }
+        : undefined,
     });
   };
 
@@ -279,21 +281,29 @@ export default function OrderFormDialog({
           customerCompany: customerCompany || "Sample Company (Pty) Ltd",
           businessRegNumber: businessRegNumber || "2024/123456/07",
           vatNumber: vatNumber || "4123456789",
-          orderItems: orderItems.length > 0 ? orderItems : [
-            { type: "membership", description: "Sample Membership", quantity: 1, unitAmount: "5000" },
-          ],
+          orderItems:
+            orderItems.length > 0
+              ? orderItems
+              : [
+                  {
+                    type: "membership",
+                    description: "Sample Membership",
+                    quantity: 1,
+                    unitAmount: "5000",
+                  },
+                ],
           totalAmount,
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to generate invoice preview");
       }
-      
+
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
-      
+
       toast({
         title: "Invoice Preview Generated",
         description: "The sample invoice has opened in a new tab.",
@@ -392,25 +402,29 @@ export default function OrderFormDialog({
               <Checkbox
                 id="invoiceRequested"
                 checked={invoiceRequested}
-                onCheckedChange={(checked) => setInvoiceRequested(checked === true)}
+                onCheckedChange={(checked) =>
+                  setInvoiceRequested(checked === true)
+                }
                 data-testid="checkbox-request-invoice"
               />
-              <Label 
-                htmlFor="invoiceRequested" 
+              <Label
+                htmlFor="invoiceRequested"
                 className="flex items-center gap-2 cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                <FileText className="h-4 w-4" />
-                Send me a tax invoice
+                Send me an invoice
               </Label>
             </div>
 
             {invoiceRequested && (
               <div className="space-y-3 pt-2 border-t mt-3">
                 <p className="text-xs text-muted-foreground">
-                  Please provide your business details for the tax invoice (VAT calculated at 15%)
+                  Please provide your business details for the tax invoice (VAT
+                  calculated at 15%)
                 </p>
                 <div className="space-y-2">
-                  <Label htmlFor="businessRegNumber">Business Registration Number</Label>
+                  <Label htmlFor="businessRegNumber">
+                    Business Registration Number
+                  </Label>
                   <Input
                     id="businessRegNumber"
                     placeholder="e.g., 2023/123456/07"

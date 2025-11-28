@@ -90,12 +90,19 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
           .text("INNOVATR", 50, 50);
       }
 
+      // Company details
+      doc
+        .fillColor(textColor)
+        .fontSize(9)
+        .font("Helvetica-Bold")
+        .text("Innovatr (Pty) Ltd.", 50, 95);
+      
       doc
         .fillColor(mutedColor)
-        .fontSize(10)
+        .fontSize(8)
         .font("Helvetica")
-        .text("Digital Innovation Solutions", 50, 100)
-        .text("South Africa", 50, 113);
+        .text("Workshop 17, Hyde Park Corner, JHB, 2196", 50, 107)
+        .text("VAT No: 4030317293", 50, 118);
 
       // TAX INVOICE header - positioned to the right, with proper spacing
       doc
@@ -121,7 +128,7 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
           { align: "right", width: 195 }
         );
 
-      const billingTop = 140;
+      const billingTop = 145;
 
       doc
         .fillColor(primaryColor)
@@ -216,6 +223,26 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
         .font("Helvetica-Bold")
         .text("Total:", labelX, yPos)
         .text(formatCurrency(total, data.currency), valueX, yPos);
+
+      // Bank details section
+      yPos += 40;
+      doc.strokeColor("#e0e0e0").moveTo(50, yPos).lineTo(250, yPos).stroke();
+      
+      yPos += 10;
+      doc
+        .fillColor(primaryColor)
+        .fontSize(10)
+        .font("Helvetica-Bold")
+        .text("Banking Details", 50, yPos);
+      
+      yPos += 15;
+      doc
+        .fillColor(textColor)
+        .fontSize(9)
+        .font("Helvetica")
+        .text("FNB - Gold Business Account", 50, yPos)
+        .text("Account Number: 63066106923", 50, yPos + 12)
+        .text("Account Name: Innovatr (Pty) Ltd.", 50, yPos + 24);
 
       // Footer at bottom of page
       const pageHeight = doc.page.height;
