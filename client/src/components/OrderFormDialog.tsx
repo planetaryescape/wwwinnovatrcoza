@@ -356,7 +356,7 @@ export default function OrderFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Complete Your Order</DialogTitle>
           <DialogDescription>
@@ -459,7 +459,7 @@ export default function OrderFormDialog({
                     data-testid="input-company-address"
                   />
                 </div>
-                <Button
+                {/* <Button
                   type="button"
                   variant="outline"
                   size="sm"
@@ -479,7 +479,7 @@ export default function OrderFormDialog({
                       Preview Sample Invoice
                     </>
                   )}
-                </Button>
+                </Button> */}
               </div>
             )}
           </div>
