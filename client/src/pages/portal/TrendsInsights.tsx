@@ -292,9 +292,7 @@ export default function TrendsInsights() {
             >
               Trends & Insights Library
             </h1>
-            <p className="text-lg text-gray-600" style={{ fontFamily: 'Roboto, sans-serif' }}>
-              Fresh perspectives on South African consumer behaviour, market shifts, and innovation opportunities.
-            </p>
+            <p className="text-lg text-gray-600" style={{ fontFamily: 'Roboto, sans-serif' }}>Not trend fluff. Your inside track on South Africa’s shifting market.</p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 mb-8">
