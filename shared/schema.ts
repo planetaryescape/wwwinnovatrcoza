@@ -115,6 +115,10 @@ export const orders = pgTable("orders", {
   customerName: text("customer_name"),
   customerEmail: text("customer_email").notNull(),
   customerCompany: text("customer_company"),
+  invoiceRequested: boolean("invoice_requested").notNull().default(false),
+  businessRegNumber: text("business_reg_number"),
+  vatNumber: text("vat_number"),
+  invoiceNumber: text("invoice_number"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

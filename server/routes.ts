@@ -7,6 +7,7 @@ import { PaymentService } from "./payments/service";
 import type { PaymentConfig } from "./payments/types";
 import { sendAdminOrderNotification, sendCustomerOrderConfirmation, sendContactFormMessage } from "./emails/email-service";
 import { uploadFile, downloadFile, deleteFile, listFiles, fileExists } from "./app-storage";
+import { generateInvoicePdf } from "./invoices/generator";
 
 // Multer for handling multipart/form-data (PayFast webhooks)
 const upload = multer();
@@ -271,7 +272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Order will be created on successful payment webhook
   app.post("/api/payment/checkout", async (req, res) => {
     try {
-      const { customerName, customerEmail, customerCompany, amount, currency, purchaseType, items, providerKey, subscription } = req.body;
+      const { customerName, customerEmail, customerCompany, amount, currency, purchaseType, items, providerKey, subscription, invoiceRequested, businessRegNumber, vatNumber } = req.body;
       
       // Store order data in payment intent metadata for later creation
       const pendingOrderData = {
@@ -283,6 +284,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         purchaseType,
         items,
         recurringAmount: subscription?.recurringAmount,
+        invoiceRequested: invoiceRequested || false,
+        businessRegNumber: businessRegNumber || null,
+        vatNumber: vatNumber || null,
       };
 
       const checkout = await paymentService.createCheckoutWithPendingOrder(
@@ -405,8 +409,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.error("Failed to send admin email notification:", emailError);
           }
 
-          // Send customer order confirmation email
+          // Send customer order confirmation email (with invoice if requested)
           try {
+            let invoiceAttachment: { filename: string; content: Buffer } | undefined;
+            
+            if (order.invoiceRequested && order.invoiceNumber) {
+              console.log("Generating invoice PDF for:", order.invoiceNumber);
+              const invoicePdf = await generateInvoicePdf({
+                invoiceNumber: order.invoiceNumber,
+                invoiceDate: order.createdAt,
+                customerName: order.customerName || "Valued Customer",
+                customerEmail: order.customerEmail,
+                customerCompany: order.customerCompany || "Company",
+                businessRegNumber: order.businessRegNumber || undefined,
+                vatNumber: order.vatNumber || undefined,
+                orderItems: items.map((item) => ({
+                  type: item.type,
+                  description: item.description || item.type,
+                  quantity: item.quantity,
+                  unitAmount: String(item.unitAmount),
+                })),
+                currency: order.currency,
+              });
+              
+              invoiceAttachment = {
+                filename: `Innovatr-Tax-Invoice-${order.invoiceNumber}.pdf`,
+                content: invoicePdf,
+              };
+              console.log("Invoice PDF generated successfully");
+            }
+
             await sendCustomerOrderConfirmation({
               customerName: order.customerName || "Valued Customer",
               customerEmail: order.customerEmail,
@@ -418,6 +450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 description: item.description || "",
                 quantity: item.quantity,
               })),
+              invoiceAttachment,
             });
           } catch (emailError) {
             console.error("Failed to send customer order confirmation:", emailError);

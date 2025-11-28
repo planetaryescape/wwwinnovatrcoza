@@ -122,6 +122,9 @@ export class PaymentService {
       purchaseType: string;
       items: any[];
       recurringAmount?: number;
+      invoiceRequested?: boolean;
+      businessRegNumber?: string | null;
+      vatNumber?: string | null;
     },
     providerKey: string = "payfast",
     subscriptionOptions?: {
@@ -151,11 +154,21 @@ export class PaymentService {
       customerName: pendingOrderData.customerName,
       customerEmail: pendingOrderData.customerEmail,
       customerCompany: pendingOrderData.customerCompany,
+      invoiceRequested: pendingOrderData.invoiceRequested || false,
+      businessRegNumber: pendingOrderData.businessRegNumber || null,
+      vatNumber: pendingOrderData.vatNumber || null,
+      invoiceNumber: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     // Store pending order data in payment intent metadata (including subscription info)
+    console.log("=== Creating Pending Order Checkout ===");
+    console.log("Invoice requested:", pendingOrderData.invoiceRequested);
+    console.log("Business reg:", pendingOrderData.businessRegNumber);
+    console.log("VAT number:", pendingOrderData.vatNumber);
+    console.log("========================================");
+    
     const insertIntent: InsertPaymentIntent = {
       orderId: pendingId, // Use pending ID, will be updated on success
       providerKey: providerKey,
@@ -246,6 +259,9 @@ export class PaymentService {
           currency: string;
           purchaseType: string;
           items: any[];
+          invoiceRequested?: boolean;
+          businessRegNumber?: string;
+          vatNumber?: string;
         };
 
         // SECURITY CHECK: Validate payment amount matches expected amount
@@ -267,6 +283,24 @@ export class PaymentService {
 
         await this.storage.updatePaymentIntent(intent.id, { status: "succeeded" });
 
+        // Generate invoice number if invoice is requested
+        console.log("=== Webhook Invoice Processing ===");
+        console.log("pendingOrder.invoiceRequested:", pendingOrder.invoiceRequested);
+        console.log("pendingOrder.businessRegNumber:", pendingOrder.businessRegNumber);
+        console.log("pendingOrder.vatNumber:", pendingOrder.vatNumber);
+        console.log("===================================");
+        
+        let invoiceNumber: string | null = null;
+        if (pendingOrder.invoiceRequested) {
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = String(now.getMonth() + 1).padStart(2, "0");
+          const day = String(now.getDate()).padStart(2, "0");
+          const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+          invoiceNumber = `INV-${year}${month}${day}-${random}`;
+          console.log("Generated invoice number:", invoiceNumber);
+        }
+
         // NOW create the actual order
         const order = await this.storage.createOrder({
           customerName: pendingOrder.customerName,
@@ -276,6 +310,10 @@ export class PaymentService {
           currency: pendingOrder.currency,
           purchaseType: pendingOrder.purchaseType,
           status: "completed",
+          invoiceRequested: pendingOrder.invoiceRequested || false,
+          businessRegNumber: pendingOrder.businessRegNumber || null,
+          vatNumber: pendingOrder.vatNumber || null,
+          invoiceNumber,
         });
 
         // Create order items

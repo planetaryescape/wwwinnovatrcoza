@@ -217,10 +217,16 @@ export async function sendCustomerOrderConfirmation(orderData: {
   orderDescription: string;
   orderTotal: string;
   orderItems: any[];
+  invoiceAttachment?: {
+    filename: string;
+    content: Buffer;
+  };
 }) {
   try {
     const resend = await getResendClient();
     const fromEmail = await getFromEmail();
+
+    const hasInvoice = !!orderData.invoiceAttachment;
 
     const itemsHtml = orderData.orderItems
       .map(
@@ -386,7 +392,9 @@ export async function sendCustomerOrderConfirmation(orderData: {
               </div>
 
               <div class="cta-box">
-                <p class="cta-text">Our team will contact you at <strong>${orderData.customerEmail}</strong> within 24 hours to process your payment and finalize your order.</p>
+                <p class="cta-text">${hasInvoice 
+                  ? `Your tax invoice is attached to this email for your records.` 
+                  : `Our team will contact you at <strong>${orderData.customerEmail}</strong> within 24 hours to process your payment and finalize your order.`}</p>
               </div>
 
               <p style="color: #718096; font-size: 14px; margin: 20px 0 0 0;">If you have any questions, please don't hesitate to reach out to our support team.</p>
@@ -401,12 +409,29 @@ export async function sendCustomerOrderConfirmation(orderData: {
       </html>
     `;
 
-    const response = await resend.emails.send({
+    const emailOptions: {
+      from: string;
+      to: string[];
+      subject: string;
+      html: string;
+      attachments?: { filename: string; content: Buffer }[];
+    } = {
       from: `Innovatr <${fromEmail}>`,
       to: [orderData.customerEmail],
-      subject: `Order Confirmation - ${orderData.orderDescription}`,
+      subject: hasInvoice 
+        ? `Tax Invoice - ${orderData.orderDescription}` 
+        : `Order Confirmation - ${orderData.orderDescription}`,
       html: emailHtml,
-    });
+    };
+
+    if (orderData.invoiceAttachment) {
+      emailOptions.attachments = [{
+        filename: orderData.invoiceAttachment.filename,
+        content: orderData.invoiceAttachment.content,
+      }];
+    }
+
+    const response = await resend.emails.send(emailOptions);
 
     return response;
   } catch (error) {

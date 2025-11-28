@@ -11,9 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Loader2, CheckCircle2, CreditCard } from "lucide-react";
+import { Loader2, CheckCircle2, CreditCard, FileText } from "lucide-react";
 
 interface OrderItem {
   type: string;
@@ -54,6 +55,9 @@ export default function OrderFormDialog({
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerCompany, setCustomerCompany] = useState("");
+  const [invoiceRequested, setInvoiceRequested] = useState(false);
+  const [businessRegNumber, setBusinessRegNumber] = useState("");
+  const [vatNumber, setVatNumber] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -91,6 +95,11 @@ export default function OrderFormDialog({
       order: any;
       items: OrderItem[];
       subscription?: SubscriptionOptions;
+      invoiceData?: {
+        invoiceRequested: boolean;
+        businessRegNumber?: string;
+        vatNumber?: string;
+      };
     }) => {
       // Create payment checkout directly - order will be created on successful payment
       const requestBody: Record<string, any> = {
@@ -103,6 +112,13 @@ export default function OrderFormDialog({
         items: data.items,
         providerKey: "payfast",
       };
+
+      // Add invoice data if requested
+      if (data.invoiceData?.invoiceRequested) {
+        requestBody.invoiceRequested = true;
+        requestBody.businessRegNumber = data.invoiceData.businessRegNumber;
+        requestBody.vatNumber = data.invoiceData.vatNumber;
+      }
 
       // Add subscription options if this is a recurring payment
       if (data.subscription?.enabled) {
@@ -224,6 +240,11 @@ export default function OrderFormDialog({
       },
       items: orderItems,
       subscription: subscriptionOptions,
+      invoiceData: invoiceRequested ? {
+        invoiceRequested: true,
+        businessRegNumber: businessRegNumber.trim() || undefined,
+        vatNumber: vatNumber.trim() || undefined,
+      } : undefined,
     });
   };
 
@@ -236,6 +257,9 @@ export default function OrderFormDialog({
     setCustomerName("");
     setCustomerEmail("");
     setCustomerCompany("");
+    setInvoiceRequested(false);
+    setBusinessRegNumber("");
+    setVatNumber("");
   };
 
   const formatPrice = (price: number) => {
@@ -318,6 +342,52 @@ export default function OrderFormDialog({
               required
               data-testid="input-customer-company"
             />
+          </div>
+
+          <div className="space-y-3 rounded-lg border p-4">
+            <div className="flex items-center space-x-3">
+              <Checkbox
+                id="invoiceRequested"
+                checked={invoiceRequested}
+                onCheckedChange={(checked) => setInvoiceRequested(checked === true)}
+                data-testid="checkbox-request-invoice"
+              />
+              <Label 
+                htmlFor="invoiceRequested" 
+                className="flex items-center gap-2 cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                <FileText className="h-4 w-4" />
+                Send me a tax invoice
+              </Label>
+            </div>
+
+            {invoiceRequested && (
+              <div className="space-y-3 pt-2 border-t mt-3">
+                <p className="text-xs text-muted-foreground">
+                  Please provide your business details for the tax invoice (VAT calculated at 15%)
+                </p>
+                <div className="space-y-2">
+                  <Label htmlFor="businessRegNumber">Business Registration Number</Label>
+                  <Input
+                    id="businessRegNumber"
+                    placeholder="e.g., 2023/123456/07"
+                    value={businessRegNumber}
+                    onChange={(e) => setBusinessRegNumber(e.target.value)}
+                    data-testid="input-business-reg"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="vatNumber">VAT Number (optional)</Label>
+                  <Input
+                    id="vatNumber"
+                    placeholder="e.g., 4123456789"
+                    value={vatNumber}
+                    onChange={(e) => setVatNumber(e.target.value)}
+                    data-testid="input-vat-number"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="bg-muted/50 rounded-lg p-4 space-y-2">

@@ -217,6 +217,10 @@ export class MemStorage implements IStorage {
         customerName: insertOrder.customerName ?? null,
         customerEmail: insertOrder.customerEmail,
         customerCompany: insertOrder.customerCompany ?? null,
+        invoiceRequested: insertOrder.invoiceRequested ?? false,
+        businessRegNumber: insertOrder.businessRegNumber ?? null,
+        vatNumber: insertOrder.vatNumber ?? null,
+        invoiceNumber: insertOrder.invoiceNumber ?? null,
         createdAt: now,
         updatedAt: now,
       })
