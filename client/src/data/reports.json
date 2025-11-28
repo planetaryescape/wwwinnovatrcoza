@@ -1,162 +1,6 @@
 [
   {
     "id": 1,
-    "title": "AI Qual",
-    "teaser": "AI Qual is our new way of hearing the unfiltered voice of your audience. It turns hours of reading into moments of clarity and shows you the feelings behind the numbers in a way that feels alive and honest. If you want to know why people choose one idea over another, this is where the truth hides.",
-    "slug": "ai-qual",
-    "series": "Inside",
-    "category": "Inside",
-    "displayCategories": ["Services", "All"],
-    "industry": "Services",
-    "publishDate": "2025-08-05",
-    "date": "2025-08-05",
-    "status": "live",
-    "coverImage": "/assets/covers/inside-cover.png",
-    "pdfPath": null,
-    "hasDownload": false,
-    "tags": ["AI Qual", "Qualitative Research", "Innovatr Tools"],
-    "isNew": false,
-    "accessLevel": "PUBLIC",
-    "content": {
-      "intro": "For years, qualitative research has been rich in insight but slow to deliver. The process was powerful, but the pace was painful. AI Qual changes that.\n\nThis upcoming addition to the Innovatr suite brings human understanding and artificial intelligence together, turning open responses and transcripts into clear, visual, decision-ready stories.\n\nAI Qual is built to help teams uncover the why behind the data, faster and at scale. It is designed for researchers, strategists, and creatives who want to bring real consumer voices into workshops, campaigns, and innovation sessions, instantly.",
-      "sections": [
-        {
-          "heading": "How It Works",
-          "body": "Upload: Add transcripts or open-ended responses from video, audio, or text.\n\nAnalyse: Our language models tag every quote with themes, emotions, and tension points.\n\nVisualise: See your findings appear instantly with word clouds, theme maps, and quoteboards that showcase standout quotes.\n\nExplore: Dive into any theme or quote to hear the raw voice of your audience. Patterns emerge in minutes and stories begin to take shape immediately."
-        },
-        {
-          "heading": "Why It Matters",
-          "body": "Speed and Scale: AI Qual processes hundreds of responses in seconds. You still get the authentic consumer voice and verbatim quotes, but the analysis is instant. What once took weeks now takes days.\n\nVisual Clarity: Insights are brought to life through automatic visuals. Teams can see which phrases dominate, how themes connect, and which quotes truly resonate. Complex data becomes easy to grasp and easy to share.\n\nStrategic Impact: AI Qual is built for more than research. It is made for strategy and creative development too. Insights can now move straight from research into action — fuelling new ideas, campaigns, and innovation sessions without delay."
-        },
-        {
-          "heading": "Coming Soon",
-          "body": "AI Qual will soon join Innovatr's suite of insight tools. It will integrate directly into Storyteller and UpSiide, creating one connected space for both qualitative and quantitative findings.\n\nThe future of insight is not just faster. It is clearer, more human, and ready to inspire creativity at scale.\n\nGet ready to explore the why behind every decision - faster, smarter, and with more heart than ever before."
-        }
-      ]
-    }
-  },
-  {
-    "id": 2,
-    "title": "Storyteller",
-    "teaser": "Storyteller transforms raw data into something people actually want to read. It turns charts into insight, patterns into meaning and long reports into a compelling journey. If you want to share findings that feel vivid instead of technical, Storyteller takes you there.",
-    "slug": "storyteller",
-    "series": "Inside",
-    "category": "Inside",
-    "displayCategories": ["Services", "All"],
-    "industry": "Services",
-    "publishDate": "2025-08-12",
-    "date": "2025-08-12",
-    "status": "live",
-    "coverImage": "/assets/covers/inside-cover.png",
-    "pdfPath": null,
-    "hasDownload": false,
-    "tags": ["Storyteller", "Insight Communication", "Data Storytelling"],
-    "isNew": false,
-    "accessLevel": "PUBLIC",
-    "content": {
-      "intro": "Data alone does not create clarity. Story does. Storyteller was created for teams who want research that explains itself. No long unpacking. No technical slides. Only clear, confident and strategic insight.\n\nStoryteller transforms your data into a headline, a supporting view, a visual and a practical action. It gives every idea a narrative your team can understand in seconds.\n\nThis is insight made simple, shareable and ready for decision making.",
-      "sections": [
-        {
-          "heading": "What is happening",
-          "body": "Research users expect speed and clarity. Storyteller brings both together.\n\nTeams want the answer first. The headline explains the core result without needing to decode charts.\n\nPeople understand visuals faster than words. Storyteller selects a visual that brings the meaning to life.\n\nActions matter more than data dumps. Teams want to know what to do next. Storyteller delivers a clear recommendation."
-        },
-        {
-          "heading": "Why this is happening",
-          "body": "Behavioural data demands a narrative: Test24 collects emotional response, intuitive behaviour and competitive commitment. Storyteller interprets these signals and turns them into a strategic insight.\n\nComplexity slows down decision making: Most teams do not have the time to interpret every chart. Storyteller filters everything down to what matters most.\n\nCreative teams need direction not detail: A good insight accelerates alignment. Storyteller delivers something that creative, brand and strategy teams can act on immediately.\n\nConsistency builds confidence: Every study gets the same structure. One headline. One insight. One visual. One action. Predictable clarity."
-        },
-        {
-          "heading": "Why it matters",
-          "body": "Storyteller gives every research output a clear voice. It helps teams move faster, collaborate better and anchor decisions in strategic truth rather than opinion.\n\nWhen insights are easy to understand, they become easy to champion. They travel further. They influence more. They shape better decisions."
-        },
-        {
-          "heading": "Innovatr takeaway",
-          "body": "Insight should not be hidden. It should be heard. Storyteller ensures your research speaks clearly and confidently.\n\nFor brands, the opportunity is simple. Turn data into narrative and narrative into action."
-        }
-      ]
-    }
-  },
-  {
-    "id": 3,
-    "title": "Market Share Simulator",
-    "teaser": "The Market Share Simulator lets you see the future before you spend a cent. Test what happens when a brand grows, shrinks, changes price or enters a new space. It reveals how real people switch, stay or move and shows you the shift that one small change can create.",
-    "slug": "market-share-simulator",
-    "series": "Inside",
-    "category": "Inside",
-    "displayCategories": ["Services", "All"],
-    "industry": "Services",
-    "publishDate": "2025-08-19",
-    "date": "2025-08-19",
-    "status": "live",
-    "coverImage": "/assets/covers/inside-cover.png",
-    "pdfPath": null,
-    "hasDownload": false,
-    "tags": ["Tools", "Market Share Simulator", "Behavioural Data"],
-    "isNew": false,
-    "accessLevel": "PUBLIC",
-    "content": {
-      "intro": "Innovation rarely fails in isolation. It fails when a stronger idea steals the choice. Our Market Share Simulator exists to answer one simple question. What will people actually choose when your idea competes in the real world?\n\nMost research reports tell you what people like. The simulator goes further. It shows you what they will pick. It reveals your source of volume and shows whether you are winning by stealing share or by growing the category.\n\nThis tool uses behavioural data from Test24 to model real market outcomes. The goal is clarity. No assumptions. No soft signals. Only real competitive behaviour.",
-      "sections": [
-        {
-          "heading": "What is happening",
-          "body": "Choice is not theoretical. It is competitive. The simulator shows three important patterns.\n\nPeople often like many ideas but commit to very few. Interest is easy. Commitment is precise. The simulator shows exactly where your idea gains or loses preference under pressure.\n\nSome ideas perform well alone but fall apart against competitors. This is the silent killer of innovation. The simulator exposes ideas that look strong on paper but collapse when placed next to a rival.\n\nSmall creative improvements can shift the entire market. A change in clarity. A stronger emotional hook. A slightly bolder benefit. The simulator shows how small refinements move real market share."
-        },
-        {
-          "heading": "Why this is happening",
-          "body": "Real behaviour under real pressure: The simulator uses behavioural data from Test24 where people swipe and choose in context. This produces outcomes that reflect natural decision making rather than idealised survey thinking.\n\nClear view of competitive tension: People often like two or three ideas but eventually choose one. The simulator reveals where your idea wins and where it loses in head to head decisions.\n\nUnderstanding your source of volume: Growth must come from somewhere. The simulator shows if your volume comes from your closest competitor, the category leader or new incremental users.\n\nScenario testing that guides creative and strategic decisions: Teams can explore what happens when they adjust design, language or price. You can quantify the impact of every decision before making it."
-        },
-        {
-          "heading": "Why it matters",
-          "body": "Winning ideas are not chosen in meeting rooms. They are chosen in competitive moments where people decide fast and intuitively. The Market Share Simulator puts you inside that moment with precision.\n\nIt gives teams the power to choose ideas with confidence, defend decisions with data and focus resources where they will have the greatest return."
-        },
-        {
-          "heading": "Innovatr takeaway",
-          "body": "The strongest innovation systems do not guess. They model. The simulator helps teams see the future before they invest in it.\n\nFor brands, the opportunity is clear. Use real behavioural modelling to guide decisions and reduce risk while accelerating growth."
-        }
-      ]
-    }
-  },
-  {
-    "id": 4,
-    "title": "The Age of Effortless",
-    "teaser": "South Africans are exhausted. Everyday life has become one long queue. Bills, traffic, load shedding schedules, banking admin, endless decision-making. People do not want brands to impress them. They want brands to remove friction. Effortless is not laziness. It is self-preservation.",
-    "slug": "the-age-of-effortless",
-    "series": "IRL",
-    "category": "IRL",
-    "displayCategories": ["Services", "FMCG", "Banking", "All"],
-    "industry": "Services",
-    "publishDate": "2025-08-22",
-    "date": "2025-08-22",
-    "status": "live",
-    "coverImage": "/assets/covers/irl-cover.png",
-    "pdfPath": "/assets/reports/innovatr-irl-the-age-of-effortless.pdf",
-    "hasDownload": true,
-    "tags": ["Effortless", "Convenience", "Consumer Behaviour", "UX"],
-    "isNew": false,
-    "accessLevel": "PUBLIC",
-    "content": {
-      "intro": "South Africans are exhausted. Everyday life has become one long queue — digital or physical. Bills. Traffic. Load shedding schedules. Banking admin. Endless decision-making.\n\nPeople do not want brands to impress them. They want brands to remove friction.\n\nEffortless is not laziness. It is self-preservation.",
-      "sections": [
-        {
-          "heading": "When Life Gets Hard, People Want Their Brands to Get Easier",
-          "body": "High admin economy. Low trust environment. Too many choices. Too much cognitive load.\n\nSouth Africans reward brands that reduce steps, reduce thinking and reduce irritation.\n\nConvenience is no longer a feature — it is a feeling. The feeling of being considered, supported, respected.\n\nThe feeling of: Ahh… finally."
-        },
-        {
-          "heading": "South Africans Are Obsessed With Saving Time and Mental Energy",
-          "body": "68% say life admin has worsened in the past 3 years.\n\n57% avoid brands that ask for too much information.\n\n53% abandon online carts when something feels annoying.\n\n44% switch brands if the competitor feels easier.\n\n36% say they feel mentally tired before 10am.\n\n29% are actively removing complexity from their life."
-        },
-        {
-          "heading": "Ease Beats Features. Every Time.",
-          "body": "People do not remember every detail. They remember how easy it felt.\n\nThe winning brands are the ones that reduce steps, simplify journeys, remove admin, automate pain points, and free up headspace.\n\nThe Age of Effortless is not about speed. It is about clarity."
-        },
-        {
-          "heading": "Innovatr takeaway",
-          "body": "Effortlessness is a behavioural strategy, not a UX trend. We help teams measure clarity of pricing, believability of claims, honesty signals in design, perceived fairness of trade-offs, emotional reaction to transparency, and barriers created by complexity.\n\nFairness builds trust. Trust builds growth. Fairness is the new flex."
-        }
-      ]
-    }
-  },
-  {
-    "id": 5,
     "title": "Fairness Is the New Flex",
     "teaser": "Fairness has become a quiet form of currency in South Africa. People want brands that make sense, speak simply and treat them with respect. The biggest flex right now is not being tricked, and the brands who honour that are the ones consumers stay loyal to.",
     "slug": "fairness-is-the-new-flex",
@@ -164,8 +8,8 @@
     "category": "IRL",
     "displayCategories": ["Services", "FMCG", "Banking", "All"],
     "industry": "Services",
-    "publishDate": "2025-08-26",
-    "date": "2025-08-26",
+    "publishDate": "2025-08-05",
+    "date": "2025-08-05",
     "status": "live",
     "coverImage": "/assets/covers/irl-cover.png",
     "pdfPath": "/assets/reports/innovatr-irl-fairness-flex.pdf",
@@ -196,47 +40,115 @@
     }
   },
   {
-    "id": 6,
-    "title": "Indulgence Without Guilt",
-    "teaser": "People are not overindulging. They are overcompensating. Stress is up, joy is down, and treats have stepped in as emotional survival tools. South Africans are choosing small, intentional pleasures that give them a moment to breathe in a high-pressure world.",
-    "slug": "indulgence-without-guilt",
-    "series": "IRL",
-    "category": "IRL",
-    "displayCategories": ["FMCG", "Food", "Bev", "All"],
-    "industry": "FMCG",
-    "publishDate": "2025-08-29",
-    "date": "2025-08-29",
+    "id": 2,
+    "title": "Banking Monogamy Is Dead",
+    "teaser": "Loyalty in banking is fading fast and South Africans are mixing, matching and experimenting across platforms. The bank you start with is no longer the bank you stay with and convenience now beats commitment.",
+    "slug": "banking-monogamy-is-dead",
+    "series": "Insights",
+    "category": "Insights",
+    "displayCategories": ["Banking", "Services"],
+    "industry": "Banking",
+    "publishDate": "2025-08-12",
+    "date": "2025-08-12",
     "status": "live",
-    "coverImage": "/assets/covers/irl-cover.png",
-    "pdfPath": "/assets/reports/innovatr-irl-indulgence-without-guilt.pdf",
-    "hasDownload": true,
-    "tags": ["Indulgence", "Treats", "Emotional Economy", "Self-Care"],
+    "coverImage": "/assets/covers/insights-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "tags": ["Financial Services", "Consumer Loyalty", "Digital Banking"],
     "isNew": false,
-    "accessLevel": "PUBLIC",
+    "accessLevel": "STARTER",
     "content": {
-      "intro": "People are not overindulging. They are overcompensating. Stress is up. Joy is down. Treats step in.\n\nSouth Africans are choosing joy in small doses. Our research shows that 74% say small treats help them cope with stress. 62% believe they deserve a daily indulgence. 58% say guilt-free treats are more appealing than ever.\n\n49% actively seek products that feel like a reward. And as one respondent put it: It is cheaper than therapy. And tastier.",
+      "intro": "South Africans are breaking up with their banks. Most no longer rely on one provider but instead spread their money across different accounts to get better features, rates, and experiences.\n\nOur latest Innovatr research shows that 67% of customers under 40 already use two or more banks or fintech providers. 58% say they would switch their main bank after just one poor service experience. And nearly 45% believe all banks offer basically the same products. Loyalty today is fragile, and every touchpoint counts.",
       "sections": [
         {
-          "heading": "Pleasure Needs No Permission Anymore",
-          "body": "The old narrative of indulgence versus restraint is fading. People no longer need to justify their treats. They see them as emotional necessities, not guilty pleasures.\n\nSmall indulgences have become coping rituals. A ten rand chocolate is not excess. It is a moment of calm in an overwhelming day."
+          "heading": "Why It Is Happening",
+          "body": "Banking has gone fully digital and deeply pragmatic. Opening a new account now takes minutes, so the effort to shop around has disappeared. Fintechs have raised expectations with zero fees, sleek design, and smart tools that make people feel in control.\n\nEconomic pressure is another driver. Consumers want every rand to stretch further, using one account for the lowest fees, another for rewards, and another for smart savings. Trust has also eroded. After years of fee increases and confusing terms, many South Africans simply test what works and move on.\n\nJust as people switch between streaming platforms or ride apps, they now treat finance the same way. Being tied to one provider feels outdated."
         },
         {
-          "heading": "Where Indulgence Is Taking Over",
-          "body": "Across categories, brands that embrace guilt-free messaging are winning. From premium snacks to affordable luxuries, the opportunity is in making people feel good about feeling good.\n\nThe shift is from I shouldn't to I deserve this."
+          "heading": "What It Means for Banks and Fintechs",
+          "body": "Differentiate with purpose: When 45% think every bank is the same, clarity is everything. Show real value, not empty promises.\n\nProtect every moment: One bad experience can end a relationship. Train teams for empathy, fix digital friction fast, and follow up proactively.\n\nLean into the multi-bank reality: Consumers will use several providers anyway. Make your app easy to integrate, simple to connect, and rewarding to keep.\n\nInnovate where it counts: Focus on solving everyday pain points, smarter budgeting, transparent fees, and accessible support.\n\nRebuild trust: Be open, fair, and consistent. Simplify terms and remove hidden costs. Trust is built one honest moment at a time."
         },
         {
-          "heading": "How Brands Can Own the Guilt-Free Indulgence Space",
-          "body": "Lead with emotional benefit, not just taste or ingredients. Position treats as self-care, not self-sabotage. Create rituals that make indulgence feel intentional. Increase perceived value so the treat feels earned."
-        },
-        {
-          "heading": "Innovatr takeaway",
-          "body": "Indulgence is not a treat trend. It is emotional behaviour. Small purchases drive big loyalty when brands make people feel seen, soothed and special.\n\nDoes your idea feel worth the treat? South Africans will tell you tomorrow."
+          "heading": "The Takeaway",
+          "body": "Loyalty is no longer a lifetime contract. It is a daily decision based on ease, transparency, and emotional connection. The brands that thrive will be the ones that prove their worth every time a customer logs in."
         }
       ]
     }
   },
   {
-    "id": 7,
+    "id": 3,
+    "title": "Cadbury Pocket-Sized Joy",
+    "teaser": "Cadbury is shrinking the moment but not the joy. South Africans are embracing small format treats that feel playful, affordable and instantly rewarding.",
+    "slug": "cadbury-pocket-sized-joy",
+    "series": "Launch",
+    "category": "Launch",
+    "displayCategories": ["FMCG", "Food"],
+    "industry": "FMCG",
+    "publishDate": "2025-08-19",
+    "date": "2025-08-19",
+    "status": "live",
+    "coverImage": "/assets/covers/launch-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "tags": ["Confectionery", "Format Innovation", "Micro Indulgence"],
+    "isNew": false,
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "There is something uniquely powerful about formats that fit in your hand. They feel simple. Casual. Effortless. Cadbury's new Pocket Sized Joy taps into this emotional truth by offering a familiar favourite in a format designed for real life snacking moments.\n\nThis is not just a smaller bar. It is a new way to enjoy comfort, treat myself energy and everyday uplift without feeling heavy or indulgent. Our Innovatr research shows that the format, name and creative direction work together to create a strong emotional connection.\n\nPocket Sized Joy is exactly what it says. Small. Easy. Feel good.",
+      "sections": [
+        {
+          "heading": "What is happening",
+          "body": "Cadbury has a long legacy of emotional storytelling. Pocket Sized Joy continues that tradition but in a way that aligns with new consumer habits.\n\nThe rise of small treats: More than half of consumers say they want treats that feel light and portion friendly. Micro indulgence is rising.\n\nConvenience as comfort: People increasingly want snacks they can take anywhere. Something that fits in a bag or pocket ranks surprisingly high in emotional appeal.\n\nLittle moments matter most: Consumers are looking for small uplifting moments in the middle of the day."
+        },
+        {
+          "heading": "Why it matters",
+          "body": "Pocket Sized Joy proves that innovation does not always require reinvention. Sometimes the strongest move is simply creating a format that amplifies an existing emotional truth.\n\nBrands that understand the intersection between portion, emotion and convenience will continue to win.\n\nPocket Sized Joy is a reminder that the smallest ideas often carry the biggest uplift."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "Do not underestimate the power of format. A smart size can unlock new occasions, new audiences and new emotional meaning.\n\nFor brands, the lesson is simple. Create products that fit life, not the other way around."
+        }
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "title": "AI Qual",
+    "teaser": "AI Qual is our new way of hearing the unfiltered voice of your audience. It turns hours of reading into moments of clarity and shows you the feelings behind the numbers in a way that feels alive and honest. If you want to know why people choose one idea over another, this is where the truth hides.",
+    "slug": "ai-qual",
+    "series": "Inside",
+    "category": "Inside",
+    "displayCategories": ["Services", "All"],
+    "industry": "Services",
+    "publishDate": "2025-08-26",
+    "date": "2025-08-26",
+    "status": "live",
+    "coverImage": "/assets/covers/inside-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "tags": ["AI Qual", "Qualitative Research", "Innovatr Tools"],
+    "isNew": false,
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "For years, qualitative research has been rich in insight but slow to deliver. The process was powerful, but the pace was painful. AI Qual changes that.\n\nThis upcoming addition to the Innovatr suite brings human understanding and artificial intelligence together, turning open responses and transcripts into clear, visual, decision-ready stories.\n\nAI Qual is built to help teams uncover the why behind the data, faster and at scale. It is designed for researchers, strategists, and creatives who want to bring real consumer voices into workshops, campaigns, and innovation sessions, instantly.",
+      "sections": [
+        {
+          "heading": "How It Works",
+          "body": "Upload: Add transcripts or open-ended responses from video, audio, or text.\n\nAnalyse: Our language models tag every quote with themes, emotions, and tension points.\n\nVisualise: See your findings appear instantly with word clouds, theme maps, and quoteboards that showcase standout quotes.\n\nExplore: Dive into any theme or quote to hear the raw voice of your audience. Patterns emerge in minutes and stories begin to take shape immediately."
+        },
+        {
+          "heading": "Why It Matters",
+          "body": "Speed and Scale: AI Qual processes hundreds of responses in seconds. You still get the authentic consumer voice and verbatim quotes, but the analysis is instant. What once took weeks now takes days.\n\nVisual Clarity: Insights are brought to life through automatic visuals. Teams can see which phrases dominate, how themes connect, and which quotes truly resonate. Complex data becomes easy to grasp and easy to share.\n\nStrategic Impact: AI Qual is built for more than research. It is made for strategy and creative development too. Insights can now move straight from research into action — fuelling new ideas, campaigns, and innovation sessions without delay."
+        },
+        {
+          "heading": "Coming Soon",
+          "body": "AI Qual will soon join Innovatr's suite of insight tools. It will integrate directly into Storyteller and UpSiide, creating one connected space for both qualitative and quantitative findings.\n\nThe future of insight is not just faster. It is clearer, more human, and ready to inspire creativity at scale.\n\nGet ready to explore the why behind every decision - faster, smarter, and with more heart than ever before."
+        }
+      ]
+    }
+  },
+  {
+    "id": 5,
     "title": "Believability Is the New Branding",
     "teaser": "People are tired of polished perfection. They want brands that feel real and honest, not overly staged. Believability is becoming the most powerful design choice in a world where trust is low and people see through everything.",
     "slug": "believability-is-the-new-branding",
@@ -276,7 +188,119 @@
     }
   },
   {
+    "id": 6,
+    "title": "The New Non-Negotiable Treat",
+    "teaser": "South Africans refuse to cut back on the small thing that makes their day feel better. A ten minute treat is becoming a coping ritual that people protect even when everything else feels fragile.",
+    "slug": "the-new-non-negotiable-treat",
+    "series": "Insights",
+    "category": "Insights",
+    "displayCategories": ["FMCG", "Food", "Bev"],
+    "industry": "FMCG",
+    "publishDate": "2025-09-09",
+    "date": "2025-09-09",
+    "status": "live",
+    "coverImage": "/assets/covers/insights-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "tags": ["FMCG", "Snacking", "Consumer Behaviour", "Emotional Economy"],
+    "isNew": false,
+    "accessLevel": "STARTER",
+    "content": {
+      "intro": "South Africans might be tightening their belts, but not when it comes to snacks.\n\nOur latest Innovatr research reveals a fascinating contradiction in consumer behaviour. Eighty percent of people say they will always find room in their budget for a treat, no matter how tough things get. Three out of four believe that a small daily indulgence is now essential for their emotional wellbeing.\n\nAs food prices rise, snacks have evolved from simple convenience into something deeply emotional. They have become a source of comfort, control, and reward. A ten rand chocolate or a packet of chips is no longer just a bite. It is a brief moment of joy that restores a sense of normality when everything else feels uncertain.",
+      "sections": [
+        {
+          "heading": "The New Language of Treats",
+          "body": "Younger consumers are chasing discovery, experimenting with new flavours and textures that make snacking playful and social.\n\nOlder consumers are leaning into nostalgia, seeking the familiar tastes and trusted brands that bring comfort and calm.\n\nAcross generations there is a shared desire for both memory and novelty. People want to relive familiar moments while discovering something new.\n\nThis blend of comfort and curiosity defines the modern snack moment."
+        },
+        {
+          "heading": "The Emotional Economy",
+          "body": "Treats are no longer about indulgence versus restraint. They have become part of a new emotional economy where people prioritise feeling okay over spending less. Food is now a form of self-care. A small act that provides emotional balance and a sense of control in uncertain times."
+        },
+        {
+          "heading": "What It Means for Brands",
+          "body": "For marketers and product teams, this shift is a powerful reminder. Treats are not optional. They are emotional.\n\nThe brands that win will be those that deliver affordable indulgence without feeling cheap, blend familiar comfort with new excitement, focus on emotional value rather than price promotion, and create small, meaningful rituals that people look forward to every day.\n\nIn an age of financial fatigue, the strongest competitive edge is positivity. Snacks might be small, but their role in people's lives has never been bigger."
+        }
+      ]
+    }
+  },
+  {
+    "id": 7,
+    "title": "Oat-Based Breakfast Revolution",
+    "teaser": "Oat based breakfasts are rising fast as people look for clean energy, slow release fullness and easy versatility. This is the new morning essential.",
+    "slug": "oat-based-breakfast-revolution",
+    "series": "Launch",
+    "category": "Launch",
+    "displayCategories": ["Food", "FMCG", "Beauty"],
+    "industry": "Food",
+    "publishDate": "2025-09-16",
+    "date": "2025-09-16",
+    "status": "live",
+    "coverImage": "/assets/covers/launch-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "tags": ["Launch", "Functional Food", "Breakfast", "Beverages"],
+    "isNew": false,
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "South Africans might be spending less but they are not giving up on joy. And in the morning they are drinking their breakfast. It is not coffee.\n\nA new ready to drink oat beverage is changing how people start their day. It is quick filling and deeply functional. People are now getting the nutrition of a meal in the time it takes to walk out the door.\n\nDesigned for busy mornings this format turns breakfast into something portable personal and purposeful. It reflects a bigger shift in how consumers manage time energy and wellbeing.",
+      "sections": [
+        {
+          "heading": "Why this is happening",
+          "body": "Innovatr food and beverage research shows that the classic sit down breakfast is fading. The new morning routine is built for multitasking.\n\n64% of consumers skip a traditional breakfast during the week but still want something quick that feels substantial.\n\n58% want drinks that boost both energy and nourishment.\n\n70% expect beverages to add value beyond hydration.\n\nPeople want products that deliver health and purpose while they move."
+        },
+        {
+          "heading": "The power of functionality",
+          "body": "This innovation sits at the meeting point of two powerful trends. Snackification and functionality.\n\nPeople are breaking free from rigid meal patterns. They want products that blend nutrition with convenience. Functional oat drinks provide sustained energy natural ingredients and a feeling of control over health goals.\n\nFrom protein smoothies to vitamin enriched waters consumers are building routines around drinks that help them feel prepared and capable."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "Functional beverages are transforming daily routines. As the lines between food and drink continue to blur the brands that will win are the ones that deliver nourishment with meaning. Products that energise both confidence and physical wellbeing."
+        }
+      ]
+    }
+  },
+  {
     "id": 8,
+    "title": "Storyteller",
+    "teaser": "Storyteller transforms raw data into something people actually want to read. It turns charts into insight, patterns into meaning and long reports into a compelling journey. If you want to share findings that feel vivid instead of technical, Storyteller takes you there.",
+    "slug": "storyteller",
+    "series": "Inside",
+    "category": "Inside",
+    "displayCategories": ["Services", "All"],
+    "industry": "Services",
+    "publishDate": "2025-09-23",
+    "date": "2025-09-23",
+    "status": "live",
+    "coverImage": "/assets/covers/inside-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "tags": ["Storyteller", "Insight Communication", "Data Storytelling"],
+    "isNew": false,
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "Data alone does not create clarity. Story does. Storyteller was created for teams who want research that explains itself. No long unpacking. No technical slides. Only clear, confident and strategic insight.\n\nStoryteller transforms your data into a headline, a supporting view, a visual and a practical action. It gives every idea a narrative your team can understand in seconds.\n\nThis is insight made simple, shareable and ready for decision making.",
+      "sections": [
+        {
+          "heading": "What is happening",
+          "body": "Research users expect speed and clarity. Storyteller brings both together.\n\nTeams want the answer first. The headline explains the core result without needing to decode charts.\n\nPeople understand visuals faster than words. Storyteller selects a visual that brings the meaning to life.\n\nActions matter more than data dumps. Teams want to know what to do next. Storyteller delivers a clear recommendation."
+        },
+        {
+          "heading": "Why this is happening",
+          "body": "Behavioural data demands a narrative: Test24 collects emotional response, intuitive behaviour and competitive commitment. Storyteller interprets these signals and turns them into a strategic insight.\n\nComplexity slows down decision making: Most teams do not have the time to interpret every chart. Storyteller filters everything down to what matters most.\n\nCreative teams need direction not detail: A good insight accelerates alignment. Storyteller delivers something that creative, brand and strategy teams can act on immediately.\n\nConsistency builds confidence: Every study gets the same structure. One headline. One insight. One visual. One action. Predictable clarity."
+        },
+        {
+          "heading": "Why it matters",
+          "body": "Storyteller gives every research output a clear voice. It helps teams move faster, collaborate better and anchor decisions in strategic truth rather than opinion.\n\nWhen insights are easy to understand, they become easy to champion. They travel further. They influence more. They shape better decisions."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "Insight should not be hidden. It should be heard. Storyteller ensures your research speaks clearly and confidently.\n\nFor brands, the opportunity is simple. Turn data into narrative and narrative into action."
+        }
+      ]
+    }
+  },
+  {
+    "id": 9,
     "title": "Simplicity Has Status",
     "teaser": "South Africans are craving calm. They want fewer decisions, fewer steps and fewer complications. When a brand removes noise, it feels premium. Simplicity has become a status symbol for people who are tired of being overwhelmed.",
     "slug": "simplicity-has-status",
@@ -284,8 +308,8 @@
     "category": "IRL",
     "displayCategories": ["FMCG", "Services", "Banking", "Beauty"],
     "industry": "Services",
-    "publishDate": "2025-09-09",
-    "date": "2025-09-09",
+    "publishDate": "2025-09-30",
+    "date": "2025-09-30",
     "status": "live",
     "coverImage": "/assets/covers/irl-cover.png",
     "pdfPath": "/assets/reports/innovatr-irl-simplicity-has-status.pdf",
@@ -316,187 +340,7 @@
     }
   },
   {
-    "id": 9,
-    "title": "The Return of Local Logic",
-    "teaser": "Global shine is losing its charm. People want brands that feel like they were made for their real lives and their real challenges. Local Logic is practical, grounded and deeply South African. It is not patriotism, it is common sense.",
-    "slug": "the-return-of-local-logic",
-    "series": "IRL",
-    "category": "IRL",
-    "displayCategories": ["FMCG", "Food", "Bev", "Services"],
-    "industry": "FMCG",
-    "publishDate": "2025-09-16",
-    "date": "2025-09-16",
-    "status": "live",
-    "coverImage": "/assets/covers/irl-cover.png",
-    "pdfPath": null,
-    "hasDownload": false,
-    "tags": ["Local", "Culture", "Authenticity", "South Africa"],
-    "isNew": false,
-    "accessLevel": "PUBLIC",
-    "content": {
-      "intro": "Over the past decade, globalisation shaped how brands came to life. Sleek templates. International tone. Universal stories crafted for scale rather than culture. It worked for a while, but the market has shifted. South Africans have begun to tune out of work that feels imported and tune in to anything that feels rooted. Uniformity has hit a ceiling because people have.\n\nOur Innovatr research shows a clear gap. When brands use local cues their trust and relatability scores jump by more than twenty percent. Consumers respond to brands that reflect their lived reality. The slang they speak. The humour they get. The colours and cues that feel like home. When a brand feels local, it feels trustworthy.",
-      "sections": [
-        {
-          "heading": "The shift across categories",
-          "body": "This shift is visible across categories. FMCG brands leaning into heritage flavours are outperforming generic global ones. Fintech and financial services are redesigning for South African context rather than copying global UX playbooks. Even premium brands are softening their edges and embracing more culturally fluent storytelling. Relevance has become a strategic advantage."
-        },
-        {
-          "heading": "Why local wins",
-          "body": "External research supports this cultural turn. Markets with high social diversity respond strongly to work that acknowledges real life nuance. South Africa is no exception. People want brands that understand their reality. Not just their data. Not just their demographics. Their cues. Their humour. Their day to day rhythm."
-        },
-        {
-          "heading": "Innovatr takeaway",
-          "body": "Local logic is not a trend. It is a return to common sense. Know the people. Speak their language. Build for their context. Global polish does not compete with relevance.\n\nThe strongest brands in South Africa will sound local, look local, and feel grounded. Authenticity now speaks with an accent and brands that embrace where they come from will go further than those chasing global sameness."
-        }
-      ]
-    }
-  },
-  {
     "id": 10,
-    "title": "The Human Subscription",
-    "teaser": "Everything is automated, but people are not. South Africans want real voices, real warmth and real reassurance in a world that has become self service heavy. The new luxury is a human who actually helps.",
-    "slug": "the-human-subscription",
-    "series": "IRL",
-    "category": "IRL",
-    "displayCategories": ["Services", "All"],
-    "industry": "Services",
-    "publishDate": "2025-09-23",
-    "date": "2025-09-23",
-    "status": "live",
-    "coverImage": "/assets/covers/irl-cover.png",
-    "pdfPath": null,
-    "hasDownload": false,
-    "tags": ["Subscriptions", "Human Connection", "Customer Service", "Loyalty"],
-    "isNew": false,
-    "accessLevel": "PUBLIC",
-    "content": {
-      "intro": "South Africans can now subscribe to almost anything. Data. Coffee. Groceries. Events. Entertainment. The convenience is appreciated, but it is no longer enough to keep people locked in. Subscriptions have become a normal part of modern life and normal rarely inspires loyalty. What stands out now is not automation. It is attention.\n\nOur latest Innovatr research shows that when a subscription includes personal touches retention climbs by thirty percent. A check in written by a human rather than a bot. A small reward that arrives without being expected. A reminder that feels considerate rather than transactional. These touches create a feeling of recognition and people stay where they feel seen.",
-      "sections": [
-        {
-          "heading": "The subscription landscape",
-          "body": "External reports highlight the same pattern. Subscription fatigue is growing and consumers are becoming more selective. They want relationships, not cycles that renew without meaning. Brands that thrive in this new era behave more like good hosts than software systems. They anticipate needs. They celebrate milestones. They communicate with warmth and clarity."
-        },
-        {
-          "heading": "A bigger truth",
-          "body": "This shift signals a bigger truth. Recurring revenue is no longer a convenience model. It is a care model. People are willing to pay for services that make life easier and make them feel valued. The emotional return matters as much as the functional one.\n\nA good subscription remembers who you are. A great one makes you glad you joined in the first place."
-        },
-        {
-          "heading": "Innovatr takeaway",
-          "body": "Subscription fatigue is rising, but the appetite for belonging is even stronger. Human connection is now the differentiator. Make it personal and people will stay."
-        }
-      ]
-    }
-  },
-  {
-    "id": 11,
-    "title": "The Return of the Third Place",
-    "teaser": "People are returning to gentle social spaces that give them a moment to breathe. Cafes, parks and small community spots are becoming emotional anchors. South Africans are looking for places where they can be alone but not feel alone.",
-    "slug": "the-return-of-the-third-place",
-    "series": "IRL",
-    "category": "IRL",
-    "displayCategories": ["Food", "Bev", "Services", "All"],
-    "industry": "Services",
-    "publishDate": "2025-09-30",
-    "date": "2025-09-30",
-    "status": "live",
-    "coverImage": "/assets/covers/irl-cover.png",
-    "pdfPath": null,
-    "hasDownload": false,
-    "tags": ["Third Place", "Community", "Social Spaces", "Wellbeing"],
-    "isNew": false,
-    "accessLevel": "PUBLIC",
-    "content": {
-      "intro": "People are returning to gentle social spaces that give them a moment to breathe. Cafes, parks and small community spots are becoming emotional anchors. South Africans are looking for places where they can be alone but not feel alone.",
-      "sections": [
-        {
-          "heading": "The search for soft connection",
-          "body": "After years of isolation and digital fatigue, people crave physical spaces that offer comfort without commitment. The third place — somewhere between home and work — has become essential for mental wellbeing.\n\nThese are not loud, busy venues. They are quiet corners where people can think, work, or simply exist in the presence of others."
-        },
-        {
-          "heading": "What brands can learn",
-          "body": "Spaces that prioritise calm, comfort and community are winning loyalty. Whether it is a coffee shop with good wifi and natural light, or a retail experience that invites people to linger, the opportunity is in creating emotional refuge.\n\nThe brands that understand this are not just selling products. They are offering sanctuary."
-        },
-        {
-          "heading": "Innovatr takeaway",
-          "body": "The return of the third place reflects a deeper need for belonging and balance. Brands that create welcoming spaces — physical or digital — will earn long-term loyalty from people seeking moments of peace."
-        }
-      ]
-    }
-  },
-  {
-    "id": 12,
-    "title": "Banking Monogamy Is Dead",
-    "teaser": "Loyalty in banking is fading fast and South Africans are mixing, matching and experimenting across platforms. The bank you start with is no longer the bank you stay with and convenience now beats commitment.",
-    "slug": "banking-monogamy-is-dead",
-    "series": "Insights",
-    "category": "Insights",
-    "displayCategories": ["Banking", "Services"],
-    "industry": "Banking",
-    "publishDate": "2025-10-07",
-    "date": "2025-10-07",
-    "status": "live",
-    "coverImage": "/assets/covers/insights-cover.png",
-    "pdfPath": null,
-    "hasDownload": false,
-    "tags": ["Financial Services", "Consumer Loyalty", "Digital Banking"],
-    "isNew": false,
-    "accessLevel": "STARTER",
-    "content": {
-      "intro": "South Africans are breaking up with their banks. Most no longer rely on one provider but instead spread their money across different accounts to get better features, rates, and experiences.\n\nOur latest Innovatr research shows that 67% of customers under 40 already use two or more banks or fintech providers. 58% say they would switch their main bank after just one poor service experience. And nearly 45% believe all banks offer basically the same products. Loyalty today is fragile, and every touchpoint counts.",
-      "sections": [
-        {
-          "heading": "Why It Is Happening",
-          "body": "Banking has gone fully digital and deeply pragmatic. Opening a new account now takes minutes, so the effort to shop around has disappeared. Fintechs have raised expectations with zero fees, sleek design, and smart tools that make people feel in control.\n\nEconomic pressure is another driver. Consumers want every rand to stretch further, using one account for the lowest fees, another for rewards, and another for smart savings. Trust has also eroded. After years of fee increases and confusing terms, many South Africans simply test what works and move on.\n\nJust as people switch between streaming platforms or ride apps, they now treat finance the same way. Being tied to one provider feels outdated."
-        },
-        {
-          "heading": "What It Means for Banks and Fintechs",
-          "body": "Differentiate with purpose: When 45% think every bank is the same, clarity is everything. Show real value, not empty promises.\n\nProtect every moment: One bad experience can end a relationship. Train teams for empathy, fix digital friction fast, and follow up proactively.\n\nLean into the multi-bank reality: Consumers will use several providers anyway. Make your app easy to integrate, simple to connect, and rewarding to keep.\n\nInnovate where it counts: Focus on solving everyday pain points, smarter budgeting, transparent fees, and accessible support.\n\nRebuild trust: Be open, fair, and consistent. Simplify terms and remove hidden costs. Trust is built one honest moment at a time."
-        },
-        {
-          "heading": "The Takeaway",
-          "body": "Loyalty is no longer a lifetime contract. It is a daily decision based on ease, transparency, and emotional connection. The brands that thrive will be the ones that prove their worth every time a customer logs in."
-        }
-      ]
-    }
-  },
-  {
-    "id": 13,
-    "title": "The New Non-Negotiable Treat",
-    "teaser": "South Africans refuse to cut back on the small thing that makes their day feel better. A ten minute treat is becoming a coping ritual that people protect even when everything else feels fragile.",
-    "slug": "the-new-non-negotiable-treat",
-    "series": "Insights",
-    "category": "Insights",
-    "displayCategories": ["FMCG", "Food", "Bev"],
-    "industry": "FMCG",
-    "publishDate": "2025-10-14",
-    "date": "2025-10-14",
-    "status": "live",
-    "coverImage": "/assets/covers/insights-cover.png",
-    "pdfPath": null,
-    "hasDownload": false,
-    "tags": ["FMCG", "Snacking", "Consumer Behaviour", "Emotional Economy"],
-    "isNew": false,
-    "accessLevel": "STARTER",
-    "content": {
-      "intro": "South Africans might be tightening their belts, but not when it comes to snacks.\n\nOur latest Innovatr research reveals a fascinating contradiction in consumer behaviour. Eighty percent of people say they will always find room in their budget for a treat, no matter how tough things get. Three out of four believe that a small daily indulgence is now essential for their emotional wellbeing.\n\nAs food prices rise, snacks have evolved from simple convenience into something deeply emotional. They have become a source of comfort, control, and reward. A ten rand chocolate or a packet of chips is no longer just a bite. It is a brief moment of joy that restores a sense of normality when everything else feels uncertain.",
-      "sections": [
-        {
-          "heading": "The New Language of Treats",
-          "body": "Younger consumers are chasing discovery, experimenting with new flavours and textures that make snacking playful and social.\n\nOlder consumers are leaning into nostalgia, seeking the familiar tastes and trusted brands that bring comfort and calm.\n\nAcross generations there is a shared desire for both memory and novelty. People want to relive familiar moments while discovering something new.\n\nThis blend of comfort and curiosity defines the modern snack moment."
-        },
-        {
-          "heading": "The Emotional Economy",
-          "body": "Treats are no longer about indulgence versus restraint. They have become part of a new emotional economy where people prioritise feeling okay over spending less. Food is now a form of self-care. A small act that provides emotional balance and a sense of control in uncertain times."
-        },
-        {
-          "heading": "What It Means for Brands",
-          "body": "For marketers and product teams, this shift is a powerful reminder. Treats are not optional. They are emotional.\n\nThe brands that win will be those that deliver affordable indulgence without feeling cheap, blend familiar comfort with new excitement, focus on emotional value rather than price promotion, and create small, meaningful rituals that people look forward to every day.\n\nIn an age of financial fatigue, the strongest competitive edge is positivity. Snacks might be small, but their role in people's lives has never been bigger."
-        }
-      ]
-    }
-  },
-  {
-    "id": 14,
     "title": "From Vegan to Vital",
     "teaser": "People are moving away from strict identity driven eating and choosing food that feels energising rather than ideological. The shift is toward vitality, balance and real nourishment.",
     "slug": "from-vegan-to-vital",
@@ -504,8 +348,8 @@
     "category": "Insights",
     "displayCategories": ["Food", "Bev", "FMCG", "Beauty"],
     "industry": "Food",
-    "publishDate": "2025-10-21",
-    "date": "2025-10-21",
+    "publishDate": "2025-10-07",
+    "date": "2025-10-07",
     "status": "live",
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
@@ -532,7 +376,119 @@
     }
   },
   {
-    "id": 15,
+    "id": 11,
+    "title": "Race for Instant Gratification",
+    "teaser": "Delivery speed is becoming a competitive sport. South Africans want everything fast and friction free, and brands who deliver without delay are winning the day.",
+    "slug": "race-for-instant-gratification",
+    "series": "Launch",
+    "category": "Launch",
+    "displayCategories": ["Services", "Food", "FMCG"],
+    "industry": "Services",
+    "publishDate": "2025-10-14",
+    "date": "2025-10-14",
+    "status": "live",
+    "coverImage": "/assets/covers/launch-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "tags": ["On Demand", "Convenience", "Customer Experience", "Delivery"],
+    "isNew": false,
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "South Africans can now have almost anything delivered in under an hour. From groceries to coffee to last-minute gifts, services like Checkers Sixty60, Mr D, and Pick n Pay asap! have turned convenience into expectation.\n\nOnce, convenience meant a store nearby. Now, it means immediacy, the reassurance that anything you need can arrive when you want it. People are no longer buying products. They are buying time, control, and peace of mind.",
+      "sections": [
+        {
+          "heading": "The value-per-minute mindset",
+          "body": "Innovatr research shows that 61% of consumers choose brands that make life easier, even if they cost more. 55% say time saved is as valuable as money saved. Almost half say they feel calmer knowing they can order instantly if they forget something.\n\nThis is what we call value-per-minute thinking, the belief that saving time equals feeling cared for. Fast service now communicates empathy. The quicker a brand responds, the more consumers feel understood."
+        },
+        {
+          "heading": "What It Means for Brands",
+          "body": "Compete on ease first, then price: Convenience now outweighs savings for most consumers. Invest in removing friction at every touchpoint.\n\nBe reliable more than fast: Speed matters, but consistency matters more. Deliver consistently, communicate clearly, and show up fast when it matters.\n\nFocus on reassurance, not just access: Consumers buy more than convenience. They buy the comfort of knowing they are covered."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "Today, loyalty is no longer tied to stores. It is tied to the services that remove friction and restore calm. The winners will be those who make ease invisible, because it simply works."
+        }
+      ]
+    }
+  },
+  {
+    "id": 12,
+    "title": "Market Share Simulator",
+    "teaser": "The Market Share Simulator lets you see the future before you spend a cent. Test what happens when a brand grows, shrinks, changes price or enters a new space. It reveals how real people switch, stay or move and shows you the shift that one small change can create.",
+    "slug": "market-share-simulator",
+    "series": "Inside",
+    "category": "Inside",
+    "displayCategories": ["Services", "All"],
+    "industry": "Services",
+    "publishDate": "2025-10-21",
+    "date": "2025-10-21",
+    "status": "live",
+    "coverImage": "/assets/covers/inside-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "tags": ["Tools", "Market Share Simulator", "Behavioural Data"],
+    "isNew": false,
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "Innovation rarely fails in isolation. It fails when a stronger idea steals the choice. Our Market Share Simulator exists to answer one simple question. What will people actually choose when your idea competes in the real world?\n\nMost research reports tell you what people like. The simulator goes further. It shows you what they will pick. It reveals your source of volume and shows whether you are winning by stealing share or by growing the category.\n\nThis tool uses behavioural data from Test24 to model real market outcomes. The goal is clarity. No assumptions. No soft signals. Only real competitive behaviour.",
+      "sections": [
+        {
+          "heading": "What is happening",
+          "body": "Choice is not theoretical. It is competitive. The simulator shows three important patterns.\n\nPeople often like many ideas but commit to very few. Interest is easy. Commitment is precise. The simulator shows exactly where your idea gains or loses preference under pressure.\n\nSome ideas perform well alone but fall apart against competitors. This is the silent killer of innovation. The simulator exposes ideas that look strong on paper but collapse when placed next to a rival.\n\nSmall creative improvements can shift the entire market. A change in clarity. A stronger emotional hook. A slightly bolder benefit. The simulator shows how small refinements move real market share."
+        },
+        {
+          "heading": "Why this is happening",
+          "body": "Real behaviour under real pressure: The simulator uses behavioural data from Test24 where people swipe and choose in context. This produces outcomes that reflect natural decision making rather than idealised survey thinking.\n\nClear view of competitive tension: People often like two or three ideas but eventually choose one. The simulator reveals where your idea wins and where it loses in head to head decisions.\n\nUnderstanding your source of volume: Growth must come from somewhere. The simulator shows if your volume comes from your closest competitor, the category leader or new incremental users.\n\nScenario testing that guides creative and strategic decisions: Teams can explore what happens when they adjust design, language or price. You can quantify the impact of every decision before making it."
+        },
+        {
+          "heading": "Why it matters",
+          "body": "Winning ideas are not chosen in meeting rooms. They are chosen in competitive moments where people decide fast and intuitively. The Market Share Simulator puts you inside that moment with precision.\n\nIt gives teams the power to choose ideas with confidence, defend decisions with data and focus resources where they will have the greatest return."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "The strongest innovation systems do not guess. They model. The simulator helps teams see the future before they invest in it.\n\nFor brands, the opportunity is clear. Use real behavioural modelling to guide decisions and reduce risk while accelerating growth."
+        }
+      ]
+    }
+  },
+  {
+    "id": 13,
+    "title": "The Return of Local Logic",
+    "teaser": "Global shine is losing its charm. People want brands that feel like they were made for their real lives and their real challenges. Local Logic is practical, grounded and deeply South African. It is not patriotism, it is common sense.",
+    "slug": "the-return-of-local-logic",
+    "series": "IRL",
+    "category": "IRL",
+    "displayCategories": ["FMCG", "Food", "Bev", "Services"],
+    "industry": "FMCG",
+    "publishDate": "2025-10-28",
+    "date": "2025-10-28",
+    "status": "live",
+    "coverImage": "/assets/covers/irl-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "tags": ["Local", "Culture", "Authenticity", "South Africa"],
+    "isNew": false,
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "Over the past decade, globalisation shaped how brands came to life. Sleek templates. International tone. Universal stories crafted for scale rather than culture. It worked for a while, but the market has shifted. South Africans have begun to tune out of work that feels imported and tune in to anything that feels rooted. Uniformity has hit a ceiling because people have.\n\nOur Innovatr research shows a clear gap. When brands use local cues their trust and relatability scores jump by more than twenty percent. Consumers respond to brands that reflect their lived reality. The slang they speak. The humour they get. The colours and cues that feel like home. When a brand feels local, it feels trustworthy.",
+      "sections": [
+        {
+          "heading": "The shift across categories",
+          "body": "This shift is visible across categories. FMCG brands leaning into heritage flavours are outperforming generic global ones. Fintech and financial services are redesigning for South African context rather than copying global UX playbooks. Even premium brands are softening their edges and embracing more culturally fluent storytelling. Relevance has become a strategic advantage."
+        },
+        {
+          "heading": "Why local wins",
+          "body": "External research supports this cultural turn. Markets with high social diversity respond strongly to work that acknowledges real life nuance. South Africa is no exception. People want brands that understand their reality. Not just their data. Not just their demographics. Their cues. Their humour. Their day to day rhythm."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "Local logic is not a trend. It is a return to common sense. Know the people. Speak their language. Build for their context. Global polish does not compete with relevance.\n\nThe strongest brands in South Africa will sound local, look local, and feel grounded. Authenticity now speaks with an accent and brands that embrace where they come from will go further than those chasing global sameness."
+        }
+      ]
+    }
+  },
+  {
+    "id": 14,
     "title": "The Moderation Movement",
     "teaser": "South Africans are not chasing extremes anymore. They are choosing slower nights, lighter drinks and more mindful experiences. Moderation is becoming a lifestyle, not a rule.",
     "slug": "the-moderation-movement",
@@ -540,8 +496,8 @@
     "category": "Insights",
     "displayCategories": ["Alcohol", "Bev", "Services"],
     "industry": "Alcohol",
-    "publishDate": "2025-10-28",
-    "date": "2025-10-28",
+    "publishDate": "2025-11-04",
+    "date": "2025-11-04",
     "status": "live",
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
@@ -568,7 +524,115 @@
     }
   },
   {
+    "id": 15,
+    "title": "Snack Box and Meal Kit Launches",
+    "teaser": "Snack boxes and meal kits are creating tiny pockets of convenience in everyday life. People want flavour, control and variety without the effort, and these launches hit the brief.",
+    "slug": "snack-box-and-meal-kit-launches",
+    "series": "Launch",
+    "category": "Launch",
+    "displayCategories": ["Food", "FMCG", "Services"],
+    "industry": "Food",
+    "publishDate": "2025-11-11",
+    "date": "2025-11-11",
+    "status": "live",
+    "coverImage": "/assets/covers/launch-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "tags": ["Meal Kits", "Snack Boxes", "Convenience", "Food Innovation"],
+    "isNew": false,
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "Snack boxes and meal kits are creating tiny pockets of convenience in everyday life. People want flavour, control and variety without the effort, and these launches hit the brief.",
+      "sections": [
+        {
+          "heading": "The convenience revolution continues",
+          "body": "Meal kits and snack boxes offer the perfect balance: variety without overwhelm, convenience without sacrifice. Consumers get the joy of discovery and the comfort of knowing exactly what they are getting.\n\nThese formats tap into the desire for controlled spontaneity — the feeling of treating yourself without the decision fatigue."
+        },
+        {
+          "heading": "Why this format works",
+          "body": "Portion control meets indulgence: People want to try new things but not commit to full sizes.\n\nCuration as value: A well-assembled box feels like a gift, even when you buy it for yourself.\n\nSubscription potential: The format naturally lends itself to recurring revenue and ongoing customer relationships."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "Snack boxes and meal kits are more than products — they are experiences. Brands that understand the emotional appeal of curation, surprise, and convenience will find loyal audiences eager for their next delivery."
+        }
+      ]
+    }
+  },
+  {
     "id": 16,
+    "title": "AI Video Interview",
+    "teaser": "AI Video Interview brings the depth of qualitative research to the speed of digital. It captures authentic human responses at scale, turning video conversations into rich, analysable insights that help teams understand not just what people say, but how they feel.",
+    "slug": "ai-video-interview",
+    "series": "Inside",
+    "category": "Inside",
+    "displayCategories": ["Services", "All"],
+    "industry": "Services",
+    "publishDate": "2025-11-18",
+    "date": "2025-11-18",
+    "status": "live",
+    "coverImage": "/assets/covers/inside-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "tags": ["AI Video", "Qualitative Research", "Innovatr Tools", "Video Insights"],
+    "isNew": true,
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "Traditional video interviews are powerful but time-consuming. AI Video Interview changes that by combining the authenticity of face-to-face conversation with the efficiency of automated analysis.\n\nParticipants record video responses to your questions from anywhere. Our AI analyses facial expressions, tone, and language to surface emotional truths that text alone cannot capture.\n\nThis is qualitative research reimagined for teams who need depth without delay.",
+      "sections": [
+        {
+          "heading": "How It Works",
+          "body": "Design: Create your interview guide with open-ended questions that invite rich responses.\n\nCapture: Participants record video answers on their own time, from any device.\n\nAnalyse: AI processes facial expressions, vocal tone, and language patterns to identify themes and emotional signals.\n\nExplore: Watch key moments, compare responses, and share highlight reels with your team."
+        },
+        {
+          "heading": "Why It Matters",
+          "body": "Authenticity at scale: Video captures nuance that surveys miss — hesitation, excitement, confusion, and conviction.\n\nSpeed without sacrifice: Get deep insights in days, not weeks. No scheduling, no travel, no transcription backlogs.\n\nEmotional intelligence: AI identifies not just what people say, but how they feel about it. Surface the emotions that drive behaviour."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "AI Video Interview bridges the gap between qualitative depth and quantitative scale. It gives teams the human connection they need without the traditional time cost.\n\nWhen you need to understand the why behind the what, this is where the conversation starts."
+        }
+      ]
+    }
+  },
+  {
+    "id": 17,
+    "title": "The Human Subscription",
+    "teaser": "Everything is automated, but people are not. South Africans want real voices, real warmth and real reassurance in a world that has become self service heavy. The new luxury is a human who actually helps.",
+    "slug": "the-human-subscription",
+    "series": "IRL",
+    "category": "IRL",
+    "displayCategories": ["Services", "All"],
+    "industry": "Services",
+    "publishDate": "2025-11-25",
+    "date": "2025-11-25",
+    "status": "live",
+    "coverImage": "/assets/covers/irl-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "tags": ["Subscriptions", "Human Connection", "Customer Service", "Loyalty"],
+    "isNew": false,
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "South Africans can now subscribe to almost anything. Data. Coffee. Groceries. Events. Entertainment. The convenience is appreciated, but it is no longer enough to keep people locked in. Subscriptions have become a normal part of modern life and normal rarely inspires loyalty. What stands out now is not automation. It is attention.\n\nOur latest Innovatr research shows that when a subscription includes personal touches retention climbs by thirty percent. A check in written by a human rather than a bot. A small reward that arrives without being expected. A reminder that feels considerate rather than transactional. These touches create a feeling of recognition and people stay where they feel seen.",
+      "sections": [
+        {
+          "heading": "The subscription landscape",
+          "body": "External reports highlight the same pattern. Subscription fatigue is growing and consumers are becoming more selective. They want relationships, not cycles that renew without meaning. Brands that thrive in this new era behave more like good hosts than software systems. They anticipate needs. They celebrate milestones. They communicate with warmth and clarity."
+        },
+        {
+          "heading": "A bigger truth",
+          "body": "This shift signals a bigger truth. Recurring revenue is no longer a convenience model. It is a care model. People are willing to pay for services that make life easier and make them feel valued. The emotional return matters as much as the functional one.\n\nA good subscription remembers who you are. A great one makes you glad you joined in the first place."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "Subscription fatigue is rising, but the appetite for belonging is even stronger. Human connection is now the differentiator. Make it personal and people will stay."
+        }
+      ]
+    }
+  },
+  {
+    "id": 18,
     "title": "The Quiet Luxury of Calm",
     "teaser": "Calm feels expensive in a country that is constantly loud. People are searching for products and spaces that give them a feeling of softness and control. Quiet luxury is not about wealth. It is about peace.",
     "slug": "the-quiet-luxury-of-calm",
@@ -576,9 +640,9 @@
     "category": "Insights",
     "displayCategories": ["Beauty", "Services", "All"],
     "industry": "Beauty",
-    "publishDate": "2025-11-04",
-    "date": "2025-11-04",
-    "status": "live",
+    "publishDate": "2025-12-02",
+    "date": "2025-12-02",
+    "status": "scheduled",
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
     "hasDownload": false,
@@ -604,7 +668,79 @@
     }
   },
   {
-    "id": 17,
+    "id": 19,
+    "title": "Functional Booze",
+    "teaser": "Alcohol is getting a wellness makeover. South Africans are reaching for drinks that promise more than a buzz — functional ingredients, lower calories, and cleaner labels are reshaping what it means to enjoy a drink.",
+    "slug": "functional-booze",
+    "series": "Launch",
+    "category": "Launch",
+    "displayCategories": ["Alcohol", "Bev", "FMCG"],
+    "industry": "Alcohol",
+    "publishDate": "2025-12-09",
+    "date": "2025-12-09",
+    "status": "scheduled",
+    "coverImage": "/assets/covers/launch-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "tags": ["Functional Drinks", "Alcohol Innovation", "Wellness", "Beverages"],
+    "isNew": true,
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "The lines between wellness and indulgence are blurring. A new wave of functional alcoholic beverages is emerging — drinks infused with adaptogens, low-sugar formulas, and clean ingredient lists.\n\nConsumers want to enjoy themselves without the guilt or the hangover. These launches prove that drinking can be part of a balanced lifestyle, not a departure from it.",
+      "sections": [
+        {
+          "heading": "What is happening",
+          "body": "Functional booze is rising across categories. Hard seltzers with electrolytes. Spirits with nootropics. Wines with lower alcohol and added antioxidants.\n\nThese products speak to a consumer who refuses to choose between pleasure and wellness. They want both — and they are willing to pay for it."
+        },
+        {
+          "heading": "Why this matters",
+          "body": "Health-conscious hedonism: Consumers are not giving up alcohol, but they are upgrading it. Functional claims add value and reduce guilt.\n\nPremium positioning: Functional ingredients justify higher price points and attract discerning drinkers.\n\nCategory disruption: Traditional brands are being challenged by newcomers who understand the wellness-first mindset."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "Functional booze is not a fad — it is a category shift. Brands that can deliver genuine benefits alongside enjoyment will capture the next generation of drinkers."
+        }
+      ]
+    }
+  },
+  {
+    "id": 20,
+    "title": "The Return of the Third Place",
+    "teaser": "People are returning to gentle social spaces that give them a moment to breathe. Cafes, parks and small community spots are becoming emotional anchors. South Africans are looking for places where they can be alone but not feel alone.",
+    "slug": "the-return-of-the-third-place",
+    "series": "IRL",
+    "category": "IRL",
+    "displayCategories": ["Food", "Bev", "Services", "All"],
+    "industry": "Services",
+    "publishDate": "2025-12-16",
+    "date": "2025-12-16",
+    "status": "scheduled",
+    "coverImage": "/assets/covers/irl-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "tags": ["Third Place", "Community", "Social Spaces", "Wellbeing"],
+    "isNew": false,
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "People are returning to gentle social spaces that give them a moment to breathe. Cafes, parks and small community spots are becoming emotional anchors. South Africans are looking for places where they can be alone but not feel alone.",
+      "sections": [
+        {
+          "heading": "The search for soft connection",
+          "body": "After years of isolation and digital fatigue, people crave physical spaces that offer comfort without commitment. The third place — somewhere between home and work — has become essential for mental wellbeing.\n\nThese are not loud, busy venues. They are quiet corners where people can think, work, or simply exist in the presence of others."
+        },
+        {
+          "heading": "What brands can learn",
+          "body": "Spaces that prioritise calm, comfort and community are winning loyalty. Whether it is a coffee shop with good wifi and natural light, or a retail experience that invites people to linger, the opportunity is in creating emotional refuge.\n\nThe brands that understand this are not just selling products. They are offering sanctuary."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "The return of the third place reflects a deeper need for belonging and balance. Brands that create welcoming spaces — physical or digital — will earn long-term loyalty from people seeking moments of peace."
+        }
+      ]
+    }
+  },
+  {
+    "id": 21,
     "title": "The Rise of the Micro-Errand Economy",
     "teaser": "Life is now managed in tiny bursts. South Africans are breaking their day into small tasks that fit into unpredictable schedules. Brands that make micro errands easier are becoming everyday heroes.",
     "slug": "the-rise-of-the-micro-errand-economy",
@@ -612,9 +748,9 @@
     "category": "Insights",
     "displayCategories": ["Services", "FMCG", "All"],
     "industry": "Services",
-    "publishDate": "2025-11-11",
-    "date": "2025-11-11",
-    "status": "live",
+    "publishDate": "2025-12-23",
+    "date": "2025-12-23",
+    "status": "scheduled",
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
     "hasDownload": false,
@@ -640,43 +776,43 @@
     }
   },
   {
-    "id": 18,
-    "title": "The Emotional Upgrade",
-    "teaser": "People are upgrading based on feeling rather than function. If something makes them feel seen, soothed or special, they will choose it. Emotional value is becoming the new differentiator.",
-    "slug": "the-emotional-upgrade",
-    "series": "Insights",
-    "category": "Insights",
-    "displayCategories": ["FMCG", "Beauty", "Services"],
-    "industry": "FMCG",
-    "publishDate": "2025-11-18",
-    "date": "2025-11-18",
-    "status": "live",
-    "coverImage": "/assets/covers/insights-cover.png",
+    "id": 22,
+    "title": "Wine Without Bottles",
+    "teaser": "The traditional wine bottle is being challenged. From cans to pouches to bag-in-box formats, South Africans are embracing wine packaging that fits modern lifestyles — portable, practical, and surprisingly premium.",
+    "slug": "wine-without-bottles",
+    "series": "Launch",
+    "category": "Launch",
+    "displayCategories": ["Alcohol", "Bev", "FMCG"],
+    "industry": "Alcohol",
+    "publishDate": "2025-12-30",
+    "date": "2025-12-30",
+    "status": "scheduled",
+    "coverImage": "/assets/covers/launch-cover.png",
     "pdfPath": null,
     "hasDownload": false,
-    "tags": ["Emotional Value", "Premium", "Consumer Behaviour", "Brand Experience"],
-    "isNew": false,
-    "accessLevel": "STARTER",
+    "tags": ["Wine Innovation", "Packaging", "Alcohol", "Format Innovation"],
+    "isNew": true,
+    "accessLevel": "PUBLIC",
     "content": {
-      "intro": "People are upgrading based on feeling rather than function. If something makes them feel seen, soothed or special, they will choose it. Emotional value is becoming the new differentiator.",
+      "intro": "Wine is escaping the bottle. A new generation of formats is making wine more accessible, portable, and occasion-friendly. From 250ml cans to sleek pouches, these innovations are changing when, where, and how South Africans enjoy wine.",
       "sections": [
         {
-          "heading": "Beyond features and benefits",
-          "body": "Consumers are no longer comparing products on specs alone. They are asking: How does this make me feel? Does it reflect who I am? Does it give me a moment of joy?\n\nThe emotional upgrade is about paying a little more for something that resonates on a deeper level. A candle that smells like home. A skincare product that feels like self-care. A coffee brand that makes mornings feel special."
+          "heading": "The format revolution",
+          "body": "Canned wine: Perfect for picnics, concerts, and casual occasions. Single-serve portions reduce waste and commitment.\n\nBag-in-box: No longer just for cheap plonk. Premium producers are embracing the format for its freshness and sustainability benefits.\n\nPouches and cartons: Lightweight, recyclable, and perfect for the on-the-go consumer."
         },
         {
-          "heading": "Why this matters for brands",
-          "body": "In a world of functional parity, emotion is the ultimate differentiator. Products that tap into identity, memory, and aspiration command loyalty that price alone cannot buy.\n\nBrands that understand this are not just selling products. They are selling feelings, moments, and meaning."
+          "heading": "Why consumers are switching",
+          "body": "Convenience: Not every occasion calls for a full bottle. Alternative formats fit more moments.\n\nSustainability: Lower carbon footprint than glass. Easier to recycle. Lighter to transport.\n\nPermission to explore: Smaller formats encourage experimentation. Try something new without the commitment."
         },
         {
           "heading": "Innovatr takeaway",
-          "body": "The emotional upgrade is real and growing. Brands that invest in understanding how people want to feel — and deliver on that promise — will win hearts and wallets alike."
+          "body": "Wine without bottles is wine without barriers. Brands that embrace format innovation will reach new consumers and occasions. The bottle is not dead — but it is no longer the only way."
         }
       ]
     }
   },
   {
-    "id": 19,
+    "id": 23,
     "title": "Local Humour as Currency",
     "teaser": "South Africans bond through humour. It is how we cope, connect and read each other. When brands use the right tone, they feel familiar. When they miss the tone, they feel foreign.",
     "slug": "local-humour-as-currency",
@@ -684,9 +820,9 @@
     "category": "Insights",
     "displayCategories": ["FMCG", "Services", "All"],
     "industry": "FMCG",
-    "publishDate": "2025-11-25",
-    "date": "2025-11-25",
-    "status": "live",
+    "publishDate": "2026-01-06",
+    "date": "2026-01-06",
+    "status": "scheduled",
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
     "hasDownload": false,
@@ -712,7 +848,43 @@
     }
   },
   {
-    "id": 20,
+    "id": 24,
+    "title": "Craft Cues",
+    "teaser": "Craft signals are everywhere — from artisanal labels to handwritten fonts to small-batch claims. South Africans are drawn to products that feel made, not manufactured. The craft aesthetic has become a powerful shortcut to quality and care.",
+    "slug": "craft-cues",
+    "series": "Launch",
+    "category": "Launch",
+    "displayCategories": ["FMCG", "Food", "Bev", "Alcohol"],
+    "industry": "FMCG",
+    "publishDate": "2026-01-13",
+    "date": "2026-01-13",
+    "status": "scheduled",
+    "coverImage": "/assets/covers/launch-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "tags": ["Craft", "Artisanal", "Premium", "Design", "Packaging"],
+    "isNew": true,
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "The craft movement has gone mainstream. What started in beer and coffee has spread to every category — from snacks to skincare to household goods. Consumers are drawn to products that feel handmade, thoughtful, and authentic.",
+      "sections": [
+        {
+          "heading": "The craft aesthetic",
+          "body": "Craft cues signal quality without saying it explicitly. Matte finishes. Handwritten typography. Brown paper and natural textures. Origin stories and founder photos.\n\nThese design choices communicate care, attention, and authenticity. They suggest that someone, somewhere, made this with intention."
+        },
+        {
+          "heading": "Why it works",
+          "body": "Trust through imperfection: Craft aesthetics feel real because they are not too polished. A slightly rough edge signals authenticity.\n\nPremium without pretension: Craft positioning justifies higher prices without feeling exclusive or inaccessible.\n\nEmotional connection: People want to support makers, not corporations. Craft cues create that feeling of supporting a person, not a machine."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "Craft cues are not just for craft brands. Any product can benefit from design choices that signal care and authenticity. The key is to be genuine — consumers can spot craft-washing from a mile away."
+        }
+      ]
+    }
+  },
+  {
+    "id": 25,
     "title": "Volume Is Out. Value Is In.",
     "teaser": "People want better, not bigger. Quality has overtaken quantity across categories and South Africans are choosing products that feel crafted rather than bulky.",
     "slug": "volume-is-out-value-is-in",
@@ -720,8 +892,8 @@
     "category": "Insights",
     "displayCategories": ["FMCG", "Food", "Beauty"],
     "industry": "FMCG",
-    "publishDate": "2025-12-02",
-    "date": "2025-12-02",
+    "publishDate": "2026-01-20",
+    "date": "2026-01-20",
     "status": "scheduled",
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
@@ -748,7 +920,7 @@
     }
   },
   {
-    "id": 21,
+    "id": 26,
     "title": "Affordable Indulgence",
     "teaser": "Small joyful moments are becoming emotional lifelines. People are saving harder but treating themselves smarter, choosing tiny luxuries that make life feel reachable.",
     "slug": "affordable-indulgence",
@@ -756,8 +928,8 @@
     "category": "Insights",
     "displayCategories": ["Food", "FMCG", "Bev"],
     "industry": "FMCG",
-    "publishDate": "2025-12-09",
-    "date": "2025-12-09",
+    "publishDate": "2026-01-27",
+    "date": "2026-01-27",
     "status": "scheduled",
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
@@ -780,7 +952,7 @@
     }
   },
   {
-    "id": 22,
+    "id": 27,
     "title": "Gen Z Drinks Less But Demands More",
     "teaser": "Gen Z is choosing presence over excess. They drink less often, but when they do, they want flavour, intention and identity. Alcohol now has to mean something.",
     "slug": "gen-z-drinks-less-but-demands-more",
@@ -788,8 +960,8 @@
     "category": "Insights",
     "displayCategories": ["Alcohol", "Bev", "Services"],
     "industry": "Alcohol",
-    "publishDate": "2025-12-16",
-    "date": "2025-12-16",
+    "publishDate": "2026-02-03",
+    "date": "2026-02-03",
     "status": "scheduled",
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
@@ -811,150 +983,6 @@
         {
           "heading": "Innovatr takeaway",
           "body": "Gen Z is rewriting the rules of drinking culture. Brands that adapt — offering quality, meaning, and flexibility — will earn their loyalty. Those that do not will be left behind."
-        }
-      ]
-    }
-  },
-  {
-    "id": 23,
-    "title": "Cadbury Pocket-Sized Joy",
-    "teaser": "Cadbury is shrinking the moment but not the joy. South Africans are embracing small format treats that feel playful, affordable and instantly rewarding.",
-    "slug": "cadbury-pocket-sized-joy",
-    "series": "Launch",
-    "category": "Launch",
-    "displayCategories": ["FMCG", "Food"],
-    "industry": "FMCG",
-    "publishDate": "2025-12-23",
-    "date": "2025-12-23",
-    "status": "scheduled",
-    "coverImage": "/assets/covers/launch-cover.png",
-    "pdfPath": null,
-    "hasDownload": false,
-    "tags": ["Confectionery", "Format Innovation", "Micro Indulgence"],
-    "isNew": false,
-    "accessLevel": "PUBLIC",
-    "content": {
-      "intro": "There is something uniquely powerful about formats that fit in your hand. They feel simple. Casual. Effortless. Cadbury's new Pocket Sized Joy taps into this emotional truth by offering a familiar favourite in a format designed for real life snacking moments.\n\nThis is not just a smaller bar. It is a new way to enjoy comfort, treat myself energy and everyday uplift without feeling heavy or indulgent. Our Innovatr research shows that the format, name and creative direction work together to create a strong emotional connection.\n\nPocket Sized Joy is exactly what it says. Small. Easy. Feel good.",
-      "sections": [
-        {
-          "heading": "What is happening",
-          "body": "Cadbury has a long legacy of emotional storytelling. Pocket Sized Joy continues that tradition but in a way that aligns with new consumer habits.\n\nThe rise of small treats: More than half of consumers say they want treats that feel light and portion friendly. Micro indulgence is rising.\n\nConvenience as comfort: People increasingly want snacks they can take anywhere. Something that fits in a bag or pocket ranks surprisingly high in emotional appeal.\n\nLittle moments matter most: Consumers are looking for small uplifting moments in the middle of the day."
-        },
-        {
-          "heading": "Why it matters",
-          "body": "Pocket Sized Joy proves that innovation does not always require reinvention. Sometimes the strongest move is simply creating a format that amplifies an existing emotional truth.\n\nBrands that understand the intersection between portion, emotion and convenience will continue to win.\n\nPocket Sized Joy is a reminder that the smallest ideas often carry the biggest uplift."
-        },
-        {
-          "heading": "Innovatr takeaway",
-          "body": "Do not underestimate the power of format. A smart size can unlock new occasions, new audiences and new emotional meaning.\n\nFor brands, the lesson is simple. Create products that fit life, not the other way around."
-        }
-      ]
-    }
-  },
-  {
-    "id": 24,
-    "title": "Oat-Based Breakfast Revolution",
-    "teaser": "Oat based breakfasts are rising fast as people look for clean energy, slow release fullness and easy versatility. This is the new morning essential.",
-    "slug": "oat-based-breakfast-revolution",
-    "series": "Launch",
-    "category": "Launch",
-    "displayCategories": ["Food", "FMCG", "Beauty"],
-    "industry": "Food",
-    "publishDate": "2025-12-30",
-    "date": "2025-12-30",
-    "status": "scheduled",
-    "coverImage": "/assets/covers/launch-cover.png",
-    "pdfPath": null,
-    "hasDownload": false,
-    "tags": ["Launch", "Functional Food", "Breakfast", "Beverages"],
-    "isNew": false,
-    "accessLevel": "PUBLIC",
-    "content": {
-      "intro": "South Africans might be spending less but they are not giving up on joy. And in the morning they are drinking their breakfast. It is not coffee.\n\nA new ready to drink oat beverage is changing how people start their day. It is quick filling and deeply functional. People are now getting the nutrition of a meal in the time it takes to walk out the door.\n\nDesigned for busy mornings this format turns breakfast into something portable personal and purposeful. It reflects a bigger shift in how consumers manage time energy and wellbeing.",
-      "sections": [
-        {
-          "heading": "Why this is happening",
-          "body": "Innovatr food and beverage research shows that the classic sit down breakfast is fading. The new morning routine is built for multitasking.\n\n64% of consumers skip a traditional breakfast during the week but still want something quick that feels substantial.\n\n58% want drinks that boost both energy and nourishment.\n\n70% expect beverages to add value beyond hydration.\n\nPeople want products that deliver health and purpose while they move."
-        },
-        {
-          "heading": "The power of functionality",
-          "body": "This innovation sits at the meeting point of two powerful trends. Snackification and functionality.\n\nPeople are breaking free from rigid meal patterns. They want products that blend nutrition with convenience. Functional oat drinks provide sustained energy natural ingredients and a feeling of control over health goals.\n\nFrom protein smoothies to vitamin enriched waters consumers are building routines around drinks that help them feel prepared and capable."
-        },
-        {
-          "heading": "Innovatr takeaway",
-          "body": "Functional beverages are transforming daily routines. As the lines between food and drink continue to blur the brands that will win are the ones that deliver nourishment with meaning. Products that energise both confidence and physical wellbeing."
-        }
-      ]
-    }
-  },
-  {
-    "id": 25,
-    "title": "Race for Instant Gratification",
-    "teaser": "Delivery speed is becoming a competitive sport. South Africans want everything fast and friction free, and brands who deliver without delay are winning the day.",
-    "slug": "race-for-instant-gratification",
-    "series": "Launch",
-    "category": "Launch",
-    "displayCategories": ["Services", "Food", "FMCG"],
-    "industry": "Services",
-    "publishDate": "2026-01-06",
-    "date": "2026-01-06",
-    "status": "scheduled",
-    "coverImage": "/assets/covers/launch-cover.png",
-    "pdfPath": null,
-    "hasDownload": false,
-    "tags": ["On Demand", "Convenience", "Customer Experience", "Delivery"],
-    "isNew": false,
-    "accessLevel": "PUBLIC",
-    "content": {
-      "intro": "South Africans can now have almost anything delivered in under an hour. From groceries to coffee to last-minute gifts, services like Checkers Sixty60, Mr D, and Pick n Pay asap! have turned convenience into expectation.\n\nOnce, convenience meant a store nearby. Now, it means immediacy, the reassurance that anything you need can arrive when you want it. People are no longer buying products. They are buying time, control, and peace of mind.",
-      "sections": [
-        {
-          "heading": "The value-per-minute mindset",
-          "body": "Innovatr research shows that 61% of consumers choose brands that make life easier, even if they cost more. 55% say time saved is as valuable as money saved. Almost half say they feel calmer knowing they can order instantly if they forget something.\n\nThis is what we call value-per-minute thinking, the belief that saving time equals feeling cared for. Fast service now communicates empathy. The quicker a brand responds, the more consumers feel understood."
-        },
-        {
-          "heading": "What It Means for Brands",
-          "body": "Compete on ease first, then price: Convenience now outweighs savings for most consumers. Invest in removing friction at every touchpoint.\n\nBe reliable more than fast: Speed matters, but consistency matters more. Deliver consistently, communicate clearly, and show up fast when it matters.\n\nFocus on reassurance, not just access: Consumers buy more than convenience. They buy the comfort of knowing they are covered."
-        },
-        {
-          "heading": "Innovatr takeaway",
-          "body": "Today, loyalty is no longer tied to stores. It is tied to the services that remove friction and restore calm. The winners will be those who make ease invisible, because it simply works."
-        }
-      ]
-    }
-  },
-  {
-    "id": 26,
-    "title": "Snack Box and Meal Kit Launches",
-    "teaser": "Snack boxes and meal kits are creating tiny pockets of convenience in everyday life. People want flavour, control and variety without the effort, and these launches hit the brief.",
-    "slug": "snack-box-and-meal-kit-launches",
-    "series": "Launch",
-    "category": "Launch",
-    "displayCategories": ["Food", "FMCG", "Services"],
-    "industry": "Food",
-    "publishDate": "2026-01-13",
-    "date": "2026-01-13",
-    "status": "scheduled",
-    "coverImage": "/assets/covers/launch-cover.png",
-    "pdfPath": null,
-    "hasDownload": false,
-    "tags": ["Meal Kits", "Snack Boxes", "Convenience", "Food Innovation"],
-    "isNew": false,
-    "accessLevel": "PUBLIC",
-    "content": {
-      "intro": "Snack boxes and meal kits are creating tiny pockets of convenience in everyday life. People want flavour, control and variety without the effort, and these launches hit the brief.",
-      "sections": [
-        {
-          "heading": "The convenience revolution continues",
-          "body": "Meal kits and snack boxes offer the perfect balance: variety without overwhelm, convenience without sacrifice. Consumers get the joy of discovery and the comfort of knowing exactly what they are getting.\n\nThese formats tap into the desire for controlled spontaneity — the feeling of treating yourself without the decision fatigue."
-        },
-        {
-          "heading": "Why this format works",
-          "body": "Portion control meets indulgence: People want to try new things but not commit to full sizes.\n\nCuration as value: A well-assembled box feels like a gift, even when you buy it for yourself.\n\nSubscription potential: The format naturally lends itself to recurring revenue and ongoing customer relationships."
-        },
-        {
-          "heading": "Innovatr takeaway",
-          "body": "Snack boxes and meal kits are more than products — they are experiences. Brands that understand the emotional appeal of curation, surprise, and convenience will find loyal audiences eager for their next delivery."
         }
       ]
     }
