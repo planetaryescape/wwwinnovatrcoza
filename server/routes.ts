@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemWithoutOrderIdSchema, insertReportSchema, insertDealSchema, insertInquirySchema } from "@shared/schema";
 import { PaymentService } from "./payments/service";
 import type { PaymentConfig } from "./payments/types";
-import { sendAdminOrderNotification, sendCustomerOrderConfirmation } from "./emails/email-service";
+import { sendAdminOrderNotification, sendCustomerOrderConfirmation, sendContactFormMessage } from "./emails/email-service";
 
 // Multer for handling multipart/form-data (PayFast webhooks)
 const upload = multer();
@@ -114,6 +114,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(inquiry);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/contact", async (req, res) => {
+    try {
+      const { name, email, company, message } = req.body;
+      
+      if (!name || !email || !message) {
+        return res.status(400).json({ error: "Name, email, and message are required" });
+      }
+
+      await sendContactFormMessage({ name, email, company: company || "", message });
+      
+      res.status(200).json({ success: true, message: "Message sent successfully" });
+    } catch (error: any) {
+      console.error("Contact form error:", error);
+      res.status(500).json({ error: "Failed to send message. Please try again later." });
     }
   });
 
