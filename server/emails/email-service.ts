@@ -128,6 +128,72 @@ export async function sendAdminOrderNotification(orderData: {
   }
 }
 
+export async function sendContactFormMessage(contactData: {
+  name: string;
+  email: string;
+  company: string;
+  message: string;
+}) {
+  try {
+    const resend = await getResendClient();
+    const fromEmail = await getFromEmail();
+    const adminEmails = getAdminEmails();
+
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            h2 { color: #2c3e50; }
+            .details { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }
+            .detail-row { margin: 10px 0; }
+            .label { font-weight: bold; color: #555; }
+            .message-box { 
+              background-color: #fff; 
+              border: 1px solid #e2e8f0; 
+              padding: 15px; 
+              border-radius: 5px; 
+              margin-top: 15px;
+              white-space: pre-wrap;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2>New Contact Form Submission</h2>
+            <div class="details">
+              <div class="detail-row"><span class="label">Name:</span> ${contactData.name}</div>
+              <div class="detail-row"><span class="label">Email:</span> ${contactData.email}</div>
+              <div class="detail-row"><span class="label">Company:</span> ${contactData.company || "Not provided"}</div>
+            </div>
+            <h3>Message:</h3>
+            <div class="message-box">${contactData.message}</div>
+            <p style="margin-top: 20px; color: #666; font-size: 12px;">
+              <em>This message was sent via the contact form on the Innovatr website.</em>
+            </p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const response = await resend.emails.send({
+      from: `Innovatr Contact Form <${fromEmail}>`,
+      to: adminEmails,
+      replyTo: contactData.email,
+      subject: `Contact Form: ${contactData.name} from ${contactData.company || "Unknown Company"}`,
+      html: emailHtml,
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Failed to send contact form message:", error);
+    throw error;
+  }
+}
+
 export async function sendCustomerOrderConfirmation(orderData: {
   customerName: string;
   customerEmail: string;
