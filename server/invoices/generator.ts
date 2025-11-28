@@ -256,22 +256,24 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
         .text("Account Number: 63066106923", 50, yPos + 12)
         .text("Account Name: Innovatr (Pty) Ltd.", 50, yPos + 24);
 
-      // Footer - positioned after bank details with some spacing
-      yPos += 50;
-      doc.strokeColor("#e0e0e0").moveTo(50, yPos).lineTo(550, yPos).stroke();
+      // Footer - fixed at bottom with proper margin (at least 2 lines from bottom)
+      const pageHeight = doc.page.height;
+      const footerTop = pageHeight - 80;
+
+      doc.strokeColor("#e0e0e0").moveTo(50, footerTop).lineTo(550, footerTop).stroke();
 
       doc
         .fillColor(mutedColor)
         .fontSize(8)
         .font("Helvetica")
-        .text("Thank you for your business! This is a computer-generated invoice and is valid without a signature.", 50, yPos + 10, {
+        .text("Thank you for your business! This is a computer-generated invoice and is valid without a signature.", 50, footerTop + 10, {
           align: "center",
           width: 500,
         })
         .text(
           "For questions, please contact richard@innovatr.co.za",
           50,
-          yPos + 22,
+          footerTop + 22,
           { align: "center", width: 500 }
         );
 
