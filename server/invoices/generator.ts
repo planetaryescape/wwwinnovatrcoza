@@ -217,29 +217,23 @@ export async function generateInvoicePdf(data: InvoiceData): Promise<Buffer> {
         .text("Total:", labelX, yPos)
         .text(formatCurrency(total, data.currency), valueX, yPos);
 
-      const pageHeight = doc.page.height;
-      const footerTop = pageHeight - 100;
-
-      doc.strokeColor("#e0e0e0").moveTo(50, footerTop).lineTo(550, footerTop).stroke();
+      // Compact footer - positioned after the totals with some spacing
+      yPos += 40;
+      
+      doc.strokeColor("#e0e0e0").moveTo(50, yPos).lineTo(550, yPos).stroke();
 
       doc
         .fillColor(mutedColor)
-        .fontSize(9)
+        .fontSize(8)
         .font("Helvetica")
-        .text("Thank you for your business!", 50, footerTop + 15, {
+        .text("Thank you for your business! This is a computer-generated invoice and is valid without a signature.", 50, yPos + 10, {
           align: "center",
           width: 500,
         })
         .text(
-          "This is a computer-generated invoice and is valid without a signature.",
+          "For questions, please contact richard@innovatr.co.za",
           50,
-          footerTop + 30,
-          { align: "center", width: 500 }
-        )
-        .text(
-          "For questions about this invoice, please contact support@innovatr.co.za",
-          50,
-          footerTop + 45,
+          yPos + 22,
           { align: "center", width: 500 }
         );
 
