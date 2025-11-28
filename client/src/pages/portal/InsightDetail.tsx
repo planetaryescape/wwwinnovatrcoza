@@ -8,12 +8,16 @@ import { Link } from "wouter";
 import reportsData from "@/data/reports.json";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import insightsHeader from "@assets/insights-header_1764322405058.png";
+import launchCover from "@assets/launch-cover_1764321848244.png";
+import insideCover from "@assets/inside-cover_1764321472939.png";
+import irlCover from "@assets/irl-cover_1764322310189.png";
 
 const categoryCoverImages: Record<string, string> = {
-  insights: "/assets/covers/insights-cover.png",
-  irl: "/assets/covers/irl-cover.png",
-  inside: "/assets/covers/inside-cover.png",
-  launch: "/assets/covers/launch-cover.png",
+  insights: insightsHeader,
+  irl: irlCover,
+  inside: insideCover,
+  launch: launchCover,
 };
 
 function normalizeCategoryKey(category: string): string {
