@@ -21,6 +21,8 @@ import {
   type InsertInquiry,
   type Subscription,
   type InsertSubscription,
+  type Company,
+  type InsertCompany,
   orders,
   orderItems,
   paymentIntents,
@@ -28,6 +30,7 @@ import {
   inquiries,
   subscriptions,
   reports,
+  companies,
 } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { db } from "./db";
@@ -83,6 +86,13 @@ export interface IStorage {
   getSubscriptionsByUserId(userId: string): Promise<Subscription[]>;
   updateSubscription(id: string, updates: Partial<Subscription>): Promise<void>;
   getAllSubscriptions(): Promise<Subscription[]>;
+
+  createCompany(company: InsertCompany): Promise<Company>;
+  getCompany(id: string): Promise<Company | undefined>;
+  getCompanyByName(name: string): Promise<Company | undefined>;
+  getAllCompanies(): Promise<Company[]>;
+  updateCompany(id: string, updates: Partial<Company>): Promise<void>;
+  getUsersByCompanyId(companyId: string): Promise<User[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -97,6 +107,7 @@ export class MemStorage implements IStorage {
   private deals: Map<string, Deal>;
   private inquiriesMap: Map<string, Inquiry>;
   private subscriptionsMap: Map<string, Subscription>;
+  private companiesMap: Map<string, Company>;
 
   constructor() {
     this.users = new Map();
@@ -110,6 +121,92 @@ export class MemStorage implements IStorage {
     this.deals = new Map();
     this.inquiriesMap = new Map();
     this.subscriptionsMap = new Map();
+    this.companiesMap = new Map();
+    
+    this.seedCompaniesAndUsers();
+  }
+  
+  private async seedCompaniesAndUsers() {
+    const existingCompanies = await this.getAllCompanies();
+    if (existingCompanies.length > 0) return;
+
+    const ruganiId = randomUUID();
+    const greenwayId = randomUUID();
+
+    const rugani: Company = {
+      id: ruganiId,
+      name: "Rugani Juice",
+      domain: "ruganijuice.co.za",
+      tier: "SCALE",
+      contractStart: new Date("2025-12-01"),
+      contractEnd: new Date("2026-11-30"),
+      monthlyFee: "26250",
+      basicCreditsTotal: 20,
+      basicCreditsUsed: 0,
+      proCreditsTotal: 4,
+      proCreditsUsed: 0,
+      notes: "Service agreement shared between Greenway Farms (Carrots Division) and Rugani Juice. Includes 2 x Test24 Pro Brand Health Audit studies (300 consumers, 10 minute survey), 2 x Test24 Pro studies (100 consumers, 10 minute survey) and 20 x Test24 Basic idea studies (100 consumers, 5 minute surveys). Additional studies at member rates: Test24 Basic R4,000 and Test24 Pro R45,000 per 100 completes.",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const greenway: Company = {
+      id: greenwayId,
+      name: "Greenway Farms",
+      domain: "greenwayfarm.co.za",
+      tier: "SCALE",
+      contractStart: new Date("2025-12-01"),
+      contractEnd: new Date("2026-11-30"),
+      monthlyFee: "26250",
+      basicCreditsTotal: 0,
+      basicCreditsUsed: 0,
+      proCreditsTotal: 0,
+      proCreditsUsed: 0,
+      notes: "Linked to Rugani Juice service agreement. Greenway users have Scale report access but Rugani holds the pooled Test24 credits.",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    this.companiesMap.set(ruganiId, rugani);
+    this.companiesMap.set(greenwayId, greenway);
+
+    const greenwayUsers = [
+      { name: "Duncan Buhr", email: "duncan@greenwayfarm.co.za", username: "duncan.buhr" },
+      { name: "Wesley Browne", email: "Wesley@greenwayfarm.co.za", username: "wesley.browne" },
+    ];
+
+    const ruganiUsers = [
+      { name: "Simonne Fourie", email: "simonne@ruganijuice.co.za", username: "simonne.fourie" },
+      { name: "Tymon Minaar", email: "tymon@ruganijuice.co.za", username: "tymon.minaar" },
+    ];
+
+    for (const u of greenwayUsers) {
+      await this.createUser({
+        username: u.username,
+        email: u.email,
+        password: "TempPass123!",
+        name: u.name,
+        company: "Greenway Farms",
+        companyId: greenwayId,
+        membershipTier: "SCALE",
+        status: "ACTIVE",
+        role: "MEMBER",
+      });
+    }
+
+    for (const u of ruganiUsers) {
+      await this.createUser({
+        username: u.username,
+        email: u.email,
+        password: "TempPass123!",
+        name: u.name,
+        company: "Rugani Juice",
+        companyId: ruganiId,
+        membershipTier: "SCALE",
+        status: "ACTIVE",
+        role: "MEMBER",
+      });
+    }
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -142,6 +239,7 @@ export class MemStorage implements IStorage {
       password: insertUser.password || Math.random().toString(36).slice(-10),
       name: insertUser.name ?? null,
       company: insertUser.company ?? null,
+      companyId: (insertUser as any).companyId ?? null,
       membershipTier: insertUser.membershipTier ?? "STARTER",
       status: insertUser.status ?? "ACTIVE",
       role: (insertUser.role as any) ?? "MEMBER",
@@ -458,6 +556,56 @@ export class MemStorage implements IStorage {
 
   async getAllSubscriptions(): Promise<Subscription[]> {
     return db.select().from(subscriptions);
+  }
+
+  async createCompany(insertCompany: InsertCompany): Promise<Company> {
+    const id = randomUUID();
+    const now = new Date();
+    const company: Company = {
+      id,
+      name: insertCompany.name,
+      domain: insertCompany.domain ?? null,
+      tier: insertCompany.tier ?? "STARTER",
+      contractStart: insertCompany.contractStart ?? null,
+      contractEnd: insertCompany.contractEnd ?? null,
+      monthlyFee: insertCompany.monthlyFee ?? null,
+      basicCreditsTotal: insertCompany.basicCreditsTotal ?? 0,
+      basicCreditsUsed: insertCompany.basicCreditsUsed ?? 0,
+      proCreditsTotal: insertCompany.proCreditsTotal ?? 0,
+      proCreditsUsed: insertCompany.proCreditsUsed ?? 0,
+      notes: insertCompany.notes ?? null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.companiesMap.set(id, company);
+    return company;
+  }
+
+  async getCompany(id: string): Promise<Company | undefined> {
+    return this.companiesMap.get(id);
+  }
+
+  async getCompanyByName(name: string): Promise<Company | undefined> {
+    return Array.from(this.companiesMap.values()).find(
+      (company) => company.name.toLowerCase() === name.toLowerCase(),
+    );
+  }
+
+  async getAllCompanies(): Promise<Company[]> {
+    return Array.from(this.companiesMap.values());
+  }
+
+  async updateCompany(id: string, updates: Partial<Company>): Promise<void> {
+    const company = this.companiesMap.get(id);
+    if (company) {
+      this.companiesMap.set(id, { ...company, ...updates, updatedAt: new Date() });
+    }
+  }
+
+  async getUsersByCompanyId(companyId: string): Promise<User[]> {
+    return Array.from(this.users.values()).filter(
+      (user) => user.companyId === companyId,
+    );
   }
 }
 
