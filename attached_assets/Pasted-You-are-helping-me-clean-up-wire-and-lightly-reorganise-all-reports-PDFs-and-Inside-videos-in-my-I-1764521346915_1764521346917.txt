@@ -1,0 +1,454 @@
+You are helping me clean up, wire and lightly reorganise all reports, PDFs and Inside videos in my Innovatr Trends & Insights Library.
+
+You are working in a TypeScript + React + Node project with a portal that already has a reports table or collection and a reports.json style config feeding the Trends & Insights section.
+
+0. IMPORTANT PRINCIPLES
+
+Do not change any card view copy, titles, teaser text or full issue content.
+Leave all text exactly as it is.
+
+Do not change any existing publish dates except the six reports I explicitly list below.
+Only adjust dates where I give direct instructions.
+
+Do not create duplicate reports.
+Always check if a report with the exact same title already exists before creating anything new.
+
+Do not auto-generate new PDFs or reports.
+If something does not have a PDF yet, leave the pdfPath or pdfUrl empty.
+I will upload / write them later.
+
+You can create missing folders and add new fields if needed.
+
+Assume my static assets live under /public/assets/.
+
+1. FILE LOCATIONS
+
+Create or use these folders:
+
+PDF reports:
+/public/assets/reports/
+
+Inside videos:
+/public/assets/videos/
+
+If these folders do not exist, create them.
+Do not move or rename files, only reference them.
+
+Use these exact filenames (do not rename them):
+
+Launch PDFs
+
+/public/assets/reports/Innovatr Launch X Cadbury Pocket-Sized Joy.pdf
+
+/public/assets/reports/Innovatr Launch X The Oat-Based Breakfast Revolution.pdf
+
+IRL PDFs
+
+/public/assets/reports/Innovatr IRL X Believability Is The New Branding.pdf
+
+/public/assets/reports/Innovatr IRL X Fairness Flex.pdf
+
+/public/assets/reports/Innovatr IRL X Human Subscription.pdf
+
+/public/assets/reports/Innovatr IRL X Indulgence Without Guilt.pdf
+
+/public/assets/reports/Innovatr IRL X Simplicity Has Status.pdf
+
+/public/assets/reports/Innovatr IRL X The Age Of Effortless.pdf
+
+/public/assets/reports/Innovatr IRL X The Return of Logic.pdf
+
+/public/assets/reports/Innovatr IRL X The Return of the Third Place.pdf
+
+Inside videos
+
+/public/assets/videos/Innovatr Inside X Agile Research Explained.mp4
+
+/public/assets/videos/Innovatr Inside X AI Video Interview.mp4
+
+/public/assets/videos/Innovatr Inside X Idea Screen Walkthrough.mp4
+
+/public/assets/videos/Innovatr Inside X Market Simulator Demo.mp4
+
+/public/assets/videos/Innovatr Inside X Storyteller Overview.mp4
+
+/public/assets/videos/Innovatr Inside X Upsiide Analysis Experience.mp4
+
+/public/assets/videos/Innovatr Inside X Upsiide Creation Experience.mp4
+
+/public/assets/videos/Innovatr Inside X Upsiide Overview.mp4
+
+/public/assets/videos/Innovatr Inside X Upsiide Respondent Experience.mp4
+
+/public/assets/videos/Innovatr Inside X Why Upsiide.mp4
+
+Leave Innovatr Inside Platform Updates.mp4 in the videos folder but do not attach it to any report yet.
+
+2. SERIES + ACCESS RULES
+
+Each report has a Series (Inside, IRL, Insights, Launch) and an Access flag.
+
+Treat Access as:
+
+"free" or "public" for content anyone can see
+
+"members" or "paid" for member-only content
+
+If your schema uses different names, map accordingly but keep the distinction.
+
+2.1 Innovatr Inside – all Free
+
+For all of these reports, set:
+
+series = "Inside"
+
+access = "free"
+
+Ensure a report exists (create if missing) for each title:
+
+Innovatr Inside: AI Qual
+
+Innovatr Inside: Storyteller
+
+Innovatr Inside: Market Simulator
+
+Innovatr Inside: Idea Screen
+
+Innovatr Inside: Upsiide Overview
+
+Innovatr Inside: Building Tests with Upsiide
+
+Innovatr Inside: The Respondent Experience
+
+Innovatr Inside: The Analysis Engine
+
+Innovatr Inside: How Innovatr Research Works
+
+If any of these records do not exist, create a new report with:
+
+correct title
+
+empty or placeholder body (I will edit content later in the CMS)
+
+reasonable categories such as ["Services", "All"]
+
+series and access as above
+
+pdfPath empty (Inside posts use videos, not downloads)
+
+2.2 IRL – mixed access
+
+Free IRL (everyone can see):
+
+The Return of the Third Place
+
+Simplicity Has Status
+
+For these:
+
+series = "IRL"
+
+access = "free"
+
+Members only IRL:
+
+Fairness Is the New Flex
+
+Believability Is the New Branding
+
+The Human Subscription
+
+The Return of Local Logic
+
+Indulgence Without Guilt
+
+The Age of Effortless
+
+any other IRL reports not listed as free
+
+For these:
+
+series = "IRL"
+
+access = "members"
+
+Special rule:
+
+Keep The Age of Effortless and Indulgence Without Guilt stored as bonus content or draft outside the weekly schedule.
+They should be visible only where drafts or bonus items are shown, not as part of the main weekly publishing sequence.
+
+2.3 Launch – mixed access
+
+Free Launch:
+
+Cadbury Pocket Sized Joy
+
+The Oat Based Breakfast Revolution
+
+Set:
+
+series = "Launch"
+
+access = "free"
+
+Members-only Launch (existing and future):
+
+Race for Instant Gratification
+
+Snack Boxes and Meal Kits
+
+any other Launch reports not listed as free
+
+For these:
+
+series = "Launch"
+
+access = "members"
+
+If Race for Instant Gratification or Snack Boxes and Meal Kits do not exist yet, create minimal new Launch reports with those titles, access = "members", no pdfPath and placeholder body.
+
+2.4 Insights – all Members only
+
+All reports where series = "Insights" must be members only:
+
+Examples:
+
+Banking Monogamy Is Dead
+
+The New Non Negotable Treat
+
+From Vegan to Vital
+
+The Moderation Movement
+
+The Quiet Luxury of Calm
+
+The Rise of the Micro Errand Economy
+
+The Emotional Upgrade
+
+Local Humour as Currency
+
+Volume Is Out. Value Is In.
+
+Affordable Indulgence
+
+Gen Z Drinks Less But Demands More
+
+Ensure:
+
+series = "Insights"
+
+access = "members"
+
+3. PUBLISH DATES
+
+You must only change publish dates for the six reports listed below.
+All other reports keep their existing publishDate or schedule.
+
+3.1 Set these SIX reports to go live on 1 August 2025
+
+Set publishDate = "2025-08-01" (or equivalent date format) for:
+
+Inside (3):
+
+Innovatr Inside: AI Qual
+
+Innovatr Inside: Storyteller
+
+Innovatr Inside: Market Simulator
+
+IRL (3):
+
+Simplicity Has Status
+
+The Return of the Third Place
+
+Fairness Is the New Flex
+
+Do not alter their teaser text or content, only the date field.
+
+3.2 All other reports
+
+Keep all other publishDate values exactly as they currently are.
+
+Do not shift or re-order any remaining dates.
+
+Leave The Age of Effortless and Indulgence Without Guilt as drafts / bonus content, not part of the dated main schedule.
+
+4. ATTACH PDF REPORTS
+
+For IRL and Launch reports that have downloadable reports, set each report’s pdfPath (or pdfUrl in the DB schema) to the correct file.
+
+Match on exact report title.
+
+Use these mappings:
+
+Launch
+
+Cadbury Pocket Sized Joy
+→ /public/assets/reports/Innovatr Launch X Cadbury Pocket-Sized Joy.pdf
+
+The Oat Based Breakfast Revolution
+→ /public/assets/reports/Innovatr Launch X The Oat-Based Breakfast Revolution.pdf
+
+IRL
+
+Fairness Is the New Flex
+→ /public/assets/reports/Innovatr IRL X Fairness Flex.pdf
+
+Believability Is the New Branding
+→ /public/assets/reports/Innovatr IRL X Believability Is The New Branding.pdf
+
+The Human Subscription
+→ /public/assets/reports/Innovatr IRL X Human Subscription.pdf
+
+Indulgence Without Guilt
+→ /public/assets/reports/Innovatr IRL X Indulgence Without Guilt.pdf
+
+Simplicity Has Status
+→ /public/assets/reports/Innovatr IRL X Simplicity Has Status.pdf
+
+The Age of Effortless
+→ /public/assets/reports/Innovatr IRL X The Age Of Effortless.pdf
+
+The Return of Local Logic
+→ /public/assets/reports/Innovatr IRL X The Return of Logic.pdf
+
+The Return of the Third Place
+→ /public/assets/reports/Innovatr IRL X The Return of the Third Place.pdf
+
+If any IRL or Launch report does not have a matching PDF in the list above, leave its pdfPath empty for now.
+
+5. ATTACH INSIDE VIDEOS
+
+Add a field to Inside reports to store one or more video paths, for example:
+
+videoPaths: string[]
+or
+
+primaryVideo: string plus extraVideos: string[]
+
+Use whichever structure fits the existing code best.
+
+Attach these video paths to the matching Inside reports:
+
+Innovatr Inside: Storyteller
+
+/public/assets/videos/Innovatr Inside X Storyteller Overview.mp4
+
+Innovatr Inside: Market Simulator
+
+/public/assets/videos/Innovatr Inside X Market Simulator Demo.mp4
+
+Innovatr Inside: Idea Screen
+
+/public/assets/videos/Innovatr Inside X Idea Screen Walkthrough.mp4
+
+Innovatr Inside: Upsiide Overview
+Two videos, both displayed under the same post:
+
+/public/assets/videos/Innovatr Inside X Upsiide Overview.mp4
+
+/public/assets/videos/Innovatr Inside X Why Upsiide.mp4
+
+Innovatr Inside: Building Tests with Upsiide
+
+/public/assets/videos/Innovatr Inside X Upsiide Creation Experience.mp4
+
+Innovatr Inside: The Respondent Experience
+
+/public/assets/videos/Innovatr Inside X Upsiide Respondent Experience.mp4
+
+Innovatr Inside: The Analysis Engine
+
+/public/assets/videos/Innovatr Inside X Upsiide Analysis Experience.mp4
+
+Innovatr Inside: How Innovatr Research Works
+
+/public/assets/videos/Innovatr Inside X Agile Research Explained.mp4
+
+Innovatr Inside: AI Qual
+
+/public/assets/videos/Innovatr Inside X AI Video Interview.mp4
+
+Do not attach Innovatr Inside Platform Updates.mp4 to any report.
+Leave it unused for now.
+
+On the front end, ensure that Inside report detail pages render a video player (or list of players) directly below the full issue body using these video paths.
+
+6. NEW REPORT CREATION RULES
+
+Only create new reports if they do not already exist:
+
+Innovatr Inside: AI Qual
+
+Innovatr Inside: Idea Screen
+
+Innovatr Inside: Upsiide Overview
+
+Innovatr Inside: Building Tests with Upsiide
+
+Innovatr Inside: The Respondent Experience
+
+Innovatr Inside: The Analysis Engine
+
+Innovatr Inside: How Innovatr Research Works
+
+Race for Instant Gratification (Launch, members)
+
+Snack Boxes and Meal Kits (Launch, members)
+
+For new Launch posts:
+
+set series = "Launch"
+
+set access = "members"
+
+leave pdfPath empty
+
+give them reasonable categories like ["Food", "FMCG", "Services"] (you can infer from the title)
+
+do not invent any content; body can be empty or a simple placeholder like "Content coming soon".
+
+Do not create any other new reports.
+
+7. FINAL CHECKS AND OUTPUT
+
+After applying all of the above:
+
+Confirm that every report now has:
+
+correct series
+
+correct access
+
+pdfPath wired where a matching PDF exists
+
+videoPaths wired for all Inside posts listed above
+
+Confirm that only these six reports have publishDate set to 2025-08-01:
+
+Innovatr Inside: AI Qual
+
+Innovatr Inside: Storyteller
+
+Innovatr Inside: Market Simulator
+
+Simplicity Has Status
+
+The Return of the Third Place
+
+Fairness Is the New Flex
+
+Confirm The Age of Effortless and Indulgence Without Guilt are marked as bonus / draft content, not part of the weekly schedule.
+
+When you are done, log or print a short summary listing:
+
+which reports had their series or access changed
+
+which reports had pdfPath added
+
+which Inside posts had video paths added
+
+any reports that were expected but missing (so I can fix them manually later)
