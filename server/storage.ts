@@ -244,6 +244,19 @@ export class MemStorage implements IStorage {
     for (const r of clientReports) {
       await this.createReport(r);
     }
+
+    const sharedDeal: InsertDeal = {
+      title: "Rugani & Greenway Service Agreement",
+      description: "Annual service agreement for Rugani Juice and Greenway Farms. Includes 2 x Test24 Pro Brand Health Audit studies (300 consumers, 10 min), 2 x Test24 Pro studies (100 consumers, 10 min), and 20 x Test24 Basic idea studies (100 consumers, 5 min). Additional studies available at member rates.",
+      originalPrice: "630000",
+      discountedPrice: "315000",
+      creditsIncluded: 26,
+      targetTiers: ["SCALE"],
+      validFrom: new Date("2025-12-01"),
+      validTo: new Date("2026-11-30"),
+      isActive: true,
+    };
+    await this.createDeal(sharedDeal);
   }
 
   async getUser(id: string): Promise<User | undefined> {
