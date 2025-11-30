@@ -8,15 +8,17 @@
     "category": "IRL",
     "displayCategories": ["Services", "FMCG", "Banking", "All"],
     "industry": "Services",
-    "publishDate": "2025-08-05",
-    "date": "2025-08-05",
+    "publishDate": "2025-08-01",
+    "date": "2025-08-01",
     "status": "live",
     "coverImage": "/assets/covers/irl-cover.png",
-    "pdfPath": "/assets/reports/innovatr-irl-fairness-flex.pdf",
+    "pdfPath": "/assets/reports/Innovatr IRL X Fairness Flex.pdf",
     "hasDownload": true,
+    "videoPaths": [],
     "tags": ["Fairness", "Trust", "Consumer Behaviour", "Transparency"],
     "isNew": false,
-    "accessLevel": "PUBLIC",
+    "access": "members",
+    "accessLevel": "STARTER",
     "content": {
       "intro": "For years, price was power. But as South Africans weather another year of cost of living strain, the currency of trust has overtaken the currency of discount. Our recent Innovatr research shows that transparency, clarity, and perceived fairness now drive stronger emotional connection than low price alone.\n\nConsumers are tired of specials with asterisks. They are asking a simpler question: Do I believe you?\n\nAnd when the answer is yes, when a brand promises no expiry, no hidden fees, or what you see is what you get, people are willing to pay a little more.\n\nFairness has become the new flex, a quiet form of empowerment that says, I know exactly what I am getting and that makes me feel in control.",
       "sections": [
@@ -54,8 +56,10 @@
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": [],
     "tags": ["Financial Services", "Consumer Loyalty", "Digital Banking"],
     "isNew": false,
+    "access": "members",
     "accessLevel": "STARTER",
     "content": {
       "intro": "South Africans are breaking up with their banks. Most no longer rely on one provider but instead spread their money across different accounts to get better features, rates, and experiences.\n\nOur latest Innovatr research shows that 67% of customers under 40 already use two or more banks or fintech providers. 58% say they would switch their main bank after just one poor service experience. And nearly 45% believe all banks offer basically the same products. Loyalty today is fragile, and every touchpoint counts.",
@@ -88,10 +92,12 @@
     "date": "2025-08-19",
     "status": "live",
     "coverImage": "/assets/covers/launch-cover.png",
-    "pdfPath": null,
-    "hasDownload": false,
+    "pdfPath": "/assets/reports/Innovatr Launch X Cadbury Pocket-Sized Joy.pdf",
+    "hasDownload": true,
+    "videoPaths": [],
     "tags": ["Confectionery", "Format Innovation", "Micro Indulgence"],
     "isNew": false,
+    "access": "free",
     "accessLevel": "PUBLIC",
     "content": {
       "intro": "There is something uniquely powerful about formats that fit in your hand. They feel simple. Casual. Effortless. Cadbury's new Pocket Sized Joy taps into this emotional truth by offering a familiar favourite in a format designed for real life snacking moments.\n\nThis is not just a smaller bar. It is a new way to enjoy comfort, treat myself energy and everyday uplift without feeling heavy or indulgent. Our Innovatr research shows that the format, name and creative direction work together to create a strong emotional connection.\n\nPocket Sized Joy is exactly what it says. Small. Easy. Feel good.",
@@ -113,21 +119,23 @@
   },
   {
     "id": 4,
-    "title": "AI Qual",
+    "title": "Innovatr Inside: AI Qual",
     "teaser": "AI Qual is our new way of hearing the unfiltered voice of your audience. It turns hours of reading into moments of clarity and shows you the feelings behind the numbers in a way that feels alive and honest. If you want to know why people choose one idea over another, this is where the truth hides.",
     "slug": "ai-qual",
     "series": "Inside",
     "category": "Inside",
     "displayCategories": ["Services", "All"],
     "industry": "Services",
-    "publishDate": "2025-08-26",
-    "date": "2025-08-26",
+    "publishDate": "2025-08-01",
+    "date": "2025-08-01",
     "status": "live",
     "coverImage": "/assets/covers/inside-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": ["/assets/videos/Innovatr Inside X AI Video Interview.mp4"],
     "tags": ["AI Qual", "Qualitative Research", "Innovatr Tools"],
     "isNew": false,
+    "access": "free",
     "accessLevel": "PUBLIC",
     "content": {
       "intro": "For years, qualitative research has been rich in insight but slow to deliver. The process was powerful, but the pace was painful. AI Qual changes that.\n\nThis upcoming addition to the Innovatr suite brings human understanding and artificial intelligence together, turning open responses and transcripts into clear, visual, decision-ready stories.\n\nAI Qual is built to help teams uncover the why behind the data, faster and at scale. It is designed for researchers, strategists, and creatives who want to bring real consumer voices into workshops, campaigns, and innovation sessions, instantly.",
@@ -160,11 +168,13 @@
     "date": "2025-09-02",
     "status": "live",
     "coverImage": "/assets/covers/irl-cover.png",
-    "pdfPath": "/assets/reports/innovatr-irl-believability-is-the-new-branding.pdf",
+    "pdfPath": "/assets/reports/Innovatr IRL X Believability Is The New Branding.pdf",
     "hasDownload": true,
+    "videoPaths": [],
     "tags": ["Believability", "Trust", "Authenticity", "Brand Strategy"],
     "isNew": false,
-    "accessLevel": "PUBLIC",
+    "access": "members",
+    "accessLevel": "STARTER",
     "content": {
       "intro": "Perfection has lost its power. For years, brands tried to polish, edit, and perfect every message until it gleamed. But the more perfect things looked, the less people believed them.\n\nAcross our recent Innovatr research, consumers describe overdesigned brands as trying too hard. They want honesty, warmth, and a voice that sounds human. The new badge of strength is not flawlessness. It is believability.\n\nSouth Africans trust what feels true. They respond to products and campaigns that sound like they were made by real people, for real people.",
       "sections": [
@@ -202,8 +212,10 @@
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": [],
     "tags": ["FMCG", "Snacking", "Consumer Behaviour", "Emotional Economy"],
     "isNew": false,
+    "access": "members",
     "accessLevel": "STARTER",
     "content": {
       "intro": "South Africans might be tightening their belts, but not when it comes to snacks.\n\nOur latest Innovatr research reveals a fascinating contradiction in consumer behaviour. Eighty percent of people say they will always find room in their budget for a treat, no matter how tough things get. Three out of four believe that a small daily indulgence is now essential for their emotional wellbeing.\n\nAs food prices rise, snacks have evolved from simple convenience into something deeply emotional. They have become a source of comfort, control, and reward. A ten rand chocolate or a packet of chips is no longer just a bite. It is a brief moment of joy that restores a sense of normality when everything else feels uncertain.",
@@ -225,7 +237,7 @@
   },
   {
     "id": 7,
-    "title": "Oat-Based Breakfast Revolution",
+    "title": "The Oat-Based Breakfast Revolution",
     "teaser": "Oat based breakfasts are rising fast as people look for clean energy, slow release fullness and easy versatility. This is the new morning essential.",
     "slug": "oat-based-breakfast-revolution",
     "series": "Launch",
@@ -236,10 +248,12 @@
     "date": "2025-09-16",
     "status": "live",
     "coverImage": "/assets/covers/launch-cover.png",
-    "pdfPath": null,
-    "hasDownload": false,
+    "pdfPath": "/assets/reports/Innovatr Launch X The Oat-Based Breakfast Revolution.pdf",
+    "hasDownload": true,
+    "videoPaths": [],
     "tags": ["Launch", "Functional Food", "Breakfast", "Beverages"],
     "isNew": false,
+    "access": "free",
     "accessLevel": "PUBLIC",
     "content": {
       "intro": "South Africans might be spending less but they are not giving up on joy. And in the morning they are drinking their breakfast. It is not coffee.\n\nA new ready to drink oat beverage is changing how people start their day. It is quick filling and deeply functional. People are now getting the nutrition of a meal in the time it takes to walk out the door.\n\nDesigned for busy mornings this format turns breakfast into something portable personal and purposeful. It reflects a bigger shift in how consumers manage time energy and wellbeing.",
@@ -261,21 +275,23 @@
   },
   {
     "id": 8,
-    "title": "Storyteller",
+    "title": "Innovatr Inside: Storyteller",
     "teaser": "Storyteller transforms raw data into something people actually want to read. It turns charts into insight, patterns into meaning and long reports into a compelling journey. If you want to share findings that feel vivid instead of technical, Storyteller takes you there.",
     "slug": "storyteller",
     "series": "Inside",
     "category": "Inside",
     "displayCategories": ["Services", "All"],
     "industry": "Services",
-    "publishDate": "2025-09-23",
-    "date": "2025-09-23",
+    "publishDate": "2025-08-01",
+    "date": "2025-08-01",
     "status": "live",
     "coverImage": "/assets/covers/inside-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": ["/assets/videos/Innovatr Inside X Storyteller Overview.mp4"],
     "tags": ["Storyteller", "Insight Communication", "Data Storytelling"],
     "isNew": false,
+    "access": "free",
     "accessLevel": "PUBLIC",
     "content": {
       "intro": "Data alone does not create clarity. Story does. Storyteller was created for teams who want research that explains itself. No long unpacking. No technical slides. Only clear, confident and strategic insight.\n\nStoryteller transforms your data into a headline, a supporting view, a visual and a practical action. It gives every idea a narrative your team can understand in seconds.\n\nThis is insight made simple, shareable and ready for decision making.",
@@ -308,14 +324,16 @@
     "category": "IRL",
     "displayCategories": ["FMCG", "Services", "Banking", "Beauty"],
     "industry": "Services",
-    "publishDate": "2025-09-30",
-    "date": "2025-09-30",
+    "publishDate": "2025-08-01",
+    "date": "2025-08-01",
     "status": "live",
     "coverImage": "/assets/covers/irl-cover.png",
-    "pdfPath": "/assets/reports/innovatr-irl-simplicity-has-status.pdf",
+    "pdfPath": "/assets/reports/Innovatr IRL X Simplicity Has Status.pdf",
     "hasDownload": true,
+    "videoPaths": [],
     "tags": ["Simplicity", "Minimalism", "Premium", "Decision Fatigue"],
     "isNew": false,
+    "access": "free",
     "accessLevel": "PUBLIC",
     "content": {
       "intro": "In South Africa, the word simple has stopped meaning basic. It now means intelligent.\n\nOur latest Innovatr research shows that consumers associate simplicity with quality and trust more than ever before. The clean design, the clear pricing, the one-click experience, have become the new markers of modernity.\n\nSimplicity signals control. It communicates that a brand respects people's time and attention. And in a noisy world, that quiet confidence feels like luxury.",
@@ -354,8 +372,10 @@
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": [],
     "tags": ["Food", "Protein", "Health Trends", "Consumer Insights"],
     "isNew": false,
+    "access": "members",
     "accessLevel": "STARTER",
     "content": {
       "intro": "Veganism once felt like the hero of modern eating, but the shine is fading. Our latest Innovatr research shows that South Africans are moving away from ideology and choosing food that fuels them. Food is no longer about signalling virtue. It is about impact.\n\nThe Financial Times recently referred to this shift as the retreat of idealism. Our data shows something even clearer. Protein is making a full comeback.",
@@ -390,9 +410,11 @@
     "coverImage": "/assets/covers/launch-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": [],
     "tags": ["On Demand", "Convenience", "Customer Experience", "Delivery"],
     "isNew": false,
-    "accessLevel": "PUBLIC",
+    "access": "members",
+    "accessLevel": "STARTER",
     "content": {
       "intro": "South Africans can now have almost anything delivered in under an hour. From groceries to coffee to last-minute gifts, services like Checkers Sixty60, Mr D, and Pick n Pay asap! have turned convenience into expectation.\n\nOnce, convenience meant a store nearby. Now, it means immediacy, the reassurance that anything you need can arrive when you want it. People are no longer buying products. They are buying time, control, and peace of mind.",
       "sections": [
@@ -413,21 +435,23 @@
   },
   {
     "id": 12,
-    "title": "Market Share Simulator",
+    "title": "Innovatr Inside: Market Simulator",
     "teaser": "The Market Share Simulator lets you see the future before you spend a cent. Test what happens when a brand grows, shrinks, changes price or enters a new space. It reveals how real people switch, stay or move and shows you the shift that one small change can create.",
     "slug": "market-share-simulator",
     "series": "Inside",
     "category": "Inside",
     "displayCategories": ["Services", "All"],
     "industry": "Services",
-    "publishDate": "2025-10-21",
-    "date": "2025-10-21",
+    "publishDate": "2025-08-01",
+    "date": "2025-08-01",
     "status": "live",
     "coverImage": "/assets/covers/inside-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": ["/assets/videos/Innovatr Inside X Market Simulator Demo.mp4"],
     "tags": ["Tools", "Market Share Simulator", "Behavioural Data"],
     "isNew": false,
+    "access": "free",
     "accessLevel": "PUBLIC",
     "content": {
       "intro": "Innovation rarely fails in isolation. It fails when a stronger idea steals the choice. Our Market Share Simulator exists to answer one simple question. What will people actually choose when your idea competes in the real world?\n\nMost research reports tell you what people like. The simulator goes further. It shows you what they will pick. It reveals your source of volume and shows whether you are winning by stealing share or by growing the category.\n\nThis tool uses behavioural data from Test24 to model real market outcomes. The goal is clarity. No assumptions. No soft signals. Only real competitive behaviour.",
@@ -464,11 +488,13 @@
     "date": "2025-10-28",
     "status": "live",
     "coverImage": "/assets/covers/irl-cover.png",
-    "pdfPath": "/assets/reports/innovatr-irl-the-return-of-local-logic.pdf",
+    "pdfPath": "/assets/reports/Innovatr IRL X The Return of Logic.pdf",
     "hasDownload": true,
+    "videoPaths": [],
     "tags": ["Local", "Culture", "Authenticity", "South Africa"],
     "isNew": false,
-    "accessLevel": "PUBLIC",
+    "access": "members",
+    "accessLevel": "STARTER",
     "content": {
       "intro": "Over the past decade, globalisation shaped how brands came to life. Sleek templates. International tone. Universal stories crafted for scale rather than culture. It worked for a while, but the market has shifted. South Africans have begun to tune out of work that feels imported and tune in to anything that feels rooted. Uniformity has hit a ceiling because people have.\n\nOur Innovatr research shows a clear gap. When brands use local cues their trust and relatability scores jump by more than twenty percent. Consumers respond to brands that reflect their lived reality. The slang they speak. The humour they get. The colours and cues that feel like home. When a brand feels local, it feels trustworthy.",
       "sections": [
@@ -502,8 +528,10 @@
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": [],
     "tags": ["Alcohol", "Moderation", "Wellness", "Mindful Drinking"],
     "isNew": false,
+    "access": "members",
     "accessLevel": "STARTER",
     "content": {
       "intro": "People still love the ritual of a drink but the buzz is no longer the main event. Our latest Innovatr research shows that the real conversation has shifted from how much to how mindfully.\n\nSouth Africans are not walking away from alcohol. They are simply choosing moments that feel intentional. The social ritual stays. The recovery time shortens.",
@@ -525,7 +553,7 @@
   },
   {
     "id": 15,
-    "title": "Snack Box and Meal Kit Launches",
+    "title": "Snack Boxes and Meal Kits",
     "teaser": "Snack boxes and meal kits are creating tiny pockets of convenience in everyday life. People want flavour, control and variety without the effort, and these launches hit the brief.",
     "slug": "snack-box-and-meal-kit-launches",
     "series": "Launch",
@@ -538,9 +566,11 @@
     "coverImage": "/assets/covers/launch-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": [],
     "tags": ["Meal Kits", "Snack Boxes", "Convenience", "Food Innovation"],
     "isNew": false,
-    "accessLevel": "PUBLIC",
+    "access": "members",
+    "accessLevel": "STARTER",
     "content": {
       "intro": "Snack boxes and meal kits are creating tiny pockets of convenience in everyday life. People want flavour, control and variety without the effort, and these launches hit the brief.",
       "sections": [
@@ -561,9 +591,9 @@
   },
   {
     "id": 16,
-    "title": "AI Video Interview",
-    "teaser": "AI Video Interview brings the depth of qualitative research to the speed of digital. It captures authentic human responses at scale, turning video conversations into rich, analysable insights that help teams understand not just what people say, but how they feel.",
-    "slug": "ai-video-interview",
+    "title": "Innovatr Inside: Idea Screen",
+    "teaser": "Idea Screen helps you filter and prioritise early-stage concepts before investing in full development. It gives teams a fast, structured way to identify which ideas have the strongest potential and which need more work.",
+    "slug": "idea-screen",
     "series": "Inside",
     "category": "Inside",
     "displayCategories": ["Services", "All"],
@@ -574,23 +604,25 @@
     "coverImage": "/assets/covers/inside-cover.png",
     "pdfPath": null,
     "hasDownload": false,
-    "tags": ["AI Video", "Qualitative Research", "Innovatr Tools", "Video Insights"],
+    "videoPaths": ["/assets/videos/Innovatr Inside X Idea Screen Walkthrough.mp4"],
+    "tags": ["Idea Screen", "Innovation", "Concept Testing", "Innovatr Tools"],
     "isNew": true,
+    "access": "free",
     "accessLevel": "PUBLIC",
     "content": {
-      "intro": "Traditional video interviews are powerful but time-consuming. AI Video Interview changes that by combining the authenticity of face-to-face conversation with the efficiency of automated analysis.\n\nParticipants record video responses to your questions from anywhere. Our AI analyses facial expressions, tone, and language to surface emotional truths that text alone cannot capture.\n\nThis is qualitative research reimagined for teams who need depth without delay.",
+      "intro": "Not every idea deserves a full investment. Idea Screen exists to help teams separate signal from noise in the earliest stages of innovation.\n\nThis tool gives you a fast, structured way to test multiple concepts at once and see which ones resonate with real consumers. It is designed for speed without sacrificing rigour.",
       "sections": [
         {
           "heading": "How It Works",
-          "body": "Design: Create your interview guide with open-ended questions that invite rich responses.\n\nCapture: Participants record video answers on their own time, from any device.\n\nAnalyse: AI processes facial expressions, vocal tone, and language patterns to identify themes and emotional signals.\n\nExplore: Watch key moments, compare responses, and share highlight reels with your team."
+          "body": "Submit your early-stage concepts — even rough ones.\n\nConsumers react quickly, giving you intuitive feedback on appeal and fit.\n\nSee which ideas rise to the top and which need refinement.\n\nMove forward with confidence, knowing you are investing in the right directions."
         },
         {
           "heading": "Why It Matters",
-          "body": "Authenticity at scale: Video captures nuance that surveys miss — hesitation, excitement, confusion, and conviction.\n\nSpeed without sacrifice: Get deep insights in days, not weeks. No scheduling, no travel, no transcription backlogs.\n\nEmotional intelligence: AI identifies not just what people say, but how they feel about it. Surface the emotions that drive behaviour."
+          "body": "Innovation is expensive. Testing early saves time and money.\n\nIdea Screen removes guesswork from the pipeline, helping teams focus on winners rather than spreading resources thin across uncertain concepts.\n\nIt is the first step toward smarter, faster innovation."
         },
         {
           "heading": "Innovatr takeaway",
-          "body": "AI Video Interview bridges the gap between qualitative depth and quantitative scale. It gives teams the human connection they need without the traditional time cost.\n\nWhen you need to understand the why behind the what, this is where the conversation starts."
+          "body": "Great innovation starts with great filtering. Idea Screen helps you find the ideas worth pursuing — before you commit."
         }
       ]
     }
@@ -608,11 +640,13 @@
     "date": "2025-11-25",
     "status": "live",
     "coverImage": "/assets/covers/irl-cover.png",
-    "pdfPath": "/assets/reports/innovatr-irl-the-human-subscription.pdf",
+    "pdfPath": "/assets/reports/Innovatr IRL X Human Subscription.pdf",
     "hasDownload": true,
+    "videoPaths": [],
     "tags": ["Subscriptions", "Human Connection", "Customer Service", "Loyalty"],
     "isNew": false,
-    "accessLevel": "PUBLIC",
+    "access": "members",
+    "accessLevel": "STARTER",
     "content": {
       "intro": "South Africans can now subscribe to almost anything. Data. Coffee. Groceries. Events. Entertainment. The convenience is appreciated, but it is no longer enough to keep people locked in. Subscriptions have become a normal part of modern life and normal rarely inspires loyalty. What stands out now is not automation. It is attention.\n\nOur latest Innovatr research shows that when a subscription includes personal touches retention climbs by thirty percent. A check in written by a human rather than a bot. A small reward that arrives without being expected. A reminder that feels considerate rather than transactional. These touches create a feeling of recognition and people stay where they feel seen.",
       "sections": [
@@ -646,8 +680,10 @@
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": [],
     "tags": ["Wellness", "Calm", "Luxury", "Self-Care"],
     "isNew": false,
+    "access": "members",
     "accessLevel": "STARTER",
     "content": {
       "intro": "After a decade of glorifying the grind, South Africans are rebelling in favour of rest. The flex now is who can be less frantic. Younger generations openly brag about getting 8 hours of sleep and logging off at 5 pm instead of pulling all-nighters. Balance is as desirable as success these days, and that balance means finding pockets of calm.",
@@ -682,8 +718,10 @@
     "coverImage": "/assets/covers/launch-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": [],
     "tags": ["Functional Drinks", "Alcohol Innovation", "Wellness", "Beverages"],
     "isNew": true,
+    "access": "free",
     "accessLevel": "PUBLIC",
     "content": {
       "intro": "The lines between wellness and indulgence are blurring. A new wave of functional alcoholic beverages is emerging — drinks infused with adaptogens, low-sugar formulas, and clean ingredient lists.\n\nConsumers want to enjoy themselves without the guilt or the hangover. These launches prove that drinking can be part of a balanced lifestyle, not a departure from it.",
@@ -712,14 +750,16 @@
     "category": "IRL",
     "displayCategories": ["Food", "Bev", "Services", "All"],
     "industry": "Services",
-    "publishDate": "2025-12-16",
-    "date": "2025-12-16",
-    "status": "scheduled",
+    "publishDate": "2025-08-01",
+    "date": "2025-08-01",
+    "status": "live",
     "coverImage": "/assets/covers/irl-cover.png",
-    "pdfPath": "/assets/reports/innovatr-irl-the-return-of-the-third-place.pdf",
+    "pdfPath": "/assets/reports/Innovatr IRL X The Return of the Third Place.pdf",
     "hasDownload": true,
+    "videoPaths": [],
     "tags": ["Third Place", "Community", "Social Spaces", "Wellbeing"],
     "isNew": false,
+    "access": "free",
     "accessLevel": "PUBLIC",
     "content": {
       "intro": "People are returning to gentle social spaces that give them a moment to breathe. Cafes, parks and small community spots are becoming emotional anchors. South Africans are looking for places where they can be alone but not feel alone.",
@@ -754,8 +794,10 @@
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": [],
     "tags": ["On Demand", "Convenience", "Delivery", "Services"],
     "isNew": false,
+    "access": "members",
     "accessLevel": "STARTER",
     "content": {
       "intro": "Need one avocado, a pharmacy run, or someone to wait for your geyser repair? There is an app or a guy for that. The micro-errand economy refers to the booming landscape of ultra-convenience services handling the little tasks of life.\n\nThink grocery deliveries like Checkers Sixty60 dropping off a few items in 60 minutes, or Mr D couriers picking up your laundry or lunch on demand. These are not luxury splurges anymore – they are becoming everyday habits for middle-class South Africans.",
@@ -790,8 +832,10 @@
     "coverImage": "/assets/covers/launch-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": [],
     "tags": ["Wine Innovation", "Packaging", "Alcohol", "Format Innovation"],
     "isNew": true,
+    "access": "free",
     "accessLevel": "PUBLIC",
     "content": {
       "intro": "Wine is escaping the bottle. A new generation of formats is making wine more accessible, portable, and occasion-friendly. From 250ml cans to sleek pouches, these innovations are changing when, where, and how South Africans enjoy wine.",
@@ -826,8 +870,10 @@
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": [],
     "tags": ["Culture", "Humour", "Brand Voice", "South Africa"],
     "isNew": false,
+    "access": "members",
     "accessLevel": "STARTER",
     "content": {
       "intro": "South Africans bond through humour. It is how we cope, connect and read each other. When brands use the right tone, they feel familiar. When they miss the tone, they feel foreign.",
@@ -862,8 +908,10 @@
     "coverImage": "/assets/covers/launch-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": [],
     "tags": ["Craft", "Artisanal", "Premium", "Design", "Packaging"],
     "isNew": true,
+    "access": "free",
     "accessLevel": "PUBLIC",
     "content": {
       "intro": "The craft movement has gone mainstream. What started in beer and coffee has spread to every category — from snacks to skincare to household goods. Consumers are drawn to products that feel handmade, thoughtful, and authentic.",
@@ -898,8 +946,10 @@
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": [],
     "tags": ["Value", "Quality", "Consumer Trends", "FMCG"],
     "isNew": false,
+    "access": "members",
     "accessLevel": "STARTER",
     "content": {
       "intro": "People want better, not bigger. Quality has overtaken quantity across categories and South Africans are choosing products that feel crafted rather than bulky.",
@@ -934,8 +984,10 @@
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": [],
     "tags": ["Affordable Luxury", "Indulgence", "Consumer Behaviour", "FMCG"],
     "isNew": false,
+    "access": "members",
     "accessLevel": "STARTER",
     "content": {
       "intro": "Small joyful moments are becoming emotional lifelines. People are saving harder but treating themselves smarter, choosing tiny luxuries that make life feel reachable.",
@@ -966,8 +1018,10 @@
     "coverImage": "/assets/covers/insights-cover.png",
     "pdfPath": null,
     "hasDownload": false,
+    "videoPaths": [],
     "tags": ["Gen Z", "Alcohol", "Mindful Drinking", "Youth Trends"],
     "isNew": false,
+    "access": "members",
     "accessLevel": "STARTER",
     "content": {
       "intro": "Gen Z is choosing presence over excess. They drink less often, but when they do, they want flavour, intention and identity. Alcohol now has to mean something.",
@@ -983,6 +1037,272 @@
         {
           "heading": "Innovatr takeaway",
           "body": "Gen Z is rewriting the rules of drinking culture. Brands that adapt — offering quality, meaning, and flexibility — will earn their loyalty. Those that do not will be left behind."
+        }
+      ]
+    }
+  },
+  {
+    "id": 28,
+    "title": "Innovatr Inside: Upsiide Overview",
+    "teaser": "Upsiide is our flagship idea testing platform. It captures real consumer behaviour through swipe-based decisions, giving you clarity on which ideas resonate and why. This is where testing meets truth.",
+    "slug": "upsiide-overview",
+    "series": "Inside",
+    "category": "Inside",
+    "displayCategories": ["Services", "All"],
+    "industry": "Services",
+    "publishDate": "2025-09-02",
+    "date": "2025-09-02",
+    "status": "live",
+    "coverImage": "/assets/covers/inside-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "videoPaths": ["/assets/videos/Innovatr Inside X Upsiide Overview.mp4", "/assets/videos/Innovatr Inside X Why Upsiide.mp4"],
+    "tags": ["Upsiide", "Idea Testing", "Behavioural Research", "Innovatr Tools"],
+    "isNew": false,
+    "access": "free",
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "Upsiide is the behavioural idea testing platform that powers Test24. It uses swipe-based decisions to capture genuine consumer preference — not what people say they like, but what they actually choose.\n\nThis overview introduces the core capabilities of Upsiide and shows why it has become the go-to tool for innovation teams who need fast, reliable answers.",
+      "sections": [
+        {
+          "heading": "How It Works",
+          "body": "Consumers see your ideas and swipe yes, no, or maybe. They then choose their favourite from the ideas they liked.\n\nThis simple mechanism reveals true commitment — the gap between interest and intent. You see not just what people like, but what they would actually pick."
+        },
+        {
+          "heading": "Why It Matters",
+          "body": "Traditional surveys ask people to rate. Upsiide asks them to choose. This behavioural approach produces data that predicts real-world performance far more accurately.\n\nYou get commitment scores, emotional drivers, and competitive context — everything you need to make confident decisions."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "Upsiide turns gut feeling into evidence. It helps teams move faster, argue less, and launch with confidence."
+        }
+      ]
+    }
+  },
+  {
+    "id": 29,
+    "title": "Innovatr Inside: Building Tests with Upsiide",
+    "teaser": "Learn how to create powerful idea tests using Upsiide. From setting up your study to crafting the right questions, this guide walks you through the creation experience step by step.",
+    "slug": "building-tests-with-upsiide",
+    "series": "Inside",
+    "category": "Inside",
+    "displayCategories": ["Services", "All"],
+    "industry": "Services",
+    "publishDate": "2025-09-09",
+    "date": "2025-09-09",
+    "status": "live",
+    "coverImage": "/assets/covers/inside-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "videoPaths": ["/assets/videos/Innovatr Inside X Upsiide Creation Experience.mp4"],
+    "tags": ["Upsiide", "Test Creation", "Research Design", "Innovatr Tools"],
+    "isNew": false,
+    "access": "free",
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "Building a great test starts with understanding the tools at your disposal. This guide walks you through the Upsiide creation experience — from defining your objectives to launching your study.\n\nWhether you are testing concepts, packaging, or messaging, the process is designed to be intuitive and fast.",
+      "sections": [
+        {
+          "heading": "Setting Up Your Study",
+          "body": "Define your audience: Who should see your ideas? Set quotas and filters to reach the right people.\n\nUpload your ideas: Add images, text, or both. Keep it real — show what consumers will actually see.\n\nCraft your questions: Add context with screeners and follow-ups. Keep it focused."
+        },
+        {
+          "heading": "Best Practices",
+          "body": "Keep ideas comparable: Test apples against apples. Ensure each idea is at a similar stage of development.\n\nLimit the number: 5-10 ideas per study works best. Too many creates fatigue.\n\nWrite clear briefs: Describe each idea simply. Avoid jargon."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "Great tests lead to great decisions. Take time to set up your study properly and the insights will follow."
+        }
+      ]
+    }
+  },
+  {
+    "id": 30,
+    "title": "Innovatr Inside: The Respondent Experience",
+    "teaser": "See Upsiide through the eyes of a respondent. This walkthrough shows exactly what consumers experience when they take part in an Upsiide study — and why the design leads to better data.",
+    "slug": "the-respondent-experience",
+    "series": "Inside",
+    "category": "Inside",
+    "displayCategories": ["Services", "All"],
+    "industry": "Services",
+    "publishDate": "2025-09-16",
+    "date": "2025-09-16",
+    "status": "live",
+    "coverImage": "/assets/covers/inside-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "videoPaths": ["/assets/videos/Innovatr Inside X Upsiide Respondent Experience.mp4"],
+    "tags": ["Upsiide", "Respondent Experience", "Research Quality", "Innovatr Tools"],
+    "isNew": false,
+    "access": "free",
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "The best research happens when respondents are engaged. Upsiide is designed to feel more like a game than a survey — keeping people focused and producing authentic responses.\n\nThis walkthrough shows exactly what consumers experience when they take part in an Upsiide study.",
+      "sections": [
+        {
+          "heading": "The Swipe Experience",
+          "body": "Respondents see one idea at a time. They swipe right for yes, left for no, or down for maybe.\n\nThis simple mechanic mirrors real decision-making — quick, intuitive, and honest. No overthinking. No social desirability bias."
+        },
+        {
+          "heading": "The Choice Phase",
+          "body": "After swiping, respondents choose their favourite from the ideas they liked. This reveals true commitment — the difference between liking something and actually wanting it."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "Engaged respondents produce better data. Upsiide's design keeps people interested and honest — which means you can trust the results."
+        }
+      ]
+    }
+  },
+  {
+    "id": 31,
+    "title": "Innovatr Inside: The Analysis Engine",
+    "teaser": "Upsiide does not just collect data — it interprets it. Discover how the analysis engine turns swipes and choices into actionable insights that guide real business decisions.",
+    "slug": "the-analysis-engine",
+    "series": "Inside",
+    "category": "Inside",
+    "displayCategories": ["Services", "All"],
+    "industry": "Services",
+    "publishDate": "2025-09-23",
+    "date": "2025-09-23",
+    "status": "live",
+    "coverImage": "/assets/covers/inside-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "videoPaths": ["/assets/videos/Innovatr Inside X Upsiide Analysis Experience.mp4"],
+    "tags": ["Upsiide", "Data Analysis", "Insights", "Innovatr Tools"],
+    "isNew": false,
+    "access": "free",
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "Data is only useful if you can understand it. Upsiide's analysis engine transforms raw responses into clear, visual insights that anyone can interpret.\n\nThis guide shows you what to look for and how to use the platform to find the stories in your data.",
+      "sections": [
+        {
+          "heading": "Key Metrics",
+          "body": "Interest: How many people swiped yes?\n\nCommitment: How many chose this as their favourite?\n\nIdea Score: The combined measure of appeal and preference.\n\nThese metrics work together to show you which ideas have genuine potential."
+        },
+        {
+          "heading": "Digging Deeper",
+          "body": "Compare across segments: See how different audiences respond.\n\nExplore emotional drivers: Understand why people choose.\n\nIdentify gaps: Find opportunities to improve."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "The analysis engine is where insight happens. Take time to explore — the answers are waiting for you."
+        }
+      ]
+    }
+  },
+  {
+    "id": 32,
+    "title": "Innovatr Inside: How Innovatr Research Works",
+    "teaser": "A complete overview of the Innovatr research approach. From agile methodology to our unique blend of quant and qual, this guide explains how we deliver fast, reliable insights.",
+    "slug": "how-innovatr-research-works",
+    "series": "Inside",
+    "category": "Inside",
+    "displayCategories": ["Services", "All"],
+    "industry": "Services",
+    "publishDate": "2025-09-30",
+    "date": "2025-09-30",
+    "status": "live",
+    "coverImage": "/assets/covers/inside-cover.png",
+    "pdfPath": null,
+    "hasDownload": false,
+    "videoPaths": ["/assets/videos/Innovatr Inside X Agile Research Explained.mp4"],
+    "tags": ["Agile Research", "Methodology", "Quant Qual", "Innovatr Tools"],
+    "isNew": false,
+    "access": "free",
+    "accessLevel": "PUBLIC",
+    "content": {
+      "intro": "Innovatr research is built for speed without sacrificing depth. We combine behavioural testing with AI-powered qualitative analysis to deliver insights in hours, not weeks.\n\nThis guide explains the methodology behind our approach and why it works.",
+      "sections": [
+        {
+          "heading": "The Agile Approach",
+          "body": "Traditional research takes too long. By the time results arrive, the market has moved.\n\nInnovatr uses agile principles: test early, learn fast, iterate quickly. We believe in good-enough data now rather than perfect data too late."
+        },
+        {
+          "heading": "Quant Meets Qual",
+          "body": "Numbers tell you what. Words tell you why. We combine both.\n\nBehavioural data from Upsiide shows you which ideas win. AI Qual analysis reveals the emotions and motivations behind those choices."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "Fast, reliable research is not a compromise — it is a competitive advantage. Innovatr helps teams make better decisions, faster."
+        }
+      ]
+    }
+  },
+  {
+    "id": 33,
+    "title": "The Age of Effortless",
+    "teaser": "South Africans are craving ease. In a world of admin overload and constant friction, the brands that remove effort win loyalty. Effortless is the new luxury.",
+    "slug": "the-age-of-effortless",
+    "series": "IRL",
+    "category": "IRL",
+    "displayCategories": ["Services", "Banking", "FMCG", "All"],
+    "industry": "Services",
+    "publishDate": "2025-12-01",
+    "date": "2025-12-01",
+    "status": "draft",
+    "coverImage": "/assets/covers/irl-cover.png",
+    "pdfPath": "/assets/reports/Innovatr IRL X The Age Of Effortless.pdf",
+    "hasDownload": true,
+    "videoPaths": [],
+    "tags": ["Effortless", "Convenience", "Friction", "Customer Experience"],
+    "isNew": false,
+    "access": "members",
+    "accessLevel": "STARTER",
+    "content": {
+      "intro": "South Africans are exhausted. Everyday life has become one long queue — digital or physical. Bills. Traffic. Load shedding schedules. Banking admin. Endless decision-making.\n\nPeople do not want brands to impress them. They want brands to remove friction. Effortless is not laziness. It is self-preservation.",
+      "sections": [
+        {
+          "heading": "The admin overload",
+          "body": "68% say life admin has worsened in the past 3 years. 57% avoid brands that ask for too much information. 53% abandon online carts when something feels annoying.\n\nEffort is now a deal-breaker."
+        },
+        {
+          "heading": "What effortless looks like",
+          "body": "Predictability over perks. Plain language. Visual transparency. Honest trade-offs. Permission to downgrade.\n\nWhen experiences feel effortless, consumers convert faster, repeat purchase, spend more, and stick through price increases."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "Ease feels like kindness. Kindness earns margin. The brands that make life simpler will earn loyalty that discounts cannot buy."
+        }
+      ]
+    }
+  },
+  {
+    "id": 34,
+    "title": "Indulgence Without Guilt",
+    "teaser": "South Africans are embracing small, intentional pleasures as emotional survival tools in a high-pressure world. Guilt is out. Permission is in.",
+    "slug": "indulgence-without-guilt",
+    "series": "IRL",
+    "category": "IRL",
+    "displayCategories": ["Food", "FMCG", "Bev", "All"],
+    "industry": "FMCG",
+    "publishDate": "2025-12-01",
+    "date": "2025-12-01",
+    "status": "draft",
+    "coverImage": "/assets/covers/irl-cover.png",
+    "pdfPath": "/assets/reports/Innovatr IRL X Indulgence Without Guilt.pdf",
+    "hasDownload": true,
+    "videoPaths": [],
+    "tags": ["Indulgence", "Guilt-Free", "Treats", "Emotional Wellbeing"],
+    "isNew": false,
+    "access": "members",
+    "accessLevel": "STARTER",
+    "content": {
+      "intro": "People are not overindulging. They are overcompensating. In a world of stress, uncertainty, and constant pressure, small pleasures have become essential coping mechanisms.\n\n74% of South Africans say they deserve a treat after a hard week. 62% say small indulgences help them cope. Pleasure needs no permission anymore.",
+      "sections": [
+        {
+          "heading": "The shift in mindset",
+          "body": "Guilt is being replaced by intentionality. People are choosing treats consciously — not as failures of willpower, but as acts of self-care.\n\nThis is not about excess. It is about balance and emotional survival."
+        },
+        {
+          "heading": "How brands can respond",
+          "body": "Own the permission space. Make treats feel deserved, not forbidden. Focus on emotional reward, not just taste or price.\n\nIndulgence drives big loyalty from small purchases."
+        },
+        {
+          "heading": "Innovatr takeaway",
+          "body": "Indulgence is not a trend. It is emotional behaviour. Brands that help people feel good about feeling good will win."
         }
       ]
     }
