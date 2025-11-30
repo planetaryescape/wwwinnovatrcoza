@@ -22,7 +22,6 @@ export const users = pgTable("users", {
   name: text("name"),
   company: text("company"),
   companyId: varchar("company_id"),
-  profilePictureUrl: text("profile_picture_url"),
   membershipTier: varchar("membership_tier", { length: 20 })
     .notNull()
     .default("STARTER"),
@@ -215,7 +214,6 @@ export const companies = pgTable("companies", {
     .default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   domain: text("domain"),
-  logoUrl: text("logo_url"),
   tier: varchar("tier", { length: 20 }).notNull().default("STARTER"),
   contractStart: timestamp("contract_start"),
   contractEnd: timestamp("contract_end"),

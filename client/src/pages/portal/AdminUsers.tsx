@@ -28,7 +28,6 @@ import {
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Search, 
   Plus, 
@@ -58,7 +57,6 @@ interface AdminUser {
   name: string | null;
   email: string;
   company: string | null;
-  companyId: string | null;
   membershipTier: string;
   role: string;
   status: string;
@@ -71,12 +69,6 @@ interface AdminUser {
   internalNotes?: string | null;
   createdAt: string;
   lastLoginAt: string | null;
-}
-
-interface Company {
-  id: string;
-  name: string;
-  logoUrl: string | null;
 }
 
 interface Subscription {
@@ -104,7 +96,6 @@ export default function AdminUsers() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<AdminUser[]>([]);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const [companies, setCompanies] = useState<Company[]>([]);
   const [search, setSearch] = useState("");
   const [tierFilter, setTierFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -115,41 +106,12 @@ export default function AdminUsers() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editNotes, setEditNotes] = useState("");
 
-  const INNOVATR_LOGO = "/attached_assets/Screenshot 2025-10-21 at 15.20.15_1764527855642.png";
-
-  const isInnovatrUser = (email: string) => {
-    const adminEmails = ["hannah@innovatr.co.za", "richard@innovatr.co.za"];
-    return adminEmails.includes(email.toLowerCase()) || email.toLowerCase().endsWith("@innovatr.co.za");
-  };
-
-  const getCompanyLogo = (companyId: string | null) => {
-    if (!companyId) return null;
-    const company = companies.find(c => c.id === companyId);
-    return company?.logoUrl || null;
-  };
-
-  const getUserLogo = (user: AdminUser) => {
-    if (user.companyId) {
-      return getCompanyLogo(user.companyId);
-    }
-    if (isInnovatrUser(user.email)) {
-      return INNOVATR_LOGO;
-    }
-    return null;
-  };
-
-  const getInitials = (name: string | null) => {
-    if (!name) return "U";
-    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
-  };
-
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [usersRes, subsRes, companiesRes] = await Promise.all([
+      const [usersRes, subsRes] = await Promise.all([
         fetch("/api/admin/users"),
         fetch("/api/admin/subscriptions"),
-        fetch("/api/admin/companies"),
       ]);
       if (!usersRes.ok) throw new Error("Failed to fetch users");
       const usersData = await usersRes.json();
@@ -158,11 +120,6 @@ export default function AdminUsers() {
       if (subsRes.ok) {
         const subsData = await subsRes.json();
         setSubscriptions(subsData);
-      }
-      
-      if (companiesRes.ok) {
-        const companiesData = await companiesRes.json();
-        setCompanies(companiesData);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load users");
@@ -456,18 +413,9 @@ export default function AdminUsers() {
                     >
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8" data-testid={`avatar-user-${user.id}`}>
-                            {getUserLogo(user) ? (
-                              <AvatarImage 
-                                src={getUserLogo(user)!} 
-                                alt={user.company || user.name || "User"} 
-                                className="object-contain bg-white p-0.5"
-                              />
-                            ) : null}
-                            <AvatarFallback className="bg-gray-100 text-gray-500 text-xs">
-                              {getUserLogo(user) ? null : getInitials(user.name)}
-                            </AvatarFallback>
-                          </Avatar>
+                          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                            <User className="w-4 h-4 text-gray-500" />
+                          </div>
                           <div>
                             <p className="font-medium text-sm text-gray-900">{user.name || "—"}</p>
                             <p className="text-xs text-muted-foreground">{user.email}</p>
@@ -525,18 +473,9 @@ export default function AdminUsers() {
             <>
               <SheetHeader className="pb-4">
                 <div className="flex items-center gap-3 mb-2">
-                  <Avatar className="h-12 w-12" data-testid="avatar-drawer-user">
-                    {getUserLogo(selectedUser) ? (
-                      <AvatarImage 
-                        src={getUserLogo(selectedUser)!} 
-                        alt={selectedUser.company || selectedUser.name || "User"} 
-                        className="object-contain bg-white p-1"
-                      />
-                    ) : null}
-                    <AvatarFallback className="bg-gray-100 text-gray-500 text-base">
-                      {getUserLogo(selectedUser) ? null : getInitials(selectedUser.name)}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                    <User className="w-6 h-6 text-gray-500" />
+                  </div>
                   <div>
                     <SheetTitle 
                       className="text-xl"

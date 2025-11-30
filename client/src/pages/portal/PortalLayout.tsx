@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -26,7 +26,6 @@ import {
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { UserAvatar } from "@/components/UserAvatar";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -93,38 +92,15 @@ interface PortalLayoutProps {
   children: React.ReactNode;
 }
 
-interface Company {
-  id: string;
-  name: string;
-  logoUrl: string | null;
-}
-
 export default function PortalLayout({ children }: PortalLayoutProps) {
   const [location, setLocation] = useLocation();
   const { user, logout, isAuthenticated, isMember, isAdmin } = useAuth();
-  const [companyLogo, setCompanyLogo] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
       setLocation("/");
     }
   }, [isAuthenticated, setLocation]);
-
-  useEffect(() => {
-    const fetchCompanyLogo = async () => {
-      if (!user?.companyId) return;
-      try {
-        const res = await fetch(`/api/member/company?companyId=${user.companyId}`);
-        if (res.ok) {
-          const company: Company = await res.json();
-          setCompanyLogo(company.logoUrl);
-        }
-      } catch (error) {
-        console.error("Failed to fetch company logo:", error);
-      }
-    };
-    fetchCompanyLogo();
-  }, [user?.companyId]);
 
   if (!isAuthenticated) {
     return null;
@@ -171,32 +147,17 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                     Innovatr
                   </button>
                 </div>
-                <div className="flex items-center gap-3">
-                  {user && (
-                    <UserAvatar 
-                      user={{
-                        name: user.name,
-                        email: user.email || "",
-                        companyId: user.companyId,
-                        role: isAdmin ? "ADMIN" : "MEMBER",
-                      }}
-                      companyLogoUrl={companyLogo}
-                      size="md"
-                      data-testid="avatar-user-profile"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" data-testid="text-member-name">{user?.name}</p>
-                    <p className="text-xs text-muted-foreground truncate mb-1" data-testid="text-member-company">
-                      {user?.company || user?.email}
-                    </p>
-                    <Badge 
-                      className={`${isMember ? getTierColor(user?.tier || 'entry') : 'bg-muted text-muted-foreground'} text-xs`}
-                      data-testid={`badge-member-tier-${user?.tier || 'free'}`}
-                    >
-                      {isMember ? `${user?.tier?.toUpperCase()} Member` : 'FREE TIER'}
-                    </Badge>
-                  </div>
+                <div>
+                  <p className="text-sm font-medium" data-testid="text-member-name">{user?.name}</p>
+                  <p className="text-xs text-muted-foreground mb-2" data-testid="text-member-company">
+                    {user?.company || user?.email}
+                  </p>
+                  <Badge 
+                    className={`${isMember ? getTierColor(user?.tier || 'entry') : 'bg-muted text-muted-foreground'} text-xs`}
+                    data-testid={`badge-member-tier-${user?.tier || 'free'}`}
+                  >
+                    {isMember ? `${user?.tier?.toUpperCase()} Member` : 'FREE TIER'}
+                  </Badge>
                 </div>
               </div>
               <SidebarGroupLabel data-testid="label-portal-menu">Portal Menu</SidebarGroupLabel>

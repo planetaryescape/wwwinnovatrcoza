@@ -41,11 +41,6 @@ Preferred communication style: Simple, everyday language.
   - **SCALE**: Premium tier with full feature access
 - **Admin Access**: Users with hannah@innovatr.co.za or richard@innovatr.co.za email addresses automatically get admin access to `/portal/admin`
 - **Access Control**: Starter members access limited content; Growth and Scale members access full portal features. Admin users have unrestricted access to all functionality and admin tools.
-- **Profile Pictures**: 
-  - Innovatr/admin users (emails ending with @innovatr.co.za): Display Innovatr logo (`attached_assets/Screenshot 2025-10-21 at 15.20.15_1764527855642.png`)
-  - Company users (users with companyId): Display company logo from the companies table
-  - Regular users: Display initials-based avatar fallback
-  - Users table includes `profilePictureUrl` field for custom profile pictures
 
 ### Members Portal
 - **Purpose**: Personalized dashboard for authenticated members to manage research, view insights, and engage.
