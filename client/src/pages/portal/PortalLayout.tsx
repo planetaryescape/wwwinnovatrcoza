@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -22,10 +22,12 @@ import {
   LogOut,
   Lock,
   Shield,
+  User,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -92,15 +94,38 @@ interface PortalLayoutProps {
   children: React.ReactNode;
 }
 
+interface Company {
+  id: string;
+  name: string;
+  logoUrl: string | null;
+}
+
 export default function PortalLayout({ children }: PortalLayoutProps) {
   const [location, setLocation] = useLocation();
   const { user, logout, isAuthenticated, isMember, isAdmin } = useAuth();
+  const [companyLogo, setCompanyLogo] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
       setLocation("/");
     }
   }, [isAuthenticated, setLocation]);
+
+  useEffect(() => {
+    const fetchCompanyLogo = async () => {
+      if (!user?.companyId) return;
+      try {
+        const res = await fetch(`/api/member/company?companyId=${user.companyId}`);
+        if (res.ok) {
+          const company: Company = await res.json();
+          setCompanyLogo(company.logoUrl);
+        }
+      } catch (error) {
+        console.error("Failed to fetch company logo:", error);
+      }
+    };
+    fetchCompanyLogo();
+  }, [user?.companyId]);
 
   if (!isAuthenticated) {
     return null;
@@ -126,6 +151,11 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
     }
   };
 
+  const getInitials = (name?: string) => {
+    if (!name) return "U";
+    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+  };
+
   const style = {
     "--sidebar-width": "16rem",
     "--sidebar-width-icon": "3rem",
@@ -147,17 +177,33 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                     Innovatr
                   </button>
                 </div>
-                <div>
-                  <p className="text-sm font-medium" data-testid="text-member-name">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground mb-2" data-testid="text-member-company">
-                    {user?.company || user?.email}
-                  </p>
-                  <Badge 
-                    className={`${isMember ? getTierColor(user?.tier || 'entry') : 'bg-muted text-muted-foreground'} text-xs`}
-                    data-testid={`badge-member-tier-${user?.tier || 'free'}`}
-                  >
-                    {isMember ? `${user?.tier?.toUpperCase()} Member` : 'FREE TIER'}
-                  </Badge>
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10" data-testid="avatar-user-profile">
+                    {companyLogo ? (
+                      <AvatarImage src={companyLogo} alt={user?.company || user?.name || "Profile"} className="object-contain bg-white p-1" />
+                    ) : null}
+                    <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+                      {companyLogo ? null : (
+                        user?.companyId ? (
+                          <User className="h-5 w-5" />
+                        ) : (
+                          getInitials(user?.name)
+                        )
+                      )}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate" data-testid="text-member-name">{user?.name}</p>
+                    <p className="text-xs text-muted-foreground truncate mb-1" data-testid="text-member-company">
+                      {user?.company || user?.email}
+                    </p>
+                    <Badge 
+                      className={`${isMember ? getTierColor(user?.tier || 'entry') : 'bg-muted text-muted-foreground'} text-xs`}
+                      data-testid={`badge-member-tier-${user?.tier || 'free'}`}
+                    >
+                      {isMember ? `${user?.tier?.toUpperCase()} Member` : 'FREE TIER'}
+                    </Badge>
+                  </div>
                 </div>
               </div>
               <SidebarGroupLabel data-testid="label-portal-menu">Portal Menu</SidebarGroupLabel>

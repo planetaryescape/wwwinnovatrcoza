@@ -214,6 +214,7 @@ export const companies = pgTable("companies", {
     .default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   domain: text("domain"),
+  logoUrl: text("logo_url"),
   tier: varchar("tier", { length: 20 }).notNull().default("STARTER"),
   contractStart: timestamp("contract_start"),
   contractEnd: timestamp("contract_end"),
