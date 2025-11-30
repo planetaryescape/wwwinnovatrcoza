@@ -89,8 +89,8 @@ function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: bool
   if (accessLevel === "STARTER" || accessLevel === "member") {
     if (!isLoggedIn) {
       return (
-        <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 shadow-sm" title="Members only">
-          <Lock className="w-3.5 h-3.5 text-gray-600" />
+        <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Members only">
+          <Lock className="w-3.5 h-3.5 text-muted-foreground" />
         </div>
       );
     }
@@ -104,7 +104,7 @@ function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: bool
     
     if (!isLoggedIn || userTierIndex < requiredTierIndex) {
       return (
-        <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 shadow-sm" title="Growth+ tier required">
+        <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Growth+ tier required">
           <Crown className="w-3.5 h-3.5 text-[#5B6EF7]" />
         </div>
       );
@@ -119,7 +119,7 @@ function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: bool
     
     if (!isLoggedIn || userTierIndex < requiredTierIndex) {
       return (
-        <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 shadow-sm" title="Scale tier required">
+        <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Scale tier required">
           <Crown className="w-3.5 h-3.5 text-[#5B6EF7]" />
         </div>
       );
@@ -139,7 +139,7 @@ function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: bool
     
     if (!hasAccess) {
       return (
-        <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 shadow-sm" title={`${allowedTiers[0]}+ tier required`}>
+        <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title={`${allowedTiers[0]}+ tier required`}>
           <Crown className="w-3.5 h-3.5 text-[#5B6EF7]" />
         </div>
       );
@@ -148,7 +148,7 @@ function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: bool
   
   if (accessLevel === "paid") {
     return (
-      <div className="absolute top-2 right-2 bg-white/90 rounded-full p-1.5 shadow-sm" title="Credits required">
+      <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Credits required">
         <CreditCard className="w-3.5 h-3.5 text-[#5B6EF7]" />
       </div>
     );
@@ -175,7 +175,7 @@ function ReportCard({ report, userTier, isLoggedIn }: { report: Report; userTier
   return (
     <Link href={`/portal/insights/${report.slug}`}>
       <article 
-        className="group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 hover:-translate-y-1 flex flex-col h-full"
+        className="group bg-card rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden border border-border hover:-translate-y-1 flex flex-col h-full"
         data-testid={`report-card-${report.id}`}
       >
         <div className="p-4 pb-0">
@@ -187,7 +187,7 @@ function ReportCard({ report, userTier, isLoggedIn }: { report: Report; userTier
             </Badge>
             <Badge 
               variant="secondary"
-              className="text-xs px-2.5 py-1 bg-gray-100 text-gray-600"
+              className="text-xs px-2.5 py-1 bg-muted text-muted-foreground"
             >
               {report.industry}
             </Badge>
@@ -214,13 +214,13 @@ function ReportCard({ report, userTier, isLoggedIn }: { report: Report; userTier
         
         <div className="p-4 flex flex-col flex-1">
           <h3 
-            className="font-serif text-xl leading-tight mb-2 text-gray-900 group-hover:text-[#5B6EF7] transition-colors line-clamp-2"
+            className="font-serif text-xl leading-tight mb-2 text-foreground group-hover:text-[#5B6EF7] transition-colors line-clamp-2"
             style={{ fontFamily: 'DM Serif Display, serif' }}
           >
             {report.title}
           </h3>
           
-          <p className="text-sm text-gray-600 leading-relaxed line-clamp-3 mb-4 flex-1">
+          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 mb-4 flex-1">
             {report.teaser}
           </p>
           
@@ -229,15 +229,15 @@ function ReportCard({ report, userTier, isLoggedIn }: { report: Report; userTier
               <Badge 
                 key={index} 
                 variant="secondary" 
-                className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 hover:bg-gray-200"
+                className="text-xs px-2 py-0.5 bg-muted text-muted-foreground hover:bg-muted/80"
               >
                 {tag}
               </Badge>
             ))}
           </div>
           
-          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-            <span className="text-sm text-gray-500">{formattedDate}</span>
+          <div className="flex items-center justify-between pt-3 border-t border-border">
+            <span className="text-sm text-muted-foreground">{formattedDate}</span>
             <div 
               className="flex items-center gap-1 text-sm font-medium transition-colors"
               style={{ color: '#5B6EF7' }}
@@ -294,26 +294,26 @@ export default function TrendsInsights() {
 
   return (
     <PortalLayout>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-background">
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="mb-8">
             <h1 
-              className="text-4xl md:text-5xl font-bold mb-3 text-gray-900"
+              className="text-4xl md:text-5xl font-bold mb-3 text-foreground"
               style={{ fontFamily: 'DM Serif Display, serif' }}
             >
               Trends & Insights Library
             </h1>
-            <p className="text-lg text-gray-600" style={{ fontFamily: 'Roboto, sans-serif' }}>Not trend fluff. Your inside track on South Africa’s shifting market.</p>
+            <p className="text-lg text-muted-foreground" style={{ fontFamily: 'Roboto, sans-serif' }}>Not trend fluff. Your inside track on South Africa’s shifting market.</p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 mb-8">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 placeholder="Search by title, topic, or tag..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-10 rounded-full border-gray-200 focus:border-[#5B6EF7] focus:ring-[#5B6EF7]"
+                className="pl-10 h-10 rounded-full border-border focus:border-[#5B6EF7] focus:ring-[#5B6EF7]"
                 data-testid="input-search-reports"
               />
             </div>
@@ -321,7 +321,7 @@ export default function TrendsInsights() {
             <div className="flex gap-2">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger 
-                  className="w-32 h-10 rounded-full border-gray-200"
+                  className="w-32 h-10 rounded-full border-border"
                   data-testid="select-category"
                 >
                   <SelectValue placeholder="Category" />
@@ -337,7 +337,7 @@ export default function TrendsInsights() {
 
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger 
-                  className="w-36 h-10 rounded-full border-gray-200"
+                  className="w-36 h-10 rounded-full border-border"
                   data-testid="select-sort"
                 >
                   <SelectValue placeholder="Sort" />
@@ -351,7 +351,7 @@ export default function TrendsInsights() {
             </div>
           </div>
 
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-sm text-muted-foreground mb-6">
             Showing {displayedReports.length} of {filteredAndSortedReports.length} reports
           </p>
 
@@ -363,7 +363,7 @@ export default function TrendsInsights() {
 
           {filteredAndSortedReports.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No reports match your search criteria.</p>
+              <p className="text-muted-foreground text-lg">No reports match your search criteria.</p>
               <Button 
                 variant="outline" 
                 className="mt-4"

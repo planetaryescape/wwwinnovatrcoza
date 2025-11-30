@@ -1,0 +1,36 @@
+ou are helping me debug a light / dark mode bug in my Innovatr portal.
+The problem only appears on the Trends & Insights library page at /portal/trends. All other pages switch correctly between light and dark mode.
+
+Find the React file that renders the Trends & Insights library page. It is likely named something like:
+
+client/src/pages/portal/TrendsInsights.tsx
+
+or similar under client/src/pages/portal/
+
+Compare its outer layout to another portal page where light / dark mode works correctly, for example:
+
+client/src/pages/portal/InsightDetail.tsx
+
+or client/src/pages/portal/PastResearch.tsx
+
+Make the Trends & Insights page use the same layout, wrappers and theme classes as the working page:
+
+Use the same top-level container component if there is one (for example PortalLayout, PageLayout or similar).
+
+Make sure the outer div uses theme friendly classes or CSS variables (for example className="min-h-screen bg-background text-foreground" or equivalent) instead of hard coded colours like background: #ffffff or bg-white / bg-black.
+
+Remove or update any custom CSS (including CSS modules or styled components) that forces a background or text colour which ignores dark mode. Use the design system tokens or Tailwind dark: variants instead.
+
+Check for any special cases:
+
+If there is a custom <Page> or <Container> component that sets its own background, make sure it uses the same props / classes as on the working pages.
+
+If there is any global CSS targeting .trends-page, .library-page or similar, update it so it uses background-color: var(--background) and color: var(--foreground) (or the equivalent in this project) instead of fixed colours.
+
+When you are done, confirm:
+
+In light mode, the Trends & Insights page background and text match the other pages.
+
+In dark mode, the same page switches correctly and there is no white block or unreadable text left.
+
+Do not change any copy, titles, card content, or routing. Only adjust layout and styling so the theme behaviour for /portal/trends matches the rest of the portal.
