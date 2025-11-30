@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Crown, CreditCard } from "lucide-react";
+import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Crown, CreditCard, Building2 } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { Link } from "wouter";
 import reportsData from "@/data/reports.json";
@@ -51,14 +51,14 @@ function getCategoryStyle(category: string) {
 type AccessLevel = "public" | "member" | "tier" | "paid";
 
 interface Report {
-  id: number;
+  id: number | string;
   category: string;
   series?: string;
   displayCategories?: string[];
   industry: string;
   date: string;
   publishDate?: string;
-  status?: "live" | "scheduled" | "draft";
+  status?: "live" | "scheduled" | "draft" | "published";
   title: string;
   teaser: string;
   slug: string;
@@ -73,14 +73,25 @@ interface Report {
   allowedTiers?: string[];
   creditType?: string;
   creditCost?: number;
+  clientCompanyIds?: string[];
+  isClientReport?: boolean;
   content?: {
     intro: string;
     sections: { heading: string; body: string }[];
   };
 }
 
-function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: boolean) {
+function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: boolean, userCompanyId?: string) {
   const accessLevel = report.accessLevel || "PUBLIC";
+  
+  // Company-only reports show a building icon
+  if (accessLevel === "companyOnly" || report.isClientReport) {
+    return (
+      <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Your organization">
+        <Building2 className="w-3.5 h-3.5 text-emerald-600" />
+      </div>
+    );
+  }
   
   if (accessLevel === "PUBLIC" || accessLevel === "public") {
     return null;
@@ -157,7 +168,7 @@ function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: bool
   return null;
 }
 
-function ReportCard({ report, userTier, isLoggedIn }: { report: Report; userTier?: string; isLoggedIn?: boolean }) {
+function ReportCard({ report, userTier, isLoggedIn, userCompanyId }: { report: Report; userTier?: string; isLoggedIn?: boolean; userCompanyId?: string }) {
   const formattedDate = new Date(report.date).toLocaleDateString('en-GB', {
     day: '2-digit',
     month: '2-digit',
@@ -166,7 +177,7 @@ function ReportCard({ report, userTier, isLoggedIn }: { report: Report; userTier
 
   const categoryStyle = getCategoryStyle(report.category);
   const coverImage = getCoverImage(report.category);
-  const accessIndicator = getAccessIndicator(report, userTier, isLoggedIn);
+  const accessIndicator = getAccessIndicator(report, userTier, isLoggedIn, userCompanyId);
   
   const accessLevel = report.accessLevel || "PUBLIC";
   const isPublicWithPdf = (accessLevel === "PUBLIC" || accessLevel === "public") && report.pdfPath;
@@ -257,20 +268,57 @@ export default function TrendsInsights() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [showAll, setShowAll] = useState(false);
+  const [clientReports, setClientReports] = useState<Report[]>([]);
   const { user } = useAuth();
   const userTier = user?.membershipTier;
+  const userCompanyId = user?.companyId;
+
+  // Fetch all reports for authenticated user (includes client-specific reports based on their companyId)
+  useEffect(() => {
+    const fetchMemberReports = async () => {
+      if (!user?.email) {
+        setClientReports([]);
+        return;
+      }
+      
+      try {
+        const res = await fetch(`/api/member/reports?email=${encodeURIComponent(user.email)}`);
+        if (res.ok) {
+          const data = await res.json();
+          // Format client-specific reports (those with clientCompanyIds)
+          const formattedReports = data
+            .filter((r: any) => r.clientCompanyIds && r.clientCompanyIds.length > 0)
+            .map((r: any) => ({
+              ...r,
+              isClientReport: true,
+              tags: r.tags || [],
+              isNew: r.isNew ?? false,
+              status: "live" as const, // API returns published, but frontend uses "live"
+            }));
+          setClientReports(formattedReports);
+        }
+      } catch (error) {
+        console.error("Failed to fetch member reports:", error);
+      }
+    };
+    
+    fetchMemberReports();
+  }, [user?.email]);
 
   const filteredAndSortedReports = useMemo(() => {
-    let filtered = (reportsData as Report[]).filter((report) => {
+    // Combine static reports with client-specific reports
+    const allReports = [...(reportsData as Report[]), ...clientReports];
+    
+    let filtered = allReports.filter((report) => {
       // Only show live reports to public users (status must be "live" or undefined for backwards compatibility)
-      const isLive = !report.status || report.status === "live";
+      const isLive = !report.status || report.status === "live" || report.status === "published";
       if (!isLive) return false;
       
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch = 
         report.title.toLowerCase().includes(searchLower) ||
         report.teaser.toLowerCase().includes(searchLower) ||
-        report.tags.some(tag => tag.toLowerCase().includes(searchLower));
+        (report.tags || []).some(tag => tag.toLowerCase().includes(searchLower));
       const matchesCategory = selectedCategory === "all" || report.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
@@ -287,7 +335,7 @@ export default function TrendsInsights() {
           return 0;
       }
     });
-  }, [searchQuery, selectedCategory, sortBy]);
+  }, [searchQuery, selectedCategory, sortBy, clientReports]);
 
   const displayedReports = showAll ? filteredAndSortedReports : filteredAndSortedReports.slice(0, 6);
   const hasMoreReports = filteredAndSortedReports.length > 6;
@@ -357,7 +405,7 @@ export default function TrendsInsights() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {displayedReports.map((report) => (
-              <ReportCard key={report.id} report={report} userTier={userTier} isLoggedIn={!!user} />
+              <ReportCard key={report.id} report={report} userTier={userTier} isLoggedIn={!!user} userCompanyId={userCompanyId ?? undefined} />
             ))}
           </div>
 

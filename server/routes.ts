@@ -624,15 +624,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Public reports endpoint (for member portal)
+  // Public reports endpoint (excludes company-only reports)
   app.get("/api/reports", async (req, res) => {
     try {
       const reports = await storage.getAllReports();
       // Filter to only published, non-archived reports for public access
+      // Exclude any reports with clientCompanyIds (those are company-specific)
       const publicReports = reports.filter(r => 
-        r.status === "published" && !r.isArchived
+        r.status === "published" && 
+        !r.isArchived &&
+        (!r.clientCompanyIds || r.clientCompanyIds.length === 0)
       );
       res.json(publicReports);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Member reports endpoint (authenticated, includes client-specific reports)
+  app.get("/api/member/reports", async (req, res) => {
+    try {
+      // Get user from query param (for simplicity) - in production this should be from session
+      const { email } = req.query;
+      
+      if (!email) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      // Look up user to get their companyId
+      const user = await storage.getUserByEmail(email as string);
+      if (!user) {
+        return res.status(401).json({ error: "User not found" });
+      }
+      
+      const userCompanyId = user.companyId;
+      const reports = await storage.getAllReports();
+      
+      // Filter reports based on access rules
+      const filteredReports = reports.filter(r => {
+        // Must be published and not archived
+        if (r.status !== "published" || r.isArchived) return false;
+        
+        // If report has no client restrictions, it's publicly accessible
+        if (!r.clientCompanyIds || r.clientCompanyIds.length === 0) return true;
+        
+        // For reports with clientCompanyIds, only show to users from those companies
+        return userCompanyId && r.clientCompanyIds.includes(userCompanyId);
+      });
+      
+      res.json(filteredReports);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
