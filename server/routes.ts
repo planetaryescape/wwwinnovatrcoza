@@ -700,6 +700,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Company management endpoints
+  app.get("/api/admin/companies", async (req, res) => {
+    try {
+      const companies = await storage.getAllCompanies();
+      res.json(companies);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/admin/companies/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const company = await storage.getCompany(id);
+      if (!company) {
+        return res.status(404).json({ error: "Company not found" });
+      }
+      res.json(company);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/admin/companies", async (req, res) => {
+    try {
+      const company = await storage.createCompany(req.body);
+      res.status(201).json(company);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/admin/companies/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const company = await storage.getCompany(id);
+      if (!company) {
+        return res.status(404).json({ error: "Company not found" });
+      }
+      await storage.updateCompany(id, req.body);
+      const updated = await storage.getCompany(id);
+      res.json(updated);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/admin/companies/:id/users", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const users = await storage.getUsersByCompanyId(id);
+      res.json(users);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Get company by user's companyId (for member portal)
+  app.get("/api/member/company", async (req, res) => {
+    try {
+      const { companyId } = req.query;
+      if (!companyId) {
+        return res.status(400).json({ error: "companyId is required" });
+      }
+      const company = await storage.getCompany(companyId as string);
+      if (!company) {
+        return res.status(404).json({ error: "Company not found" });
+      }
+      res.json(company);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Subscription management endpoints
   app.get("/api/admin/subscriptions", async (req, res) => {
     try {
