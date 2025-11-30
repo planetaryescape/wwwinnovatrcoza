@@ -115,10 +115,27 @@ export default function AdminUsers() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editNotes, setEditNotes] = useState("");
 
+  const INNOVATR_LOGO = "/attached_assets/Screenshot 2025-10-21 at 15.20.15_1764527855642.png";
+
+  const isInnovatrUser = (email: string) => {
+    const adminEmails = ["hannah@innovatr.co.za", "richard@innovatr.co.za"];
+    return adminEmails.includes(email.toLowerCase()) || email.toLowerCase().endsWith("@innovatr.co.za");
+  };
+
   const getCompanyLogo = (companyId: string | null) => {
     if (!companyId) return null;
     const company = companies.find(c => c.id === companyId);
     return company?.logoUrl || null;
+  };
+
+  const getUserLogo = (user: AdminUser) => {
+    if (user.companyId) {
+      return getCompanyLogo(user.companyId);
+    }
+    if (isInnovatrUser(user.email)) {
+      return INNOVATR_LOGO;
+    }
+    return null;
   };
 
   const getInitials = (name: string | null) => {
@@ -440,21 +457,15 @@ export default function AdminUsers() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8" data-testid={`avatar-user-${user.id}`}>
-                            {getCompanyLogo(user.companyId) ? (
+                            {getUserLogo(user) ? (
                               <AvatarImage 
-                                src={getCompanyLogo(user.companyId)!} 
+                                src={getUserLogo(user)!} 
                                 alt={user.company || user.name || "User"} 
                                 className="object-contain bg-white p-0.5"
                               />
                             ) : null}
                             <AvatarFallback className="bg-gray-100 text-gray-500 text-xs">
-                              {getCompanyLogo(user.companyId) ? null : (
-                                user.companyId ? (
-                                  <Building2 className="w-4 h-4" />
-                                ) : (
-                                  getInitials(user.name)
-                                )
-                              )}
+                              {getUserLogo(user) ? null : getInitials(user.name)}
                             </AvatarFallback>
                           </Avatar>
                           <div>
@@ -515,21 +526,15 @@ export default function AdminUsers() {
               <SheetHeader className="pb-4">
                 <div className="flex items-center gap-3 mb-2">
                   <Avatar className="h-12 w-12" data-testid="avatar-drawer-user">
-                    {getCompanyLogo(selectedUser.companyId) ? (
+                    {getUserLogo(selectedUser) ? (
                       <AvatarImage 
-                        src={getCompanyLogo(selectedUser.companyId)!} 
+                        src={getUserLogo(selectedUser)!} 
                         alt={selectedUser.company || selectedUser.name || "User"} 
                         className="object-contain bg-white p-1"
                       />
                     ) : null}
                     <AvatarFallback className="bg-gray-100 text-gray-500 text-base">
-                      {getCompanyLogo(selectedUser.companyId) ? null : (
-                        selectedUser.companyId ? (
-                          <Building2 className="w-6 h-6" />
-                        ) : (
-                          getInitials(selectedUser.name)
-                        )
-                      )}
+                      {getUserLogo(selectedUser) ? null : getInitials(selectedUser.name)}
                     </AvatarFallback>
                   </Avatar>
                   <div>

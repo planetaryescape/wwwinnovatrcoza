@@ -100,6 +100,8 @@ interface Company {
   logoUrl: string | null;
 }
 
+const INNOVATR_LOGO = "/attached_assets/Screenshot 2025-10-21 at 15.20.15_1764527855642.png";
+
 export default function PortalLayout({ children }: PortalLayoutProps) {
   const [location, setLocation] = useLocation();
   const { user, logout, isAuthenticated, isMember, isAdmin } = useAuth();
@@ -126,6 +128,8 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
     };
     fetchCompanyLogo();
   }, [user?.companyId]);
+
+  const isInnovatrUser = isAdmin || user?.email?.endsWith("@innovatr.co.za");
 
   if (!isAuthenticated) {
     return null;
@@ -181,15 +185,11 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                   <Avatar className="h-10 w-10" data-testid="avatar-user-profile">
                     {companyLogo ? (
                       <AvatarImage src={companyLogo} alt={user?.company || user?.name || "Profile"} className="object-contain bg-white p-1" />
+                    ) : isInnovatrUser ? (
+                      <AvatarImage src={INNOVATR_LOGO} alt="Innovatr" className="object-contain bg-white p-1" />
                     ) : null}
                     <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
-                      {companyLogo ? null : (
-                        user?.companyId ? (
-                          <User className="h-5 w-5" />
-                        ) : (
-                          getInitials(user?.name)
-                        )
-                      )}
+                      {companyLogo || isInnovatrUser ? null : getInitials(user?.name)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">

@@ -22,6 +22,7 @@ export const users = pgTable("users", {
   name: text("name"),
   company: text("company"),
   companyId: varchar("company_id"),
+  profilePictureUrl: text("profile_picture_url"),
   membershipTier: varchar("membership_tier", { length: 20 })
     .notNull()
     .default("STARTER"),

@@ -287,6 +287,7 @@ export class MemStorage implements IStorage {
       name: insertUser.name ?? null,
       company: insertUser.company ?? null,
       companyId: (insertUser as any).companyId ?? null,
+      profilePictureUrl: (insertUser as any).profilePictureUrl ?? null,
       membershipTier: insertUser.membershipTier ?? "STARTER",
       status: insertUser.status ?? "ACTIVE",
       role: (insertUser.role as any) ?? "MEMBER",
