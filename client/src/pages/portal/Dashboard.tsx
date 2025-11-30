@@ -16,6 +16,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import PortalLayout from "./PortalLayout";
 import LockedFeature from "@/components/LockedFeature";
+import CompanyCreditsCard from "@/components/CompanyCreditsCard";
 
 const mockCredits = {
   basicRemaining: 7,
@@ -152,8 +153,11 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Credits & Activity */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Company Credits Widget - shown for company users */}
+            {user?.companyId && <CompanyCreditsCard companyId={user.companyId} />}
+
             {/* Credit Summary Widget */}
-            {isMember ? (
+            {isMember && !user?.companyId ? (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2" data-testid="text-credits-title">
@@ -208,7 +212,7 @@ export default function Dashboard() {
                   </div>
                 </CardContent>
               </Card>
-            ) : (
+            ) : !user?.companyId ? (
               <LockedFeature
                 title="Research Credits"
                 description="Track and manage your Test24 credits. Members get exclusive discounts and credit packages."
@@ -235,7 +239,7 @@ export default function Dashboard() {
                   </p>
                 </div>
               </LockedFeature>
-            )}
+            ) : null}
 
             {/* Personalized Recommendations Feed */}
             {isMember ? (

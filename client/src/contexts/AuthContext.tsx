@@ -8,6 +8,7 @@ export interface User {
   email: string;
   name: string;
   company?: string;
+  companyId?: string | null;
   tier: UserTier;
   membershipTier?: MembershipTier;
   isAdmin?: boolean;
@@ -37,6 +38,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
+    try {
+      const res = await fetch(`/api/users/email/${encodeURIComponent(email)}`);
+      if (res.ok) {
+        const dbUser = await res.json();
+        const isAdmin = email === "hannah@innovatr.co.za" || email === "richard@innovatr.co.za";
+        
+        const tierMap: Record<string, UserTier> = {
+          STARTER: "entry",
+          GROWTH: "gold",
+          SCALE: "platinum",
+        };
+        
+        const loggedInUser: User = {
+          id: dbUser.id,
+          email: dbUser.email,
+          name: dbUser.name || email.split("@")[0],
+          company: dbUser.company,
+          companyId: dbUser.companyId,
+          tier: tierMap[dbUser.membershipTier] || "gold",
+          membershipTier: dbUser.membershipTier,
+          isAdmin,
+        };
+        
+        setUser(loggedInUser);
+        localStorage.setItem("innovatr_user", JSON.stringify(loggedInUser));
+        return;
+      }
+    } catch (err) {
+      console.log("User not found in backend, using mock data");
+    }
+    
     await new Promise(resolve => setTimeout(resolve, 500));
     
     let tier: UserTier = "gold";

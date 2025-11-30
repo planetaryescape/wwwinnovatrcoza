@@ -489,6 +489,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User lookup endpoint for login
+  app.get("/api/users/email/:email", async (req, res) => {
+    try {
+      const { email } = req.params;
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      const { password, ...safeUser } = user;
+      res.json(safeUser);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Admin API endpoints
   app.get("/api/admin/users", async (req, res) => {
     try {
