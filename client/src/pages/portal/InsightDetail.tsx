@@ -2,7 +2,7 @@ import { useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Download, ArrowLeft, Calendar, Briefcase, Lock, Crown, CreditCard, LogIn } from "lucide-react";
+import { Download, ArrowLeft, Calendar, Briefcase, Lock, Crown, CreditCard, LogIn, Play } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { Link } from "wouter";
 import reportsData from "@/data/reports.json";
@@ -586,6 +586,50 @@ export default function InsightDetail() {
                     <Download className="w-4 h-4 mr-2" />
                     Download full report
                   </Button>
+                </div>
+              )}
+
+              {report.series === "Inside" && report.videoPaths && report.videoPaths.length > 0 && (
+                <div className="mt-12 pt-8 border-t border-gray-100">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center">
+                      <Play className="w-5 h-5 text-violet-700" />
+                    </div>
+                    <div>
+                      <h3 
+                        className="text-2xl font-bold text-gray-900"
+                        style={{ fontFamily: 'DM Serif Display, serif' }}
+                      >
+                        Watch the Demo
+                      </h3>
+                      <p className="text-gray-600 text-sm">
+                        See how this tool works in action
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-6">
+                    {report.videoPaths.map((videoPath, index) => {
+                      const videoName = videoPath.split('/').pop()?.replace('.mp4', '').replace(/-/g, ' ').replace('Innovatr Inside X ', '') || `Video ${index + 1}`;
+                      return (
+                        <div key={index} className="rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                          {report.videoPaths && report.videoPaths.length > 1 && (
+                            <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                              <span className="text-sm font-medium text-gray-700">{videoName}</span>
+                            </div>
+                          )}
+                          <video
+                            controls
+                            className="w-full aspect-video bg-gray-900"
+                            preload="metadata"
+                            data-testid={`video-player-${index}`}
+                          >
+                            <source src={videoPath} type="video/mp4" />
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </>
