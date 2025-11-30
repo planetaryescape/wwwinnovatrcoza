@@ -207,6 +207,43 @@ export class MemStorage implements IStorage {
         role: "MEMBER",
       });
     }
+
+    const clientReports: InsertReport[] = [
+      {
+        title: "Rugani 100% Carrot Juice Concept Test",
+        category: "Launch",
+        industry: "Beverages",
+        teaser: "Concept testing for new carrot juice product range. Consumer insights on flavour preferences, packaging design, and brand positioning for the South African market.",
+        accessLevel: "companyOnly",
+        creditType: "none",
+        status: "published",
+        series: "Client",
+        slug: "rugani-carrot-juice-concept",
+        date: new Date("2025-11-15"),
+        displayCategories: ["Bev", "Food", "FMCG"],
+        hasDownload: false,
+        clientCompanyIds: [ruganiId, greenwayId],
+      },
+      {
+        title: "Greenway Carrots Brand Health Study",
+        category: "Insights",
+        industry: "Agriculture",
+        teaser: "Comprehensive brand health audit tracking consumer perceptions, awareness, and purchase intent for Greenway Farm carrots in retail channels.",
+        accessLevel: "companyOnly",
+        creditType: "none",
+        status: "published",
+        series: "Client",
+        slug: "greenway-carrots-brand-health",
+        date: new Date("2025-11-20"),
+        displayCategories: ["Agriculture", "FMCG", "Retail"],
+        hasDownload: false,
+        clientCompanyIds: [ruganiId, greenwayId],
+      },
+    ];
+
+    for (const r of clientReports) {
+      await this.createReport(r);
+    }
   }
 
   async getUser(id: string): Promise<User | undefined> {
