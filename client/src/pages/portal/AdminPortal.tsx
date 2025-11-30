@@ -9,6 +9,7 @@ import AdminOrders from "./AdminOrders";
 import AdminReports from "./AdminReports";
 import AdminDeals from "./AdminDeals";
 import AdminSubscriptions from "./AdminSubscriptions";
+import AdminCompanies from "./AdminCompanies";
 
 export default function AdminPortal() {
   const [, setLocation] = useLocation();
@@ -36,9 +37,10 @@ export default function AdminPortal() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview" data-testid="tab-admin-overview">Overview</TabsTrigger>
             <TabsTrigger value="users" data-testid="tab-admin-users">Users</TabsTrigger>
+            <TabsTrigger value="companies" data-testid="tab-admin-companies">Companies</TabsTrigger>
             <TabsTrigger value="orders" data-testid="tab-admin-orders">Orders</TabsTrigger>
             <TabsTrigger value="subscriptions" data-testid="tab-admin-subscriptions">Subscriptions</TabsTrigger>
             <TabsTrigger value="reports" data-testid="tab-admin-reports">Reports</TabsTrigger>
@@ -51,6 +53,10 @@ export default function AdminPortal() {
 
           <TabsContent value="users">
             <AdminUsers />
+          </TabsContent>
+
+          <TabsContent value="companies">
+            <AdminCompanies />
           </TabsContent>
 
           <TabsContent value="orders">
