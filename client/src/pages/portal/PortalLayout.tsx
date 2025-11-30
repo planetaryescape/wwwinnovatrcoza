@@ -22,12 +22,11 @@ import {
   LogOut,
   Lock,
   Shield,
-  User,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/UserAvatar";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -100,8 +99,6 @@ interface Company {
   logoUrl: string | null;
 }
 
-const INNOVATR_LOGO = "/attached_assets/Screenshot 2025-10-21 at 15.20.15_1764527855642.png";
-
 export default function PortalLayout({ children }: PortalLayoutProps) {
   const [location, setLocation] = useLocation();
   const { user, logout, isAuthenticated, isMember, isAdmin } = useAuth();
@@ -129,8 +126,6 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
     fetchCompanyLogo();
   }, [user?.companyId]);
 
-  const isInnovatrUser = isAdmin || user?.email?.endsWith("@innovatr.co.za");
-
   if (!isAuthenticated) {
     return null;
   }
@@ -155,11 +150,6 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
     }
   };
 
-  const getInitials = (name?: string) => {
-    if (!name) return "U";
-    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
-  };
-
   const style = {
     "--sidebar-width": "16rem",
     "--sidebar-width-icon": "3rem",
@@ -182,16 +172,19 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                   </button>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10" data-testid="avatar-user-profile">
-                    {companyLogo ? (
-                      <AvatarImage src={companyLogo} alt={user?.company || user?.name || "Profile"} className="object-contain bg-white p-1" />
-                    ) : isInnovatrUser ? (
-                      <AvatarImage src={INNOVATR_LOGO} alt="Innovatr" className="object-contain bg-white p-1" />
-                    ) : null}
-                    <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
-                      {companyLogo || isInnovatrUser ? null : getInitials(user?.name)}
-                    </AvatarFallback>
-                  </Avatar>
+                  {user && (
+                    <UserAvatar 
+                      user={{
+                        name: user.name,
+                        email: user.email || "",
+                        companyId: user.companyId,
+                        role: isAdmin ? "ADMIN" : "MEMBER",
+                      }}
+                      companyLogoUrl={companyLogo}
+                      size="md"
+                      data-testid="avatar-user-profile"
+                    />
+                  )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate" data-testid="text-member-name">{user?.name}</p>
                     <p className="text-xs text-muted-foreground truncate mb-1" data-testid="text-member-company">
