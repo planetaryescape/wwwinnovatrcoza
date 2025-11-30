@@ -58,15 +58,17 @@ interface Report {
   industry: string;
   date: string;
   publishDate?: string;
-  status?: "live" | "scheduled";
+  status?: "live" | "scheduled" | "draft";
   title: string;
   teaser: string;
   slug: string;
   coverImage: string;
   pdfPath: string | null;
   hasDownload?: boolean;
+  videoPaths?: string[];
   tags: string[];
   isNew: boolean;
+  access?: "free" | "members";
   accessLevel?: string;
   allowedTiers?: string[];
   creditType?: string;
