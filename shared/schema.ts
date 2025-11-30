@@ -21,6 +21,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   name: text("name"),
   company: text("company"),
+  companyId: varchar("company_id"),
   membershipTier: varchar("membership_tier", { length: 20 })
     .notNull()
     .default("STARTER"),
@@ -206,6 +207,49 @@ export const insertPaymentEventSchema = createInsertSchema(paymentEvents).omit({
 export type InsertPaymentEvent = z.infer<typeof insertPaymentEventSchema>;
 export type PaymentEvent = typeof paymentEvents.$inferSelect;
 
+// Companies schema - For client accounts with pooled credits
+export const companies = pgTable("companies", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  domain: text("domain"),
+  tier: varchar("tier", { length: 20 }).notNull().default("STARTER"),
+  contractStart: timestamp("contract_start"),
+  contractEnd: timestamp("contract_end"),
+  monthlyFee: decimal("monthly_fee", { precision: 10, scale: 2 }),
+  basicCreditsTotal: integer("basic_credits_total").notNull().default(0),
+  basicCreditsUsed: integer("basic_credits_used").notNull().default(0),
+  proCreditsTotal: integer("pro_credits_total").notNull().default(0),
+  proCreditsUsed: integer("pro_credits_used").notNull().default(0),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertCompanySchema = createInsertSchema(companies)
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    name: z.string().min(1, "Company name is required"),
+    tier: z.enum(["STARTER", "GROWTH", "SCALE"]).default("STARTER"),
+  });
+
+export type InsertCompany = z.infer<typeof insertCompanySchema>;
+export type Company = typeof companies.$inferSelect;
+
+// Helper functions for credit calculations
+export function getBasicCreditsRemaining(company: Company): number {
+  return (company.basicCreditsTotal ?? 0) - (company.basicCreditsUsed ?? 0);
+}
+
+export function getProCreditsRemaining(company: Company): number {
+  return (company.proCreditsTotal ?? 0) - (company.proCreditsUsed ?? 0);
+}
+
 // Reports schema - Aligned with reports.json structure
 export const reports = pgTable("reports", {
   id: varchar("id")
@@ -226,6 +270,7 @@ export const reports = pgTable("reports", {
     .notNull()
     .default("public"),
   allowedTiers: text("allowed_tiers").array().default([]),
+  clientCompanyIds: text("client_company_ids").array().default([]),
   creditType: varchar("credit_type", { length: 20 }).default("none"),
   creditCost: integer("credit_cost").default(0),
   isFeatured: boolean("is_featured").notNull().default(false),
@@ -249,7 +294,7 @@ export const insertReportSchema = createInsertSchema(reports)
     title: z.string().min(1, "Title is required"),
     category: z.enum(["Insights", "Launch", "Inside", "IRL"]),
     teaser: z.string().optional(),
-    accessLevel: z.enum(["public", "member", "tier", "paid"]).default("public"),
+    accessLevel: z.enum(["public", "member", "tier", "paid", "companyOnly"]).default("public"),
     creditType: z.enum(["none", "basic", "pro"]).default("none"),
     status: z.enum(["draft", "scheduled", "published", "archived"]).default("published"),
     date: z.date().optional(),

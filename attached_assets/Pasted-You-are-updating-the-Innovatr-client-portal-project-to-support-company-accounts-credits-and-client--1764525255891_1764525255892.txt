@@ -1,0 +1,334 @@
+You are updating the Innovatr client portal project to support company accounts, credits and client specific reports for Rugani and Greenway.
+
+Do not change any existing behaviour unless it is explicitly requested below.
+
+1. Overall goal
+
+Add:
+
+Two companies
+
+Rugani Juice
+
+Greenway Farms (Carrots Division)
+
+Four named users linked to those companies
+
+Contract credits for Rugani based on our service agreement
+
+Two Rugani reports available on their dashboards
+
+Rugani Test24 Basic key visual report
+
+Project Fresh TTL NBL Non Alcoholic Category Strategy deck
+
+A simple way for both the Admin and the client users to see how many credits they have and how many are left.
+
+Keep the existing Admin layout and styling as much as possible.
+
+2. Data model updates
+
+Assume the project already has some kind of persistence for:
+
+users
+
+reports
+
+deals or memberships
+
+If something is missing, create the minimum new structures to support this:
+
+2.1 Company model
+
+Create a Company entity if it does not exist yet, for example:
+
+type Company = {
+  id: string;
+  name: string;
+  domain?: string;            // e.g. ruganijuice.co.za
+  tier: 'Starter' | 'Growth' | 'Scale';
+  contractStart?: string;     // ISO date, e.g. '2025-12-01'
+  contractEnd?: string;       // '2026-11-30'
+  monthlyFee?: number;        // 26250 (excl VAT)
+  basicCreditsTotal?: number;
+  basicCreditsUsed?: number;
+  proCreditsTotal?: number;
+  proCreditsUsed?: number;
+  notes?: string;             // free text for contract notes
+};
+
+
+If the portal already has a companies or clients collection, extend that instead of creating a new one, but keep the same fields.
+
+2.2 User model link
+
+Ensure each User has a companyId (or similar) linking them to a Company:
+
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  companyId?: string;
+  membershipTier: 'Starter' | 'Growth' | 'Scale';
+  status: 'Active' | 'Inactive';
+};
+
+
+Do not change any other existing user fields.
+
+2.3 Credits helpers
+
+Implement helper functions to calculate remaining credits at company level:
+
+function getBasicCreditsRemaining(company: Company): number {
+  return (company.basicCreditsTotal ?? 0) - (company.basicCreditsUsed ?? 0);
+}
+
+function getProCreditsRemaining(company: Company): number {
+  return (company.proCreditsTotal ?? 0) - (company.proCreditsUsed ?? 0);
+}
+
+
+Later, any time a Test24 Basic or Pro study is logged as “used”, we will increment basicCreditsUsed or proCreditsUsed. For now, just wire the fields and display them.
+
+3. Seed the two companies
+
+Create two Company records:
+
+3.1 Rugani Juice
+{
+  "name": "Rugani Juice",
+  "domain": "ruganijuice.co.za",
+  "tier": "Scale",
+  "contractStart": "2025-12-01",
+  "contractEnd": "2026-11-30",
+  "monthlyFee": 26250,
+  "basicCreditsTotal": 20,
+  "basicCreditsUsed": 0,
+  "proCreditsTotal": 4,
+  "proCreditsUsed": 0,
+  "notes": "Service agreement shared between Greenway Farms (Carrots Division) and Rugani Juice. Includes 2 x Test24 Pro Brand Health Audit studies (300 consumers, 10 minute survey), 2 x Test24 Pro studies (100 consumers, 10 minute survey) and 20 x Test24 Basic idea studies (100 consumers, 5 minute surveys). Additional studies at member rates: Test24 Basic R4,000 and Test24 Pro R45,000 per 100 completes."
+}
+
+3.2 Greenway Farms (Carrots Division)
+{
+  "name": "Greenway Farms",
+  "domain": "greenwayfarm.co.za",
+  "tier": "Scale",
+  "contractStart": "2025-12-01",
+  "contractEnd": "2026-11-30",
+  "monthlyFee": 26250,
+  "basicCreditsTotal": 0,
+  "basicCreditsUsed": 0,
+  "proCreditsTotal": 0,
+  "proCreditsUsed": 0,
+  "notes": "Linked to Rugani Juice service agreement. Greenway users have Scale report access but Rugani holds the pooled Test24 credits."
+}
+
+
+Store them in whatever seed file or JSON store the portal already uses for initial data.
+
+4. Create and link the four users
+
+Under Admin → Users, make sure the following users exist and are linked to the correct company and tier:
+
+Greenway Farms users
+
+Name: Duncan Buhr
+Email: duncan@greenwayfarm.co.za
+Company: Greenway Farms
+Membership Tier: Scale
+Status: Active
+
+Name: Wesley Browne
+Email: Wesley@greenwayfarm.co.za
+Company: Greenway Farms
+Membership Tier: Scale
+Status: Active
+
+Rugani Juice users
+
+Name: Simonne Fourie
+Email: simonne@ruganijuice.co.za
+Company: Rugani Juice
+Membership Tier: Scale
+Status: Active
+
+Name: Tymon Minaar
+Email: tymon@ruganijuice.co.za
+Company: Rugani Juice
+Membership Tier: Scale
+Status: Active
+
+If you have a user seeding script, add them there. Otherwise, create them in whatever JSON or DB layer powers the portal.
+
+Do not send any emails from this step; we are just wiring data.
+
+5. Deal or contract record
+
+If the portal has a Deals or Contracts section, create one shared deal that links Rugani and Greenway:
+
+type Deal = {
+  id: string;
+  name: string;              // "Rugani & Greenway 2025 2026 Service Agreement"
+  companies: string[];       // [ruganiCompanyId, greenwayCompanyId]
+  tier: 'Scale';
+  contractStart: string;     // 2025-12-01
+  contractEnd: string;       // 2026-11-30
+  monthlyFee: number;        // 26250
+  basicCreditsTotal: number; // 20
+  proCreditsTotal: number;   // 4
+  notes: string;
+};
+
+
+Set notes to a short summary of the scope of work from the service agreement (same content as the Rugani Juice company notes field).
+
+Link the credits on the deal to the Rugani company record so the numbers stay aligned.
+
+6. Client specific reports for Rugani
+
+We want Rugani and Greenway users to see two key reports in their portal under whatever “Reports” or “Past Research” area you have.
+
+Assume a Report entity roughly like this:
+
+type Report = {
+  id: string;
+  title: string;
+  clientCompanyIds?: string[];  // companies allowed to see it
+  series?: string;              // e.g. "Client Study"
+  tags?: string[];
+  date: string;                 // ISO
+  filePath?: string;            // PPTX path
+  access: 'companyOnly' | 'members' | 'public';
+};
+
+
+If you already have a report model, just extend it with clientCompanyIds and reuse existing fields.
+
+6.1 File locations
+
+Use these paths and assume I will upload the PPTX files to match:
+
+/public/assets/client-reports/Rugani_Test24_Basic_Key_Visual_Nov2025.pptx
+(Rugani Test24 Basic report)
+
+/public/assets/client-reports/Project_Fresh_TTL_NBL_Non_Alcoholic_Strategy_Feb2025.pptx
+(Project Fresh TTL deck)
+
+Create the folder /public/assets/client-reports/ if it does not exist.
+
+6.2 Report entries
+
+Create two reports:
+
+Report 1 – Rugani Test24 Basic
+
+{
+  "title": "Rugani Test24 Basic Key Visual Deep Dive",
+  "clientCompanyIds": ["Rugani Juice", "Greenway Farms"],
+  "series": "Client Study",
+  "tags": ["Test24 Basic", "Key Visual", "Fruit Juice", "South Africa"],
+  "date": "2025-11-15",
+  "filePath": "/public/assets/client-reports/Rugani_Test24_Basic_Key_Visual_Nov2025.pptx",
+  "access": "companyOnly"
+}
+
+
+Report 2 – Project Fresh TTL
+
+{
+  "title": "Project Fresh NBL Non Alcoholic Category Strategy",
+  "clientCompanyIds": ["Rugani Juice", "Greenway Farms"],
+  "series": "Client Study",
+  "tags": ["TTL Strategy", "Non Alcoholic", "Namibia Breweries", "Project Fresh"],
+  "date": "2025-02-15",
+  "filePath": "/public/assets/client-reports/Project_Fresh_TTL_NBL_Non_Alcoholic_Strategy_Feb2025.pptx",
+  "access": "companyOnly"
+}
+
+
+Use whatever ID system your app already uses. Dates are approximate and can be adjusted if you prefer.
+
+7. Surfacing credits in the UI
+
+Update the portal UI in two places:
+
+7.1 Admin → Users / Deals
+
+On the Admin Dashboard, add a small summary of credits for any company linked to a user or deal:
+
+In the Users table, for each user show a compact pill like:
+Company credits: Basic 20 / 0 used, Pro 4 / 0 used for Rugani staff, pulled from the Rugani company record.
+
+In the Deals or Companies view, show a clearer panel:
+
+Contract term: 01 Dec 2025 – 30 Nov 2026
+
+Tier: Scale
+
+Monthly fee: R26 250 excl VAT
+
+Test24 credits: 20 Basic, 4 Pro
+
+Remaining: Basic = getBasicCreditsRemaining(company), Pro = getProCreditsRemaining(company)
+
+Make sure this is read only for now. Admins will manually update basicCreditsUsed and proCreditsUsed later until we wire automatic usage.
+
+7.2 Client side view
+
+When a Rugani or Greenway user logs in:
+
+Add a small "Your Innovatr Credits" card at the top of their dashboard or Reports page.
+
+If the user belongs to Rugani:
+
+Show: 20 Test24 Basic credits total, 4 Test24 Pro credits total and the remaining numbers based on the helper functions.
+
+Add a short line: These credits cover shared work for Greenway Farms and Rugani Juice under your 2025 2026 service agreement.
+
+If the user belongs to Greenway:
+
+Show the same numbers but label clearly that credits are held by Rugani Juice and are shared across both teams.
+
+Do not allow them to edit anything – this is only a display.
+
+8. Permissions
+
+Only Admin users should see and edit company records, deals and raw credit numbers.
+
+Rugani and Greenway users should only see:
+
+Their own credits summary (read only)
+
+Their client specific reports (the two PPTX decks) inside the portal
+
+No other client should see these two reports.
+
+9. Final checks
+
+Once you have implemented everything:
+
+Confirm the two Company records exist and are correctly linked to the four users.
+
+Confirm credits for Rugani show as:
+
+Basic: total 20, used 0, remaining 20
+
+Pro: total 4, used 0, remaining 4
+
+Confirm Greenway shows zero total credits but still has Scale access.
+
+Confirm the two Rugani reports appear under the right section for Rugani and Greenway users only.
+
+Confirm Admin views show the same credit numbers in the Users and Deals or Companies areas.
+
+Do not alter any other reports, content, mailers or scheduling logic.
+
+At the end, output a short summary of:
+
+Which files or collections you changed
+
+The IDs of the new companies, users and reports you created
+
+Any assumptions or TODOs, for example “upload PPTX files to the paths above”.
