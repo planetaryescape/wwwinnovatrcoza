@@ -153,6 +153,7 @@ export class MemStorage implements IStorage {
       name: "Rugani Juice",
       domain: "ruganijuice.co.za",
       logoUrl: null,
+      industry: "Beverages",
       tier: "SCALE",
       contractStart: new Date("2025-12-01"),
       contractEnd: new Date("2026-11-30"),
@@ -183,6 +184,7 @@ export class MemStorage implements IStorage {
       name: "Greenway Farms",
       domain: "greenwayfarm.co.za",
       logoUrl: null,
+      industry: "Agriculture",
       tier: "SCALE",
       contractStart: new Date("2025-12-01"),
       contractEnd: new Date("2026-11-30"),
@@ -269,6 +271,29 @@ export class MemStorage implements IStorage {
 
     for (const r of clientReportsData) {
       await this.createReport(r);
+    }
+
+    // Two Rugani Past Research projects added and linked by companyId.
+    // Access is restricted to Rugani users (by company) and admins.
+    const ruganiClientReports: InsertClientReport[] = [
+      {
+        companyId: ruganiId,
+        title: "Rugani x Clicks Wellness Beverage Positioning",
+        description: "Quant deep dive into how Rugani's 330 ml and 750 ml formats perform against LiquiFruit, Coke, Powerade and Red Bull in Clicks. Shows that Rugani's natural positioning fits the Clicks wellness mission and proves the role of each format in fridges, health aisles and checkout.",
+        pdfUrl: "/assets/client-reports/rugani/Rugani_X_Clicks_Test24_Basic.pptx",
+        tags: ["Rugani", "Clicks", "Test24 Basic", "Retail Positioning", "Beverages", "Wellness", "Category Growth"],
+      },
+      {
+        companyId: ruganiId,
+        title: "Rugani New Key Visual Optimisation",
+        description: "Evaluation of Rugani's new key visual against Sir Fruit, LiquiFruit and Rhodes among heavy juice users. Identifies where the current ad underperforms and gives a roadmap to shift from sport-only energy cues to everyday natural health and refreshment.",
+        pdfUrl: "/assets/client-reports/rugani/Rugani_Test24_X_Ad_Campaign.pptx",
+        tags: ["Rugani", "Creative Testing", "Key Visual", "Test24 Basic", "Juice", "Brand Communication"],
+      },
+    ];
+
+    for (const cr of ruganiClientReports) {
+      await this.createClientReport(cr);
     }
 
     const sharedDeal: InsertDeal = {
@@ -648,6 +673,7 @@ export class MemStorage implements IStorage {
       name: insertCompany.name,
       domain: insertCompany.domain ?? null,
       logoUrl: (insertCompany as any).logoUrl ?? null,
+      industry: insertCompany.industry ?? null,
       tier: insertCompany.tier ?? "STARTER",
       contractStart: insertCompany.contractStart ?? null,
       contractEnd: insertCompany.contractEnd ?? null,
