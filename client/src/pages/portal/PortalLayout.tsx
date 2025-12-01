@@ -22,6 +22,8 @@ import {
   LogOut,
   Lock,
   Shield,
+  Eye,
+  X,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
@@ -94,7 +96,7 @@ interface PortalLayoutProps {
 
 export default function PortalLayout({ children }: PortalLayoutProps) {
   const [location, setLocation] = useLocation();
-  const { user, logout, isAuthenticated, isMember, isAdmin } = useAuth();
+  const { user, logout, isAuthenticated, isMember, isAdmin, impersonation, exitImpersonation } = useAuth();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -204,6 +206,33 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
         </Sidebar>
 
         <div className="flex flex-col flex-1">
+          {impersonation.isImpersonating && (
+            <div 
+              className="bg-amber-500 text-amber-950 px-4 py-2 flex items-center justify-between"
+              data-testid="impersonation-bar"
+            >
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4" />
+                <span className="text-sm font-medium">
+                  Viewing as: <strong>{user?.name || user?.email}</strong>
+                  {user?.company && <span className="ml-1">({user.company})</span>}
+                </span>
+              </div>
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                onClick={() => {
+                  exitImpersonation();
+                  setLocation("/portal/admin");
+                }}
+                className="text-amber-950 hover:bg-amber-600 hover:text-amber-950"
+                data-testid="button-exit-impersonation"
+              >
+                <X className="w-4 h-4 mr-1" />
+                Exit View
+              </Button>
+            </div>
+          )}
           <header className="flex items-center justify-between p-4 border-b">
             <SidebarTrigger data-testid="button-sidebar-toggle" />
             <ThemeToggle />
