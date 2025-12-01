@@ -63,9 +63,10 @@ function canAccessReport(
   userTier: string | undefined,
   isMember: boolean
 ): boolean {
-  const accessLevel = report.accessLevel || "PUBLIC";
+  const accessLevel = (report.accessLevel || "PUBLIC").toUpperCase();
+  const accessField = (report.access || "free").toLowerCase();
   
-  if (accessLevel === "PUBLIC" || accessLevel === "public" || report.access === "free") {
+  if (accessLevel === "PUBLIC" || accessField === "free") {
     return true;
   }
   
@@ -73,7 +74,7 @@ function canAccessReport(
     return false;
   }
   
-  if (accessLevel === "STARTER" || accessLevel === "member") {
+  if (accessLevel === "STARTER" || accessLevel === "MEMBER" || accessField === "members") {
     return true;
   }
   
@@ -156,14 +157,21 @@ export default function Dashboard() {
   const { user, isMember } = useAuth();
 
   const { data: company, isLoading: isLoadingCompany } = useQuery<Company>({
-    queryKey: ["/api/companies", user?.companyId],
+    queryKey: ["/api/member/company", user?.companyId],
+    queryFn: async () => {
+      const response = await fetch(`/api/member/company?companyId=${user?.companyId}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
     enabled: !!user?.companyId,
+    retry: false,
   });
 
   const userIndustry = useMemo(() => {
-    if (company?.industry) return company.industry;
-    return undefined;
+    return company?.industry || undefined;
   }, [company]);
+
+  const isLoadingRecommendations = isLoadingCompany && !!user?.companyId;
 
   const recommendedReports = useMemo(() => {
     return getRecommendedReports(
@@ -380,7 +388,7 @@ export default function Dashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {isLoadingCompany && user?.companyId ? (
+                  {isLoadingRecommendations ? (
                     <div className="space-y-3">
                       {[1, 2, 3].map((i) => (
                         <div key={i} className="flex items-start gap-3 p-3 rounded-md border">
@@ -438,31 +446,37 @@ export default function Dashboard() {
                 showButton={true}
               >
                 <div className="space-y-3 mt-4">
-                  {recommendedReports.slice(0, 3).map((report) => (
-                    <div
-                      key={report.id}
-                      className="flex items-start gap-3 p-3 rounded-md border"
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="text-sm font-medium">{report.title}</h4>
-                          {isNewReport(report.publishDate) && (
-                            <Badge variant="secondary" className="text-xs">
-                              NEW
-                            </Badge>
-                          )}
+                  {recommendedReports.length > 0 ? (
+                    recommendedReports.slice(0, 3).map((report) => (
+                      <div
+                        key={report.id}
+                        className="flex items-start gap-3 p-3 rounded-md border"
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="text-sm font-medium">{report.title}</h4>
+                            {isNewReport(report.publishDate) && (
+                              <Badge variant="secondary" className="text-xs">
+                                NEW
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {report.series} • {formatDate(report.publishDate)}
+                          </p>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          {report.series} • {formatDate(report.publishDate)}
-                        </p>
+                        {report.pdfPath && report.hasDownload ? (
+                          <Download className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        ) : (
+                          <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        )}
                       </div>
-                      {report.pdfPath && report.hasDownload ? (
-                        <Download className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                      ) : (
-                        <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                      )}
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No recommended reports yet.
+                    </p>
+                  )}
                 </div>
               </LockedFeature>
             )}
