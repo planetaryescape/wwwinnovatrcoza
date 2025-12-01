@@ -20,7 +20,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { login, signup } = useAuth();
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +41,12 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
         });
       }
       onOpenChange(false);
-      setLocation("/portal");
+      
+      // Redirect to member portal dashboard after successful login/signup
+      // Only redirect if not already in the portal to avoid redirect loops
+      if (!location.startsWith("/portal")) {
+        setLocation("/portal/dashboard");
+      }
     } catch (error) {
       toast({
         title: "Error",
