@@ -536,6 +536,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/admin/users/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const user = await storage.getUser(id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      const { password, ...safeUser } = user;
+      res.json(safeUser);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   app.patch("/api/admin/users/:id", async (req, res) => {
     try {
       const { id } = req.params;
@@ -839,10 +853,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const filename = `${id}_${Date.now()}_${req.file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-      const path = `company_logos/${filename}`;
+      const filePath = `company_logos/${filename}`;
       
-      await uploadFile(path, req.file.buffer, req.file.mimetype);
-      await storage.updateCompany(id, { logoUrl: `/assets/${path}` });
+      await uploadFile(req.file.buffer, filePath);
+      await storage.updateCompany(id, { logoUrl: `/assets/${filePath}` });
       
       const updated = await storage.getCompany(id);
       res.json(updated);
@@ -940,10 +954,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const filename = `${id}_${Date.now()}_${req.file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-      const path = `client_reports/${filename}`;
+      const filePath = `client_reports/${filename}`;
       
-      await uploadFile(path, req.file.buffer, req.file.mimetype);
-      await storage.updateClientReport(id, { pdfUrl: `/assets/${path}` });
+      await uploadFile(req.file.buffer, filePath);
+      await storage.updateClientReport(id, { pdfUrl: `/assets/${filePath}` });
       
       const updated = await storage.getClientReport(id);
       res.json(updated);

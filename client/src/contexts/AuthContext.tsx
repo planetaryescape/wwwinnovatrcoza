@@ -14,6 +14,13 @@ export interface User {
   isAdmin?: boolean;
 }
 
+export interface ImpersonationState {
+  isImpersonating: boolean;
+  originalAdmin: User | null;
+  impersonatedUserId?: string;
+  impersonatedCompanyId?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
@@ -23,17 +30,31 @@ interface AuthContextType {
   isMember: boolean;
   isAdmin: boolean;
   membershipTier?: MembershipTier;
+  impersonation: ImpersonationState;
+  impersonateUser: (userId: string) => Promise<void>;
+  impersonateCompany: (companyId: string) => Promise<void>;
+  exitImpersonation: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const defaultImpersonation: ImpersonationState = {
+  isImpersonating: false,
+  originalAdmin: null,
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [impersonation, setImpersonation] = useState<ImpersonationState>(defaultImpersonation);
 
   useEffect(() => {
     const savedUser = localStorage.getItem("innovatr_user");
+    const savedImpersonation = localStorage.getItem("innovatr_impersonation");
     if (savedUser) {
       setUser(JSON.parse(savedUser));
+    }
+    if (savedImpersonation) {
+      setImpersonation(JSON.parse(savedImpersonation));
     }
   }, []);
 
@@ -122,16 +143,120 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setUser(null);
+    setImpersonation(defaultImpersonation);
     localStorage.removeItem("innovatr_user");
+    localStorage.removeItem("innovatr_impersonation");
+  };
+
+  const impersonateUser = async (userId: string) => {
+    if (!user?.isAdmin) return;
+    
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`);
+      if (!res.ok) throw new Error("Failed to fetch user");
+      
+      const targetUser = await res.json();
+      const tierMap: Record<string, UserTier> = {
+        STARTER: "entry",
+        GROWTH: "gold",
+        SCALE: "platinum",
+      };
+      
+      const impersonatedUser: User = {
+        id: targetUser.id,
+        email: targetUser.email,
+        name: targetUser.name || targetUser.email.split("@")[0],
+        company: targetUser.company,
+        companyId: targetUser.companyId,
+        tier: tierMap[targetUser.membershipTier] || "gold",
+        membershipTier: targetUser.membershipTier,
+        isAdmin: false,
+      };
+      
+      const newImpersonation: ImpersonationState = {
+        isImpersonating: true,
+        originalAdmin: user,
+        impersonatedUserId: userId,
+      };
+      
+      setUser(impersonatedUser);
+      setImpersonation(newImpersonation);
+      localStorage.setItem("innovatr_user", JSON.stringify(impersonatedUser));
+      localStorage.setItem("innovatr_impersonation", JSON.stringify(newImpersonation));
+    } catch (error) {
+      console.error("Failed to impersonate user:", error);
+    }
+  };
+
+  const impersonateCompany = async (companyId: string) => {
+    if (!user?.isAdmin) return;
+    
+    try {
+      const companyRes = await fetch(`/api/admin/companies/${companyId}`);
+      if (!companyRes.ok) throw new Error("Failed to fetch company");
+      
+      const company = await companyRes.json();
+      const tierMap: Record<string, UserTier> = {
+        STARTER: "entry",
+        GROWTH: "gold",
+        SCALE: "platinum",
+      };
+      
+      const companyViewUser: User = {
+        id: `company_${companyId}`,
+        email: `admin@${company.domain || 'company.com'}`,
+        name: company.name,
+        company: company.name,
+        companyId: companyId,
+        tier: tierMap[company.tier] || "gold",
+        membershipTier: company.tier,
+        isAdmin: false,
+      };
+      
+      const newImpersonation: ImpersonationState = {
+        isImpersonating: true,
+        originalAdmin: user,
+        impersonatedCompanyId: companyId,
+      };
+      
+      setUser(companyViewUser);
+      setImpersonation(newImpersonation);
+      localStorage.setItem("innovatr_user", JSON.stringify(companyViewUser));
+      localStorage.setItem("innovatr_impersonation", JSON.stringify(newImpersonation));
+    } catch (error) {
+      console.error("Failed to impersonate company:", error);
+    }
+  };
+
+  const exitImpersonation = () => {
+    if (!impersonation.isImpersonating || !impersonation.originalAdmin) return;
+    
+    setUser(impersonation.originalAdmin);
+    setImpersonation(defaultImpersonation);
+    localStorage.setItem("innovatr_user", JSON.stringify(impersonation.originalAdmin));
+    localStorage.removeItem("innovatr_impersonation");
   };
 
   const isAuthenticated = user !== null;
   const isMember = user !== null && user.tier !== "free";
-  const isAdmin = user?.isAdmin ?? false;
+  const isAdmin = impersonation.isImpersonating ? false : (user?.isAdmin ?? false);
   const membershipTier = user?.membershipTier;
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, isAuthenticated, isMember, isAdmin, membershipTier }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      signup, 
+      logout, 
+      isAuthenticated, 
+      isMember, 
+      isAdmin, 
+      membershipTier,
+      impersonation,
+      impersonateUser,
+      impersonateCompany,
+      exitImpersonation,
+    }}>
       {children}
     </AuthContext.Provider>
   );

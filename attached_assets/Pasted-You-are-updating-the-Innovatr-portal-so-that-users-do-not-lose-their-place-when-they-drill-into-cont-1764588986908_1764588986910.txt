@@ -1,0 +1,109 @@
+You are updating the Innovatr portal so that users do not lose their place when they drill into content and go back.
+
+Right now there is a UX bug:
+
+On the Trends and Insights page, if I filter to a series (for example Launch), scroll down, and click into a report, when I go back I am dropped on the default unfiltered list again at the top of the page.
+
+On the home page, if I scroll down and click into Test24 Basic or Test24 Pro, when I go back I am returned to the very top of the home page instead of the position I came from.
+
+I want the portal to remember both list state and scroll position whenever the user goes into a detail view and then returns.
+
+Please implement the following behaviour.
+
+1. Preserve list and filter state on Trends and Insights
+
+For the Trends and Insights library page:
+
+When a user changes the series filter (Inside, Launch, IRL, Insights), category filters, search text, sort order, or pagination, store that state in a way that survives navigation to a detail page.
+
+When the user clicks into a report and then:
+
+Uses the browser Back button
+
+Or uses any in app back navigation
+the page must restore:
+
+The previous active series
+
+The previous category filters
+
+The previous search text
+
+The previous sort order
+
+The previous pagination page
+
+Recommended implementation:
+
+Keep all list state in either:
+
+URL query parameters, or
+
+A shared store or context that is not reset on route change
+
+On mount, the Trends and Insights component must read this stored state and initialise itself from it instead of using hard coded defaults.
+
+Important: do not change any titles, copy, or data. Only the state and navigation behaviour.
+
+2. Restore scroll position on back
+
+For both the Trends and Insights library and the home page:
+
+Before navigating from a list or section into a detail view, record the current window.scrollY.
+
+When the user navigates back from a detail view, restore the scroll position for that route so the user lands exactly where they were.
+
+You can use either:
+
+The router’s built in scroll restoration support if available, or
+
+A small custom solution that:
+
+Stores scrollY in history.state or a simple in memory map keyed by route
+
+On mount of the list page, checks if there is a stored scroll position for this route and calls window.scrollTo(0, storedY) after the content has rendered.
+
+Make sure this works for:
+
+Trends and Insights list to report detail and back
+
+Home page to Test24 Basic or Test24 Pro detail and back
+
+Any other card that opens a detail page inside the portal
+
+3. Do not break refresh behaviour
+
+It is acceptable that a full browser refresh resets filters and scroll.
+The key requirement is:
+
+When navigating inside the app
+
+And when using the browser Back button
+
+the previous state and scroll position must be restored.
+
+4. Final checks
+
+Before you finish, test the following flows:
+
+Go to Trends and Insights
+
+Filter to Launch
+
+Scroll down
+
+Open a Launch report
+
+Use Back
+Expected: Launch is still selected, the same cards are visible, and the scroll position is restored.
+
+Go to the home page
+
+Scroll down till Test24 Basic or Pro is half way down the screen
+
+Click into Test24
+
+Use Back
+Expected: Home page scroll position is restored and I am back at the Test24 section, not at the top.
+
+Confirm there are no console errors and that existing data loading and content are unchanged.
