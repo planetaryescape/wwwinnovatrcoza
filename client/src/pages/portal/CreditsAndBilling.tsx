@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,7 @@ import PortalLayout from "./PortalLayout";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import LockedFeature from "@/components/LockedFeature";
+import OrderFormDialog from "@/components/OrderFormDialog";
 
 const mockCreditPackages = [
   {
@@ -74,9 +76,26 @@ const mockBillingHistory = [
 export default function CreditsAndBilling() {
   const [, setLocation] = useLocation();
   const { isMember } = useAuth();
+  const [showOrderForm, setShowOrderForm] = useState(false);
+  const [selectedPack, setSelectedPack] = useState<typeof mockCreditPackages[0] | null>(null);
 
   const formatPrice = (amount: number) => {
     return `R${amount.toLocaleString()}`;
+  };
+
+  const handlePurchasePack = (pack: typeof mockCreditPackages[0]) => {
+    setSelectedPack(pack);
+    setShowOrderForm(true);
+  };
+
+  const getOrderItems = () => {
+    if (!selectedPack) return [];
+    return [{
+      type: "credit_pack",
+      description: `Test24 ${selectedPack.type} Credit${selectedPack.credits > 1 ? 's' : ''} (${selectedPack.credits}x)`,
+      quantity: 1,
+      unitAmount: selectedPack.price.toString(),
+    }];
   };
 
   const basicCredits = { remaining: 7, total: 10 };
@@ -271,7 +290,11 @@ export default function CreditsAndBilling() {
                         Save {pack.savings}%
                       </p>
                     </div>
-                    <Button className="w-full" data-testid={`button-buy-pack-${index}`}>
+                    <Button 
+                      className="w-full" 
+                      data-testid={`button-buy-pack-${index}`}
+                      onClick={() => handlePurchasePack(pack)}
+                    >
                       Purchase
                     </Button>
                   </CardContent>
@@ -359,6 +382,20 @@ export default function CreditsAndBilling() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Order Form Dialog for Credit Pack Purchases */}
+      {selectedPack && (
+        <OrderFormDialog
+          open={showOrderForm}
+          onOpenChange={setShowOrderForm}
+          orderItems={getOrderItems()}
+          totalAmount={selectedPack.price}
+          purchaseType={`Test24 ${selectedPack.type} Credit Pack`}
+          onSuccess={() => {
+            setSelectedPack(null);
+          }}
+        />
+      )}
     </PortalLayout>
   );
 }
