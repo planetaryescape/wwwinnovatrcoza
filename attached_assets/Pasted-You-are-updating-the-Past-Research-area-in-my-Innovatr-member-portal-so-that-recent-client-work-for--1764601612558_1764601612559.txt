@@ -1,0 +1,235 @@
+You are updating the Past Research area in my Innovatr member portal so that recent client work for Rugani is visible when Rugani users log in.
+
+Do not change any routing, auth or credit logic.
+Do not touch the Trends & Insights library.
+Only work inside whatever data model and UI is used for Past Research.
+
+0. Context and assumptions
+
+The portal already has:
+
+Companies like Rugani and Greenway Farms configured
+
+Users linked to those companies (for example Tymon and Simonne for Rugani)
+
+A Past Research page in the member portal (likely at /portal/past-research or similar) that can list previous projects.
+
+Right now, Rugani has no visible projects in Past Research.
+I want to add two concrete studies and link them to the Rugani company so that when Tymon logs in with his Rugani email, he can see them.
+
+Assume I will upload the report files into the project after you wire the data.
+
+Use these exact file paths and filenames (create folders if they do not exist):
+
+/public/assets/client-reports/rugani/Rugani_X_Clicks_Test24_Basic.pptx
+/public/assets/client-reports/rugani/Rugani_Test24_X_Ad_Campaign.pptx
+
+
+(I will upload the files with these exact names.)
+
+1. Find the Past Research data model
+
+Locate where Past Research items are stored and rendered. This might be:
+
+A pastResearch collection in a database
+
+A past-research.json or similar config file under data/ or public/
+
+A PastResearch or Projects model in the backend.
+
+Identify the fields each project currently has (for example):
+
+id
+
+title
+
+companyId or client
+
+method or studyType
+
+date
+
+summary
+
+tags
+
+fileUrl or downloadUrl
+
+visibility or access control (if any)
+
+Do not change the structure for existing projects.
+If necessary, extend it minimally to support a companyId if it does not already exist.
+
+2. Ensure Rugani company linkage
+
+Find the company record for Rugani (might be called Rugani, Rugani Juice or similar) in your companies table / collection.
+
+Note its id or unique key. You will need it to link the projects.
+
+If no dedicated company model exists yet but users have a company or companyName field:
+
+Use the same identifier that Rugani users have (e.g. "Rugani Juice").
+
+3. Create two Rugani projects
+
+Create two new Past Research records for Rugani with the following content.
+
+If the model uses different field names, map appropriately (for example clientName instead of companyName).
+
+Project 1 – Rugani x Clicks positioning
+{
+  "title": "Rugani x Clicks Wellness Beverage Positioning",
+  "company": "Rugani Juice",        // or companyId: <Rugani company id>, matching your model
+  "studyType": "Test24 Basic",
+  "method": "Concept & pack positioning",
+  "sector": "Beverages",
+  "country": "South Africa",
+  "date": "2025-12-01",             // 1 December 2025
+  "fileUrl": "/public/assets/client-reports/rugani/Rugani_X_Clicks_Test24_Basic.pptx",
+  "summary": "Quant deep dive into how Rugani’s 330 ml and 750 ml formats perform against LiquiFruit, Coke, Powerade and Red Bull in Clicks. Shows that Rugani’s natural positioning fits the Clicks wellness mission and proves the role of each format in fridges, health aisles and checkout.",
+  "meta": {
+    "sample": "n=100 Clicks shoppers",
+    "regions": ["Gauteng", "Western Cape", "KZN"],
+    "design": "Test24 Basic, 100 consumers, 5 minute survey"
+  },
+  "keyTakeouts": [
+    "Health shoppers are ready – 68% of Clicks shoppers actively choose healthier beverages and Rugani’s natural story lands with strong interest above 80% for both formats.",
+    "Dual format, zero cannibalisation – 330 ml wins on-the-go missions and checkout impulse, 750 ml leads in family and breakfast occasions with combined category growth above 22% and limited impact on LiquiFruit.",
+    "Clear placement playbook for Clicks – 330 ml belongs in checkout and main fridges as a wellness impulse drink while 750 ml earns a premium slot in the health aisle as the family wellness anchor."
+  ],
+  "tags": [
+    "Rugani",
+    "Clicks",
+    "Test24 Basic",
+    "Retail Positioning",
+    "Beverages",
+    "Wellness",
+    "Category Growth"
+  ],
+  "status": "completed",
+  "visibility": "company"           // visible to Rugani users + admins (see next section)
+}
+
+Project 2 – Rugani key visual optimisation
+{
+  "title": "Rugani New Key Visual Optimisation",
+  "company": "Rugani Juice",        // or companyId as above
+  "studyType": "Test24 Basic",
+  "method": "Creative screen – key visual",
+  "sector": "Beverages",
+  "country": "South Africa",
+  "date": "2025-11-07",             // 7 November 2025
+  "fileUrl": "/public/assets/client-reports/rugani/Rugani_Test24_X_Ad_Campaign.pptx",
+  "summary": "Evaluation of Rugani’s new key visual against Sir Fruit, LiquiFruit and Rhodes among heavy juice users. Identifies where the current ad underperforms and gives a roadmap to shift from sport-only energy cues to everyday natural health and refreshment.",
+  "meta": {
+    "sample": "n=100 women 35–55, heavy juice users",
+    "design": "Test24 Basic creative screen"
+  },
+  "keyTakeouts": [
+    "Idea liked, not yet chosen – Rugani’s key visual lands around mid 70s on Idea Score but lags competitors on Commitment, showing curiosity without conversion.",
+    "Health story is strong, execution is noisy – Consumers love the real fruit and vegetable story and CANSA link, but exaggerated visuals and sport-focused framing create disbelief and anxiety rather than trust and joy.",
+    "Path to a winning visual – Replace the leg and beetroot execution with real ingredient and pack shots, simplify copy, and reposition the ad as everyday natural health and affordable satisfaction, not only for athletes."
+  ],
+  "tags": [
+    "Rugani",
+    "Creative Testing",
+    "Key Visual",
+    "Test24 Basic",
+    "Juice",
+    "Brand Communication"
+  ],
+  "status": "completed",
+  "visibility": "company"
+}
+
+
+Adjust field names to match your existing schema, but keep all the content.
+
+4. Visibility rules
+
+I want these two projects to show only for:
+
+All users who belong to the Rugani company (for example Tymon and Simonne)
+
+Admin / Innovatr users
+
+Implementation:
+
+In the Past Research query for the logged-in user:
+
+If user.role is admin or has an @innovatr.co.za email, they can see all projects.
+
+Otherwise, filter projects where project.companyId === user.companyId or project.company === user.companyName (whatever your model uses).
+
+Ensure Greenway users do not see Rugani projects unless explicitly intended. For now, treat them as separate companies.
+
+Do not change any access rules for other existing projects.
+
+5. UI behaviour on Past Research page
+
+On /portal/past-research (or equivalent), when a Rugani user logs in:
+
+They should see at least these two cards in their list.
+
+Each card shows:
+
+Title
+
+Short summary line (you can combine sector, country, date)
+
+The summary as the main body copy
+
+Tags as badges if your UI supports it
+
+When they click the download or “View report” action:
+
+Open or download the file at the fileUrl provided above.
+
+Keep the existing file viewer / download behaviour for other projects.
+
+Do not change styling or layout outside of what is needed to display these two new cards consistently with existing projects.
+
+6. Testing checklist
+
+Please verify:
+
+Rugani user view
+
+Log in as a Rugani user (e.g. Tymon’s email).
+
+Go to Past Research.
+
+Confirm both Rugani projects appear with correct titles, dates and summaries.
+
+Click download and confirm the browser attempts to load the correct file path.
+
+Other company view
+
+Log in as a non-Rugani client (e.g. Greenway if configured).
+
+They should not see the Rugani projects.
+
+Admin view
+
+Log in as an admin / Innovatr account.
+
+Confirm you can see Rugani projects and all other projects.
+
+No layout regressions
+
+Past Research page loads without errors.
+
+No changes to Trends & Insights, Dashboard, Credits & Billing or any other pages.
+
+7. Comment and document
+
+In the main Past Research data / component file, add a short comment summarising:
+
+That two Rugani projects were added,
+
+That they are linked by company / companyId,
+
+And that access is restricted to Rugani users and admins.
+
+Do not introduce any new libraries.
+Keep all code changes scoped to Past Research data and its filtering logic.
