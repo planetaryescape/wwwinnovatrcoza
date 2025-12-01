@@ -1160,6 +1160,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Client report PDF upload endpoint
+  app.post("/api/upload/client-report", fileUpload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      if (req.file.mimetype !== "application/pdf") {
+        return res.status(400).json({ error: "Invalid file type. Only PDF files are allowed." });
+      }
+
+      const companyId = req.body.companyId || "unknown";
+      const timestamp = Date.now();
+      const originalName = req.file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
+      const fileName = `client_reports/${companyId}/${timestamp}-${originalName}`;
+
+      const result = await uploadFile(req.file.buffer, fileName);
+
+      if (result.ok && result.path) {
+        res.json({ 
+          success: true, 
+          path: result.path,
+          url: `/api/files/${result.path}`
+        });
+      } else {
+        res.status(500).json({ error: result.error || "Upload failed" });
+      }
+    } catch (error: any) {
+      console.error("Client report upload error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Serve files from App Storage
   app.get("/api/files/*", async (req, res) => {
     try {
