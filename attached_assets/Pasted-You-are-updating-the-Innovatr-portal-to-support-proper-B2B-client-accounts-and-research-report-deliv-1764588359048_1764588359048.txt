@@ -1,0 +1,200 @@
+You are updating the Innovatr portal to support proper B2B client accounts and research report delivery.
+Do NOT change any existing Trends Library functionality.
+You are adding a new Client Research System with the following requirements:
+
+1. COMPANY ACCOUNTS
+Create a new table/collection: companies
+
+Fields:
+
+id
+
+name
+
+logoUrl
+
+tier (Starter, Growth, Scale)
+
+proCredits
+
+basicCredits
+
+dealDetails (JSON)
+
+createdAt
+
+Admin can:
+
+Create company
+
+Upload/change company logo
+
+Edit company details
+
+Delete company (must also orphan or delete users)
+
+2. USER MANAGEMENT (CRUD)
+Update users table to include:
+
+companyId (FK)
+
+tier
+
+creditsInheritedFromCompany (boolean)
+
+Admin can:
+
+Add users
+
+Assign them to a company
+
+Edit email/tier/status/company
+
+DELETE users
+
+Impersonate user
+
+Impersonate company
+
+3. PAST RESEARCH (Client Reports)
+Create new table: clientReports
+
+Fields:
+
+id
+
+companyId
+
+title
+
+description
+
+pdfUrl
+
+uploadedAt
+
+tags (optional)
+
+Admin can:
+
+Upload new PDF
+
+Assign report to a company
+
+Edit report
+
+Delete report
+
+Re-upload PDF
+
+Users can:
+
+View any report linked to their company
+
+Download PDF
+
+4. IMPERSONATION MODE (“VIEW AS CLIENT”)
+Add a button on each company:
+“View Company Portal”
+This loads a simulated version of the client view showing:
+
+Dashboard
+
+Past Research (company reports only)
+
+Credits
+
+Deals
+
+Trends access according to company tier
+
+Add a button on each user:
+“View as User”
+This shows:
+
+User-specific view
+
+Ensures permissions are correct
+
+Helps admin troubleshoot client issues
+
+NO admin actions allowed in impersonation mode.
+
+5. ADMIN PANEL UPDATES
+Under Admin > Companies:
+
+Company profile page shows:
+
+Logo
+
+Name
+
+Credits
+
+Users table
+
+Reports table
+
+Upload Report button
+
+Impersonate company button
+
+Under Admin > Users:
+
+Add "Delete user" button
+
+Add "Edit user" modal
+
+Add "View as user" button
+
+Under Admin > Reports:
+
+New section for all client research reports
+
+6. CLIENT USER VIEW
+Modify client portal view so that:
+
+Past Research tab ONLY shows reports assigned to the user’s company
+
+Credit summary displays company-level credits
+
+Trends library access determined by company tier
+
+Trends access logic:
+
+Free: Inside + 2 IRL + 2 Launch
+
+Scale: All content
+
+7. FILE STORAGE
+All uploaded PDFs must go to:
+/public/assets/client_reports/
+
+All company logos to:
+/public/assets/company_logos/
+
+8. DO NOT break existing features
+Keep:
+
+Trends Library
+
+Launch a New Brief
+
+Deals
+
+Credits & Billing
+
+Only extend functionality.
+
+9. Once done, confirm:
+Companies visible
+
+Users linked correctly
+
+Reports visible under Past Research
+
+Impersonation works
+
+Credits display correctly
+
+No front-end errors

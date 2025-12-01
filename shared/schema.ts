@@ -29,6 +29,7 @@ export const users = pgTable("users", {
   role: varchar("role", { length: 20 }).notNull().default("MEMBER"),
   creditsBasic: integer("credits_basic").notNull().default(0),
   creditsPro: integer("credits_pro").notNull().default(0),
+  creditsInheritedFromCompany: boolean("credits_inherited_from_company").notNull().default(true),
   totalSpend: decimal("total_spend", { precision: 10, scale: 2 }).default("0"),
   firstProjectDate: timestamp("first_project_date"),
   lastProjectDate: timestamp("last_project_date"),
@@ -214,6 +215,7 @@ export const companies = pgTable("companies", {
     .default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   domain: text("domain"),
+  logoUrl: text("logo_url"),
   tier: varchar("tier", { length: 20 }).notNull().default("STARTER"),
   contractStart: timestamp("contract_start"),
   contractEnd: timestamp("contract_end"),
@@ -222,6 +224,7 @@ export const companies = pgTable("companies", {
   basicCreditsUsed: integer("basic_credits_used").notNull().default(0),
   proCreditsTotal: integer("pro_credits_total").notNull().default(0),
   proCreditsUsed: integer("pro_credits_used").notNull().default(0),
+  dealDetails: jsonb("deal_details"),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -340,6 +343,37 @@ export const insertDealSchema = createInsertSchema(deals)
 
 export type InsertDeal = z.infer<typeof insertDealSchema>;
 export type Deal = typeof deals.$inferSelect;
+
+// Client Reports - Past Research delivered to specific companies
+export const clientReports = pgTable("client_reports", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  pdfUrl: text("pdf_url"),
+  thumbnailUrl: text("thumbnail_url"),
+  tags: text("tags").array().default([]),
+  uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertClientReportSchema = createInsertSchema(clientReports)
+  .omit({
+    id: true,
+    uploadedAt: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    title: z.string().min(1, "Title is required"),
+    companyId: z.string().min(1, "Company ID is required"),
+  });
+
+export type InsertClientReport = z.infer<typeof insertClientReportSchema>;
+export type ClientReport = typeof clientReports.$inferSelect;
 
 export const inquiries = pgTable("inquiries", {
   id: varchar("id")
