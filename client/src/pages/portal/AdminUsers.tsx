@@ -26,6 +26,16 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { 
@@ -46,11 +56,15 @@ import {
   Users,
   Crown,
   Zap,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Eye,
+  Trash2
 } from "lucide-react";
 import NewUserModal from "./NewUserModal";
 import { useToast } from "@/hooks/use-toast";
 import { exportUsersToCSV } from "@/lib/csvExport";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLocation } from "wouter";
 
 interface AdminUser {
   id: string;
@@ -93,6 +107,8 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 
 export default function AdminUsers() {
   const { toast } = useToast();
+  const { impersonateUser } = useAuth();
+  const [, setLocation] = useLocation();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<AdminUser[]>([]);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
@@ -105,6 +121,8 @@ export default function AdminUsers() {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editNotes, setEditNotes] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null);
 
   const fetchData = async () => {
     try {
@@ -203,6 +221,51 @@ export default function AdminUsers() {
   const handleSaveNotes = async () => {
     if (!selectedUser) return;
     await handleUpdateUser(selectedUser.id, { internalNotes: editNotes });
+  };
+
+  const handleViewAsUser = async () => {
+    if (!selectedUser) return;
+    await impersonateUser(selectedUser.id);
+    setDrawerOpen(false);
+    setLocation("/portal");
+    toast({
+      title: "Viewing as User",
+      description: `Now viewing portal as ${selectedUser.name || selectedUser.email}`,
+    });
+  };
+
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+    try {
+      const res = await fetch(`/api/admin/users/${userToDelete.id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete user");
+      
+      setUsers(users.filter(u => u.id !== userToDelete.id));
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
+      if (selectedUser?.id === userToDelete.id) {
+        setDrawerOpen(false);
+        setSelectedUser(null);
+      }
+      
+      toast({
+        title: "User Deleted",
+        description: "User has been removed from the system",
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to delete user",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const confirmDelete = (user: AdminUser) => {
+    setUserToDelete(user);
+    setDeleteDialogOpen(true);
   };
 
   const formatDate = (dateStr: string | null | undefined) => {
@@ -472,18 +535,40 @@ export default function AdminUsers() {
           {selectedUser && (
             <>
               <SheetHeader className="pb-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                    <User className="w-6 h-6 text-gray-500" />
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                      <User className="w-6 h-6 text-gray-500" />
+                    </div>
+                    <div>
+                      <SheetTitle 
+                        className="text-xl"
+                        style={{ fontFamily: 'DM Serif Display, serif' }}
+                      >
+                        {selectedUser.name || "Unnamed User"}
+                      </SheetTitle>
+                      <SheetDescription>{selectedUser.email}</SheetDescription>
+                    </div>
                   </div>
-                  <div>
-                    <SheetTitle 
-                      className="text-xl"
-                      style={{ fontFamily: 'DM Serif Display, serif' }}
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleViewAsUser}
+                      data-testid="button-view-as-user"
                     >
-                      {selectedUser.name || "Unnamed User"}
-                    </SheetTitle>
-                    <SheetDescription>{selectedUser.email}</SheetDescription>
+                      <Eye className="w-4 h-4 mr-2" />
+                      View as User
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => confirmDelete(selectedUser)}
+                      className="text-destructive hover:text-destructive"
+                      data-testid="button-delete-user"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               </SheetHeader>
@@ -646,6 +731,28 @@ export default function AdminUsers() {
       </Sheet>
 
       <NewUserModal open={modalOpen} onOpenChange={setModalOpen} onSuccess={fetchData} />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete User</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {userToDelete?.name || userToDelete?.email}? 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteUser}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="button-confirm-delete"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

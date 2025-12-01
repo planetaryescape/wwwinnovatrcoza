@@ -774,7 +774,7 @@ export default function AdminCompanies() {
                       ))}
                       {companyReports.length > 3 && (
                         <Button 
-                          variant="link" 
+                          variant="ghost" 
                           size="sm" 
                           className="w-full text-muted-foreground"
                           onClick={() => setLocation(`/portal/admin?tab=reports&companyId=${selectedCompany.id}`)}
