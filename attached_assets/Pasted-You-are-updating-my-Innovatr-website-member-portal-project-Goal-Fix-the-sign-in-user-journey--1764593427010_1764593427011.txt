@@ -1,0 +1,166 @@
+You are updating my Innovatr website + member portal project.
+
+Goal
+
+Fix the sign-in user journey:
+
+When a member logs in from the public site (the marketing homepage), they must be automatically redirected straight into their member portal dashboard.
+
+Right now, after login the user stays on the homepage and only sees the “Hannah • GOLD” menu in the top right. They then have to click “Member Portal” to actually reach /portal/dashboard. I want to remove that extra step.
+
+Please implement this without breaking any existing routes or causing 404 errors.
+
+Tech + structure (important)
+
+The public marketing site lives at / and other top-level routes (Services, Pricing, Membership, Contact).
+
+The member portal lives under /portal/...
+Examples:
+
+/portal/dashboard
+
+/portal/trends
+
+/portal/admin
+
+There is a Sign In flow triggered from the marketing site (top right header button).
+
+This opens a sign-in modal / page where the user enters email + password.
+
+On success, auth state is stored (for example via an auth context, token storage, or similar).
+
+There is a “Member Portal” menu item in the header dropdown that currently navigates to the portal after login.
+
+Do not change any copy, design, layout, or membership logic. Only fix routing / redirects around sign in.
+
+What I want you to do
+
+Find the sign-in submission handler
+
+Locate the React component / function that:
+
+Handles the sign-in form submit
+
+Calls the login API
+
+Sets the authenticated user state
+
+This might live in something like:
+
+AuthContext, useAuth, signin.tsx, SignInModal.tsx, or components/auth/...
+
+Do not rename or remove this function. You will only extend it.
+
+Add a post-login redirect to the portal dashboard
+
+After a successful login (when the API confirms credentials and user state is stored):
+
+Automatically redirect to the member portal dashboard route:
+
+Preferred: /portal/dashboard
+
+If /portal/dashboard does not exist, use /portal or whatever is the existing default portal route.
+
+Use the existing routing system:
+
+If the app uses React Router: use useNavigate() or history.push('/portal/dashboard').
+
+If it uses Next.js: use router.push('/portal/dashboard').
+
+Only trigger this redirect after:
+
+The login request has succeeded
+
+The authenticated user has been saved in context / state / cookies.
+
+Pseudocode for what I want:
+
+const handleLogin = async () => {
+  setLoading(true);
+  try {
+    const user = await authApi.login(email, password);
+    authContext.setUser(user);
+    // NEW: redirect straight to portal dashboard
+    router.push('/portal/dashboard');
+  } catch (err) {
+    showError(err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+Keep other behaviours unchanged
+
+Do not remove or break:
+
+The “Member Portal” button in the header
+
+The “GOLD” tag / user menu
+
+Any existing log out logic
+
+Users who are already logged in should still be able to:
+
+Browse the public site
+
+Click “Member Portal” to jump into /portal/dashboard
+(no redirect loops).
+
+Avoid redirect loops and 404s
+
+Make sure you only redirect after a fresh login, not every time the homepage loads.
+
+Do not change the portal routes themselves. Assume:
+
+/portal/dashboard already exists and is valid.
+
+If for some reason the codebase uses a slightly different dashboard route, adjust the redirect to match the existing dashboard route instead of inventing a new one.
+
+If the login component is reused inside the portal, avoid redirect loops by:
+
+Only redirecting if the current path starts with / (marketing side), not /portal.
+
+Or by checking something like if (!location.pathname.startsWith('/portal')) { redirect }.
+
+Sign-up and password reset
+
+Do not change the sign-up or password reset flows.
+
+If they share the same handler, keep behaviour consistent:
+
+After a successful first login, still redirect to /portal/dashboard.
+
+Testing checklist (please follow this in code comments or console logs)
+
+Implement and verify the following:
+
+Case 1: New or returning member on the public homepage
+
+Click Sign In, enter valid credentials
+
+On success, they are immediately redirected to /portal/dashboard
+
+Case 2: Already logged-in user on homepage
+
+Refresh /
+
+They should stay on / unless they explicitly click “Member Portal”
+
+Case 3: Logged-in user clicking “Member Portal”
+
+Should navigate cleanly to /portal/dashboard with no extra redirects
+
+No 404 pages appear during any of these flows.
+
+Explain what you changed
+
+Once done, add a short summary comment in the code (and in your Replit task output) explaining:
+
+Which files you edited
+
+Which route you use for the dashboard redirect
+
+How you avoided redirect loops
+
+Do not refactor unrelated components, styles or copy. Focus only on the login → portal redirect behaviour.
