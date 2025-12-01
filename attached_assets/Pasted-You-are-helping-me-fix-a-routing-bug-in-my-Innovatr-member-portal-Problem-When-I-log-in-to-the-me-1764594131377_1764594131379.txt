@@ -1,0 +1,131 @@
+You are helping me fix a routing bug in my Innovatr member portal.
+
+Problem
+
+When I log in to the member portal from the marketing site, I am redirected to /portal/dashboard, but in preview I get:
+
+404 Page Not Found – Did you forget to add the page to the router?
+
+Previously, after logging in, I successfully landed on my member dashboard (the page that says something like “Welcome back, Hannah” with tiles for Launch New Brief, Latest Trends, Buy Credits, Past Studies, and the Research Credits panel). That page currently still exists, but the route mapping is broken.
+
+I need you to:
+
+Find the existing dashboard component that renders the “Welcome back” view inside the portal layout.
+
+Ensure there is a valid route for it, and that /portal/dashboard points to it.
+
+Make sure the login flow redirects to that route after a successful sign-in.
+
+Do not break any other existing portal routes.
+
+Please follow these rules carefully.
+
+1. Find the current portal dashboard route
+
+Search the codebase for the main dashboard component. Look for things like:
+
+Welcome back,
+
+Your Research Credits
+
+Launch New Brief tile component
+
+Or a component named something like DashboardPage, PortalDashboard, MemberDashboard, etc.
+
+Identify which route path currently renders that component. It might be:
+
+/portal
+
+/portal/index
+
+/portal/home
+
+or something similar
+
+Do not rename the component. Just note what path it is currently mapped to in the router.
+
+2. Ensure /portal/dashboard is a valid route
+
+I want /portal/dashboard to be a valid path that shows the same dashboard view as the main portal home.
+
+Depending on the router we use (React Router, Next.js, etc.):
+
+If there is already a route for /portal that renders the dashboard, then:
+
+Add /portal/dashboard as an alias that renders the same component, or
+
+Create a small redirect route from /portal/dashboard to the existing dashboard path.
+
+If the dashboard is already at /portal/dashboard and something else changed, then:
+
+Fix any misconfigured route definition so that /portal/dashboard is properly registered again.
+
+Important:
+
+Do not remove or break the existing /portal route.
+
+Both /portal and /portal/dashboard should work and show the dashboard page.
+
+3. Fix the login redirect
+
+Find the sign-in flow for members:
+
+This is the form shown in the modal/dialog when a user clicks “Sign In” on the main marketing site.
+
+Look for the code that:
+
+Handles a successful login / token storage
+
+Calls a navigation function (e.g. navigate, router.push, history.push, etc.)
+
+Update the redirect so that, after a successful login, users are taken directly to the portal dashboard route you fixed in step 2. For consistency, use /portal/dashboard as the main target (which now correctly renders the dashboard).
+
+Example pattern (pseudo-code):
+
+// after successful login
+navigate('/portal/dashboard');
+
+
+or the equivalent for our routing library.
+
+Make sure:
+
+We only change the post-login redirect.
+
+We do not modify the underlying authentication logic (tokens, cookies, guards, etc.).
+
+We do not introduce any new 404s.
+
+4. Do not alter unrelated behaviour
+
+Please do not:
+
+Change any API calls or backend endpoints.
+
+Change any text, styling, or layout on the dashboard itself.
+
+Touch the “Launch New Brief” form or any other pages.
+
+We are only:
+
+Fixing the route mapping for the dashboard.
+
+Making sure /portal/dashboard and /portal work.
+
+Making login redirect to the correct dashboard route.
+
+5. Quick self-check
+
+After your changes, ensure that all of this is true:
+
+Visiting /portal/dashboard in preview shows the full member dashboard (“Welcome back, Hannah…” etc.), not a 404.
+
+Visiting /portal still works and shows the same dashboard.
+
+Logging in from the marketing site:
+
+Sends the user to /portal/dashboard automatically.
+
+Does not show any 404s or routing errors in the console.
+
+Please implement the changes carefully and keep the rest of the application behaviour unchanged.

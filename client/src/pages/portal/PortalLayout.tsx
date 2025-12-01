@@ -168,11 +168,14 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                   {menuItems.map((item) => {
                     if (item.adminOnly && !isAdmin) return null;
                     const isLocked = !isMember && item.lockedForFree;
+                    const isActive = item.url === "/portal" 
+                      ? (location === "/portal" || location === "/portal/dashboard")
+                      : location === item.url;
                     return (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton
                           asChild
-                          isActive={location === item.url}
+                          isActive={isActive}
                           data-testid={`menu-item-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
                         >
                           <button 

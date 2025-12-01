@@ -42,11 +42,8 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       }
       onOpenChange(false);
       
-      // Redirect to member portal dashboard after successful login/signup
-      // Only redirect if not already in the portal to avoid redirect loops
-      if (!location.startsWith("/portal")) {
-        setLocation("/portal/dashboard");
-      }
+      // Always redirect to member portal dashboard after successful login/signup
+      setLocation("/portal/dashboard");
     } catch (error) {
       toast({
         title: "Error",

@@ -49,6 +49,7 @@ function Router() {
       <Route path="/payment/return" component={PaymentReturn} />
       <Route path="/payment/cancel" component={PaymentReturn} />
       <Route path="/portal" component={Dashboard} />
+      <Route path="/portal/dashboard" component={Dashboard} />
       <Route path="/portal/trends" component={TrendsInsights} />
       <Route path="/portal/insights/:slug" component={InsightDetail} />
       <Route path="/portal/launch" component={LaunchBrief} />
