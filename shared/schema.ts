@@ -216,6 +216,7 @@ export const companies = pgTable("companies", {
   name: text("name").notNull(),
   domain: text("domain"),
   logoUrl: text("logo_url"),
+  industry: text("industry"),
   tier: varchar("tier", { length: 20 }).notNull().default("STARTER"),
   contractStart: timestamp("contract_start"),
   contractEnd: timestamp("contract_end"),

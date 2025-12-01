@@ -1,0 +1,205 @@
+You are updating the “Recommended for You” widget on my Innovatr member dashboard.
+
+Right now this block shows hard-coded, placeholder reports that are not part of my real Trends & Insights Library.
+
+Your job is to:
+
+Replace the static content with real reports from the existing Trends & Insights Library data.
+
+Respect each user’s access level (Free vs Member / tier) when choosing which reports to show.
+
+Keep the current visual design and layout of the widget.
+
+Do not change any other dashboard cards or flows.
+
+1. Where this lives
+
+There is a member dashboard page (under the member portal, e.g. route like /portal/dashboard) that currently renders a card titled:
+
+Recommended for You
+Curated insights based on your industry
+
+Inside that card there is a list of three items similar to:
+
+SA Beverage Innovation Trends Q4 2024
+
+Youth Consumer Behaviour Report
+
+Competitor Alert: New product launches in FMCG
+
+Each item has:
+
+Title
+
+Category line (e.g. Beverage • 15/11/2024)
+
+An optional “NEW” badge
+
+A download icon on the right
+
+These are fake examples. I want this card to be wired to my real report data.
+
+2. Data source: Trends & Insights Library
+
+Assume there is already a central data source for my reports, used by the Trends & Insights pages, for example:
+
+A reports table in the database
+
+Or a JSON file / API endpoint like /api/reports
+
+Or a helper like getReports() used by the Trends & Insights route
+
+Each report object already has at least:
+
+id or slug
+
+title
+
+series (Inside, IRL, Launch, Insights)
+
+category or industry (e.g. Banking, FMCG, Services)
+
+publishDate or publishedAt
+
+access or tier (e.g. free, members, insights)
+
+pdfUrl or detailUrl (link to download or view report page)
+
+Use the same source the Trends & Insights Library is using.
+Do not create a separate, duplicated list.
+
+3. Recommendation logic
+
+Implement a simple but meaningful recommendation algorithm with graceful fallback.
+
+3.1. Determine the user’s “industry”
+
+For the logged-in user:
+
+Try to read an industry or sector field from:
+
+The user profile
+
+Or the associated company (e.g. company record for Rugani, Greenway)
+
+If multiple fields exist, prefer the company industry first, then fall back to user industry.
+
+If you cannot find an industry:
+
+Treat the user as “general” and just show the latest reports they have access to (see fallback below).
+
+3.2. Filter reports by access
+
+From the full list of reports:
+
+Include only reports that the current user is allowed to see based on their membership tier and report access rule:
+
+If user is a Free / starter member:
+
+Include:
+
+All Inside reports (access = free)
+
+Any IRL / Launch reports explicitly marked free
+
+Exclude member-only Insights and member-only IRL/Launch reports.
+
+If user is a paying member (Gold / Scale / Pro etc.):
+
+Include all reports: Inside, IRL, Launch, Insights that their tier can see (keep existing logic).
+
+Use whatever access fields already exist (e.g. access: 'free' | 'members', requiresMembership, tier, etc.).
+Do not change any access rules; just reuse them for filtering.
+
+3.3. Rank and select 3 reports
+
+From the accessible reports:
+
+Try to get reports where the category / industry matches the user’s industry.
+
+Sort those by publishDate descending (newest first).
+
+Take the top 3.
+
+If fewer than 3 reports match the industry:
+
+Fill the remaining slots with the most recent accessible reports, regardless of industry.
+
+If there are no accessible reports at all:
+
+Show a friendly empty state in the card:
+
+e.g. “No recommended reports yet. As you start using Innovatr, we’ll surface reports that match your industry.”
+
+4. Rendering in the widget
+
+Keep the visual style identical to the current design.
+
+For each of the selected up to 3 reports:
+
+Title: use the report title.
+
+Meta line:
+
+[Primary category or series label] • [publish date in DD/MM/YYYY]
+
+Example: Banking • 07/10/2025
+
+NEW badge:
+
+Show the NEW badge if publishDate is within the last 30 days relative to “today”.
+
+Download / view icon:
+
+If the report has a pdfUrl, clicking the icon should open or download that PDF in a new tab.
+
+If the report only has a detailUrl, clicking should navigate to the report detail page in the Trends & Insights Library.
+
+Use the same icon/button style already present.
+
+Do not add any extra text or actions in this card besides what already exists.
+
+5. Behaviour and performance
+
+Load recommendations as part of the dashboard render, using:
+
+Server-side data fetching if the dashboard already uses it, or
+
+A client-side request to the existing reports API.
+
+Avoid heavy queries. Reuse existing helpers where possible (e.g. getLatestReports, getReportsByIndustry).
+
+Ensure the card handles:
+
+Loading state (e.g. skeleton or simple spinner)
+
+No data state (see above)
+
+6. Testing checklist
+
+Please verify:
+
+Log in as a Free member:
+
+Recommended for You only shows free-access reports.
+
+If there are fewer than 3, the card still renders nicely with 1–2 items or the empty state.
+
+Log in as a paying member:
+
+Card now includes Insights / member-only reports, prioritised by:
+
+Same industry
+
+Newest first
+
+Clicking anywhere on a recommended item (or the download icon) correctly:
+
+Opens the report detail page or
+
+Downloads / opens the PDF, depending on how the rest of the system is designed.
+
+NEW badge appears only on reports published in the last 30 days and disappears automatically as they age.
+
+Do not change the wording of “Recommended for You” or the subtitle.
+Simply wire this card to the real report library using the logic above.

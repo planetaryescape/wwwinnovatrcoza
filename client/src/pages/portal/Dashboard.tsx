@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   FileText,
   Download,
@@ -11,12 +13,42 @@ import {
   Sparkles,
   Clock,
   AlertCircle,
+  ExternalLink,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
 import PortalLayout from "./PortalLayout";
 import LockedFeature from "@/components/LockedFeature";
 import CompanyCreditsCard from "@/components/CompanyCreditsCard";
+import reportsData from "@/data/reports.json";
+import type { Company } from "@shared/schema";
+
+interface Report {
+  id: number;
+  title: string;
+  teaser: string;
+  slug: string;
+  series: string;
+  category: string;
+  displayCategories?: string[];
+  industry: string;
+  publishDate: string;
+  date: string;
+  status: string;
+  coverImage: string;
+  pdfPath: string | null;
+  hasDownload: boolean;
+  videoPaths: string[];
+  tags: string[];
+  isNew: boolean;
+  access: string;
+  accessLevel: string;
+  content?: {
+    intro: string;
+    sections: { heading: string; body: string }[];
+  };
+}
 
 const mockCredits = {
   basicRemaining: 7,
@@ -26,29 +58,85 @@ const mockCredits = {
   expiryDate: "30 Dec 2025",
 };
 
-const mockRecommendations = [
-  {
-    id: 1,
-    title: "SA Beverage Innovation Trends Q4 2024",
-    category: "Beverage",
-    date: "2024-11-15",
-    isNew: true,
-  },
-  {
-    id: 2,
-    title: "Youth Consumer Behaviour Report",
-    category: "Consumer Insights",
-    date: "2024-11-10",
-    isNew: true,
-  },
-  {
-    id: 3,
-    title: "Competitor Alert: New product launches in FMCG",
-    category: "Competitive Intelligence",
-    date: "2024-11-12",
-    isNew: false,
-  },
-];
+function canAccessReport(
+  report: Report,
+  userTier: string | undefined,
+  isMember: boolean
+): boolean {
+  const accessLevel = report.accessLevel || "PUBLIC";
+  
+  if (accessLevel === "PUBLIC" || accessLevel === "public" || report.access === "free") {
+    return true;
+  }
+  
+  if (!isMember) {
+    return false;
+  }
+  
+  if (accessLevel === "STARTER" || accessLevel === "member") {
+    return true;
+  }
+  
+  const tierHierarchy: Record<string, number> = {
+    "STARTER": 1,
+    "GROWTH": 2,
+    "SCALE": 3,
+  };
+  
+  const userLevel = tierHierarchy[userTier?.toUpperCase() || "STARTER"] || 1;
+  const requiredLevel = tierHierarchy[accessLevel] || 1;
+  
+  return userLevel >= requiredLevel;
+}
+
+function isNewReport(publishDate: string): boolean {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const reportDate = new Date(publishDate);
+  return reportDate >= thirtyDaysAgo;
+}
+
+function getRecommendedReports(
+  reports: Report[],
+  userTier: string | undefined,
+  isMember: boolean,
+  userIndustry: string | undefined
+): Report[] {
+  const accessibleReports = reports.filter(report => 
+    report.status === "live" && canAccessReport(report, userTier, isMember)
+  );
+  
+  const sortedByDate = [...accessibleReports].sort(
+    (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
+  );
+  
+  if (!userIndustry) {
+    return sortedByDate.slice(0, 3);
+  }
+  
+  const industryMatches = sortedByDate.filter(report => {
+    const reportIndustry = report.industry?.toLowerCase() || "";
+    const matchIndustry = userIndustry.toLowerCase();
+    
+    if (reportIndustry === matchIndustry) return true;
+    
+    const displayCategories = report.displayCategories || [];
+    return displayCategories.some(cat => cat.toLowerCase() === matchIndustry);
+  });
+  
+  const nonIndustryMatches = sortedByDate.filter(report => {
+    const reportIndustry = report.industry?.toLowerCase() || "";
+    const matchIndustry = userIndustry.toLowerCase();
+    
+    if (reportIndustry === matchIndustry) return false;
+    
+    const displayCategories = report.displayCategories || [];
+    return !displayCategories.some(cat => cat.toLowerCase() === matchIndustry);
+  });
+  
+  const recommended = [...industryMatches, ...nonIndustryMatches];
+  return recommended.slice(0, 3);
+}
 
 const mockDeals = [
   {
@@ -66,6 +154,44 @@ const mockDeals = [
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { user, isMember } = useAuth();
+
+  const { data: company, isLoading: isLoadingCompany } = useQuery<Company>({
+    queryKey: ["/api/companies", user?.companyId],
+    enabled: !!user?.companyId,
+  });
+
+  const userIndustry = useMemo(() => {
+    if (company?.industry) return company.industry;
+    return undefined;
+  }, [company]);
+
+  const recommendedReports = useMemo(() => {
+    return getRecommendedReports(
+      reportsData as Report[],
+      user?.membershipTier,
+      isMember,
+      userIndustry
+    );
+  }, [user?.membershipTier, isMember, userIndustry]);
+
+  const handleReportClick = (report: Report, event: React.MouseEvent) => {
+    event.stopPropagation();
+    
+    if (report.pdfPath && report.hasDownload) {
+      window.open(report.pdfPath, "_blank");
+    } else {
+      setLocation(`/portal/insights/${report.slug}`);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
 
   const basicPercentage = (mockCredits.basicRemaining / mockCredits.basicTotal) * 100;
   const proPercentage = (mockCredits.proRemaining / mockCredits.proTotal) * 100;
@@ -254,31 +380,55 @@ export default function Dashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    {mockRecommendations.map((rec) => (
-                      <div
-                        key={rec.id}
-                        className="flex items-start gap-3 p-3 rounded-md hover-elevate active-elevate-2 cursor-pointer border"
-                        onClick={() => setLocation("/portal/trends")}
-                        data-testid={`recommendation-${rec.id}`}
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="text-sm font-medium">{rec.title}</h4>
-                            {rec.isNew && (
-                              <Badge variant="secondary" className="text-xs">
-                                NEW
-                              </Badge>
-                            )}
+                  {isLoadingCompany && user?.companyId ? (
+                    <div className="space-y-3">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-start gap-3 p-3 rounded-md border">
+                          <div className="flex-1 space-y-2">
+                            <Skeleton className="h-4 w-3/4" />
+                            <Skeleton className="h-3 w-1/2" />
                           </div>
-                          <p className="text-xs text-muted-foreground">
-                            {rec.category} • {new Date(rec.date).toLocaleDateString()}
-                          </p>
+                          <Skeleton className="h-4 w-4" />
                         </div>
-                        <Download className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : recommendedReports.length > 0 ? (
+                    <div className="space-y-3">
+                      {recommendedReports.map((report) => (
+                        <div
+                          key={report.id}
+                          className="flex items-start gap-3 p-3 rounded-md hover-elevate active-elevate-2 cursor-pointer border"
+                          onClick={(e) => handleReportClick(report, e)}
+                          data-testid={`recommendation-${report.id}`}
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="text-sm font-medium">{report.title}</h4>
+                              {isNewReport(report.publishDate) && (
+                                <Badge variant="secondary" className="text-xs">
+                                  NEW
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {report.series} • {formatDate(report.publishDate)}
+                            </p>
+                          </div>
+                          {report.pdfPath && report.hasDownload ? (
+                            <Download className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          ) : (
+                            <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6">
+                      <p className="text-sm text-muted-foreground">
+                        No recommended reports yet. As you start using Innovatr, we'll surface reports that match your industry.
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ) : (
@@ -288,25 +438,29 @@ export default function Dashboard() {
                 showButton={true}
               >
                 <div className="space-y-3 mt-4">
-                  {mockRecommendations.map((rec) => (
+                  {recommendedReports.slice(0, 3).map((report) => (
                     <div
-                      key={rec.id}
+                      key={report.id}
                       className="flex items-start gap-3 p-3 rounded-md border"
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <h4 className="text-sm font-medium">{rec.title}</h4>
-                          {rec.isNew && (
+                          <h4 className="text-sm font-medium">{report.title}</h4>
+                          {isNewReport(report.publishDate) && (
                             <Badge variant="secondary" className="text-xs">
                               NEW
                             </Badge>
                           )}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          {rec.category} • {new Date(rec.date).toLocaleDateString()}
+                          {report.series} • {formatDate(report.publishDate)}
                         </p>
                       </div>
-                      <Download className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      {report.pdfPath && report.hasDownload ? (
+                        <Download className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      ) : (
+                        <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      )}
                     </div>
                   ))}
                 </div>
