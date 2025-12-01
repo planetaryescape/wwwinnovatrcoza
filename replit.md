@@ -46,6 +46,12 @@ Preferred communication style: Simple, everyday language.
 - **Purpose**: Personalized dashboard for authenticated members to manage research, view insights, and engage.
 - **Layout**: Persistent sidebar navigation with collapsible menu.
 - **Member Sections**: Dashboard, Trends & Insights Library, Launch New Brief, Credits & Billing, Past Research Dashboard, Member Deals, Settings.
+- **Dashboard Recommendations**: "Recommended for You" widget shows real reports from Trends & Insights library filtered by:
+  - Access level (PUBLIC/STARTER/GROWTH/SCALE) based on user's membership tier
+  - Industry matching prioritizes reports matching user's company industry
+  - NEW badge appears for reports published in last 30 days
+  - Click navigation to report detail pages or direct PDF download
+  - Loading skeletons and empty states for smooth UX
 - **Admin Section** (admin users only): Admin Dashboard with tabs for:
   - **Overview**: System metrics (Total Users, Starter/Growth/Scale member counts, Active Deals)
   - **Users**: User management table with search, tier filtering, and membership/credits display
