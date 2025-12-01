@@ -103,7 +103,7 @@ function MultiSelect({ options, selected, onChange, placeholder, testId }: Multi
             >
               <Checkbox
                 checked={selected.includes(option.value)}
-                onCheckedChange={() => toggleOption(option.value)}
+                className="pointer-events-none"
               />
               <span className="text-sm">{option.label}</span>
             </div>
