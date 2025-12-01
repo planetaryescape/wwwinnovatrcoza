@@ -23,6 +23,8 @@ import {
   type InsertSubscription,
   type Company,
   type InsertCompany,
+  type ClientReport,
+  type InsertClientReport,
   orders,
   orderItems,
   paymentIntents,
@@ -92,7 +94,17 @@ export interface IStorage {
   getCompanyByName(name: string): Promise<Company | undefined>;
   getAllCompanies(): Promise<Company[]>;
   updateCompany(id: string, updates: Partial<Company>): Promise<void>;
+  deleteCompany(id: string): Promise<void>;
   getUsersByCompanyId(companyId: string): Promise<User[]>;
+  
+  deleteUser(id: string): Promise<void>;
+
+  createClientReport(report: InsertClientReport): Promise<ClientReport>;
+  getClientReport(id: string): Promise<ClientReport | undefined>;
+  getClientReportsByCompanyId(companyId: string): Promise<ClientReport[]>;
+  getAllClientReports(): Promise<ClientReport[]>;
+  updateClientReport(id: string, updates: Partial<ClientReport>): Promise<void>;
+  deleteClientReport(id: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -108,6 +120,7 @@ export class MemStorage implements IStorage {
   private inquiriesMap: Map<string, Inquiry>;
   private subscriptionsMap: Map<string, Subscription>;
   private companiesMap: Map<string, Company>;
+  private clientReportsMap: Map<string, ClientReport>;
 
   constructor() {
     this.users = new Map();
@@ -122,6 +135,7 @@ export class MemStorage implements IStorage {
     this.inquiriesMap = new Map();
     this.subscriptionsMap = new Map();
     this.companiesMap = new Map();
+    this.clientReportsMap = new Map();
     
     this.seedCompaniesAndUsers();
   }
@@ -137,6 +151,7 @@ export class MemStorage implements IStorage {
       id: ruganiId,
       name: "Rugani Juice",
       domain: "ruganijuice.co.za",
+      logoUrl: null,
       tier: "SCALE",
       contractStart: new Date("2025-12-01"),
       contractEnd: new Date("2026-11-30"),
@@ -145,6 +160,18 @@ export class MemStorage implements IStorage {
       basicCreditsUsed: 0,
       proCreditsTotal: 4,
       proCreditsUsed: 0,
+      dealDetails: {
+        title: "Annual Service Agreement",
+        features: [
+          "2 x Test24 Pro Brand Health Audit studies (300 consumers, 10 min)",
+          "2 x Test24 Pro studies (100 consumers, 10 min)", 
+          "20 x Test24 Basic idea studies (100 consumers, 5 min)"
+        ],
+        memberRates: {
+          basic: 4000,
+          pro: 45000
+        }
+      },
       notes: "Service agreement shared between Greenway Farms (Carrots Division) and Rugani Juice. Includes 2 x Test24 Pro Brand Health Audit studies (300 consumers, 10 minute survey), 2 x Test24 Pro studies (100 consumers, 10 minute survey) and 20 x Test24 Basic idea studies (100 consumers, 5 minute surveys). Additional studies at member rates: Test24 Basic R4,000 and Test24 Pro R45,000 per 100 completes.",
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -154,6 +181,7 @@ export class MemStorage implements IStorage {
       id: greenwayId,
       name: "Greenway Farms",
       domain: "greenwayfarm.co.za",
+      logoUrl: null,
       tier: "SCALE",
       contractStart: new Date("2025-12-01"),
       contractEnd: new Date("2026-11-30"),
@@ -162,6 +190,7 @@ export class MemStorage implements IStorage {
       basicCreditsUsed: 0,
       proCreditsTotal: 0,
       proCreditsUsed: 0,
+      dealDetails: null,
       notes: "Linked to Rugani Juice service agreement. Greenway users have Scale report access but Rugani holds the pooled Test24 credits.",
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -295,6 +324,7 @@ export class MemStorage implements IStorage {
       role: (insertUser.role as any) ?? "MEMBER",
       creditsBasic: insertUser.creditsBasic ?? 0,
       creditsPro: insertUser.creditsPro ?? 0,
+      creditsInheritedFromCompany: (insertUser as any).creditsInheritedFromCompany ?? true,
       totalSpend: "0",
       firstProjectDate: null,
       lastProjectDate: null,
@@ -615,6 +645,7 @@ export class MemStorage implements IStorage {
       id,
       name: insertCompany.name,
       domain: insertCompany.domain ?? null,
+      logoUrl: (insertCompany as any).logoUrl ?? null,
       tier: insertCompany.tier ?? "STARTER",
       contractStart: insertCompany.contractStart ?? null,
       contractEnd: insertCompany.contractEnd ?? null,
@@ -623,6 +654,7 @@ export class MemStorage implements IStorage {
       basicCreditsUsed: insertCompany.basicCreditsUsed ?? 0,
       proCreditsTotal: insertCompany.proCreditsTotal ?? 0,
       proCreditsUsed: insertCompany.proCreditsUsed ?? 0,
+      dealDetails: (insertCompany as any).dealDetails ?? null,
       notes: insertCompany.notes ?? null,
       createdAt: now,
       updatedAt: now,
@@ -652,10 +684,62 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async deleteCompany(id: string): Promise<void> {
+    this.companiesMap.delete(id);
+  }
+
   async getUsersByCompanyId(companyId: string): Promise<User[]> {
     return Array.from(this.users.values()).filter(
       (user) => user.companyId === companyId,
     );
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    this.users.delete(id);
+  }
+
+  async createClientReport(insertReport: InsertClientReport): Promise<ClientReport> {
+    const id = randomUUID();
+    const now = new Date();
+    const report: ClientReport = {
+      id,
+      companyId: insertReport.companyId,
+      title: insertReport.title,
+      description: insertReport.description ?? null,
+      pdfUrl: insertReport.pdfUrl ?? null,
+      thumbnailUrl: insertReport.thumbnailUrl ?? null,
+      tags: insertReport.tags ?? [],
+      uploadedAt: now,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.clientReportsMap.set(id, report);
+    return report;
+  }
+
+  async getClientReport(id: string): Promise<ClientReport | undefined> {
+    return this.clientReportsMap.get(id);
+  }
+
+  async getClientReportsByCompanyId(companyId: string): Promise<ClientReport[]> {
+    return Array.from(this.clientReportsMap.values()).filter(
+      (report) => report.companyId === companyId,
+    );
+  }
+
+  async getAllClientReports(): Promise<ClientReport[]> {
+    return Array.from(this.clientReportsMap.values());
+  }
+
+  async updateClientReport(id: string, updates: Partial<ClientReport>): Promise<void> {
+    const report = this.clientReportsMap.get(id);
+    if (report) {
+      this.clientReportsMap.set(id, { ...report, ...updates, updatedAt: new Date() });
+    }
+  }
+
+  async deleteClientReport(id: string): Promise<void> {
+    this.clientReportsMap.delete(id);
   }
 }
 
