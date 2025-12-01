@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,12 +12,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CreditCard, Download, Package, CheckCircle, Lock } from "lucide-react";
+import { CreditCard, Download, Package, CheckCircle, Clock, AlertCircle, FileText } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
-import LockedFeature from "@/components/LockedFeature";
 import OrderFormDialog from "@/components/OrderFormDialog";
+import type { Order } from "@shared/schema";
 
 const mockCreditPackages = [
   {
@@ -75,12 +76,78 @@ const mockBillingHistory = [
 
 export default function CreditsAndBilling() {
   const [, setLocation] = useLocation();
-  const { isMember } = useAuth();
+  const { isMember, user } = useAuth();
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [selectedPack, setSelectedPack] = useState<typeof mockCreditPackages[0] | null>(null);
 
-  const formatPrice = (amount: number) => {
-    return `R${amount.toLocaleString()}`;
+  // Fetch user's orders
+  const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
+    queryKey: ['/api/member/orders', { email: user?.email }],
+    queryFn: async () => {
+      const response = await fetch(`/api/member/orders?email=${encodeURIComponent(user?.email || '')}`);
+      if (!response.ok) throw new Error('Failed to fetch orders');
+      return response.json();
+    },
+    enabled: !!user?.email,
+  });
+
+  // Separate pending invoice orders from paid orders
+  const pendingInvoiceOrders = orders.filter(
+    (order) => order.invoiceRequested && order.status === 'pending'
+  );
+  const paidOrders = orders.filter((order) => order.status === 'paid');
+
+  const formatPrice = (amount: number | string) => {
+    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return `R${num.toLocaleString()}`;
+  };
+
+  const formatDate = (date: Date | string) => {
+    return new Date(date).toLocaleDateString('en-ZA', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const getStatusBadge = (status: string, invoiceRequested: boolean | null) => {
+    if (invoiceRequested && status === 'pending') {
+      return (
+        <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+          <Clock className="w-3 h-3 mr-1" />
+          Invoice Pending
+        </Badge>
+      );
+    }
+    switch (status) {
+      case 'paid':
+        return (
+          <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Paid
+          </Badge>
+        );
+      case 'pending':
+        return (
+          <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+            <Clock className="w-3 h-3 mr-1" />
+            Pending
+          </Badge>
+        );
+      case 'cancelled':
+        return (
+          <Badge variant="secondary" className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+            <AlertCircle className="w-3 h-3 mr-1" />
+            Cancelled
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="secondary">
+            {status}
+          </Badge>
+        );
+    }
   };
 
   const handlePurchasePack = (pack: typeof mockCreditPackages[0]) => {
@@ -304,6 +371,52 @@ export default function CreditsAndBilling() {
           </CardContent>
         </Card>
 
+        {/* Pending Invoice Orders */}
+        {pendingInvoiceOrders.length > 0 && (
+          <Card className="border-amber-500/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-amber-500" />
+                Pending Invoices
+              </CardTitle>
+              <CardDescription>
+                Orders awaiting payment. Credits will be activated once payment is received.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Order ID</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead className="text-right">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pendingInvoiceOrders.map((order) => (
+                    <TableRow key={order.id} data-testid={`pending-order-${order.id}`}>
+                      <TableCell className="font-medium font-mono text-xs">{order.id.slice(0, 8)}...</TableCell>
+                      <TableCell>{formatDate(order.createdAt)}</TableCell>
+                      <TableCell>{order.purchaseType}</TableCell>
+                      <TableCell className="text-right font-semibold">
+                        {formatPrice(order.amount)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {getStatusBadge(order.status, order.invoiceRequested)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <p className="text-sm text-muted-foreground mt-4">
+                An invoice has been sent to your email. Once payment is confirmed, your credits will be activated automatically.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Billing History */}
         <Card>
           <CardHeader>
@@ -319,7 +432,7 @@ export default function CreditsAndBilling() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Invoice ID</TableHead>
+                  <TableHead>Order ID</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
@@ -328,7 +441,31 @@ export default function CreditsAndBilling() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockBillingHistory.map((invoice) => (
+                {/* Show real paid orders from API */}
+                {paidOrders.map((order) => (
+                  <TableRow key={order.id} data-testid={`order-${order.id}`}>
+                    <TableCell className="font-medium font-mono text-xs">{order.id.slice(0, 8)}...</TableCell>
+                    <TableCell>{formatDate(order.createdAt)}</TableCell>
+                    <TableCell>{order.purchaseType}</TableCell>
+                    <TableCell className="text-right font-semibold">
+                      {formatPrice(order.amount)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {getStatusBadge(order.status, order.invoiceRequested)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        data-testid={`button-download-order-${order.id}`}
+                      >
+                        <Download className="w-4 h-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {/* Show mock data if no real orders exist */}
+                {paidOrders.length === 0 && mockBillingHistory.map((invoice) => (
                   <TableRow key={invoice.id} data-testid={`invoice-${invoice.id}`}>
                     <TableCell className="font-medium">{invoice.id}</TableCell>
                     <TableCell>
@@ -339,7 +476,7 @@ export default function CreditsAndBilling() {
                       {formatPrice(invoice.amount)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
                         <CheckCircle className="w-3 h-3 mr-1" />
                         {invoice.status}
                       </Badge>

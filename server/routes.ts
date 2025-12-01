@@ -853,6 +853,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get orders for the current user by email
+  app.get("/api/member/orders", async (req, res) => {
+    try {
+      const email = req.query.email as string;
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+      const orders = await storage.getOrdersByEmail(email);
+      res.json(orders);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Company management endpoints
   app.get("/api/admin/companies", async (req, res) => {
     try {
