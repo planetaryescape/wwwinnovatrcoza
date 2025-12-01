@@ -237,7 +237,7 @@ export class MemStorage implements IStorage {
       });
     }
 
-    const clientReports: InsertReport[] = [
+    const clientReportsData: InsertReport[] = [
       {
         title: "Rugani 100% Carrot Juice Concept Test",
         category: "Launch",
@@ -246,11 +246,9 @@ export class MemStorage implements IStorage {
         accessLevel: "companyOnly",
         creditType: "none",
         status: "published",
-        series: "Client",
         slug: "rugani-carrot-juice-concept",
         date: new Date("2025-11-15"),
-        displayCategories: ["Bev", "Food", "FMCG"],
-        hasDownload: false,
+        topics: ["Beverages", "Food", "FMCG"],
         clientCompanyIds: [ruganiId, greenwayId],
       },
       {
@@ -261,16 +259,14 @@ export class MemStorage implements IStorage {
         accessLevel: "companyOnly",
         creditType: "none",
         status: "published",
-        series: "Client",
         slug: "greenway-carrots-brand-health",
         date: new Date("2025-11-20"),
-        displayCategories: ["Agriculture", "FMCG", "Retail"],
-        hasDownload: false,
+        topics: ["Agriculture", "FMCG", "Retail"],
         clientCompanyIds: [ruganiId, greenwayId],
       },
     ];
 
-    for (const r of clientReports) {
+    for (const r of clientReportsData) {
       await this.createReport(r);
     }
 
@@ -280,7 +276,8 @@ export class MemStorage implements IStorage {
       originalPrice: "630000",
       discountedPrice: "315000",
       creditsIncluded: 26,
-      targetTiers: ["SCALE"],
+      targetTierKeys: ["SCALE"],
+      createdByUserId: "system",
       validFrom: new Date("2025-12-01"),
       validTo: new Date("2026-11-30"),
       isActive: true,

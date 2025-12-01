@@ -812,6 +812,176 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/admin/companies/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const company = await storage.getCompany(id);
+      if (!company) {
+        return res.status(404).json({ error: "Company not found" });
+      }
+      await storage.deleteCompany(id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Company logo upload
+  app.post("/api/admin/companies/:id/logo", fileUpload.single("logo"), async (req, res) => {
+    try {
+      const { id } = req.params;
+      const company = await storage.getCompany(id);
+      if (!company) {
+        return res.status(404).json({ error: "Company not found" });
+      }
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+      
+      const filename = `${id}_${Date.now()}_${req.file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const path = `company_logos/${filename}`;
+      
+      await uploadFile(path, req.file.buffer, req.file.mimetype);
+      await storage.updateCompany(id, { logoUrl: `/assets/${path}` });
+      
+      const updated = await storage.getCompany(id);
+      res.json(updated);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Delete user
+  app.delete("/api/admin/users/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const user = await storage.getUser(id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      await storage.deleteUser(id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Client Reports CRUD endpoints
+  app.get("/api/admin/client-reports", async (req, res) => {
+    try {
+      const reports = await storage.getAllClientReports();
+      res.json(reports);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/admin/client-reports/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const report = await storage.getClientReport(id);
+      if (!report) {
+        return res.status(404).json({ error: "Client report not found" });
+      }
+      res.json(report);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/admin/client-reports", async (req, res) => {
+    try {
+      const report = await storage.createClientReport(req.body);
+      res.status(201).json(report);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/admin/client-reports/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const report = await storage.getClientReport(id);
+      if (!report) {
+        return res.status(404).json({ error: "Client report not found" });
+      }
+      await storage.updateClientReport(id, req.body);
+      const updated = await storage.getClientReport(id);
+      res.json(updated);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.delete("/api/admin/client-reports/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const report = await storage.getClientReport(id);
+      if (!report) {
+        return res.status(404).json({ error: "Client report not found" });
+      }
+      await storage.deleteClientReport(id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Client report PDF upload
+  app.post("/api/admin/client-reports/:id/pdf", fileUpload.single("pdf"), async (req, res) => {
+    try {
+      const { id } = req.params;
+      const report = await storage.getClientReport(id);
+      if (!report) {
+        return res.status(404).json({ error: "Client report not found" });
+      }
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+      
+      const filename = `${id}_${Date.now()}_${req.file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const path = `client_reports/${filename}`;
+      
+      await uploadFile(path, req.file.buffer, req.file.mimetype);
+      await storage.updateClientReport(id, { pdfUrl: `/assets/${path}` });
+      
+      const updated = await storage.getClientReport(id);
+      res.json(updated);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Get client reports by company (for member portal)
+  app.get("/api/member/client-reports", async (req, res) => {
+    try {
+      const { email } = req.query;
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+      
+      const user = await storage.getUserByEmail(email as string);
+      if (!user || !user.companyId) {
+        return res.json([]);
+      }
+      
+      const reports = await storage.getClientReportsByCompanyId(user.companyId);
+      res.json(reports);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/admin/companies/:companyId/client-reports", async (req, res) => {
+    try {
+      const { companyId } = req.params;
+      const reports = await storage.getClientReportsByCompanyId(companyId);
+      res.json(reports);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Get company by user's companyId (for member portal)
   app.get("/api/member/company", async (req, res) => {
     try {
