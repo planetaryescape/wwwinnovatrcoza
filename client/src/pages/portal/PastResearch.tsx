@@ -29,7 +29,7 @@ interface ClientReport {
 }
 
 export default function PastResearch() {
-  const { isMember, user, company } = useAuth();
+  const { isMember, user, company, isAdmin } = useAuth();
   const [, setLocation] = useLocation();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,7 +42,9 @@ export default function PastResearch() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch("/api/member/client-reports");
+      // Two Rugani projects added and linked by companyId.
+      // Access is restricted to Rugani users (by company) and admins.
+      const res = await fetch(`/api/member/client-reports?email=${encodeURIComponent(user?.email || '')}`);
       if (!res.ok) {
         throw new Error("Failed to fetch reports");
       }
@@ -56,12 +58,15 @@ export default function PastResearch() {
   };
 
   useEffect(() => {
-    if (user?.companyId) {
+    // Admin users can see all reports, company users see their company's reports
+    // Members without a companyId should see empty state (not stuck loading)
+    if (user?.email && (user?.companyId || isAdmin)) {
       fetchReports();
-    } else {
+    } else if (user?.email) {
+      // User is logged in but doesn't have access (no companyId and not admin)
       setLoading(false);
     }
-  }, [user?.companyId]);
+  }, [user?.companyId, user?.email, isAdmin]);
 
   const allTags = Array.from(new Set(reports.flatMap(r => r.tags))).sort();
 
@@ -89,7 +94,7 @@ export default function PastResearch() {
   };
 
   const showLockedBanner = !isMember;
-  const showNoCompanyBanner = !user?.companyId && isMember;
+  const showNoCompanyBanner = !user?.companyId && isMember && !isAdmin;
 
   return (
     <PortalLayout>
@@ -181,7 +186,7 @@ export default function PastResearch() {
           </Card>
         )}
 
-        {isMember && user?.companyId && (
+        {isMember && (user?.companyId || isAdmin) && (
           <>
             <Card>
               <CardHeader>

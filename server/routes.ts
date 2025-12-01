@@ -1133,11 +1133,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get client reports by company (for member portal)
+  // Two Rugani projects added and linked by companyId.
+  // Access is restricted to company users (by companyId) and admins (via isAdminUser).
   app.get("/api/member/client-reports", async (req, res) => {
     try {
       const { email } = req.query;
       if (!email) {
         return res.status(400).json({ error: "Email is required" });
+      }
+      
+      // Admin users (@innovatr.co.za) can see all client reports
+      if (isAdminUser(email as string)) {
+        const allReports = await storage.getAllClientReports();
+        return res.json(allReports);
       }
       
       const user = await storage.getUserByEmail(email as string);
