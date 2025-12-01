@@ -1,0 +1,211 @@
+You are updating the “Launch New Brief” form in my Innovatr member portal.
+
+Overall goal
+
+Change the audience fields (Region, Age, Gender, Income) from single select to multi-select.
+
+Update the Competitors field logic so that:
+
+For Test24 Basic briefs: max 2 competitors
+
+For Test24 Pro (and any other type): keep the current limit (max 5 competitors)
+
+Keep the rest of the flow, styling and validation intact.
+
+Do not:
+
+change any copy or labels except the competitors label where specified
+
+rename any existing fields or props
+
+modify any other page, route, or component outside this brief form
+
+Current form (what you can assume)
+
+In the member portal, under /portal/launch, there is a “Launch New Brief” form with a Research Details section. It currently has fields similar to:
+
+Region * – single select dropdown
+
+Age * – single select dropdown
+
+Income * – single select dropdown
+
+Gender * – single select dropdown
+
+Competitors (up to 5) * – input or tag input allowing up to 5 competitor brand names
+
+There is also a way to specify the study type, for example Test24 Basic vs Test24 Pro. This might come from:
+
+a dropdown in the form, or
+
+a studyType, testType, package, or similar field in the brief object, or
+
+URL / query parameters
+
+Find where this is stored and used in the form.
+
+1. Convert audience fields to multi-select
+
+For these four fields:
+
+Region
+
+Age
+
+Gender
+
+Income
+
+Do the following:
+
+Switch UI controls to multi-select
+
+If we use a custom Select component or a library (e.g. react-select), switch to the multi-select variant for each of these four fields.
+
+Users must be able to choose one or many options for each field.
+
+Update state shape
+
+If a field currently stores a single string (for example "Gauteng"), change this to an array of strings (for example ["Gauteng", "Western Cape"]).
+
+Do this consistently for Region, Age, Gender, and Income.
+
+Do not change the field names themselves (keep things like region, age, gender, income or whatever is already in use).
+
+Update submit payload
+
+When the brief is submitted, ensure the payload sends arrays for:
+
+region or regions
+
+age or ages
+
+gender or genders
+
+income or incomes
+
+Keep the existing key names; just change the type from string to string[].
+
+If the backend still expects a single value, add a small mapping layer only in the submit handler (for example: send the first element) but still keep arrays in the UI state. Prefer arrays end-to-end if the backend supports them.
+
+Update validation
+
+Validation should now check that each field has at least one selection (array.length > 0).
+
+Reuse the existing error messages; they should trigger when the array is empty.
+
+Ensure the UI clearly shows multiple selected values (chips / tags / pills) and allows removing one value without clearing them all.
+
+Do not change options
+
+Keep the same Region / Age / Gender / Income option lists and text that are already in the form.
+
+2. Competitors field: limit 2 for Test24 Basic
+
+The existing field is labelled:
+
+Competitors (up to 5) *
+
+and allows up to 5 competitor brand names.
+
+Desired behaviour:
+
+If the brief is Test24 Basic:
+
+Max 2 competitors
+
+Label: Competitors (up to 2) *
+
+If the brief is Test24 Pro or any other type:
+
+Max 5 competitors (current behaviour)
+
+Label: Competitors (up to 5) *
+
+Implementation details:
+
+Detect study type
+
+Inside this form component, find the value that represents the package, for example:
+
+const studyType = brief.studyType; // or testType / selectedPackage / etc.
+
+
+Define:
+
+const isBasic = studyType === 'Test24 Basic'; // use the actual value used in the app
+const maxCompetitors = isBasic ? 2 : 5;
+const competitorsLabel = `Competitors (up to ${maxCompetitors}) *`;
+
+
+Apply max limit to the input
+
+Pass maxCompetitors into the competitors input / tag component.
+
+Prevent users from adding more than maxCompetitors entries.
+
+Optional: once the limit is reached, disable the add action or show a small helper text.
+
+Keep the field required (must have at least 1 competitor).
+
+Update label
+
+Replace any hard-coded “Competitors (up to 5) *” label with the dynamic competitorsLabel.
+
+Do not change storage shape
+
+Keep storing competitors in the same way as before (e.g. an array of strings).
+
+Only the maximum allowed count and the label should change.
+
+3. Keep API and backend behaviour consistent
+
+The brief submission function must still send a JSON payload the backend can handle.
+
+If you have to adapt the payload for the backend (for example flatten arrays), do this only in the submit handler and add a short comment documenting the transformation.
+
+Do not change any API endpoints, URLs, or method names.
+
+4. Testing checklist (for you to follow)
+
+Verify all of the following:
+
+Multi-select audience fields
+
+Region, Age, Gender, and Income all allow multiple selections.
+
+Removing one value does not clear the others.
+
+Submitting with none selected in any required field triggers the same “required” error state as before.
+
+Competitors behaviour
+
+When study type is Test24 Basic:
+
+Label shows Competitors (up to 2) *
+
+User cannot add more than 2 competitors
+
+When study type is Test24 Pro or any non-Basic type:
+
+Label shows Competitors (up to 5) *
+
+User can add up to 5 competitors as before
+
+Submit + reload
+
+Submitting a valid brief works without console errors.
+
+After reload, the form still behaves as expected.
+
+5. Comment summary
+
+In the main Launch New Brief form file, please add a short comment summarising:
+
+Which fields were converted to multi-select and that they now store arrays.
+
+How the Basic vs Pro competitor logic works (maxCompetitors based on studyType).
+
+Any assumptions you made about studyType values or backend expectations.
+
+Do not touch any other routes, layouts, or copy outside this form.

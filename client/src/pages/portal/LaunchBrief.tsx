@@ -1,3 +1,20 @@
+/**
+ * Launch New Brief Form
+ * 
+ * MULTI-SELECT FIELDS:
+ * - Region, Age, Gender, and Income fields now store arrays (string[]) instead of single strings.
+ * - Users can select multiple options for each audience field.
+ * 
+ * COMPETITORS LOGIC:
+ * - For Test24 Basic (selectedBrief === "basic"): maxCompetitors = 2
+ * - For Test24 Pro or any other type: maxCompetitors = 5
+ * - The label and input limit adjust dynamically based on study type.
+ * 
+ * BACKEND ASSUMPTION:
+ * - The submit payload sends arrays for region, age, gender, income, and competitors.
+ * - If backend expects different formats, modify only the handleSubmit function.
+ */
+
 import { useState, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,36 +24,163 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { FileText, Zap, CheckCircle, Upload, ArrowRight, FileUp, X, Download } from "lucide-react";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { FileText, Zap, CheckCircle, Upload, ArrowRight, FileUp, X, Download, ChevronDown, Plus } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { useToast } from "@/hooks/use-toast";
 
 type BriefType = "basic" | "pro" | null;
 
+interface MultiSelectOption {
+  value: string;
+  label: string;
+}
+
+interface MultiSelectProps {
+  options: MultiSelectOption[];
+  selected: string[];
+  onChange: (selected: string[]) => void;
+  placeholder: string;
+  testId: string;
+}
+
+function MultiSelect({ options, selected, onChange, placeholder, testId }: MultiSelectProps) {
+  const [open, setOpen] = useState(false);
+
+  const toggleOption = (value: string) => {
+    if (selected.includes(value)) {
+      onChange(selected.filter(v => v !== value));
+    } else {
+      onChange([...selected, value]);
+    }
+  };
+
+  const getSelectedLabels = () => {
+    return selected.map(v => options.find(o => o.value === v)?.label).filter(Boolean);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between font-normal"
+          data-testid={testId}
+        >
+          {selected.length > 0 ? (
+            <div className="flex flex-wrap gap-1 max-w-[90%]">
+              {selected.length <= 2 ? (
+                getSelectedLabels().map((label, i) => (
+                  <Badge key={i} variant="secondary" className="text-xs">
+                    {label}
+                  </Badge>
+                ))
+              ) : (
+                <Badge variant="secondary" className="text-xs">
+                  {selected.length} selected
+                </Badge>
+              )}
+            </div>
+          ) : (
+            <span className="text-muted-foreground">{placeholder}</span>
+          )}
+          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full p-2" align="start">
+        <div className="space-y-1 max-h-60 overflow-auto">
+          {options.map((option) => (
+            <div
+              key={option.value}
+              className="flex items-center space-x-2 p-2 hover-elevate rounded cursor-pointer"
+              onClick={() => toggleOption(option.value)}
+              data-testid={`option-${testId}-${option.value}`}
+            >
+              <Checkbox
+                checked={selected.includes(option.value)}
+                onCheckedChange={() => toggleOption(option.value)}
+              />
+              <span className="text-sm">{option.label}</span>
+            </div>
+          ))}
+        </div>
+        {selected.length > 0 && (
+          <div className="pt-2 mt-2 border-t">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full text-xs"
+              onClick={() => onChange([])}
+              data-testid={`button-clear-${testId}`}
+            >
+              Clear all
+            </Button>
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+const regionOptions: MultiSelectOption[] = [
+  { value: "eastern-cape", label: "Eastern Cape" },
+  { value: "free-state", label: "Free State" },
+  { value: "gauteng", label: "Gauteng" },
+  { value: "kwazulu-natal", label: "KwaZulu-Natal" },
+  { value: "limpopo", label: "Limpopo" },
+  { value: "mpumalanga", label: "Mpumalanga" },
+  { value: "northern-cape", label: "Northern Cape" },
+  { value: "north-west", label: "North West" },
+  { value: "western-cape", label: "Western Cape" },
+];
+
+const ageOptions: MultiSelectOption[] = [
+  { value: "18-24", label: "18–24" },
+  { value: "25-34", label: "25–34" },
+  { value: "35-44", label: "35–44" },
+  { value: "45-54", label: "45–54" },
+  { value: "55+", label: "55+" },
+];
+
+const incomeOptions: MultiSelectOption[] = [
+  { value: "under-10k", label: "Under R10,000" },
+  { value: "10k-20k", label: "R10k – R20k" },
+  { value: "30k-50k", label: "R30k – R50k" },
+  { value: "50k-75k", label: "R50k – R75k" },
+  { value: "75k-100k", label: "R75k – R100k" },
+  { value: "100k+", label: "R100k+" },
+];
+
+const genderOptions: MultiSelectOption[] = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+  { value: "other", label: "Other" },
+];
+
 export default function LaunchBrief() {
   const [selectedBrief, setSelectedBrief] = useState<BriefType>(null);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [competitorInput, setCompetitorInput] = useState("");
   const [formData, setFormData] = useState({
     clientName: "",
     clientEmail: "",
     clientContact: "",
     clientCompany: "",
     researchObjective: "",
-    region: "",
-    age: "",
-    income: "",
-    gender: "",
+    region: [] as string[],
+    age: [] as string[],
+    income: [] as string[],
+    gender: [] as string[],
     industry: "",
     companyBrand: "",
     numberOfIdeas: "1",
-    competitors: "",
+    competitors: [] as string[],
     confirmTerms: false,
     subscribeUpdates: false,
   });
@@ -44,6 +188,11 @@ export default function LaunchBrief() {
 
   const PRICE_PER_CONCEPT = selectedBrief === "basic" ? 5000 : 45000;
   const totalPrice = PRICE_PER_CONCEPT * parseInt(formData.numberOfIdeas || "1");
+
+  // Competitors limit: 2 for Basic, 5 for Pro
+  const isBasic = selectedBrief === "basic";
+  const maxCompetitors = isBasic ? 2 : 5;
+  const competitorsLabel = `Competitors (up to ${maxCompetitors}) *`;
 
   const handleFileUpload = useCallback((files: FileList | null) => {
     if (!files) return;
@@ -103,30 +252,82 @@ export default function LaunchBrief() {
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const addCompetitor = () => {
+    const trimmed = competitorInput.trim();
+    if (!trimmed) return;
+    
+    if (formData.competitors.length >= maxCompetitors) {
+      toast({
+        title: "Limit reached",
+        description: `You can only add up to ${maxCompetitors} competitors`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.competitors.includes(trimmed)) {
+      toast({
+        title: "Duplicate competitor",
+        description: "This competitor has already been added",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setFormData({ ...formData, competitors: [...formData.competitors, trimmed] });
+    setCompetitorInput("");
+  };
+
+  const removeCompetitor = (index: number) => {
+    setFormData({
+      ...formData,
+      competitors: formData.competitors.filter((_, i) => i !== index),
+    });
+  };
+
+  const handleCompetitorKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addCompetitor();
+    }
+  };
+
   const handleSubmit = () => {
-    // Validate all required fields
-    const requiredFields = [
+    // Validate all required fields - arrays must have at least one selection
+    const requiredTextFields = [
       { value: formData.clientName, label: "Client Name" },
       { value: formData.clientEmail, label: "Client Email" },
       { value: formData.clientContact, label: "Client Contact Number" },
       { value: formData.clientCompany, label: "Client Company" },
       { value: formData.researchObjective, label: "Research Objective" },
+      { value: formData.industry, label: "Industry" },
+      { value: formData.companyBrand, label: "Company Brand" },
+      { value: formData.numberOfIdeas, label: "Number of Ideas" },
+    ];
+
+    const requiredArrayFields = [
       { value: formData.region, label: "Region" },
       { value: formData.age, label: "Age" },
       { value: formData.income, label: "Income" },
       { value: formData.gender, label: "Gender" },
-      { value: formData.industry, label: "Industry" },
-      { value: formData.companyBrand, label: "Company Brand" },
-      { value: formData.numberOfIdeas, label: "Number of Ideas" },
       { value: formData.competitors, label: "Competitors" },
     ];
 
-    const emptyField = requiredFields.find(field => !field.value.trim());
-    
-    if (emptyField) {
+    const emptyTextField = requiredTextFields.find(field => !field.value.trim());
+    if (emptyTextField) {
       toast({
         title: "Missing required field",
-        description: `Please fill in ${emptyField.label}`,
+        description: `Please fill in ${emptyTextField.label}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const emptyArrayField = requiredArrayFields.find(field => field.value.length === 0);
+    if (emptyArrayField) {
+      toast({
+        title: "Missing required field",
+        description: `Please select at least one ${emptyArrayField.label}`,
         variant: "destructive",
       });
       return;
@@ -161,6 +362,15 @@ export default function LaunchBrief() {
       return;
     }
 
+    // Submit payload - all audience fields and competitors are arrays
+    const payload = {
+      studyType: selectedBrief === "basic" ? "Test24 Basic" : "Test24 Pro",
+      ...formData,
+      // Arrays are sent as-is for backend processing
+    };
+
+    console.log("Brief submission payload:", payload);
+
     toast({
       title: "Brief Submitted!",
       description: `Your ${selectedBrief === "basic" ? "Test24 Basic" : "Test24 Pro"} study is being set up. Expected delivery: 24 hours.`,
@@ -169,20 +379,21 @@ export default function LaunchBrief() {
     // Reset form
     setSelectedBrief(null);
     setUploadedFiles([]);
+    setCompetitorInput("");
     setFormData({
       clientName: "",
       clientEmail: "",
       clientContact: "",
       clientCompany: "",
       researchObjective: "",
-      region: "",
-      age: "",
-      income: "",
-      gender: "",
+      region: [],
+      age: [],
+      income: [],
+      gender: [],
       industry: "",
       companyBrand: "",
       numberOfIdeas: "1",
-      competitors: "",
+      competitors: [],
       confirmTerms: false,
       subscribeUpdates: false,
     });
@@ -461,89 +672,46 @@ export default function LaunchBrief() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="region">Region *</Label>
-                <Select
-                  value={formData.region}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, region: value })
-                  }
-                >
-                  <SelectTrigger id="region" data-testid="select-region">
-                    <SelectValue placeholder="Select region" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="eastern-cape">Eastern Cape</SelectItem>
-                    <SelectItem value="free-state">Free State</SelectItem>
-                    <SelectItem value="gauteng">Gauteng</SelectItem>
-                    <SelectItem value="kwazulu-natal">KwaZulu-Natal</SelectItem>
-                    <SelectItem value="limpopo">Limpopo</SelectItem>
-                    <SelectItem value="mpumalanga">Mpumalanga</SelectItem>
-                    <SelectItem value="northern-cape">Northern Cape</SelectItem>
-                    <SelectItem value="north-west">North West</SelectItem>
-                    <SelectItem value="western-cape">Western Cape</SelectItem>
-                  </SelectContent>
-                </Select>
+                <MultiSelect
+                  options={regionOptions}
+                  selected={formData.region}
+                  onChange={(selected) => setFormData({ ...formData, region: selected })}
+                  placeholder="Select regions"
+                  testId="select-region"
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="age">Age *</Label>
-                <Select
-                  value={formData.age}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, age: value })
-                  }
-                >
-                  <SelectTrigger id="age" data-testid="select-age">
-                    <SelectValue placeholder="Select age range" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="18-24">18–24</SelectItem>
-                    <SelectItem value="25-34">25–34</SelectItem>
-                    <SelectItem value="35-44">35–44</SelectItem>
-                    <SelectItem value="45-54">45–54</SelectItem>
-                    <SelectItem value="55+">55+</SelectItem>
-                  </SelectContent>
-                </Select>
+                <MultiSelect
+                  options={ageOptions}
+                  selected={formData.age}
+                  onChange={(selected) => setFormData({ ...formData, age: selected })}
+                  placeholder="Select age ranges"
+                  testId="select-age"
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="income">Income *</Label>
-                <Select
-                  value={formData.income}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, income: value })
-                  }
-                >
-                  <SelectTrigger id="income" data-testid="select-income">
-                    <SelectValue placeholder="Select income range" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="under-10k">Under R10,000</SelectItem>
-                    <SelectItem value="10k-20k">R10k – R20k</SelectItem>
-                    <SelectItem value="30k-50k">R30k – R50k</SelectItem>
-                    <SelectItem value="50k-75k">R50k – R75k</SelectItem>
-                    <SelectItem value="75k-100k">R75k – R100k</SelectItem>
-                    <SelectItem value="100k+">R100k+</SelectItem>
-                  </SelectContent>
-                </Select>
+                <MultiSelect
+                  options={incomeOptions}
+                  selected={formData.income}
+                  onChange={(selected) => setFormData({ ...formData, income: selected })}
+                  placeholder="Select income ranges"
+                  testId="select-income"
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="gender">Gender *</Label>
-                <Select
-                  value={formData.gender}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, gender: value })
-                  }
-                >
-                  <SelectTrigger id="gender" data-testid="select-gender">
-                    <SelectValue placeholder="Select gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                <MultiSelect
+                  options={genderOptions}
+                  selected={formData.gender}
+                  onChange={(selected) => setFormData({ ...formData, gender: selected })}
+                  placeholder="Select genders"
+                  testId="select-gender"
+                />
               </div>
 
               <div className="space-y-2">
@@ -591,16 +759,53 @@ export default function LaunchBrief() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="competitors">Competitors (up to 5) *</Label>
-                <Input
-                  id="competitors"
-                  placeholder="e.g., Brand A, Brand B, Brand C"
-                  value={formData.competitors}
-                  onChange={(e) =>
-                    setFormData({ ...formData, competitors: e.target.value })
-                  }
-                  data-testid="input-competitors"
-                />
+                <Label htmlFor="competitors">{competitorsLabel}</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="competitors"
+                    placeholder="Enter competitor name"
+                    value={competitorInput}
+                    onChange={(e) => setCompetitorInput(e.target.value)}
+                    onKeyDown={handleCompetitorKeyDown}
+                    disabled={formData.competitors.length >= maxCompetitors}
+                    data-testid="input-competitors"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={addCompetitor}
+                    disabled={formData.competitors.length >= maxCompetitors || !competitorInput.trim()}
+                    data-testid="button-add-competitor"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {formData.competitors.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {formData.competitors.map((competitor, index) => (
+                      <Badge
+                        key={index}
+                        variant="secondary"
+                        className="flex items-center gap-1 pr-1"
+                        data-testid={`competitor-tag-${index}`}
+                      >
+                        {competitor}
+                        <button
+                          type="button"
+                          onClick={() => removeCompetitor(index)}
+                          className="ml-1 hover:bg-muted rounded-full p-0.5"
+                          data-testid={`button-remove-competitor-${index}`}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  {formData.competitors.length} of {maxCompetitors} competitors added
+                </p>
               </div>
             </div>
 
