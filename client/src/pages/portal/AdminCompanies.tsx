@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Search, 
   RefreshCw, 
@@ -42,9 +43,17 @@ import {
   TrendingUp,
   User as UserIcon,
   Clock,
-  FileText
+  FileText,
+  Eye,
+  Upload,
+  Download,
+  Trash2,
+  Plus,
+  Image as ImageIcon
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLocation } from "wouter";
 
 interface Company {
   id: string;
@@ -59,6 +68,21 @@ interface Company {
   proCreditsTotal: number;
   proCreditsUsed: number;
   notes: string | null;
+  logoUrl: string | null;
+  dealDetails: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ClientReport {
+  id: string;
+  companyId: string;
+  title: string;
+  description: string | null;
+  researchType: string;
+  status: string;
+  pdfUrl: string | null;
+  deliveredAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -80,9 +104,12 @@ const tierConfig: Record<string, { label: string; color: string; icon: any }> = 
 
 export default function AdminCompanies() {
   const { toast } = useToast();
+  const { impersonateCompany } = useAuth();
+  const [, setLocation] = useLocation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [companyUsers, setCompanyUsers] = useState<CompanyUser[]>([]);
+  const [companyReports, setCompanyReports] = useState<ClientReport[]>([]);
   const [search, setSearch] = useState("");
   const [tierFilter, setTierFilter] = useState("all");
   const [loading, setLoading] = useState(true);
@@ -90,6 +117,8 @@ export default function AdminCompanies() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editNotes, setEditNotes] = useState("");
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   const fetchCompanies = async () => {
     try {
@@ -115,6 +144,64 @@ export default function AdminCompanies() {
       console.error("Failed to fetch company users:", err);
       setCompanyUsers([]);
     }
+  };
+
+  const fetchCompanyReports = async (companyId: string) => {
+    try {
+      const res = await fetch(`/api/admin/client-reports?companyId=${companyId}`);
+      if (!res.ok) throw new Error("Failed to fetch company reports");
+      const data = await res.json();
+      setCompanyReports(data);
+    } catch (err) {
+      console.error("Failed to fetch company reports:", err);
+      setCompanyReports([]);
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedCompany) return;
+
+    setUploadingLogo(true);
+    try {
+      const formData = new FormData();
+      formData.append("logo", file);
+
+      const res = await fetch(`/api/admin/companies/${selectedCompany.id}/logo`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Failed to upload logo");
+
+      const updated = await res.json();
+      setSelectedCompany({ ...selectedCompany, logoUrl: updated.logoUrl });
+      setCompanies(companies.map(c => c.id === selectedCompany.id ? { ...c, logoUrl: updated.logoUrl } : c));
+      
+      toast({
+        title: "Logo Uploaded",
+        description: "Company logo has been updated",
+      });
+    } catch (err) {
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload company logo",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleViewAsClient = async () => {
+    if (!selectedCompany) return;
+    await impersonateCompany(selectedCompany.id);
+    setDrawerOpen(false);
+    setLocation("/portal");
+    toast({
+      title: "Viewing as Client",
+      description: `Now viewing portal as ${selectedCompany.name}`,
+    });
   };
 
   useEffect(() => {
@@ -153,7 +240,10 @@ export default function AdminCompanies() {
     setSelectedCompany(company);
     setEditNotes(company.notes || "");
     setDrawerOpen(true);
-    await fetchCompanyUsers(company.id);
+    await Promise.all([
+      fetchCompanyUsers(company.id),
+      fetchCompanyReports(company.id),
+    ]);
   };
 
   const handleUpdateCompany = async (companyId: string, updates: Partial<Company>) => {
@@ -379,13 +469,47 @@ export default function AdminCompanies() {
           {selectedCompany && (
             <>
               <SheetHeader>
-                <SheetTitle className="flex items-center gap-2">
-                  <Building2 className="w-5 h-5" />
-                  {selectedCompany.name}
-                </SheetTitle>
-                <SheetDescription>
-                  Company account details and credit management
-                </SheetDescription>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="relative cursor-pointer group"
+                      onClick={() => logoInputRef.current?.click()}
+                    >
+                      <Avatar className="w-14 h-14">
+                        {selectedCompany.logoUrl ? (
+                          <AvatarImage src={selectedCompany.logoUrl} alt={selectedCompany.name} />
+                        ) : null}
+                        <AvatarFallback className="bg-muted">
+                          <Building2 className="w-6 h-6 text-muted-foreground" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Upload className="w-5 h-5 text-white" />
+                      </div>
+                    </div>
+                    <input
+                      ref={logoInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleLogoUpload}
+                      disabled={uploadingLogo}
+                    />
+                    <div>
+                      <SheetTitle className="text-lg">{selectedCompany.name}</SheetTitle>
+                      <SheetDescription>{selectedCompany.domain || "No domain set"}</SheetDescription>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleViewAsClient}
+                    data-testid="button-view-as-client"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    View as Client
+                  </Button>
+                </div>
               </SheetHeader>
 
               <div className="mt-6 space-y-6">
@@ -593,6 +717,71 @@ export default function AdminCompanies() {
                           </Badge>
                         </div>
                       ))}
+                    </div>
+                  )}
+                </div>
+
+                <Separator />
+
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      Client Reports
+                    </h4>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setLocation(`/portal/admin?tab=reports&companyId=${selectedCompany.id}`)}
+                      data-testid="button-manage-reports"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add Report
+                    </Button>
+                  </div>
+                  {companyReports.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No research reports delivered yet</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {companyReports.slice(0, 3).map((report) => (
+                        <div 
+                          key={report.id} 
+                          className="flex items-center justify-between p-3 rounded-lg bg-muted/30"
+                          data-testid={`row-company-report-${report.id}`}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">{report.title}</p>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Badge variant="outline" className="text-xs">
+                                {report.researchType === "BASIC" ? "Test24 Basic" : "Test24 Pro"}
+                              </Badge>
+                              <span>{formatDate(report.deliveredAt || report.createdAt)}</span>
+                            </div>
+                          </div>
+                          {report.pdfUrl && (
+                            <a 
+                              href={report.pdfUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="ml-2"
+                            >
+                              <Button size="icon" variant="ghost">
+                                <Download className="w-4 h-4" />
+                              </Button>
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                      {companyReports.length > 3 && (
+                        <Button 
+                          variant="link" 
+                          size="sm" 
+                          className="w-full text-muted-foreground"
+                          onClick={() => setLocation(`/portal/admin?tab=reports&companyId=${selectedCompany.id}`)}
+                        >
+                          View all {companyReports.length} reports
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>
