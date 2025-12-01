@@ -1,3 +1,20 @@
+/**
+ * Order Form Dialog Component
+ * 
+ * TWO DISTINCT FLOWS:
+ * 1. Card Payment (default): "Send me an invoice" unchecked
+ *    - Button shows "Pay Online"
+ *    - Triggers existing payment gateway (PayFast)
+ *    - Order created after successful payment
+ * 
+ * 2. Invoice Flow: "Send me an invoice" checked
+ *    - Button shows "Invoice me"
+ *    - Creates order with invoiceRequested=true, status="pending"
+ *    - Sends email to richard@innovatr.co.za and hannah@innovatr.co.za
+ *    - Redirects to Credits & Billing page
+ *    - Credits only become active when admin marks order as "paid"
+ */
+
 import { useState, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -60,6 +77,7 @@ export default function OrderFormDialog({
   const [vatNumber, setVatNumber] = useState("");
   const [companyAddress, setCompanyAddress] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isInvoiceSuccess, setIsInvoiceSuccess] = useState(false);
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -92,6 +110,39 @@ export default function OrderFormDialog({
     },
   });
 
+  // Invoice flow mutation - creates order with invoiceRequested=true
+  const createInvoiceOrderMutation = useMutation({
+    mutationFn: async (data: {
+      customerName: string;
+      customerEmail: string;
+      customerCompany: string;
+      amount: string;
+      purchaseType: string;
+      items: OrderItem[];
+      businessRegNumber?: string;
+      vatNumber?: string;
+      companyAddress?: string;
+    }) => {
+      const response = await apiRequest("POST", "/api/invoice-orders", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      setIsInvoiceSuccess(true);
+      toast({
+        title: "Invoice Request Submitted",
+        description: "We'll prepare your invoice and send it to your email. Credits will be activated once payment is received.",
+      });
+      onSuccess?.();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Invoice Request Failed",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const initiatePaymentMutation = useMutation({
     mutationFn: async (data: {
       order: any;
@@ -116,7 +167,7 @@ export default function OrderFormDialog({
         providerKey: "payfast",
       };
 
-      // Add invoice data if requested
+      // Add invoice data if requested (for card payments that also want an invoice after)
       if (data.invoiceData?.invoiceRequested) {
         requestBody.invoiceRequested = true;
         requestBody.businessRegNumber = data.invoiceData.businessRegNumber;
@@ -216,6 +267,7 @@ export default function OrderFormDialog({
     });
   };
 
+  // Card payment flow - opens payment gateway
   const handlePayOnline = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -244,23 +296,49 @@ export default function OrderFormDialog({
       },
       items: orderItems,
       subscription: subscriptionOptions,
-      invoiceData: invoiceRequested
-        ? {
-            invoiceRequested: true,
-            businessRegNumber: businessRegNumber.trim() || undefined,
-            vatNumber: vatNumber.trim() || undefined,
-            companyAddress: companyAddress.trim() || undefined,
-          }
-        : undefined,
+      // Note: For card payments, we don't send invoice data - only for invoice-only flow
+    });
+  };
+
+  // Invoice flow - creates order without payment gateway
+  const handleInvoiceRequest = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (
+      !customerName.trim() ||
+      !customerEmail.trim() ||
+      !customerCompany.trim()
+    ) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in your name, company, and email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createInvoiceOrderMutation.mutate({
+      customerName,
+      customerEmail,
+      customerCompany,
+      amount: totalAmount.toString(),
+      purchaseType,
+      items: orderItems,
+      businessRegNumber: businessRegNumber.trim() || undefined,
+      vatNumber: vatNumber.trim() || undefined,
+      companyAddress: companyAddress.trim() || undefined,
     });
   };
 
   const handleClose = () => {
     if (isSuccess) {
       setLocation("/");
+    } else if (isInvoiceSuccess) {
+      setLocation("/portal/credits");
     }
     onOpenChange(false);
     setIsSuccess(false);
+    setIsInvoiceSuccess(false);
     setCustomerName("");
     setCustomerEmail("");
     setCustomerCompany("");
@@ -325,6 +403,7 @@ export default function OrderFormDialog({
     }
   };
 
+  // Success state for inquiry
   if (isSuccess) {
     return (
       <Dialog open={open} onOpenChange={handleClose}>
@@ -347,6 +426,31 @@ export default function OrderFormDialog({
             </DialogDescription>
             <Button onClick={handleClose} data-testid="button-close-success">
               Back to Home
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Success state for invoice request
+  if (isInvoiceSuccess) {
+    return (
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-md">
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <CheckCircle2 className="w-16 h-16 text-green-500 mb-4" />
+            <DialogTitle className="text-2xl mb-2">
+              Invoice Request Submitted!
+            </DialogTitle>
+            <DialogDescription className="text-base mb-6">
+              Thank you, <span className="font-medium text-foreground">{customerName}</span>!{" "}
+              We'll prepare an invoice and send it to{" "}
+              <span className="font-medium text-foreground">{customerEmail}</span>.{" "}
+              Your credits will be activated once payment is received.
+            </DialogDescription>
+            <Button onClick={handleClose} data-testid="button-view-billing">
+              View Credits & Billing
             </Button>
           </div>
         </DialogContent>
@@ -459,27 +563,6 @@ export default function OrderFormDialog({
                     data-testid="input-company-address"
                   />
                 </div>
-                {/* <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handlePreviewInvoice}
-                  disabled={isGeneratingPreview}
-                  className="w-full"
-                  data-testid="button-preview-invoice"
-                >
-                  {isGeneratingPreview ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Generating Preview...
-                    </>
-                  ) : (
-                    <>
-                      <Eye className="w-4 h-4 mr-2" />
-                      Preview Sample Invoice
-                    </>
-                  )}
-                </Button> */}
               </div>
             )}
           </div>
@@ -507,43 +590,33 @@ export default function OrderFormDialog({
               onClick={() => onOpenChange(false)}
               disabled={
                 createInquiryMutation.isPending ||
-                initiatePaymentMutation.isPending
+                initiatePaymentMutation.isPending ||
+                createInvoiceOrderMutation.isPending
               }
               data-testid="button-cancel-order"
             >
               Cancel
             </Button>
-            {/* <Button
-              type="button"
-              onClick={handleSubmit}
-              disabled={
-                createInquiryMutation.isPending ||
-                initiatePaymentMutation.isPending
-              }
-              data-testid="button-submit-order"
-            >
-              {createInquiryMutation.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                "Place Order"
-              )}
-            </Button> */}
+            {/* Dynamic button based on invoice checkbox */}
             <Button
               type="button"
-              onClick={handlePayOnline}
+              onClick={invoiceRequested ? handleInvoiceRequest : handlePayOnline}
               disabled={
                 createInquiryMutation.isPending ||
-                initiatePaymentMutation.isPending
+                initiatePaymentMutation.isPending ||
+                createInvoiceOrderMutation.isPending
               }
-              data-testid="button-pay-online"
+              data-testid={invoiceRequested ? "button-invoice-me" : "button-pay-online"}
             >
-              {initiatePaymentMutation.isPending ? (
+              {initiatePaymentMutation.isPending || createInvoiceOrderMutation.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Processing...
+                </>
+              ) : invoiceRequested ? (
+                <>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Invoice me
                 </>
               ) : (
                 <>
@@ -553,10 +626,6 @@ export default function OrderFormDialog({
               )}
             </Button>
           </div>
-
-          {/* <p className="text-xs text-muted-foreground text-center">
-            Choose "Place Order" for manual payment coordination or "Pay Online" to pay securely with PayFast.
-          </p> */}
         </form>
       </DialogContent>
     </Dialog>

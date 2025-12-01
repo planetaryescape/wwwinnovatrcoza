@@ -56,6 +56,7 @@ export interface IStorage {
   createOrder(order: InsertOrder): Promise<Order>;
   getOrder(id: string): Promise<Order | undefined>;
   getAllOrders(): Promise<Order[]>;
+  getOrdersByEmail(email: string): Promise<Order[]>;
   updateOrder(id: string, updates: Partial<Order>): Promise<void>;
   createOrderItem(item: InsertOrderItem): Promise<OrderItem>;
   getOrderItems(orderId: string): Promise<OrderItem[]>;
@@ -410,6 +411,10 @@ export class MemStorage implements IStorage {
 
   async getAllOrders(): Promise<Order[]> {
     return db.select().from(orders);
+  }
+
+  async getOrdersByEmail(email: string): Promise<Order[]> {
+    return db.select().from(orders).where(eq(orders.customerEmail, email));
   }
 
   async updateOrder(id: string, updates: Partial<Order>): Promise<void> {

@@ -210,6 +210,105 @@ export async function sendContactFormMessage(contactData: {
   }
 }
 
+/**
+ * Send invoice request notification to admin team
+ * Sent to richard@innovatr.co.za and hannah@innovatr.co.za when a user requests an invoice
+ * Credits are NOT activated until the invoice is marked as paid
+ */
+export async function sendInvoiceRequestNotification(orderData: {
+  orderId: string;
+  customerName: string;
+  customerEmail: string;
+  customerCompany: string;
+  packDescription: string;
+  totalAmount: string;
+  orderItems: { type: string; description: string; quantity: number }[];
+}) {
+  try {
+    const resend = await getResendClient();
+    const fromEmail = await getFromEmail();
+    
+    // Always send to both Richard and Hannah
+    const adminEmails = ["richard@innovatr.co.za", "hannah@innovatr.co.za"];
+
+    const itemsHtml = orderData.orderItems
+      .map(
+        (item) =>
+          `<li>${item.description || item.type} - Qty: ${item.quantity}</li>`,
+      )
+      .join("");
+
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            h2 { color: #2c3e50; }
+            .notice { 
+              background-color: #fff3cd; 
+              border: 1px solid #ffc107; 
+              padding: 15px; 
+              border-radius: 5px; 
+              margin: 20px 0;
+              color: #856404;
+            }
+            .details { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }
+            .detail-row { margin: 10px 0; }
+            .label { font-weight: bold; color: #555; }
+            ul { padding-left: 20px; }
+            .order-id { 
+              font-family: monospace; 
+              background-color: #e9ecef; 
+              padding: 2px 6px; 
+              border-radius: 3px; 
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2>New Invoice Request from Member Portal</h2>
+            
+            <div class="notice">
+              <strong>Payment Pending:</strong> This is an invoice request. Credits will NOT be activated until payment is confirmed.
+            </div>
+            
+            <div class="details">
+              <div class="detail-row"><span class="label">Order ID:</span> <span class="order-id">${orderData.orderId}</span></div>
+              <div class="detail-row"><span class="label">Customer Name:</span> ${orderData.customerName}</div>
+              <div class="detail-row"><span class="label">Customer Email:</span> ${orderData.customerEmail}</div>
+              <div class="detail-row"><span class="label">Company:</span> ${orderData.customerCompany}</div>
+              <div class="detail-row"><span class="label">Credit Pack:</span> ${orderData.packDescription}</div>
+              <div class="detail-row"><span class="label">Total Amount:</span> <strong>${orderData.totalAmount}</strong></div>
+            </div>
+            
+            <h3>Order Items:</h3>
+            <ul>
+              ${itemsHtml}
+            </ul>
+            
+            <p><em>Please prepare an invoice for this customer and follow up for payment. Once paid, mark the order as "paid" to activate the credits.</em></p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const response = await resend.emails.send({
+      from: `Innovatr <${fromEmail}>`,
+      to: adminEmails,
+      subject: `Invoice Request: ${orderData.customerCompany} - ${orderData.packDescription}`,
+      html: emailHtml,
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Failed to send invoice request notification:", error);
+    throw error;
+  }
+}
+
 export async function sendCustomerOrderConfirmation(orderData: {
   customerName: string;
   customerEmail: string;

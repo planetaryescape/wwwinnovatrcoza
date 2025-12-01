@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemWithoutOrderIdSchema, insertReportSchema, insertDealSchema, insertInquirySchema } from "@shared/schema";
 import { PaymentService } from "./payments/service";
 import type { PaymentConfig } from "./payments/types";
-import { sendAdminOrderNotification, sendCustomerOrderConfirmation, sendContactFormMessage } from "./emails/email-service";
+import { sendAdminOrderNotification, sendCustomerOrderConfirmation, sendContactFormMessage, sendInvoiceRequestNotification } from "./emails/email-service";
 import { uploadFile, downloadFile, deleteFile, listFiles, fileExists } from "./app-storage";
 import { generateInvoicePdf } from "./invoices/generator";
 
@@ -230,6 +230,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(order);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
+    }
+  });
+
+  /**
+   * Invoice Order Flow:
+   * - Creates an order with invoiceRequested = true and status = "pending"
+   * - Sends email notification to richard@innovatr.co.za and hannah@innovatr.co.za
+   * - Does NOT open payment gateway
+   * - Credits are only activated when admin manually updates status to "paid"
+   */
+  app.post("/api/invoice-orders", async (req, res) => {
+    try {
+      const { customerName, customerEmail, customerCompany, amount, currency, purchaseType, items, businessRegNumber, vatNumber, companyAddress } = req.body;
+
+      // Validate required fields
+      if (!customerName || !customerEmail || !customerCompany || !amount || !purchaseType) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      // Create order with invoiceRequested = true and status = "pending" (awaiting payment)
+      const validatedOrder = insertOrderSchema.parse({
+        customerName,
+        customerEmail,
+        customerCompany,
+        amount,
+        currency: currency || "ZAR",
+        purchaseType,
+        status: "pending", // Will change to "paid" when payment is received
+        invoiceRequested: true, // Mark this as an invoice request
+        businessRegNumber: businessRegNumber || null,
+        vatNumber: vatNumber || null,
+        companyAddress: companyAddress || null,
+      });
+
+      const order = await storage.createOrder(validatedOrder);
+
+      // Create order items
+      const validatedItems = items?.map((item: any) => insertOrderItemWithoutOrderIdSchema.parse(item)) || [];
+      for (const itemData of validatedItems) {
+        await storage.createOrderItem({
+          ...itemData,
+          orderId: order.id,
+        });
+      }
+
+      // Send invoice request notification to admin team
+      try {
+        await sendInvoiceRequestNotification({
+          orderId: order.id,
+          customerName: order.customerName || "Unknown",
+          customerEmail: order.customerEmail || "No email provided",
+          customerCompany: order.customerCompany || "Company Not Provided",
+          packDescription: order.purchaseType || "Credit Pack",
+          totalAmount: `R${Number(order.amount).toLocaleString()}`,
+          orderItems: validatedItems.map((item: any) => ({
+            type: item.type,
+            description: item.description || "",
+            quantity: item.quantity,
+          })),
+        });
+      } catch (emailError) {
+        console.error("Failed to send invoice request notification:", emailError);
+        // Don't fail the order creation if email fails
+      }
+
+      res.status(201).json(order);
+    } catch (error: any) {
+      console.error("Invoice order creation failed:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Get user's orders (for Credits & Billing page)
+  app.get("/api/user-orders", async (req, res) => {
+    try {
+      const email = req.query.email as string;
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+
+      const orders = await storage.getOrdersByEmail(email);
+      res.json(orders);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
     }
   });
 

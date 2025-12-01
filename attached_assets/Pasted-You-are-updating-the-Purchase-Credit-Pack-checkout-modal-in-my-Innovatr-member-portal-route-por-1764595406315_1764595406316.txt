@@ -1,0 +1,278 @@
+You are updating the “Purchase Credit Pack” checkout modal in my Innovatr member portal (route: /portal/credits).
+
+The current behaviour:
+
+User clicks “Purchase” on a credit pack (e.g. Test24 Basic Credit).
+
+A modal opens titled “Complete Your Order”.
+
+Fields include:
+
+Full Name
+
+Email Address
+
+Company Name
+
+A checkbox: “Send me an invoice”
+
+Order Summary + Total
+
+There is a single primary button at the bottom: “Pay Online”.
+
+Regardless of whether “Send me an invoice” is checked or not, clicking “Pay Online” sends the user into the online payment gateway flow.
+
+After payment, credits are applied and billing records are updated (this must stay exactly as is).
+
+I want to add a proper “invoice” flow, without breaking the existing card-payment flow.
+
+1. High level behaviour changes
+1.1 Two distinct flows
+
+Normal card payment (default)
+
+“Send me an invoice” is unchecked.
+
+Button label remains “Pay Online”.
+
+Clicking triggers the existing online payment / gateway logic (no changes, just keep it as is).
+
+Invoice-only flow
+
+User checks “Send me an invoice”.
+
+Primary button label changes to “Invoice me” (or “Request invoice” – choose one and use it consistently).
+
+Clicking the button must NOT open the payment gateway.
+
+Instead:
+
+Create an Invoice / Pending Order record with all details.
+
+Send an email notification to both:
+
+richard@innovatr.co.za
+
+hannah@innovatr.co.za
+
+Redirect the user to their Credits & Billing page (/portal/credits or the correct route) where they can see the new invoice with a status like “Awaiting payment”.
+
+No credits should be “active” yet. Credits should only be marked as available once payment is confirmed (you can assume this will be handled manually for now, via the admin side).
+
+2. UI changes in the modal
+
+Keep the existing layout and styling of the checkout modal.
+
+Reuse the existing checkbox field Send me an invoice – do not rename it in the UI.
+
+Implement dynamic button text:
+
+When checkbox is unchecked: primary button text = “Pay Online”.
+
+When checkbox is checked: primary button text = “Invoice me”.
+
+The button should only be enabled when all required fields (Full Name, Email, etc.) are valid — same validation rules as now.
+
+3. Data model and status tracking
+
+You can assume there is already some sort of order / purchase model used when people buy credits online. Extend or reuse this in the simplest possible way.
+
+3.1 New invoice record
+
+When “Send me an invoice” is checked and the user clicks “Invoice me”:
+
+Create a record in the same or a related collection/table that is used for credit purchases, with fields similar to:
+
+userId
+
+companyId (if applicable)
+
+fullName
+
+email
+
+companyName
+
+packType (e.g. “Test24 Basic Credit (1x)”)
+
+quantity
+
+totalAmount
+
+currency
+
+paymentMethod: 'invoice'
+
+status: 'pending' (or ‘awaiting_payment’)
+
+createdAt
+
+Do not increment or activate the user’s credits at this point.
+
+3.2 Credits & Billing screen
+
+On the Credits & Billing page in the portal:
+
+Add or extend the existing “billing history / invoices” section to show these invoice-based orders.
+
+Each invoice record should show at least:
+
+Date
+
+Pack name
+
+Amount
+
+Payment method (e.g. “Invoice”)
+
+Status (e.g. “Awaiting payment”, “Paid”)
+
+If there is already a history table, just add these records into the same list and show a status badge.
+
+Make sure newly created invoice orders appear here immediately after the user is redirected.
+
+3.3 Status updates (admin / manual)
+
+You can assume that status changes (from pending to paid) will be handled manually by an admin for now.
+
+Add any small helper functions or enums you need, e.g. OrderStatus = { PENDING, PAID }.
+
+Do not build the admin UI for updating yet — just ensure the model and the Credits & Billing view can display the current status correctly.
+
+4. Email notifications
+
+When an invoice request is created:
+
+Send one notification email to both:
+
+richard@innovatr.co.za
+
+hannah@innovatr.co.za
+
+Content can be simple, but must include:
+
+User full name
+
+Company name (if filled)
+
+Email address
+
+Credit pack purchased
+
+Quantity
+
+Total amount
+
+Internal order / invoice ID
+
+A note like “New invoice request from member portal – payment pending”.
+
+Implementation notes:
+
+Reuse any existing email utility / service already in the project (e.g. whatever is used for order or contact form emails).
+
+Do not introduce a new email provider if one already exists.
+
+If the app already sends an email on purchase, you can factor out a helper like sendPurchaseNotification(order) and call it for invoice orders as well, making sure it sends to both addresses.
+
+5. Routing and redirects
+
+Important: Do not break the existing payment gateway route.
+
+Implement this behaviour:
+
+Card payment flow (checkbox off):
+
+Existing behaviour stays exactly the same.
+
+The “Pay Online” button continues to call the same handler / gateway / redirect.
+
+Invoice flow (checkbox on):
+
+onSubmit should:
+
+Validate fields.
+
+Create an invoice order record.
+
+Send the email notifications.
+
+Redirect the user to the Credits & Billing page (/portal/credits or the correct internal route in the router).
+
+No redirect to PayFast or any external payment provider.
+
+If the portal uses React Router or Next.js, use the existing navigation helper (e.g. navigate('/portal/credits') or router.push('/portal/credits')) so the UX stays consistent.
+
+6. Safety constraints
+
+Do not modify any other flows outside of:
+
+The purchase modal component(s).
+
+Any order / invoice model / API directly related to this action.
+
+The Credits & Billing view to display invoice entries.
+
+Do not alter:
+
+The way existing, successful card payments are processed.
+
+The way membership plans or included credits are calculated.
+
+If you need to refactor a file, keep changes minimal and clearly commented.
+
+7. Testing checklist
+
+Please make sure the following flows work:
+
+Pay Online – Basic
+
+Checkbox unchecked.
+
+User completes form and clicks Pay Online.
+
+Behaviour is exactly as before (payment gateway, credits updated, history visible).
+
+Pay Online – Pro
+
+Same as above, with a Pro pack.
+
+No change in behaviour.
+
+Invoice me – Basic / Pro
+
+Checkbox checked.
+
+Button text changes to “Invoice me”.
+
+On click:
+
+No payment gateway opens.
+
+Invoice record is created with status = pending.
+
+Email is sent to richard@innovatr.co.za
+ and hannah@innovatr.co.za
+.
+
+User is redirected to Credits & Billing.
+
+The invoice appears in the list with “Awaiting payment”.
+
+No double-processing
+
+Ensure invoice requests do not also trigger the card payment function.
+
+Ensure card payments do not accidentally get marked as invoice orders.
+
+8. Code comments
+
+In the main purchase modal file and any related order handler, add short comments explaining:
+
+The two flows: “card payment” vs “invoice request”.
+
+How invoice orders are stored and where they appear in Credits & Billing.
+
+That credits only become active when an invoice is marked as paid.
+
+Do not change any other parts of the app beyond what is required for this behaviour.
