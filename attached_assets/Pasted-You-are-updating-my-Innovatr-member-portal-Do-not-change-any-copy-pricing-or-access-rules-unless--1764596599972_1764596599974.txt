@@ -1,0 +1,439 @@
+You are updating my Innovatr member portal.
+Do not change any copy, pricing, or access rules unless explicitly asked.
+Keep the existing design system, components and styling.
+Your tasks are grouped into two areas:
+
+
+New user sign-up and membership tagging
+
+
+Trends & Insights report page UX (“back to top” and “jump to report”)
+
+
+
+1. New user sign-up and membership tagging
+Goal
+When a new user signs up from the website:
+
+
+They are automatically created as a “Free” member (or equivalent starter tier).
+
+
+They appear in the Admin → Users table as a member that admins can see and manage.
+
+
+If they upgrade later, their membership tier is updated and visible to admins.
+
+
+What to assume
+
+
+There is already a sign-up or registration flow that creates a user account and logs them in.
+
+
+There is already a Users table in the database (or similar model) that is shown in Admin → Users.
+
+
+Users currently have some form of:
+
+
+tier, plan, membershipTier or similar
+
+
+role or isAdmin
+
+
+Possibly companyId or company for client organisations
+
+
+
+
+What to implement
+
+
+Default tier for all new sign-ups
+
+
+Find the code where a new user is created (e.g. an API route like /api/register or a createUser function).
+
+
+Ensure every newly created user has:
+
+
+tier (or equivalent) set to your starter / free tier value (for example "Free" or "Starter" – use the same string the rest of the portal already expects).
+
+
+A role or membership flag that clearly identifies them as a member, not an admin. For example:
+
+
+role: 'member'
+
+
+or isMember: true, isAdmin: false
+
+
+
+
+
+
+If the system already sets some default tier, keep it, but make it explicit and consistent. The important part is that all sign-ups appear as Free/Starter in Admin → Users.
+
+
+
+
+Ensure new users appear in Admin → Users
+
+
+Check the query used on the Admin → Users panel (e.g. getUsers, /api/admin/users).
+
+
+Confirm that regular members are included in this query (not only admins or company contacts).
+
+
+If filtering exists (for example where role != 'admin'), make sure newly registered members match the criteria.
+
+
+Result: as soon as a user signs up, an admin viewing Admin → Users sees them with:
+
+
+Name
+
+
+Email
+
+
+Tier = Free / Starter
+
+
+Status = Active (or equivalent)
+
+
+
+
+
+
+Update tier when users upgrade
+
+
+Find the code that handles membership upgrades / purchases (for example:
+
+
+credit pack purchase that changes membership
+
+
+membership plan checkout
+
+
+
+
+Whenever a membership upgrade is successfully completed:
+
+
+Update the user record to the correct tier:
+
+
+e.g. "Starter" → "Gold", "Scale", "Pro" etc.
+
+
+
+
+Ensure this tier is the same value shown in:
+
+
+Dashboard (badges like GOLD member)
+
+
+Admin → Users (Tier column)
+
+
+
+
+
+
+Do not change the business logic or pricing. Only ensure that when an upgrade is confirmed, the user’s tier is updated in one single source of truth and reflected everywhere.
+
+
+
+
+No behavioural changes beyond this
+
+
+Do not change:
+
+
+The sign-in flow.
+
+
+Password logic.
+
+
+Company assignment.
+
+
+
+
+Only add or fix the default tier and make sure Admin → Users accurately reflects sign-ups and upgrades.
+
+
+
+
+
+2. Trends & Insights report page UX
+Goal
+On each report detail page in the Trends & Insights Library:
+
+
+There should be only one downloadable report action, at the end of the post.
+
+
+Add a “Jump to report” link near the top that scrolls down to the download section.
+
+
+Add a “Back to top” control that quickly scrolls to the top of the page.
+
+
+Keep all existing access rules (free vs member-only) intact.
+
+
+Current behaviour (assume)
+
+
+Each report page has:
+
+
+A hero / header section with title, meta info, tags etc.
+
+
+Overlaid card content or body copy in the middle.
+
+
+A “Download PDF” or “Download full report” call-to-action currently shown in more than one place (top + bottom).
+
+
+
+
+There is an existing pdfUrl / pdfPath property on the report object used to render the download button.
+
+
+What to change
+
+
+Only show the download report action at the bottom
+
+
+Find the component that renders a single report detail (e.g. ReportDetail, TrendDetail, or similar under the Trends & Insights route).
+
+
+Locate all places where a download button / link is rendered, such as:
+
+
+Near the top of the article
+
+
+Inside the header block
+
+
+At the bottom of the article
+
+
+
+
+Remove or disable the top-of-page download action so that:
+
+
+There is exactly one visible download CTA.
+
+
+It appears only at the end of the report, after the content.
+
+
+
+
+Preserve existing styling for the bottom CTA (same button style / copy you already use).
+
+
+
+
+Add a “Jump to report” link near the top
+
+
+In the top area of the report (just below the hero / introduction or just after the first paragraph), add a small text link or subtle button:
+
+
+Label: Jump to report
+
+
+
+
+This link should:
+
+
+Use an in-page anchor or scroll function to jump directly to the download section at the bottom.
+
+
+Example implementation:
+
+
+Add an id="report-download" to the container around the bottom download CTA.
+
+
+Hook the top link to scroll: document.getElementById('report-download')... or equivalent React utility.
+
+
+
+
+
+
+Style:
+
+
+Use an existing secondary / text-link style from the design system so it feels native.
+
+
+
+
+Respect existing access logic:
+
+
+If the report is members-only and the download button is gated, the “Jump to report” link should still scroll to that same gated section, not expose anything new.
+
+
+
+
+
+
+Add a “Back to top” control
+
+
+On the same report detail page, add a Back to top control that appears once the user has scrolled down a bit (for example after the first viewport height).
+
+
+Label: Back to top
+
+
+Behaviour:
+
+
+Smoothly scroll back to the top of the page / article.
+
+
+
+
+Implementation options:
+
+
+A small floating button in the bottom-right on desktop and a slightly larger tap target on mobile.
+
+
+Or a text-link styled button near the bottom download section (for example under the download CTA).
+
+
+
+
+Use existing button / icon styles from the portal so it feels consistent.
+
+
+
+
+Do not change access and membership rules
+
+
+Whatever logic currently decides:
+
+
+Whether a user can see the full report content.
+
+
+Whether they can download the PDF (free vs member-only).
+
+
+
+
+Leave all of that intact.
+
+
+You are only:
+
+
+Moving the visible download CTA to a single position (bottom),
+
+
+Adding shortcut navigation (Jump to report and Back to top),
+
+
+And wiring scroll behaviour.
+
+
+
+
+
+
+
+3. Testing checklist
+Before finishing:
+
+
+Sign-up and Admin view
+
+
+Create a brand-new account via the normal sign-up flow.
+
+
+Confirm:
+
+
+User is created with tier = Free/Starter.
+
+
+User appears in Admin → Users with that tier and Active status.
+
+
+
+
+
+
+Upgrade and admin tier tag
+
+
+Simulate an upgrade (use whichever flow exists).
+
+
+Confirm:
+
+
+Tier updates in the dashboard badge.
+
+
+Tier updates in Admin → Users.
+
+
+
+
+
+
+Report page UX
+
+
+Open several reports (Inside, IRL, Launch, Insights).
+
+
+Confirm:
+
+
+Only one download button and it is at the end of the article.
+
+
+“Jump to report” at the top scrolls you to the download section.
+
+
+“Back to top” scrolls you to the top and behaves nicely on desktop and mobile.
+
+
+Access gating (free vs member) still behaves exactly as before.
+
+
+
+
+
+
+Do not introduce new routes or change any marketing-site behaviour. Focus only on the membership tagging, admin visibility, and Trends & Insights report page UX described above.

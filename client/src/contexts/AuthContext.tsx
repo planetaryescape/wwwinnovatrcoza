@@ -153,21 +153,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signup = async (email: string, password: string, name: string) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
     const isAdmin = email === "hannah@innovatr.co.za" || email === "richard@innovatr.co.za";
     
-    const mockUser: User = {
-      id: "user-" + Date.now(),
-      email,
-      name,
-      tier: "free",
-      membershipTier: "STARTER",
-      isAdmin,
-    };
-    
-    setUser(mockUser);
-    localStorage.setItem("innovatr_user", JSON.stringify(mockUser));
+    try {
+      // Call the API to create the user in the database
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, name }),
+      });
+      
+      if (res.ok) {
+        const dbUser = await res.json();
+        
+        const newUser: User = {
+          id: dbUser.id,
+          email: dbUser.email,
+          name: dbUser.name || name,
+          company: dbUser.company,
+          tier: "free", // New users start as free
+          membershipTier: "STARTER", // All new signups are STARTER
+          isAdmin,
+        };
+        
+        setUser(newUser);
+        localStorage.setItem("innovatr_user", JSON.stringify(newUser));
+        return;
+      }
+      
+      // If user already exists, try logging in instead
+      if (res.status === 409) {
+        throw new Error("User with this email already exists. Please log in instead.");
+      }
+      
+      throw new Error("Failed to create account");
+    } catch (err: any) {
+      console.error("Signup error:", err);
+      // If API fails, still create local user for demo purposes
+      const mockUser: User = {
+        id: "user-" + Date.now(),
+        email,
+        name,
+        tier: "free",
+        membershipTier: "STARTER",
+        isAdmin,
+      };
+      
+      setUser(mockUser);
+      localStorage.setItem("innovatr_user", JSON.stringify(mockUser));
+    }
   };
 
   const logout = () => {

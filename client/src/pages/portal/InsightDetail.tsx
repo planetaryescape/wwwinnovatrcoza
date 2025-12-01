@@ -1,8 +1,9 @@
+import { useState, useEffect } from "react";
 import { useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Download, ArrowLeft, Calendar, Briefcase, Lock, Crown, CreditCard, LogIn, Play } from "lucide-react";
+import { Download, ArrowLeft, Calendar, Briefcase, Lock, Crown, CreditCard, LogIn, Play, ChevronUp, FileText } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { Link } from "wouter";
 import reportsData from "@/data/reports.json";
@@ -340,6 +341,7 @@ export default function InsightDetail() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   const report = (reportsData as Report[]).find((r) => r.slug === params?.slug);
 
@@ -352,6 +354,27 @@ export default function InsightDetail() {
         .filter((r) => r.id !== report.id && (r.category === report.category || r.tags.some(t => report.tags.includes(t))))
         .slice(0, 3)
     : [];
+
+  // Show back to top button after scrolling down one viewport height
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > window.innerHeight);
+    };
+    
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const scrollToDownload = () => {
+    const downloadSection = document.getElementById("report-download");
+    if (downloadSection) {
+      downloadSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   const handleLogin = () => {
     setLocation("/login");
@@ -492,35 +515,21 @@ export default function InsightDetail() {
             ))}
           </div>
 
-          <p className="text-lg text-gray-700 leading-relaxed mb-8">
+          <p className="text-lg text-gray-700 leading-relaxed mb-4">
             {report.teaser}
           </p>
 
-          {report.hasDownload && report.pdfPath && (
-            <div className="mb-8 p-6 bg-gradient-to-r from-rose-50 to-white rounded-lg border border-rose-100">
-              <div className="flex flex-col sm:flex-row items-center gap-4">
-                <div className="flex-1 text-center sm:text-left">
-                  <h3 
-                    className="text-xl font-bold text-gray-900 mb-1"
-                    style={{ fontFamily: 'DM Serif Display, serif' }}
-                  >
-                    Download full IRL report
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    Get the complete research with all diagnostics, stats and charts
-                  </p>
-                </div>
-                <Button 
-                  size="lg"
-                  onClick={handleDownload}
-                  className="rounded-full whitespace-nowrap"
-                  style={{ backgroundColor: '#5B6EF7' }}
-                  data-testid="button-download-irl"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Download PDF
-                </Button>
-              </div>
+          {/* Jump to report link - visible when there's a downloadable report */}
+          {report.pdfPath && (
+            <div className="mb-8">
+              <button
+                onClick={scrollToDownload}
+                className="inline-flex items-center gap-1.5 text-[#5B6EF7] hover:text-[#4958d6] text-sm font-medium transition-colors"
+                data-testid="button-jump-to-report"
+              >
+                <FileText className="w-4 h-4" />
+                Jump to report
+              </button>
             </div>
           )}
 
@@ -566,7 +575,7 @@ export default function InsightDetail() {
               )}
 
               {report.pdfPath && (
-                <div className="mt-12 pt-8 border-t border-gray-100 text-center">
+                <div id="report-download" className="mt-12 pt-8 border-t border-gray-100 text-center">
                   <h3 
                     className="text-2xl font-bold mb-2 text-gray-900"
                     style={{ fontFamily: 'DM Serif Display, serif' }}
@@ -663,6 +672,19 @@ export default function InsightDetail() {
             </Button>
           </div>
         </div>
+
+        {/* Floating Back to Top button */}
+        {showBackToTop && (
+          <button
+            onClick={scrollToTop}
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-[#5B6EF7] text-white rounded-full shadow-lg hover:bg-[#4958d6] transition-all duration-300 md:px-4 md:py-2"
+            aria-label="Back to top"
+            data-testid="button-back-to-top"
+          >
+            <ChevronUp className="w-5 h-5" />
+            <span className="hidden md:inline text-sm font-medium">Back to top</span>
+          </button>
+        )}
       </div>
     </PortalLayout>
   );

@@ -71,6 +71,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const paymentService = new PaymentService(paymentConfig, storage);
 
+  // User registration endpoint - creates new users with STARTER tier
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const { email, password, name, company } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+      }
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({ error: "User with this email already exists" });
+      }
+      
+      // Create user with default STARTER tier and MEMBER role
+      const newUser = await storage.createUser({
+        username: email.split("@")[0] + "_" + Date.now(), // Generate unique username from email
+        email,
+        password, // In production, this should be hashed
+        name: name || email.split("@")[0],
+        company: company || null,
+        membershipTier: "STARTER", // All new signups start as STARTER
+        status: "ACTIVE",
+        role: "MEMBER",
+        creditsBasic: 0,
+        creditsPro: 0,
+      });
+      
+      // Return user without password
+      const { password: _, ...safeUser } = newUser;
+      res.status(201).json(safeUser);
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // User login endpoint
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+      }
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+      
+      // In production, compare hashed passwords
+      if (user.password !== password) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+      
+      // Update last login
+      await storage.updateUser(user.id, { lastLoginAt: new Date() });
+      
+      // Return user without password
+      const { password: _, ...safeUser } = user;
+      res.json(safeUser);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   app.post("/api/coupon-claims", async (req, res) => {
     try {
       const validatedData = insertCouponClaimSchema.parse(req.body);
