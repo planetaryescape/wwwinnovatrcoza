@@ -91,11 +91,18 @@ export default function CreditsAndBilling() {
     enabled: !!user?.email,
   });
 
-  // Separate pending invoice orders from paid orders
+  // Separate pending invoice orders from completed/paid orders
+  // Pending invoice orders: invoiceRequested=true AND status=pending
+  // Completed orders: Any order that is paid, completed, or any non-pending invoice order
   const pendingInvoiceOrders = orders.filter(
-    (order) => order.invoiceRequested && order.status === 'pending'
+    (order) => order.invoiceRequested === true && order.status === 'pending'
   );
-  const paidOrders = orders.filter((order) => order.status === 'paid');
+  
+  // Billing history shows all orders except pending invoice requests
+  // This includes: paid orders, completed orders, and any order that isn't a pending invoice
+  const billingHistoryOrders = orders
+    .filter((order) => !(order.invoiceRequested === true && order.status === 'pending'))
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const formatPrice = (amount: number | string) => {
     const num = typeof amount === 'string' ? parseFloat(amount) : amount;
@@ -441,8 +448,8 @@ export default function CreditsAndBilling() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {/* Show real paid orders from API */}
-                {paidOrders.map((order) => (
+                {/* Show orders from API */}
+                {billingHistoryOrders.map((order) => (
                   <TableRow key={order.id} data-testid={`order-${order.id}`}>
                     <TableCell className="font-medium font-mono text-xs">{order.id.slice(0, 8)}...</TableCell>
                     <TableCell>{formatDate(order.createdAt)}</TableCell>
@@ -465,7 +472,7 @@ export default function CreditsAndBilling() {
                   </TableRow>
                 ))}
                 {/* Show mock data if no real orders exist */}
-                {paidOrders.length === 0 && mockBillingHistory.map((invoice) => (
+                {billingHistoryOrders.length === 0 && mockBillingHistory.map((invoice) => (
                   <TableRow key={invoice.id} data-testid={`invoice-${invoice.id}`}>
                     <TableCell className="font-medium">{invoice.id}</TableCell>
                     <TableCell>
