@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,8 @@ import PortalLayout from "./PortalLayout";
 import { Link } from "wouter";
 import reportsData from "@/data/reports.json";
 import { useAuth } from "@/contexts/AuthContext";
+import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
+import { useUrlFilters } from "@/hooks/use-url-filters";
 import insightsCover from "@assets/insights-cover_1764321138388.png";
 import launchCover from "@assets/launch-cover_1764321848244.png";
 import insideCover from "@assets/inside-cover_1764321472939.png";
@@ -264,14 +266,13 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId }: { report: R
 }
 
 export default function TrendsInsights() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [sortBy, setSortBy] = useState("newest");
-  const [showAll, setShowAll] = useState(false);
+  const { filters, setFilters, clearFilters } = useUrlFilters();
   const [clientReports, setClientReports] = useState<Report[]>([]);
   const { user } = useAuth();
   const userTier = user?.membershipTier;
   const userCompanyId = user?.companyId;
+  
+  useScrollRestoration("trends-insights");
 
   // Fetch all reports for authenticated user (includes client-specific reports based on their companyId)
   useEffect(() => {
@@ -314,17 +315,17 @@ export default function TrendsInsights() {
       const isLive = !report.status || report.status === "live" || report.status === "published";
       if (!isLive) return false;
       
-      const searchLower = searchQuery.toLowerCase();
+      const searchLower = filters.search.toLowerCase();
       const matchesSearch = 
         report.title.toLowerCase().includes(searchLower) ||
         report.teaser.toLowerCase().includes(searchLower) ||
         (report.tags || []).some(tag => tag.toLowerCase().includes(searchLower));
-      const matchesCategory = selectedCategory === "all" || report.category === selectedCategory;
+      const matchesCategory = filters.category === "all" || report.category === filters.category;
       return matchesSearch && matchesCategory;
     });
 
     return filtered.sort((a, b) => {
-      switch (sortBy) {
+      switch (filters.sort) {
         case "newest":
           return new Date(b.date).getTime() - new Date(a.date).getTime();
         case "oldest":
@@ -335,9 +336,9 @@ export default function TrendsInsights() {
           return 0;
       }
     });
-  }, [searchQuery, selectedCategory, sortBy, clientReports]);
+  }, [filters.search, filters.category, filters.sort, clientReports]);
 
-  const displayedReports = showAll ? filteredAndSortedReports : filteredAndSortedReports.slice(0, 6);
+  const displayedReports = filters.showAll ? filteredAndSortedReports : filteredAndSortedReports.slice(0, 6);
   const hasMoreReports = filteredAndSortedReports.length > 6;
 
   return (
@@ -359,15 +360,15 @@ export default function TrendsInsights() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 placeholder="Search by title, topic, or tag..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={filters.search}
+                onChange={(e) => setFilters({ search: e.target.value })}
                 className="pl-10 h-10 rounded-full border-border focus:border-[#5B6EF7] focus:ring-[#5B6EF7]"
                 data-testid="input-search-reports"
               />
             </div>
             
             <div className="flex gap-2">
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select value={filters.category} onValueChange={(value) => setFilters({ category: value })}>
                 <SelectTrigger 
                   className="w-32 h-10 rounded-full border-border"
                   data-testid="select-category"
@@ -383,7 +384,7 @@ export default function TrendsInsights() {
                 </SelectContent>
               </Select>
 
-              <Select value={sortBy} onValueChange={setSortBy}>
+              <Select value={filters.sort} onValueChange={(value) => setFilters({ sort: value })}>
                 <SelectTrigger 
                   className="w-36 h-10 rounded-full border-border"
                   data-testid="select-sort"
@@ -415,10 +416,7 @@ export default function TrendsInsights() {
               <Button 
                 variant="outline" 
                 className="mt-4"
-                onClick={() => {
-                  setSearchQuery("");
-                  setSelectedCategory("all");
-                }}
+                onClick={clearFilters}
                 data-testid="button-clear-filters"
               >
                 Clear filters
@@ -426,12 +424,12 @@ export default function TrendsInsights() {
             </div>
           )}
 
-          {hasMoreReports && !showAll && filteredAndSortedReports.length > 0 && (
+          {hasMoreReports && !filters.showAll && filteredAndSortedReports.length > 0 && (
             <div className="text-center">
               <Button
                 variant="outline"
                 size="lg"
-                onClick={() => setShowAll(true)}
+                onClick={() => setFilters({ showAll: true })}
                 className="rounded-full px-8 border-[#5B6EF7] text-[#5B6EF7] hover:bg-[#5B6EF7] hover:text-white"
                 data-testid="button-show-all"
               >
@@ -441,12 +439,12 @@ export default function TrendsInsights() {
             </div>
           )}
 
-          {showAll && hasMoreReports && (
+          {filters.showAll && hasMoreReports && (
             <div className="text-center">
               <Button
                 variant="outline"
                 size="lg"
-                onClick={() => setShowAll(false)}
+                onClick={() => setFilters({ showAll: false })}
                 className="rounded-full px-8 border-[#5B6EF7] text-[#5B6EF7] hover:bg-[#5B6EF7] hover:text-white"
                 data-testid="button-show-less"
               >
