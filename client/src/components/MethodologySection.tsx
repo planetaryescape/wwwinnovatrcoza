@@ -29,7 +29,8 @@ export default function MethodologySection() {
             01 — Our Difference
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6 max-w-4xl mx-auto leading-tight" style={{ color: '#4D5FF1' }}>
-            Turning local insights into<br />fast decision making
+            <span className="block">Turning local insights into</span>
+            <span className="block">evidence based decisions</span>
           </h2>
         </div>
 
