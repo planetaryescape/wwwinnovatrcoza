@@ -320,7 +320,8 @@ export default function TrendsInsights() {
         report.title.toLowerCase().includes(searchLower) ||
         report.teaser.toLowerCase().includes(searchLower) ||
         (report.tags || []).some(tag => tag.toLowerCase().includes(searchLower));
-      const matchesCategory = filters.category === "all" || report.category === filters.category;
+      const matchesCategory = filters.category === "all" || 
+        report.category.toLowerCase() === filters.category.toLowerCase();
       return matchesSearch && matchesCategory;
     });
 

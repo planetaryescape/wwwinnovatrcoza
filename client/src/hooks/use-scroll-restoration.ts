@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
-import { useLocation } from "wouter";
+import { useEffect, useRef, useCallback } from "react";
 
 const SCROLL_POSITIONS_KEY = "scroll-positions";
+const THROTTLE_MS = 100;
 
 interface ScrollPositions {
   [path: string]: number;
@@ -31,37 +31,60 @@ function getScrollPosition(path: string): number {
   return positions[path] || 0;
 }
 
-export function useScrollRestoration(key?: string) {
-  const [location] = useLocation();
-  const scrollKey = key || location;
+export function useScrollRestoration(key: string) {
   const restored = useRef(false);
+  const lastSaveTime = useRef(0);
+  const pendingSave = useRef<number | null>(null);
+
+  const throttledSave = useCallback((position: number) => {
+    const now = Date.now();
+    
+    if (pendingSave.current !== null) {
+      cancelAnimationFrame(pendingSave.current);
+    }
+
+    if (now - lastSaveTime.current >= THROTTLE_MS) {
+      saveScrollPosition(key, position);
+      lastSaveTime.current = now;
+    } else {
+      pendingSave.current = requestAnimationFrame(() => {
+        saveScrollPosition(key, position);
+        lastSaveTime.current = Date.now();
+        pendingSave.current = null;
+      });
+    }
+  }, [key]);
 
   useEffect(() => {
     if (!restored.current) {
-      const savedPosition = getScrollPosition(scrollKey);
+      const savedPosition = getScrollPosition(key);
       if (savedPosition > 0) {
-        setTimeout(() => {
+        requestAnimationFrame(() => {
           window.scrollTo(0, savedPosition);
-        }, 50);
+        });
       }
       restored.current = true;
     }
 
     const handleScroll = () => {
-      saveScrollPosition(scrollKey, window.scrollY);
+      throttledSave(window.scrollY);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
+    
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      if (pendingSave.current !== null) {
+        cancelAnimationFrame(pendingSave.current);
+      }
     };
-  }, [scrollKey]);
+  }, [key, throttledSave]);
 
   return {
     clearPosition: () => {
       try {
         const positions = getScrollPositions();
-        delete positions[scrollKey];
+        delete positions[key];
         sessionStorage.setItem(SCROLL_POSITIONS_KEY, JSON.stringify(positions));
       } catch {
         // Ignore storage errors
