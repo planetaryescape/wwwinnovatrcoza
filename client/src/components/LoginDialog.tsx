@@ -42,8 +42,8 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       }
       onOpenChange(false);
       
-      // Always redirect to member portal dashboard after successful login/signup
-      setLocation("/portal/dashboard");
+      // Redirect to member portal after successful login/signup
+      setLocation("/portal");
     } catch (error) {
       toast({
         title: "Error",
