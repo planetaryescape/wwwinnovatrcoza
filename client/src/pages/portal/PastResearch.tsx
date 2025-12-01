@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,112 +10,116 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, FileText, Download, Eye, Grid3x3, List, Lock } from "lucide-react";
+import { Search, FileText, Download, Eye, Grid3x3, List, Lock, RefreshCw, Building2, Calendar, Tag } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
-import LockedFeature from "@/components/LockedFeature";
 
-const mockStudies = [
-  {
-    id: 1,
-    title: "Protein Bar Flavour Test",
-    type: "Basic",
-    date: "2024-11-10",
-    category: "Food & Beverage",
-    score: 78,
-    status: "completed",
-    topFindings: "Chocolate Peanut variant ranked highest",
-  },
-  {
-    id: 2,
-    title: "Packaging Design Study",
-    type: "Pro",
-    date: "2024-10-28",
-    category: "Design & Innovation",
-    score: 82,
-    status: "completed",
-    topFindings: "Eco-friendly packaging drove 40% preference increase",
-  },
-  {
-    id: 3,
-    title: "Brand Positioning Analysis",
-    type: "Pro",
-    date: "2024-10-15",
-    category: "Brand Strategy",
-    score: 75,
-    status: "completed",
-    topFindings: "Premium positioning resonated with target audience",
-  },
-  {
-    id: 4,
-    title: "Product Name Testing",
-    type: "Basic",
-    date: "2024-09-22",
-    category: "Marketing",
-    score: 68,
-    status: "completed",
-    topFindings: "Name B outperformed by 25% in recall tests",
-  },
-  {
-    id: 5,
-    title: "Market Entry Strategy",
-    type: "Pro",
-    date: "2024-09-08",
-    category: "Strategy",
-    score: 85,
-    status: "completed",
-    topFindings: "Cape Town market showed strongest potential",
-  },
-  {
-    id: 6,
-    title: "New Service Concept Test",
-    type: "Basic",
-    date: "2024-08-25",
-    category: "Services",
-    score: 71,
-    status: "completed",
-    topFindings: "Subscription model preferred by 65% of respondents",
-  },
-];
+interface ClientReport {
+  id: string;
+  companyId: string;
+  title: string;
+  description: string | null;
+  pdfUrl: string | null;
+  thumbnailUrl: string | null;
+  tags: string[];
+  uploadedAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function PastResearch() {
-  const { isMember } = useAuth();
+  const { isMember, user, company } = useAuth();
   const [, setLocation] = useLocation();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterCategory, setFilterCategory] = useState("all");
-  const [filterType, setFilterType] = useState("all");
+  const [filterTag, setFilterTag] = useState("all");
+  const [reports, setReports] = useState<ClientReport[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredStudies = mockStudies.filter((study) => {
-    const matchesSearch =
-      study.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      study.topFindings.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = filterCategory === "all" || study.category === filterCategory;
-    const matchesType = filterType === "all" || study.type === filterType;
-    return matchesSearch && matchesCategory && matchesType;
-  });
-
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600";
-    if (score >= 70) return "text-accent";
-    return "text-orange-600";
+  const fetchReports = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch("/api/member/client-reports");
+      if (!res.ok) {
+        throw new Error("Failed to fetch reports");
+      }
+      const data = await res.json();
+      setReports(data);
+    } catch (err) {
+      setError("Failed to load your research reports");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Show banner for free users
+  useEffect(() => {
+    if (user?.companyId) {
+      fetchReports();
+    } else {
+      setLoading(false);
+    }
+  }, [user?.companyId]);
+
+  const allTags = Array.from(new Set(reports.flatMap(r => r.tags))).sort();
+
+  const filteredReports = reports.filter((report) => {
+    const matchesSearch =
+      report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      report.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      report.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesTag = filterTag === "all" || report.tags.includes(filterTag);
+    return matchesSearch && matchesTag;
+  });
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  const handleDownload = (report: ClientReport) => {
+    if (report.pdfUrl) {
+      window.open(report.pdfUrl, '_blank');
+    }
+  };
+
   const showLockedBanner = !isMember;
+  const showNoCompanyBanner = !user?.companyId && isMember;
 
   return (
     <PortalLayout>
       <div className="p-6 max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-serif font-bold mb-2">Past Research</h1>
+            <h1 
+              className="text-4xl font-bold mb-2"
+              style={{ fontFamily: 'DM Serif Display, serif' }}
+            >
+              Past Research
+            </h1>
             <p className="text-lg text-muted-foreground">
-              Access all your completed studies and insights
+              {company ? (
+                <>Access all completed research for <span className="font-medium">{company.name}</span></>
+              ) : (
+                "Access all your completed studies and insights"
+              )}
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={fetchReports}
+              disabled={loading}
+              data-testid="button-refresh"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            </Button>
             <Button
               variant={viewMode === "grid" ? "default" : "outline"}
               size="icon"
@@ -135,7 +139,6 @@ export default function PastResearch() {
           </div>
         </div>
 
-        {/* Free User Banner */}
         {showLockedBanner && (
           <Card className="border-primary bg-primary/5">
             <CardContent className="p-6">
@@ -157,144 +160,217 @@ export default function PastResearch() {
           </Card>
         )}
 
-        {/* Filters */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Filter Studies</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="md:col-span-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input
-                    placeholder="Search by title or findings..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                    data-testid="input-search-studies"
-                  />
+        {showNoCompanyBanner && (
+          <Card className="border-accent bg-accent/5">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
+                  <Building2 className="w-6 h-6 text-accent" />
                 </div>
-              </div>
-              <Select value={filterCategory} onValueChange={setFilterCategory}>
-                <SelectTrigger data-testid="select-category">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="Food & Beverage">Food & Beverage</SelectItem>
-                  <SelectItem value="Design & Innovation">Design & Innovation</SelectItem>
-                  <SelectItem value="Brand Strategy">Brand Strategy</SelectItem>
-                  <SelectItem value="Marketing">Marketing</SelectItem>
-                  <SelectItem value="Strategy">Strategy</SelectItem>
-                  <SelectItem value="Services">Services</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger data-testid="select-type">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="Basic">Test24 Basic</SelectItem>
-                  <SelectItem value="Pro">Test24 Pro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="mt-4 text-sm text-muted-foreground">
-              Showing {filteredStudies.length} of {mockStudies.length} studies
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Studies Grid/List */}
-        {viewMode === "grid" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredStudies.map((study) => (
-              <Card
-                key={study.id}
-                className="hover-elevate flex flex-col"
-                data-testid={`study-card-${study.id}`}
-              >
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant={study.type === "Pro" ? "default" : "secondary"}>
-                      Test24 {study.type}
-                    </Badge>
-                    <span className={`text-2xl font-bold ${getScoreColor(study.score)}`}>
-                      {study.score}
-                    </span>
-                  </div>
-                  <CardTitle className="text-lg">{study.title}</CardTitle>
-                  <CardDescription>{study.category}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1 flex flex-col">
-                  <div className="flex-1 space-y-3">
-                    <div className="text-sm">
-                      <p className="text-muted-foreground mb-1">Top Finding:</p>
-                      <p className="font-medium">{study.topFindings}</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(study.date).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t">
-                    <Button variant="outline" size="sm" data-testid={`button-view-${study.id}`}>
-                      <Eye className="w-4 h-4 mr-1" />
-                      View
-                    </Button>
-                    <Button variant="outline" size="sm" data-testid={`button-download-${study.id}`}>
-                      <Download className="w-4 h-4 mr-1" />
-                      Export
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <Card>
-            <CardContent className="p-0">
-              <div className="divide-y">
-                {filteredStudies.map((study) => (
-                  <div
-                    key={study.id}
-                    className="p-4 hover-elevate flex items-center gap-4"
-                    data-testid={`study-row-${study.id}`}
-                  >
-                    <div className="flex-shrink-0">
-                      <FileText className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold">{study.title}</h3>
-                        <Badge variant={study.type === "Pro" ? "default" : "secondary"} className="text-xs">
-                          {study.type}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{study.topFindings}</p>
-                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                        <span>{study.category}</span>
-                        <span>{new Date(study.date).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                    <div className={`text-3xl font-bold ${getScoreColor(study.score)}`}>
-                      {study.score}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" data-testid={`button-view-${study.id}`}>
-                        <Eye className="w-4 h-4 mr-1" />
-                        View
-                      </Button>
-                      <Button variant="outline" size="sm" data-testid={`button-download-${study.id}`}>
-                        <Download className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold mb-2">Company Not Assigned</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Your account is not yet linked to a company. Once assigned, you'll have access to all research reports delivered to your organization.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Please contact your administrator or Innovatr support for assistance.
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {isMember && user?.companyId && (
+          <>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Filter Reports</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <Input
+                        placeholder="Search by title, description, or tags..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10"
+                        data-testid="input-search-reports"
+                      />
+                    </div>
+                  </div>
+                  <Select value={filterTag} onValueChange={setFilterTag}>
+                    <SelectTrigger data-testid="select-tag">
+                      <SelectValue placeholder="Filter by tag" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Tags</SelectItem>
+                      {allTags.map(tag => (
+                        <SelectItem key={tag} value={tag}>{tag}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="mt-4 text-sm text-muted-foreground">
+                  Showing {filteredReports.length} of {reports.length} reports
+                </div>
+              </CardContent>
+            </Card>
+
+            {loading ? (
+              <div className="flex items-center justify-center h-64">
+                <RefreshCw className="w-8 h-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : error ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <p className="text-destructive mb-4">{error}</p>
+                  <Button onClick={fetchReports} variant="outline">
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Retry
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : filteredReports.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">No Research Reports Yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    {reports.length === 0 
+                      ? "Your company hasn't received any research reports yet. Check back after your next completed study."
+                      : "No reports match your current filters."}
+                  </p>
+                  {reports.length === 0 && (
+                    <Button onClick={() => setLocation("/portal/launch-brief")} data-testid="button-launch-brief">
+                      Launch New Research
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            ) : viewMode === "grid" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredReports.map((report) => (
+                  <Card
+                    key={report.id}
+                    className="hover-elevate flex flex-col"
+                    data-testid={`report-card-${report.id}`}
+                  >
+                    <CardHeader>
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        {report.tags.slice(0, 2).map(tag => (
+                          <Badge key={tag} variant="secondary" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                        {report.tags.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{report.tags.length - 2}
+                          </Badge>
+                        )}
+                      </div>
+                      <CardTitle className="text-lg">{report.title}</CardTitle>
+                      {report.description && (
+                        <CardDescription className="line-clamp-2">
+                          {report.description}
+                        </CardDescription>
+                      )}
+                    </CardHeader>
+                    <CardContent className="flex-1 flex flex-col">
+                      <div className="flex-1 space-y-3">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Calendar className="w-3 h-3" />
+                          <span>Delivered {formatDate(report.uploadedAt)}</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleDownload(report)}
+                          disabled={!report.pdfUrl}
+                          data-testid={`button-view-${report.id}`}
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          View
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleDownload(report)}
+                          disabled={!report.pdfUrl}
+                          data-testid={`button-download-${report.id}`}
+                        >
+                          <Download className="w-4 h-4 mr-1" />
+                          Download
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="p-0">
+                  <div className="divide-y">
+                    {filteredReports.map((report) => (
+                      <div
+                        key={report.id}
+                        className="p-4 hover-elevate flex items-center gap-4"
+                        data-testid={`report-row-${report.id}`}
+                      >
+                        <div className="flex-shrink-0">
+                          <FileText className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <h3 className="font-semibold truncate">{report.title}</h3>
+                            {report.tags.slice(0, 2).map(tag => (
+                              <Badge key={tag} variant="secondary" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                          {report.description && (
+                            <p className="text-sm text-muted-foreground line-clamp-1">{report.description}</p>
+                          )}
+                          <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {formatDate(report.uploadedAt)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 flex-shrink-0">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDownload(report)}
+                            disabled={!report.pdfUrl}
+                            data-testid={`button-view-${report.id}`}
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            View
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDownload(report)}
+                            disabled={!report.pdfUrl}
+                            data-testid={`button-download-${report.id}`}
+                          >
+                            <Download className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </>
         )}
       </div>
     </PortalLayout>

@@ -21,8 +21,17 @@ export interface ImpersonationState {
   impersonatedCompanyId?: string;
 }
 
+export interface Company {
+  id: string;
+  name: string;
+  logoUrl?: string | null;
+  creditsBasic: number;
+  creditsPro: number;
+}
+
 interface AuthContextType {
   user: User | null;
+  company: Company | null;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
@@ -45,6 +54,7 @@ const defaultImpersonation: ImpersonationState = {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [company, setCompany] = useState<Company | null>(null);
   const [impersonation, setImpersonation] = useState<ImpersonationState>(defaultImpersonation);
 
   useEffect(() => {
@@ -57,6 +67,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setImpersonation(JSON.parse(savedImpersonation));
     }
   }, []);
+
+  useEffect(() => {
+    const fetchCompany = async () => {
+      if (user?.companyId) {
+        try {
+          const res = await fetch(`/api/companies/${user.companyId}`);
+          if (res.ok) {
+            const companyData = await res.json();
+            setCompany(companyData);
+          }
+        } catch (err) {
+          console.log("Failed to fetch company data");
+        }
+      } else {
+        setCompany(null);
+      }
+    };
+    fetchCompany();
+  }, [user?.companyId]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -244,7 +273,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={{ 
-      user, 
+      user,
+      company,
       login, 
       signup, 
       logout, 
