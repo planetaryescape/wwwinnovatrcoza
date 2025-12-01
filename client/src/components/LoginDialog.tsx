@@ -41,7 +41,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
         });
       }
       onOpenChange(false);
-      setLocation("/portal");
+      setLocation("/portal/dashboard");
     } catch (error) {
       toast({
         title: "Error",
