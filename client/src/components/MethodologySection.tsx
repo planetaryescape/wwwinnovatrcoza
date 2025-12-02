@@ -38,7 +38,7 @@ export default function MethodologySection() {
               <div className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">
                 01 — Our Difference
               </div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6 max-w-4xl mx-auto leading-tight" style={{ color: '#4D5FF1' }}>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6 max-w-4xl mx-auto leading-tight text-white">
                 <span className="block">Turn insights into</span>
                 <span className="block">evidence based decisions</span>
               </h2>
@@ -46,18 +46,18 @@ export default function MethodologySection() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
               {features.map((feature, index) => (
-                <Card 
+                <div 
                   key={index}
-                  className="p-6 text-center hover-elevate transition-all duration-300"
+                  className="p-6 text-center hover-elevate transition-all duration-300 bg-slate-600 rounded-md"
                   data-testid={`feature-${index}`}
                 >
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                    <feature.icon className="w-8 h-8 text-primary" />
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-500 flex items-center justify-center">
+                    <feature.icon className="w-8 h-8 text-white" />
                   </div>
-                  <div className="text-2xl font-serif font-bold mb-1">{index + 1}</div>
-                  <h3 className="font-bold mb-1">{feature.label}</h3>
-                  <p className="text-sm text-muted-foreground">{feature.subtitle}</p>
-                </Card>
+                  <div className="text-2xl font-serif font-bold mb-1 text-black">{index + 1}</div>
+                  <h3 className="font-bold mb-1 text-black">{feature.label}</h3>
+                  <p className="text-sm text-gray-900">{feature.subtitle}</p>
+                </div>
               ))}
             </div>
           </div>
