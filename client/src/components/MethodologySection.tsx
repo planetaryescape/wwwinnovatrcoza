@@ -35,7 +35,7 @@ export default function MethodologySection() {
           
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
+              <div className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">
                 01 — Our Difference
               </div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6 max-w-4xl mx-auto leading-tight" style={{ color: '#4D5FF1' }}>
