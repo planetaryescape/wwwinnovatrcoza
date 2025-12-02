@@ -44,7 +44,9 @@ function Router() {
       <Route path="/checkout/pro-members" component={CheckoutProMembers} />
       <Route path="/checkout/membership-entry" component={CheckoutMembershipEntry} />
       <Route path="/checkout/membership-gold" component={CheckoutMembershipGold} />
+      <Route path="/checkout/membership-growth" component={CheckoutMembershipGold} />
       <Route path="/checkout/membership-platinum" component={CheckoutMembershipPlatinum} />
+      <Route path="/checkout/membership-scale" component={CheckoutMembershipPlatinum} />
       <Route path="/checkout" component={CheckoutPage} />
       <Route path="/payment/return" component={PaymentReturn} />
       <Route path="/payment/cancel" component={PaymentReturn} />
