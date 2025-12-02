@@ -5,7 +5,7 @@ import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import OrderFormDialog from "@/components/OrderFormDialog";
 
-const goldFeatures = [
+const growthFeatures = [
   "Everything in Entry membership",
   "10x Test24 Basic ideas included (~R50k value)",
   "2x Test24 Pro Studies included (~R90k value)",
@@ -31,7 +31,7 @@ export default function CheckoutMembershipGold() {
   };
 
   const entryPrice = 60000;
-  const goldUpgrade = 120000;
+  const growthUpgrade = 120000;
   const totalPrice = 180000;
   const totalValue = 260000;
   const savings = totalValue - totalPrice;
@@ -57,7 +57,7 @@ export default function CheckoutMembershipGold() {
                   <Crown className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-serif font-bold">Gold Membership</h1>
+                  <h1 className="text-4xl font-serif font-bold">Growth Membership</h1>
                   <div className="flex items-center gap-2">
                     <span className="bg-accent text-accent-foreground px-3 py-1 rounded-full text-xs font-bold">
                       MOST POPULAR
@@ -79,7 +79,7 @@ export default function CheckoutMembershipGold() {
                   <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
                     <h3 className="font-semibold mb-2">Entry Membership Required</h3>
                     <p className="text-sm text-muted-foreground">
-                      Gold membership includes Entry benefits plus additional credits and features
+                      Growth membership includes Entry benefits plus additional credits and features
                     </p>
                   </div>
 
@@ -98,7 +98,7 @@ export default function CheckoutMembershipGold() {
                     <div className="border rounded-lg p-4 bg-primary/5">
                       <div className="flex items-center gap-2 mb-2">
                         <Crown className="w-4 h-4 text-primary" />
-                        <h4 className="font-semibold">Gold Upgrade</h4>
+                        <h4 className="font-semibold">Growth Upgrade</h4>
                       </div>
                       <ul className="space-y-1 text-sm text-muted-foreground">
                         <li>• 10 Basic credits included</li>
@@ -125,11 +125,11 @@ export default function CheckoutMembershipGold() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl">All Gold Features</CardTitle>
+                <CardTitle className="text-xl">All Growth Features</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-4">
-                  {goldFeatures.map((feature, index) => (
+                  {growthFeatures.map((feature, index) => (
                     <div key={index} className="flex gap-3">
                       <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                       <span className="text-sm">{feature}</span>
@@ -154,10 +154,10 @@ export default function CheckoutMembershipGold() {
                   <div className="bg-muted/50 rounded-lg p-4 space-y-2">
                     <div className="flex items-center gap-2">
                       <Crown className="w-4 h-4 text-primary" />
-                      <p className="font-medium">Gold Membership</p>
+                      <p className="font-medium">Growth Membership</p>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Includes Entry + Gold upgrade
+                      Includes Entry + Growth upgrade
                     </p>
                   </div>
                 </div>
@@ -171,8 +171,8 @@ export default function CheckoutMembershipGold() {
                     <span className="font-semibold" data-testid="text-entry-price">{formatPrice(entryPrice)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Gold Tier Upgrade</span>
-                    <span className="font-semibold" data-testid="text-gold-upgrade">{formatPrice(goldUpgrade)}</span>
+                    <span className="text-muted-foreground">Growth Tier Upgrade</span>
+                    <span className="font-semibold" data-testid="text-gold-upgrade">{formatPrice(growthUpgrade)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-accent font-medium pt-2 border-t">
                     <span>Total Package Value</span>
@@ -225,13 +225,13 @@ export default function CheckoutMembershipGold() {
           },
           {
             type: "membership_upgrade",
-            description: "Gold Tier Upgrade (10x Basic + 2x Pro)",
+            description: "Growth Tier Upgrade (10x Basic + 2x Pro)",
             quantity: 1,
-            unitAmount: String(goldUpgrade),
+            unitAmount: String(growthUpgrade),
           },
         ]}
         totalAmount={totalPrice}
-        purchaseType="Gold Membership (Annual)"
+        purchaseType="Growth Membership (Annual)"
       />
     </div>
   );

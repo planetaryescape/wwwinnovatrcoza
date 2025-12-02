@@ -5,7 +5,7 @@ import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import OrderFormDialog from "@/components/OrderFormDialog";
 
-const platinumFeatures = [
+const scaleFeatures = [
   "Everything in Entry membership",
   "15x Test24 Basic ideas included (~R75k value)",
   "3x Test24 Pro Studies included (~R135k value)",
@@ -33,7 +33,7 @@ export default function CheckoutMembershipPlatinum() {
   };
 
   const entryPrice = 60000;
-  const platinumUpgrade = 195000;
+  const scaleUpgrade = 195000;
   const totalPrice = 255000;
   const totalValue = 360000;
   const savings = totalValue - totalPrice;
@@ -59,7 +59,7 @@ export default function CheckoutMembershipPlatinum() {
                   <Gem className="w-6 h-6 text-accent" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-serif font-bold">Platinum Membership</h1>
+                  <h1 className="text-4xl font-serif font-bold">Scale Membership</h1>
                   <div className="flex items-center gap-2">
                     <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold">
                       BEST VALUE
@@ -81,7 +81,7 @@ export default function CheckoutMembershipPlatinum() {
                   <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
                     <h3 className="font-semibold mb-2">Entry Membership Required</h3>
                     <p className="text-sm text-muted-foreground">
-                      Platinum membership includes Entry benefits plus extensive credits and enterprise features
+                      Scale membership includes Entry benefits plus extensive credits and enterprise features
                     </p>
                   </div>
 
@@ -101,7 +101,7 @@ export default function CheckoutMembershipPlatinum() {
                     <div className="border rounded-lg p-4 bg-accent/10">
                       <div className="flex items-center gap-2 mb-2">
                         <Gem className="w-4 h-4 text-accent" />
-                        <h4 className="font-semibold">Platinum Upgrade</h4>
+                        <h4 className="font-semibold">Scale Upgrade</h4>
                       </div>
                       <ul className="space-y-1 text-sm text-muted-foreground">
                         <li>• 15 Basic credits included</li>
