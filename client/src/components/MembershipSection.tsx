@@ -6,7 +6,7 @@ import { useLocation } from "wouter";
 
 const membershipPlans = [
   {
-    name: "Entry",
+    name: "Starter",
     icon: Star,
     price: "R60k",
     priceBreakdown: null,
@@ -29,7 +29,7 @@ const membershipPlans = [
     name: "Growth",
     icon: Crown,
     price: "R180k",
-    priceBreakdown: "Entry (R60k) + Growth (R120k)",
+    priceBreakdown: "Starter (R60k) + Growth (R120k)",
     totalPrice: "R180k",
     period: "per year",
     monthly: null,
@@ -37,7 +37,7 @@ const membershipPlans = [
     description: "For growing businesses",
     savings: "Best for scale",
     features: [
-      "Everything in Entry",
+      "Everything in Starter",
       "x10 Test24 Basic ideas / year",
       "x2 Test24 Pro Studies / year",
     ],
@@ -47,7 +47,7 @@ const membershipPlans = [
     name: "Scale",
     icon: Gem,
     price: "R255k",
-    priceBreakdown: "Entry (R60k) + Scale (R195k)",
+    priceBreakdown: "Starter (R60k) + Scale (R195k)",
     totalPrice: "R255k",
     period: "per year",
     monthly: null,
@@ -55,7 +55,7 @@ const membershipPlans = [
     description: "Enterprise-level insights",
     savings: "Maximum value",
     features: [
-      "Everything in Entry",
+      "Everything in Starter",
       "x15 Test24 Basic ideas / year",
       "x3 Test24 Pro Studies / year",
       "Dedicated Insights Support",
@@ -68,7 +68,7 @@ export default function MembershipSection() {
   const [, setLocation] = useLocation();
 
   const handleBecomeMember = (planName: string) => {
-    if (planName === "Entry") {
+    if (planName === "Starter") {
       setLocation("/checkout/membership-entry");
     } else if (planName === "Growth") {
       setLocation("/checkout/membership-growth");

@@ -5,7 +5,7 @@ import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import OrderFormDialog from "@/components/OrderFormDialog";
 
-const entryFeatures = [
+const starterFeatures = [
   "Trends Report Access",
   "Discounted Research Pricing",
   "Test24 Basic: R5,000 per idea (50% off)",
@@ -58,7 +58,7 @@ export default function CheckoutMembershipEntry() {
                   <Star className="w-6 h-6 text-accent" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-serif font-bold">Entry Membership</h1>
+                  <h1 className="text-4xl font-serif font-bold">Starter Membership</h1>
                   <p className="text-muted-foreground">
                     {paymentType === "monthly" ? "Monthly Plan" : "Annual Plan"}
                   </p>
@@ -181,7 +181,7 @@ export default function CheckoutMembershipEntry() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-4">
-                  {entryFeatures.map((feature, index) => (
+                  {starterFeatures.map((feature, index) => (
                     <div key={index} className="flex gap-3">
                       <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                       <span className="text-sm">{feature}</span>
@@ -223,7 +223,7 @@ export default function CheckoutMembershipEntry() {
                 <div>
                   <h3 className="font-semibold mb-2">Selected Plan</h3>
                   <div className="bg-muted/50 rounded-lg p-4">
-                    <p className="font-medium">Entry Membership</p>
+                    <p className="font-medium">Starter Membership</p>
                     <p className="text-sm text-muted-foreground mt-1">
                       {paymentType === "monthly" ? "Monthly billing" : "Annual billing"}
                     </p>
@@ -305,13 +305,13 @@ export default function CheckoutMembershipEntry() {
         orderItems={[
           {
             type: "membership",
-            description: `Entry Membership (${paymentType === "monthly" ? "Monthly" : "Annual"})`,
+            description: `Starter Membership (${paymentType === "monthly" ? "Monthly" : "Annual"})`,
             quantity: 1,
             unitAmount: String(totalDueToday),
           },
         ]}
         totalAmount={totalDueToday}
-        purchaseType={`Entry Membership (${paymentType === "monthly" ? "Monthly" : "Annual"})`}
+        purchaseType={`Starter Membership (${paymentType === "monthly" ? "Monthly" : "Annual"})`}
         subscriptionOptions={paymentType === "monthly" ? {
           enabled: true,
           subscriptionType: 1, // Fixed subscription

@@ -43,11 +43,11 @@ export default function Navigation() {
 
   const getTierBadgeVariant = (tier: string) => {
     switch (tier) {
-      case "platinum":
+      case "scale":
         return "default";
-      case "gold":
+      case "growth":
         return "secondary";
-      case "entry":
+      case "starter":
         return "outline";
       default:
         return "outline";

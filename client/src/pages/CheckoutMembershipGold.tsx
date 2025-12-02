@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import OrderFormDialog from "@/components/OrderFormDialog";
 
 const growthFeatures = [
-  "Everything in Entry membership",
+  "Everything in Starter membership",
   "10x Test24 Basic ideas included (~R50k value)",
   "2x Test24 Pro Studies included (~R90k value)",
   "Priority support & faster response times",
@@ -77,9 +77,9 @@ export default function CheckoutMembershipGold() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                    <h3 className="font-semibold mb-2">Entry Membership Required</h3>
+                    <h3 className="font-semibold mb-2">Starter Membership Required</h3>
                     <p className="text-sm text-muted-foreground">
-                      Growth membership includes Entry benefits plus additional credits and features
+                      Growth membership includes Starter benefits plus additional credits and features
                     </p>
                   </div>
 
@@ -87,7 +87,7 @@ export default function CheckoutMembershipGold() {
                     <div className="border rounded-lg p-4 bg-accent/5">
                       <div className="flex items-center gap-2 mb-2">
                         <Star className="w-4 h-4 text-accent" />
-                        <h4 className="font-semibold">Entry Base</h4>
+                        <h4 className="font-semibold">Starter Base</h4>
                       </div>
                       <ul className="space-y-1 text-sm text-muted-foreground">
                         <li>• Discounted research rates</li>
@@ -157,7 +157,7 @@ export default function CheckoutMembershipGold() {
                       <p className="font-medium">Growth Membership</p>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Includes Entry + Growth upgrade
+                      Includes Starter + Growth upgrade
                     </p>
                   </div>
                 </div>
@@ -167,7 +167,7 @@ export default function CheckoutMembershipGold() {
                     MEMBERSHIP BREAKDOWN
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Entry Membership Base</span>
+                    <span className="text-muted-foreground">Starter Membership Base</span>
                     <span className="font-semibold" data-testid="text-entry-price">{formatPrice(entryPrice)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
@@ -219,7 +219,7 @@ export default function CheckoutMembershipGold() {
         orderItems={[
           {
             type: "membership",
-            description: "Entry Membership (Annual)",
+            description: "Starter Membership (Annual)",
             quantity: 1,
             unitAmount: String(entryPrice),
           },

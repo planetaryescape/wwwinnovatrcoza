@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
-export type UserTier = "free" | "entry" | "growth" | "scale";
+export type UserTier = "free" | "starter" | "growth" | "scale";
 export type MembershipTier = "STARTER" | "GROWTH" | "SCALE";
 
 export interface User {
@@ -95,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const isAdmin = email === "hannah@innovatr.co.za" || email === "richard@innovatr.co.za";
         
         const tierMap: Record<string, UserTier> = {
-          STARTER: "free",
+          STARTER: "starter",
           GROWTH: "growth",
           SCALE: "scale",
         };
@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           name: dbUser.name || email.split("@")[0],
           company: dbUser.company,
           companyId: dbUser.companyId,
-          tier: tierMap[dbUser.membershipTier] || "gold",
+          tier: tierMap[dbUser.membershipTier] || "starter",
           membershipTier: dbUser.membershipTier,
           isAdmin,
         };

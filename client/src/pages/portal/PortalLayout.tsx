@@ -123,7 +123,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
         return "bg-primary text-primary-foreground";
       case "growth":
         return "bg-accent text-accent-foreground";
-      case "entry":
+      case "starter":
         return "bg-primary/60 text-primary-foreground";
       default:
         return "bg-muted text-muted-foreground";
@@ -157,7 +157,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                     {user?.company || user?.email}
                   </p>
                   <Badge 
-                    className={`${isMember ? getTierColor(user?.tier || 'entry') : 'bg-muted text-muted-foreground'} text-xs`}
+                    className={`${isMember ? getTierColor(user?.tier || 'starter') : 'bg-muted text-muted-foreground'} text-xs`}
                     data-testid={`badge-member-tier-${user?.tier || 'free'}`}
                   >
                     {isMember ? `${user?.tier?.toUpperCase()} Member` : 'FREE TIER'}
