@@ -48,15 +48,15 @@ export default function MethodologySection() {
               {features.map((feature, index) => (
                 <div 
                   key={index}
-                  className="p-6 text-center hover-elevate transition-all duration-300 bg-slate-600 rounded-md"
+                  className="text-center transition-all duration-300"
                   data-testid={`feature-${index}`}
                 >
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-500 flex items-center justify-center">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center">
                     <feature.icon className="w-8 h-8 text-white" />
                   </div>
-                  <div className="text-2xl font-serif font-bold mb-1 text-black">{index + 1}</div>
-                  <h3 className="font-bold mb-1 text-black">{feature.label}</h3>
-                  <p className="text-sm text-gray-900">{feature.subtitle}</p>
+                  <div className="text-2xl font-serif font-bold mb-1 text-white">{index + 1}</div>
+                  <h3 className="font-bold mb-1 text-white">{feature.label}</h3>
+                  <p className="text-sm text-white">{feature.subtitle}</p>
                 </div>
               ))}
             </div>
