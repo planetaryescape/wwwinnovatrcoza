@@ -118,11 +118,13 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
   };
 
   const getTierColor = (tier: string) => {
-    switch (tier) {
-      case "platinum":
+    switch (tier?.toLowerCase()) {
+      case "scale":
         return "bg-primary text-primary-foreground";
-      case "gold":
+      case "growth":
         return "bg-accent text-accent-foreground";
+      case "entry":
+        return "bg-primary/60 text-primary-foreground";
       default:
         return "bg-muted text-muted-foreground";
     }
