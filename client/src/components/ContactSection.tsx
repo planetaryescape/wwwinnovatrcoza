@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Mail, Calendar, MessageSquare, Loader2, CheckCircle } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import contactBackground from "@assets/pexels-chris-f-8344064_1764657952677.jpeg";
 
 export default function ContactSection() {
   const { toast } = useToast();
@@ -71,16 +72,24 @@ export default function ContactSection() {
   };
 
   return (
-    <section id="contact" className="py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="contact" className="py-20 relative overflow-hidden">
+      <div 
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ 
+          backgroundImage: `url(${contactBackground})`
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/60" />
+      
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-4" style={{ color: '#4D5FF1' }}>Let's start a conversation?</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-4 text-white">Let's start a conversation?</h2>
+          <p className="text-xl text-white max-w-2xl mx-auto">
             Ready to launch better innovation? Get in touch.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto relative z-10">
           <Card>
             <CardHeader>
               <div className="w-12 h-12 mb-4 rounded-md bg-primary/10 flex items-center justify-center">
