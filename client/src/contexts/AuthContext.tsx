@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
-export type UserTier = "free" | "entry" | "gold" | "platinum";
+export type UserTier = "free" | "entry" | "growth" | "scale";
 export type MembershipTier = "STARTER" | "GROWTH" | "SCALE";
 
 export interface User {
@@ -95,9 +95,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const isAdmin = email === "hannah@innovatr.co.za" || email === "richard@innovatr.co.za";
         
         const tierMap: Record<string, UserTier> = {
-          STARTER: "entry",
-          GROWTH: "gold",
-          SCALE: "platinum",
+          STARTER: "free",
+          GROWTH: "growth",
+          SCALE: "scale",
         };
         
         const loggedInUser: User = {
@@ -121,18 +121,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    let tier: UserTier = "gold";
-    let membershipTier: MembershipTier = "GROWTH";
+    let tier: UserTier = "free";
+    let membershipTier: MembershipTier = "STARTER";
     let company = "Demo Company";
     
-    if (email.includes("free")) {
-      tier = "free";
-      membershipTier = "STARTER";
-    } else if (email.includes("entry")) {
-      tier = "entry";
-      membershipTier = "STARTER";
-    } else if (email.includes("platinum")) {
-      tier = "platinum";
+    if (email.includes("growth")) {
+      tier = "growth";
+      membershipTier = "GROWTH";
+    } else if (email.includes("scale")) {
+      tier = "scale";
       membershipTier = "SCALE";
     }
     
@@ -220,9 +217,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       const targetUser = await res.json();
       const tierMap: Record<string, UserTier> = {
-        STARTER: "entry",
-        GROWTH: "gold",
-        SCALE: "platinum",
+        STARTER: "free",
+        GROWTH: "growth",
+        SCALE: "scale",
       };
       
       const impersonatedUser: User = {
@@ -231,7 +228,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         name: targetUser.name || targetUser.email.split("@")[0],
         company: targetUser.company,
         companyId: targetUser.companyId,
-        tier: tierMap[targetUser.membershipTier] || "gold",
+        tier: tierMap[targetUser.membershipTier] || "free",
         membershipTier: targetUser.membershipTier,
         isAdmin: false,
       };
@@ -260,9 +257,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       const company = await companyRes.json();
       const tierMap: Record<string, UserTier> = {
-        STARTER: "entry",
-        GROWTH: "gold",
-        SCALE: "platinum",
+        STARTER: "free",
+        GROWTH: "growth",
+        SCALE: "scale",
       };
       
       const companyViewUser: User = {
@@ -271,7 +268,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         name: company.name,
         company: company.name,
         companyId: companyId,
-        tier: tierMap[company.tier] || "gold",
+        tier: tierMap[company.tier] || "free",
         membershipTier: company.tier,
         isAdmin: false,
       };

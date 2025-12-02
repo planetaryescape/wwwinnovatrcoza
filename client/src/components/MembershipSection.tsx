@@ -26,10 +26,10 @@ const membershipPlans = [
     value: null,
   },
   {
-    name: "Gold",
+    name: "Growth",
     icon: Crown,
     price: "R180k",
-    priceBreakdown: "Entry (R60k) + Gold (R120k)",
+    priceBreakdown: "Entry (R60k) + Growth (R120k)",
     totalPrice: "R180k",
     period: "per year",
     monthly: null,
@@ -44,10 +44,10 @@ const membershipPlans = [
     value: "~R260k value",
   },
   {
-    name: "Platinum",
+    name: "Scale",
     icon: Gem,
     price: "R255k",
-    priceBreakdown: "Entry (R60k) + Platinum (R195k)",
+    priceBreakdown: "Entry (R60k) + Scale (R195k)",
     totalPrice: "R255k",
     period: "per year",
     monthly: null,
@@ -70,10 +70,10 @@ export default function MembershipSection() {
   const handleBecomeMember = (planName: string) => {
     if (planName === "Entry") {
       setLocation("/checkout/membership-entry");
-    } else if (planName === "Gold") {
-      setLocation("/checkout/membership-gold");
-    } else if (planName === "Platinum") {
-      setLocation("/checkout/membership-platinum");
+    } else if (planName === "Growth") {
+      setLocation("/checkout/membership-growth");
+    } else if (planName === "Scale") {
+      setLocation("/checkout/membership-scale");
     }
   };
 
