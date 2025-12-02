@@ -30,10 +30,10 @@ export default function MethodologySection() {
             className="absolute inset-0 bg-cover bg-center"
             style={{ 
               backgroundImage: `url(${differenceBackground})`,
-              opacity: 0.3
+              opacity: 0.6
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/70 to-background" />
           
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
