@@ -54,7 +54,7 @@ const mockBillingHistory = [
   {
     id: "INV-2024-11-001",
     date: "2024-11-01",
-    description: "Gold Membership Annual Renewal",
+    description: "Growth Membership Annual Renewal",
     amount: 180000,
     status: "paid",
   },
@@ -205,7 +205,7 @@ export default function CreditsAndBilling() {
                 <div className="flex-1">
                   <h3 className="text-2xl font-semibold mb-3">Become an Innovatr Member</h3>
                   <p className="text-muted-foreground mb-4">
-                    Unlock discounted Test24 credits, access the full trends library, member deals, and priority support. Choose from Entry, Gold, or Platinum tiers.
+                    Unlock discounted Test24 credits, access the full trends library, member deals, and priority support. Choose from Entry, Growth, or Scale tiers.
                   </p>
                   <div className="flex gap-3">
                     <Button size="lg" onClick={() => setLocation("/#membership")} data-testid="button-explore-plans">
@@ -273,7 +273,7 @@ export default function CreditsAndBilling() {
                 <span>Test24 Basic Credits</span>
                 <Badge variant="secondary">{basicCredits.remaining} Available</Badge>
               </CardTitle>
-              <CardDescription>Included in Gold Membership</CardDescription>
+              <CardDescription>Included in Growth Membership</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -299,7 +299,7 @@ export default function CreditsAndBilling() {
                 <span>Test24 Pro Credits</span>
                 <Badge variant="secondary">{proCredits.remaining} Available</Badge>
               </CardTitle>
-              <CardDescription>Included in Gold Membership</CardDescription>
+              <CardDescription>Included in Growth Membership</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">

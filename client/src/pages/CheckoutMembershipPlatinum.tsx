@@ -133,11 +133,11 @@ export default function CheckoutMembershipPlatinum() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl">All Platinum Features</CardTitle>
+                <CardTitle className="text-xl">All Scale Features</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-4">
-                  {platinumFeatures.map((feature, index) => (
+                  {scaleFeatures.map((feature, index) => (
                     <div key={index} className="flex gap-3">
                       <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                       <span className="text-sm">{feature}</span>
@@ -162,10 +162,10 @@ export default function CheckoutMembershipPlatinum() {
                   <div className="bg-muted/50 rounded-lg p-4 space-y-2">
                     <div className="flex items-center gap-2">
                       <Gem className="w-4 h-4 text-accent" />
-                      <p className="font-medium">Platinum Membership</p>
+                      <p className="font-medium">Scale Membership</p>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Includes Entry + Platinum upgrade
+                      Includes Entry + Scale upgrade
                     </p>
                   </div>
                 </div>
@@ -179,8 +179,8 @@ export default function CheckoutMembershipPlatinum() {
                     <span className="font-semibold" data-testid="text-entry-price">{formatPrice(entryPrice)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Platinum Tier Upgrade</span>
-                    <span className="font-semibold" data-testid="text-platinum-upgrade">{formatPrice(platinumUpgrade)}</span>
+                    <span className="text-muted-foreground">Scale Tier Upgrade</span>
+                    <span className="font-semibold" data-testid="text-platinum-upgrade">{formatPrice(scaleUpgrade)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-accent font-medium pt-2 border-t">
                     <span>Total Package Value</span>
@@ -233,13 +233,13 @@ export default function CheckoutMembershipPlatinum() {
           },
           {
             type: "membership_upgrade",
-            description: "Platinum Tier Upgrade (15x Basic + 3x Pro)",
+            description: "Scale Tier Upgrade (15x Basic + 3x Pro)",
             quantity: 1,
-            unitAmount: String(platinumUpgrade),
+            unitAmount: String(scaleUpgrade),
           },
         ]}
         totalAmount={totalPrice}
-        purchaseType="Platinum Membership (Annual)"
+        purchaseType="Scale Membership (Annual)"
       />
     </div>
   );

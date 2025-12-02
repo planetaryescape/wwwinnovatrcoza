@@ -156,7 +156,7 @@ export default function FreeTierPortal() {
                   Unlock Full Member Benefits
                 </CardTitle>
                 <CardDescription data-testid="text-upgrade-description">
-                  Upgrade to Entry, Gold, or Platinum membership for complete access to our research platform
+                  Upgrade to Entry, Growth, or Scale membership for complete access to our research platform
                 </CardDescription>
               </div>
             </div>

@@ -28,7 +28,7 @@ const exclusiveDeals = [
   },
   {
     id: 3,
-    title: "Upgrade to Platinum - Save R40k",
+    title: "Upgrade to Scale - Save R40k",
     description: "Unlock 15 Basic + 3 Pro studies annually. Best ROI for active teams.",
     savings: "R40,000+",
     expires: "30 days",
@@ -51,7 +51,7 @@ const monthlyOffers = [
     title: "Early Access: AI Qual Beta Features",
     description: "Be first to test new VOC analysis tools launching in January.",
     value: "Beta access",
-    price: "Gold+ members",
+    price: "Growth+ members",
     icon: Sparkles,
   },
   {
@@ -236,16 +236,16 @@ export default function MemberDeals() {
               Want Even More Value?
             </h2>
             <p className="text-lg opacity-90">
-              Upgrade to Platinum for maximum savings and exclusive features
+              Upgrade to Scale for maximum savings and exclusive features
             </p>
             <div className="flex gap-4 justify-center">
               <Button
                 variant="secondary"
                 size="lg"
-                onClick={() => setLocation("/checkout/membership-platinum")}
+                onClick={() => setLocation("/checkout/membership-scale")}
                 data-testid="button-upgrade-platinum"
               >
-                View Platinum Benefits
+                View Scale Benefits
               </Button>
               <Button
                 variant="outline"

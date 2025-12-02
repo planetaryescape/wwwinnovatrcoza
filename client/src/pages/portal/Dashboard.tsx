@@ -142,11 +142,11 @@ function getRecommendedReports(
 const mockDeals = [
   {
     title: "Buy 3 Test24 Basic, Get 1 Free",
-    description: "Limited time offer for Gold members",
+    description: "Limited time offer for Growth members",
     expires: "5 days",
   },
   {
-    title: "Upgrade to Platinum - Save R40k",
+    title: "Upgrade to Scale - Save R40k",
     description: "Unlock 15 Basic + 3 Pro studies annually",
     expires: "This month only",
   },
