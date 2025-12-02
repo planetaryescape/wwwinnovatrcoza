@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Sparkles, TrendingUp, MessageSquare, BarChart3, Zap, Clock } from "lucide-react";
 import neonLightsBackground from "@assets/pexels-chris-f-8344064_1763492180742.jpeg";
 import circlesBackground from "@assets/pexels-pixabay-247676_1763492180745.jpeg";
+import differenceBackground from "@assets/pexels-merlin-lightpainting-10874566_1764656420841.jpeg";
 
 const features = [
   { icon: Clock, label: "SPEED", subtitle: "24hr Turn-Around" },
@@ -23,32 +24,45 @@ export default function MethodologySection() {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
       
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
-            01 — Our Difference
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6 max-w-4xl mx-auto leading-tight" style={{ color: '#4D5FF1' }}>
-            <span className="block">Turn insights into</span>
-            <span className="block">evidence based decisions</span>
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-          {features.map((feature, index) => (
-            <Card 
-              key={index}
-              className="p-6 text-center hover-elevate transition-all duration-300"
-              data-testid={`feature-${index}`}
-            >
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                <feature.icon className="w-8 h-8 text-primary" />
+      <div className="relative z-10">
+        <div className="relative py-20 overflow-hidden">
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ 
+              backgroundImage: `url(${differenceBackground})`,
+              opacity: 0.3
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
+          
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
+                01 — Our Difference
               </div>
-              <div className="text-2xl font-serif font-bold mb-1">{index + 1}</div>
-              <h3 className="font-bold mb-1">{feature.label}</h3>
-              <p className="text-sm text-muted-foreground">{feature.subtitle}</p>
-            </Card>
-          ))}
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6 max-w-4xl mx-auto leading-tight" style={{ color: '#4D5FF1' }}>
+                <span className="block">Turn insights into</span>
+                <span className="block">evidence based decisions</span>
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+              {features.map((feature, index) => (
+                <Card 
+                  key={index}
+                  className="p-6 text-center hover-elevate transition-all duration-300"
+                  data-testid={`feature-${index}`}
+                >
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                    <feature.icon className="w-8 h-8 text-primary" />
+                  </div>
+                  <div className="text-2xl font-serif font-bold mb-1">{index + 1}</div>
+                  <h3 className="font-bold mb-1">{feature.label}</h3>
+                  <p className="text-sm text-muted-foreground">{feature.subtitle}</p>
+                </Card>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="relative bg-card border border-card-border rounded-lg p-8 md:p-12 overflow-hidden">
