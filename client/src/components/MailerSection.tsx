@@ -1,23 +1,37 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Check } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Mail, Check, Building2, User, Briefcase } from "lucide-react";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
+interface SubscriptionData {
+  name: string;
+  email: string;
+  company: string;
+  industry: string;
+}
+
 export default function MailerSection() {
-  const [email, setEmail] = useState("");
+  const [formData, setFormData] = useState<SubscriptionData>({
+    name: "",
+    email: "",
+    company: "",
+    industry: "",
+  });
   const [isSubscribed, setIsSubscribed] = useState(false);
   const { toast } = useToast();
 
   const subscribeMutation = useMutation({
-    mutationFn: async (email: string) => {
-      return apiRequest("POST", "/api/mailer-subscriptions", { email });
+    mutationFn: async (data: SubscriptionData) => {
+      return apiRequest("POST", "/api/mailer-subscriptions", data);
     },
     onSuccess: () => {
       setIsSubscribed(true);
-      setEmail("");
+      setFormData({ name: "", email: "", company: "", industry: "" });
       toast({
         title: "Successfully subscribed!",
         description: "You'll receive Pulse Insights bi-weekly in your inbox.",
@@ -34,10 +48,16 @@ export default function MailerSection() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      subscribeMutation.mutate(email);
+    if (formData.name && formData.email && formData.company && formData.industry) {
+      subscribeMutation.mutate(formData);
     }
   };
+
+  const handleInputChange = (field: keyof SubscriptionData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const isFormValid = formData.name && formData.email && formData.company && formData.industry;
 
   return (
     <section id="mailer" className="py-20 bg-muted/30">
@@ -65,26 +85,96 @@ export default function MailerSection() {
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="max-w-md mx-auto">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="flex-1"
-                data-testid="input-mailer-email"
-              />
+          <form onSubmit={handleSubmit} className="max-w-lg mx-auto">
+            <div className="bg-card border border-card-border rounded-lg p-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="mailer-name" className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-muted-foreground" />
+                    Name
+                  </Label>
+                  <Input
+                    id="mailer-name"
+                    type="text"
+                    placeholder="Your name"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    required
+                    data-testid="input-mailer-name"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="mailer-email" className="flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-muted-foreground" />
+                    Email
+                  </Label>
+                  <Input
+                    id="mailer-email"
+                    type="email"
+                    placeholder="you@company.com"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    required
+                    data-testid="input-mailer-email"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="mailer-company" className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-muted-foreground" />
+                    Company
+                  </Label>
+                  <Input
+                    id="mailer-company"
+                    type="text"
+                    placeholder="Your company"
+                    value={formData.company}
+                    onChange={(e) => handleInputChange("company", e.target.value)}
+                    required
+                    data-testid="input-mailer-company"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="mailer-industry" className="flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-muted-foreground" />
+                    Industry
+                  </Label>
+                  <Select
+                    value={formData.industry}
+                    onValueChange={(value) => handleInputChange("industry", value)}
+                  >
+                    <SelectTrigger id="mailer-industry" data-testid="select-mailer-industry">
+                      <SelectValue placeholder="Select industry" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beverage">Food & Beverage</SelectItem>
+                      <SelectItem value="retail">Retail</SelectItem>
+                      <SelectItem value="financial">Financial Services</SelectItem>
+                      <SelectItem value="technology">Technology</SelectItem>
+                      <SelectItem value="healthcare">Healthcare</SelectItem>
+                      <SelectItem value="manufacturing">Manufacturing</SelectItem>
+                      <SelectItem value="media">Media & Entertainment</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <Button
                 type="submit"
                 size="lg"
-                disabled={subscribeMutation.isPending}
+                className="w-full"
+                disabled={subscribeMutation.isPending || !isFormValid}
                 data-testid="button-subscribe-mailer"
               >
                 {subscribeMutation.isPending ? "Subscribing..." : "Subscribe to Pulse Insights"}
               </Button>
             </div>
+            
             <p className="text-sm text-muted-foreground mt-4 text-center">
               Get early access to select trends and reports. Full library available with an Innovatr Membership.
             </p>

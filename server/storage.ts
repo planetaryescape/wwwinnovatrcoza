@@ -52,6 +52,7 @@ export interface IStorage {
   getCouponClaimByEmail(email: string): Promise<CouponClaim | undefined>;
   createMailerSubscription(subscription: InsertMailerSubscription): Promise<MailerSubscription>;
   getMailerSubscriptionByEmail(email: string): Promise<MailerSubscription | undefined>;
+  getAllMailerSubscriptions(): Promise<MailerSubscription[]>;
   
   createOrder(order: InsertOrder): Promise<Order>;
   getOrder(id: string): Promise<Order | undefined>;
@@ -400,6 +401,12 @@ export class MemStorage implements IStorage {
   async getMailerSubscriptionByEmail(email: string): Promise<MailerSubscription | undefined> {
     return Array.from(this.mailerSubscriptions.values()).find(
       (sub) => sub.email.toLowerCase() === email.toLowerCase(),
+    );
+  }
+
+  async getAllMailerSubscriptions(): Promise<MailerSubscription[]> {
+    return Array.from(this.mailerSubscriptions.values()).sort(
+      (a, b) => new Date(b.subscribedAt).getTime() - new Date(a.subscribedAt).getTime()
     );
   }
 

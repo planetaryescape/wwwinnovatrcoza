@@ -86,7 +86,10 @@ export const mailerSubscriptions = pgTable("mailer_subscriptions", {
   id: varchar("id")
     .primaryKey()
     .default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
   email: text("email").notNull().unique(),
+  company: text("company").notNull(),
+  industry: text("industry").notNull(),
   subscribedAt: timestamp("subscribed_at").defaultNow().notNull(),
 });
 
@@ -94,10 +97,16 @@ export const insertMailerSubscriptionSchema = createInsertSchema(
   mailerSubscriptions,
 )
   .pick({
+    name: true,
     email: true,
+    company: true,
+    industry: true,
   })
   .extend({
+    name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Invalid email address"),
+    company: z.string().min(2, "Company name must be at least 2 characters"),
+    industry: z.string().min(1, "Please select an industry"),
   });
 
 export type InsertMailerSubscription = z.infer<

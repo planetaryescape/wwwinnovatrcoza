@@ -121,11 +121,23 @@ Admins can access `/portal/admin` and all admin API endpoints.
 - `POST /api/admin/deals` - Create new deal
 - `PATCH /api/admin/deals/:id` - Update deal
 - `GET /api/member/deals` - List applicable deals for logged-in user (filtered by tier and validity)
+- `GET /api/admin/mailer-subscriptions` - List all Pulse Insights newsletter subscribers
+
+### Admin Portal Tabs (8 tabs)
+- Overview, Companies, Orders, Subscriptions, Subscribers, Reports, Client Reports, Deals
 
 ### Data Models
 - **Users**: id, username, email, password, name, company, membershipTier, status, creditsBasic, creditsPro, createdAt, lastLoginAt
 - **Reports**: id, title, category, industry, date, teaser, accessLevel (PUBLIC|STARTER|GROWTH|SCALE), isArchived, createdAt, updatedAt
 - **Deals**: id, title, description, originalPrice, discountedPrice, creditsIncluded, targetTiers (array), validFrom, validTo, isActive, createdAt, updatedAt
+- **MailerSubscriptions**: id, name, email, company, industry, subscribedAt
+
+### Mailer Subscription System
+- **Pulse Insights Newsletter**: Bi-weekly insights delivered to subscribers
+- **Subscription Form**: Collects name, email, company, and industry
+- **Industries Available**: Food & Beverage, Retail, Financial Services, Technology, Healthcare, Manufacturing, Media & Entertainment, Other
+- **Admin View**: Subscribers tab in admin portal shows all subscribers with search, stats (total, unique companies, industries, last 30 days)
+- **API**: `POST /api/mailer-subscriptions` creates subscription, prevents duplicates by email
 
 ### Email Notifications
 - **Service**: Resend for email delivery (via Replit's integration system)

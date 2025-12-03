@@ -171,6 +171,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/admin/mailer-subscriptions", async (req, res) => {
+    try {
+      const subscriptions = await storage.getAllMailerSubscriptions();
+      res.json(subscriptions);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.post("/api/orders", async (req, res) => {
     try {
       const validatedOrder = insertOrderSchema.parse(req.body.order);
