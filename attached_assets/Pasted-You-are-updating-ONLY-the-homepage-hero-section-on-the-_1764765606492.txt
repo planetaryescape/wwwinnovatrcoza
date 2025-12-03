@@ -1,0 +1,165 @@
+You are updating ONLY the homepage hero section on the public site (the section with the headline:
+
+“Launch Better Innovation”
+“Smart, Affordable Research in 24hrs”
+
+Goal
+
+Reduce or refine the dark overlay on the hero background image so the image looks:
+
+Brighter
+
+Crisper
+
+Less “muddy” or greyed out
+
+Keep text fully readable in both light and dark mode.
+
+Do not change layout, copy, buttons, or routing behaviour.
+
+1. Find the hero component
+
+Locate the React (or JSX/TSX) component that renders the homepage hero, likely something like:
+
+HomeHero, LandingHero, HeroSection, or similar,
+
+Or the main hero section in the home page file (e.g. /client/src/pages/Home.tsx or similar).
+
+You will recognise it by:
+
+The heading Launch Better Innovation
+
+Subheading Smart, Affordable Research in 24hrs
+
+Buttons: New: See Test24 and See Membership Plans
+
+A full-width background image of a road / light trails.
+
+Identify where the background image and any overlay / gradient are defined. This could be:
+
+Tailwind classes like bg-gradient-to-b from-black/60
+
+A styled div with ::before or ::after adding a dark overlay
+
+A CSS module or styled-component with a background: linear-gradient(...), url(...)
+
+2. Soften the dark overlay (but keep legibility)
+
+Current behaviour: the image appears too dark and slightly “covered” by a semi-opaque layer.
+
+Update the overlay styling to something like:
+
+If using Tailwind:
+
+Change any very dark opacity like from-black/70, from-black/60, bg-black/60 etc
+
+To a lighter option like from-black/30 or bg-black/25
+
+Example:
+
+// Before (too dark)
+<div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/70" />
+
+// After (subtle but still readable)
+<div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/20 to-black/40" />
+
+
+If using custom CSS:
+
+Reduce the alpha value on the overlay:
+
+/* Before */
+.hero-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.7),
+    rgba(0, 0, 0, 0.7)
+  );
+}
+
+/* After */
+.hero-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.25),
+    rgba(0, 0, 0, 0.45)
+  );
+}
+
+
+Keep a slight gradient at the bottom to ensure the white headline remains readable, but the overall image must look more vibrant and crisp.
+
+3. Ensure the image is rendered crisply
+
+While you are in the hero code, confirm:
+
+The background image uses the full-resolution asset (not a thumbnail).
+
+CSS uses:
+
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+
+
+No unnecessary filters are applied like filter: blur(...), brightness(0.7) etc.
+If any filters exist that darken the image (brightness, opacity) reduce or remove them.
+
+Example:
+
+/* Before */
+.hero-image {
+  filter: brightness(0.7);
+}
+
+/* After */
+.hero-image {
+  filter: brightness(0.9); /* or remove entirely if contrast is still good */
+}
+
+4. Dark mode behaviour
+
+If there is special styling for dark mode (e.g. dark:bg-black/75):
+
+Keep dark mode slightly darker than light mode for legibility, but still avoid a heavy blackout layer.
+
+Example Tailwind adjustment:
+
+<div className="
+  absolute inset-0
+  bg-gradient-to-b from-black/20 via-black/15 to-black/35
+  dark:from-black/35 dark:via-black/30 dark:to-black/55
+" />
+
+
+So:
+
+Light mode = more image, less overlay
+
+Dark mode = a bit more overlay, but still not too heavy.
+
+5. Testing checklist
+
+After changes, verify:
+
+On desktop and mobile:
+
+The hero image looks brighter and sharper.
+
+The main text is still clearly readable in both light and dark mode.
+
+Buttons and layout remain exactly as before.
+
+No new flicker or layout shift has been introduced when toggling light/dark mode.
+
+No other page sections are accidentally affected (only the homepage hero overlay).
+
+Do not change:
+
+Any copy, routes, buttons, or CTA behaviour
+
+Any pricing, navigation, or portal logic
+
+Any other page’s backgrounds
+
+Only refine the overlay and image clarity for the homepage hero.

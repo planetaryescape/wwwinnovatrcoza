@@ -23,7 +23,7 @@ export default function HeroSection() {
           backgroundImage: `url(${heroBackground})`
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/30" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-black/15 dark:from-black/50 dark:via-black/30 dark:to-black/25" />
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold text-white mb-4 tracking-tight leading-tight">
