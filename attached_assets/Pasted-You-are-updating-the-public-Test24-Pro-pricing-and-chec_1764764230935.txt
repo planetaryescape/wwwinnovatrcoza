@@ -1,0 +1,248 @@
+You are updating the public Test24 Pro pricing and checkout flow on my Innovatr marketing site.
+
+Context
+
+This is NOT inside the member portal. It is part of the main site under Pricing.
+
+From the pricing page, a user clicks on Test24 Pro and lands on a dedicated checkout page or modal, something like /checkout/pro-members or a similar route.
+
+At the top of the site there is a logged in header state that shows the user name and their membership tier (e.g. a GOLD pill) when a member is logged in.
+
+The Test24 Pro checkout already supports:
+
+A standard Test24 Pro price
+
+A lower member price (about R5 000 less)
+
+An Entry Membership line item that can be added to the order
+
+The current UI uses a simple checkbox like “I already have an active Entry Plan membership” but it does not actually check the real membership status from the logged in user.
+
+Goal
+
+On the public Test24 Pro checkout page, automatically detect if the current logged in user has an active Entry Membership.
+
+If they ARE a member:
+
+Apply the member Test24 Pro price automatically
+
+Update the copy so the page clearly shows that member pricing is applied
+
+Do not try to sell them membership again
+
+If they are NOT a member (or not logged in):
+
+Show the standard Test24 Pro price by default
+
+Promote the benefit of adding an Entry Membership to unlock member pricing
+
+Let them toggle whether to add the Entry Membership to this order
+
+Do all of this on the public pricing / checkout page, without changing any logic inside the member portal.
+
+Do not move this page to a different route. Do not change any other products or flows.
+
+You can assume
+
+There is an authentication context or hook that exposes the current user, something like useAuth(), useUser(), or AuthContext.
+
+The user object, when logged in, has a company or account attached that contains membership info, such as:
+
+company.membershipTier (for example Starter, Growth, Scale, Entry)
+
+or company.hasEntryMembership
+
+or a membershipStatus or isMember flag
+
+There is already a pricing configuration for Test24 Pro that stores:
+
+standardProPrice (non member price)
+
+memberProPrice (member price, about R5 000 less)
+
+Use the actual field and variable names from the codebase. Add new constants only if needed.
+
+Detect membership on the public site
+
+Inside the Test24 Pro pricing / checkout component:
+
+Import or access the current user from the existing auth mechanism.
+
+Derive a boolean:
+
+const hasActiveEntryMembership = Boolean(
+  user?.company?.membershipTier === 'Entry' ||
+  user?.company?.hasEntryMembership ||
+  user?.membershipStatus === 'entry_active'
+);
+
+
+Replace these checks with the real fields you find. The goal is that hasActiveEntryMembership is TRUE only when the logged in user genuinely has an active Entry Membership.
+
+Also derive:
+
+const isLoggedIn = Boolean(user);
+const isMember = isLoggedIn && hasActiveEntryMembership;
+
+
+Pricing logic
+
+At the top of this component (or in the pricing config it uses), ensure you have:
+
+const standardProPrice = /* existing standard price */;
+const memberProPrice = /* existing member price, standard minus R5000 */;
+
+
+Then derive the effective Test24 Pro price:
+
+const proPrice = isMember ? memberProPrice : standardProPrice;
+
+
+Make sure this proPrice is what the order summary uses when calculating the Test24 Pro line item and the total.
+
+UI behaviour when the user IS a member
+
+If isMember is true, update the public Test24 Pro checkout page like this:
+
+Top banner
+
+Replace any generic banner that talks about saving with member pricing with:
+
+Title: Member pricing applied
+
+Sub text: You already have an active Entry Membership. Your Test24 Pro price includes the member discount.
+
+Entry Membership area
+
+Remove or hide the “I already have an active Entry Plan membership” checkbox.
+
+Instead show a small status pill and helper copy:
+
+Status pill: Status: Active member
+
+Helper text:
+
+Your Entry Membership is active, so you qualify for member pricing on all Test24 Pro studies.
+
+You will only be billed for the Test24 Pro study shown in your order summary.
+
+Do NOT allow adding another Entry Membership for this user on this public Pro checkout page.
+
+Order summary
+
+Always use memberProPrice for the Test24 Pro line item when isMember is true.
+
+Under the Test24 Pro line item, add a small helper line:
+
+Member discount applied
+
+If the design supports showing both values:
+
+Standard rate R50 000 per study
+
+Member rate R45 000 per study
+
+Make sure no Entry Membership product line appears in the order summary for existing members.
+
+Checkout payload
+
+When isMember is true, send only the Test24 Pro purchase in the payload.
+
+Do not try to create or charge for a new Entry Membership.
+
+UI behaviour when the user is NOT a member but IS logged in
+
+If isLoggedIn is true and isMember is false:
+
+Top banner
+
+Title: Save with member pricing
+
+Sub text: Become a member today and save R5 000 on every Test24 Pro study.
+
+Entry Membership area
+
+Replace the old checkbox with TWO radio options:
+
+Add Entry Membership and unlock member pricing
+Helper: One annual fee. Member pricing on all Test24 Pro studies.
+
+Continue without membership
+Helper: Pay the standard Test24 Pro rate for this study only.
+
+Implementation detail:
+
+Add state:
+
+const [addMembership, setAddMembership] = useState(false);
+
+
+When the first radio is selected, setAddMembership(true).
+
+When the second radio is selected, setAddMembership(false).
+
+Order summary behaviour when logged in non member
+
+If addMembership is false:
+
+Use standardProPrice for the Test24 Pro line item.
+
+Do NOT include an Entry Membership line item.
+
+Show a hint below the Test24 Pro line:
+
+You are paying the standard Test24 Pro rate. Add an Entry Membership to unlock member pricing.
+
+If addMembership is true:
+
+Add a separate Entry Membership line to the order summary using the existing membership product configuration that the site already uses.
+
+Use memberProPrice for the Test24 Pro line item.
+
+Add a hint:
+
+Entry Membership added. Member pricing will apply to this study.
+
+Checkout payload
+
+If addMembership is false: send a payload for a single Test24 Pro purchase at the standard price.
+
+If addMembership is true: send a combined payload that creates an Entry Membership AND a Test24 Pro purchase, using the same data structure that other membership purchases on the public site already use.
+
+Behaviour when the user is NOT logged in
+
+If isLoggedIn is false:
+
+Keep standard Test24 Pro pricing by default.
+
+Hide the radio options for adding membership, and instead show a simple message near the Entry Membership area:
+
+Log in or create an account to unlock member pricing on Test24 Pro.
+
+You may show a subtle line under the price:
+Members save R5 000 per Test24 Pro study.
+
+Keep the existing “Proceed to Payment” flow, which should route the user to sign up or sign in if required.
+
+Do not attempt to infer membership for anonymous visitors.
+
+Safeguards and style
+
+Add null checks everywhere you access user or company so the page never crashes if no user is present.
+
+Keep all styling, components and layout consistent with the current design system (buttons, cards, typography).
+
+Do not change any other products on the Pricing page. Only apply this logic to Test24 Pro.
+
+Code comment summary
+
+At the top of the Test24 Pro checkout component, add a short comment explaining the new behaviour:
+
+// Test24 Pro public checkout
+// - Detects if the logged in user has an active Entry Membership
+// - Applies member Test24 Pro pricing automatically for existing members
+// - For non members, allows adding Entry Membership to unlock member pricing on this and future Pro studies
+// - Anonymous visitors see standard pricing with a prompt to log in for member pricing
+
+
+Do not modify any other routes, payment handlers or portal pages.
