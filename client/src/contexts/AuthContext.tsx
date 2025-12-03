@@ -106,8 +106,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           name: dbUser.name || email.split("@")[0],
           company: dbUser.company,
           companyId: dbUser.companyId,
-          tier: tierMap[dbUser.membershipTier] || "starter",
-          membershipTier: dbUser.membershipTier,
+          // Admins always get Scale tier access
+          tier: isAdmin ? "scale" : (tierMap[dbUser.membershipTier] || "starter"),
+          membershipTier: isAdmin ? "SCALE" : dbUser.membershipTier,
           isAdmin,
         };
         
@@ -140,8 +141,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       name: email.split("@")[0].charAt(0).toUpperCase() + email.split("@")[0].slice(1),
       company,
-      tier,
-      membershipTier,
+      // Admins always get Scale tier access
+      tier: isAdmin ? "scale" : tier,
+      membershipTier: isAdmin ? "SCALE" : membershipTier,
       isAdmin,
     };
     
@@ -168,8 +170,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email: dbUser.email,
           name: dbUser.name || name,
           company: dbUser.company,
-          tier: "free", // New users start as free
-          membershipTier: "STARTER", // All new signups are STARTER
+          // Admins get Scale tier, regular users start as free
+          tier: isAdmin ? "scale" : "free",
+          membershipTier: isAdmin ? "SCALE" : "STARTER",
           isAdmin,
         };
         
@@ -191,8 +194,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         id: "user-" + Date.now(),
         email,
         name,
-        tier: "free",
-        membershipTier: "STARTER",
+        // Admins get Scale tier, regular users start as free
+        tier: isAdmin ? "scale" : "free",
+        membershipTier: isAdmin ? "SCALE" : "STARTER",
         isAdmin,
       };
       
@@ -298,8 +302,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const isAuthenticated = user !== null;
-  const isMember = user !== null && user.tier !== "free";
-  const isAdmin = impersonation.isImpersonating ? false : (user?.isAdmin ?? false);
+  // Admins always have full member access (Scale tier perks)
+  const isAdminUser = impersonation.isImpersonating ? false : (user?.isAdmin ?? false);
+  const isMember = user !== null && (user.tier !== "free" || isAdminUser);
+  const isAdmin = isAdminUser;
   const membershipTier = user?.membershipTier;
 
   return (
