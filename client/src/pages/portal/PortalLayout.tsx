@@ -157,7 +157,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                     {user?.company || user?.email}
                   </p>
                   <Badge 
-                    className={`${isAdmin ? 'bg-destructive text-destructive-foreground' : isMember ? getTierColor(user?.tier || 'starter') : 'bg-muted text-muted-foreground'} text-xs`}
+                    className={`${isAdmin ? 'bg-primary text-primary-foreground' : isMember ? getTierColor(user?.tier || 'starter') : 'bg-muted text-muted-foreground'} text-xs`}
                     data-testid={`badge-member-tier-${isAdmin ? 'admin' : user?.tier || 'free'}`}
                   >
                     {isAdmin ? 'ADMIN' : isMember ? `${user?.tier?.toUpperCase()} Member` : 'FREE TIER'}

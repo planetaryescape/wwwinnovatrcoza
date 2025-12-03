@@ -117,7 +117,14 @@ export default function Navigation() {
                     >
                       <User className="h-4 w-4" />
                       <span>{user?.name}</span>
-                      {user?.tier && (
+                      {user?.isAdmin ? (
+                        <Badge 
+                          className="ml-1 text-xs bg-primary text-primary-foreground"
+                          data-testid="badge-tier-admin"
+                        >
+                          ADMIN
+                        </Badge>
+                      ) : user?.tier && (
                         <Badge 
                           variant={getTierBadgeVariant(user.tier)} 
                           className="ml-1 text-xs"
