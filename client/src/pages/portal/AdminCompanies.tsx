@@ -49,6 +49,7 @@ import {
   Download,
   Trash2,
   Plus,
+  Minus,
   Image as ImageIcon
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -607,33 +608,24 @@ export default function AdminCompanies() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div className="space-y-4 mt-4">
                     <div>
-                      <Label className="text-xs text-muted-foreground">Add Basic Credits</Label>
-                      <div className="flex gap-2 mt-1">
+                      <Label className="text-xs text-muted-foreground mb-2 block">Adjust Basic Credits</Label>
+                      <div className="flex items-center gap-2">
                         <Input 
                           type="number" 
-                          min="0" 
-                          placeholder="0"
-                          className="w-20"
-                          data-testid="input-add-basic-credits"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              const value = parseInt((e.target as HTMLInputElement).value);
-                              if (value > 0) {
-                                handleUpdateCompany(selectedCompany.id, { 
-                                  basicCreditsTotal: selectedCompany.basicCreditsTotal + value 
-                                });
-                                (e.target as HTMLInputElement).value = '';
-                              }
-                            }
-                          }}
+                          min="1" 
+                          placeholder="Amount"
+                          className="w-24"
+                          id="basic-credits-input"
+                          data-testid="input-adjust-basic-credits"
                         />
                         <Button 
                           size="sm" 
                           variant="outline"
-                          onClick={(e) => {
-                            const input = (e.currentTarget.previousElementSibling as HTMLInputElement);
+                          className="gap-1"
+                          onClick={() => {
+                            const input = document.getElementById('basic-credits-input') as HTMLInputElement;
                             const value = parseInt(input.value);
                             if (value > 0) {
                               handleUpdateCompany(selectedCompany.id, { 
@@ -644,36 +636,50 @@ export default function AdminCompanies() {
                           }}
                           data-testid="button-add-basic-credits"
                         >
+                          <Plus className="w-3 h-3" />
                           Add
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="gap-1 text-destructive hover:text-destructive"
+                          onClick={() => {
+                            const input = document.getElementById('basic-credits-input') as HTMLInputElement;
+                            const value = parseInt(input.value);
+                            if (value > 0) {
+                              const newTotal = Math.max(0, selectedCompany.basicCreditsTotal - value);
+                              const newUsed = Math.min(selectedCompany.basicCreditsUsed, newTotal);
+                              handleUpdateCompany(selectedCompany.id, { 
+                                basicCreditsTotal: newTotal,
+                                basicCreditsUsed: newUsed
+                              });
+                              input.value = '';
+                            }
+                          }}
+                          data-testid="button-remove-basic-credits"
+                        >
+                          <Minus className="w-3 h-3" />
+                          Remove
                         </Button>
                       </div>
                     </div>
                     <div>
-                      <Label className="text-xs text-muted-foreground">Add Pro Credits</Label>
-                      <div className="flex gap-2 mt-1">
+                      <Label className="text-xs text-muted-foreground mb-2 block">Adjust Pro Credits</Label>
+                      <div className="flex items-center gap-2">
                         <Input 
                           type="number" 
-                          min="0" 
-                          placeholder="0"
-                          className="w-20"
-                          data-testid="input-add-pro-credits"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              const value = parseInt((e.target as HTMLInputElement).value);
-                              if (value > 0) {
-                                handleUpdateCompany(selectedCompany.id, { 
-                                  proCreditsTotal: selectedCompany.proCreditsTotal + value 
-                                });
-                                (e.target as HTMLInputElement).value = '';
-                              }
-                            }
-                          }}
+                          min="1" 
+                          placeholder="Amount"
+                          className="w-24"
+                          id="pro-credits-input"
+                          data-testid="input-adjust-pro-credits"
                         />
                         <Button 
                           size="sm" 
                           variant="outline"
-                          onClick={(e) => {
-                            const input = (e.currentTarget.previousElementSibling as HTMLInputElement);
+                          className="gap-1"
+                          onClick={() => {
+                            const input = document.getElementById('pro-credits-input') as HTMLInputElement;
                             const value = parseInt(input.value);
                             if (value > 0) {
                               handleUpdateCompany(selectedCompany.id, { 
@@ -684,7 +690,30 @@ export default function AdminCompanies() {
                           }}
                           data-testid="button-add-pro-credits"
                         >
+                          <Plus className="w-3 h-3" />
                           Add
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="gap-1 text-destructive hover:text-destructive"
+                          onClick={() => {
+                            const input = document.getElementById('pro-credits-input') as HTMLInputElement;
+                            const value = parseInt(input.value);
+                            if (value > 0) {
+                              const newTotal = Math.max(0, selectedCompany.proCreditsTotal - value);
+                              const newUsed = Math.min(selectedCompany.proCreditsUsed, newTotal);
+                              handleUpdateCompany(selectedCompany.id, { 
+                                proCreditsTotal: newTotal,
+                                proCreditsUsed: newUsed
+                              });
+                              input.value = '';
+                            }
+                          }}
+                          data-testid="button-remove-pro-credits"
+                        >
+                          <Minus className="w-3 h-3" />
+                          Remove
                         </Button>
                       </div>
                     </div>

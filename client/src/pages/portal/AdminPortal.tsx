@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PortalLayout from "./PortalLayout";
 import AdminOverview from "./AdminOverview";
-import AdminUsers from "./AdminUsers";
 import AdminOrders from "./AdminOrders";
 import AdminReports from "./AdminReports";
 import AdminDeals from "./AdminDeals";
@@ -33,14 +32,13 @@ export default function AdminPortal() {
         <div>
           <h1 className="text-4xl font-serif font-bold mb-2">Admin Dashboard</h1>
           <p className="text-lg text-muted-foreground">
-            Manage users, orders, reports, deals, and system overview
+            Manage companies, orders, reports, deals, and system overview
           </p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview" data-testid="tab-admin-overview">Overview</TabsTrigger>
-            <TabsTrigger value="users" data-testid="tab-admin-users">Users</TabsTrigger>
             <TabsTrigger value="companies" data-testid="tab-admin-companies">Companies</TabsTrigger>
             <TabsTrigger value="orders" data-testid="tab-admin-orders">Orders</TabsTrigger>
             <TabsTrigger value="subscriptions" data-testid="tab-admin-subscriptions">Subscriptions</TabsTrigger>
@@ -51,10 +49,6 @@ export default function AdminPortal() {
 
           <TabsContent value="overview">
             <AdminOverview />
-          </TabsContent>
-
-          <TabsContent value="users">
-            <AdminUsers />
           </TabsContent>
 
           <TabsContent value="companies">
