@@ -40,10 +40,12 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
           description: "You've successfully logged in.",
         });
       }
-      onOpenChange(false);
       
-      // Redirect to member portal after successful login/signup
-      setLocation("/portal");
+      // Close dialog and redirect to portal
+      onOpenChange(false);
+      setTimeout(() => {
+        setLocation("/portal");
+      }, 100);
     } catch (error) {
       toast({
         title: "Error",
