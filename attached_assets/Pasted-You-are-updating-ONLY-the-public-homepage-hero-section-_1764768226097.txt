@@ -1,0 +1,214 @@
+You are updating ONLY the public homepage hero section that shows:
+
+Heading: “Launch Better Innovation”
+
+Subheading: “Smart, Affordable Research in 24hrs”
+
+Buttons: “New: See Test24” and “See Membership Plans”
+
+Background: the road / light trail image
+
+Goal
+
+Make the hero text block (heading, subheading, buttons) look cleaner and more readable on desktop and mobile by:
+
+Improving contrast and readability of the subheading
+
+Ensuring the text block has a consistent vertical position that feels intentional (not floating on the horizon line)
+
+Keeping all existing copy, routes and CTA behaviour exactly the same
+
+Do not touch any other sections or pages.
+
+1. Find the hero component
+
+Locate the React or JSX/TSX component that renders the main homepage hero, for example:
+
+HomeHero, LandingHero, HeroSection, or similar
+
+Or the hero section in /client/src/pages/index.tsx, /Home.tsx or equivalent
+
+You will recognise it by the Launch Better Innovation heading and the two primary buttons.
+
+Confirm where the text block is structured, e.g. something like:
+
+<section className="...">
+  <div className="hero-overlay" />
+  <div className="hero-content">
+    <h1>Launch Better Innovation</h1>
+    <p>Smart, Affordable Research in 24hrs</p>
+    <div className="hero-actions">
+      {/* buttons */}
+    </div>
+  </div>
+</section>
+
+2. Improve layout and vertical positioning
+
+Right now the text often sits visually on the “horizon line” of the image, so the subheading gets lost.
+
+Update the hero layout so that:
+
+The content block is vertically centred but slightly above the brightest part of the image
+
+On desktop, the heading, subheading and buttons are grouped in a clear column with consistent spacing
+
+Implementation guidance:
+
+Use a flex or grid layout on the hero container, for example:
+
+<section className="relative flex items-center justify-center min-h-[70vh] md:min-h-[80vh]">
+  {/* overlay & background already handled */}
+  <div className="relative z-10 px-4 md:px-8">
+    {/* hero content */}
+  </div>
+</section>
+
+
+Add a small upward offset for the content, so it is slightly above the centre of the image, for example:
+
+<div className="relative z-10 px-4 md:px-8 translate-y-[-4vh] md:translate-y-[-6vh]">
+
+
+Adjust the exact translate values if needed but keep it subtle.
+
+Do not change the background image logic or routing, only the placement of the content.
+
+3. Make the subheading more readable
+
+The subheading “Smart, Affordable Research in 24hrs” must be clearly readable on both desktop and mobile.
+
+Update the subheading styles as follows:
+
+Limit its width and centre it:
+
+max-w-[640px] or similar
+
+text-center with mx-auto
+
+Increase line height slightly for readability:
+
+leading-relaxed or equivalent
+
+Ensure good contrast against the image:
+
+Keep text colour as text-white or text-slate-50
+
+Add a very subtle text shadow or backdrop for the text block only, not the whole screen
+
+Example Tailwind style for the subheading:
+
+<p
+  className="
+    mt-4 md:mt-6
+    max-w-[640px]
+    mx-auto
+    text-base md:text-lg
+    text-slate-50
+    leading-relaxed
+    drop-shadow-[0_1px_8px_rgba(0,0,0,0.7)]
+  "
+>
+  Smart, Affordable Research in 24hrs
+</p>
+
+
+If you prefer not to use drop-shadow, you can wrap the text block in a subtle translucent background just behind the text:
+
+<div className="inline-block rounded-md bg-black/20 px-4 py-2 md:px-6 md:py-3 backdrop-blur-[2px]">
+  {/* heading and subheading */}
+</div>
+
+
+Choose one approach (text shadow or a very light translucent panel) but keep it minimal and premium, not heavy.
+
+4. Responsive typography and spacing
+
+On smaller screens, ensure the hero text hierarchy remains clear and not cramped.
+
+Adjust typography:
+
+Heading:
+
+Mobile: around text-4xl with leading-tight
+
+Desktop: text-5xl or text-6xl with md:leading-tight
+
+Subheading:
+
+Mobile: text-sm or text-base
+
+Desktop: text-lg
+
+Example:
+
+<h1 className="
+  text-4xl md:text-6xl
+  font-semibold
+  tracking-tight
+  text-white
+  text-center
+">
+  Launch Better Innovation
+</h1>
+
+
+Spacing:
+
+Add consistent vertical spacing:
+
+<div className="mt-6 md:mt-8 flex flex-col items-center gap-4 md:gap-5">
+  {/* subheading then buttons */}
+</div>
+
+
+On mobile, ensure there is at least pt-24 pb-24 inside the hero so the content does not feel squashed under the navbar.
+
+5. Keep buttons visually balanced
+
+Make sure the primary and secondary buttons remain aligned and readable:
+
+Wrap them in a flex container:
+
+<div className="mt-6 md:mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+  {/* main CTA and secondary CTA */}
+</div>
+
+
+Do not change button routes or labels, only ensure spacing and alignment looks good across breakpoints.
+
+6. Testing checklist
+
+After implementing the changes, verify:
+
+Desktop
+
+Heading and subheading are clearly readable over the image.
+
+Subheading no longer feels “lost” on the horizon line.
+
+Buttons sit neatly below the subheading with even spacing.
+
+Hero looks balanced at full HD and at laptop widths.
+
+Mobile and tablet
+
+No text overlaps with the navbar or image edges.
+
+Heading and subheading remain legible without crowding.
+
+Buttons are visible without scrolling too far down.
+
+Light / dark mode
+
+Subheading and heading maintain strong contrast in both modes.
+
+Any text shadow or local background used under the text still looks subtle and premium.
+
+No regressions
+
+No impact on other sections, pages, or routing.
+
+No change to button behaviour or links.
+
+Do not modify copy, URLs, analytics, or any portal logic. Only adjust the hero section’s layout and styling for better readability and visual balance.
