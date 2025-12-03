@@ -19,9 +19,9 @@ import { LoginDialog } from "@/components/LoginDialog";
 import { useAuth } from "@/contexts/AuthContext";
 
 const reachPricing = [
-  { reach: 100, memberPrice: 45000, regularPrice: 50000, label: "100 Consumers" },
-  { reach: 200, memberPrice: 85500, regularPrice: 95000, label: "200 Consumers" },
-  { reach: 500, memberPrice: 202500, regularPrice: 225000, label: "500 Consumers" },
+  { reach: 100, memberPrice: 45000, regularPrice: 50000, memberRate: 450, regularRate: 500, label: "100 Consumers" },
+  { reach: 300, memberPrice: 128400, regularPrice: 142500, memberRate: 428, regularRate: 475, label: "300 Consumers" },
+  { reach: 600, memberPrice: 243000, regularPrice: 270000, memberRate: 405, regularRate: 450, label: "600 Consumers" },
 ];
 
 const ENTRY_PLAN_COST = 60000;
@@ -367,7 +367,7 @@ export default function CheckoutProMembers() {
                       className="mt-3 space-y-3"
                     >
                       {reachPricing.map((tier) => {
-                        const displayPrice = effectiveIsMember ? tier.memberPrice : tier.regularPrice;
+                        const displayRate = effectiveIsMember ? tier.memberRate : tier.regularRate;
                         return (
                           <div
                             key={tier.reach}
@@ -393,7 +393,7 @@ export default function CheckoutProMembers() {
                                     {tier.label}
                                   </Label>
                                   <p className="text-sm text-muted-foreground mt-0.5">
-                                    ~{formatPrice(Math.round(displayPrice / tier.reach))} per consumer
+                                    R{displayRate} per consumer
                                   </p>
                                 </div>
                               </div>

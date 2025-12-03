@@ -1,0 +1,198 @@
+You are updating ONLY the “Reach per Study” section on the public Test24 Pro checkout page (/checkout/pro-members or whichever file contains this logic).
+
+Goal
+
+Replace the existing reach options:
+
+100 Consumers
+
+200 Consumers
+
+500 Consumers
+
+With NEW options:
+
+100 Consumers
+
+300 Consumers
+
+600 Consumers
+
+Each option must include:
+
+Non-member price per consumer
+
+Member price per consumer
+
+Correct total price per study (consumer count × correct rate)
+
+Correct price displayed inside the order summary
+
+All logic connected to membership discounts must remain intact and functional
+
+The only change is replacing the 200/500 options with 300/600 and updating the pricing maths accordingly
+
+Do not alter:
+
+Study count selector
+
+Any membership logic
+
+Any checkout payload logic
+
+Any component layout
+
+Any styling
+
+Any global pricing structures
+Only modify the reach tier definitions and calculations.
+
+The New Reach Tiers (Exact Values)
+1. 100 Consumers
+
+Non-member rate: R500 per consumer
+
+Member rate: R450 per consumer
+
+Total non-member price: 100 × R500 = R50 000
+
+Total member price: 100 × R450 = R45 000
+(Already exists — keep the same)
+
+2. 300 Consumers
+
+Non-member rate: R475 per consumer
+
+Member rate: R428 per consumer
+
+Total non-member price: 300 × R475 = R142 500
+
+Total member price: 300 × R428 = R128 400
+
+3. 600 Consumers
+
+Non-member rate: R450 per consumer
+
+Member rate: R405 per consumer
+
+Total non-member price: 600 × R450 = R270 000
+
+Total member price: 600 × R405 = R243 000
+
+Instructions for Implementation
+
+Locate the reach tier configuration
+This will be something like:
+
+const reachOptions = [
+  { consumers: 100, ... },
+  { consumers: 200, ... },
+  { consumers: 500, ... },
+];
+
+
+or separated into constants or a pricing file.
+
+Replace the existing objects with the following:
+
+const reachOptions = [
+  {
+    consumers: 100,
+    nonMemberRate: 500,
+    memberRate: 450,
+  },
+  {
+    consumers: 300,
+    nonMemberRate: 475,
+    memberRate: 428,
+  },
+  {
+    consumers: 600,
+    nonMemberRate: 450,
+    memberRate: 405,
+  },
+];
+
+
+If the component expects total prices instead of rates, compute them before rendering:
+
+const nonMemberPrice = consumers * nonMemberRate;
+const memberPrice = consumers * memberRate;
+
+
+Ensure the UI displays correctly
+
+Wherever the UI currently renders:
+
+Price per study
+
+Member price (small text under the main price)
+
+Per-consumer hint (e.g., “~R500 per consumer”)
+
+Update to use:
+
+`~R${nonMemberRate} per consumer`
+`R${nonMemberPrice}` main price  
+`R${memberPrice} for members` secondary price  
+
+
+Ensure the order summary uses the correct selected tier
+
+Where the order summary sets:
+
+pricePerStudy = isMember ? memberPrice : nonMemberPrice;
+
+
+This must use your new tier pricing without modifying the membership logic.
+
+Nothing else changes.
+Do not modify:
+
+totals logic
+
+volume discount logic
+
+membership detection
+
+checkout payload
+
+routing
+
+UI components
+
+text copy elsewhere
+
+Only replace the three reach tier definitions and ensure derived pricing updates correctly.
+
+Final Verification Checklist
+
+After implementing:
+
+Selecting 100 consumers
+
+Price should show R50 000
+
+Member price shows R45 000
+
+Order summary uses correct values
+
+Selecting 300 consumers
+
+Price shows R142 500
+
+Member price shows R128 400
+
+Per-consumer text updates
+
+Order summary updates correctly
+
+Selecting 600 consumers
+
+Price shows R270 000
+
+Member price shows R243 000
+
+Order summary reflects correct pricing
+
+Everything else must remain unchanged.

@@ -9,9 +9,9 @@ import { useState, useMemo, useEffect } from "react";
 import OrderFormDialog from "@/components/OrderFormDialog";
 
 const reachPricing = [
-  { reach: 100, price: 50000, label: "100 Consumers" },
-  { reach: 200, price: 95000, label: "200 Consumers" },
-  { reach: 500, price: 225000, label: "500 Consumers" },
+  { reach: 100, price: 50000, rate: 500, label: "100 Consumers" },
+  { reach: 300, price: 142500, rate: 475, label: "300 Consumers" },
+  { reach: 600, price: 270000, rate: 450, label: "600 Consumers" },
 ];
 
 const features = [
@@ -172,7 +172,7 @@ export default function CheckoutProPAYG() {
                                   {tier.label}
                                 </Label>
                                 <p className="text-sm text-muted-foreground mt-0.5">
-                                  ~{formatPrice(Math.round(tier.price / tier.reach))} per consumer
+                                  R{tier.rate} per consumer
                                 </p>
                               </div>
                             </div>
