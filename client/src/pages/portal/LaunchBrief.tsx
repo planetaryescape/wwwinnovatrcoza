@@ -1289,27 +1289,29 @@ export default function LaunchBrief() {
                 </div>
               </div>
 
-              <div className="flex items-start space-x-2" data-field="confirmPaymentTerms">
-                <Checkbox
-                  id="confirmPaymentTerms"
-                  checked={formData.confirmPaymentTerms}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, confirmPaymentTerms: checked as boolean })
-                  }
-                  data-testid="checkbox-confirm-payment-terms"
-                />
-                <div className="space-y-1">
-                  <label
-                    htmlFor="confirmPaymentTerms"
-                    className="text-sm leading-tight cursor-pointer"
-                  >
-                    If I choose to be invoiced, I agree to a 30-day payment term. My project will begin once payment or a purchase order is received. {formData.billingPreference === "invoice" ? "*" : ""}
-                  </label>
-                  {validationErrors.confirmPaymentTerms && (
-                    <p className="text-xs text-destructive">{validationErrors.confirmPaymentTerms}</p>
-                  )}
+              {formData.billingPreference === "invoice" && (
+                <div className="flex items-start space-x-2" data-field="confirmPaymentTerms">
+                  <Checkbox
+                    id="confirmPaymentTerms"
+                    checked={formData.confirmPaymentTerms}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, confirmPaymentTerms: checked as boolean })
+                    }
+                    data-testid="checkbox-confirm-payment-terms"
+                  />
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="confirmPaymentTerms"
+                      className="text-sm leading-tight cursor-pointer"
+                    >
+                      I agree to a 30-day payment term. My project will begin once payment or a purchase order is received. *
+                    </label>
+                    {validationErrors.confirmPaymentTerms && (
+                      <p className="text-xs text-destructive">{validationErrors.confirmPaymentTerms}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="flex items-start space-x-2">
                 <Checkbox
