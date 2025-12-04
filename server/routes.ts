@@ -33,7 +33,7 @@ const fileUpload = multer({
 // Multer for brief file uploads - supports wider range of file types
 const briefFileUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max per file
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB max per file
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
       "video/mp4", "video/quicktime", "video/webm",
