@@ -1,0 +1,451 @@
+Your job now is to clean up and finalise the Innovatr Admin Portal so that:
+
+All companies, credits and research projects are seeded correctly
+
+The Admin Overview gives a calm, professional, high value snapshot
+
+The Companies and Orders tabs are simplified and aligned with how Innovatr actually works
+
+Client research visibility is secure so that each client only sees their own work
+
+The new Nando’s, Rugani, Greenway, DGB and Revlon Elizabeth Arden Mitchum data is correct and visible to admins
+
+You are working in the Innovatr portal project that already has a PostgreSQL database and Admin area.
+
+1. DATA MODEL AND SEEDING FIXES
+
+Use the existing DatabaseStorage and seeding logic. Make sure all values below are persisted in the real database, not in memory.
+
+1.1 Companies and tiers
+
+Ensure the following companies exist in the database and are visible under Admin → Companies:
+
+Innovatr
+
+Domain: innovatr.co.za
+
+Tier: Scale
+
+Credits:
+
+Test24 Basic credits: 25
+
+Test24 Pro credits: 4
+
+Rugani Juice
+
+Domain: ruganijuice.co.za
+
+Tier: Growth
+
+Credits:
+
+Test24 Basic credits: 8
+
+Test24 Pro credits: 2
+
+Note: Originally had 10 Basic and 2 Pro, but they have used 2 Basic already. Store the used vs total correctly in your schema and surface the remaining where needed.
+
+Greenway Farms
+
+Domain: greenwayfarm.co.za (or the closest existing domain already in the system, do not create duplicates)
+
+Tier: Growth
+
+Credits:
+
+Test24 Basic credits: 10
+
+Test24 Pro credits: 2
+
+Nando’s South Africa
+
+Domain: nandos.co.za
+
+Tier: Growth
+
+Credits:
+
+Test24 Basic credits remaining: 0
+
+Test24 Pro credits remaining: 0
+
+They had 5 Basic credits and used all 5 on their current Test24 Menu study. Make sure that is reflected in any “credits used” or history logic if you track it.
+
+DGB
+
+Domain: dgb.co.za
+
+Tier: Starter
+
+Credits:
+
+Test24 Basic credits: 0
+
+Test24 Pro credits: 0
+
+This was a once off pilot. No remaining credits.
+
+Revlon
+
+Domain: revlon.com
+
+Tier: Scale
+
+Credits:
+
+Test24 Basic credits: 0
+
+Test24 Pro credits: 0
+
+Mitchum
+
+Domain: mitchum.com
+
+Tier: Scale
+
+Credits:
+
+Test24 Basic credits: 0
+
+Test24 Pro credits: 0
+
+Elizabeth Arden
+
+Domain: elizabetharden.com
+
+Tier: Scale
+
+Credits:
+
+Test24 Basic credits: 0
+
+Test24 Pro credits: 0
+
+Make sure the Companies tab header uses the sum of remaining credits across all companies, not x of y progress bars. See section 3.
+
+1.2 Company users and membership
+
+Confirm the following users are mapped to companies and appear correctly in Admin → Members as Portal Members:
+
+Simone Kakana → Company: Nando’s South Africa → Tier Growth
+
+Tymon → Company: Rugani Juice → Tier Growth
+
+Simonne → Company: Rugani Juice → Tier Growth
+
+Revlon, Mitchum, Elizabeth Arden and DGB can remain without assigned users for now, but must still show as companies in the Admin → Companies table and in credit totals.
+
+1.3 Client reports per company
+
+In the Admin → Companies drawer, under Client Reports, ensure:
+
+Rugani Juice
+
+Linked client reports (Test24 Pro):
+
+Rugani x Clicks Wellness Beverage Positioning
+
+Rugani New Key Visual Optimisation
+
+Nando’s South Africa
+
+Linked client report (live or ongoing Test24 Pro):
+
+Nando’s Menu Innovation Study – Live Results
+
+DGB
+
+Linked client report (Test24 Basic pilot):
+
+Use the attached file attached_assets/Innovatr x Durbanville Hills Test24 Basic Report.pptx but label it as a DGB pilot study in the title, for example:
+DGB Test24 Basic Pilot – Durbanville Hills
+
+Greenway Farms, Revlon, Mitchum, Elizabeth Arden
+
+No client reports yet. Ensure their drawers reflect this clearly.
+
+Make sure the My Research admin view and any Test24 tracker uses these report entries rather than any old placeholder seeds.
+
+2. RESEARCH AND STUDY TRACKING
+2.1 My Research tab (admin view)
+
+In My Research for admin accounts (Hannah and Richard):
+
+Show at least these studies:
+
+Rugani x Clicks Wellness Beverage Positioning – Test24 Pro – Completed
+
+Rugani New Key Visual Optimisation – Test24 Pro – Completed
+
+Nando’s Menu Innovation Study – Test24 Basic or Pro as currently configured – Active / In Progress
+
+DGB Test24 Basic Pilot – Durbanville Hills – Test24 Basic – Completed
+
+The counts at the top of My Research must reflect:
+
+Total research items
+
+How many are Active
+
+How many are Completed
+
+These numbers must be driven from the same database records used for client reports and the Test24 tracker, not hard coded.
+
+3. ADMIN OVERVIEW REWORK
+
+The Admin Overview should feel like a calm control room, not like a noisy BI dashboard.
+
+Use the existing Innovatr portal typography and colours (the same style as the rest of the portal, not the bright pastel demo charts). Keep plenty of white space.
+
+3.1 System Overview row
+
+Replace the current “System overview” bar with a cleaner, more premium set of cards and slightly more useful information.
+
+Structure:
+
+A single horizontal row of compact cards, similar height to what you have now.
+
+Cards:
+
+Users
+
+Main value: total portal users
+
+Small sub label below value (lighter text): New this month: X
+
+Companies
+
+Main value: total companies
+
+Sub label: New this month: Y
+
+Active Studies
+
+Main value: number of currently active Test24 studies
+
+Sub label: In progress right now
+
+Reports
+
+Main value: published reports only
+
+Sub label: Free: N (count of all free reports available to non logged in users)
+
+Credits Available
+
+Main value: XX Basic / YY Pro
+
+This must be the sum of remaining Test24 Basic and Pro credits across all companies in the database.
+
+Sub label: Across all companies
+
+Visual tweaks:
+
+Each card should keep a very subtle icon badge (like you already have) but with muted colours that match the portal (not rainbow gradients).
+
+Use a single soft grey card background, slightly lifted with a small shadow, and consistent rounded corners.
+
+Keep the cards the same approximate size as now so the row does not become taller.
+
+3.2 Research Pipeline card replacement
+
+Replace the current Research Pipeline component on the Overview (the one that shows “0 New, 1 In Progress, 1 Completed, 1 Active”) with a more useful Test24 tracker.
+
+Design a new card titled Test24 Tracker that uses the same card width and height but has more value:
+
+Layout inside the card:
+
+Row of pill stats across the top:
+
+Total Test24 Basic: X
+
+Total Test24 Pro: Y
+
+This month: A Basic / B Pro
+
+In progress: C
+
+Underneath, a simple horizontal bar or very light stacked bar where:
+
+Left segment shows the proportion of Basic vs Pro studies in total
+
+Right aligned small caption: 2 briefs in pipeline or N briefs in pipeline
+
+Keep this chart minimal, with a maximum of two colours (one for Basic and one for Pro) that match the portal palette. No gradients or heavy labels. The whole card must still feel light and readable.
+
+4. ORDERS TAB CLEANUP
+
+In Admin → Orders:
+
+Keep the three summary cards at the top, but remove revenue completely.
+
+New header cards:
+
+Orders This Month – number only
+
+Total Orders – number only
+
+Average Response Time – optional; if this is too complex, replace with Last Order date instead
+
+Charts:
+
+Convert the current “Orders & Revenue Trend” chart into Orders Trend only:
+
+X axis: months
+
+Y axis: number of orders
+
+Single series: Orders
+
+Remove the “Revenue by Product Type” chart entirely.
+
+Remove any R78,888.889 or other revenue labels, average order values and revenue statistics from this page and from the overview.
+
+The Order List table stays as it is.
+
+5. COMPANIES TAB CREDITS DISPLAY
+
+In Admin → Companies:
+
+Update the header cards:
+
+Total Companies – still correct
+
+Scale Accounts – count of companies with tier Scale
+
+Basic Credits – show total remaining Basic credits across all companies as a single number, not 7/32 style
+
+Pro Credits – show total remaining Pro credits as a single number
+
+In the Company Accounts table:
+
+For each company, display the remaining credits only, for example:
+
+Rugani Juice: 8 Basic, 2 Pro
+
+Greenway Farms: 10 Basic, 2 Pro
+
+Nando’s South Africa: 0 Basic, 0 Pro
+
+DGB: 0 Basic, 0 Pro
+
+Revlon / Mitchum / Elizabeth Arden: 0 Basic, 0 Pro
+
+Remove progress style 25 / 25 or 0 / 5. If you want to show used vs total anywhere, keep that inside the company drawer only, not in the main table.
+
+6. CLIENT REPORT VISIBILITY BUG FIX
+
+There is a bug where clients can see other companies reports.
+
+You must enforce that:
+
+A logged in client can only see:
+
+Their own company reports
+
+Any free public Innovatr reports that are deliberately exposed to everyone (if that is supported)
+
+Only admin users (Hannah and Richard, or users with admin role) can see all client reports.
+
+Implementation guidance:
+
+On the API side:
+
+Check all app.get("/api/member/reports"...), /api/member/client-reports, /api/member/studies, or similar member endpoints in server/routes.ts.
+
+For each member facing endpoint, use the authenticated session user (req.session.user or equivalent) and filter by:
+
+companyId (preferred) or
+
+user email that maps to a company
+
+Do not allow an email query parameter to override the company when the user is not admin. If any member endpoint accepts ?email= or ?companyId=, ignore those for non admin and always derive from the session.
+
+Admin endpoints like /api/admin/reports and /api/admin/client-reports must remain protected with requireAdmin and can still return all data.
+
+On the frontend side:
+
+For the client My Research page, make sure it calls the member endpoints that are scoped to the current session user, not the admin endpoints.
+
+For the admin My Research or Admin → Reports, use the admin endpoints.
+
+Test cases:
+
+Log in as a Rugani user and confirm they only see Rugani client reports.
+
+Log in as the Nando’s user and confirm they only see Nando’s own Menu study.
+
+Confirm neither can see the DGB pilot.
+
+Log in as Hannah (admin) and confirm she can see all reports.
+
+7. MAKE THE SYSTEM OVERVIEW BAR MORE VISUAL WITHOUT NOISE
+
+You already updated the System Overview row per section 3.1. Now add a little more visual interest while staying minimal:
+
+Increase the icon badge size slightly and use a very soft coloured background for each icon (e.g. light blue for Users, light purple for Companies, light orange for Reports).
+
+Make the main number slightly larger and bold, and keep the label and sub label in lighter text.
+
+Add a tiny pill at the top right of each card that shows the selected date range label, for example Last 30 days, but it does not have to be interactive per card. It can just mirror the global filter.
+
+Do not add extra charts or spark lines into these cards. Keep it text based with subtle iconography.
+
+The overall effect must feel more premium and readable without feeling like a toy dashboard.
+
+8. GENERAL DESIGN GUARDRAILS
+
+Use the existing Innovatr portal design system. No neon gradients, no saturated rainbow cards.
+
+Prioritise legibility over decoration. If a chart does not add new information, prefer a simple number.
+
+Keep all Admin pages consistent with each other in spacing, fonts and card style.
+
+Do not change the Briefs tab layout; Hannah is happy with that one.
+
+9. QA CHECKLIST BEFORE YOU STOP
+
+After implementing all of the above, run through this checklist:
+
+Admin Overview
+
+System Overview row shows correct values for: Users, Companies, Active Studies, Reports (published), Free reports, Total remaining credits (Basic and Pro).
+
+Test24 Tracker card shows total Basic and Pro studies, this month counts and in progress counts.
+
+Companies
+
+Header shows correct totals with simple numbers for Basic and Pro credits.
+
+Each company row shows correct remaining credits.
+
+Company drawers show correct users and client reports as described.
+
+Orders
+
+No revenue figures or revenue charts anywhere.
+
+Orders chart shows orders per month only.
+
+My Research (admin)
+
+Shows the four key studies (two Rugani, one Nando’s active, one DGB pilot) with correct statuses.
+
+Client visibility
+
+Rugani user sees only Rugani reports.
+
+Nando’s user sees only Nando’s reports.
+
+DGB is not visible to other clients.
+
+Admin sees everything.
+
+Style
+
+Admin Overview feels clean, professional and not childish or overly busy.
+
+Text is readable and there are no clashing colours.
+
+When everything in this checklist passes, commit your changes and stop.
