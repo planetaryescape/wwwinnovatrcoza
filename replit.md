@@ -49,6 +49,7 @@ Preferred communication style: Simple, everyday language.
 - **Briefs Tab**: Pipeline view with 5 columns (New, In Progress, Under Review, Completed, On Hold) with drag-and-drop functionality.
 - **Design Principles**: Clean, uncluttered interface focused on operational metrics. Data consistency across all tabs from same database tables.
 - **Trends & Insights Library**: View toggle feature (grid/list views) with refresh button for consistent display options.
+- **View-as-Company Mode**: Admin impersonation feature allowing admins to view the portal as a specific company. Activated from Companies tab via "View Portal" button. Hides Admin tab, shows amber impersonation banner on all pages, uses company's data. Exit via "Back to Companies" button which restores admin access and returns to Companies tab. Impersonation state persists in AuthContext and localStorage until explicitly cleared. Route protection prevents accessing /portal/admin while impersonating.
 
 ### Payment Gateway System
 - **Architecture**: Multi-provider system with a unified `PaymentProvider` interface.
