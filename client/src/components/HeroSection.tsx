@@ -23,7 +23,6 @@ export default function HeroSection() {
           backgroundImage: `url(${heroBackground})`
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-black/15 dark:from-black/50 dark:via-black/30 dark:to-black/25" />
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-24 pb-24 translate-y-[-4vh] md:translate-y-[-6vh]">
         <div className="inline-block rounded-lg bg-black/20 px-6 py-6 md:px-10 md:py-8 backdrop-blur-[2px]">
