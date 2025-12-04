@@ -44,7 +44,7 @@ interface AuthContextType {
   company: Company | null;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
   isMember: boolean;
   isAdmin: boolean;
@@ -100,125 +100,102 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user?.companyId, user?.email]);
 
   const login = async (email: string, password: string) => {
-    try {
-      const res = await fetch(`/api/users/email/${encodeURIComponent(email)}`);
-      if (res.ok) {
-        const dbUser = await res.json();
-        const isAdmin = email === "hannah@innovatr.co.za" || email === "richard@innovatr.co.za";
-        
-        const tierMap: Record<string, UserTier> = {
-          STARTER: "starter",
-          GROWTH: "growth",
-          SCALE: "scale",
-        };
-        
-        const loggedInUser: User = {
-          id: dbUser.id,
-          email: dbUser.email,
-          name: dbUser.name || email.split("@")[0],
-          company: dbUser.company,
-          companyId: dbUser.companyId,
-          // Admins always get Scale tier access
-          tier: isAdmin ? "scale" : (tierMap[dbUser.membershipTier] || "starter"),
-          membershipTier: isAdmin ? "SCALE" : dbUser.membershipTier,
-          isAdmin,
-        };
-        
-        setUser(loggedInUser);
-        localStorage.setItem("innovatr_user", JSON.stringify(loggedInUser));
-        return;
-      }
-    } catch (err) {
-      console.log("User not found in backend, using mock data");
+    // Use real API authentication with bcrypt password validation
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || "Invalid email or password");
     }
     
-    await new Promise(resolve => setTimeout(resolve, 500));
+    const dbUser = await res.json();
     
-    let tier: UserTier = "free";
-    let membershipTier: MembershipTier = "STARTER";
-    let company = "Demo Company";
+    // Check if user has admin role or admin email
+    const isAdmin = dbUser.role === "ADMIN" || 
+      email === "hannah@innovatr.co.za" || 
+      email === "richard@innovatr.co.za";
     
-    if (email.includes("growth")) {
-      tier = "growth";
-      membershipTier = "GROWTH";
-    } else if (email.includes("scale")) {
-      tier = "scale";
-      membershipTier = "SCALE";
-    }
+    const tierMap: Record<string, UserTier> = {
+      STARTER: "starter",
+      GROWTH: "growth",
+      SCALE: "scale",
+    };
     
-    const isAdmin = email === "hannah@innovatr.co.za" || email === "richard@innovatr.co.za";
-    
-    const mockUser: User = {
-      id: "user-" + Date.now(),
-      email,
-      name: email.split("@")[0].charAt(0).toUpperCase() + email.split("@")[0].slice(1),
-      company,
+    const loggedInUser: User = {
+      id: dbUser.id,
+      email: dbUser.email,
+      name: dbUser.name || email.split("@")[0],
+      company: dbUser.company,
+      companyId: dbUser.companyId,
       // Admins always get Scale tier access
-      tier: isAdmin ? "scale" : tier,
-      membershipTier: isAdmin ? "SCALE" : membershipTier,
+      tier: isAdmin ? "scale" : (tierMap[dbUser.membershipTier] || "starter"),
+      membershipTier: isAdmin ? "SCALE" : dbUser.membershipTier,
       isAdmin,
     };
     
-    setUser(mockUser);
-    localStorage.setItem("innovatr_user", JSON.stringify(mockUser));
+    setUser(loggedInUser);
+    localStorage.setItem("innovatr_user", JSON.stringify(loggedInUser));
   };
 
   const signup = async (email: string, password: string, name: string) => {
-    const isAdmin = email === "hannah@innovatr.co.za" || email === "richard@innovatr.co.za";
+    // Call the API to create the user in the database with hashed password
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, name }),
+    });
     
-    try {
-      // Call the API to create the user in the database
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name }),
-      });
-      
-      if (res.ok) {
-        const dbUser = await res.json();
-        
-        const newUser: User = {
-          id: dbUser.id,
-          email: dbUser.email,
-          name: dbUser.name || name,
-          company: dbUser.company,
-          // Admins get Scale tier, regular users start as free
-          tier: isAdmin ? "scale" : "free",
-          membershipTier: isAdmin ? "SCALE" : "STARTER",
-          isAdmin,
-        };
-        
-        setUser(newUser);
-        localStorage.setItem("innovatr_user", JSON.stringify(newUser));
-        return;
-      }
-      
-      // If user already exists, try logging in instead
+    if (!res.ok) {
+      const error = await res.json();
       if (res.status === 409) {
         throw new Error("User with this email already exists. Please log in instead.");
       }
-      
-      throw new Error("Failed to create account");
-    } catch (err: any) {
-      console.error("Signup error:", err);
-      // If API fails, still create local user for demo purposes
-      const mockUser: User = {
-        id: "user-" + Date.now(),
-        email,
-        name,
-        // Admins get Scale tier, regular users start as free
-        tier: isAdmin ? "scale" : "free",
-        membershipTier: isAdmin ? "SCALE" : "STARTER",
-        isAdmin,
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem("innovatr_user", JSON.stringify(mockUser));
+      throw new Error(error.message || "Failed to create account");
     }
+    
+    const dbUser = await res.json();
+    
+    // Check if user has admin role or admin email
+    const isAdmin = dbUser.role === "ADMIN" || 
+      email === "hannah@innovatr.co.za" || 
+      email === "richard@innovatr.co.za";
+    
+    const tierMap: Record<string, UserTier> = {
+      STARTER: "starter",
+      GROWTH: "growth",
+      SCALE: "scale",
+    };
+    
+    const newUser: User = {
+      id: dbUser.id,
+      email: dbUser.email,
+      name: dbUser.name || name,
+      company: dbUser.company,
+      companyId: dbUser.companyId,
+      // Admins get Scale tier, regular users start as starter
+      tier: isAdmin ? "scale" : (tierMap[dbUser.membershipTier] || "starter"),
+      membershipTier: isAdmin ? "SCALE" : (dbUser.membershipTier || "STARTER"),
+      isAdmin,
+    };
+    
+    setUser(newUser);
+    localStorage.setItem("innovatr_user", JSON.stringify(newUser));
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // Call API to invalidate session (best effort)
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (err) {
+      console.log("Logout API call failed, clearing local state");
+    }
+    
     setUser(null);
+    setCompany(null);
     setImpersonation(defaultImpersonation);
     localStorage.removeItem("innovatr_user");
     localStorage.removeItem("innovatr_impersonation");

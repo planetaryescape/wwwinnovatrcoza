@@ -34,13 +34,26 @@ Preferred communication style: Simple, everyday language.
 - **Validation**: Zod schemas integrated with React Hook Form and Drizzle ORM.
 
 ### Authentication & Authorization
-- **Authentication**: `AuthContext` manages user state (persisted in `localStorage`) with login, signup, and logout.
+- **Authentication**: Real multi-tenant authentication with bcrypt password hashing
+  - `AuthContext` manages user state (persisted in `localStorage`) with login, signup, and logout
+  - Passwords are hashed using bcrypt with 12 salt rounds via `server/auth/password.ts`
+  - Login/signup calls `/api/auth/login` and `/api/auth/signup` endpoints with proper password validation
+  - Password reset flow with secure token generation and email delivery
+- **Database Schema**: 
+  - `passwordHash` field stores bcrypt hashes (no plaintext passwords stored)
+  - `password_resets` table for secure password reset tokens
+  - `sessions` table for session management with token hashes
+  - `credit_ledger` table for transaction-based credit tracking
 - **Membership Tiers**: Three membership tiers for logged-in users:
   - **STARTER**: Free tier for new signups and basic members
   - **GROWTH**: Mid-tier membership with enhanced features
   - **SCALE**: Premium tier with full feature access
-- **Admin Access**: Users with hannah@innovatr.co.za or richard@innovatr.co.za email addresses automatically get admin access to `/portal/admin`
+- **User Roles**: ADMIN, MEMBER (stored in `role` field)
+- **Admin Access**: Users with ADMIN role or hannah@innovatr.co.za / richard@innovatr.co.za emails get admin access to `/portal/admin`
 - **Access Control**: Starter members access limited content; Growth and Scale members access full portal features. Admin users have unrestricted access to all functionality and admin tools.
+- **Seeded Users**: 
+  - Admin: hannah@innovatr.co.za, richard@innovatr.co.za (password: InnovatrAdmin2024!)
+  - Clients: Rugani Juice and Greenway Farms users (password: TempPass123!)
 
 ### Members Portal
 - **Purpose**: Personalized dashboard for authenticated members to manage research, view insights, and engage.

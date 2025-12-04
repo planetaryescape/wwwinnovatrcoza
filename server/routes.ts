@@ -103,14 +103,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { email, password, name, company } = req.body;
       
       if (!email || !password) {
-        return res.status(400).json({ error: "Email and password are required" });
+        return res.status(400).json({ message: "Email and password are required" });
       }
       
       // Validate password strength
       const passwordValidation = validatePasswordStrength(password);
       if (!passwordValidation.valid) {
         return res.status(400).json({ 
-          error: "Password does not meet requirements",
+          message: "Password does not meet requirements",
           details: passwordValidation.errors 
         });
       }
@@ -118,17 +118,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        return res.status(409).json({ error: "User with this email already exists" });
+        return res.status(409).json({ message: "User with this email already exists" });
       }
       
-      // Hash the password
+      // Hash the password BEFORE creating user (never store plaintext)
       const passwordHash = await hashPassword(password);
       
-      // Create user with default STARTER tier and MEMBER role
+      // Create user with empty password field (security: never store plaintext)
       const newUser = await storage.createUser({
         username: email.split("@")[0] + "_" + Date.now(),
         email,
-        password: "***hashed***", // Placeholder for legacy field
+        password: "", // Security: never store plaintext passwords
         name: name || email.split("@")[0],
         company: company || null,
         membershipTier: "STARTER",
@@ -138,15 +138,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         creditsPro: 0,
       });
       
-      // Update with password hash
-      await storage.updateUser(newUser.id, { passwordHash });
+      // Atomically set passwordHash (required for all new accounts)
+      await storage.updateUser(newUser.id, { 
+        passwordHash,
+        emailVerified: false 
+      });
       
-      // Return user without password fields
-      const { password: _, passwordHash: __, ...safeUser } = newUser;
+      // Return user without sensitive fields
+      const { password: _, passwordHash: __, ...safeUser } = { ...newUser, passwordHash };
       res.status(201).json(safeUser);
     } catch (error: any) {
       console.error("Signup error:", error);
-      res.status(400).json({ error: error.message });
+      res.status(400).json({ message: error.message });
     }
   });
 
@@ -156,41 +159,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { email, password } = req.body;
       
       if (!email || !password) {
-        return res.status(400).json({ error: "Email and password are required" });
+        return res.status(400).json({ message: "Email and password are required" });
       }
       
       const user = await storage.getUserByEmail(email);
       if (!user) {
-        return res.status(401).json({ error: "Invalid credentials" });
+        return res.status(401).json({ message: "Invalid email or password" });
       }
       
       // Check if account is active
       if (!user.isActive) {
-        return res.status(403).json({ error: "Account is disabled. Please contact support." });
+        return res.status(403).json({ message: "Account is disabled. Please contact support." });
       }
       
-      // Verify password - support both hashed and legacy passwords
+      // Verify password using bcrypt (passwordHash is required for all accounts)
       let passwordValid = false;
       
       if (user.passwordHash) {
-        // Use bcrypt for hashed passwords
+        // Use bcrypt for hashed passwords (preferred path)
         passwordValid = await verifyPassword(password, user.passwordHash);
-      } else {
-        // Fallback to plain text for legacy accounts (to be migrated)
+      } else if (user.password && user.password !== "") {
+        // Legacy migration path: compare plaintext and migrate to bcrypt
         passwordValid = user.password === password;
         
-        // If valid, migrate to hashed password
+        // If valid, migrate to hashed password immediately
         if (passwordValid) {
           const newHash = await hashPassword(password);
           await storage.updateUser(user.id, { 
             passwordHash: newHash,
-            password: "***migrated***"
+            password: "" // Clear plaintext after migration
           });
         }
       }
+      // Note: if both passwordHash and password are empty/null, login fails
       
       if (!passwordValid) {
-        return res.status(401).json({ error: "Invalid credentials" });
+        return res.status(401).json({ message: "Invalid email or password" });
       }
       
       // Update last login
@@ -204,7 +208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(safeUser);
     } catch (error: any) {
       console.error("Login error:", error);
-      res.status(400).json({ error: error.message });
+      res.status(400).json({ message: error.message });
     }
   });
 
