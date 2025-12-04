@@ -58,6 +58,38 @@ const isAdminUser = (email?: string) => {
   return email === "hannah@innovatr.co.za" || email === "richard@innovatr.co.za";
 };
 
+// Demo accounts list - used for minimum credit display
+const DEMO_ACCOUNTS = ["hannah@innovatr.co.za", "richard@innovatr.co.za"];
+const DEMO_MIN_BASIC_CREDITS = 22;
+const DEMO_MIN_PRO_CREDITS = 4;
+
+// Helper function to apply demo minimum credits to user response
+function applyDemoUserCredits(user: any) {
+  if (!user || !DEMO_ACCOUNTS.includes(user.email)) {
+    return user;
+  }
+  
+  // For demo accounts, show minimum credits directly on user object
+  return {
+    ...user,
+    creditsBasic: Math.max(user.creditsBasic ?? 0, DEMO_MIN_BASIC_CREDITS),
+    creditsPro: Math.max(user.creditsPro ?? 0, DEMO_MIN_PRO_CREDITS),
+  };
+}
+
+// Helper function to apply demo minimum credits to company
+function applyDemoCredits(company: any, userEmail?: string) {
+  if (!company || !userEmail || !DEMO_ACCOUNTS.includes(userEmail)) {
+    return company;
+  }
+  
+  return {
+    ...company,
+    basicCreditsTotal: Math.max(company.basicCreditsTotal ?? 0, DEMO_MIN_BASIC_CREDITS + (company.basicCreditsUsed ?? 0)),
+    proCreditsTotal: Math.max(company.proCreditsTotal ?? 0, DEMO_MIN_PRO_CREDITS + (company.proCreditsUsed ?? 0)),
+  };
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // put application routes here
   // prefix all routes with /api
@@ -227,9 +259,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         path: "/",
       });
       
-      // Return user without password fields
+      // Return user without password fields, with demo credits applied
       const { password: _, passwordHash: __, ...safeUser } = user;
-      res.json(safeUser);
+      
+      // Apply demo minimum credits for demo accounts
+      const userWithDemoCredits = applyDemoUserCredits(safeUser);
+      res.json(userWithDemoCredits);
     } catch (error: any) {
       console.error("Login error:", error);
       res.status(400).json({ message: error.message });
@@ -275,9 +310,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update session last active time
       // (Could be optimized to update less frequently)
       
-      // Return user without password fields
+      // Return user without password fields, with demo credits applied
       const { password: _, passwordHash: __, ...safeUser } = user;
-      res.json(safeUser);
+      const userWithDemoCredits = applyDemoUserCredits(safeUser);
+      res.json(userWithDemoCredits);
     } catch (error: any) {
       console.error("Auth check error:", error);
       res.status(400).json({ message: error.message });
@@ -1223,28 +1259,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ error: error.message });
     }
   });
-
-  // Demo accounts list - used for minimum credit display
-  const DEMO_ACCOUNTS = ["hannah@innovatr.co.za", "richard@innovatr.co.za"];
-  const DEMO_MIN_BASIC_CREDITS = 22;
-  const DEMO_MIN_PRO_CREDITS = 4;
-  
-  // Helper function to apply demo minimum credits
-  function applyDemoCredits(company: any, userEmail?: string) {
-    if (!company || !userEmail || !DEMO_ACCOUNTS.includes(userEmail)) {
-      return company;
-    }
-    
-    // Ensure minimum credits are displayed for demo accounts
-    const basicRemaining = (company.basicCreditsTotal ?? 0) - (company.basicCreditsUsed ?? 0);
-    const proRemaining = (company.proCreditsTotal ?? 0) - (company.proCreditsUsed ?? 0);
-    
-    return {
-      ...company,
-      basicCreditsTotal: Math.max(company.basicCreditsTotal ?? 0, DEMO_MIN_BASIC_CREDITS + (company.basicCreditsUsed ?? 0)),
-      proCreditsTotal: Math.max(company.proCreditsTotal ?? 0, DEMO_MIN_PRO_CREDITS + (company.proCreditsUsed ?? 0)),
-    };
-  }
 
   // Get company by ID (for authenticated users to fetch their own company)
   app.get("/api/companies/:id", async (req, res) => {
