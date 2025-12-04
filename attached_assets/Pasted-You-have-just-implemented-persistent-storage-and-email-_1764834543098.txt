@@ -1,0 +1,207 @@
+You have just implemented persistent storage and email notifications for the Launch New Brief form.
+
+Now extend that work so that:
+
+Any files the client uploads with their brief (pptx, pdf, xlsx, jpg, mp4, etc.) are properly stored server-side
+
+The emails (client confirmation + internal notification) include those files
+
+Preferably as download links
+
+Attach the files directly only if that is already easy and safe with the existing email utility
+
+The Admin > Brief Submissions view clearly shows all uploaded files with download buttons
+
+Do not undo or overwrite the previous changes. Build on top of them.
+
+1. Reuse and upgrade the existing upload field
+
+In the Launch New Brief form there is already a Project / Idea Brief upload section (max file size 3 MB, with allowed types like pdf, docx, xlsx, pptx, videos, etc).
+
+Do the following:
+
+Confirm which component handles this field (for example FileUpload, UploadField, or a simple <input type="file" />)
+
+Make sure the field supports:
+
+All currently allowed types
+
+At least one file, and ideally multiple files
+
+On the front-end, when the user selects files, ensure they are:
+
+Uploaded via the appropriate API or
+
+Included in a FormData POST if that is how uploads are already done in the app
+
+If there is already a global upload utility (used for reports or other documents), reuse that pattern.
+
+2. Server-side storage for brief files
+
+On the backend, extend the brief submission logic so that:
+
+Uploaded files are stored in a consistent storage location, e.g.:
+
+Local folder such as /uploads/briefs or
+
+An existing storage abstraction (S3 bucket, file service, etc.) if the app already uses one
+
+For each stored file, create a small metadata object:
+
+type BriefFile = {
+  id: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  url: string;        // public or signed download URL
+  uploadedAt: string; // ISO timestamp
+};
+
+
+Attach an array of these to the BriefSubmission record as files: BriefFile[].
+
+Important:
+
+Do not store raw binary blobs in the brief record. Store only metadata + URL/path.
+
+Enforce reasonable limits:
+
+Max size per file (you can keep the existing 3 MB limit, or whatever is already configured)
+
+Optional: max 5 files per submission
+
+If the upload fails for any file, handle it gracefully:
+
+Keep the brief submission if at least the core data is valid
+
+Log the failed file and return a clear error message to the UI if appropriate
+
+3. Include files in the emails
+
+Update the email sending logic that you just created for Launch New Brief:
+
+3.1. Client confirmation email
+
+In the body of the confirmation email, add a section:
+
+If there are uploaded files:
+
+List each file on its own line:
+
+• {fileName} – {fileSize} KB – [Download]({url})
+
+If your email provider does not support clickable links easily, at least include the full URL so it can be copy-pasted.
+
+Do not block the email if a file is missing a URL. Instead:
+
+Skip that file and log a warning on the server.
+
+3.2. Internal notification email (Richard + Hannah)
+
+Include the same file list:
+
+Files attached:
+
+• {fileName} – {fileSize} KB – {url}
+
+If your existing email utility already supports attachments and the file size is reasonable:
+
+You may attach the files directly to the email in addition to listing the URLs
+
+To keep things safe, apply a simple rule:
+
+Only attach files if each is under 5 MB and total attachments are under 20 MB
+
+If attachments are not straightforward with the current mailer, it is sufficient to include download links.
+
+Do not change the subject lines or recipients from the previous prompt. Just extend the email body to include file information.
+
+4. Surface files in Admin > Brief Submissions
+
+In the Admin > Brief Submissions section you just added:
+
+In the table view:
+
+Add a simple indicator if the brief has files, e.g. a column called Files with:
+
+0, 1, 2, or 3+ as a count
+
+Or a small icon if there is at least one file
+
+In the detail view for a single brief:
+
+Add a “Files” section that lists each file:
+
+File name
+
+File type (derived from mimeType)
+
+File size (human readable, e.g. 2.4 MB)
+
+A Download button or link that opens the file URL in a new tab or triggers a download
+
+Example layout in the detail view:
+
+Files
+• Nandos_Test24_Brief.pptx – 1.2 MB – [Download]
+• Concept_Visuals.jpg – 640 KB – [Download]
+
+Make sure that only admin users can see these files in the Admin section (same permission logic as the rest of Admin).
+
+5. Keep the public API stable
+
+Ensure the changes do not break the Launch New Brief front-end:
+
+The brief submission endpoint should now:
+
+Accept file uploads
+
+Store files and their metadata
+
+Return the BriefSubmission object including its files array
+
+If the front-end does not immediately need the file metadata, you can ignore it on the client side for now and just rely on the emails + Admin view.
+
+6. Testing checklist
+
+Please test:
+
+Submit a Launch New Brief with:
+
+One file (e.g. PPTX)
+
+Then again with multiple files (e.g. PPTX + JPG + XLSX)
+
+Confirm:
+
+The brief is stored with a files array in the backend
+
+Each file has a valid URL and sensible metadata
+
+Check emails:
+
+Client email includes the “Files” section with correct filenames and download links
+
+Internal email to richard@innovatr.co.za and hannah@innovatr.co.za includes the same list (and attachments, if supported)
+
+In the Admin portal:
+
+Go to Admin > Brief Submissions
+
+Confirm the file count appears in the table
+
+Open the detail view and verify:
+
+All files are listed with names, sizes and download links
+
+Clicking “Download” works as expected
+
+Submit another brief without files and confirm:
+
+Brief still saves correctly
+
+Emails send correctly
+
+Admin view handles files: [] without errors
+
+Do not modify any other upload flows (reports, trends, membership documents). Only extend the Launch New Brief pipeline and the Brief Submissions admin view.

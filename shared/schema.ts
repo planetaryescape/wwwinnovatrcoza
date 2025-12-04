@@ -439,6 +439,16 @@ export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
 export type Subscription = typeof subscriptions.$inferSelect;
 
+// Brief File metadata type
+export interface BriefFile {
+  id: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  url: string;
+  uploadedAt: string;
+}
+
 // Brief Submissions - For storing Launch New Brief form submissions
 export const briefSubmissions = pgTable("brief_submissions", {
   id: varchar("id")
@@ -459,10 +469,21 @@ export const briefSubmissions = pgTable("brief_submissions", {
   industry: text("industry"),
   competitors: text("competitors").array().default([]),
   projectFileUrls: text("project_file_urls").array().default([]),
+  files: jsonb("files").default([]),
   status: varchar("status", { length: 20 }).notNull().default("new"),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Zod schema for brief file validation
+const briefFileSchema = z.object({
+  id: z.string(),
+  fileName: z.string(),
+  fileSize: z.number(),
+  mimeType: z.string(),
+  url: z.string(),
+  uploadedAt: z.string(),
 });
 
 export const insertBriefSubmissionSchema = createInsertSchema(briefSubmissions)
@@ -477,7 +498,8 @@ export const insertBriefSubmissionSchema = createInsertSchema(briefSubmissions)
     companyName: z.string().min(1, "Company name is required"),
     studyType: z.string().min(1, "Study type is required"),
     researchObjective: z.string().min(1, "Research objective is required"),
-    status: z.enum(["new", "in_progress", "completed", "cancelled"]).default("new"),
+    status: z.enum(["new", "in_progress", "completed", "on_hold", "cancelled"]).default("new"),
+    files: z.array(briefFileSchema).default([]),
   });
 
 export type InsertBriefSubmission = z.infer<typeof insertBriefSubmissionSchema>;

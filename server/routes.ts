@@ -9,7 +9,7 @@ import { sendAdminOrderNotification, sendCustomerOrderConfirmation, sendContactF
 import { uploadFile, downloadFile, deleteFile, listFiles, fileExists } from "./app-storage";
 import { generateInvoicePdf } from "./invoices/generator";
 
-// Multer for handling multipart/form-data (PayFast webhooks)
+// Multer for handling multipart/form-data (PayFast webhooks and file uploads)
 const upload = multer();
 
 // Multer for file uploads with memory storage
@@ -22,6 +22,29 @@ const fileUpload = multer({
       cb(null, true);
     } else {
       cb(new Error("Invalid file type. Only JPEG, PNG, WebP, GIF, and PDF files are allowed."));
+    }
+  },
+});
+
+// Multer for brief file uploads - supports wider range of file types
+const briefFileUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max per file
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      "video/mp4", "video/quicktime", "video/webm",
+      "audio/mpeg", "audio/mp4", "audio/mp4a-latm",
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "text/plain",
+      "image/jpeg", "image/png", "image/gif", "image/webp",
+    ];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error(`Invalid file type: ${file.mimetype}. Supported types: PDF, DOCX, XLSX, PPTX, TXT, images, videos, and audio.`));
     }
   },
 });
@@ -1486,11 +1509,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ======= Brief Submission Endpoints =======
 
+  // Upload files for brief submission
+  app.post("/api/briefs/upload", briefFileUpload.array("files", 5), async (req, res) => {
+    try {
+      const files = req.files as Express.Multer.File[];
+      
+      if (!files || files.length === 0) {
+        return res.status(400).json({ error: "No files uploaded" });
+      }
+
+      const uploadResults = [];
+
+      for (const file of files) {
+        // Generate a safe storage key: briefs/{uuid}-{sanitized-filename}
+        const fileId = randomUUID();
+        const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 100);
+        const storagePath = `briefs/${fileId}-${sanitizedName}`;
+
+        // Upload to Replit Object Storage
+        const uploadResult = await uploadFile(Buffer.from(file.buffer), storagePath);
+
+        if (!uploadResult.ok) {
+          console.error(`Failed to upload file ${file.originalname}:`, uploadResult.error);
+          // Continue with other files, but log the failure
+          continue;
+        }
+
+        // Build file metadata
+        const fileMetadata = {
+          id: fileId,
+          fileName: file.originalname,
+          fileSize: file.size,
+          mimeType: file.mimetype,
+          url: `/api/files/${storagePath}`,
+          uploadedAt: new Date().toISOString(),
+        };
+
+        uploadResults.push(fileMetadata);
+      }
+
+      if (uploadResults.length === 0) {
+        return res.status(500).json({ error: "Failed to upload any files" });
+      }
+
+      res.json({ success: true, files: uploadResults });
+    } catch (error: any) {
+      console.error("Brief file upload error:", error);
+      res.status(500).json({ error: error.message || "File upload failed" });
+    }
+  });
+
+  // Helper function to generate unique ID for file upload
+  function randomUUID(): string {
+    return crypto.randomUUID ? crypto.randomUUID() : 
+      'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+  }
+
   // Create a new brief submission
   app.post("/api/briefs", async (req, res) => {
     try {
       const { z } = await import("zod");
       
+      const briefFileSchema = z.object({
+        id: z.string(),
+        fileName: z.string(),
+        fileSize: z.number(),
+        mimeType: z.string(),
+        url: z.string(),
+        uploadedAt: z.string(),
+      });
+
       const briefSchema = z.object({
         submittedByName: z.string().min(1, "Name is required"),
         submittedByEmail: z.string().email("Valid email is required"),
@@ -1507,6 +1599,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         industry: z.string().optional(),
         competitors: z.array(z.string()).default([]),
         projectFileUrls: z.array(z.string()).default([]),
+        files: z.array(briefFileSchema).default([]),
       });
 
       const validated = briefSchema.parse(req.body);
@@ -1517,6 +1610,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "new",
       });
 
+      // Get files array for emails (cast to expected type)
+      const briefFiles = (brief.files || []) as Array<{
+        id: string;
+        fileName: string;
+        fileSize: number;
+        mimeType: string;
+        url: string;
+        uploadedAt: string;
+      }>;
+
       // Send client confirmation email
       try {
         await sendBriefConfirmationEmail({
@@ -1526,6 +1629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           studyType: brief.studyType,
           numIdeas: brief.numIdeas,
           researchObjective: brief.researchObjective,
+          files: briefFiles,
         });
       } catch (emailError) {
         console.error("Failed to send brief confirmation email:", emailError);
@@ -1550,6 +1654,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           industry: brief.industry,
           competitors: brief.competitors ?? [],
           projectFileUrls: brief.projectFileUrls ?? [],
+          files: briefFiles,
           createdAt: brief.createdAt,
         });
       } catch (emailError) {

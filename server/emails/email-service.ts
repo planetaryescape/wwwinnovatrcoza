@@ -539,6 +539,23 @@ export async function sendCustomerOrderConfirmation(orderData: {
   }
 }
 
+// Helper to format file size
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+// Brief file type
+interface BriefFileInfo {
+  id: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  url: string;
+  uploadedAt: string;
+}
+
 /**
  * Send brief submission confirmation to client
  */
@@ -549,10 +566,28 @@ export async function sendBriefConfirmationEmail(briefData: {
   studyType: string;
   numIdeas: number;
   researchObjective: string;
+  files?: BriefFileInfo[];
 }) {
   try {
     const resend = await getResendClient();
     const fromEmail = await getFromEmail();
+
+    // Build files section if files exist
+    const files = briefData.files || [];
+    const filesHtml = files.length > 0 ? `
+      <div style="margin-top: 20px;">
+        <p><strong>Files attached to your brief:</strong></p>
+        <ul style="padding-left: 20px;">
+          ${files.map(file => {
+            if (!file.url) {
+              console.warn(`Brief file ${file.fileName} missing URL, skipping`);
+              return '';
+            }
+            return `<li>${escapeHtml(file.fileName)} – ${formatFileSize(file.fileSize)}</li>`;
+          }).filter(Boolean).join('')}
+        </ul>
+      </div>
+    ` : '';
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -615,7 +650,7 @@ export async function sendBriefConfirmationEmail(briefData: {
         <body>
           <div class="container">
             <div class="header">
-              <h1>Brief Received ✓</h1>
+              <h1>Brief Received</h1>
             </div>
             
             <div class="content">
@@ -631,13 +666,15 @@ export async function sendBriefConfirmationEmail(briefData: {
               <p><strong>Research Objective:</strong></p>
               <p style="background-color: #f7fafc; padding: 15px; border-radius: 4px; white-space: pre-wrap;">${escapeHtml(briefData.researchObjective.substring(0, 500))}${briefData.researchObjective.length > 500 ? '...' : ''}</p>
 
+              ${filesHtml}
+
               <p style="margin-top: 25px;">Richard or Hannah will be in touch shortly to discuss your project and next steps.</p>
               
               <p style="color: #718096;">Expected turnaround: <strong>24 hours</strong> from survey launch.</p>
             </div>
 
             <div class="footer">
-              <p style="margin: 0;">© ${new Date().getFullYear()} Innovatr. All rights reserved.</p>
+              <p style="margin: 0;">${new Date().getFullYear()} Innovatr. All rights reserved.</p>
             </div>
           </div>
         </body>
@@ -678,6 +715,7 @@ export async function sendBriefAdminNotification(briefData: {
   industry?: string | null;
   competitors: string[];
   projectFileUrls: string[];
+  files?: BriefFileInfo[];
   createdAt: Date;
 }) {
   try {
@@ -692,9 +730,25 @@ export async function sendBriefAdminNotification(briefData: {
       timeStyle: "short",
     });
 
-    const filesHtml = briefData.projectFileUrls.length > 0 
-      ? briefData.projectFileUrls.map(url => `<li><a href="${url}">${url}</a></li>`).join("")
-      : "<li>No files uploaded</li>";
+    // Build file HTML from new files array with download links
+    const files = briefData.files || [];
+    const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+      ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+      : process.env.REPLIT_DOMAINS 
+        ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` 
+        : '';
+    
+    let filesHtml: string;
+    if (files.length > 0) {
+      filesHtml = files.map(file => {
+        const downloadUrl = file.url.startsWith('http') ? file.url : `${baseUrl}${file.url}`;
+        return `<li><a href="${downloadUrl}" target="_blank" rel="noopener">${escapeHtml(file.fileName)}</a> (${formatFileSize(file.fileSize)})</li>`;
+      }).join("");
+    } else if (briefData.projectFileUrls.length > 0) {
+      filesHtml = briefData.projectFileUrls.map(url => `<li><a href="${url}">${url}</a></li>`).join("");
+    } else {
+      filesHtml = "<li>No files uploaded</li>";
+    }
 
     const emailHtml = `
       <!DOCTYPE html>

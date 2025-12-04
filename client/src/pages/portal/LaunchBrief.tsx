@@ -200,7 +200,7 @@ export default function LaunchBrief() {
     if (!files) return;
 
     const validFiles = Array.from(files).filter((file) => {
-      const maxSize = 3 * 1024 * 1024; // 3MB
+      const maxSize = 5 * 1024 * 1024; // 5MB
       const validTypes = [
         "video/mp4", "video/quicktime", "video/webm",
         "audio/mpeg", "audio/mp4", "audio/mp4a-latm",
@@ -213,7 +213,7 @@ export default function LaunchBrief() {
       if (file.size > maxSize) {
         toast({
           title: "File too large",
-          description: `${file.name} exceeds 3MB limit`,
+          description: `${file.name} exceeds 5MB limit`,
           variant: "destructive",
         });
         return false;
@@ -294,6 +294,9 @@ export default function LaunchBrief() {
     }
   };
 
+  // State for file upload in progress
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
+
   const submitBriefMutation = useMutation({
     mutationFn: async (payload: Record<string, any>) => {
       const response = await apiRequest("POST", "/api/briefs", payload);
@@ -336,7 +339,37 @@ export default function LaunchBrief() {
     },
   });
 
-  const handleSubmit = () => {
+  // Upload files to server and return metadata
+  const uploadFilesToServer = async (files: File[]): Promise<{
+    id: string;
+    fileName: string;
+    fileSize: number;
+    mimeType: string;
+    url: string;
+    uploadedAt: string;
+  }[]> => {
+    if (files.length === 0) return [];
+
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append("files", file);
+    });
+
+    const response = await fetch("/api/briefs/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to upload files");
+    }
+
+    const data = await response.json();
+    return data.files || [];
+  };
+
+  const handleSubmit = async () => {
     // Validate all required fields - arrays must have at least one selection
     const requiredTextFields = [
       { value: formData.clientName, label: "Client Name" },
@@ -397,6 +430,15 @@ export default function LaunchBrief() {
       return;
     }
 
+    if (uploadedFiles.length > 5) {
+      toast({
+        title: "Too many files",
+        description: "Maximum 5 files allowed per brief submission",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!formData.confirmTerms) {
       toast({
         title: "Terms required",
@@ -406,26 +448,42 @@ export default function LaunchBrief() {
       return;
     }
 
-    // Build the payload matching the backend schema
-    const payload = {
-      submittedByName: formData.clientName,
-      submittedByEmail: formData.clientEmail,
-      submittedByContact: formData.clientContact,
-      companyName: formData.clientCompany,
-      companyBrand: formData.companyBrand,
-      studyType: selectedBrief === "basic" ? "Test24 Basic" : "Test24 Pro",
-      numIdeas: numberOfIdeas,
-      researchObjective: formData.researchObjective,
-      regions: formData.region,
-      ages: formData.age,
-      genders: formData.gender,
-      incomes: formData.income,
-      industry: formData.industry,
-      competitors: formData.competitors,
-      projectFileUrls: uploadedFiles.map(f => f.url),
-    };
+    try {
+      setIsUploadingFiles(true);
 
-    submitBriefMutation.mutate(payload);
+      // First upload all files to get their server URLs
+      const uploadedFileMetadata = await uploadFilesToServer(uploadedFiles);
+
+      // Build the payload matching the backend schema
+      const payload = {
+        submittedByName: formData.clientName,
+        submittedByEmail: formData.clientEmail,
+        submittedByContact: formData.clientContact,
+        companyName: formData.clientCompany,
+        companyBrand: formData.companyBrand,
+        studyType: selectedBrief === "basic" ? "Test24 Basic" : "Test24 Pro",
+        numIdeas: numberOfIdeas,
+        researchObjective: formData.researchObjective,
+        regions: formData.region,
+        ages: formData.age,
+        genders: formData.gender,
+        incomes: formData.income,
+        industry: formData.industry,
+        competitors: formData.competitors,
+        projectFileUrls: [], // Deprecated, use files array instead
+        files: uploadedFileMetadata,
+      };
+
+      submitBriefMutation.mutate(payload);
+    } catch (error: any) {
+      toast({
+        title: "File upload failed",
+        description: error.message || "Failed to upload files. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingFiles(false);
+    }
   };
 
   if (!selectedBrief) {
@@ -974,10 +1032,15 @@ export default function LaunchBrief() {
               className="w-full"
               size="lg"
               onClick={handleSubmit}
-              disabled={submitBriefMutation.isPending}
+              disabled={isUploadingFiles || submitBriefMutation.isPending}
               data-testid="button-submit-brief"
             >
-              {submitBriefMutation.isPending ? (
+              {isUploadingFiles ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Uploading files...
+                </>
+              ) : submitBriefMutation.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Submitting...

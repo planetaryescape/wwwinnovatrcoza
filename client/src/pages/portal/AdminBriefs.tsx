@@ -52,6 +52,15 @@ import { format } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
+interface BriefFile {
+  id: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  url: string;
+  uploadedAt: string;
+}
+
 interface BriefSubmission {
   id: string;
   submittedByName: string;
@@ -69,10 +78,18 @@ interface BriefSubmission {
   industry: string | null;
   competitors: string[];
   projectFileUrls: string[];
+  files?: BriefFile[];
   status: string;
   notes: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+// Helper to format file size
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
@@ -257,6 +274,7 @@ export default function AdminBriefs() {
                   <TableHead>Client</TableHead>
                   <TableHead>Company</TableHead>
                   <TableHead>Ideas</TableHead>
+                  <TableHead>Files</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Submitted</TableHead>
                   <TableHead>Actions</TableHead>
@@ -266,6 +284,7 @@ export default function AdminBriefs() {
                 {filteredBriefs.map((brief) => {
                   const statusInfo = statusConfig[brief.status] || statusConfig.new;
                   const StatusIcon = statusInfo.icon;
+                  const fileCount = (brief.files?.length || 0) + (brief.projectFileUrls?.length || 0);
 
                   return (
                     <TableRow key={brief.id} data-testid={`row-brief-${brief.id}`}>
@@ -290,6 +309,12 @@ export default function AdminBriefs() {
                       </TableCell>
                       <TableCell>
                         <span className="font-medium">{brief.numIdeas}</span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1 text-sm">
+                          <FileText className="h-3 w-3 text-muted-foreground" />
+                          <span>{fileCount}</span>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Badge className={statusInfo.color}>
@@ -512,23 +537,48 @@ export default function AdminBriefs() {
                 </Card>
               )}
 
-              {selectedBrief.projectFileUrls.length > 0 && (
+              {((selectedBrief.files && selectedBrief.files.length > 0) || selectedBrief.projectFileUrls.length > 0) && (
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">Uploaded Files</CardTitle>
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <Download className="h-4 w-4" />
+                      Uploaded Files ({(selectedBrief.files?.length || 0) + (selectedBrief.projectFileUrls?.length || 0)})
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {selectedBrief.projectFileUrls.map((url, idx) => (
+                      {selectedBrief.files?.map((file) => (
                         <div
-                          key={idx}
-                          className="flex items-center justify-between p-2 bg-muted/50 rounded-md"
+                          key={file.id}
+                          className="flex items-center justify-between p-3 bg-muted/50 rounded-md"
                         >
-                          <div className="flex items-center gap-2">
-                            <FileText className="h-4 w-4 text-muted-foreground" />
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-sm font-medium truncate">{file.fileName}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {formatFileSize(file.fileSize)} - {file.mimeType.split('/')[1]?.toUpperCase() || file.mimeType}
+                              </span>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm" asChild>
+                            <a href={file.url} target="_blank" rel="noopener noreferrer" download>
+                              <Download className="h-4 w-4 mr-1" />
+                              Download
+                            </a>
+                          </Button>
+                        </div>
+                      ))}
+                      {selectedBrief.projectFileUrls?.map((url, idx) => (
+                        <div
+                          key={`legacy-${idx}`}
+                          className="flex items-center justify-between p-3 bg-muted/50 rounded-md"
+                        >
+                          <div className="flex items-center gap-3">
+                            <FileText className="h-5 w-5 text-muted-foreground" />
                             <span className="text-sm truncate max-w-[300px]">{url.split("/").pop()}</span>
                           </div>
-                          <Button variant="ghost" size="sm" asChild>
+                          <Button variant="outline" size="sm" asChild>
                             <a href={url} target="_blank" rel="noopener noreferrer">
                               <Download className="h-4 w-4 mr-1" />
                               Download
