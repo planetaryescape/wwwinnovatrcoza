@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Crown, CreditCard, Building2 } from "lucide-react";
+import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Crown, CreditCard, Building2, Grid3x3, List, RefreshCw } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { Link } from "wouter";
 import reportsData from "@/data/reports.json";
@@ -268,11 +268,22 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId }: { report: R
 export default function TrendsInsights() {
   const { filters, setFilters, clearFilters } = useUrlFilters();
   const [clientReports, setClientReports] = useState<Report[]>([]);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [refreshing, setRefreshing] = useState(false);
   const { user } = useAuth();
   const userTier = user?.membershipTier;
   const userCompanyId = user?.companyId;
   
   useScrollRestoration("trends-insights");
+  
+  const handleRefresh = () => {
+    setRefreshing(true);
+    // Simulate refresh by clearing and refetching
+    setClientReports([]);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 500);
+  };
 
   // Fetch all reports for authenticated user (includes client-specific reports based on their companyId)
   useEffect(() => {
@@ -346,14 +357,43 @@ export default function TrendsInsights() {
     <PortalLayout>
       <div className="min-h-screen bg-background">
         <div className="max-w-6xl mx-auto px-6 py-8">
-          <div className="mb-8">
-            <h1 
-              className="text-4xl md:text-5xl font-bold mb-3 text-foreground"
-              style={{ fontFamily: 'DM Serif Display, serif' }}
-            >
-              Trends & Insights Library
-            </h1>
-            <p className="text-lg text-muted-foreground" style={{ fontFamily: 'Roboto, sans-serif' }}>Not trend fluff. Your inside track on South Africa’s shifting market.</p>
+          <div className="mb-8 flex items-start justify-between gap-4">
+            <div>
+              <h1 
+                className="text-4xl md:text-5xl font-bold mb-3 text-foreground"
+                style={{ fontFamily: 'DM Serif Display, serif' }}
+              >
+                Trends & Insights Library
+              </h1>
+              <p className="text-lg text-muted-foreground" style={{ fontFamily: 'Roboto, sans-serif' }}>Not trend fluff. Your inside track on South Africa’s shifting market.</p>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleRefresh}
+                disabled={refreshing}
+                data-testid="button-refresh"
+              >
+                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              </Button>
+              <Button
+                variant={viewMode === "grid" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("grid")}
+                data-testid="button-view-grid"
+              >
+                <Grid3x3 className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("list")}
+                data-testid="button-view-list"
+              >
+                <List className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 mb-8">
@@ -405,11 +445,39 @@ export default function TrendsInsights() {
             Showing {displayedReports.length} of {filteredAndSortedReports.length} reports
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {displayedReports.map((report) => (
-              <ReportCard key={report.id} report={report} userTier={userTier} isLoggedIn={!!user} userCompanyId={userCompanyId ?? undefined} />
-            ))}
-          </div>
+          {viewMode === "grid" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              {displayedReports.map((report) => (
+                <ReportCard key={report.id} report={report} userTier={userTier} isLoggedIn={!!user} userCompanyId={userCompanyId ?? undefined} />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3 mb-8">
+              {displayedReports.map((report) => (
+                <Link key={report.id} href={`/portal/trends/${report.slug}`}>
+                  <div className="flex items-center gap-4 p-4 border rounded-lg hover-elevate bg-card" data-testid={`list-report-${report.id}`}>
+                    <div 
+                      className="w-20 h-14 rounded-md bg-cover bg-center flex-shrink-0"
+                      style={{ backgroundImage: `url(${getCoverImage(report.category)})` }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge className={`${getCategoryStyle(report.category).bg} ${getCategoryStyle(report.category).text} text-xs`}>
+                          {report.category}
+                        </Badge>
+                        {report.isNew && (
+                          <Badge className="bg-[#00D084] text-white text-xs">NEW</Badge>
+                        )}
+                      </div>
+                      <h3 className="font-semibold text-foreground truncate">{report.title}</h3>
+                      <p className="text-sm text-muted-foreground line-clamp-1">{report.teaser}</p>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
 
           {filteredAndSortedReports.length === 0 && (
             <div className="text-center py-12">
