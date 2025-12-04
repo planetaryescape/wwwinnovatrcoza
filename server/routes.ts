@@ -1199,6 +1199,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .filter((c) => c.remaining > 0 && c.rate > 0)
         .sort((a, b) => a.remaining / a.rate - b.remaining / b.rate)[0];
 
+      // Get Test24 studies - all studies marked as Test24
+      const test24Studies = studies
+        .filter((s) => s.isTest24)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 10)
+        .map((s) => ({
+          id: s.id,
+          title: s.title,
+          companyName: s.companyName,
+          status: s.status,
+          studyType: s.studyType,
+          isTest24: s.isTest24,
+          submittedByName: s.submittedByName || "Unknown",
+          createdAt: s.createdAt,
+          deliveryDate: s.deliveryDate,
+        }));
+
+      // Get all reports for free reports library
+      const reports = await storage.getAllReports();
+      const freeReports = reports
+        .filter((r) => r.status === "published" && !r.isArchived && r.accessLevel !== "companyOnly")
+        .sort((a, b) => new Date(b.date || b.createdAt).getTime() - new Date(a.date || a.createdAt).getTime())
+        .slice(0, 9)
+        .map((r) => ({
+          id: r.id,
+          title: r.title,
+          category: r.category || "General",
+          accessLevel: r.accessLevel,
+          status: r.status,
+          date: r.date || r.createdAt,
+          topics: r.topics || [],
+        }));
+
       res.json({
         metrics: {
           totalUsers: users.length,
@@ -1206,7 +1239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           activeSubscriptions: subscriptions.filter((s) => s.status === "active").length,
           activeStudies: studies.filter((s) => s.status === "in_progress" || s.status === "AUDIENCE_LIVE" || s.status === "ANALYSING_DATA").length,
           briefsThisPeriod: periodBriefs.length,
-          reportsPublished: 16, // From reports.json
+          reportsPublished: reports.filter((r) => r.status === "published").length,
           creditsRemaining: {
             basic: totalBasicCredits - usedBasicCredits,
             pro: totalProCredits - usedProCredits,
@@ -1241,6 +1274,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           orderTrend,
           studyTrend,
         },
+        test24Studies,
+        freeReports,
         activeDeals: deals.filter((d) => d.isActive).length,
         timestamp: new Date(),
       });

@@ -324,9 +324,9 @@ export default function AdminCompanies() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold" data-testid="text-basic-credits">
-              {stats.usedBasicCredits}/{stats.totalBasicCredits}
+              {stats.totalBasicCredits - stats.usedBasicCredits}
             </div>
-            <Progress value={getCreditsProgress(stats.usedBasicCredits, stats.totalBasicCredits)} className="mt-2 h-1" />
+            <p className="text-xs text-muted-foreground">remaining</p>
           </CardContent>
         </Card>
         <Card>
@@ -336,9 +336,9 @@ export default function AdminCompanies() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold" data-testid="text-pro-credits">
-              {stats.usedProCredits}/{stats.totalProCredits}
+              {stats.totalProCredits - stats.usedProCredits}
             </div>
-            <Progress value={getCreditsProgress(stats.usedProCredits, stats.totalProCredits)} className="mt-2 h-1" />
+            <p className="text-xs text-muted-foreground">remaining</p>
           </CardContent>
         </Card>
       </div>
@@ -412,24 +412,10 @@ export default function AdminCompanies() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{company.basicCreditsTotal - company.basicCreditsUsed}</span>
-                          <span className="text-muted-foreground text-sm">/ {company.basicCreditsTotal}</span>
-                        </div>
-                        <Progress 
-                          value={getCreditsProgress(company.basicCreditsUsed, company.basicCreditsTotal)} 
-                          className="mt-1 h-1 w-20" 
-                        />
+                        <span className="font-medium">{company.basicCreditsTotal - company.basicCreditsUsed}</span>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{company.proCreditsTotal - company.proCreditsUsed}</span>
-                          <span className="text-muted-foreground text-sm">/ {company.proCreditsTotal}</span>
-                        </div>
-                        <Progress 
-                          value={getCreditsProgress(company.proCreditsUsed, company.proCreditsTotal)} 
-                          className="mt-1 h-1 w-20" 
-                        />
+                        <span className="font-medium">{company.proCreditsTotal - company.proCreditsUsed}</span>
                       </TableCell>
                       <TableCell>{company.monthlyFee ? formatCurrency(company.monthlyFee) : "—"}</TableCell>
                       <TableCell>

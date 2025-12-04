@@ -39,8 +39,15 @@ Preferred communication style: Simple, everyday language.
 ### Members Portal
 - **Purpose**: Personalized dashboard for authenticated members.
 - **Sections**: Dashboard, Trends & Insights Library, Launch New Brief, Credits & Billing, Past Research Dashboard, Member Deals, Settings.
-- **Admin Section**: Dedicated `/portal/admin` for ADMIN users with tabs for Overview, Users, Reports, Deals.
+- **Admin Section**: Dedicated `/portal/admin` for ADMIN users with tabs for Overview, Companies, Users, Orders, Briefs, Reports, Deals.
 - **Trends & Insights Library**: Dynamic content with search, filtering, sorting, and access level gating (PUBLIC, STARTER, GROWTH, SCALE).
+
+### Admin Portal B2B Client System
+- **Overview Tab**: Clean, simplified design with Test24 Tracker (active/completed studies), Free Reports library, and Research Pipeline summary (brief status counts).
+- **Companies Tab**: Company accounts with pooled credits. Credit display shows only remaining credits (not x/y format). Companies: Innovatr, Rugani Juice, Greenway Farms, Nando's South Africa, DGB, Revlon, Mitchum, Elizabeth Arden.
+- **Orders Tab**: Order management without revenue analytics. Shows order counts only (total, this month, completed, pending). No revenue values, charts, or averages.
+- **Briefs Tab**: Pipeline view with 5 columns (New, In Progress, Under Review, Completed, On Hold) with drag-and-drop functionality.
+- **Design Principles**: Clean, uncluttered interface focused on operational metrics. Data consistency across all tabs from same database tables.
 
 ### Payment Gateway System
 - **Architecture**: Multi-provider system with a unified `PaymentProvider` interface.

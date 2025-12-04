@@ -3,119 +3,89 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { 
   Users, 
   Building2, 
-  CreditCard, 
   FileText, 
-  TrendingUp, 
-  BarChart3, 
   Zap,
-  Download,
   RefreshCw,
   CheckCircle,
   Clock,
   Loader2,
-  AlertTriangle,
-  Crown,
+  Play,
+  FileCheck,
+  ExternalLink,
+  FlaskConical,
 } from "lucide-react";
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+
+interface Study {
+  id: string;
+  title: string;
+  companyName: string;
+  status: string;
+  studyType: string;
+  isTest24: boolean;
+  submittedByName: string;
+  createdAt: string;
+  deliveryDate?: string;
+}
+
+interface Report {
+  id: string;
+  title: string;
+  category: string;
+  accessLevel: string;
+  status: string;
+  date: string;
+  topics: string[];
+}
+
+interface BriefStats {
+  new: number;
+  inProgress: number;
+  completed: number;
+  onHold: number;
+}
 
 interface AnalyticsData {
   metrics: {
     totalUsers: number;
     totalCompanies: number;
-    activeSubscriptions: number;
     activeStudies: number;
-    briefsThisPeriod: number;
     reportsPublished: number;
     creditsRemaining: {
       basic: number;
       pro: number;
     };
   };
-  people: {
-    newUsers: number;
-    newCompanies: number;
-    topActiveCompany: string;
-    usersByTier: {
-      starter: number;
-      growth: number;
-      scale: number;
-    };
-  };
-  revenue: {
-    ordersThisPeriod: number;
-    totalOrderValue: number;
-    averageOrderValue: number;
-    creditsPurchased: number;
-    creditsUsed: number;
-    nextToRunOut: string;
-  };
   pipeline: {
     totalBriefs: number;
-    briefStats: {
-      new: number;
-      inProgress: number;
-      completed: number;
-      onHold: number;
-    };
+    briefStats: BriefStats;
     activeStudies: number;
-    studyTrend: { month: string; studies: number }[];
   };
-  charts: {
-    studiesByCompany: { name: string; studies: number; basicCredits: number; proCredits: number }[];
-    orderTrend: { month: string; orders: number; revenue: number }[];
-    studyTrend: { month: string; studies: number }[];
-  };
-  activeDeals: number;
+  test24Studies: Study[];
+  freeReports: Report[];
   timestamp: string;
 }
 
-const CHART_COLORS = {
-  primary: "#0033A0",
-  secondary: "#7c3aed",
-  success: "#22c55e",
-  warning: "#f59e0b",
-  info: "#3b82f6",
-  muted: "#6b7280",
+const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
+  "AUDIENCE_LIVE": { label: "Live", color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300", icon: Play },
+  "IN_PROGRESS": { label: "In Progress", color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300", icon: Loader2 },
+  "COMPLETED": { label: "Completed", color: "bg-gray-100 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300", icon: CheckCircle },
+  "PENDING": { label: "Pending", color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300", icon: Clock },
 };
-
-const CATEGORY_COLORS = ["#0033A0", "#7c3aed", "#f97316", "#ec4899"];
 
 export default function AdminOverview() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [period, setPeriod] = useState("30d");
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchAnalytics = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`/api/admin/analytics?period=${period}`);
+      const res = await fetch("/api/admin/analytics?period=all");
       if (!res.ok) throw new Error("Failed to fetch analytics");
       const data = await res.json();
       setAnalytics(data);
@@ -125,7 +95,7 @@ export default function AdminOverview() {
     } finally {
       setLoading(false);
     }
-  }, [period]);
+  }, []);
 
   useEffect(() => {
     fetchAnalytics();
@@ -133,69 +103,18 @@ export default function AdminOverview() {
     return () => clearInterval(interval);
   }, [fetchAnalytics]);
 
-  const formatCurrency = (value: number) => 
-    `R${value.toLocaleString("en-ZA", { minimumFractionDigits: 0 })}`;
-
-  const formatMonth = (monthStr: string) => {
-    const [year, month] = monthStr.split("-");
-    const date = new Date(parseInt(year), parseInt(month) - 1);
-    return date.toLocaleDateString("en-ZA", { month: "short" });
-  };
-
-  const handleDownloadPdf = async () => {
-    if (!analytics) return;
-    const summaryText = `
-Innovatr Admin Summary
-Generated: ${new Date().toLocaleString()}
-Period: ${period === "7d" ? "Last 7 Days" : period === "30d" ? "Last 30 Days" : period === "year" ? "This Year" : "All Time"}
-
-KEY METRICS
-- Total Users: ${analytics.metrics.totalUsers}
-- Total Companies: ${analytics.metrics.totalCompanies}
-- Active Subscriptions: ${analytics.metrics.activeSubscriptions}
-- Active Studies: ${analytics.metrics.activeStudies}
-- Briefs This Period: ${analytics.metrics.briefsThisPeriod}
-- Reports Published: ${analytics.metrics.reportsPublished}
-- Credits Remaining: ${analytics.metrics.creditsRemaining.basic} Basic, ${analytics.metrics.creditsRemaining.pro} Pro
-
-REVENUE & ORDERS
-- Orders This Period: ${analytics.revenue.ordersThisPeriod}
-- Total Order Value: ${formatCurrency(analytics.revenue.totalOrderValue)}
-- Average Order Value: ${formatCurrency(analytics.revenue.averageOrderValue)}
-
-RESEARCH PIPELINE
-- Total Briefs: ${analytics.pipeline.totalBriefs}
-- New: ${analytics.pipeline.briefStats.new}
-- In Progress: ${analytics.pipeline.briefStats.inProgress}
-- Completed: ${analytics.pipeline.briefStats.completed}
-
-TOP ACTIVE COMPANY: ${analytics.people.topActiveCompany}
-NEXT TO RUN OUT OF CREDITS: ${analytics.revenue.nextToRunOut}
-    `.trim();
-
-    const blob = new Blob([summaryText], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `innovatr-admin-summary-${new Date().toISOString().split("T")[0]}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   const MetricCard = ({ 
     label, 
     value, 
     icon: Icon, 
-    subtitle,
     iconColor = "text-primary"
   }: { 
     label: string; 
     value: string | number; 
     icon: any;
-    subtitle?: string;
     iconColor?: string;
   }) => (
-    <Card className="hover-elevate cursor-pointer">
+    <Card className="hover-elevate">
       <CardContent className="p-4">
         <div className="flex items-center justify-between gap-2">
           <div className="flex-1 min-w-0">
@@ -205,11 +124,8 @@ NEXT TO RUN OUT OF CREDITS: ${analytics.revenue.nextToRunOut}
             ) : (
               <p className="text-2xl font-bold">{value}</p>
             )}
-            {subtitle && (
-              <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
-            )}
           </div>
-          <div className={`w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0`}>
+          <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
             <Icon className={`w-5 h-5 ${iconColor}`} />
           </div>
         </div>
@@ -217,12 +133,24 @@ NEXT TO RUN OUT OF CREDITS: ${analytics.revenue.nextToRunOut}
     </Card>
   );
 
-  const reportCategories = [
-    { name: "Insights", value: 6 },
-    { name: "Launch", value: 4 },
-    { name: "Inside", value: 3 },
-    { name: "IRL", value: 3 },
-  ];
+  const getStatusBadge = (status: string) => {
+    const config = statusConfig[status] || statusConfig["PENDING"];
+    const Icon = config.icon;
+    return (
+      <Badge className={`${config.color} gap-1`}>
+        <Icon className="w-3 h-3" />
+        {config.label}
+      </Badge>
+    );
+  };
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("en-ZA", { 
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -230,7 +158,7 @@ NEXT TO RUN OUT OF CREDITS: ${analytics.revenue.nextToRunOut}
         <div>
           <h2 className="text-2xl font-serif font-bold mb-1">Control Room</h2>
           <p className="text-muted-foreground">
-            System overview and analytics dashboard
+            System overview
             {lastUpdated && (
               <span className="ml-2 text-xs">
                 Last updated: {lastUpdated.toLocaleTimeString()}
@@ -238,39 +166,16 @@ NEXT TO RUN OUT OF CREDITS: ${analytics.revenue.nextToRunOut}
             )}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger className="w-[150px]" data-testid="select-period">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7d">Last 7 Days</SelectItem>
-              <SelectItem value="30d">Last 30 Days</SelectItem>
-              <SelectItem value="year">This Year</SelectItem>
-              <SelectItem value="all">All Time</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={fetchAnalytics}
-            disabled={loading}
-            data-testid="button-refresh-analytics"
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
-          <Button 
-            variant="default"
-            size="sm"
-            onClick={handleDownloadPdf}
-            disabled={loading || !analytics}
-            data-testid="button-download-summary"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Download Summary
-          </Button>
-        </div>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={fetchAnalytics}
+          disabled={loading}
+          data-testid="button-refresh-analytics"
+        >
+          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+          Refresh
+        </Button>
       </div>
 
       {error && (
@@ -281,9 +186,9 @@ NEXT TO RUN OUT OF CREDITS: ${analytics.revenue.nextToRunOut}
         </Card>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <MetricCard 
-          label="Total Users" 
+          label="Users" 
           value={analytics?.metrics.totalUsers || 0} 
           icon={Users}
           iconColor="text-blue-500"
@@ -295,34 +200,20 @@ NEXT TO RUN OUT OF CREDITS: ${analytics.revenue.nextToRunOut}
           iconColor="text-violet-500"
         />
         <MetricCard 
-          label="Active Subs" 
-          value={analytics?.metrics.activeSubscriptions || 0} 
-          icon={CreditCard}
-          iconColor="text-green-500"
-        />
-        <MetricCard 
           label="Active Studies" 
           value={analytics?.metrics.activeStudies || 0} 
-          icon={BarChart3}
+          icon={FlaskConical}
           iconColor="text-orange-500"
-        />
-        <MetricCard 
-          label="Briefs" 
-          value={analytics?.metrics.briefsThisPeriod || 0}
-          subtitle="This period"
-          icon={FileText}
-          iconColor="text-blue-500"
         />
         <MetricCard 
           label="Reports" 
           value={analytics?.metrics.reportsPublished || 0}
-          subtitle="Published"
-          icon={TrendingUp}
+          icon={FileCheck}
           iconColor="text-emerald-500"
         />
         <MetricCard 
-          label="Credits Left" 
-          value={`${analytics?.metrics.creditsRemaining.basic || 0}B / ${analytics?.metrics.creditsRemaining.pro || 0}P`}
+          label="Credits Available" 
+          value={`${analytics?.metrics.creditsRemaining.basic || 0} Basic / ${analytics?.metrics.creditsRemaining.pro || 0} Pro`}
           icon={Zap}
           iconColor="text-amber-500"
         />
@@ -330,280 +221,188 @@ NEXT TO RUN OUT OF CREDITS: ${analytics.revenue.nextToRunOut}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              People & Companies
+              <FlaskConical className="w-5 h-5 text-orange-500" />
+              Test24 Tracker
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-3 bg-muted/50 rounded-lg">
-                <p className="text-2xl font-bold">{analytics?.people.newUsers || 0}</p>
-                <p className="text-xs text-muted-foreground">New Users</p>
+          <CardContent>
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
               </div>
-              <div className="text-center p-3 bg-muted/50 rounded-lg">
-                <p className="text-2xl font-bold">{analytics?.people.newCompanies || 0}</p>
-                <p className="text-xs text-muted-foreground">New Companies</p>
+            ) : analytics?.test24Studies && analytics.test24Studies.length > 0 ? (
+              <div className="space-y-3">
+                {analytics.test24Studies.map((study) => (
+                  <div 
+                    key={study.id} 
+                    className="p-3 border rounded-lg hover-elevate"
+                    data-testid={`study-item-${study.id}`}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{study.title}</p>
+                        <p className="text-sm text-muted-foreground">{study.companyName}</p>
+                      </div>
+                      {getStatusBadge(study.status)}
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>
+                        {study.studyType === "basic" ? "Test24 Basic" : "Test24 Pro"}
+                      </span>
+                      <span>
+                        {study.submittedByName}
+                      </span>
+                      {study.deliveryDate && (
+                        <span>Delivered: {formatDate(study.deliveryDate)}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="text-center p-3 bg-primary/10 rounded-lg">
-                <p className="text-sm font-bold truncate">{analytics?.people.topActiveCompany || "N/A"}</p>
-                <p className="text-xs text-muted-foreground">Top Active</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <Users className="w-3 h-3" />
-                {analytics?.people.usersByTier.starter || 0} Starter
-              </Badge>
-              <Badge className="bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 flex items-center gap-1">
-                <Zap className="w-3 h-3" />
-                {analytics?.people.usersByTier.growth || 0} Growth
-              </Badge>
-              <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 flex items-center gap-1">
-                <Crown className="w-3 h-3" />
-                {analytics?.people.usersByTier.scale || 0} Scale
-              </Badge>
-            </div>
-
-            {analytics?.charts.studiesByCompany && analytics.charts.studiesByCompany.length > 0 && (
-              <div className="h-48">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={analytics.charts.studiesByCompany.slice(0, 5)} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                    <XAxis type="number" fontSize={12} />
-                    <YAxis type="category" dataKey="name" width={100} fontSize={11} tickLine={false} />
-                    <Tooltip />
-                    <Bar dataKey="studies" fill={CHART_COLORS.primary} radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <FlaskConical className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p>No Test24 studies yet</p>
               </div>
             )}
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
-              <CreditCard className="w-5 h-5" />
-              Revenue & Credits
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-3 bg-muted/50 rounded-lg">
-                <p className="text-2xl font-bold">{analytics?.revenue.ordersThisPeriod || 0}</p>
-                <p className="text-xs text-muted-foreground">Orders</p>
-              </div>
-              <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                <p className="text-lg font-bold text-green-700 dark:text-green-400">
-                  {formatCurrency(analytics?.revenue.totalOrderValue || 0)}
-                </p>
-                <p className="text-xs text-muted-foreground">Total Value</p>
-              </div>
-              <div className="text-center p-3 bg-muted/50 rounded-lg">
-                <p className="text-lg font-bold">
-                  {formatCurrency(analytics?.revenue.averageOrderValue || 0)}
-                </p>
-                <p className="text-xs text-muted-foreground">Avg Order</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-amber-600" />
-                <span className="text-sm">Next to run out:</span>
-              </div>
-              <span className="font-medium text-amber-700 dark:text-amber-400">
-                {analytics?.revenue.nextToRunOut || "N/A"}
-              </span>
-            </div>
-
-            {analytics?.charts.studiesByCompany && analytics.charts.studiesByCompany.length > 0 && (
-              <div className="h-40">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={analytics.charts.studiesByCompany.slice(0, 5)}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" fontSize={10} tickLine={false} />
-                    <YAxis fontSize={12} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="basicCredits" name="Basic" stackId="a" fill={CHART_COLORS.info} />
-                    <Bar dataKey="proCredits" name="Pro" stackId="a" fill={CHART_COLORS.secondary} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <FileText className="w-5 h-5" />
+              <FileText className="w-5 h-5 text-blue-500" />
               Research Pipeline
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-4 gap-2">
-              <div className="text-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <p className="text-xl font-bold text-blue-700 dark:text-blue-400">
+              <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">
                   {analytics?.pipeline.briefStats.new || 0}
                 </p>
-                <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1">
+                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
                   <Clock className="w-3 h-3" /> New
                 </p>
               </div>
-              <div className="text-center p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                <p className="text-xl font-bold text-yellow-700 dark:text-yellow-400">
+              <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <p className="text-2xl font-bold text-yellow-700 dark:text-yellow-400">
                   {analytics?.pipeline.briefStats.inProgress || 0}
                 </p>
-                <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1">
-                  <Loader2 className="w-3 h-3" /> Progress
+                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                  <Loader2 className="w-3 h-3" /> In Progress
                 </p>
               </div>
-              <div className="text-center p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                <p className="text-xl font-bold text-green-700 dark:text-green-400">
+              <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <p className="text-2xl font-bold text-green-700 dark:text-green-400">
                   {analytics?.pipeline.briefStats.completed || 0}
                 </p>
-                <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-1">
-                  <CheckCircle className="w-3 h-3" /> Done
+                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                  <CheckCircle className="w-3 h-3" /> Completed
                 </p>
               </div>
-              <div className="text-center p-2 bg-muted/50 rounded-lg">
-                <p className="text-xl font-bold">{analytics?.pipeline.activeStudies || 0}</p>
-                <p className="text-[10px] text-muted-foreground">Active</p>
+              <div className="text-center p-3 bg-muted/50 rounded-lg">
+                <p className="text-2xl font-bold">{analytics?.pipeline.activeStudies || 0}</p>
+                <p className="text-xs text-muted-foreground">Active</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-sm">
-              <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-blue-500 transition-all" 
-                  style={{ width: `${((analytics?.pipeline.briefStats.new || 0) / Math.max(1, analytics?.pipeline.totalBriefs || 1)) * 100}%` }}
-                />
-              </div>
-              <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-yellow-500 transition-all" 
-                  style={{ width: `${((analytics?.pipeline.briefStats.inProgress || 0) / Math.max(1, analytics?.pipeline.totalBriefs || 1)) * 100}%` }}
-                />
-              </div>
-              <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-green-500 transition-all" 
-                  style={{ width: `${((analytics?.pipeline.briefStats.completed || 0) / Math.max(1, analytics?.pipeline.totalBriefs || 1)) * 100}%` }}
-                />
-              </div>
+            <div className="flex items-center gap-1">
+              <div 
+                className="h-2 bg-blue-500 rounded-l-full transition-all" 
+                style={{ 
+                  width: `${((analytics?.pipeline.briefStats.new || 0) / Math.max(1, analytics?.pipeline.totalBriefs || 1)) * 100}%`,
+                  minWidth: analytics?.pipeline.briefStats.new ? '10%' : '0'
+                }}
+              />
+              <div 
+                className="h-2 bg-yellow-500 transition-all" 
+                style={{ 
+                  width: `${((analytics?.pipeline.briefStats.inProgress || 0) / Math.max(1, analytics?.pipeline.totalBriefs || 1)) * 100}%`,
+                  minWidth: analytics?.pipeline.briefStats.inProgress ? '10%' : '0'
+                }}
+              />
+              <div 
+                className="h-2 bg-green-500 rounded-r-full transition-all" 
+                style={{ 
+                  width: `${((analytics?.pipeline.briefStats.completed || 0) / Math.max(1, analytics?.pipeline.totalBriefs || 1)) * 100}%`,
+                  minWidth: analytics?.pipeline.briefStats.completed ? '10%' : '0'
+                }}
+              />
             </div>
 
-            {analytics?.charts.studyTrend && analytics.charts.studyTrend.length > 0 && (
-              <div className="h-32">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={analytics.charts.studyTrend}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="month" fontSize={10} tickFormatter={formatMonth} />
-                    <YAxis fontSize={12} />
-                    <Tooltip labelFormatter={(v) => formatMonth(v as string)} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="studies" 
-                      stroke={CHART_COLORS.primary} 
-                      strokeWidth={2}
-                      dot={{ fill: CHART_COLORS.primary, r: 3 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              Reports & Content
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-4 gap-2">
-              <div className="text-center p-2 bg-muted/50 rounded-lg">
-                <p className="text-xl font-bold">16</p>
-                <p className="text-[10px] text-muted-foreground">Total</p>
-              </div>
-              <div className="text-center p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                <p className="text-xl font-bold text-green-700 dark:text-green-400">16</p>
-                <p className="text-[10px] text-muted-foreground">Published</p>
-              </div>
-              <div className="text-center p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-                <p className="text-xl font-bold text-amber-700 dark:text-amber-400">0</p>
-                <p className="text-[10px] text-muted-foreground">Scheduled</p>
-              </div>
-              <div className="text-center p-2 bg-muted/50 rounded-lg">
-                <p className="text-xl font-bold">0</p>
-                <p className="text-[10px] text-muted-foreground">Drafts</p>
-              </div>
-            </div>
-
-            <div className="h-40">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={reportCategories}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={40}
-                    outerRadius={60}
-                    paddingAngle={2}
-                    dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}`}
-                    labelLine={false}
-                  >
-                    {reportCategories.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {reportCategories.map((cat, i) => (
-                <Badge 
-                  key={cat.name} 
-                  variant="secondary"
-                  style={{ backgroundColor: `${CATEGORY_COLORS[i]}20`, color: CATEGORY_COLORS[i] }}
-                >
-                  {cat.name}: {cat.value}
-                </Badge>
-              ))}
+            <div className="text-sm text-muted-foreground text-center">
+              {analytics?.pipeline.totalBriefs || 0} total briefs in pipeline
             </div>
           </CardContent>
         </Card>
       </div>
 
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <FileCheck className="w-5 h-5 text-emerald-500" />
+            Free Reports Library
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-24 w-full" />
+              ))}
+            </div>
+          ) : analytics?.freeReports && analytics.freeReports.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {analytics.freeReports.map((report) => (
+                <div 
+                  key={report.id} 
+                  className="p-3 border rounded-lg hover-elevate"
+                  data-testid={`report-item-${report.id}`}
+                >
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <p className="font-medium text-sm line-clamp-2">{report.title}</p>
+                    <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="secondary" className="text-xs">
+                      {report.category}
+                    </Badge>
+                    {report.topics?.slice(0, 2).map((topic) => (
+                      <Badge key={topic} variant="outline" className="text-xs">
+                        {topic}
+                      </Badge>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {formatDate(report.date)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p>No free reports available</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <Card className="bg-muted/30">
         <CardContent className="p-4">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-6 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500" />
-                <span className="text-muted-foreground">Email Service: Active</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500" />
-                <span className="text-muted-foreground">Database: Connected</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500" />
-                <span className="text-muted-foreground">Active Deals: {analytics?.activeDeals || 0}</span>
-              </div>
+          <div className="flex items-center gap-6 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-500" />
+              <span className="text-muted-foreground">System Status: Online</span>
             </div>
-            <div className="text-xs text-muted-foreground">
-              System Status: All Systems Operational
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-500" />
+              <span className="text-muted-foreground">Database: Connected</span>
             </div>
           </div>
         </CardContent>

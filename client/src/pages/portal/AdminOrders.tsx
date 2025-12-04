@@ -21,24 +21,12 @@ import {
   Search, 
   Eye, 
   ShoppingCart, 
-  DollarSign, 
-  TrendingUp, 
+  CheckCircle,
+  Clock,
   RefreshCw,
-  Calendar,
   Building2,
+  Package,
 } from "lucide-react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  Legend,
-} from "recharts";
 
 interface OrderItem {
   id: string;
@@ -61,12 +49,6 @@ interface AdminOrder {
   createdAt: string;
   items: OrderItem[];
 }
-
-const CHART_COLORS = {
-  primary: "#0033A0",
-  secondary: "#7c3aed",
-  success: "#22c55e",
-};
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
@@ -138,72 +120,13 @@ export default function AdminOrders() {
              orderDate.getFullYear() === now.getFullYear();
     });
 
-    const totalValue = orders.reduce((sum, o) => sum + parseFloat(o.amount || "0"), 0);
-    const thisMonthValue = thisMonth.reduce((sum, o) => sum + parseFloat(o.amount || "0"), 0);
-
     return {
       total: orders.length,
       thisMonth: thisMonth.length,
-      totalValue,
-      thisMonthValue,
-      averageOrder: orders.length > 0 ? totalValue / orders.length : 0,
       completed: orders.filter(o => o.status === "completed").length,
       pending: orders.filter(o => o.status === "pending").length,
     };
   }, [orders]);
-
-  const ordersByMonth = useMemo(() => {
-    const byMonth: Record<string, { month: string; orders: number; revenue: number }> = {};
-    
-    orders.forEach(o => {
-      const date = new Date(o.createdAt);
-      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      if (!byMonth[key]) {
-        byMonth[key] = { month: key, orders: 0, revenue: 0 };
-      }
-      byMonth[key].orders++;
-      byMonth[key].revenue += parseFloat(o.amount || "0");
-    });
-
-    return Object.values(byMonth)
-      .sort((a, b) => a.month.localeCompare(b.month))
-      .slice(-6);
-  }, [orders]);
-
-  const ordersByType = useMemo(() => {
-    const byType: Record<string, { type: string; count: number; revenue: number }> = {};
-    
-    orders.forEach(o => {
-      const type = o.purchaseType || "Other";
-      if (!byType[type]) {
-        byType[type] = { type, count: 0, revenue: 0 };
-      }
-      byType[type].count++;
-      byType[type].revenue += parseFloat(o.amount || "0");
-    });
-
-    return Object.values(byType).sort((a, b) => b.revenue - a.revenue);
-  }, [orders]);
-
-  const formatPrice = (price: string | number) => {
-    return `R${Number(price).toLocaleString("en-ZA")}`;
-  };
-
-  const formatMonth = (monthStr: string) => {
-    const [year, month] = monthStr.split("-");
-    const date = new Date(parseInt(year), parseInt(month) - 1);
-    return date.toLocaleDateString("en-ZA", { month: "short" });
-  };
-
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      pending: "secondary",
-      processing: "default",
-      completed: "default",
-      failed: "destructive",
-    };
-    return variants[status] || "outline";
-  };
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
@@ -220,8 +143,6 @@ export default function AdminOrders() {
       year: "numeric",
       month: "short",
       day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     });
   };
 
@@ -258,7 +179,7 @@ export default function AdminOrders() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-2xl font-serif font-bold mb-1">Orders Management</h2>
+          <h2 className="text-2xl font-serif font-bold mb-1">Orders</h2>
           <p className="text-muted-foreground">View and manage customer orders</p>
         </div>
         <Button variant="outline" size="sm" onClick={fetchOrders} disabled={loading} data-testid="button-refresh-orders">
@@ -283,22 +204,8 @@ export default function AdminOrders() {
                 <ShoppingCart className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{stats.thisMonth}</p>
-                <p className="text-xs text-muted-foreground">Orders This Month</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-green-600 dark:text-green-400" />
-              </div>
-              <div>
-                <p className="text-xl font-bold">{formatPrice(stats.thisMonthValue)}</p>
-                <p className="text-xs text-muted-foreground">This Month Value</p>
+                <p className="text-2xl font-bold">{stats.total}</p>
+                <p className="text-xs text-muted-foreground">Total Orders</p>
               </div>
             </div>
           </CardContent>
@@ -308,11 +215,11 @@ export default function AdminOrders() {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                <Package className="w-5 h-5 text-violet-600 dark:text-violet-400" />
               </div>
               <div>
-                <p className="text-xl font-bold">{formatPrice(stats.averageOrder)}</p>
-                <p className="text-xs text-muted-foreground">Average Order</p>
+                <p className="text-2xl font-bold">{stats.thisMonth}</p>
+                <p className="text-xs text-muted-foreground">This Month</p>
               </div>
             </div>
           </CardContent>
@@ -321,71 +228,28 @@ export default function AdminOrders() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{stats.total}</p>
-                <p className="text-xs text-muted-foreground">Total Orders</p>
+                <p className="text-2xl font-bold">{stats.completed}</p>
+                <p className="text-xs text-muted-foreground">Completed</p>
               </div>
             </div>
           </CardContent>
         </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Orders & Revenue Trend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {ordersByMonth.length > 0 ? (
-              <div className="h-48">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={ordersByMonth}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="month" fontSize={11} tickFormatter={formatMonth} />
-                    <YAxis yAxisId="left" fontSize={11} />
-                    <YAxis yAxisId="right" orientation="right" fontSize={11} tickFormatter={(v) => `R${v/1000}k`} />
-                    <Tooltip 
-                      formatter={(value: number, name: string) => [
-                        name === "revenue" ? formatPrice(value) : value,
-                        name === "revenue" ? "Revenue" : "Orders"
-                      ]}
-                      labelFormatter={formatMonth}
-                    />
-                    <Legend />
-                    <Bar yAxisId="left" dataKey="orders" name="Orders" fill={CHART_COLORS.primary} radius={[4, 4, 0, 0]} />
-                    <Line yAxisId="right" type="monotone" dataKey="revenue" name="Revenue" stroke={CHART_COLORS.success} strokeWidth={2} dot={false} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-8">No order data available</p>
-            )}
-          </CardContent>
-        </Card>
 
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Revenue by Product Type</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {ordersByType.length > 0 ? (
-              <div className="h-48">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={ordersByType} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                    <XAxis type="number" fontSize={11} tickFormatter={(v) => `R${v/1000}k`} />
-                    <YAxis type="category" dataKey="type" width={120} fontSize={11} tickLine={false} />
-                    <Tooltip formatter={(value: number) => formatPrice(value)} />
-                    <Bar dataKey="revenue" fill={CHART_COLORS.secondary} radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
               </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-8">No order data available</p>
-            )}
+              <div>
+                <p className="text-2xl font-bold">{stats.pending}</p>
+                <p className="text-xs text-muted-foreground">Pending</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -448,50 +312,40 @@ export default function AdminOrders() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {filteredOrders.map((order) => (
             <Card key={order.id} className="hover-elevate" data-testid={`card-order-${order.id}`}>
-              <CardContent className="pt-6">
-                <div className="flex justify-between items-start gap-4 flex-wrap">
-                  <div className="space-y-2">
+              <CardContent className="py-4">
+                <div className="flex justify-between items-center gap-4 flex-wrap">
+                  <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <p className="font-semibold text-sm" data-testid={`text-order-id-${order.id}`}>
-                        Order #{order.id.substring(0, 8)}
+                        {order.purchaseType}
                       </p>
                       <Badge className={getStatusColor(order.status)}>
                         {order.status}
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      Customer: {order.customerName || "Unknown"} ({order.customerEmail})
-                    </p>
-                    {order.customerCompany && (
-                      <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <Building2 className="w-3 h-3" />
-                        {order.customerCompany}
-                      </p>
-                    )}
-                    <p className="text-sm text-muted-foreground">
-                      Purchase: {order.purchaseType}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Date: {formatDate(order.createdAt)}
-                    </p>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      {order.customerCompany && (
+                        <span className="flex items-center gap-1">
+                          <Building2 className="w-3 h-3" />
+                          {order.customerCompany}
+                        </span>
+                      )}
+                      <span>{order.customerName || order.customerEmail}</span>
+                      <span>{formatDate(order.createdAt)}</span>
+                    </div>
                   </div>
-                  <div className="text-right space-y-2">
-                    <p className="font-bold text-lg">
-                      {formatPrice(order.amount)}
-                    </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleViewOrder(order)}
-                      data-testid={`button-view-order-${order.id}`}
-                    >
-                      <Eye className="w-4 h-4 mr-2" />
-                      View Details
-                    </Button>
-                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewOrder(order)}
+                    data-testid={`button-view-order-${order.id}`}
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Details
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -553,40 +407,29 @@ export default function AdminOrders() {
                       <span className="text-muted-foreground">Date:</span>{" "}
                       {formatDate(selectedOrder.createdAt)}
                     </p>
-                    <p>
-                      <span className="text-muted-foreground">Total:</span>{" "}
-                      <span className="font-semibold">
-                        {formatPrice(selectedOrder.amount)}
-                      </span>
-                    </p>
                   </div>
                 </div>
 
-                <div>
-                  <h4 className="font-semibold mb-3">Order Items</h4>
-                  <div className="space-y-2 text-sm border rounded-lg p-3">
-                    {selectedOrder.items.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex justify-between items-start pb-2 border-b last:border-0 last:pb-0"
-                      >
-                        <div>
-                          <p className="font-medium">{item.description || item.type}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Qty: {item.quantity}
-                          </p>
+                {selectedOrder.items.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-3">Order Items</h4>
+                    <div className="space-y-2 text-sm border rounded-lg p-3">
+                      {selectedOrder.items.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex justify-between items-start pb-2 border-b last:border-0 last:pb-0"
+                        >
+                          <div>
+                            <p className="font-medium">{item.description || item.type}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Qty: {item.quantity}
+                            </p>
+                          </div>
                         </div>
-                        <p className="font-medium text-right">
-                          {formatPrice(
-                            String(
-                              Number(item.unitAmount) * item.quantity
-                            )
-                          )}
-                        </p>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           )}
