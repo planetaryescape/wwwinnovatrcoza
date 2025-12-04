@@ -1,0 +1,452 @@
+You are the coding assistant working on the Innovatr portal project currently open in this Replit.
+Tech stack: React + TypeScript frontend, Node/Express backend, PostgreSQL with Drizzle ORM, sessions for auth, and an Admin Portal under /portal/admin.
+
+Your job in this task is to:
+
+Do a full, careful audit of how admin analytics, credits, studies, reports and members are wired up and stored.
+
+Fix any bugs or mismatches you find.
+
+Tidy up and slightly redesign specific UI blocks (especially the “Research Pipeline” card on the Admin Overview).
+
+Fix a privacy bug so that clients can only see their own research and reports.
+
+Update Pulse membership logic so that every portal user is automatically a Pulse member (paid or free).
+
+Please follow the steps and specifications below exactly and work directly in this codebase.
+
+1. Understand Current State
+
+Inspect the code for:
+
+Admin portal pages and components
+
+client/src/pages/portal/admin/*
+
+Any shared admin components (cards, charts, overview tiles, etc.).
+
+“My Research” page
+
+client/src/pages/portal/research*.
+
+Storage / DB layer and schema
+
+server/storage.ts, server/db.ts, shared/schema.ts or similar.
+
+Any “Test24 Tracker”, “Research Pipeline”, “Credits”, “Reports” and “Members/Companies” components.
+
+Identify:
+
+Where studies / briefs are stored (table name, fields, status values).
+
+Where reports are stored and how they link to companies / users.
+
+Where credits are stored, especially Basic vs Pro.
+
+Where Pulse membership or newsletter subscribers are stored (field names and tables).
+
+Make short comments in the relevant files if helpful, but do not change behaviour yet.
+
+2. Ground-Truth Data You Must Enforce
+
+Use the DB and seed data so the following are true and reflected correctly across Admin, My Research and Credits:
+
+Companies & Tiers
+
+We have these companies:
+
+Innovatr
+
+Tier: Scale
+
+Credits: 25 Basic, 4 Pro
+
+Can be used as internal test client.
+
+Rugani Juice
+
+Tier: Growth
+
+Credits now: 8 Basic, 2 Pro
+
+They originally had 10 Basic but used 2. Keep this history consistent with orders / ledger where relevant.
+
+Client reports attached to Rugani:
+
+“Rugani x Clicks Wellness Beverage Positioning” – Test24 Pro – Completed.
+
+“Rugani New Key Visual Optimisation” – Test24 Pro – Completed.
+
+Greenway Farms
+
+Tier: Growth
+
+Credits: 10 Basic, 2 Pro
+
+Currently no client reports linked.
+
+They are the parent company for Rugani in a commercial sense, but in the portal they can stay as a separate company with their own credits.
+
+Nando’s South Africa
+
+Tier: Growth
+
+Credits: 5 Basic initially, now 0 (they used all 5 on their current project).
+
+One active study:
+
+“Nando’s Menu Test” – Test24 Basic – Live / ongoing (audience live).
+
+One client report (live results) linked to Nando’s.
+
+DGB
+
+Tier: Starter
+
+Credits: 1 Test24 Basic originally, now 0 (used on the pilot).
+
+One completed Test24 Basic study and attached report:
+
+“Innovatr x Durbanville Hills Test24 Basic Report” – Completed.
+
+Revlon, Mitchum, Elizabeth Arden
+
+Tier: Scale for all three.
+
+Credits: 0 Basic, 0 Pro for now.
+
+No contact users yet.
+
+No client reports yet.
+
+Make sure all of these companies appear correctly in the Admin → Companies tab, with the right tier and simple credit counts (see Section 5).
+
+Portal Members
+
+Current portal members (Admin → Members tab) must look like this:
+
+Wesley Browne – Company: Greenway Farms – Tier: Growth – Credits label: 10B 2P
+
+Duncan Buhr – Company: Greenway Farms – Tier: Growth – Credits label: 10B 2P
+
+Simonne – Company: Rugani Juice – Tier: Growth – Credits label: 8B 2P
+
+Tymon – Company: Rugani Juice – Tier: Growth – Credits label: 8B 2P – Studies: 2
+
+Simone Kakana – Company: Nando’s South Africa – Tier: Growth – Credits label: 0B 0P – Studies: 1
+
+You may adjust or add internal admin users if needed, but keep the above intact.
+
+3. Fix Client Report Visibility Bug
+
+There is a glitch: all clients can see each other’s reports.
+
+Find where client-facing reports are fetched for:
+
+The “My Research” tab (client side)
+
+Any company report listing views or downloads
+
+Enforce strict scoping:
+
+A logged-in portal member must only see:
+
+Reports linked to their company id
+
+Studies / briefs owned by their company id
+
+Admin users can see everything.
+
+Implementation details:
+
+Use the session or auth middleware to get the current user’s userId and companyId.
+
+Make sure all report and study queries in member endpoints filter by companyId (and not by free text email).
+
+Re-check any /api/member/* and /api/reports style routes so they:
+
+Require authentication
+
+Use companyId for scoping
+
+Test by simulating logins (or using seeded demo accounts) for Rugani vs Nando’s and confirm they cannot see each other’s reports.
+
+4. Pulse Membership Logic
+
+I want every portal user to be a Pulse member, whether they are on a free tier or a paid membership.
+
+Find where Pulse membership and newsletter subscribers are stored:
+
+It might be a boolean like pulseSubscribed, isPulseMember, or a separate newsletter_subscribers table.
+
+Update logic so that:
+
+When any new portal user signs up, they are:
+
+Created as a normal user with their tier (Starter / Growth / Scale / Free)
+
+Marked as a Pulse member (e.g. pulseSubscribed = true or equivalent)
+
+Existing portal members (Wesley, Duncan, Simonne, Tymon, Simone Kakana) are also Pulse members.
+
+Admin → Members tab:
+
+In the “Pulse” column, show “Yes” (or similar) for all portal members by default.
+
+“Pulse Insights Newsletter Subscribers” section at the bottom should:
+
+Include all portal members as subscribed (unless later manually unsubscribed).
+
+Correctly count the number of subscribers.
+
+Keep the flexibility:
+
+Implement in a way that we can later distinguish between “Portal Member only” and “External newsletter subscriber only” if needed, but for now all portal members should appear in the Pulse list.
+
+5. Clean Up Admin Overview Tiles & Credits
+
+On the Admin → Overview tab, we now have a “System Overview” strip with tiles like:
+
+Users
+
+Companies
+
+Active Studies
+
+Reports
+
+Credits Available: 43 Basic / 8 Pro etc.
+
+I like this strip but want it cleaner, minimal, and data-correct:
+
+Keep the 5 tiles but ensure each value is accurate:
+
+Users = total portal users
+
+Companies = total companies in the DB
+
+Active Studies = count of active / live studies (e.g. Nando’s Menu Test = 1)
+
+Reports = total published client reports (not drafts)
+
+Credits Available = sum of remaining Basic / Pro credits across all companies.
+
+Fix credit counting:
+
+Use the ground-truth credits from Section 2 to ensure:
+
+Rugani: 8B / 2P
+
+Greenway: 10B / 2P
+
+Nando’s: 0B / 0P
+
+DGB: 0B / 0P
+
+Revlon, Mitchum, Elizabeth Arden: 0B / 0P
+
+Innovatr: 25B / 4P
+
+Ensure the Admin → Companies tab does NOT show “x / y” style progress for credits anymore. It should just show simple counts:
+
+Example: for Innovatr: “25 Basic” and “4 Pro”
+
+For Greenway: “10 Basic” and “2 Pro” etc.
+
+Revise the small “Credits Available” tile:
+
+Keep it compact (no charts here).
+
+Clear label like:
+
+Line 1 (bold): Credits Available
+
+Line 2: 43 Basic
+
+Line 3: 8 Pro
+
+Use the existing icon but keep colours subtle and legible.
+
+6. Orders Tab – Remove Revenue
+
+On Admin → Orders:
+
+Keep:
+
+“Orders This Month”
+
+“Total Orders”
+
+Orders trend chart (orders per month)
+
+Order list and filters
+
+Completely remove:
+
+“R0 This Month Value”
+
+“Average Order”
+
+Any “Revenue by Product Type” charts
+
+Any revenue amounts like R78,888.889
+
+Make sure charts and stats now only reflect order counts, not revenue.
+
+7. Redesign the “Research Pipeline” Card (Admin Overview)
+
+The current “Research Pipeline” card on the Admin Overview looks cluttered and not very useful.
+
+Replace it with a simpler, more insightful card of the same width and height called “Research Snapshot” with this design:
+
+Card title: Research Snapshot (same style as other card titles).
+
+Top row: three small numbers in a single horizontal line (no big coloured tiles):
+
+Total studies: X
+
+Active: Y
+
+Completed: Z
+These values should be calculated based on the same study/brief data used elsewhere.
+
+Main body: list the three most recent studies across all companies, sorted by most recent delivery or status update.
+
+Each row shows:
+
+Study name (e.g. “Nando’s Menu Test”)
+
+Company name (e.g. “Nando’s South Africa”)
+
+Study type badge: Test24 Basic or Test24 Pro
+
+Status pill: Live, Completed, In progress etc. (use existing status colour system from elsewhere in the app)
+
+Footer line:
+
+Small, subtle text at the bottom:
+
+View all research →
+
+Clicking it should take admin users to the main Admin → Briefs tab.
+
+Style:
+
+No large coloured blocks; light, clean, mostly white with subtle borders and small pills, so it feels professional and not childish.
+
+Re-use existing typography and badge styles from the rest of the admin (no new wild colours).
+
+8. Test24 Tracker Card – Keep but Sanity-Check Data
+
+On the Admin Overview, keep the Test24 Tracker card as it is visually, but:
+
+Confirm the numbers are correct:
+
+Total Basic: should equal count of all Test24 Basic projects (e.g. DGB pilot + Nando’s Menu Test = 2).
+
+Total Pro: should equal count of all Test24 Pro projects (Rugani x Clicks + Rugani New KV = 2).
+
+“This month” counts should follow the currently selected date filter (Last 7 days / Last 30 days / 12 months).
+
+“In progress” should count live / in-field studies (currently Nando’s = 1).
+
+Confirm that the list under the tracker:
+
+Includes the four studies with correct status and company names.
+
+Uses correct labels for Test24 Basic vs Test24 Pro.
+
+9. Make All Portal Users Pulse Members
+
+Tie this back into the data:
+
+When a new member account is created (via signup or admin):
+
+Automatically set them as:
+
+Portal Member
+
+Pulse Member (for newsletter / insights mailing)
+
+In Admin → Members table:
+
+Ensure the “Pulse” column shows Yes or a simple icon indicating membership for all current members.
+
+The top tiles on the Members tab should correctly count:
+
+Total Members
+
+Pulse Subscribers
+
+Active Payments
+
+Companies
+
+Newsletter subscriber section:
+
+List all current portal members as subscribers (unless there is an explicit unsubscribe flag somewhere).
+
+Make sure counts and table values match.
+
+10. Full “Extreme” Consistency Check
+
+Before finishing, do a full cross-check of all admin and member-facing analytics:
+
+Cross-check DB vs UI:
+
+Run SQL queries (or Drizzle queries) in code or logs to confirm:
+
+Company counts
+
+Credit totals
+
+Study counts (active vs completed)
+
+Report counts
+
+Compare these to what the Admin Overview and Admin sub-tabs display.
+
+Cross-check My Research vs Admin:
+
+For each company (Rugani, Greenway, Nando’s, DGB):
+
+Confirm the number of studies and reports visible under My Research (member view) matches what Admin sees for that company.
+
+Confirm that a Rugani user can not see Nando’s or DGB reports, and vice versa.
+
+Cross-check Credits:
+
+Confirm that all credit totals used in:
+
+Admin → Overview
+
+Admin → Companies
+
+Admin → Members (credits labels)
+all come from the same underlying source and match the ground-truth numbers in Section 2.
+
+Confirm live updating:
+
+If the admin overview is intended to auto-update (e.g. polling or WebSockets), make sure refresh logic still works and that the “Last updated” timestamp updates correctly.
+
+Keep the Refresh and Download Summary buttons and ensure they work.
+
+Run the app:
+
+Log in as an admin.
+
+Click through: Admin → Overview, Companies, Orders, Briefs, Members, Reports, My Research.
+
+Fix any obvious console errors, type errors or layout breakages you see.
+
+11. Code Quality
+
+While making these changes:
+
+Keep styling consistent with existing admin styling (no new design language, no bright gradients).
+
+Prefer reusing existing components and card layouts where possible.
+
+Do not introduce unnecessary complexity; keep the UI clear and professional.
+
+When done, summarise briefly in comments in one central place (for example at the top of the main admin overview component) what you changed and where the key calculations live.

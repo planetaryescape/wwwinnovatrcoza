@@ -241,7 +241,7 @@ export class DatabaseStorage implements IStorage {
         name: "DGB",
         domain: "dgb.co.za",
         industry: "Wine & Spirits",
-        tier: "GROWTH",
+        tier: "STARTER",
         basicCreditsTotal: 1,
         basicCreditsUsed: 1,
         proCreditsTotal: 0,
@@ -447,7 +447,7 @@ export class DatabaseStorage implements IStorage {
       tags: ["Menu", "QSR", "Test24 Basic"],
     });
 
-    // Rugani Study 1 - Clicks Wellness (completed)
+    // Rugani Study 1 - Clicks Wellness (completed) - Test24 Pro
     const ruganiStudy1Id = randomUUID();
     await db.insert(studies).values({
       id: ruganiStudy1Id,
@@ -455,16 +455,16 @@ export class DatabaseStorage implements IStorage {
       companyName: "Rugani Juice",
       title: "Rugani x Clicks Wellness Beverage Positioning",
       description: "Quant deep dive into how Rugani's formats perform against competitors in Clicks.",
-      studyType: "basic",
+      studyType: "pro",
       isTest24: true,
       status: "COMPLETED",
       submittedByEmail: "tymon@rugani.co.za",
       submittedByName: "Tymon",
-      tags: ["Beverages", "Retail", "Test24 Basic"],
+      tags: ["Beverages", "Retail", "Test24 Pro"],
       deliveryDate: new Date("2025-11-07"),
     });
 
-    // Rugani Study 2 - Key Visual (completed)
+    // Rugani Study 2 - Key Visual (completed) - Test24 Pro
     const ruganiStudy2Id = randomUUID();
     await db.insert(studies).values({
       id: ruganiStudy2Id,
@@ -472,12 +472,12 @@ export class DatabaseStorage implements IStorage {
       companyName: "Rugani Juice",
       title: "Rugani New Key Visual Optimisation",
       description: "Evaluation of Rugani's new key visual against competitors.",
-      studyType: "basic",
+      studyType: "pro",
       isTest24: true,
       status: "COMPLETED",
       submittedByEmail: "tymon@rugani.co.za",
       submittedByName: "Tymon",
-      tags: ["Creative Testing", "Key Visual", "Test24 Basic"],
+      tags: ["Creative Testing", "Key Visual", "Test24 Pro"],
       deliveryDate: new Date("2025-11-07"),
     });
 
@@ -586,14 +586,14 @@ export class DatabaseStorage implements IStorage {
     });
 
     // Create Client Reports
-    // Rugani's 2 reports
+    // Rugani's 2 reports - Test24 Pro
     await db.insert(clientReports).values({
       id: randomUUID(),
       companyId: ruganiId,
       title: "Rugani x Clicks Wellness Beverage Positioning",
       description: "Quant deep dive into how Rugani's 330 ml and 750 ml formats perform against LiquiFruit, Coke, Powerade and Red Bull in Clicks.",
-      pdfUrl: "/assets/client-reports/rugani/Rugani_X_Clicks_Test24_Basic.pptx",
-      tags: ["Rugani", "Clicks", "Test24 Basic", "Retail Positioning", "Beverages"],
+      pdfUrl: "/assets/client-reports/rugani/Rugani_X_Clicks_Test24_Pro.pptx",
+      tags: ["Rugani", "Clicks", "Test24 Pro", "Retail Positioning", "Beverages"],
       uploadedAt: new Date("2025-11-07"),
     });
 
@@ -603,7 +603,7 @@ export class DatabaseStorage implements IStorage {
       title: "Rugani New Key Visual Optimisation",
       description: "Evaluation of Rugani's new key visual against Sir Fruit, LiquiFruit and Rhodes among heavy juice users.",
       pdfUrl: "/assets/client-reports/rugani/Rugani_Test24_X_Ad_Campaign.pptx",
-      tags: ["Rugani", "Creative Testing", "Key Visual", "Test24 Basic"],
+      tags: ["Rugani", "Creative Testing", "Key Visual", "Test24 Pro"],
       uploadedAt: new Date("2025-11-07"),
     });
 

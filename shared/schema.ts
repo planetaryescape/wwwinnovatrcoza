@@ -38,6 +38,7 @@ export const users = pgTable("users", {
   internalNotes: text("internal_notes"),
   isActive: boolean("is_active").notNull().default(true),
   emailVerified: boolean("email_verified").notNull().default(false),
+  pulseSubscribed: boolean("pulse_subscribed").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at"),
