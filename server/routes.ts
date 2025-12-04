@@ -60,7 +60,7 @@ const isAdminUser = (email?: string) => {
 
 // Demo accounts list - used for minimum credit display
 const DEMO_ACCOUNTS = ["hannah@innovatr.co.za", "richard@innovatr.co.za"];
-const DEMO_MIN_BASIC_CREDITS = 22;
+const DEMO_MIN_BASIC_CREDITS = 25;
 const DEMO_MIN_PRO_CREDITS = 4;
 
 // Helper function to apply demo minimum credits to user response

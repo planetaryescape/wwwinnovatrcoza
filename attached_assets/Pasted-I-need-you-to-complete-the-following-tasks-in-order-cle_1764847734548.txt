@@ -1,0 +1,149 @@
+I need you to complete the following tasks in order, cleanly and thoroughly.  
+Please read everything before starting any changes.
+
+====================================================
+PHASE 1 — FIX ADMIN PROFILES (NAME + BASE CREDITS)
+====================================================
+
+1. Update the two admin user accounts in the database seed and live storage:
+   • Admin 1: 
+       Name: "HannaH Steven"
+       Email: "hannah@innovatr.co.za"
+   • Admin 2:
+       Name: "Richard Lawrence"
+       Email: "richard@innovatr.co.za"
+
+2. For both admins, set their default starting credits to:
+   • 25 Test24 Basic credits
+   • 4 Test24 Pro credits
+
+3. Ensure:
+   • Credits are stored in the real database, not memory.
+   • Credits appear correctly in:
+        - Dashboard (Innovatr Credit Pool)
+        - Checkout screens
+        - Credit deduction flow
+        - Admin > Companies (if applicable)
+   • Remove all placeholder “999 of 999 remaining” values.
+
+4. Make sure both admin users have:
+   • Correct hashed passwords
+   • Fully functional authentication
+   • Profiles tracked under the new real user accounts system
+
+====================================================
+PHASE 2 — FIX NAME DISPLAY ON THE PORTAL
+====================================================
+
+Wherever the admin name appears (sidebar, dashboard, welcome name in the portal), update it so:
+
+   • “HannaH Sobey” becomes “HannaH Steven”
+   • “Demo Company” can remain the generic label OR be updated to "Innovatr Admin" depending on the existing design structure.
+
+====================================================
+PHASE 3 — SYSTEM-WIDE FUNCTIONALITY AUDIT
+====================================================
+
+Once Phase 1 + 2 are complete, run a full audit of all user journeys and list every issue found.
+
+The audit MUST include checks across:
+
+1. Authentication System
+   • Signup flow (email, password hashing, DB write)
+   • Login (token, session, expiration, error handling)
+   • Logout
+   • Reset password system (token generation, email sending, update in DB)
+   • Whether users can still bypass authentication
+   • Whether the portal correctly recognises logged-in vs logged-out states
+
+2. User Accounts + Permissions
+   • Admin accounts behaving as admin
+   • Members/accounts mapped correctly to companies
+   • Credits are tied to accounts, not frontend illusion
+   • All profile fields update correctly
+
+3. Credits System
+   • Credits display properly across the portal
+   • Credits deduct when submitting a brief
+   • Credits top-up functionality working
+   • Credits transfer to checkout correctly
+   • Errors when not enough credits
+   • Admin + member credits tracked separately
+
+4. Brief Submission System
+   • File uploads stored properly (PDF, JPG, XLSX, MP4, PPTX)
+   • Attachments properly linked to the brief entry in DB
+   • Briefs appear in My Research + Admin > Briefs
+   • Emails triggered:
+        - Confirmation to client with attachment links
+        - Notification to admins
+   • Backend can handle briefs with:
+        - Multiple files
+        - Large files (20mb+)
+   • Error messages shown clearly if upload fails
+
+5. Reports System
+   • Reports saved in DB, not memory
+   • Reports linked to correct user or company
+   • Reports downloadable
+   • UploadedAt dates display correctly in all views
+   • My Research correctly shows:
+        - Upcoming/live studies
+        - In-progress (“Audience Live”)
+        - Analysing
+        - Completed reports
+
+6. Checkout + Pricing + Membership
+   • Member vs non-member pricing logic
+   • Correct prices for 100, 300, 600 consumers
+   • Membership discounts apply only if logged-in user is an active member
+   • “Use my credits” option works
+   • Top-up credits flow appears if insufficient
+   • Invoices vs online payment logic is correct
+
+7. Home Page + UI Rendering
+   • Hero image overlay removed
+   • Text alignment improved (no buried subhead)
+   • Light/dark modes check
+   • Mobile responsiveness
+   • Speed + rendering errors
+
+8. Navigation + Routing
+   • No broken links
+   • Login required for portal pages
+   • Logout returns user to correct page
+
+9. State Management
+   • AuthContext
+   • UserContext
+   • Credits state
+   • Company selection
+   • No stale data
+   • No console errors
+
+10. Email Services
+   • All templates render properly
+   • All dynamic fields work
+   • Attachment links functional
+   • SMTP/API credentials correct
+   • Email failure fallback recorded in DB
+
+====================================================
+PHASE 4 — DELIVERABLES
+====================================================
+
+After completing the above:
+
+1. Provide a clean, itemised list of **ALL issues** found.
+2. For each issue, provide:
+   • File name and line reference
+   • Cause of the issue
+   • Recommended fix
+   • Whether it is critical or non-critical
+
+3. Once I approve, we will generate a second prompt to fix all issues.
+
+====================================================
+
+PLEASE CONFIRM when all tasks in Phase 1 + 2 are complete before running the audit.
+Do not skip steps.

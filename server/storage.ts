@@ -217,9 +217,9 @@ export class MemStorage implements IStorage {
       contractStart: null,
       contractEnd: null,
       monthlyFee: null,
-      basicCreditsTotal: 999,
+      basicCreditsTotal: 25,
       basicCreditsUsed: 0,
-      proCreditsTotal: 999,
+      proCreditsTotal: 4,
       proCreditsUsed: 0,
       dealDetails: null,
       notes: "Internal Innovatr team - admin access",
@@ -288,8 +288,8 @@ export class MemStorage implements IStorage {
 
     // Admin users with hashed passwords
     const adminUsers = [
-      { name: "Hannah Sobey", email: "hannah@innovatr.co.za", username: "hannah.sobey", passwordHash: adminPasswordHash },
-      { name: "Richard Sobey", email: "richard@innovatr.co.za", username: "richard.sobey", passwordHash: adminPasswordHash },
+      { name: "HannaH Steven", email: "hannah@innovatr.co.za", username: "hannah.steven", passwordHash: adminPasswordHash, creditsBasic: 25, creditsPro: 4 },
+      { name: "Richard Lawrence", email: "richard@innovatr.co.za", username: "richard.lawrence", passwordHash: adminPasswordHash, creditsBasic: 25, creditsPro: 4 },
     ];
 
     for (const u of adminUsers) {
@@ -303,6 +303,8 @@ export class MemStorage implements IStorage {
         membershipTier: "SCALE",
         status: "ACTIVE",
         role: "ADMIN",
+        creditsBasic: u.creditsBasic,
+        creditsPro: u.creditsPro,
       });
     }
 
@@ -481,6 +483,8 @@ export class MemStorage implements IStorage {
     membershipTier: string;
     status: string;
     role: string;
+    creditsBasic?: number;
+    creditsPro?: number;
   }): Promise<User> {
     const id = randomUUID();
     const now = new Date();
@@ -496,8 +500,8 @@ export class MemStorage implements IStorage {
       membershipTier: userData.membershipTier as any,
       status: userData.status as any,
       role: userData.role as any,
-      creditsBasic: 0,
-      creditsPro: 0,
+      creditsBasic: userData.creditsBasic ?? 0,
+      creditsPro: userData.creditsPro ?? 0,
       creditsInheritedFromCompany: true,
       totalSpend: "0",
       firstProjectDate: null,

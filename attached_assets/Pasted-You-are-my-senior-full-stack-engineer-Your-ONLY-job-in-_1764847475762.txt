@@ -1,0 +1,221 @@
+You are my senior full-stack engineer.
+
+Your ONLY job in this task is to perform a deep audit of this Innovatr web app.
+Do not fix anything yet. Just analyse and report.
+
+1. Scope of the audit
+
+You must:
+
+Scan both frontend and backend code
+
+Consider all major user journeys
+
+Identify functional bugs, logic holes, broken flows, and edge-case risks
+
+Note where behaviour is confusing or inconsistent, even if it “technically works”
+
+This app includes:
+
+Public website (home, services, pricing, membership, contact)
+
+Test24 Pro checkout
+
+Member portal (Dashboard, Trends & Insights, Launch New Brief, Credits & Billing, My Research, Member Deals, Admin)
+
+Authentication and user accounts
+
+Credits system and research briefs
+
+Client reports and admin tools
+
+2. Think in terms of real user journeys
+
+For each of these user types, imagine their full journey and check the code paths that power it:
+
+New visitor
+
+Visits home page
+
+Clicks Test24 / Membership / Contact
+
+Fills in a contact or signup form
+
+New free member
+
+Signs up
+
+Logs in
+
+Browses Trends & Insights and My Research
+
+Launches a Test24 Basic brief
+
+Chooses Invoice Me vs Pay Online vs Use My Credits (if applicable)
+
+Uploads creative and attachments
+
+Receives confirmation emails
+
+Paying member with credits
+
+Logs in
+
+Views credits in Credits & Billing
+
+Uses credits to pay for a study
+
+Has too few credits (should be prompted to top up)
+
+Has zero credits (should be told to purchase)
+
+Sees their study and report in My Research
+
+Returning client
+
+Logs in again later
+
+Sees previous briefs and reports in My Research
+
+Launches a new brief
+
+Uses different payment methods
+
+Admin (Hannah / Richard)
+
+Logs in with admin credentials
+
+Accesses Admin dashboard
+
+Views companies, orders, briefs, subscriptions, users, reports
+
+Checks brief submissions, attachments and statuses
+
+Sees seeded demo credits on their own profiles
+
+Views client reports in their My Research tab
+
+3. What I want you to find
+
+For the entire codebase, please:
+
+A. Authentication and accounts
+
+Any remaining mock auth or “fake login” paths
+
+Flows where a user can bypass login requirements
+
+Inconsistent use of email / id to identify a user
+
+Places where login state can get out of sync between frontend and backend
+
+Reset-password edge cases (invalid tokens, expired links, no user found etc.)
+
+B. Credits and payments
+
+Where credits are not tied to a real user account
+
+Places where credits can go negative or not deduct correctly
+
+Any mismatch between:
+
+credits shown in UI
+
+credits stored in backend
+
+credits actually used for a study
+
+Inconsistencies between Pay Online, Invoice Me, and Use My Credits
+
+Flows where a user could submit a study without actually paying or using credits
+
+C. Brief submission
+
+Any place where brief data or attachments are not stored reliably
+
+Missing validation (required fields, multi-selects, file size limits)
+
+File-upload edge cases:
+
+20MB files
+
+multiple files
+
+unsupported file types
+
+Situations where emails might fail and there is no fallback in the admin tools
+
+D. My Research / Past Research
+
+Cases where a user’s reports or briefs do not appear correctly
+
+Any hard-coded sample data that should now be dynamic
+
+Issues with report download links or missing files
+
+Conflicts between “Past Research” and “My Research” naming or routing
+
+E. Admin area
+
+Pages or tabs that reference removed / legacy data
+
+Inconsistent filters, company mapping, tags or search
+
+Any admin action that can break user data (eg unsafe deletion, missing checks)
+
+F. Routing and navigation
+
+Broken routes (404s) inside the portal
+
+Routes that should be protected but are public
+
+Direct URL access that bypasses intended flows
+
+G. General robustness
+
+Unhandled promise rejections
+
+Console errors in browser
+
+API endpoints that do not handle bad input
+
+Any TODOs that affect functionality
+
+Anything that would crash or confuse a real paying client
+
+4. Output format
+
+Do not edit any code in this task.
+
+Return a structured audit report in this format:
+
+High-Risk Issues
+
+[Component / file / route]
+
+What is wrong
+
+Why it is risky
+
+Which user journeys are affected
+
+Medium-Risk Issues
+
+Same structure as above
+
+Low-Risk / UX Issues
+
+Confusing flows, unclear text, inconsistent behaviours
+
+Tech Debt / Clean-up Opportunities
+
+Legacy code, unused components, obvious refactors
+
+Suggested Fix Order
+
+A short list of what you would fix first, second, third, in order of impact and risk.
+
+Be specific: reference files, components, endpoints and functions wherever possible so we can address them one by one in follow-up prompts.
+
+Do not propose code changes now.
+I only want a complete, honest list of issues and risks.
