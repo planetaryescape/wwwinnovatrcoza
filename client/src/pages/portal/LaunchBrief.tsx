@@ -28,9 +28,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { FileText, Zap, CheckCircle, Upload, ArrowRight, FileUp, X, Download, ChevronDown, Plus } from "lucide-react";
+import { FileText, Zap, CheckCircle, Upload, ArrowRight, FileUp, X, Download, ChevronDown, Plus, Loader2 } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 type BriefType = "basic" | "pro" | null;
 
@@ -292,6 +294,48 @@ export default function LaunchBrief() {
     }
   };
 
+  const submitBriefMutation = useMutation({
+    mutationFn: async (payload: Record<string, any>) => {
+      const response = await apiRequest("POST", "/api/briefs", payload);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Brief Submitted!",
+        description: `Your ${selectedBrief === "basic" ? "Test24 Basic" : "Test24 Pro"} study is being set up. Expected delivery: 24 hours.`,
+      });
+      
+      // Reset form
+      setSelectedBrief(null);
+      setUploadedFiles([]);
+      setCompetitorInput("");
+      setFormData({
+        clientName: "",
+        clientEmail: "",
+        clientContact: "",
+        clientCompany: "",
+        researchObjective: "",
+        region: [],
+        age: [],
+        income: [],
+        gender: [],
+        industry: "",
+        companyBrand: "",
+        numberOfIdeas: "1",
+        competitors: [],
+        confirmTerms: false,
+        subscribeUpdates: false,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Submission failed",
+        description: error.message || "Failed to submit brief. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSubmit = () => {
     // Validate all required fields - arrays must have at least one selection
     const requiredTextFields = [
@@ -362,41 +406,26 @@ export default function LaunchBrief() {
       return;
     }
 
-    // Submit payload - all audience fields and competitors are arrays
+    // Build the payload matching the backend schema
     const payload = {
+      submittedByName: formData.clientName,
+      submittedByEmail: formData.clientEmail,
+      submittedByContact: formData.clientContact,
+      companyName: formData.clientCompany,
+      companyBrand: formData.companyBrand,
       studyType: selectedBrief === "basic" ? "Test24 Basic" : "Test24 Pro",
-      ...formData,
-      // Arrays are sent as-is for backend processing
+      numIdeas: numberOfIdeas,
+      researchObjective: formData.researchObjective,
+      regions: formData.region,
+      ages: formData.age,
+      genders: formData.gender,
+      incomes: formData.income,
+      industry: formData.industry,
+      competitors: formData.competitors,
+      projectFileUrls: uploadedFiles.map(f => f.url),
     };
 
-    console.log("Brief submission payload:", payload);
-
-    toast({
-      title: "Brief Submitted!",
-      description: `Your ${selectedBrief === "basic" ? "Test24 Basic" : "Test24 Pro"} study is being set up. Expected delivery: 24 hours.`,
-    });
-    
-    // Reset form
-    setSelectedBrief(null);
-    setUploadedFiles([]);
-    setCompetitorInput("");
-    setFormData({
-      clientName: "",
-      clientEmail: "",
-      clientContact: "",
-      clientCompany: "",
-      researchObjective: "",
-      region: [],
-      age: [],
-      income: [],
-      gender: [],
-      industry: "",
-      companyBrand: "",
-      numberOfIdeas: "1",
-      competitors: [],
-      confirmTerms: false,
-      subscribeUpdates: false,
-    });
+    submitBriefMutation.mutate(payload);
   };
 
   if (!selectedBrief) {
@@ -945,10 +974,20 @@ export default function LaunchBrief() {
               className="w-full"
               size="lg"
               onClick={handleSubmit}
+              disabled={submitBriefMutation.isPending}
               data-testid="button-submit-brief"
             >
-              Submit Brief
-              <ArrowRight className="w-4 h-4 ml-2" />
+              {submitBriefMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  Submit Brief
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </>
+              )}
             </Button>
           </CardContent>
         </Card>

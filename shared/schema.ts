@@ -438,3 +438,47 @@ export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
 
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
 export type Subscription = typeof subscriptions.$inferSelect;
+
+// Brief Submissions - For storing Launch New Brief form submissions
+export const briefSubmissions = pgTable("brief_submissions", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  submittedByName: text("submitted_by_name").notNull(),
+  submittedByEmail: text("submitted_by_email").notNull(),
+  submittedByContact: text("submitted_by_contact"),
+  companyName: text("company_name").notNull(),
+  companyBrand: text("company_brand"),
+  studyType: varchar("study_type", { length: 50 }).notNull(),
+  numIdeas: integer("num_ideas").notNull().default(1),
+  researchObjective: text("research_objective").notNull(),
+  regions: text("regions").array().default([]),
+  ages: text("ages").array().default([]),
+  genders: text("genders").array().default([]),
+  incomes: text("incomes").array().default([]),
+  industry: text("industry"),
+  competitors: text("competitors").array().default([]),
+  projectFileUrls: text("project_file_urls").array().default([]),
+  status: varchar("status", { length: 20 }).notNull().default("new"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertBriefSubmissionSchema = createInsertSchema(briefSubmissions)
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    submittedByName: z.string().min(1, "Name is required"),
+    submittedByEmail: z.string().email("Valid email is required"),
+    companyName: z.string().min(1, "Company name is required"),
+    studyType: z.string().min(1, "Study type is required"),
+    researchObjective: z.string().min(1, "Research objective is required"),
+    status: z.enum(["new", "in_progress", "completed", "cancelled"]).default("new"),
+  });
+
+export type InsertBriefSubmission = z.infer<typeof insertBriefSubmissionSchema>;
+export type BriefSubmission = typeof briefSubmissions.$inferSelect;

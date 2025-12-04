@@ -25,6 +25,8 @@ import {
   type InsertCompany,
   type ClientReport,
   type InsertClientReport,
+  type BriefSubmission,
+  type InsertBriefSubmission,
   orders,
   orderItems,
   paymentIntents,
@@ -107,6 +109,11 @@ export interface IStorage {
   getAllClientReports(): Promise<ClientReport[]>;
   updateClientReport(id: string, updates: Partial<ClientReport>): Promise<void>;
   deleteClientReport(id: string): Promise<void>;
+
+  createBriefSubmission(brief: InsertBriefSubmission): Promise<BriefSubmission>;
+  getBriefSubmission(id: string): Promise<BriefSubmission | undefined>;
+  getAllBriefSubmissions(): Promise<BriefSubmission[]>;
+  updateBriefSubmission(id: string, updates: Partial<BriefSubmission>): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -123,6 +130,7 @@ export class MemStorage implements IStorage {
   private subscriptionsMap: Map<string, Subscription>;
   private companiesMap: Map<string, Company>;
   private clientReportsMap: Map<string, ClientReport>;
+  private briefSubmissionsMap: Map<string, BriefSubmission>;
 
   constructor() {
     this.users = new Map();
@@ -138,6 +146,7 @@ export class MemStorage implements IStorage {
     this.subscriptionsMap = new Map();
     this.companiesMap = new Map();
     this.clientReportsMap = new Map();
+    this.briefSubmissionsMap = new Map();
     
     this.seedCompaniesAndUsers();
   }
@@ -775,6 +784,52 @@ export class MemStorage implements IStorage {
 
   async deleteClientReport(id: string): Promise<void> {
     this.clientReportsMap.delete(id);
+  }
+
+  async createBriefSubmission(insertBrief: InsertBriefSubmission): Promise<BriefSubmission> {
+    const id = randomUUID();
+    const now = new Date();
+    const brief: BriefSubmission = {
+      id,
+      submittedByName: insertBrief.submittedByName,
+      submittedByEmail: insertBrief.submittedByEmail,
+      submittedByContact: insertBrief.submittedByContact ?? null,
+      companyName: insertBrief.companyName,
+      companyBrand: insertBrief.companyBrand ?? null,
+      studyType: insertBrief.studyType,
+      numIdeas: insertBrief.numIdeas ?? 1,
+      researchObjective: insertBrief.researchObjective,
+      regions: insertBrief.regions ?? [],
+      ages: insertBrief.ages ?? [],
+      genders: insertBrief.genders ?? [],
+      incomes: insertBrief.incomes ?? [],
+      industry: insertBrief.industry ?? null,
+      competitors: insertBrief.competitors ?? [],
+      projectFileUrls: insertBrief.projectFileUrls ?? [],
+      status: insertBrief.status ?? "new",
+      notes: insertBrief.notes ?? null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.briefSubmissionsMap.set(id, brief);
+    return brief;
+  }
+
+  async getBriefSubmission(id: string): Promise<BriefSubmission | undefined> {
+    return this.briefSubmissionsMap.get(id);
+  }
+
+  async getAllBriefSubmissions(): Promise<BriefSubmission[]> {
+    return Array.from(this.briefSubmissionsMap.values()).sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+
+  async updateBriefSubmission(id: string, updates: Partial<BriefSubmission>): Promise<void> {
+    const brief = this.briefSubmissionsMap.get(id);
+    if (brief) {
+      this.briefSubmissionsMap.set(id, { ...brief, ...updates, updatedAt: new Date() });
+    }
   }
 }
 

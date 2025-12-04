@@ -1,0 +1,317 @@
+You are updating my Innovatr member portal so that every “Launch New Brief” submission is permanently stored and properly emailed.
+
+Right now:
+
+The Launch New Brief form submits but
+
+Submissions are not stored anywhere
+
+No emails are sent to us
+
+A real client (Simone from Nando’s) submitted a brief and it is lost
+
+From now on, every submission must be:
+
+Saved in the backend (database or existing storage layer)
+
+Emailed to:
+
+The client (confirmation)
+
+Richard and Hannah (notification)
+
+Visible in an Admin table inside the portal
+
+Please do this without breaking any existing flows.
+
+1. Find the Launch New Brief form
+
+In the member portal, under /portal/launch, there is a page where users:
+
+Fill in Research Objective
+
+Choose Region, Age, Gender, Income
+
+Enter Industry, Company Brand, Competitors, etc
+
+Upload a Project / Idea Brief file
+
+Specify number of ideas / concepts
+
+You previously updated this form for multi-select audience fields. Reuse that component.
+
+Identify:
+
+The React component that renders this form (e.g. LaunchBriefForm, LaunchNewBriefPage or similar)
+
+The function that currently handles submit (e.g. handleSubmit, submitBrief, onSubmit)
+
+The API endpoint or service used to send the brief (if any). If there is no backend call yet and it is just logging or a placeholder, you must implement one.
+
+2. Create a proper “Brief Submission” model
+
+We need a server-side data model to store each submission.
+
+Use whatever storage pattern the app already uses for other data (e.g. reports, companies, credits). If there is an existing data access layer (e.g. server/db.ts, fakeDb.ts, Prisma, Supabase client, or similar), follow that approach and add a new collection/table for brief submissions.
+
+Create a BriefSubmission type with at least:
+
+id – unique ID (string or number)
+
+createdAt – ISO timestamp
+
+updatedAt – ISO timestamp
+
+submittedByName – full name from the form
+
+submittedByEmail – email from the form
+
+companyName – company / brand they entered
+
+studyType – e.g. Test24 Basic, Test24 Pro or other
+
+numIdeas – number of ideas / concepts to test
+
+researchObjective – text field
+
+region / regions – array of strings
+
+age / ages – array of strings
+
+gender / genders – array of strings
+
+income / incomes – array of strings
+
+industry – string
+
+competitors – array of strings
+
+projectFileUrl – URL or path to uploaded brief (if upload is supported)
+
+status – default "new" (later can be "in_progress", "completed" etc)
+
+notes – optional internal notes string
+
+Make sure the entire payload from the front-end form is captured and stored. If some fields are optional, allow null / empty values but still save the record.
+
+If the app currently uses in-memory storage for similar objects, add a new briefSubmissions collection and make sure it survives across server restarts in the same way that other entities do (or at least matches the existing pattern).
+
+3. Implement the API endpoint for saving briefs
+
+Create or update an API route, for example:
+
+POST /api/briefs or
+
+POST /api/launch/brief
+
+Requirements:
+
+Accept the JSON payload sent from the Launch New Brief form
+
+Validate required fields:
+
+submittedByName, submittedByEmail, companyName, studyType, researchObjective
+
+Create a BriefSubmission record in the storage layer
+
+Return a JSON response with:
+
+success: true
+
+The saved brief (including id and timestamps)
+
+Add error handling:
+
+If validation fails, return a 400 with a friendly message
+
+Log any internal error and return 500 with success: false and a generic error message
+
+4. Wire the form to the new endpoint
+
+Update the Launch New Brief form submit handler so that:
+
+On submit, it POSTS to the new API endpoint with the full form data
+
+On success:
+
+Show a thank you / success message to the client, e.g.
+
+“Thanks for submitting your brief. We will review and contact you shortly.”
+
+Optionally clear the form or disable it, depending on current UX
+
+On failure:
+
+Show a non-technical error message and log details to the console
+
+Make sure this works for both Test24 Basic and Test24 Pro (and any other study types) with no behaviour changes beyond saving and emails.
+
+5. Add email notifications (client + internal)
+
+There must now be two email flows when a brief is successfully stored:
+
+5.1. Reuse existing email utility
+
+If the project already has an email util (NodeMailer, Resend, SendGrid, or a custom mailer used for orders / payment / contact forms), reuse that exact mechanism.
+
+Look for:
+
+sendEmail, mailer.ts, emailService, contactController etc
+
+Any existing code that emails Richard or Hannah when an order is placed or a payment is made
+
+Do not introduce a second email provider if one already exists. Plug into the current one.
+
+5.2. Client confirmation email
+
+After a brief is saved:
+
+Send an email to submittedByEmail
+
+From: a friendly Innovatr address (e.g. hello@innovatr.co.za or the existing default sender)
+
+Subject:
+
+Innovatr | We’ve received your Test24 brief (or similar generic subject if studyType varies)
+
+Body (plain text or simple HTML):
+
+Thank them for submitting the brief
+
+Confirm the key details:
+
+Their name
+
+Company name
+
+Study type
+
+Number of ideas
+
+High-level summary of their objective
+
+Let them know that Richard or Hannah will be in touch shortly
+
+You can generate a simple template string; do not over-engineer the layout.
+
+5.3. Internal notification email
+
+At the same time, send an internal email to:
+
+richard@innovatr.co.za
+
+hannah@innovatr.co.za
+
+Subject example:
+
+New Test24 brief submitted – {companyName} ({studyType})
+
+Body should include:
+
+Timestamp
+
+Client name + email
+
+Company name
+
+Study type
+
+Number of ideas / concepts
+
+Full research objective
+
+Audience selections (Region, Age, Gender, Income)
+
+Competitors
+
+Link to the client’s uploaded brief file (if available)
+
+A link to the new Admin > Brief Submissions page (see next section)
+
+If the email util supports reply-to, set replyTo to the client’s email so Richard or Hannah can reply directly.
+
+6. Add Admin view: “Brief Submissions”
+
+In the Admin portal (left-hand sidebar inside /portal/admin), add a new tab or section, e.g.:
+
+Under Admin, either:
+
+a new sub-tab Brief Submissions, or
+
+a table inside the existing Admin dashboard
+
+Requirements:
+
+Display a table listing all BriefSubmission records
+
+Columns (desktop):
+
+Date (createdAt, formatted nicely)
+
+Client name
+
+Company
+
+Study type
+
+Number of ideas
+
+Status (default “New”)
+
+Clicking a row opens a detail view or side panel with full information:
+
+All fields including objective, audience, competitors, and link to the uploaded file
+
+Optional status dropdown (New, In Progress, Completed) that updates the record server-side
+
+Make sure this view is only visible to admin users (the same permission logic currently used for Admin sections).
+
+7. UX behaviour for the client
+
+After a client submits:
+
+Keep them on the Launch New Brief page but show a clear success state:
+
+Inline success banner OR
+
+Confirmation panel with key info and a “Back to Dashboard” button
+
+Do not silently fail; any backend / email errors should show a friendly message and log details.
+
+No redirects to random pages. Keep the current page and just show state changes.
+
+8. Testing checklist
+
+Please verify:
+
+Submit a Launch New Brief as a logged-in user.
+
+Confirm the API saves the brief (check database / storage or Admin table).
+
+Confirm the client receives a confirmation email. (Use the configured email sender; if running in dev mode, use whatever test inbox the project uses.)
+
+Confirm both richard@innovatr.co.za and hannah@innovatr.co.za receive the internal notification with full details.
+
+Log in as an admin and check Admin > Brief Submissions:
+
+New brief appears in the table with correct data
+
+Detail view works
+
+Status updates (if implemented) are persisted
+
+Submit multiple briefs (Basic and Pro) and make sure:
+
+All are stored
+
+All trigger emails
+
+No regression in the portal or pricing / checkout flows
+
+Do not touch any unrelated pages, pricing, credits, or report logic. This task is only about:
+
+Storing Launch New Brief submissions
+
+Sending the two email types
+
+Exposing submissions in the Admin portal

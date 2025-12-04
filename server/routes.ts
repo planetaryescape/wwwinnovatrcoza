@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemWithoutOrderIdSchema, insertReportSchema, insertDealSchema, insertInquirySchema } from "@shared/schema";
 import { PaymentService } from "./payments/service";
 import type { PaymentConfig } from "./payments/types";
-import { sendAdminOrderNotification, sendCustomerOrderConfirmation, sendContactFormMessage, sendInvoiceRequestNotification } from "./emails/email-service";
+import { sendAdminOrderNotification, sendCustomerOrderConfirmation, sendContactFormMessage, sendInvoiceRequestNotification, sendBriefConfirmationEmail, sendBriefAdminNotification } from "./emails/email-service";
 import { uploadFile, downloadFile, deleteFile, listFiles, fileExists } from "./app-storage";
 import { generateInvoicePdf } from "./invoices/generator";
 
@@ -1480,6 +1480,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.send(invoicePdf);
     } catch (error: any) {
       console.error("Sample invoice generation error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // ======= Brief Submission Endpoints =======
+
+  // Create a new brief submission
+  app.post("/api/briefs", async (req, res) => {
+    try {
+      const { z } = await import("zod");
+      
+      const briefSchema = z.object({
+        submittedByName: z.string().min(1, "Name is required"),
+        submittedByEmail: z.string().email("Valid email is required"),
+        submittedByContact: z.string().optional(),
+        companyName: z.string().min(1, "Company name is required"),
+        companyBrand: z.string().optional(),
+        studyType: z.string().min(1, "Study type is required"),
+        numIdeas: z.number().min(1).default(1),
+        researchObjective: z.string().min(1, "Research objective is required"),
+        regions: z.array(z.string()).default([]),
+        ages: z.array(z.string()).default([]),
+        genders: z.array(z.string()).default([]),
+        incomes: z.array(z.string()).default([]),
+        industry: z.string().optional(),
+        competitors: z.array(z.string()).default([]),
+        projectFileUrls: z.array(z.string()).default([]),
+      });
+
+      const validated = briefSchema.parse(req.body);
+
+      // Create brief submission
+      const brief = await storage.createBriefSubmission({
+        ...validated,
+        status: "new",
+      });
+
+      // Send client confirmation email
+      try {
+        await sendBriefConfirmationEmail({
+          submittedByName: brief.submittedByName,
+          submittedByEmail: brief.submittedByEmail,
+          companyName: brief.companyName,
+          studyType: brief.studyType,
+          numIdeas: brief.numIdeas,
+          researchObjective: brief.researchObjective,
+        });
+      } catch (emailError) {
+        console.error("Failed to send brief confirmation email:", emailError);
+      }
+
+      // Send admin notification email
+      try {
+        await sendBriefAdminNotification({
+          id: brief.id,
+          submittedByName: brief.submittedByName,
+          submittedByEmail: brief.submittedByEmail,
+          submittedByContact: brief.submittedByContact,
+          companyName: brief.companyName,
+          companyBrand: brief.companyBrand,
+          studyType: brief.studyType,
+          numIdeas: brief.numIdeas,
+          researchObjective: brief.researchObjective,
+          regions: brief.regions ?? [],
+          ages: brief.ages ?? [],
+          genders: brief.genders ?? [],
+          incomes: brief.incomes ?? [],
+          industry: brief.industry,
+          competitors: brief.competitors ?? [],
+          projectFileUrls: brief.projectFileUrls ?? [],
+          createdAt: brief.createdAt,
+        });
+      } catch (emailError) {
+        console.error("Failed to send brief admin notification:", emailError);
+      }
+
+      res.status(201).json({ success: true, brief });
+    } catch (error: any) {
+      console.error("Brief submission error:", error);
+      if (error.name === "ZodError") {
+        const firstError = error.errors?.[0]?.message || "Invalid input";
+        return res.status(400).json({ success: false, error: firstError });
+      }
+      res.status(500).json({ success: false, error: "Failed to submit brief. Please try again." });
+    }
+  });
+
+  // Get all brief submissions (admin only)
+  app.get("/api/admin/briefs", async (req, res) => {
+    try {
+      const briefs = await storage.getAllBriefSubmissions();
+      res.json(briefs);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get single brief submission
+  app.get("/api/admin/briefs/:id", async (req, res) => {
+    try {
+      const brief = await storage.getBriefSubmission(req.params.id);
+      if (!brief) {
+        return res.status(404).json({ error: "Brief not found" });
+      }
+      res.json(brief);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Update brief submission (admin only - for status updates, notes)
+  app.patch("/api/admin/briefs/:id", async (req, res) => {
+    try {
+      const { status, notes } = req.body;
+      
+      const brief = await storage.getBriefSubmission(req.params.id);
+      if (!brief) {
+        return res.status(404).json({ error: "Brief not found" });
+      }
+
+      const updates: Record<string, any> = {};
+      if (status) updates.status = status;
+      if (notes !== undefined) updates.notes = notes;
+
+      await storage.updateBriefSubmission(req.params.id, updates);
+      
+      const updated = await storage.getBriefSubmission(req.params.id);
+      res.json(updated);
+    } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
   });

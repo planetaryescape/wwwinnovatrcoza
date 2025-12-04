@@ -538,3 +538,278 @@ export async function sendCustomerOrderConfirmation(orderData: {
     throw error;
   }
 }
+
+/**
+ * Send brief submission confirmation to client
+ */
+export async function sendBriefConfirmationEmail(briefData: {
+  submittedByName: string;
+  submittedByEmail: string;
+  companyName: string;
+  studyType: string;
+  numIdeas: number;
+  researchObjective: string;
+}) {
+  try {
+    const resend = await getResendClient();
+    const fromEmail = await getFromEmail();
+
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; 
+              color: #1a202c; 
+              background-color: #f7fafc;
+              line-height: 1.6;
+            }
+            .container { 
+              max-width: 600px; 
+              margin: 0 auto; 
+              background-color: #ffffff;
+              border-radius: 8px;
+              overflow: hidden;
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              padding: 40px 20px;
+              text-align: center;
+            }
+            .header h1 {
+              margin: 0;
+              font-size: 24px;
+              font-weight: 700;
+            }
+            .content { 
+              padding: 40px 20px;
+            }
+            .info-box {
+              background-color: #f7fafc;
+              border-left: 4px solid #667eea;
+              padding: 15px;
+              margin: 20px 0;
+              border-radius: 4px;
+            }
+            .info-row {
+              margin: 10px 0;
+            }
+            .label {
+              font-weight: 600;
+              color: #4a5568;
+            }
+            .footer {
+              background-color: #f7fafc;
+              padding: 20px;
+              text-align: center;
+              border-top: 1px solid #e2e8f0;
+              font-size: 12px;
+              color: #718096;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Brief Received ✓</h1>
+            </div>
+            
+            <div class="content">
+              <p style="font-size: 16px;">Hello ${escapeHtml(briefData.submittedByName)},</p>
+              <p>Thank you for submitting your research brief. We've received your ${escapeHtml(briefData.studyType)} request and our team will review it shortly.</p>
+
+              <div class="info-box">
+                <div class="info-row"><span class="label">Company:</span> ${escapeHtml(briefData.companyName)}</div>
+                <div class="info-row"><span class="label">Study Type:</span> ${escapeHtml(briefData.studyType)}</div>
+                <div class="info-row"><span class="label">Number of Ideas:</span> ${briefData.numIdeas}</div>
+              </div>
+
+              <p><strong>Research Objective:</strong></p>
+              <p style="background-color: #f7fafc; padding: 15px; border-radius: 4px; white-space: pre-wrap;">${escapeHtml(briefData.researchObjective.substring(0, 500))}${briefData.researchObjective.length > 500 ? '...' : ''}</p>
+
+              <p style="margin-top: 25px;">Richard or Hannah will be in touch shortly to discuss your project and next steps.</p>
+              
+              <p style="color: #718096;">Expected turnaround: <strong>24 hours</strong> from survey launch.</p>
+            </div>
+
+            <div class="footer">
+              <p style="margin: 0;">© ${new Date().getFullYear()} Innovatr. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const response = await resend.emails.send({
+      from: `Innovatr <${fromEmail}>`,
+      to: [briefData.submittedByEmail],
+      subject: `Innovatr | We've received your ${briefData.studyType} brief`,
+      html: emailHtml,
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Failed to send brief confirmation email:", error);
+    throw error;
+  }
+}
+
+/**
+ * Send brief submission notification to admin team (Richard and Hannah)
+ */
+export async function sendBriefAdminNotification(briefData: {
+  id: string;
+  submittedByName: string;
+  submittedByEmail: string;
+  submittedByContact?: string | null;
+  companyName: string;
+  companyBrand?: string | null;
+  studyType: string;
+  numIdeas: number;
+  researchObjective: string;
+  regions: string[];
+  ages: string[];
+  genders: string[];
+  incomes: string[];
+  industry?: string | null;
+  competitors: string[];
+  projectFileUrls: string[];
+  createdAt: Date;
+}) {
+  try {
+    const resend = await getResendClient();
+    const fromEmail = await getFromEmail();
+    
+    const adminEmails = ["richard@innovatr.co.za", "hannah@innovatr.co.za"];
+
+    const formatArray = (arr: string[]) => arr.length > 0 ? arr.join(", ") : "Not specified";
+    const formatDate = (date: Date) => new Date(date).toLocaleString("en-ZA", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+
+    const filesHtml = briefData.projectFileUrls.length > 0 
+      ? briefData.projectFileUrls.map(url => `<li><a href="${url}">${url}</a></li>`).join("")
+      : "<li>No files uploaded</li>";
+
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; color: #333; }
+            .container { max-width: 700px; margin: 0 auto; padding: 20px; }
+            h2 { color: #2c3e50; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+            .section { margin: 25px 0; }
+            .section h3 { color: #4a5568; margin-bottom: 10px; font-size: 16px; }
+            .details { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; }
+            .detail-row { margin: 8px 0; }
+            .label { font-weight: bold; color: #555; display: inline-block; min-width: 150px; }
+            .objective-box { 
+              background-color: #fff; 
+              border: 1px solid #e2e8f0; 
+              padding: 15px; 
+              border-radius: 5px;
+              white-space: pre-wrap;
+            }
+            ul { padding-left: 20px; }
+            .cta-button {
+              display: inline-block;
+              background-color: #667eea;
+              color: white !important;
+              padding: 12px 24px;
+              border-radius: 5px;
+              text-decoration: none;
+              margin-top: 20px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2>New ${escapeHtml(briefData.studyType)} Brief Submitted</h2>
+            
+            <div class="section">
+              <h3>Submission Details</h3>
+              <div class="details">
+                <div class="detail-row"><span class="label">Submitted:</span> ${formatDate(briefData.createdAt)}</div>
+                <div class="detail-row"><span class="label">Brief ID:</span> <code>${briefData.id}</code></div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Client Information</h3>
+              <div class="details">
+                <div class="detail-row"><span class="label">Name:</span> ${escapeHtml(briefData.submittedByName)}</div>
+                <div class="detail-row"><span class="label">Email:</span> <a href="mailto:${briefData.submittedByEmail}">${escapeHtml(briefData.submittedByEmail)}</a></div>
+                <div class="detail-row"><span class="label">Contact:</span> ${briefData.submittedByContact || "Not provided"}</div>
+                <div class="detail-row"><span class="label">Company:</span> ${escapeHtml(briefData.companyName)}</div>
+                <div class="detail-row"><span class="label">Brand:</span> ${briefData.companyBrand || "Not provided"}</div>
+                <div class="detail-row"><span class="label">Industry:</span> ${briefData.industry || "Not provided"}</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Study Details</h3>
+              <div class="details">
+                <div class="detail-row"><span class="label">Study Type:</span> <strong>${escapeHtml(briefData.studyType)}</strong></div>
+                <div class="detail-row"><span class="label">Number of Ideas:</span> ${briefData.numIdeas}</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Research Objective</h3>
+              <div class="objective-box">${escapeHtml(briefData.researchObjective)}</div>
+            </div>
+
+            <div class="section">
+              <h3>Target Audience</h3>
+              <div class="details">
+                <div class="detail-row"><span class="label">Regions:</span> ${formatArray(briefData.regions)}</div>
+                <div class="detail-row"><span class="label">Age Groups:</span> ${formatArray(briefData.ages)}</div>
+                <div class="detail-row"><span class="label">Gender:</span> ${formatArray(briefData.genders)}</div>
+                <div class="detail-row"><span class="label">Income Levels:</span> ${formatArray(briefData.incomes)}</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Competitors</h3>
+              <div class="details">
+                ${briefData.competitors.length > 0 
+                  ? `<ul>${briefData.competitors.map(c => `<li>${escapeHtml(c)}</li>`).join("")}</ul>`
+                  : "<p>No competitors specified</p>"
+                }
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Uploaded Files</h3>
+              <ul>${filesHtml}</ul>
+            </div>
+
+            <p style="margin-top: 30px;">
+              <em>Reply directly to this email to contact the client at ${escapeHtml(briefData.submittedByEmail)}</em>
+            </p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const response = await resend.emails.send({
+      from: `Innovatr <${fromEmail}>`,
+      to: adminEmails,
+      replyTo: briefData.submittedByEmail,
+      subject: `New ${briefData.studyType} brief submitted – ${briefData.companyName}`,
+      html: emailHtml,
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Failed to send brief admin notification:", error);
+    throw error;
+  }
+}
