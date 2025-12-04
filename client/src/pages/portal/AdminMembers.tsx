@@ -85,6 +85,7 @@ interface User {
   companyId: string | null;
   createdAt: string;
   updatedAt?: string;
+  pulseSubscribed?: boolean;
 }
 
 interface Company {
@@ -219,7 +220,7 @@ export default function AdminMembers() {
         const studyCount = studiesByEmail[user.email.toLowerCase()] || 0;
         return {
           ...user,
-          isPulseSubscriber: !!pulseInfo,
+          isPulseSubscriber: !!pulseInfo || user.pulseSubscribed === true,
           pulseInfo,
           hasActivePayment: paymentInfo?.status === "active",
           paymentInfo,
