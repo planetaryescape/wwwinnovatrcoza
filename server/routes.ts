@@ -178,6 +178,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         emailVerified: false 
       });
       
+      // Send welcome email to new user
+      try {
+        await emailService.sendAccountCreatedEmail(email, name || email.split("@")[0]);
+      } catch (emailError) {
+        console.error("Failed to send welcome email:", emailError);
+        // Don't fail signup if email fails
+      }
+      
       // Return user without sensitive fields
       const { password: _, passwordHash: __, ...safeUser } = { ...newUser, passwordHash };
       res.status(201).json(safeUser);
@@ -374,8 +382,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expiresAt,
       });
       
-      // Send reset email (construct reset URL)
-      const resetUrl = `${process.env.REPLIT_URL || 'https://localhost:5000'}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
+      // Send reset email (construct reset URL using FRONTEND_URL)
+      const resetUrl = `${emailService.FRONTEND_URL}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
       
       // Send email via Resend
       try {
@@ -449,6 +457,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Mark token as used
       await storage.markPasswordResetUsed(resetRecord.id);
       
+      // Send password reset success email
+      try {
+        await emailService.sendPasswordResetSuccessEmail(user.email, user.name || 'User');
+      } catch (emailError) {
+        console.error("Failed to send password reset success email:", emailError);
+        // Don't fail the reset if email fails
+      }
+      
       res.json({ message: "Password has been reset successfully. You can now log in with your new password." });
     } catch (error: any) {
       console.error("Password reset confirm error:", error);
@@ -482,6 +498,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const subscription = await storage.createMailerSubscription(validatedData);
+      
+      // Send subscription confirmation email
+      try {
+        await emailService.sendSubscriptionConfirmedEmail(validatedData.email, validatedData.name || undefined);
+      } catch (emailError) {
+        console.error("Failed to send subscription confirmation email:", emailError);
+        // Don't fail the subscription if email fails
+      }
+      
       res.status(201).json({ message: "Successfully subscribed to Pulse Insights", subscription });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
@@ -1687,7 +1712,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Verify ownership: user must own the subscription or be an admin
       if (!isAdminUser(sessionUser.email) && 
-          subscription.userEmail !== sessionUser.email && 
+          subscription.customerEmail !== sessionUser.email && 
           subscription.userId !== sessionUser.id) {
         return res.status(403).json({ error: "Access denied" });
       }

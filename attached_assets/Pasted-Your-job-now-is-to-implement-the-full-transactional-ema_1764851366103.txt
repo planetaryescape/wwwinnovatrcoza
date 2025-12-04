@@ -1,0 +1,650 @@
+Your job now is to implement the full transactional email system refactor based on the audit you just completed and the requirements below.
+Do not change unrelated parts of the app. Focus on the email layer, copy, and URLs.
+
+0. High level goals
+
+
+Create a single, unified email design system (HTML + text) for all transactional emails.
+
+
+Replace all ad-hoc HTML snippets with reusable templates and consistent styling.
+
+
+Implement all missing templates and wire them to the correct flows.
+
+
+Fix URL and environment issues so links always point to the live Innovatr site.
+
+
+Keep security and privacy intact (no passwords or hashes in emails).
+
+
+
+1. Core email architecture
+Work in server/emails/email-service.ts (or the existing email service file).
+1.1 Base layout
+Create a base layout helper:
+function renderBaseEmail(options: {
+  title: string;
+  greetingName?: string;  // first name, optional
+  bodyHtml: string;       // main body paragraphs/markup
+  buttonLabel?: string;
+  buttonUrl?: string;
+  showButton?: boolean;
+  footerNote?: string;
+}): string
+
+Requirements:
+
+
+White background, max width ~600px, centred container.
+
+
+Use system fonts: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif.
+
+
+Simple, elegant layout similar in feel to a HubSpot mailer but no gradients:
+
+
+White body
+
+
+Dark text
+
+
+One primary button colour reusing the existing Innovatr button colour from the web app (do not introduce new brand colours; pull from existing styles or hardcode the same purple already used in web buttons).
+
+
+
+
+Greeting:
+
+
+If greetingName is provided, use Hi {{greetingName}},
+
+
+Else use Hi there,
+
+
+
+
+Button:
+
+
+Rounded corners, solid brand colour background, white text.
+
+
+Only render if buttonLabel and buttonUrl are provided.
+
+
+
+
+Under the button, when relevant, support an optional “if the button does not work, copy this link” section.
+
+
+Footer (same on every email):
+This is an automated message from Innovatr.
+If you have any questions, contact us at hello@innovatr.co.za.
+© 2025 Innovatr. All rights reserved.
+
+
+
+1.2 Template dispatcher
+Define a central template renderer and type:
+export type EmailTemplateType =
+  | "PASSWORD_RESET_REQUEST"
+  | "PASSWORD_RESET_SUCCESS"
+  | "ACCOUNT_CREATED"
+  | "EMAIL_VERIFICATION"
+  | "BRIEF_SUBMITTED"
+  | "AUDIENCE_LIVE"
+  | "STUDY_COMPLETE"
+  | "SUBSCRIPTION_CONFIRMED"
+  | "SUBSCRIPTION_CANCELLED"
+  | "CREDITS_ADDED"
+  | "CREDITS_LOW"
+  | "PAYMENT_CONFIRMED"
+  | "INVOICE_ISSUED";
+  // you can keep using any existing internal admin-only templates too,
+  // but wrap them with the same base layout
+
+export function renderEmailTemplate(
+  type: EmailTemplateType,
+  data: any
+): { subject: string; html: string; text: string } {
+  // implement a switch over `type` using the copy below
+}
+
+
+
+html should call renderBaseEmail.
+
+
+text should be a plain text fallback (either by constructing a parallel string or stripping tags from HTML); it must not include any HTML.
+
+
+Keep the existing sendEmail / Resend integration, but route all email sends through renderEmailTemplate.
+
+2. URL and env handling
+
+
+Introduce or use a single base URL env variable, e.g.:
+
+
+const FRONTEND_URL =
+  process.env.FRONTEND_URL || "https://www.innovatr.co.za";
+
+
+
+Replace all hardcoded frontend links in email templates with combinations of:
+
+
+
+
+${FRONTEND_URL}/portal/login
+
+
+${FRONTEND_URL}/portal/research
+
+
+${FRONTEND_URL}/portal/credits
+
+
+Or ${FRONTEND_URL} for home when appropriate.
+
+
+
+
+Password reset links:
+
+
+Continue using whatever token logic exists, but build the link using FRONTEND_URL, not localhost or REPLIT_URL.
+
+
+
+
+
+3. Exact copy for each template
+Use the exact wording below (except where dynamic variables are indicated).
+Where you see {{placeholder}}, keep this dynamic and pass it via data.
+For all templates, if a firstName is available from data, pass it into greetingName.
+
+3.1 PASSWORD_RESET_REQUEST
+Subject:
+Reset Your Innovatr Password
+Title:
+Reset Your Password
+Body paragraphs (HTML):
+
+
+We received a request to reset your password for your Innovatr account.
+
+
+Click the button below to create a new password:
+
+
+Button:
+
+
+Label: Reset Password
+
+
+Url: {{resetLink}}
+
+
+Below the button:
+
+
+This link will expire in 1 hour for security reasons.
+
+
+If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.
+
+
+If the button does not work, copy and paste this link in your browser: followed by {{resetLink}} on its own line.
+
+
+
+3.2 PASSWORD_RESET_SUCCESS
+Subject:
+Your Innovatr Password Has Been Updated
+Title:
+Password Updated Successfully
+Body:
+
+
+Your password has been successfully updated. You can now log in to your Innovatr account using your new password.
+
+
+If you did not make this change or believe your account was accessed without permission, please contact us immediately at hello@innovatr.co.za.
+
+
+No button required.
+
+3.3 ACCOUNT_CREATED
+Subject:
+Welcome to Innovatr
+Title:
+Your Innovatr Account Is Ready
+Body:
+
+
+Your Innovatr account has been successfully created.
+
+
+You can now log in to your portal to access your research tools, track briefs, and view your insights.
+
+
+If you did not create this account, please contact us immediately at hello@innovatr.co.za.
+
+
+Button:
+
+
+Label: Go to the Portal
+
+
+Url: {{portalLink}} (usually ${FRONTEND_URL}/portal/login)
+
+
+
+3.4 EMAIL_VERIFICATION
+Subject:
+Verify Your Innovatr Account
+Title:
+Confirm Your Email Address
+Body:
+
+
+Please confirm your email address to complete your Innovatr account setup.
+
+
+Button:
+
+
+Label: Verify Email
+
+
+Url: {{verifyLink}}
+
+
+Below button:
+
+
+This link will expire in 1 hour.
+
+
+If you did not sign up for Innovatr, you can safely ignore this email.
+
+
+
+3.5 BRIEF_SUBMITTED
+Subject:
+Your Test24 Brief Has Been Received
+Title:
+Brief Submitted Successfully
+Body:
+
+
+Thanks for submitting your brief. Everything has been received safely.
+
+
+Our team is reviewing your details and preparing your study for launch. You will be notified as soon as your audience goes live.
+
+
+You can view this brief anytime in your Innovatr portal under My Research.
+
+
+Button:
+
+
+Label: View My Research
+
+
+Url: {{portalLink}} (My Research view)
+
+
+
+3.6 AUDIENCE_LIVE
+Subject:
+Your Test24 Audience Is Live
+Title:
+Your Study Is Now Live
+Body:
+
+
+Good news, your audience is officially live.
+
+
+We are now collecting real consumer data. Your full insights report will be ready within 24 hours.
+
+
+You can track your project status anytime in your My Research portal.
+
+
+Button:
+
+
+Label: View Study Status
+
+
+Url: {{portalLink}}
+
+
+
+3.7 STUDY_COMPLETE
+Subject:
+Your Test24 Report Is Ready
+Title:
+Your Insights Are Ready
+Body:
+
+
+Your study is complete and your insights report is now available in your Innovatr portal.
+
+
+Go to My Research to view, download, or share your results.
+
+
+If you would like us to walk you through the findings, simply reply to this email.
+
+
+Button:
+
+
+Label: View My Report
+
+
+Url: {{reportLink}} if provided, otherwise fall back to {{portalLink}}.
+
+
+
+3.8 SUBSCRIPTION_CONFIRMED
+Subject:
+You Are Now Subscribed to Innovatr Mailers
+Title:
+Welcome to Innovatr Intelligence
+Body:
+
+
+You are now subscribed to Innovatr mailers.
+
+
+You will receive fresh insights, trends, and real data from South African markets, all crafted to help you build what people actually want.
+
+
+You can unsubscribe anytime by clicking the link in any email.
+
+
+No button required.
+
+3.9 SUBSCRIPTION_CANCELLED
+Subject:
+You Have Been Unsubscribed
+Title:
+You Are Unsubscribed
+Body:
+
+
+You have been successfully unsubscribed from Innovatr mailers.
+
+
+If this was a mistake or you want to rejoin later, you can subscribe again anytime on our website.
+
+
+Button:
+
+
+Label: Visit Innovatr
+
+
+Url: ${FRONTEND_URL}
+
+
+
+3.10 CREDITS_ADDED
+Subject:
+Your Innovatr Credits Have Been Updated
+Title:
+Credits Added Successfully
+Body:
+
+
+Your Innovatr research credits have been updated.
+
+
+Available now:
+
+
+Test24 Basic Credits: {{basicCredits}}
+
+
+Test24 Pro Credits: {{proCredits}}
+
+
+
+
+These are now ready to use in your portal.
+
+
+Button:
+
+
+Label: View Credits
+
+
+Url: ${FRONTEND_URL}/portal/credits or appropriate Credits & Billing route.
+
+
+
+3.11 CREDITS_LOW
+Subject:
+You Are Running Low on Research Credits
+Title:
+Low Credit Alert
+Body:
+
+
+Just a heads up, your Innovatr research credits are running low.
+
+
+Remaining:
+
+
+Basic Credits: {{basicCredits}}
+
+
+Pro Credits: {{proCredits}}
+
+
+
+
+You can top up anytime in your portal under Credits & Billing.
+
+
+Button:
+
+
+Label: Top Up Credits
+
+
+Url: credits purchase route (e.g. ${FRONTEND_URL}/portal/credits).
+
+
+
+3.12 PAYMENT_CONFIRMED
+Subject:
+Your Innovatr Order Has Been Confirmed
+Title:
+Payment Received
+Body:
+
+
+We have received your payment and your order is now confirmed.
+
+
+Your study will begin as soon as your brief is submitted and approved.
+
+
+You can track your orders anytime in Credits & Billing.
+
+
+If available, optionally display:
+
+
+Order reference: {{orderReference}}
+
+
+Amount: {{amount}}
+
+
+Button:
+
+
+Label: View Order
+
+
+Url: billing/orders view in the portal.
+
+
+
+3.13 INVOICE_ISSUED
+Subject:
+Your Innovatr Invoice Is Ready
+Title:
+Invoice Issued
+Body:
+
+
+Your invoice has been generated and sent to your email.
+
+
+Your study will begin once payment or a purchase order has been received.
+
+
+If you need help or require the invoice to be resent, please let us know.
+
+
+Optional extra lines if data is provided:
+
+
+Invoice number: {{invoiceNumber}}
+
+
+Amount: {{amount}}
+
+
+Button:
+
+
+Label: View Invoice
+
+
+Url: billing view in the portal.
+
+
+
+4. Wire templates to existing functions
+Update all existing email-sending functions in the server (for example, functions you saw in the audit such as):
+
+
+sendPasswordResetEmail
+
+
+sendBriefConfirmationEmail
+
+
+sendStudyLiveNotification
+
+
+sendStudyCompletedNotification
+
+
+sendCustomerOrderConfirmation
+
+
+sendInvoiceRequestNotification
+
+
+sendAdminOrderNotification
+
+
+sendBriefAdminNotification
+
+
+sendContactFormMessage
+
+
+to call renderEmailTemplate with the correct type and data:
+
+
+Password reset request → PASSWORD_RESET_REQUEST
+
+
+After a successful reset (wherever that happens) → PASSWORD_RESET_SUCCESS
+
+
+After signup → ACCOUNT_CREATED (and optionally EMAIL_VERIFICATION if the flow supports it)
+
+
+Brief submission → BRIEF_SUBMITTED
+
+
+Study live → AUDIENCE_LIVE
+
+
+Study completed → STUDY_COMPLETE
+
+
+Customer order confirmation → PAYMENT_CONFIRMED
+
+
+Invoice creation for invoice-me orders → INVOICE_ISSUED
+
+
+Mailer subscription confirmation / unsubscribe → map to SUBSCRIPTION_CONFIRMED / SUBSCRIPTION_CANCELLED if those flows exist already or are added now.
+
+
+Credits top-up events → CREDITS_ADDED
+
+
+Low credit logic (if there is a threshold check) → CREDITS_LOW
+
+
+Admin notification emails (order received, brief received, contact form etc) can reuse the same base layout but can keep simpler internal copy. Make sure they still send plain text fallbacks.
+
+5. Testing and verification
+
+
+Add temporary test scripts or loggers (or use existing routes) to send at least one instance of each template to a test email and visually confirm:
+
+
+Typography and spacing are consistent.
+
+
+Colours match the main Innovatr brand (no more ugly gradients).
+
+
+Links point to https://www.innovatr.co.za/... rather than localhost or raw Replit URLs.
+
+
+
+
+Confirm that:
+
+
+No email payload ever includes password or passwordHash.
+
+
+All templates return both html and text.
+
+
+Password reset flow now sends the reset request email and, after a successful reset, the success email.
+
+
+
+
+Remove any obsolete legacy HTML email snippets that are no longer used, to avoid confusion.
+
+
+When finished, summarise the changes you made (files touched, new helpers, and how to trigger each email for manual testing).
