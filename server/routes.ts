@@ -11,6 +11,7 @@ import * as emailService from "./emails/email-service";
 import { sendAdminOrderNotification, sendCustomerOrderConfirmation, sendContactFormMessage, sendInvoiceRequestNotification, sendBriefConfirmationEmail, sendBriefAdminNotification } from "./emails/email-service";
 import { uploadFile, downloadFile, deleteFile, listFiles, fileExists } from "./app-storage";
 import { generateInvoicePdf } from "./invoices/generator";
+import { createAndUploadPlaceholderPDF } from "./pdf-generator";
 import { hashPassword, verifyPassword, validatePasswordStrength, generateResetToken, hashResetToken, getResetTokenExpiry, generateSessionToken, getSessionExpiry, isExpired, hashSessionToken } from "./auth/password";
 import { requireAuth, requireAdmin, redactUser, redactUsers, isAdminUser as isAdminUserMiddleware, apiError, type AuthenticatedRequest } from "./middleware";
 
@@ -1723,13 +1724,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const filename = `${id}_${Date.now()}_${req.file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-      const filePath = `client_reports/${filename}`;
+      const filePath = `client_reports/${report.companyId}/${filename}`;
       
       await uploadFile(req.file.buffer, filePath);
-      await storage.updateClientReport(id, { pdfUrl: `/assets/${filePath}` });
+      await storage.updateClientReport(id, { pdfUrl: `/api/files/${filePath}` });
       
       const updated = await storage.getClientReport(id);
       res.json(updated);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Generate placeholder PDF for a client report
+  app.post("/api/admin/client-reports/:id/generate-pdf", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const report = await storage.getClientReport(id);
+      if (!report) {
+        return res.status(404).json({ error: "Client report not found" });
+      }
+
+      const company = await storage.getCompany(report.companyId);
+      const companyName = company?.name || "Unknown Company";
+
+      const storagePath = `client_reports/${report.companyId}/${id}_${Date.now()}.pdf`;
+      const result = await createAndUploadPlaceholderPDF(
+        {
+          title: report.title,
+          companyName,
+          description: report.description || undefined,
+          reportType: report.tags?.includes("Test24 Pro") ? "Test24 Pro Report" : "Test24 Basic Report",
+          date: report.uploadedAt ? new Date(report.uploadedAt).toLocaleDateString("en-ZA") : undefined,
+        },
+        storagePath
+      );
+
+      if (result.success && result.url) {
+        await storage.updateClientReport(id, { pdfUrl: result.url });
+        const updated = await storage.getClientReport(id);
+        res.json({ success: true, report: updated });
+      } else {
+        res.status(500).json({ error: result.error || "Failed to generate PDF" });
+      }
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Regenerate placeholder PDFs for all client reports that have invalid paths
+  app.post("/api/admin/client-reports/regenerate-all-pdfs", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const reports = await storage.getAllClientReports();
+      const companies = await storage.getAllCompanies();
+      const companyMap = new Map(companies.map(c => [c.id, c.name]));
+
+      const results: { id: string; title: string; success: boolean; error?: string }[] = [];
+
+      for (const report of reports) {
+        // Skip reports without pdfUrl or with valid /api/files paths that exist
+        if (!report.pdfUrl || report.pdfUrl.startsWith("/api/files/")) {
+          // Check if file exists for /api/files paths
+          if (report.pdfUrl?.startsWith("/api/files/")) {
+            const filePath = report.pdfUrl.replace("/api/files/", "");
+            const exists = await fileExists(filePath);
+            if (exists) {
+              results.push({ id: report.id, title: report.title, success: true });
+              continue;
+            }
+          }
+        }
+
+        // Generate new PDF for reports with invalid paths
+        if (report.pdfUrl && !report.pdfUrl.startsWith("/api/files/")) {
+          const companyName = companyMap.get(report.companyId) || "Unknown Company";
+          const storagePath = `client_reports/${report.companyId}/${report.id}_${Date.now()}.pdf`;
+          
+          const result = await createAndUploadPlaceholderPDF(
+            {
+              title: report.title,
+              companyName,
+              description: report.description || undefined,
+              reportType: report.tags?.includes("Test24 Pro") ? "Test24 Pro Report" : "Test24 Basic Report",
+              date: report.uploadedAt ? new Date(report.uploadedAt).toLocaleDateString("en-ZA") : undefined,
+            },
+            storagePath
+          );
+
+          if (result.success && result.url) {
+            await storage.updateClientReport(report.id, { pdfUrl: result.url });
+            results.push({ id: report.id, title: report.title, success: true });
+          } else {
+            results.push({ id: report.id, title: report.title, success: false, error: result.error });
+          }
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        message: `Processed ${results.length} reports`,
+        results 
+      });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
