@@ -125,6 +125,8 @@ export interface IStorage {
 
   createBriefSubmission(brief: InsertBriefSubmission): Promise<BriefSubmission>;
   getBriefSubmission(id: string): Promise<BriefSubmission | undefined>;
+  getBriefSubmissionsByEmail(email: string): Promise<BriefSubmission[]>;
+  getBriefSubmissionsByCompanyId(companyId: string): Promise<BriefSubmission[]>;
   getAllBriefSubmissions(): Promise<BriefSubmission[]>;
   updateBriefSubmission(id: string, updates: Partial<BriefSubmission>): Promise<void>;
 
@@ -971,6 +973,18 @@ export class MemStorage implements IStorage {
 
   async getBriefSubmission(id: string): Promise<BriefSubmission | undefined> {
     return this.briefSubmissionsMap.get(id);
+  }
+
+  async getBriefSubmissionsByEmail(email: string): Promise<BriefSubmission[]> {
+    return Array.from(this.briefSubmissionsMap.values())
+      .filter(b => b.submittedByEmail === email)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getBriefSubmissionsByCompanyId(companyId: string): Promise<BriefSubmission[]> {
+    return Array.from(this.briefSubmissionsMap.values())
+      .filter(b => b.companyId === companyId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
   async getAllBriefSubmissions(): Promise<BriefSubmission[]> {

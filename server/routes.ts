@@ -1515,12 +1515,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get company by user's companyId (for member portal)
+  // Get company by user's companyId or email (for member portal)
   app.get("/api/member/company", async (req, res) => {
     try {
-      const { companyId } = req.query;
+      const { companyId, email } = req.query;
+      
+      // If email is provided, look up user first to get their companyId
+      if (email) {
+        const user = await storage.getUserByEmail(email as string);
+        if (!user || !user.companyId) {
+          return res.status(404).json({ error: "User not found or not associated with a company" });
+        }
+        const company = await storage.getCompany(user.companyId);
+        if (!company) {
+          return res.status(404).json({ error: "Company not found" });
+        }
+        // Apply demo credits for Hannah and Richard
+        const adjustedCompany = applyDemoCredits(company, email as string);
+        return res.json(adjustedCompany);
+      }
+      
+      // Fallback to companyId parameter
       if (!companyId) {
-        return res.status(400).json({ error: "companyId is required" });
+        return res.status(400).json({ error: "companyId or email is required" });
       }
       const company = await storage.getCompany(companyId as string);
       if (!company) {
@@ -1529,6 +1546,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(company);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Get briefs for logged-in member (by email or companyId)
+  app.get("/api/member/briefs", async (req, res) => {
+    try {
+      const email = req.query.email as string;
+      const companyId = req.query.companyId as string;
+      
+      if (!email && !companyId) {
+        return res.status(400).json({ error: "Email or companyId required" });
+      }
+      
+      // Admin users (@innovatr.co.za) can see all briefs
+      if (email && isAdminUser(email)) {
+        const allBriefs = await storage.getAllBriefSubmissions();
+        return res.json(allBriefs);
+      }
+      
+      // For regular users, get briefs by email or company
+      let briefs;
+      if (email) {
+        briefs = await storage.getBriefSubmissionsByEmail(email);
+      } else if (companyId) {
+        briefs = await storage.getBriefSubmissionsByCompanyId(companyId);
+      }
+      
+      res.json(briefs || []);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get credit ledger history for member's company
+  app.get("/api/member/credit-ledger", async (req, res) => {
+    try {
+      const { email, companyId } = req.query;
+      
+      if (!email && !companyId) {
+        return res.status(400).json({ error: "Email or companyId required" });
+      }
+      
+      let targetCompanyId = companyId as string;
+      
+      // If email is provided, look up user's company
+      if (email && !companyId) {
+        const user = await storage.getUserByEmail(email as string);
+        if (!user || !user.companyId) {
+          return res.json([]); // No company, no credit history
+        }
+        targetCompanyId = user.companyId;
+      }
+      
+      const ledgerEntries = await storage.getCreditLedgerByCompanyId(targetCompanyId);
+      res.json(ledgerEntries);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
     }
   });
 
