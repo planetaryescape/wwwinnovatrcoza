@@ -1,0 +1,322 @@
+You are an expert TypeScript Node React developer working in the `innovatr-website` monorepo.
+
+This is a FINAL POLISH configuration task.
+
+Your job now is to:
+
+1) Properly set up Nando's as a live client in the database
+2) Track Nando's Test24 Basic Menu Wraps project as a real order that used 5 Test24 Basic credits
+3) Properly reflect Rugani's existing Test24 Basic project as an order that used 2 Test24 Basic credits
+4) Make sure credits, orders, briefs, studies and My Research are all wired correctly for both Nando's and Rugani
+5) Remove the old "Client Research Reports" list from the Admin area, since admins now use their own "My Research" tab for viewing client reports
+6) Confirm that NOTHING in this task changes the special Innovatr demo admin profiles or sends any unexpected client emails
+
+Please work in small, clear phases and explain what you are doing.
+
+--------------------------------
+PHASE 1 – NANDO'S COMPANY, USER AND MEMBERSHIP
+--------------------------------
+
+Create a proper Nando's company and portal user, using the PostgreSQL DatabaseStorage implementation (NOT the in memory storage).
+
+COMPANY
+
+Create a new company:
+
+- name: "Nando's"
+- slug / key: "nandos"
+- website: "https://www.nandos.co.za"
+- phone: "+27 11 216 3300"
+- country: "South Africa"
+- industry: "Food & Beverage"
+- segment: "Fast Casual / QSR"
+
+USER
+
+Create a primary portal user for the account:
+
+- fullName: "Simone Kakana"
+- email: "Simone@nandos.co.za"
+- phone: "+27 82 442 5541"
+- role: member / client (NOT admin)
+- companyId: link to the new Nando's company
+- password: generate a secure temporary password (e.g. "NandosTest24!"), but store only the bcrypt hash using the existing auth flow
+
+Important:
+
+- Do NOT send any welcome or account created emails as part of seeding.
+- Make sure this user appears under:
+  - Admin → Companies → Nando's → Users
+  - Admin → Users list with the correct company mapping
+- Do not change the existing admin demo users:
+  - Hannah (Innovatr admin) with 25 Basic and 4 Pro credits
+  - Richard (Innovatr admin) with 25 Basic and 4 Pro credits
+
+MEMBERSHIP
+
+Nando's has bought a membership.
+
+Using the existing membership/subscription model:
+
+- Create a membership / subscription record for Nando's, using the appropriate "Entry" or "Member" plan type already defined.
+- Link it to:
+  - companyId: Nando's
+  - primary user: Simone (if your schema supports this)
+- Status: active
+- Start date: use a recent realistic date
+- Billing type: "Invoice" or whatever your current default is
+
+--------------------------------
+PHASE 2 – NANDO'S CREDITS, ORDER AND LEDGER
+--------------------------------
+
+Nando's bought 5 Test24 Basic credits as part of their membership and has used those 5 credits for their first study.
+
+CREDITS
+
+For Nando's:
+
+- Starting Test24 Basic credits: 5
+- Pro credits: 0
+- After creating and launching the Nando's Test24 Basic Menu Wraps study, they should end on:
+  - Test24 Basic credits: 0
+  - Pro credits: 0
+
+Implement this using your real credit system:
+
+- Use the company and/or user credit balance fields (e.g. creditsBasic, creditsPro) rather than any demo credit helpers.
+- Use the credit ledger system to record:
+  1) A "credits added" entry for "Purchased 5 Test24 Basic credits"
+  2) A "credits used" entry for "Used 5 Test24 Basic credits for Nando's Test24 Basic Menu Wraps"
+- The net balance must be zero Basic credits for Nando's after these entries.
+
+ORDER
+
+Create an order record for Nando's, visible in the Admin → Orders view.
+
+Requirements for the Nando's order:
+
+- companyId: Nando's
+- createdBy: Simone's user id
+- status: "Completed"
+- line items:
+  - one membership line (Entry Plan / Member Plan)
+  - one credit pack line: 5 x Test24 Basic credits
+- total amount: use your existing pricing model for 5 Test24 Basic credits (if you have a helper for this, use it; otherwise you can store a reasonable placeholder value consistent with Test24 Basic pricing)
+- link this order into the credit ledger so that the "credits added" entry clearly references this order id
+
+This order must appear in:
+
+- Admin → Orders
+- Any company level order history for Nando's
+- Any credit ledger endpoint for the Nando's company / Simone user
+
+--------------------------------
+PHASE 3 – NANDO'S STUDY, STATUS AND BRIEF SUBMISSION
+--------------------------------
+
+We already have context from a Test24 Basic Nando's project. Please seed one live Test24 Basic study and its associated brief submission.
+
+STUDY
+
+Create a single study for Nando's:
+
+- internalName: "Nando's Test24 Basic Menu Wraps"
+- clientFacingTitle: "Menu Wraps Test"
+- type: "Test24 Basic"
+- companyId: Nando's
+- owner / createdBy: Simone
+- upsiideStudyLink: "https://app.upsiide.com/studies/rzjn5mb2"
+- templateName: "Nando's X Test24 Basic"
+- market: "South Africa"
+- language: "English"
+- nSize: 100
+- ideasCount: 5
+- competitorsCount: 0
+- tags: ["Food & Beverage", "Fast Casual", "Menu", "Wraps", "Nando's"]
+
+Audience meta:
+
+- country: "South Africa"
+- language: "English"
+- age: 18 to 59
+- gender: all
+- behaviour: eats fast food or fast casual a few times a month or more
+
+IDEAS
+
+Attach these 5 ideas to the study using your existing concept/idea table:
+
+1) "BBQ sauce and crunchy coleslaw chicken wrap"
+   description: "Flame grilled chicken in a toasted wrap with grilled pineapple, barbeque sauce, crunchy coleslaw and crisp leafy lettuce."
+
+2) "Caesar dressing and parmesan cheese chicken wrap"
+   description: "Flame grilled chicken in a toasted wrap with crisp leafy lettuce, creamy caesar dressing, parmesan cheese and golden croutons."
+
+3) "Spiced smoky sweetcorn and whipped feta chicken wrap"
+   description: "Flame grilled chicken in a toasted wrap with grilled smoky peri corn, creamy whipped feta and crisp leafy lettuce."
+
+4) "Hot honey and grilled peri pineapple chicken wrap"
+   description: "Flame grilled chicken in a toasted wrap with peri pineapple, hot honey and crisp leafy lettuce."
+
+5) "Spicey mango chutney and halloumi chicken wrap"
+   description: "Flame grilled chicken in a toasted wrap with crisp leafy lettuce, grilled halloumi cheese and spicey mango chutney."
+
+Use existing imageUrl handling if images exist. Otherwise leave imageUrl as null.
+
+STUDY STATUS AND EMAILS
+
+Real world: the audience is currently live, but we DO NOT want Simone to be emailed yet.
+
+- Set the study status to your "ongoing" state, for example:
+  - status: "AUDIENCE_LIVE" or equivalent
+- Ensure that this seeding does NOT trigger:
+  - sendStudyLiveNotification
+  - sendStudyCompletedNotification
+- If your code sends emails on status transitions, make sure:
+  - this seeding path bypasses those triggers, OR
+  - any "study live" email flag for this record is already marked as sent so it will not send retroactively
+
+Later, when we manually mark this study as COMPLETE in the admin UI, the normal "study complete, your report is ready" email should fire using the new template system.
+
+BRIEF SUBMISSION
+
+Create a brief submission for this project so that both Admin and Simone see it in:
+
+- Admin → Briefs / overview
+- Simone's portal → My Research or Briefs
+
+Use the existing brief schema, with fields such as:
+
+- companyId: Nando's
+- userId: Simone
+- studyType: "Test24 Basic"
+- projectName: "Nando's Menu Wraps Test"
+- researchObjective: something like "Evaluate 5 new menu wrap ideas for Nando's South Africa."
+- ideasCount: 5
+- competitorsCount: 0
+- file attachments: you can leave file references empty for now, or create placeholder references that match your file storage logic
+- status: "Audience live" (or the closest equivalent status in your brief workflow)
+
+--------------------------------
+PHASE 4 – RUGANI ORDER, CREDITS, STUDY LINK AND BRIEF
+--------------------------------
+
+Rugani already exists as a seeded client with two Test24 Basic concepts tested.
+
+Treat Rugani as having used 2 Test24 Basic credits for that project. We want this to be visible as a "real" order and ledger entry in the system, WITHOUT changing how Rugani sees their reports.
+
+CREDITS AND ORDER
+
+For Rugani:
+
+- Add a credit ledger entry: "Purchased 2 Test24 Basic credits" (or a small pack)
+- Add a second ledger entry: "Used 2 Test24 Basic credits for Rugani x Clicks Wellness Beverage Positioning" (or the appropriate study name)
+- After this, Rugani's current credit balance should reflect whatever your default is for them (you can keep them on 0 if that is simpler, as long as it does not interfere with demos).
+
+Create an order for Rugani:
+
+- companyId: Rugani
+- createdBy: the appropriate Rugani contact or a generic internal user
+- status: "Completed"
+- line items:
+  - 1 x Test24 Basic study with 2 concepts
+- link this order to the credit ledger entries, similar to Nando's
+
+STUDY AND BRIEF LINK
+
+You already have Rugani studies and client reports seeded.
+
+- Make sure the existing Rugani Test24 Basic study (with 2 concepts) is linked to this new order and ledger entries
+- Create or update a Rugani brief submission record so that:
+  - Admin overview shows the Rugani brief
+  - Rugani's portal My Research / Briefs shows the project with status "Completed"
+
+Do NOT change how their reports display or any existing client facing behaviour.
+
+--------------------------------
+PHASE 5 – ADMIN OVERVIEW, MY RESEARCH AND REMOVING OLD CLIENT VIEW
+--------------------------------
+
+ADMIN OVERVIEW
+
+Update the Admin overview / dashboard so that:
+
+- Nando's and Rugani are both reflected correctly in:
+  - total companies
+  - total orders
+  - total studies
+  - total briefs
+- Any "ongoing studies" count should include the Nando's Test24 Basic Menu Wraps project.
+- Any "completed studies" count should include at least the existing Rugani Test24 Basic project.
+
+MY RESEARCH (ADMIN)
+
+Admins (Hannah and Richard) now use the same My Research components as members to see client reports.
+
+- Ensure that when an admin logs in and goes to "My Research":
+  - they can filter and view Nando's and Rugani studies and reports as appropriate
+  - they can see the Nando's ongoing study
+  - they can see the Rugani completed study and any attached client reports
+
+REMOVE OLD CLIENT VIEW FROM ADMIN
+
+The Admin area previously had a "Client Research Reports" list.
+
+We no longer want a separate "Client Reports" tab inside Admin, to avoid duplication.
+
+- Remove or hide the old "Client Reports" tab / section from:
+  - Admin → Client Research Reports
+- Remove any frontend routes and components that exist solely for that tab, as long as this does not break My Research.
+- Keep all API endpoints that are still used by My Research, but avoid any unused duplicate endpoints.
+
+After this, the rule is:
+
+- Admins use THEIR My Research tab to see client deliverables.
+- Clients use THEIR My Research tab to see their own studies and reports.
+
+--------------------------------
+PHASE 6 – VALIDATION AND SAFETY CHECKS
+--------------------------------
+
+When you finish coding:
+
+1. Run TypeScript / LSP checks and fix any errors or warnings introduced by your changes.
+
+2. From the backend, run quick checks using curl or minimal scripts:
+
+- Fetch Nando's company via admin API and show:
+  - name
+  - membership status
+  - credit balances
+- Fetch Simone's user via admin users API and show:
+  - name
+  - email
+  - company
+  - role
+- Fetch Nando's studies and verify:
+  - one Test24 Basic study
+  - status is "audience live" or equivalent
+  - ideasCount = 5
+- Fetch Nando's credit ledger and orders to confirm:
+  - one order with membership + 5 Test24 Basic credits
+  - credits added and used entries net to 0 credits remaining
+- Fetch Rugani's orders and credit ledger:
+  - one order reflecting the 2 concept Test24 Basic project
+  - ledger entries showing 2 credits purchased and 2 used
+- Fetch admin overview stats and confirm:
+  - Nando's and Rugani are included
+  - Nando's is counted as an ongoing study
+
+3. Confirm in your final output, in plain English:
+
+- Simone will NOT receive any emails yet.
+- Nando's has 0 remaining Test24 Basic credits after using 5 for their study.
+- Rugani's existing project appears as an order and credit usage but their client facing experience is unchanged.
+- Innovatr admin demo accounts (Hannah and Richard) still have 25 Basic and 4 Pro credits each, unchanged.
+- Admin My Research shows Nando's and Rugani correctly.
+- The old Admin "Client Research Reports" tab is removed and no longer visible.
+
+Do NOT trigger any real transactional emails during this task. Use existing Resend sandbox behaviour only.
+
+Once all checks pass, summarise the changes clearly so that a non developer (Hannah) can understand what is now working and how Nando's and Rugani appear in the system.
