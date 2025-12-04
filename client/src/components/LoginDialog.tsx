@@ -18,13 +18,57 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [showResetLink, setShowResetLink] = useState(false);
+  const [showResetForm, setShowResetForm] = useState(false);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
   const { login, signup } = useAuth();
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
 
+  const handlePasswordResetRequest = async () => {
+    if (!email) {
+      setLoginError("Please enter your email address first.");
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/auth/password-reset/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      
+      if (response.ok) {
+        setResetEmailSent(true);
+        toast({
+          title: "Reset email sent",
+          description: "Check your inbox for password reset instructions.",
+        });
+      } else {
+        toast({
+          title: "Could not send reset email",
+          description: "Please check your email address and try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Could not send reset email. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setLoginError(null);
 
     try {
       if (isSignup) {
@@ -33,12 +77,14 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
           title: "Welcome to Innovatr!",
           description: "Your free account has been created. Access trend reports now!",
         });
+        setLoginAttempts(0);
       } else {
         await login(email, password);
         toast({
           title: "Welcome back!",
           description: "You've successfully logged in.",
         });
+        setLoginAttempts(0);
       }
       
       // Close dialog and redirect to portal
@@ -46,10 +92,27 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       setTimeout(() => {
         setLocation("/portal");
       }, 100);
-    } catch (error) {
+    } catch (error: any) {
+      const newAttempts = loginAttempts + 1;
+      setLoginAttempts(newAttempts);
+      
+      // Progressive error messages
+      if (!isSignup) {
+        if (newAttempts === 1) {
+          setLoginError("Incorrect email or password. Please try again.");
+        } else if (newAttempts >= 2) {
+          setLoginError("Incorrect email or password. Please try again.");
+          setShowResetLink(true);
+        }
+      } else {
+        // Signup error
+        const message = error?.message || "Could not create account. Please try again.";
+        setLoginError(message);
+      }
+      
       toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
+        title: isSignup ? "Signup failed" : "Login failed",
+        description: error?.message || "Please check your credentials and try again.",
         variant: "destructive",
       });
     } finally {
@@ -117,6 +180,28 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
               required
             />
           </div>
+
+          {loginError && (
+            <div className="rounded-md bg-destructive/10 p-3 text-sm" data-testid="error-login">
+              <p className="text-destructive">{loginError}</p>
+              {showResetLink && !isSignup && !resetEmailSent && (
+                <button
+                  type="button"
+                  onClick={handlePasswordResetRequest}
+                  className="mt-2 text-primary hover:underline text-xs"
+                  data-testid="button-forgot-password"
+                  disabled={isLoading}
+                >
+                  Forgot your password? Click here to reset it.
+                </button>
+              )}
+              {resetEmailSent && (
+                <p className="mt-2 text-green-600 text-xs">
+                  Password reset email sent. Check your inbox.
+                </p>
+              )}
+            </div>
+          )}
 
           {isSignup && (
             <div className="rounded-md bg-accent/10 p-3 text-sm" data-testid="banner-free-benefits">
