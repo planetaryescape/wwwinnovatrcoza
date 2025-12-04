@@ -504,3 +504,55 @@ export const insertBriefSubmissionSchema = createInsertSchema(briefSubmissions)
 
 export type InsertBriefSubmission = z.infer<typeof insertBriefSubmissionSchema>;
 export type BriefSubmission = typeof briefSubmissions.$inferSelect;
+
+// Study status enum for the research lifecycle
+export const STUDY_STATUS = {
+  NEW: "NEW",
+  AUDIENCE_LIVE: "AUDIENCE_LIVE",
+  ANALYSING_DATA: "ANALYSING_DATA",
+  COMPLETED: "COMPLETED",
+} as const;
+
+export type StudyStatus = typeof STUDY_STATUS[keyof typeof STUDY_STATUS];
+
+// Studies table - Unified view of research projects (links briefs to completed reports)
+export const studies = pgTable("studies", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id"),
+  companyName: text("company_name").notNull(),
+  briefId: varchar("brief_id"),
+  clientReportId: varchar("client_report_id"),
+  title: text("title").notNull(),
+  description: text("description"),
+  studyType: varchar("study_type", { length: 50 }).notNull(),
+  isTest24: boolean("is_test24").notNull().default(true),
+  tags: text("tags").array().default([]),
+  status: varchar("status", { length: 20 }).notNull().default("NEW"),
+  statusUpdatedAt: timestamp("status_updated_at").defaultNow().notNull(),
+  reportUrl: text("report_url"),
+  deliveryDate: timestamp("delivery_date"),
+  submittedByEmail: text("submitted_by_email").notNull(),
+  submittedByName: text("submitted_by_name"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertStudySchema = createInsertSchema(studies)
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+    statusUpdatedAt: true,
+  })
+  .extend({
+    title: z.string().min(1, "Title is required"),
+    companyName: z.string().min(1, "Company name is required"),
+    studyType: z.enum(["basic", "pro"]),
+    status: z.enum(["NEW", "AUDIENCE_LIVE", "ANALYSING_DATA", "COMPLETED"]).default("NEW"),
+    submittedByEmail: z.string().email("Valid email is required"),
+  });
+
+export type InsertStudy = z.infer<typeof insertStudySchema>;
+export type Study = typeof studies.$inferSelect;

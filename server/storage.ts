@@ -28,6 +28,9 @@ import {
   type BriefSubmission,
   type InsertBriefSubmission,
   type BriefFile,
+  type Study,
+  type InsertStudy,
+  type StudyStatus,
   orders,
   orderItems,
   paymentIntents,
@@ -115,6 +118,16 @@ export interface IStorage {
   getBriefSubmission(id: string): Promise<BriefSubmission | undefined>;
   getAllBriefSubmissions(): Promise<BriefSubmission[]>;
   updateBriefSubmission(id: string, updates: Partial<BriefSubmission>): Promise<void>;
+
+  // Studies - unified research project view
+  createStudy(study: InsertStudy): Promise<Study>;
+  getStudy(id: string): Promise<Study | undefined>;
+  getStudyByBriefId(briefId: string): Promise<Study | undefined>;
+  getStudiesByCompanyId(companyId: string): Promise<Study[]>;
+  getStudiesByEmail(email: string): Promise<Study[]>;
+  getAllStudies(): Promise<Study[]>;
+  updateStudy(id: string, updates: Partial<Study>): Promise<void>;
+  updateStudyStatus(id: string, status: StudyStatus): Promise<Study | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -132,6 +145,7 @@ export class MemStorage implements IStorage {
   private companiesMap: Map<string, Company>;
   private clientReportsMap: Map<string, ClientReport>;
   private briefSubmissionsMap: Map<string, BriefSubmission>;
+  private studiesMap: Map<string, Study>;
 
   constructor() {
     this.users = new Map();
@@ -148,6 +162,7 @@ export class MemStorage implements IStorage {
     this.companiesMap = new Map();
     this.clientReportsMap = new Map();
     this.briefSubmissionsMap = new Map();
+    this.studiesMap = new Map();
     
     this.seedCompaniesAndUsers();
   }
@@ -832,6 +847,82 @@ export class MemStorage implements IStorage {
     if (brief) {
       this.briefSubmissionsMap.set(id, { ...brief, ...updates, updatedAt: new Date() });
     }
+  }
+
+  // Studies - unified research project view
+  async createStudy(insertStudy: InsertStudy): Promise<Study> {
+    const id = randomUUID();
+    const now = new Date();
+    const study: Study = {
+      id,
+      companyId: insertStudy.companyId ?? null,
+      companyName: insertStudy.companyName,
+      briefId: insertStudy.briefId ?? null,
+      clientReportId: insertStudy.clientReportId ?? null,
+      title: insertStudy.title,
+      description: insertStudy.description ?? null,
+      studyType: insertStudy.studyType,
+      isTest24: insertStudy.isTest24 ?? true,
+      tags: insertStudy.tags ?? [],
+      status: insertStudy.status ?? "NEW",
+      statusUpdatedAt: now,
+      reportUrl: insertStudy.reportUrl ?? null,
+      deliveryDate: insertStudy.deliveryDate ?? null,
+      submittedByEmail: insertStudy.submittedByEmail,
+      submittedByName: insertStudy.submittedByName ?? null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.studiesMap.set(id, study);
+    return study;
+  }
+
+  async getStudy(id: string): Promise<Study | undefined> {
+    return this.studiesMap.get(id);
+  }
+
+  async getStudyByBriefId(briefId: string): Promise<Study | undefined> {
+    return Array.from(this.studiesMap.values()).find(s => s.briefId === briefId);
+  }
+
+  async getStudiesByCompanyId(companyId: string): Promise<Study[]> {
+    return Array.from(this.studiesMap.values())
+      .filter(s => s.companyId === companyId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getStudiesByEmail(email: string): Promise<Study[]> {
+    return Array.from(this.studiesMap.values())
+      .filter(s => s.submittedByEmail.toLowerCase() === email.toLowerCase())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getAllStudies(): Promise<Study[]> {
+    return Array.from(this.studiesMap.values())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async updateStudy(id: string, updates: Partial<Study>): Promise<void> {
+    const study = this.studiesMap.get(id);
+    if (study) {
+      this.studiesMap.set(id, { ...study, ...updates, updatedAt: new Date() });
+    }
+  }
+
+  async updateStudyStatus(id: string, status: StudyStatus): Promise<Study | undefined> {
+    const study = this.studiesMap.get(id);
+    if (study) {
+      const now = new Date();
+      const updatedStudy: Study = {
+        ...study,
+        status,
+        statusUpdatedAt: now,
+        updatedAt: now,
+      };
+      this.studiesMap.set(id, updatedStudy);
+      return updatedStudy;
+    }
+    return undefined;
   }
 }
 

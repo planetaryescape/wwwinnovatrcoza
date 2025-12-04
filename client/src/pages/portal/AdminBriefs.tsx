@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,10 +47,34 @@ import {
   CheckCircle,
   AlertTriangle,
   XCircle,
+  Play,
+  BarChart3,
+  Rocket,
+  Timer,
 } from "lucide-react";
 import { format } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+
+interface Study {
+  id: string;
+  briefId: string | null;
+  companyId: string | null;
+  companyName: string;
+  title: string;
+  description: string | null;
+  studyType: "basic" | "pro";
+  status: "NEW" | "AUDIENCE_LIVE" | "ANALYSING_DATA" | "COMPLETED";
+  statusUpdatedAt: string | null;
+  isTest24: boolean;
+  tags: string[];
+  reportUrl: string | null;
+  deliveryDate: string | null;
+  submittedByEmail: string;
+  submittedByName: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface BriefFile {
   id: string;
@@ -100,6 +124,13 @@ const statusConfig: Record<string, { label: string; color: string; icon: any }> 
   cancelled: { label: "Cancelled", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400", icon: XCircle },
 };
 
+const studyStatusConfig: Record<string, { label: string; color: string; icon: any }> = {
+  NEW: { label: "Submitted", color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400", icon: Clock },
+  AUDIENCE_LIVE: { label: "Fieldwork Live", color: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400", icon: Play },
+  ANALYSING_DATA: { label: "Analysing", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400", icon: BarChart3 },
+  COMPLETED: { label: "Complete", color: "bg-primary/15 text-primary dark:bg-primary/20", icon: CheckCircle },
+};
+
 export default function AdminBriefs() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
@@ -108,10 +139,26 @@ export default function AdminBriefs() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [editStatus, setEditStatus] = useState("");
   const [editNotes, setEditNotes] = useState("");
+  const [linkedStudy, setLinkedStudy] = useState<Study | null>(null);
+  const [studyStatus, setStudyStatus] = useState<string>("");
 
   const { data: briefs = [], isLoading } = useQuery<BriefSubmission[]>({
     queryKey: ["/api/admin/briefs"],
   });
+
+  const { data: studies = [] } = useQuery<Study[]>({
+    queryKey: ["/api/admin/studies"],
+  });
+
+  useEffect(() => {
+    if (selectedBrief && studies.length > 0) {
+      const study = studies.find(s => s.briefId === selectedBrief.id);
+      setLinkedStudy(study || null);
+      if (study) {
+        setStudyStatus(study.status);
+      }
+    }
+  }, [selectedBrief, studies]);
 
   const updateBriefMutation = useMutation({
     mutationFn: async ({ id, status, notes }: { id: string; status?: string; notes?: string }) => {
@@ -129,6 +176,52 @@ export default function AdminBriefs() {
       toast({
         title: "Update failed",
         description: error.message || "Failed to update brief.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const createStudyMutation = useMutation({
+    mutationFn: async (briefId: string) => {
+      const response = await apiRequest("POST", `/api/admin/studies/from-brief/${briefId}`, {});
+      return response.json();
+    },
+    onSuccess: (study) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/studies"] });
+      setLinkedStudy(study);
+      setStudyStatus(study.status);
+      toast({
+        title: "Study created",
+        description: `Study "${study.title}" has been created and is ready for fieldwork.`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to create study",
+        description: error.message || "Could not create study from this brief.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateStudyStatusMutation = useMutation({
+    mutationFn: async ({ id, status, sendNotification }: { id: string; status: string; sendNotification?: boolean }) => {
+      const response = await apiRequest("PATCH", `/api/admin/studies/${id}/status`, { status, sendNotification });
+      return response.json();
+    },
+    onSuccess: (study) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/studies"] });
+      setLinkedStudy(study);
+      setStudyStatus(study.status);
+      toast({
+        title: "Study status updated",
+        description: `Study status changed to ${studyStatusConfig[study.status]?.label || study.status}.`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Status update failed",
+        description: error.message || "Failed to update study status.",
         variant: "destructive",
       });
     },
@@ -593,11 +686,125 @@ export default function AdminBriefs() {
 
               <Card className="border-primary/20">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Admin Controls</CardTitle>
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Rocket className="h-4 w-4" />
+                    Study Management
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {!linkedStudy ? (
+                    <div className="p-4 bg-muted/50 rounded-lg text-center">
+                      <Timer className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground mb-3">
+                        No study has been created for this brief yet
+                      </p>
+                      <Button
+                        onClick={() => selectedBrief && createStudyMutation.mutate(selectedBrief.id)}
+                        disabled={createStudyMutation.isPending}
+                        data-testid="button-create-study"
+                      >
+                        {createStudyMutation.isPending ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Creating...
+                          </>
+                        ) : (
+                          <>
+                            <Rocket className="h-4 w-4 mr-2" />
+                            Create Study
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="p-3 bg-muted/50 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">{linkedStudy.title}</span>
+                          <Badge className={studyStatusConfig[linkedStudy.status]?.color}>
+                            {studyStatusConfig[linkedStudy.status]?.label}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Created {format(new Date(linkedStudy.createdAt), "MMM d, yyyy")}
+                          {linkedStudy.statusUpdatedAt && ` • Last updated ${format(new Date(linkedStudy.statusUpdatedAt), "MMM d 'at' h:mm a")}`}
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Update Study Status</Label>
+                        <Select value={studyStatus} onValueChange={setStudyStatus}>
+                          <SelectTrigger data-testid="select-study-status">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="NEW">Submitted (Awaiting Launch)</SelectItem>
+                            <SelectItem value="AUDIENCE_LIVE">Fieldwork Live (24hr countdown)</SelectItem>
+                            <SelectItem value="ANALYSING_DATA">Analysing Data</SelectItem>
+                            <SelectItem value="COMPLETED">Completed</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => linkedStudy && updateStudyStatusMutation.mutate({
+                            id: linkedStudy.id,
+                            status: studyStatus,
+                            sendNotification: true,
+                          })}
+                          disabled={updateStudyStatusMutation.isPending || studyStatus === linkedStudy.status}
+                          className="flex-1"
+                          data-testid="button-update-study-status"
+                        >
+                          {updateStudyStatusMutation.isPending ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Updating...
+                            </>
+                          ) : (
+                            <>
+                              Update & Notify Client
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => linkedStudy && updateStudyStatusMutation.mutate({
+                            id: linkedStudy.id,
+                            status: studyStatus,
+                            sendNotification: false,
+                          })}
+                          disabled={updateStudyStatusMutation.isPending || studyStatus === linkedStudy.status}
+                          data-testid="button-update-study-silent"
+                        >
+                          Update Only
+                        </Button>
+                      </div>
+
+                      {linkedStudy.status === "AUDIENCE_LIVE" && (
+                        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                            <Play className="h-4 w-4" />
+                            <span className="text-sm font-medium">24-hour countdown active</span>
+                          </div>
+                          <p className="text-xs text-green-600/80 dark:text-green-400/80 mt-1">
+                            Client can see the countdown timer in their My Research dashboard
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="border-primary/20">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Brief Admin Controls</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Status</Label>
+                    <Label>Brief Status</Label>
                     <Select value={editStatus} onValueChange={setEditStatus}>
                       <SelectTrigger data-testid="select-edit-status">
                         <SelectValue />
@@ -633,7 +840,7 @@ export default function AdminBriefs() {
                         Saving...
                       </>
                     ) : (
-                      "Save Changes"
+                      "Save Brief Changes"
                     )}
                   </Button>
                 </CardContent>

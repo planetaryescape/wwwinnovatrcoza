@@ -1,0 +1,325 @@
+You are working on my Innovatr member portal.
+Tech stack: React front end with TypeScript, Tailwind CSS, a Node or Express style API and a PostgreSQL database for persistent storage. Please follow the patterns already used in the codebase for routing, data models and API calls.
+
+I want you to improve the research journey for clients by:
+
+Renaming “Past Research” to “My Research” in the portal
+
+Showing both completed reports and in progress studies
+
+Adding clear project statuses with a simple 24 hour countdown for live Test24 studies
+
+Sending notification emails when a brief moves to key stages
+
+Do not remove or break any existing functionality. Extend what is there.
+
+1. Rename “Past Research” to “My Research”
+
+What to change
+
+In the member portal sidebar and in the page header:
+
+Change the menu item label from “Past Research” to “My Research”
+
+Change the page title from “Past Research” to “My Research”
+
+Keep the existing route path /portal/research exactly as it is
+
+Keep the existing description text structure but feel free to tweak slightly to make it fit the new concept (for example “Access all your studies and reports in one place”)
+
+Make sure:
+
+The active state for the sidebar still works
+
+Any links, breadcrumbs or redirects that referenced “Past Research” still work but show “My Research” in the UI
+
+2. Unify projects and reports under “My Research”
+
+Right now “Past Research” shows completed reports like Rugani x Clicks etc. I want “My Research” to show:
+
+Completed studies and their reports
+
+Any live or in progress Test24 studies that have been launched but are not yet completed
+
+Data model
+
+If there is already a Report, Study, or Project model, extend it. Otherwise, create a simple Study or Project entity that covers both:
+
+Fields to include (you can extend an existing model):
+
+id
+
+companyId
+
+companyName (snapshot)
+
+title (example: “Rugani x Clicks Wellness Beverage Positioning”)
+
+description (short insight summary used on the card)
+
+tags array (brand name, category, test type etc)
+
+Status field: one of
+
+"NEW"
+
+"AUDIENCE_LIVE"
+
+"ANALYSING_DATA"
+
+"COMPLETED"
+
+createdAt
+
+statusUpdatedAt (timestamp when the current status was set)
+
+deliveryDate or completedAt (when the final report is done and available)
+
+reportUrl (download link if completed)
+
+Optional flag isTest24 if you need to distinguish Test24 studies
+
+If there is already a place where studies are stored when a brief is approved and launched, reuse or extend that rather than creating a parallel structure.
+
+My Research page behaviour
+
+On /portal/research (now “My Research”):
+
+Keep the existing card layout but add a status pill on each card
+
+Show all studies for the logged in user or their company, not only completed ones
+
+Default order: newest first by createdAt
+
+For each card:
+
+Show title, tags, date and description as currently
+
+Add a status pill using the new status field:
+
+NEW
+
+Audience live
+
+Analysing data
+
+Completed
+
+For COMPLETED:
+
+Show the existing “View” and “Download” buttons
+
+Show the delivered date as you currently do
+
+For NEW, AUDIENCE_LIVE and ANALYSING_DATA:
+
+Keep the “View” button to open a detail page or read only overview
+
+Do not show a “Download” button if there is no report yet
+
+Show a small line of helper copy for the client:
+
+NEW: “We are reviewing your brief”
+
+Audience live: “Your audience is live and your 24 hour fieldwork has started”
+
+Analysing data: “We are analysing your results and building your report”
+
+You do not need to build a complex new detail page if there is not one yet. It is fine if “View” simply opens a basic study summary that shows the brief data.
+
+3. Status lifecycle and 24 hour countdown
+
+I want a clear lifecycle for Test24 studies.
+
+Allowed statuses:
+
+NEW
+
+Default when a brief is accepted or created by an admin
+
+AUDIENCE_LIVE
+
+Set when you have programmed the survey and launched the audience
+
+ANALYSING_DATA
+
+Set when fieldwork is complete and you are working with the results
+
+COMPLETED
+
+Set when the report is ready and the download link is attached
+
+Admin controls
+
+In the Admin portal where you manage briefs or projects:
+
+Add a simple status dropdown or buttons for each study so that admin users can change between the four statuses manually
+
+When the admin changes the status, update:
+
+status field
+
+statusUpdatedAt to now()
+
+This will drive the countdown and email notifications.
+
+24 hour countdown
+
+For Test24 studies only:
+
+When status changes from NEW to AUDIENCE_LIVE, start a 24 hour countdown timer
+
+Do not hard code a timer in the UI. Calculate it based on timestamps:
+
+startTime = statusUpdatedAt when status is AUDIENCE_LIVE
+
+targetTime = startTime + 24 hours
+
+Remaining time = targetTime - currentTime
+
+On the “My Research” cards and on any detail view for that project, show:
+
+A small line such as “Estimated delivery in 21 hours 15 minutes” while the remaining time is positive
+
+After the target time has passed but before status is COMPLETED, show “Estimated delivery window has passed. We are finalising your report” instead of a negative countdown
+
+This countdown is purely informational for the client, it does not automatically switch the status to COMPLETED. Status changes remain under admin control.
+
+4. Email notifications for clients
+
+I already have emails wired up for brief submission. Extend the email system to send simple notifications when the study status changes.
+
+Do not introduce a reference ID. Use plain language and the project title.
+
+When a brief is first submitted
+
+This should already be covered by the previous prompt, but ensure:
+
+Client receives a confirmation email with a summary of their brief and any uploaded attachments via links
+
+Innovatr internal team (richard@innovatr.co.za
+ and hannah@innovatr.co.za
+) receives the same summary and links
+
+New emails to add
+
+All emails should be sent to the email address of the user who submitted the brief, plus CC or a second email to hannah@innovatr.co.za if that is already a pattern you are using. Do not send extra mail to Richard on these status changes, unless required by existing patterns.
+
+Status changes to AUDIENCE_LIVE
+
+Subject example:
+Your Test24 study is live
+
+Body content should include:
+
+A friendly line such as:
+“Your audience is now live and we have started your Test24 fieldwork.”
+
+A reminder of the 24 hour delivery promise:
+“We aim to deliver your results within 24 hours from launch.”
+
+A link to “My Research” in the portal where they can see the live status and countdown
+
+Basic details: study name, brand, type (Basic or Pro)
+
+Status changes to COMPLETED
+
+Subject example:
+Your Test24 results are ready
+
+Body content should include:
+
+Line confirming completion:
+“Your Test24 study is now complete and your report is ready in your Innovatr portal.”
+
+A button or link to “My Research” or directly to the project report
+
+A short reminder that they can download the report from their portal
+
+Email robustness
+
+If email sending fails:
+
+Do not block the status update or save operation
+
+Log the failure (for example to console, file, or DB log) with enough detail to debug later
+
+Since the study is stored and visible under “My Research” this is acceptable, the data is not lost
+
+5. Storage and attachments
+
+You already updated the brief submission flow to store attachments and include download links in internal emails. Extend that pattern so that:
+
+The Study or Project entity knows which brief or attachment set belongs to it
+
+In the Admin view, when you open a study, you can see links to the original brief files
+
+Do not expose internal raw file paths to other companies. Only the company that owns the study and admins should be able to see or download those attachments.
+
+6. Copy and microcopy
+
+Please use this copy or close variants in the UI:
+
+Page title: My Research
+
+Subtitle: Access all your studies and reports in one place
+
+Status pill labels:
+
+NEW → New
+
+AUDIENCE_LIVE → Audience live
+
+ANALYSING_DATA → Analysing data
+
+COMPLETED → Completed
+
+Helper text under cards:
+
+New: We are reviewing your brief
+
+Audience live: Your audience is live and your 24 hour fieldwork has started
+
+Analysing data: We are analysing your results and building your report
+
+Completed: Your report is ready to view and download
+
+Countdown text:
+
+While time remaining is positive:
+Estimated delivery in {hh} hours {mm} minutes
+
+After the 24 hours has passed and before Completed:
+Estimated delivery window has passed. We are finalising your report.
+
+Confirmation note on the success screen after brief submission:
+
+Thanks, we have received your brief. We will review your brief and contact you shortly with timings and confirmation.
+
+7. General guidelines
+
+Keep styling consistent with the existing visual system: DM Serif for headings, Roboto for body, existing Tailwind classes
+
+Reuse existing components where possible (card layouts, badges, buttons)
+
+Do not introduce breaking changes to routes or API endpoints
+
+Add brief inline comments where you implement:
+
+The new status field and lifecycle
+
+The countdown logic
+
+The new email triggers
+
+When you are done, the experience should feel like this:
+
+Client submits a brief and sees confirmation
+
+Admin sets the study to Audience live once launched, starting the countdown
+
+Client receives a mail that their audience is live and sees the countdown under My Research
+
+Admin moves the study to Analysing data and finally Completed
+
+Client receives a mail that results are ready and sees the completed report under My Research with a download button

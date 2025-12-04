@@ -61,7 +61,7 @@ const menuItems = [
     adminOnly: false,
   },
   {
-    title: "Past Research",
+    title: "My Research",
     url: "/portal/research",
     icon: Archive,
     lockedForFree: true,

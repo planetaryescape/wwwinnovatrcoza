@@ -867,3 +867,170 @@ export async function sendBriefAdminNotification(briefData: {
     throw error;
   }
 }
+
+// ==================== Study Status Notification Emails ====================
+// These emails are sent when a study's status changes
+
+export async function sendStudyLiveNotification(studyData: {
+  clientEmail: string;
+  clientName: string;
+  studyTitle: string;
+  studyType: string;
+  companyName: string;
+}) {
+  try {
+    const resend = await getResendClient();
+    const fromEmail = await getFromEmail();
+    const adminEmails = getAdminEmails();
+
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: 'Roboto', Arial, sans-serif; color: #333; background-color: #f5f5f5; margin: 0; padding: 20px; }
+            .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; padding: 40px; }
+            h1 { color: #1a1a1a; font-family: 'DM Serif Display', Georgia, serif; font-size: 28px; margin-bottom: 20px; }
+            .highlight { background: linear-gradient(135deg, #00e5ff 0%, #7c4dff 100%); color: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+            .highlight h2 { margin: 0 0 10px 0; font-size: 18px; }
+            .highlight p { margin: 0; font-size: 14px; opacity: 0.9; }
+            .details { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+            .detail-row { margin: 10px 0; }
+            .label { font-weight: 600; color: #555; }
+            .cta-button { display: inline-block; background: #7c4dff; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; margin-top: 20px; }
+            .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #888; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>Your Test24 study is live!</h1>
+            
+            <p>Hi ${escapeHtml(studyData.clientName)},</p>
+            
+            <p>Great news! Your audience is now live and we have started your ${escapeHtml(studyData.studyType)} fieldwork.</p>
+            
+            <div class="highlight">
+              <h2>24-Hour Delivery Promise</h2>
+              <p>We aim to deliver your results within 24 hours from launch. You can track progress in your Innovatr portal.</p>
+            </div>
+            
+            <div class="details">
+              <div class="detail-row"><span class="label">Study:</span> ${escapeHtml(studyData.studyTitle)}</div>
+              <div class="detail-row"><span class="label">Company:</span> ${escapeHtml(studyData.companyName)}</div>
+              <div class="detail-row"><span class="label">Type:</span> ${escapeHtml(studyData.studyType)}</div>
+            </div>
+            
+            <p>Visit your <strong>My Research</strong> dashboard to see the live status and countdown timer.</p>
+            
+            <a href="https://innovatr.co.za/portal/research" class="cta-button">View My Research</a>
+            
+            <div class="footer">
+              <p>If you have any questions, reply to this email or contact us at hello@innovatr.co.za</p>
+              <p>&copy; ${new Date().getFullYear()} Innovatr. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const response = await resend.emails.send({
+      from: `Innovatr <${fromEmail}>`,
+      to: [studyData.clientEmail],
+      cc: adminEmails.slice(0, 1), // CC first admin (hannah)
+      subject: `Your Test24 study is live – ${studyData.studyTitle}`,
+      html: emailHtml,
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Failed to send study live notification:", error);
+    throw error;
+  }
+}
+
+export async function sendStudyCompletedNotification(studyData: {
+  clientEmail: string;
+  clientName: string;
+  studyTitle: string;
+  studyType: string;
+  companyName: string;
+  reportUrl?: string;
+}) {
+  try {
+    const resend = await getResendClient();
+    const fromEmail = await getFromEmail();
+    const adminEmails = getAdminEmails();
+
+    const reportSection = studyData.reportUrl 
+      ? `<a href="${escapeHtml(studyData.reportUrl)}" class="cta-button" style="margin-right: 10px;">Download Report</a>`
+      : '';
+
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: 'Roboto', Arial, sans-serif; color: #333; background-color: #f5f5f5; margin: 0; padding: 20px; }
+            .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; padding: 40px; }
+            h1 { color: #1a1a1a; font-family: 'DM Serif Display', Georgia, serif; font-size: 28px; margin-bottom: 20px; }
+            .success-banner { background: linear-gradient(135deg, #00c853 0%, #1de9b6 100%); color: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }
+            .success-banner h2 { margin: 0; font-size: 20px; }
+            .details { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+            .detail-row { margin: 10px 0; }
+            .label { font-weight: 600; color: #555; }
+            .cta-button { display: inline-block; background: #7c4dff; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; margin-top: 20px; }
+            .cta-button.secondary { background: #f0f0f0; color: #333; }
+            .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #888; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>Your Test24 results are ready!</h1>
+            
+            <p>Hi ${escapeHtml(studyData.clientName)},</p>
+            
+            <div class="success-banner">
+              <h2>Study Complete</h2>
+            </div>
+            
+            <p>Your ${escapeHtml(studyData.studyType)} study is now complete and your report is ready in your Innovatr portal.</p>
+            
+            <div class="details">
+              <div class="detail-row"><span class="label">Study:</span> ${escapeHtml(studyData.studyTitle)}</div>
+              <div class="detail-row"><span class="label">Company:</span> ${escapeHtml(studyData.companyName)}</div>
+              <div class="detail-row"><span class="label">Type:</span> ${escapeHtml(studyData.studyType)}</div>
+            </div>
+            
+            <p>You can view and download your report from the <strong>My Research</strong> section of your portal.</p>
+            
+            <div style="margin-top: 20px;">
+              ${reportSection}
+              <a href="https://innovatr.co.za/portal/research" class="cta-button ${studyData.reportUrl ? 'secondary' : ''}">View My Research</a>
+            </div>
+            
+            <div class="footer">
+              <p>Thank you for choosing Innovatr for your market research needs.</p>
+              <p>If you have any questions about your results, reply to this email or contact us at hello@innovatr.co.za</p>
+              <p>&copy; ${new Date().getFullYear()} Innovatr. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const response = await resend.emails.send({
+      from: `Innovatr <${fromEmail}>`,
+      to: [studyData.clientEmail],
+      cc: adminEmails.slice(0, 1), // CC first admin (hannah)
+      subject: `Your Test24 results are ready – ${studyData.studyTitle}`,
+      html: emailHtml,
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Failed to send study completed notification:", error);
+    throw error;
+  }
+}

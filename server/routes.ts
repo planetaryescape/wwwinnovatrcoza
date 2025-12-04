@@ -1,10 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
+import { z } from "zod";
 import { storage } from "./storage";
 import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemWithoutOrderIdSchema, insertReportSchema, insertDealSchema, insertInquirySchema } from "@shared/schema";
 import { PaymentService } from "./payments/service";
 import type { PaymentConfig } from "./payments/types";
+import * as emailService from "./emails/email-service";
 import { sendAdminOrderNotification, sendCustomerOrderConfirmation, sendContactFormMessage, sendInvoiceRequestNotification, sendBriefConfirmationEmail, sendBriefAdminNotification } from "./emails/email-service";
 import { uploadFile, downloadFile, deleteFile, listFiles, fileExists } from "./app-storage";
 import { generateInvoicePdf } from "./invoices/generator";
@@ -1714,6 +1716,212 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updated = await storage.getBriefSubmission(req.params.id);
       res.json(updated);
     } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // ==================== Studies Routes ====================
+  // Studies represent the unified view of research projects linking briefs to completed reports
+  
+  // Get studies for logged-in member (by email or companyId)
+  app.get("/api/member/studies", async (req, res) => {
+    try {
+      const email = req.query.email as string;
+      const companyId = req.query.companyId as string;
+      
+      let studies;
+      if (companyId) {
+        studies = await storage.getStudiesByCompanyId(companyId);
+      } else if (email) {
+        studies = await storage.getStudiesByEmail(email);
+      } else {
+        return res.status(400).json({ error: "Email or companyId required" });
+      }
+      
+      res.json(studies);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get all studies (admin only)
+  app.get("/api/admin/studies", async (req, res) => {
+    try {
+      const studies = await storage.getAllStudies();
+      res.json(studies);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Create a new study from a brief (admin only)
+  app.post("/api/admin/studies", async (req, res) => {
+    try {
+      const studySchema = z.object({
+        briefId: z.string().optional(),
+        companyId: z.string().optional(),
+        companyName: z.string().min(1, "Company name required"),
+        title: z.string().min(1, "Title required"),
+        description: z.string().optional(),
+        studyType: z.enum(["basic", "pro"]),
+        status: z.enum(["NEW", "AUDIENCE_LIVE", "ANALYSING_DATA", "COMPLETED"]).default("NEW"),
+        isTest24: z.boolean().default(true),
+        tags: z.array(z.string()).default([]),
+        submittedByEmail: z.string().email("Valid email required"),
+        submittedByName: z.string().optional(),
+      });
+
+      const validated = studySchema.parse(req.body);
+      const study = await storage.createStudy(validated);
+      
+      res.status(201).json(study);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Create a study from an existing brief (admin only)
+  app.post("/api/admin/studies/from-brief/:briefId", async (req, res) => {
+    try {
+      const brief = await storage.getBriefSubmission(req.params.briefId);
+      if (!brief) {
+        return res.status(404).json({ error: "Brief not found" });
+      }
+
+      // Check if a study already exists for this brief
+      const existingStudy = await storage.getStudyByBriefId(brief.id);
+      if (existingStudy) {
+        return res.status(400).json({ error: "A study already exists for this brief", study: existingStudy });
+      }
+
+      // Create study from brief data
+      const study = await storage.createStudy({
+        briefId: brief.id,
+        companyName: brief.companyName,
+        title: `${brief.companyBrand || brief.companyName} - ${brief.studyType === "basic" ? "Test24 Basic" : "Test24 Pro"}`,
+        description: brief.researchObjective.slice(0, 200),
+        studyType: brief.studyType as "basic" | "pro",
+        status: "NEW",
+        isTest24: true,
+        tags: [brief.companyName, brief.studyType, brief.industry || ""].filter(Boolean),
+        submittedByEmail: brief.submittedByEmail,
+        submittedByName: brief.submittedByName,
+      });
+
+      res.status(201).json(study);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get a single study (admin only)
+  app.get("/api/admin/studies/:id", async (req, res) => {
+    try {
+      const study = await storage.getStudy(req.params.id);
+      if (!study) {
+        return res.status(404).json({ error: "Study not found" });
+      }
+      res.json(study);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Update study (admin only - for general updates)
+  app.patch("/api/admin/studies/:id", async (req, res) => {
+    try {
+      const study = await storage.getStudy(req.params.id);
+      if (!study) {
+        return res.status(404).json({ error: "Study not found" });
+      }
+
+      const updateSchema = z.object({
+        title: z.string().optional(),
+        description: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+        reportUrl: z.string().optional(),
+        clientReportId: z.string().optional(),
+      });
+
+      const validated = updateSchema.parse(req.body);
+      await storage.updateStudy(req.params.id, validated);
+
+      const updated = await storage.getStudy(req.params.id);
+      res.json(updated);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Update study status (admin only - optionally triggers email notifications)
+  app.patch("/api/admin/studies/:id/status", async (req, res) => {
+    try {
+      const study = await storage.getStudy(req.params.id);
+      if (!study) {
+        return res.status(404).json({ error: "Study not found" });
+      }
+
+      const statusSchema = z.object({
+        status: z.enum(["NEW", "AUDIENCE_LIVE", "ANALYSING_DATA", "COMPLETED"]),
+        reportUrl: z.string().optional(), // For COMPLETED status
+        sendNotification: z.boolean().optional().default(true), // Whether to send email notification
+      });
+
+      const { status, reportUrl, sendNotification } = statusSchema.parse(req.body);
+      const previousStatus = study.status;
+
+      // Update the status
+      const updatedStudy = await storage.updateStudyStatus(req.params.id, status);
+
+      // If report URL provided with COMPLETED status, update it
+      if (status === "COMPLETED" && reportUrl) {
+        await storage.updateStudy(req.params.id, { 
+          reportUrl, 
+          deliveryDate: new Date() 
+        });
+      }
+
+      // Send email notifications for status changes (if enabled)
+      if (updatedStudy && previousStatus !== status && sendNotification) {
+        try {
+          if (status === "AUDIENCE_LIVE") {
+            // Send "Your Test24 study is live" email
+            await emailService.sendStudyLiveNotification({
+              clientEmail: study.submittedByEmail,
+              clientName: study.submittedByName || "Valued Client",
+              studyTitle: study.title,
+              studyType: study.studyType === "basic" ? "Test24 Basic" : "Test24 Pro",
+              companyName: study.companyName,
+            });
+          } else if (status === "COMPLETED") {
+            // Send "Your Test24 results are ready" email
+            await emailService.sendStudyCompletedNotification({
+              clientEmail: study.submittedByEmail,
+              clientName: study.submittedByName || "Valued Client",
+              studyTitle: study.title,
+              studyType: study.studyType === "basic" ? "Test24 Basic" : "Test24 Pro",
+              companyName: study.companyName,
+              reportUrl: reportUrl || undefined,
+            });
+          }
+        } catch (emailError) {
+          // Log email error but don't fail the status update
+          console.error("Failed to send study status notification email:", emailError);
+        }
+      }
+
+      const finalStudy = await storage.getStudy(req.params.id);
+      res.json(finalStudy);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
       res.status(500).json({ error: error.message });
     }
   });
