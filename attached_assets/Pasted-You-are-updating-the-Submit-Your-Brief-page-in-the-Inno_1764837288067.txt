@@ -1,0 +1,383 @@
+You are updating the “Submit Your Brief” page in the Innovatr member portal.
+This page lives under /portal/launch and is used for Test24 Basic and Test24 Pro projects.
+
+Your job is to improve clarity, structure and UX of the form while keeping all existing backend wiring, routing, validation and email logic intact.
+
+1. Files and scope
+
+Find the React page or component that renders the Test24 Submit Your Brief flow, likely something like:
+
+client/src/pages/portal/launch.tsx
+
+or a LaunchBriefPage and related components such as LaunchBriefForm, BriefForm, AudienceSection, AttachmentsSection, etc.
+
+Restrict your changes to:
+
+The layout, copy and behaviour of the submit form UI.
+
+The client side validation related to new fields and attachment constraints.
+
+Do not:
+
+Break or remove existing API calls.
+
+Change server routes or database schemas.
+
+Change any unrelated pages or navigation.
+
+If you need a new small component for concepts or competitors, create it in the same folder as the current form components.
+
+2. Overall structure of the page
+
+Update the page so the form follows this structure in order:
+
+Page header
+
+Title: Submit Your Brief
+
+Subtitle: dynamic, based on study type, e.g. Test24 Basic or Test24 Pro (use whatever value already indicates the package).
+
+How It Works (3 step strip)
+
+Heading: How It Works:
+
+Step 1 title: Upload Your Brief
+
+Body:
+Share your project details and attach any ideas, references, or visuals that bring your vision to life.
+
+Step 2 title: Review & Launch
+
+Body:
+We’ll turn your brief into a ready-to-launch survey. Review, approve, and hit go.
+
+Step 3 title: Get Insights Fast
+
+Body:
+Your full report arrives in just 24 hours, packed with clear, actionable insights.
+
+Download Demo Materials (keep existing buttons and behaviour, just ensure the copy is:)
+
+Section title: Download Demo Materials
+
+Subtitle: See what your report and questionnaire will look like.
+
+Client Details
+Keep the same fields you already have:
+
+Client Name
+
+Client Email Address
+
+Client Contact Number
+
+Client Company
+Only adjust wording if needed to match the rest of the style. Do not change field keys or validation rules.
+
+Research Details
+
+Section title: Research Details
+
+Keep existing Research Objective field. Label should stay:
+Research Objective *
+Placeholder:
+What do you want to learn from this research?
+
+Audience (Region, Age, Gender, Income)
+These may already be multi select; keep that behaviour. Ensure labels are:
+
+Region *
+Placeholder: Select regions
+
+Age *
+Placeholder: Select age ranges
+
+Income *
+Placeholder: Select income ranges
+
+Gender *
+Placeholder: Select genders
+
+Behaviour:
+
+All four fields are multi-select.
+
+Store values as arrays of strings.
+
+Validation: each must have at least one value selected.
+
+3. Concepts & Competitors
+3.1 Concept count
+
+Keep whichever field you currently use for number of ideas, but wire it to the new concept builder so they stay in sync, for example:
+
+Label: How many concepts are being tested? *
+
+But ideally, treat this as a derived value:
+
+When the user adds or removes concept boxes, update the concept count automatically.
+
+If you keep an editable number field, make sure changing it adds or removes empty concept slots accordingly.
+
+3.2 New Concept Builder UI
+
+Create a “Your Concepts” section directly under the concept count:
+
+Section title: Your Concepts
+
+Add an “Add Concept” button that appends concept blocks.
+
+Each Concept Block should include:
+
+Concept Name (required)
+
+Label: Concept name *
+
+Placeholder: e.g. New snack bar idea, TVC #1, Route B
+
+Concept creatives upload (allow multiple files)
+
+Label: Upload creative(s)
+
+Subtext / microcopy under the field:
+You can upload multiple files. Drag and drop or click to browse.
+
+Accepted file types: reuse whatever you support globally, but display this helper text:
+Supported types: Images, videos, decks, and documents.
+(You do not need to list every extension here if the upload component already restricts them.)
+
+Concept description (optional)
+
+Label: Concept notes (optional)
+
+Placeholder: Add any additional context or messaging you want us to understand.
+
+Add controls to:
+
+Add Concept (button below the last concept block).
+
+Remove Concept (small secondary button or icon in the top right of each block, except when only one block exists).
+
+Ensure the form state stores concepts as an array, e.g.:
+
+concepts: [
+  {
+    name: string;
+    description?: string;
+    files: UploadedFile[];
+  }
+]
+
+
+Tie the concept count and pricing logic to concepts.length.
+
+3.3 Competitors – optional but clear
+
+Replace the current competitors label and helper with:
+
+Label (dynamic based on study type):
+If Test24 Basic: Competitors (optional, up to 2)
+If Test24 Pro (or any non Basic): Competitors (optional, up to 5)
+
+Helper text under the label:
+Add the competitors you’d like your concepts compared against. You can leave this blank if you don’t want competitor benchmarks.
+
+Behaviour:
+
+Use the same chip or tag style input you already have.
+
+For Test24 Basic: hard cap 2 competitor entries.
+
+For Pro and other types: cap 5 entries.
+
+When the cap is reached:
+
+Prevent adding more items.
+
+Optionally show a small helper message:
+You’ve reached the maximum number of competitors for this study.
+
+4. Attachments (Global / Extra Material)
+
+Below Concepts & Competitors, add a dedicated section:
+
+Section title: Additional Supporting Materials
+
+Body copy:
+
+Upload any extra references, brief documents, guidelines or mood boards that will help us understand your project.
+Supports images, decks, videos, audio and documents. Maximum file size per file: 20MB.
+
+Behaviour:
+
+Use an upload area that allows multiple files.
+
+Show this microcopy under the upload box:
+You can upload multiple files. Drag and drop or click to browse.
+
+Enforce:
+
+Max size 20MB per file.
+
+If a file is too large, show an error message in a toast or inline alert near the upload:
+
+Error message:
+
+Title (if needed): File too large
+Text:
+
+This file is too large to upload. Please compress it and try again. If you still experience issues, email your materials directly to richard@innovatr.co.za and hannah@innovatr.co.za and we’ll attach them to your project manually.
+
+Do not silently drop files. The user must know if a file was rejected.
+
+5. Billing preferences and payment terms
+
+At the bottom of the form, above the Summary, add a Billing Preferences section.
+
+Section title: Billing Preferences
+
+Add a toggle or radio buttons with two options:
+
+Pay Online
+
+Invoice Me
+
+For each option, show short explanatory copy:
+
+For Pay Online (when selected):
+
+Your card will be charged immediately and your project will move into the queue right away.
+
+For Invoice Me (when selected):
+
+You’ll receive an invoice within 1 working day. Your project will begin once payment or a purchase order is received. Standard 30-day payment terms apply.
+
+Tie this selection to whatever billing field you currently use for payment method, so the backend still receives the correct value.
+
+Legal checkboxes (under attachments or billing)
+
+Update / add the consent checkboxes as follows:
+
+Project authorisation (required)
+
+I confirm that this brief is accurate and I authorise Innovatr to prepare the study based on the information supplied.
+
+Payment terms (required if “Invoice Me” is selected, optional otherwise but can be always shown)
+
+If I choose to be invoiced, I agree to a 30-day payment term. My project will begin once payment or a purchase order is received.
+
+Marketing opt in (keep this optional, existing behaviour)
+
+Keep me updated with insights, news, and special offers. I can unsubscribe anytime.
+
+6. Summary section and submit button labels
+
+Keep your existing Summary card but ensure labels:
+
+Title: Summary
+
+Fields:
+
+Study Type
+
+Number of Concepts
+
+Turnaround Time
+
+Total Cost
+
+Make sure Number of Concepts is derived from concepts.length.
+
+Dynamic primary button
+
+Change the primary button text based on billing selection:
+
+If Pay Online is selected:
+Button label: Submit & Pay
+
+If Invoice Me is selected:
+Button label: Submit Brief
+
+Backend behaviour remains:
+
+The same API is called.
+
+The payment method value tells the backend whether to trigger online payment or invoice flow (do not change that protocol, just wire the UI to it).
+
+7. Success page / success state
+
+After a successful brief submission (API call succeeds), instead of leaving the user on the same form with a small toast, show a dedicated success view.
+
+You can either:
+
+Navigate to a route like /portal/launch/success, or
+
+Replace the form with a success panel on the same page.
+
+Use this copy:
+
+Title:
+Your brief has been successfully submitted!
+
+Body text:
+
+We’ve emailed you a confirmation and saved your brief in your My Research tab.
+We’ll review it and contact you shortly.
+
+Add a primary button:
+
+Label: Go to My Research
+
+Route: /portal/research (or whatever route you are using for the My Research page)
+
+Add a secondary button or text link:
+
+Label: Back to Dashboard
+
+Route: /portal/dashboard
+
+Make sure the form fields reset after a successful submission so the user does not accidentally submit the same brief twice.
+
+8. Validation and UX polish
+
+Do not allow submission until:
+
+Required client details are filled.
+
+Research Objective is filled.
+
+At least one region, age, income and gender is selected.
+
+At least one concept exists and each concept has:
+
+A name
+
+Required consent checkboxes are ticked.
+
+If validation fails, scroll to the first error and show inline error messages next to the problematic fields.
+
+Keep existing styling:
+
+Use current typography, colours and card styling.
+
+Do not introduce new design systems or colour tokens.
+
+9. Final checks
+
+Before finishing:
+
+Confirm that all existing APIs still receive the expected fields plus the new ones.
+
+Confirm that the total price calculation still works and uses the correct concept count.
+
+Confirm that:
+
+Multiple concept uploads work.
+
+Multiple extra attachments work.
+
+File size errors show the new error message.
+
+Confirm the success state appears and that navigation to My Research works.
+
+Do not introduce any console errors or TypeScript type errors. If any type definitions need updates for the new concept structure, update them in a minimal, backward compatible way.
