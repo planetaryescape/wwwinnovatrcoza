@@ -164,13 +164,23 @@ export default function PastResearch() {
     return matchesSearch && matchesTag;
   });
 
-  const completedStudies = studies.filter(s => 
-    s.status === "COMPLETED" &&
-    (searchQuery === "" || 
+  // Filter completed studies, excluding those that have a matching client report
+  // to avoid showing duplicates (when a study is completed AND a client report is uploaded with the same title)
+  const completedStudies = studies.filter(s => {
+    if (s.status !== "COMPLETED") return false;
+    
+    // Check if there's a client report with the same title - if so, skip this study
+    const hasMatchingReport = reports.some(r => 
+      r.title.toLowerCase() === s.title.toLowerCase()
+    );
+    if (hasMatchingReport) return false;
+    
+    // Apply search filter
+    return (searchQuery === "" || 
       s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())))
-  );
+      s.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())));
+  });
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('en-GB', {
