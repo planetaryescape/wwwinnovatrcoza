@@ -1392,7 +1392,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userCompanyId = sessionUser.companyId;
       const reports = await storage.getAllReports();
       
-      // Filter reports based on access rules
+      // Admin users can see ALL published reports (including all client-specific reports)
+      if (isAdminUser(sessionUser.email)) {
+        const allPublishedReports = reports.filter(r => 
+          r.status === "published" && !r.isArchived
+        );
+        return res.json(allPublishedReports);
+      }
+      
+      // Filter reports based on access rules for regular users
       const filteredReports = reports.filter(r => {
         // Must be published and not archived
         if (r.status !== "published" || r.isArchived) return false;
