@@ -25,6 +25,7 @@ export interface Company {
   id: string;
   name: string;
   logoUrl?: string | null;
+  tier?: string;
   basicCreditsTotal: number;
   basicCreditsUsed: number;
   proCreditsTotal: number;

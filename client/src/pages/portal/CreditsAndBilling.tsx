@@ -76,7 +76,7 @@ const mockBillingHistory = [
 
 export default function CreditsAndBilling() {
   const [, setLocation] = useLocation();
-  const { isMember, user } = useAuth();
+  const { isMember, user, company } = useAuth();
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [selectedPack, setSelectedPack] = useState<typeof mockCreditPackages[0] | null>(null);
 
@@ -172,11 +172,20 @@ export default function CreditsAndBilling() {
     }];
   };
 
-  const basicCredits = { remaining: 7, total: 10 };
-  const proCredits = { remaining: 1, total: 2 };
+  // Calculate credits from actual company data
+  const basicCreditsTotal = company?.basicCreditsTotal ?? 0;
+  const basicCreditsUsed = company?.basicCreditsUsed ?? 0;
+  const basicCreditsRemaining = basicCreditsTotal - basicCreditsUsed;
+  
+  const proCreditsTotal = company?.proCreditsTotal ?? 0;
+  const proCreditsUsed = company?.proCreditsUsed ?? 0;
+  const proCreditsRemaining = proCreditsTotal - proCreditsUsed;
+  
+  const basicCredits = { remaining: basicCreditsRemaining, total: basicCreditsTotal };
+  const proCredits = { remaining: proCreditsRemaining, total: proCreditsTotal };
 
-  const basicPercentage = (basicCredits.remaining / basicCredits.total) * 100;
-  const proPercentage = (proCredits.remaining / proCredits.total) * 100;
+  const basicPercentage = basicCredits.total > 0 ? (basicCredits.remaining / basicCredits.total) * 100 : 0;
+  const proPercentage = proCredits.total > 0 ? (proCredits.remaining / proCredits.total) * 100 : 0;
 
   // Free users can access this page to purchase memberships/credits
   if (!isMember) {
@@ -273,7 +282,9 @@ export default function CreditsAndBilling() {
                 <span>Test24 Basic Credits</span>
                 <Badge variant="secondary">{basicCredits.remaining} Available</Badge>
               </CardTitle>
-              <CardDescription>Included in Growth Membership</CardDescription>
+              <CardDescription>
+                {company?.tier ? `Included in ${company.tier.charAt(0) + company.tier.slice(1).toLowerCase()} Membership` : 'Company credits'}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -299,7 +310,9 @@ export default function CreditsAndBilling() {
                 <span>Test24 Pro Credits</span>
                 <Badge variant="secondary">{proCredits.remaining} Available</Badge>
               </CardTitle>
-              <CardDescription>Included in Growth Membership</CardDescription>
+              <CardDescription>
+                {company?.tier ? `Included in ${company.tier.charAt(0) + company.tier.slice(1).toLowerCase()} Membership` : 'Company credits'}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">

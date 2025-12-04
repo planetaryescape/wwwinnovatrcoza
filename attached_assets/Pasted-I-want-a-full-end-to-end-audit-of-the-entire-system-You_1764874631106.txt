@@ -1,0 +1,431 @@
+I want a full end to end audit of the entire system. Your job is to:
+
+Critically review every important user journey
+
+Find and fix functional bugs, data wiring issues, and storage problems
+
+Tighten error handling and edge cases
+
+Confirm that permissions and visibility rules are correct
+
+Make sure payments, uploads, emails and credits all work as intended
+
+Do not redesign the visual UI or layout. Focus on correctness, clarity, and reliability.
+
+0. High level context and rules
+
+Portal roles:
+
+Visitor (no account)
+
+Logged in member (Starter, Growth, Scale etc)
+
+Admin (me and Richard)
+
+Major areas:
+
+Public marketing pages and mailer signups
+
+Member login, signup, password reset, and profile
+
+Test24 briefs and research projects
+
+Credits and billing
+
+My Research (reports and studies)
+
+Trends & Insights (public and free reports)
+
+Admin dashboard (Overview, Companies, Orders, Briefs, Members, Reports, Deals)
+
+Transactional emails (account, password, subscriptions, research, credits)
+
+Important rules:
+
+Admins can see everything, including all client reports.
+
+Normal company users can only see:
+
+Their own company’s projects and reports
+
+Public/free reports in the library
+
+Credits, orders, briefs, and reports must stay consistent across:
+
+Company profile sidebar
+
+My Research
+
+Admin Overview, Companies, Orders, Briefs, Members, Reports
+
+You may refactor small pieces of code for clarity or reuse, but do not start a huge redesign.
+
+Create or update a markdown file called:
+
+PORTAL_FULL_AUDIT.md
+
+This file will be your running checklist and final summary.
+
+1. Map every route and page
+
+Scan the client and server folders and list:
+
+All major pages (paths like /, /portal/dashboard, /portal/research, /portal/admin, /portal/login, etc).
+
+The main API endpoints that those pages call (auth, payments, reports, briefs, companies, credits, emails).
+
+In PORTAL_FULL_AUDIT.md, add a section:
+
+## Site Map & Key Endpoints
+
+Summarise:
+
+Pages and their purposes
+
+The critical backend endpoints each page relies on
+
+Do not change behaviour yet. This is just the map.
+
+2. Authentication and access control audit
+2.1 Login / logout / signup
+
+Check the login form:
+
+What happens when credentials are correct?
+
+What happens when they are wrong?
+
+Implement clear error handling:
+
+First wrong password → show “Incorrect email or password. Please try again.”
+
+Second consecutive failure → also show a subtle link “Reset your password” next to the error.
+
+Check the Reset Password flow end to end:
+
+Request reset with a valid email
+
+Ensure email is sent using the new transactional email system
+
+Click reset link → set new password
+
+After successful reset:
+
+Old reset token cannot be reused
+
+User can log in with new password
+
+Show friendly success message on UI
+
+Confirm logout:
+
+Clears session / token correctly
+
+Redirects to an appropriate page (e.g. login or home)
+
+2.2 Role-based access
+
+Find where user roles are stored and verified (e.g. role, isAdmin, or role enum).
+
+Confirm:
+
+Admin pages (/portal/admin) are only accessible to admin accounts.
+
+Normal users cannot hit admin APIs directly. Protect routes on the server too.
+
+Admins can still view the portal from a company POV where that feature exists, but that does not leak data to regular users.
+
+Document all findings and fixes in PORTAL_FULL_AUDIT.md under:
+
+## Authentication & Access Control
+
+3. Memberships, credits and orders
+
+Credits MUST be consistent between:
+
+Company detail panel (credits used / remaining)
+
+Admin Companies table
+
+Admin Overview (Credits Available, Test24 tracker etc)
+
+Member list rows (credits per user if shown)
+
+My Research and client reports (number of completed studies)
+
+3.1 Data integrity checks
+
+Inspect the schema / tables for companies, memberships, credits, orders and studies.
+
+For each real company (Rugani Juice, Greenway Farms, DGB, Nando’s, Revlon, Mitchum, Elizabeth Arden, Innovatr itself):
+
+Confirm the stored basic and pro credits match the intended amounts.
+
+Confirm that used credits correctly reflect the number of Test24 Basic / Pro projects.
+
+Fix any mismatches where:
+
+Credits used > credits purchased
+
+Credits remaining do not equal purchased minus used
+
+Totals on the Admin Overview differ from the sum of all companies
+
+3.2 Orders page
+
+Check that Orders show:
+
+Correct customer
+
+Correct company
+
+Correct product / membership name
+
+Status (completed, pending, failed)
+
+Remove or hide revenue metrics that are not accurate / not wired to real data (as already requested), but keep orders count and statuses.
+
+Add a section:
+
+## Memberships, Credits & Orders
+
+List what was wrong and how you fixed it.
+
+4. Payments and backup behaviour
+
+Find the payment integration (Stripe / PayFast / other).
+
+Confirm:
+
+Client-side checkout flow works end to end in test mode.
+
+Webhooks (if used) correctly update:
+
+Membership tier
+
+Credit allocations
+
+Orders table
+
+For each failure scenario:
+
+Payment succeeds but webhook fails → add logging and a “manual reconciliation needed” state instead of silently failing.
+
+Payment fails or is cancelled → do not upgrade membership, do not allocate credits; show clear error on UI.
+
+Ensure:
+
+No sensitive payment data is stored in plain text.
+
+Secrets are read from env and not hard-coded.
+
+Document all risks / mitigations under:
+
+## Payments & Resilience
+
+5. Briefs, Test24 projects and research pipeline
+
+Trace how a brief submission becomes a Test24 project / study, and then a client report.
+
+Confirm that:
+
+Briefs statuses (New, In progress, Completed) match the real state of the study.
+
+The Admin Overview tiles (research pipeline, Test24 tracker etc) use the same source of truth.
+
+Replace the simplistic “Research Pipeline” widget with something more useful but still compact (as already discussed).
+
+For example:
+
+Show counts by status
+
+Show how many briefs are linked to Test24 Basic, Test24 Pro, or “Other”
+
+Keep the current box size; just improve content and labels.
+
+Add to PORTAL_FULL_AUDIT.md:
+
+## Briefs & Research Pipeline
+
+6. Reports, file storage and downloads
+
+This area has already caused issues (404 on downloads), so please verify thoroughly.
+
+Confirm that all public reports and client reports:
+
+Have valid file paths / keys in the database
+
+Point to files that actually exist where the backend expects them
+
+Test download behaviour for:
+
+A public report from Trends & Insights
+
+A free report in the library
+
+Each client report for Rugani, Greenway, DGB, Nando’s
+
+Ensure the following rules are enforced:
+
+Admins: can see and download all reports
+
+Company users: can only see and download their own company’s reports plus public/free reports
+
+Visitors: can only access public/free content
+
+Error handling:
+
+If the report record exists but the file is missing, show a toast like:
+“This report file is not available yet. Please contact Innovatr to re-upload it.”
+
+Do not send the user to a generic 404 page.
+
+Log missing file incidents server-side.
+
+Update PORTAL_FULL_AUDIT.md:
+
+## Reports, Files & Downloads
+
+7. Transactional emails and notifications
+
+Use the new unified email template system.
+
+Verify that the following events send emails correctly and use the correct template:
+
+New account created
+
+Password reset requested
+
+Password reset successful
+
+Newsletter / mailer subscription confirmed
+
+Brief submitted
+
+Audience live / research in field
+
+Study completed (if wired)
+
+Credits added or running low (if implemented)
+
+Check each email for:
+
+Links that use the correct FRONTEND_URL
+
+Branding and layout render correctly in plain HTML clients
+
+Plain-text fallback is available
+
+Ensure no email leaks data about other companies or their reports.
+
+Add section:
+
+## Email System
+
+Outline which templates you tested and any fixes made.
+
+8. UX and empty states sanity check
+
+Walk through the site as each of these personas:
+
+New visitor who has never heard of Innovatr
+
+Free Pulse member (signed up, no paid membership yet)
+
+Growth / Scale client user (Rugani, Greenway, Nando’s etc)
+
+Admin user
+
+For each persona:
+
+Check menu items: everything they see should make sense for their role.
+
+Check empty states: what happens if:
+
+They have no reports yet
+
+They have no credits left
+
+They have not submitted any briefs
+
+Make sure all empty states:
+
+Explain what is happening
+
+Give a clear next step (e.g. “Launch a new brief” / “Contact us to buy credits”)
+
+Document notes under:
+
+## UX & Empty States
+
+9. Error handling, logging and “what could go wrong” list
+
+Add a section:
+
+## Risks, Edge Cases & Mitigations
+
+There, list:
+
+The top potential failure points you see in this codebase:
+
+Payments
+
+Auth tokens
+
+File uploads / storage
+
+Emails
+
+Credits and orders getting out of sync
+
+For each, specify:
+
+What could go wrong
+
+How the current code behaves
+
+Any improvements you implemented (or TODOs if it requires a bigger future change)
+
+Also make sure:
+
+All critical API calls have try/catch and user-friendly error messages.
+
+The frontend never silently fails without telling the user something went wrong.
+
+10. Final checklist
+
+Before you stop:
+
+Run through:
+
+Login
+
+Signup
+
+Password reset
+
+Launching a brief (at least to submission)
+
+Viewing and downloading a public report
+
+Viewing and downloading a client report
+
+Admin Overview, Companies, Orders, Briefs, Members, Reports
+
+Confirm that:
+
+No unauthorised data is visible to the wrong user type
+
+No links to 404 pages remain in main flows
+
+Credits, orders, briefs and reports tell a consistent story for each company
+
+Update PORTAL_FULL_AUDIT.md at the top with a short executive summary:
+
+What you changed
+
+What is now stable
+
+Any high priority TODO items that must be handled later
+
+Use this entire instruction set as your task list. Work methodically, do not skip steps, and prefer small, safe fixes over big rewrites.
