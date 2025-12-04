@@ -1,0 +1,413 @@
+You are updating the Innovatr portal codebase.
+
+Goal
+Move from “illusion” accounts to a real multi-tenant system where:
+
+Users authenticate with real passwords and reset them via email
+
+Credits, orders, briefs and attachments are all tied to those users and their companies
+
+Everything is stored in the database (emails are notifications, not the source of truth)
+
+Use the existing stack, routing and styling. Reuse existing components as much as possible.
+
+1. Implement real user accounts (auth basics)
+
+This section is unchanged in spirit from the previous prompt, just summarised.
+
+1.1 User model
+
+Create or update a persistent User table (PostgreSQL):
+
+id (uuid, PK)
+
+email (string, unique, required)
+
+passwordHash (string, required)
+
+fullName (string, required)
+
+companyId (FK to Company, nullable initially but should be filled for normal users)
+
+role ('user' | 'admin')
+
+membershipTier ('free' | 'gold' | 'platinum' | etc', default 'free')
+
+isActive (boolean, default true)
+
+createdAt, updatedAt
+
+lastLoginAt (nullable)
+
+If a User model exists, extend/migrate instead of recreating.
+
+1.2 Seed admin users
+
+Seed two admin users if they do not exist:
+
+hannah@innovatr.co.za
+
+richard@innovatr.co.za
+
+Both:
+
+role = 'admin'
+
+membershipTier = 'gold' (or whatever matches the current design)
+
+Use a strong random password and store only the passwordHash.
+
+2. Proper login and sign-up
+
+2.1 Password hashing
+
+Use an existing secure library (e.g. bcrypt).
+
+Hash on sign-up or password change.
+
+Store only the hash.
+
+2.2 Sign-up flow
+
+On Sign Up:
+
+Fields: Full Name, Work Email, Company Name, Password.
+
+Validation:
+
+Unique email
+
+Minimum password strength
+
+On success:
+
+Create (or reuse) Company record.
+
+Create User linked to that company:
+
+role = 'user'
+
+membershipTier = 'free'
+
+Log the user in.
+
+Redirect to Portal Dashboard.
+
+Ensure the new user appears in Admin user/company views (see section 5).
+
+2.3 Login flow
+
+Check email + password against DB.
+
+On failure: show “Incorrect email or password. Please try again.”
+
+On success:
+
+Create session/token via existing auth mechanism.
+
+Update lastLoginAt.
+
+Redirect:
+
+From the public site → portal Dashboard
+
+From portal sign-in → last requested page or Dashboard
+
+Remove any logic that lets someone log in with a fake/empty password.
+
+3. Password reset via email
+
+3.1 Password reset storage
+
+Create PasswordResetToken table:
+
+id
+
+userId (FK)
+
+tokenHash
+
+expiresAt
+
+createdAt
+
+3.2 “Forgot password”
+
+Add “Forgot your password?” link on login.
+
+Form asks for email.
+
+Back-end:
+
+If user exists: create a token, store hashed token, send email with link
+
+https://www.innovatr.co.za/reset-password?token=<raw>
+
+If user does not exist: still respond success (no leakage).
+
+3.3 Reset page
+
+/reset-password page:
+
+Validates token via API.
+
+Shows New Password + Confirm Password form.
+
+Back-end:
+
+Validate token (hash + expiry).
+
+Update passwordHash, delete/mark token used.
+
+Optionally log in user and redirect to Dashboard.
+
+4. Make the user the owner of everything
+
+This is the crucial bit that speaks directly to Jesse’s concerns.
+
+We need to ensure all key objects are linked to a real user and company.
+
+Create or update these models as needed:
+
+Company
+
+Holds company-level info (name, industry, etc).
+
+A company can have multiple users.
+
+Credits
+
+For example: CompanyCredits table:
+
+id
+
+companyId
+
+basicCredits (int)
+
+proCredits (int)
+
+updatedAt
+
+Or use a CreditLedger model with rows per transaction (preferred, see 6.2).
+
+Brief
+
+id
+
+userId (FK) ← who submitted
+
+companyId (FK) ← whose project it is
+
+studyType ('Test24 Basic' | 'Test24 Pro' | ...)
+
+status ('new' | 'audience_live' | 'analysing' | 'completed')
+
+Client fields (name, email, company) can be stored but should be auto-prefilled from User/Company.
+
+Timestamps (created, updated, etc).
+
+BriefAttachment
+
+id
+
+briefId
+
+fileName
+
+fileSize
+
+fileType
+
+storagePath or URL (where file is stored: local disk, object storage, etc)
+
+createdAt
+
+Order / Payment
+
+Order model tying together:
+
+userId, companyId
+
+what was purchased (credits, studies, membership)
+
+payment method (online, invoice, credits)
+
+status (pending, paid, cancelled).
+
+Key requirement
+Whenever someone:
+
+signs up
+
+buys credits
+
+submits a brief
+
+those records must all reference the same userId and companyId.
+
+This removes the “portal as illusion” problem Jesse pointed out.
+
+5. Admin visibility
+
+Create or update Admin screens so they read from these real models:
+
+Admin → Users
+
+Shows real User records (name, email, company, membership, role, created, last login).
+
+Admin → Companies
+
+Shows each company, current credit balances, active users, briefs.
+
+Admin → Briefs
+
+Shows submitted briefs with:
+
+linked user/company
+
+status (new, audience live, analysing, completed)
+
+links to attachments.
+
+Admins should never rely on email as the only copy of a brief.
+
+6. Credits: buy, store, and use
+
+We need credits to be real, per account, not just a visual.
+
+6.1 Buying credits
+
+When someone buys credits:
+
+If logged in:
+
+Create an Order tied to their userId + companyId.
+
+Update a CompanyCredits table or append a row to a CreditLedger.
+
+If not logged in (e.g. marketing checkout on the site):
+
+Encourage sign-in / sign-up before purchase where possible.
+
+At minimum, ensure the purchase is later linkable to a user/company by email.
+
+6.2 Recommended: credit ledger
+
+Instead of only storing raw balances, maintain a CreditLedger:
+
+id
+
+companyId
+
+type ('purchase' | 'use' | 'adjustment')
+
+studyType ('basic' | 'pro' | etc.)
+
+quantity (positive for purchase, negative for use)
+
+orderId (optional link)
+
+briefId (for usage entries)
+
+createdAt
+
+Then compute balances as:
+
+basicCredits = sum(quantity where type in purchase/adjustment for basic)
+proCredits   = sum(quantity where type in purchase/adjustment for pro)
+...
+
+
+This makes auditing and debugging much easier.
+
+6.3 Using credits on brief submission
+
+When a logged-in user submits a brief and selects “Use my credits”:
+
+Check their company’s relevant credit balance.
+
+If sufficient:
+
+Deduct by inserting a negative entry in CreditLedger linked to that briefId.
+
+Mark the brief’s payment method as credits.
+
+If insufficient:
+
+Show a clear message:
+“You do not have enough credits for this study. Please top up or choose another payment option.”
+
+Offer a Top up credits route.
+
+Whenever the portal shows “Available credits”, use the ledger/balance, not a hard-coded number.
+
+7. Brief submission and attachments (source of truth)
+
+Tie this into the new auth system and credits.
+
+7.1 When a logged-in user opens “Submit Your Brief”
+
+Pre-fill Client Name, Email, Company from their User + Company data.
+
+Still allow edits if needed, but defaults come from their profile.
+
+7.2 File upload
+
+Allow multiple files.
+
+Enforce size limit (e.g. 20 MB total or per file; align with what you can store).
+
+If a file is too large:
+
+Show:
+“This file is too large to upload. Please try again with a smaller file. If you still have issues, email your creative to richard@innovatr.co.za
+.”
+
+Store files in persistent storage:
+
+Local folder or cloud storage bucket.
+
+Save metadata rows in BriefAttachment.
+
+7.3 Submission
+
+On submit:
+
+Create Brief with userId + companyId.
+
+Create any credit usage entries if they chose “Use my credits”.
+
+Store each attachment in BriefAttachment.
+
+Send emails:
+
+To the client: confirmation with summary and links (or at least filenames) of uploaded files.
+
+To richard@innovatr.co.za and hannah@innovatr.co.za: notification with a link to the Brief in the Admin area and access to attachments.
+
+Emails are notifications only. The authoritative record is the DB.
+
+8. Security, UX and migration notes
+
+Please also:
+
+Enforce unique emails at DB level.
+
+Add basic rate limiting around login to avoid brute forcing.
+
+Never log or email raw passwords or reset tokens.
+
+For existing “fake” users:
+
+If there is any legacy data, avoid breaking pages; consider a small migration script to backfill minimal User/Company records if needed.
+
+After implementation, verify:
+
+You cannot log in with the wrong password.
+
+Credits purchased/used actually change balances tied to the correct company.
+
+Briefs appear in Admin with correct user/company and attachments.
+
+Emails are sent, but even if email fails, the Admin can still see the full brief and attachments.

@@ -18,7 +18,8 @@ export const users = pgTable("users", {
     .default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
   email: text("email").notNull().unique(),
-  password: text("password").notNull(),
+  password: text("password").notNull(), // Legacy field - will be deprecated
+  passwordHash: text("password_hash"), // New bcrypt hashed password
   name: text("name"),
   company: text("company"),
   companyId: varchar("company_id"),
@@ -35,7 +36,10 @@ export const users = pgTable("users", {
   lastProjectDate: timestamp("last_project_date"),
   lastActivityDate: timestamp("last_activity_date"),
   internalNotes: text("internal_notes"),
+  isActive: boolean("is_active").notNull().default(true),
+  emailVerified: boolean("email_verified").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at"),
 });
 
@@ -43,7 +47,9 @@ export const insertUserSchema = createInsertSchema(users)
   .omit({
     id: true,
     createdAt: true,
+    updatedAt: true,
     lastLoginAt: true,
+    passwordHash: true,
   })
   .extend({
     email: z.string().email("Invalid email"),
@@ -58,6 +64,100 @@ export const insertUserSchema = createInsertSchema(users)
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// Password reset tokens table
+export const passwordResets = pgTable("password_resets", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  tokenHash: text("token_hash").notNull(), // Hashed token for security
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"), // Null until token is used
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertPasswordResetSchema = createInsertSchema(passwordResets).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertPasswordReset = z.infer<typeof insertPasswordResetSchema>;
+export type PasswordReset = typeof passwordResets.$inferSelect;
+
+// Credit ledger for tracking all credit transactions
+export const creditLedger = pgTable("credit_ledger", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull(),
+  userId: varchar("user_id"), // Who initiated the transaction
+  creditType: varchar("credit_type", { length: 20 }).notNull(), // 'basic' or 'pro'
+  transactionType: varchar("transaction_type", { length: 20 }).notNull(), // 'purchase', 'use', 'adjustment', 'refund'
+  amount: integer("amount").notNull(), // Positive for credit, negative for debit
+  balanceAfter: integer("balance_after").notNull(), // Running balance after transaction
+  description: text("description"),
+  orderId: varchar("order_id"), // Link to order if this was a purchase
+  briefId: varchar("brief_id"), // Link to brief if this was usage
+  metadata: jsonb("metadata"), // Additional context
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertCreditLedgerSchema = createInsertSchema(creditLedger).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertCreditLedger = z.infer<typeof insertCreditLedgerSchema>;
+export type CreditLedgerEntry = typeof creditLedger.$inferSelect;
+
+// Brief file attachments table
+export const briefFiles = pgTable("brief_files", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  briefId: varchar("brief_id").notNull(),
+  userId: varchar("user_id"), // Who uploaded the file
+  companyId: varchar("company_id"),
+  fileName: text("file_name").notNull(),
+  fileSize: integer("file_size").notNull(),
+  mimeType: text("mime_type").notNull(),
+  storagePath: text("storage_path").notNull(), // Path in object storage
+  url: text("url"), // Public URL if available
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertBriefFileSchema = createInsertSchema(briefFiles).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertBriefFile = z.infer<typeof insertBriefFileSchema>;
+export type BriefFileRecord = typeof briefFiles.$inferSelect;
+
+// User sessions table for proper session management
+export const sessions = pgTable("sessions", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  companyId: varchar("company_id"),
+  tokenHash: text("token_hash").notNull().unique(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastActiveAt: timestamp("last_active_at").defaultNow().notNull(),
+});
+
+export const insertSessionSchema = createInsertSchema(sessions).omit({
+  id: true,
+  createdAt: true,
+  lastActiveAt: true,
+});
+
+export type InsertSession = z.infer<typeof insertSessionSchema>;
+export type Session = typeof sessions.$inferSelect;
 
 export const couponClaims = pgTable("coupon_claims", {
   id: varchar("id")
