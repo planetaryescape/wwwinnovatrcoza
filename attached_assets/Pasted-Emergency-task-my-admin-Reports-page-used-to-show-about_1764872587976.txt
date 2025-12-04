@@ -1,0 +1,120 @@
+Emergency task: my admin Reports page used to show about 36 reports. After recent changes it now shows only 8 total reports. I need you to diagnose and restore the missing reports without breaking anything else.
+
+Do not change any visual styling. Do not remove any existing functionality that is working.
+
+Follow these steps in order:
+
+1. Check what is actually in the database
+
+Find the database access layer for the reports table (Drizzle schema or equivalent).
+
+Run a query in the server environment to log:
+
+SELECT COUNT(*) FROM reports
+
+The titles of all reports that exist (log them in the console).
+
+Tell me in a code comment at the top of the main reports service file:
+
+How many rows are currently in reports
+
+A sample of the titles you found.
+
+If there are only 8 rows in reports, go to step 2A.
+If there are still ~36 rows, go to step 2B.
+
+2A. If the database really has only 8 rows
+
+This means the earlier AI task truncated or re-seeded the table.
+
+Search the repo for any seed data or static config that defines reports, trends, or insights:
+
+Look for files like seedReports, reports-seed, trends, insights, or similar.
+
+Also check the Git history for earlier versions of the seed file where more reports were defined.
+
+Without changing the schema, reconstruct the missing reports by:
+
+Re-using the old seed data from a previous commit if it still exists, or
+
+Restoring the previous seed logic that inserted the full set of reports.
+
+Insert the missing reports into the reports table.
+
+Make sure the original fields are set correctly: title, category (Insights, Launch, IRL, Inside, etc), access level (Public / Starter / Growth / Scale), status (Published, Draft, Scheduled), and published date.
+
+Do not delete or override the 8 existing reports. Only add to the table.
+
+After inserting, confirm with:
+
+SELECT COUNT(*) FROM reports
+
+It should now show the larger total again (around 36).
+
+2B. If the database still has all 36 rows
+
+This means the query or filters changed.
+
+Find the backend endpoint used by the Admin → Reports tab.
+
+It will be something like /api/admin/reports or a shared reports fetch function.
+
+Check what filtering is now applied:
+
+Are we filtering by accessLevel = 'public' only?
+
+Are we excluding anything with clientCompanyIds?
+
+Are draft or scheduled reports being excluded by default?
+
+Update the query so that:
+
+Admin reports view returns all reports regardless of access level, as long as they are not soft-deleted.
+
+Normal client / portal users should still only see the reports they are allowed to see (do not change client scoping).
+
+Confirm that:
+
+Admin Reports grid shows the full list again.
+
+Client Trend & Insights and My Research views remain correctly scoped for non-admin users.
+
+3. Sanity check client vs admin access
+
+Because we recently worked on report visibility, confirm the following:
+
+As ADMIN:
+
+Admin → Reports shows the full set of reports (around 36).
+
+Admin can see both public trend reports and client specific reports.
+
+As a client user (e.g. Rugani / Nando’s):
+
+Trends & Insights only shows public trend reports as designed.
+
+My Research only shows that company’s own studies and reports.
+
+Client users cannot see other companies’ reports.
+
+If you find any regression for client visibility, fix it while keeping admin access unrestricted.
+
+4. Do NOT change these things
+
+Do not change any report titles or content.
+
+Do not change any visual styling of the Reports page.
+
+Do not remove any existing filters (Status, Access, Category).
+
+Do not modify anything related to credits, companies, orders, or briefs in this task.
+
+When you are finished:
+
+Leave a clear comment in the main reports service or route handler summarising:
+
+Root cause (truncated table vs over-filtering).
+
+What you changed to restore the reports.
+
+Make sure the Admin Reports counter at the top reflects the higher total again.
