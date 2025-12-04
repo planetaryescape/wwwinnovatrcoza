@@ -5,6 +5,7 @@ export interface FilterState {
   search: string;
   category: string;
   sort: string;
+  access: string;
   showAll: boolean;
 }
 
@@ -12,6 +13,7 @@ const DEFAULT_FILTERS: FilterState = {
   search: "",
   category: "all",
   sort: "newest",
+  access: "all",
   showAll: false,
 };
 
@@ -29,6 +31,7 @@ export function useUrlFilters() {
       search: params.get("q") || DEFAULT_FILTERS.search,
       category: params.get("category") || DEFAULT_FILTERS.category,
       sort: params.get("sort") || DEFAULT_FILTERS.sort,
+      access: params.get("access") || DEFAULT_FILTERS.access,
       showAll: parseBoolean(params.get("all")),
     };
   }, [searchString]);
@@ -55,6 +58,12 @@ export function useUrlFilters() {
         params.set("sort", updatedFilters.sort);
       } else {
         params.delete("sort");
+      }
+
+      if (updatedFilters.access && updatedFilters.access !== DEFAULT_FILTERS.access) {
+        params.set("access", updatedFilters.access);
+      } else {
+        params.delete("access");
       }
 
       if (updatedFilters.showAll) {

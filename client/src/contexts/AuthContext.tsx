@@ -1,4 +1,15 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { 
+  normalizeUserTier, 
+  getTierLevel, 
+  canAccessTier, 
+  isFreeUser as checkIsFreeUser,
+  isPaidMember as checkIsPaidMember,
+  isAdminUser as checkIsAdminUser,
+  type TierName,
+  type TierLevel,
+  TIER_LEVELS
+} from "@shared/access";
 
 export type UserTier = "free" | "starter" | "growth" | "scale";
 export type MembershipTier = "STARTER" | "GROWTH" | "SCALE";
@@ -50,11 +61,17 @@ interface AuthContextType {
   isLoading: boolean;
   isMember: boolean;
   isAdmin: boolean;
+  isFreeUser: boolean;
+  isPaidMember: boolean;
   membershipTier?: MembershipTier;
+  tierLevel: TierLevel;
+  canAccess: (requiredTier: string) => boolean;
   impersonation: ImpersonationState;
   impersonateUser: (userId: string) => Promise<void>;
   impersonateCompany: (companyId: string) => Promise<void>;
   exitImpersonation: () => void;
+  isViewingAsCompany: boolean;
+  viewingCompanyName?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -341,6 +358,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isMember = user !== null && (user.tier !== "free" || isAdminUser);
   const isAdmin = isAdminUser;
   const membershipTier = user?.membershipTier;
+  
+  // Use centralized access helpers
+  const isFreeUser = user ? checkIsFreeUser(user.membershipTier, user.isAdmin ? "ADMIN" : "MEMBER") : true;
+  const isPaidMember = user ? checkIsPaidMember(user.membershipTier) : false;
+  const tierLevel = getTierLevel(user?.membershipTier);
+  const canAccess = (requiredTier: string) => canAccessTier(user?.membershipTier, requiredTier);
+  
+  // View-as-company state
+  const isViewingAsCompany = impersonation.isImpersonating && !!impersonation.impersonatedCompanyId;
+  const viewingCompanyName = isViewingAsCompany ? user?.company : undefined;
 
   return (
     <AuthContext.Provider value={{ 
@@ -352,12 +379,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthenticated,
       isLoading,
       isMember, 
-      isAdmin, 
+      isAdmin,
+      isFreeUser,
+      isPaidMember,
       membershipTier,
+      tierLevel,
+      canAccess,
       impersonation,
       impersonateUser,
       impersonateCompany,
       exitImpersonation,
+      isViewingAsCompany,
+      viewingCompanyName,
     }}>
       {children}
     </AuthContext.Provider>

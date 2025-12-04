@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { User, Building2, Bell, Shield, Users } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { useToast } from "@/hooks/use-toast";
+import { INDUSTRY_OPTIONS } from "@shared/access";
 
 export default function Settings() {
   const { toast } = useToast();
@@ -111,17 +112,16 @@ export default function Settings() {
 
             <div className="space-y-2">
               <Label htmlFor="industry">Industry</Label>
-              <Select defaultValue="beverage">
+              <Select defaultValue="Food & Beverage">
                 <SelectTrigger id="industry" data-testid="select-industry">
                   <SelectValue placeholder="Select your industry" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="beverage">Food & Beverage</SelectItem>
-                  <SelectItem value="retail">Retail</SelectItem>
-                  <SelectItem value="financial">Financial Services</SelectItem>
-                  <SelectItem value="technology">Technology</SelectItem>
-                  <SelectItem value="healthcare">Healthcare</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  {INDUSTRY_OPTIONS.map((industry) => (
+                    <SelectItem key={industry} value={industry}>
+                      {industry}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">

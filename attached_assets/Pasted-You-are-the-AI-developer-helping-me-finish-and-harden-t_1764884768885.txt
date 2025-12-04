@@ -1,0 +1,448 @@
+You are the AI developer helping me finish and harden the Innovatr client portal. The project is already mostly built. I now need you to focus on memberships, user accounts, access control, and free vs member content plus a few UX tweaks.
+
+Please read this ENTIRE prompt carefully before making any changes.
+
+1. High level goals
+
+Make sure memberships and user accounts work correctly for all roles.
+
+Ensure only Richard and Hannah (admins) can see and use the Admin tab.
+
+Lock and gate member-only content properly while still letting free users see tempting cards.
+
+Ensure pricing behaviour is correct for free vs member users (Launch New Brief, Buy Credits).
+
+Add more industry options to the Settings page.
+
+Fix / verify view-as-company mode so I can see the exact client view without admin noise.
+
+Add a simple “Access: Free only / All” filter to the Trends & Insights Library.
+
+Please work incrementally: inspect the existing code and data models first, then apply small, well-scoped updates, test, and only then move on.
+
+2. User types and membership tiers
+
+There are effectively three user types:
+
+Admin users
+
+Currently: Hannah and Richard.
+
+They can see and use the Admin tab and all sub-tabs.
+
+They can also view portals from a company’s perspective (“view as company”).
+
+Member company users (Starter / Growth / Scale)
+
+E.g. Rugani, Greenway Farms, Nando’s, etc.
+
+They belong to a company that has a tier: Starter, Growth or Scale.
+
+They get discounted pricing and access to Starter or higher-level content based on tier.
+
+Free users
+
+Registered users without an active paid membership.
+
+They should automatically be:
+
+A free account
+
+A Pulse member for email / content purposes.
+
+2.1 Access hierarchy
+
+Implement a simple numeric hierarchy for access levels and tiers:
+
+Content access levels:
+
+Free = level 0
+
+Starter = level 1
+
+Growth = level 2
+
+Scale = level 3
+
+Rules:
+
+If a user has Starter, they can see Free + Starter content.
+
+If a user has Growth, they can see Free + Starter + Growth content.
+
+If a user has Scale, they can see everything.
+
+Free users only see Free content.
+
+This should be enforced in the backend queries AND in the frontend rendering logic.
+
+If you already have enums for tiers / access, map them cleanly to these levels (you can create a small helper function like getAccessLevel(access) and getUserMaxAccess(user)).
+
+3. Admin tab and “view as company” behaviour
+3.1 Admin visibility
+
+Make the following rules absolute:
+
+Only admin users (Hannah + Richard or users with role === 'admin') can:
+
+See the Admin menu item in the sidebar.
+
+Access any /portal/admin routes.
+
+Non-admin users must NEVER see:
+
+The Admin tab in the sidebar.
+
+Any admin dashboard routes (redirect to /portal or a 404 equivalent).
+
+Ensure this is enforced both:
+
+In the frontend sidebar rendering, and
+
+In route guards / server checks if you have them.
+
+3.2 “View as company” mode
+
+You already have a way to “view” a company’s portal as an admin. Please:
+
+Find the code that handles view-as-company (for example, passing a companyId query param or a context state).
+
+In view-as-company mode:
+
+Hide the Admin tab from the sidebar.
+
+Use the company’s tier and permissions as if you were a normal user at that company.
+
+Show a top banner like:
+Viewing: Rugani Juice · You’re viewing this company’s portal as an admin
+with a “Back to Companies” button that exits view-as-company and returns to admin view.
+
+When you click Back to Companies, restore the full admin view, including the Admin tab.
+
+This lets me click around and see exactly what a specific client would see, without accidentally exposing admin controls.
+
+4. Trends & Insights Library: free vs member content
+4.1 Which reports are free?
+
+Use the Access field in the reports data to drive things, but ensure the following are definitely marked as Free:
+
+All “Innovatr Inside” reports (category = Inside)
+
+Plus these specific titles (Access should be Free):
+
+Banking Monogamy Is Dead
+
+Simplicity Has Status
+
+From Vegan to Vital
+
+Cadbury Pocket-Sized Joy
+
+The Oat-Based Breakfast Revolution
+
+The Return of the Third Place
+
+Innovatr Inside: Market Simulator
+
+Innovatr Inside: AI Qual
+
+Innovatr Inside: Idea Screen
+
+Innovatr Inside: Upsiide Overview
+
+Innovatr Inside: Building Tests with Upsiide
+
+Innovatr Inside: The Respondent Experience
+
+Innovatr Inside: The Analysis Engine
+
+Innovatr Inside: How Innovatr Research Works
+
+Everything else can be Starter or higher as already configured.
+
+4.2 Behaviour for free users
+
+For free users in the Trends & Insights Library:
+
+They should:
+
+See all cards in the grid (Free + Starter + higher).
+
+Be able to open and read any report where access = 'Free'.
+
+See locked cards for all other access levels.
+
+Locked card UX proposal (please implement):
+
+Card visible but slightly dimmed / blurred.
+
+Add a small lock icon and ribbon, e.g.
+
+Starter members only or Members only.
+
+Clicking a locked card should:
+
+Open a modal or side panel explaining:
+
+That this is member-only content.
+
+Benefits of becoming a member.
+
+A clear CTA: “Talk to us about membership” or “Request access”.
+
+Do NOT navigate to the full report for free users.
+
+Ensure this lock behaviour is implemented consistently in grid view and list view.
+
+4.3 Behaviour for member users
+
+For member users:
+
+Use the access hierarchy from section 2.
+
+If a user’s company tier is Starter, they see Free + Starter content unlocked.
+
+Growth sees Free + Starter + Growth.
+
+Scale sees everything.
+
+Locked state should appear only for content above their tier.
+
+4.4 Access filter
+
+In the Trends & Insights Library (where we currently have “All / Insights / Launch / Inside / IRL” and “Newest first / Oldest first / A to Z”):
+
+Add an Access filter next to the existing sort dropdown:
+
+Label: Access
+
+Options:
+
+All
+
+Free only
+
+When Free only is selected:
+
+Show only reports where access = 'Free'.
+
+Keep other filters (category, sort) working as usual.
+
+5. Tabs and lock icons for free users
+
+For free users:
+
+Member Deals:
+
+Show the tab in the sidebar with a lock icon.
+
+When they click it:
+
+Show a simple “locked” page explaining:
+
+Member Deals are only for Starter, Growth, Scale members.
+
+Key benefits and a CTA to contact Innovatr / upgrade.
+
+My Research:
+
+Free users should still have access to launch a Test24 project but at once-off pricing.
+
+On the My Research page, add:
+
+A visible pricing section that shows once-off prices.
+
+A small promo block, e.g.
+“Running more than one project this year? Membership gives you discounted Test24 pricing and included credits.”
+
+Any other member-only features / sections:
+
+Keep the lock icon visible.
+
+Do not let free users access member-only flows, but always explain what they’re missing.
+
+6. Pricing and credits logic
+
+Check the logic in Launch New Brief and Credits & Billing:
+
+Free users:
+
+Can:
+
+Launch a Test24 Basic or Pro project at full once-off pricing.
+
+Buy Test24 credits at full list price.
+
+Should NOT see any member discounts.
+
+Member users (Starter / Growth / Scale):
+
+Should always see discounted pricing, based on whatever config you already have for each tier.
+
+Their available Basic / Pro credits should come from their company’s credit pool.
+
+When they use credits (via a study), those should decrement correctly in the Admin Companies view and in their own view.
+
+Admin view:
+
+In the Admin → Companies tab, ensure Basic and Pro credit counts match what is used in:
+
+My Research (per company)
+
+Test24 Tracker
+
+Companies side panel.
+
+Double-check that:
+
+Credits shown in Admin Overview → Credits Available line up with the sum of real companies (no fictional / Innovatr internal credits).
+
+When tests are created, completed, or still live, credit usage remains consistent.
+
+7. Free users and Pulse membership
+
+Implement the following for every new signup:
+
+When a user signs up and does not belong to an existing member company:
+
+Mark them as:
+
+Free account (no paid membership).
+
+Pulse member = true (for newsletter / content).
+
+In the Admin → Members tab:
+
+All users (free + members) should show as Pulse members by default unless explicitly opted out.
+
+Ensure that Pulse subscription status is visible in the Members table and correctly reflects the backend flag.
+
+8. Settings page: industry options
+
+In the Settings page (profile information), expand the Industry dropdown.
+
+Currently it has only a few options. Replace / extend it with a list of ±20 industries, for example:
+
+Food & Beverage
+
+Retail
+
+Financial Services
+
+Banking & Fintech
+
+Insurance
+
+Technology
+
+Telecoms & Connectivity
+
+Media & Entertainment
+
+FMCG / Packaged Goods
+
+Alcohol & Beverages
+
+Beauty & Personal Care
+
+Household & Homecare
+
+Quick Service Restaurants & Fast Food
+
+Automotive & Mobility
+
+Travel & Tourism
+
+Healthcare & Pharma
+
+Education
+
+Non-profit & NGOs
+
+Government & Public Sector
+
+E-commerce & Marketplaces
+
+Real Estate & Property
+
+Other
+
+Store these as a constant list that is easy to extend in future. Make sure the selected value persists in the database and is loaded correctly when returning to the settings page.
+
+9. “Free content” definition in code
+
+Make sure the code has a single source of truth for “free content”:
+
+A field like access: 'Free' | 'Starter' | 'Growth' | 'Scale'.
+
+Do not hard-code repeated lists of free titles in multiple places.
+
+Any time we check if something is free, call a helper like isFreeReport(report).
+
+Apply this consistently in:
+
+Trends & Insights listing.
+
+Free Reports Library section in the Admin Overview (if present).
+
+Any public teaser views.
+
+10. Testing and verification
+
+After implementing everything, please:
+
+Create or use three test users:
+
+admin@example.com (admin, company Innovatr)
+
+member@example.com (Growth or Scale member at a client company)
+
+freeuser@example.com (no membership, but Pulse = true)
+
+For each user, walk through:
+
+Sidebar visibility:
+
+Admin tab only visible for admin.
+
+Lock icons visible only where appropriate.
+
+Trends & Insights:
+
+Free user: sees all cards; opens only Free reports; gets lock modal on others; Access filter “Free only” works.
+
+Member user: sees Free + content up to their tier; locked only for higher-tier if any.
+
+Admin: sees everything.
+
+My Research:
+
+Free user: sees once-off pricing, promo for membership.
+
+Member user: sees their own studies and correct credit usage.
+
+Admin in view-as-company mode: sees exactly what the company would see, no Admin tab.
+
+Member Deals:
+
+Free user: locked page with upgrade CTA.
+
+Member user: sees deals correctly tied to their tier.
+
+Admin: can still access all deals.
+
+Credits & Billing / Launch New Brief:
+
+Prices and credit usage behave correctly for free vs member vs admin (view-as-company).
+
+Fix any issues you find during testing. Please leave concise comments in the code where logic is non-obvious.
+
+When done, summarise in the Replit task log:
+
+What you changed.
+
+Where the core access logic lives (files / components).
+
+How to add a new access tier or free report in future.
+
+Use clean, readable TypeScript / React code, avoid duplication, and keep the UI consistent with the current design system.

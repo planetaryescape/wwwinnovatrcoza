@@ -193,8 +193,13 @@ const generateId = () => Math.random().toString(36).substring(2, 9);
 
 type BillingPreference = "online" | "invoice" | "credits";
 
+const BASIC_MEMBER_PRICE = 5000;
+const BASIC_STANDARD_PRICE = 5500;
+const PRO_MEMBER_PRICE = 45000;
+const PRO_STANDARD_PRICE = 50000;
+
 export default function LaunchBrief() {
-  const { user, company, isMember } = useAuth();
+  const { user, company, isMember, isFreeUser } = useAuth();
   const [, setLocationHook] = useLocation();
   const queryClient = useQueryClient();
   const [selectedBrief, setSelectedBrief] = useState<BriefType>(null);
@@ -653,6 +658,31 @@ export default function LaunchBrief() {
             </p>
           </div>
 
+          {/* Free user membership promo */}
+          {isFreeUser && (
+            <Card className="bg-primary/5 border-primary/30 mb-4">
+              <CardContent className="p-4 flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Coins className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">Save with Innovatr Membership</p>
+                    <p className="text-sm text-muted-foreground">
+                      Members save R500 on every Basic credit and 10% on Pro studies
+                    </p>
+                  </div>
+                </div>
+                <Link href="/#membership">
+                  <Button variant="outline" size="sm" data-testid="button-view-membership">
+                    View Plans
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             <Card
               className="hover-elevate active-elevate-2 cursor-pointer border-2 border-accent/30"
@@ -667,10 +697,21 @@ export default function LaunchBrief() {
                 <CardDescription className="text-base">
                   Fast idea validation with quantitative insights
                 </CardDescription>
-                <div className="pt-4">
-                  <Badge className="bg-accent text-accent-foreground">
-                    1 Credit - R5,000 member rate
-                  </Badge>
+                <div className="pt-4 space-y-2">
+                  {isFreeUser ? (
+                    <>
+                      <Badge className="bg-accent text-accent-foreground">
+                        R{BASIC_STANDARD_PRICE.toLocaleString()} standard rate
+                      </Badge>
+                      <p className="text-xs text-muted-foreground">
+                        Members save R{(BASIC_STANDARD_PRICE - BASIC_MEMBER_PRICE).toLocaleString()} per credit
+                      </p>
+                    </>
+                  ) : (
+                    <Badge className="bg-accent text-accent-foreground">
+                      1 Credit - R{BASIC_MEMBER_PRICE.toLocaleString()} member rate
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -706,10 +747,21 @@ export default function LaunchBrief() {
                 <CardDescription className="text-base">
                   Enterprise-level quant & qual testing
                 </CardDescription>
-                <div className="pt-4">
-                  <Badge className="bg-primary text-primary-foreground">
-                    1 Credit - R45,000 member rate
-                  </Badge>
+                <div className="pt-4 space-y-2">
+                  {isFreeUser ? (
+                    <>
+                      <Badge className="bg-primary text-primary-foreground">
+                        R{PRO_STANDARD_PRICE.toLocaleString()} standard rate
+                      </Badge>
+                      <p className="text-xs text-muted-foreground">
+                        Members save R{(PRO_STANDARD_PRICE - PRO_MEMBER_PRICE).toLocaleString()} per study (10% off)
+                      </p>
+                    </>
+                  ) : (
+                    <Badge className="bg-primary text-primary-foreground">
+                      1 Credit - R{PRO_MEMBER_PRICE.toLocaleString()} member rate
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">

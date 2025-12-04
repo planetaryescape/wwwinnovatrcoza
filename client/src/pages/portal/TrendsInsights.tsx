@@ -15,6 +15,12 @@ import { Link } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { useUrlFilters } from "@/hooks/use-url-filters";
+import { 
+  isFreeContent, 
+  getEffectiveAccessLevel, 
+  canAccessTier as sharedCanAccessTier,
+  getAccessDisplayName
+} from "@shared/access";
 import insightsCover from "@assets/insights-cover_1764321138388.png";
 import launchCover from "@assets/launch-cover_1764321848244.png";
 import insideCover from "@assets/inside-cover_1764321472939.png";
@@ -49,38 +55,6 @@ function getCategoryStyle(category: string) {
   return categoryColors[key] || categoryColors.insights;
 }
 
-type AccessLevel = "public" | "member" | "tier" | "paid" | "starter" | "growth" | "scale";
-
-function normalizeAccessLevel(level: string | undefined): string {
-  if (!level) return "public";
-  const lower = level.toLowerCase();
-  if (lower === "public" || lower === "free") return "public";
-  if (lower === "starter" || lower === "member") return "starter";
-  if (lower === "growth") return "growth";
-  if (lower === "scale") return "scale";
-  if (lower === "tier") return "tier";
-  if (lower === "paid") return "paid";
-  return lower;
-}
-
-function normalizeUserTier(tier: string | undefined): string {
-  if (!tier) return "";
-  return tier.toLowerCase();
-}
-
-const tierHierarchy: Record<string, number> = {
-  "": 0,
-  "public": 0,
-  "starter": 1,
-  "growth": 2,
-  "scale": 3,
-};
-
-function canAccessTier(userTier: string, requiredTier: string): boolean {
-  const userLevel = tierHierarchy[normalizeUserTier(userTier)] || 0;
-  const requiredLevel = tierHierarchy[normalizeAccessLevel(requiredTier)] || 0;
-  return userLevel >= requiredLevel;
-}
 
 interface Report {
   id: number | string;
@@ -114,11 +88,16 @@ interface Report {
 }
 
 function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: boolean, userCompanyId?: string) {
-  const accessLevel = normalizeAccessLevel(report.accessLevel);
-  const normalizedUserTier = normalizeUserTier(userTier);
+  // Use shared access helpers for consistent tier gating
+  const effectiveAccess = getEffectiveAccessLevel({
+    slug: report.slug,
+    title: report.title,
+    category: report.category,
+    accessLevel: report.accessLevel
+  });
   
   // Company-only reports show a building icon
-  if (accessLevel === "companyonly" || report.isClientReport) {
+  if (report.isClientReport) {
     return (
       <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Your organization">
         <Building2 className="w-3.5 h-3.5 text-emerald-600" />
@@ -126,65 +105,34 @@ function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: bool
     );
   }
   
-  // Public/free reports show no indicator
-  if (accessLevel === "public") {
+  // Free/public content - no indicator
+  if (effectiveAccess === "PUBLIC") {
     return null;
   }
   
-  // Starter (base membership) - show lock if not logged in
-  if (accessLevel === "starter") {
-    if (!isLoggedIn) {
+  // Use shared canAccessTier for tier-based gating
+  const userHasAccess = isLoggedIn && sharedCanAccessTier(userTier, effectiveAccess);
+  
+  if (!userHasAccess) {
+    // Show appropriate icon based on required tier level
+    if (effectiveAccess === "STARTER") {
       return (
         <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Members only">
           <Lock className="w-3.5 h-3.5 text-muted-foreground" />
         </div>
       );
     }
-    return null;
-  }
-  
-  // Growth tier - show crown if user doesn't have access
-  if (accessLevel === "growth") {
-    if (!isLoggedIn || !canAccessTier(normalizedUserTier, "growth")) {
-      return (
-        <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Growth+ tier required">
-          <Crown className="w-3.5 h-3.5 text-[#5B6EF7]" />
-        </div>
-      );
-    }
-    return null;
-  }
-  
-  // Scale tier - show crown if user doesn't have access
-  if (accessLevel === "scale") {
-    if (!isLoggedIn || !canAccessTier(normalizedUserTier, "scale")) {
-      return (
-        <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Scale tier required">
-          <Crown className="w-3.5 h-3.5 text-[#5B6EF7]" />
-        </div>
-      );
-    }
-    return null;
-  }
-  
-  // Tier-locked content with specific allowed tiers
-  if (accessLevel === "tier") {
-    const allowedTiers = report.allowedTiers || [];
-    const hasAccess = allowedTiers.some(tier => canAccessTier(normalizedUserTier, tier));
     
-    if (!hasAccess) {
-      const lowestTier = allowedTiers[0] || "starter";
-      const tierLabel = lowestTier.charAt(0).toUpperCase() + lowestTier.slice(1);
-      return (
-        <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title={`${tierLabel}+ tier required`}>
-          <Crown className="w-3.5 h-3.5 text-[#5B6EF7]" />
-        </div>
-      );
-    }
+    // Growth+ or Scale required - show crown
+    return (
+      <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title={`${getAccessDisplayName(effectiveAccess)} tier required`}>
+        <Crown className="w-3.5 h-3.5 text-[#5B6EF7]" />
+      </div>
+    );
   }
   
   // Paid content (requires credits)
-  if (accessLevel === "paid") {
+  if (report.creditCost && report.creditCost > 0) {
     return (
       <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Credits required">
         <CreditCard className="w-3.5 h-3.5 text-[#5B6EF7]" />
@@ -206,8 +154,14 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId }: { report: R
   const coverImage = getCoverImage(report.category);
   const accessIndicator = getAccessIndicator(report, userTier, isLoggedIn, userCompanyId);
   
-  const accessLevel = normalizeAccessLevel(report.accessLevel);
-  const isPublicWithPdf = accessLevel === "public" && report.pdfPath;
+  // Use shared access helper to determine if content is free/public
+  const isPublicContent = isFreeContent({
+    slug: report.slug,
+    title: report.title,
+    category: report.category,
+    accessLevel: report.accessLevel
+  });
+  const isPublicWithPdf = isPublicContent && report.pdfPath;
   const ctaText = isPublicWithPdf ? "Download full report" : "Read full issue";
 
   return (
@@ -382,7 +336,17 @@ export default function TrendsInsights() {
         (report.tags || []).some(tag => tag.toLowerCase().includes(searchLower));
       const matchesCategory = filters.category === "all" || 
         report.category.toLowerCase() === filters.category.toLowerCase();
-      return matchesSearch && matchesCategory;
+      
+      // Access filter: show all or only free content
+      const matchesAccess = filters.access === "all" || 
+        isFreeContent({
+          slug: report.slug,
+          title: report.title,
+          category: report.category,
+          accessLevel: report.accessLevel
+        });
+      
+      return matchesSearch && matchesCategory && matchesAccess;
     });
 
     return filtered.sort((a, b) => {
@@ -397,7 +361,7 @@ export default function TrendsInsights() {
           return 0;
       }
     });
-  }, [filters.search, filters.category, filters.sort, reports, clientReports]);
+  }, [filters.search, filters.category, filters.sort, filters.access, reports, clientReports]);
 
   const displayedReports = filters.showAll ? filteredAndSortedReports : filteredAndSortedReports.slice(0, 6);
   const hasMoreReports = filteredAndSortedReports.length > 6;
@@ -485,6 +449,19 @@ export default function TrendsInsights() {
                   <SelectItem value="newest">Newest first</SelectItem>
                   <SelectItem value="oldest">Oldest first</SelectItem>
                   <SelectItem value="atoz">A to Z</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={filters.access} onValueChange={(value) => setFilters({ access: value })}>
+                <SelectTrigger 
+                  className="w-32 h-10 rounded-full border-border"
+                  data-testid="select-access"
+                >
+                  <SelectValue placeholder="Access" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Access</SelectItem>
+                  <SelectItem value="free">Free Only</SelectItem>
                 </SelectContent>
               </Select>
             </div>

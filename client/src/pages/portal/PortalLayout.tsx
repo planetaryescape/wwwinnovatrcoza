@@ -96,7 +96,7 @@ interface PortalLayoutProps {
 
 export default function PortalLayout({ children }: PortalLayoutProps) {
   const [location, setLocation] = useLocation();
-  const { user, logout, isAuthenticated, isMember, isAdmin, impersonation, exitImpersonation } = useAuth();
+  const { user, logout, isAuthenticated, isMember, isAdmin, isFreeUser, impersonation, exitImpersonation, isViewingAsCompany, viewingCompanyName } = useAuth();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -168,7 +168,8 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {menuItems.map((item) => {
-                    if (item.adminOnly && !isAdmin) return null;
+                    // Hide admin items for non-admins AND during impersonation mode
+                    if (item.adminOnly && (!isAdmin || impersonation.isImpersonating)) return null;
                     const isLocked = !isMember && item.lockedForFree;
                     const isActive = item.url === "/portal" 
                       ? (location === "/portal" || location === "/portal/dashboard")
@@ -219,8 +220,12 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
               <div className="flex items-center gap-2">
                 <Eye className="w-4 h-4" />
                 <span className="text-sm font-medium">
-                  Viewing as: <strong>{user?.name || user?.email}</strong>
-                  {user?.company && <span className="ml-1">({user.company})</span>}
+                  {isViewingAsCompany ? (
+                    <>Viewing: <strong>{viewingCompanyName || user?.company}</strong> - You&apos;re viewing this company&apos;s portal as an admin</>
+                  ) : (
+                    <>Viewing as: <strong>{user?.name || user?.email}</strong>
+                    {user?.company && <span className="ml-1">({user.company})</span>}</>
+                  )}
                 </span>
               </div>
               <Button 
@@ -234,7 +239,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                 data-testid="button-exit-impersonation"
               >
                 <X className="w-4 h-4 mr-1" />
-                Exit View
+                {isViewingAsCompany ? "Back to Companies" : "Exit View"}
               </Button>
             </div>
           )}
