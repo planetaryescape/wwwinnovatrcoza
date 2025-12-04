@@ -1232,6 +1232,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
           topics: r.topics || [],
         }));
 
+      // Calculate "this month" metrics
+      const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const usersThisMonth = users.filter((u) => new Date(u.createdAt) >= thisMonthStart).length;
+      const companiesThisMonth = companies.filter((c) => new Date(c.createdAt) >= thisMonthStart).length;
+      
+      // Count PUBLIC reports (truly free to all)
+      const freeReportsCount = reports.filter((r) => 
+        r.status === "published" && 
+        !r.isArchived && 
+        (r.accessLevel === "PUBLIC" || r.accessLevel === "public")
+      ).length;
+
+      // Test24 tracker stats
+      const test24BasicTotal = studies.filter((s) => s.isTest24 && s.studyType === "basic").length;
+      const test24ProTotal = studies.filter((s) => s.isTest24 && s.studyType === "pro").length;
+      const test24ThisMonth = studies.filter((s) => s.isTest24 && new Date(s.createdAt) >= thisMonthStart);
+      const test24BasicThisMonth = test24ThisMonth.filter((s) => s.studyType === "basic").length;
+      const test24ProThisMonth = test24ThisMonth.filter((s) => s.studyType === "pro").length;
+      const test24InProgress = studies.filter((s) => 
+        s.isTest24 && 
+        (s.status === "in_progress" || s.status === "AUDIENCE_LIVE" || s.status === "ANALYSING_DATA" || s.status === "IN_PROGRESS")
+      ).length;
+
       res.json({
         metrics: {
           totalUsers: users.length,
@@ -1240,10 +1263,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           activeStudies: studies.filter((s) => s.status === "in_progress" || s.status === "AUDIENCE_LIVE" || s.status === "ANALYSING_DATA").length,
           briefsThisPeriod: periodBriefs.length,
           reportsPublished: reports.filter((r) => r.status === "published").length,
+          freeReportsCount,
           creditsRemaining: {
             basic: totalBasicCredits - usedBasicCredits,
             pro: totalProCredits - usedProCredits,
           },
+          newUsersThisMonth: usersThisMonth,
+          newCompaniesThisMonth: companiesThisMonth,
+        },
+        test24Stats: {
+          totalBasic: test24BasicTotal,
+          totalPro: test24ProTotal,
+          basicThisMonth: test24BasicThisMonth,
+          proThisMonth: test24ProThisMonth,
+          inProgress: test24InProgress,
+          briefsInPipeline: briefs.filter((b) => b.status !== "completed").length,
         },
         people: {
           newUsers: periodUsers.length,

@@ -47,17 +47,30 @@ interface BriefStats {
   onHold: number;
 }
 
+interface Test24Stats {
+  totalBasic: number;
+  totalPro: number;
+  basicThisMonth: number;
+  proThisMonth: number;
+  inProgress: number;
+  briefsInPipeline: number;
+}
+
 interface AnalyticsData {
   metrics: {
     totalUsers: number;
     totalCompanies: number;
     activeStudies: number;
     reportsPublished: number;
+    freeReportsCount: number;
     creditsRemaining: {
       basic: number;
       pro: number;
     };
+    newUsersThisMonth: number;
+    newCompaniesThisMonth: number;
   };
+  test24Stats: Test24Stats;
   pipeline: {
     totalBriefs: number;
     briefStats: BriefStats;
@@ -106,26 +119,33 @@ export default function AdminOverview() {
   const MetricCard = ({ 
     label, 
     value, 
+    subLabel,
     icon: Icon, 
-    iconColor = "text-primary"
+    iconBgColor = "bg-blue-50 dark:bg-blue-900/20",
+    iconColor = "text-blue-600 dark:text-blue-400"
   }: { 
     label: string; 
     value: string | number; 
+    subLabel?: string;
     icon: any;
+    iconBgColor?: string;
     iconColor?: string;
   }) => (
     <Card className="hover-elevate">
       <CardContent className="p-4">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-muted-foreground mb-1 truncate">{label}</p>
+            <p className="text-xs font-medium text-muted-foreground mb-1 truncate">{label}</p>
             {loading ? (
-              <Skeleton className="h-7 w-16" />
+              <Skeleton className="h-8 w-20" />
             ) : (
-              <p className="text-2xl font-bold">{value}</p>
+              <p className="text-2xl font-bold tracking-tight">{value}</p>
+            )}
+            {subLabel && !loading && (
+              <p className="text-xs text-muted-foreground mt-1">{subLabel}</p>
             )}
           </div>
-          <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+          <div className={`w-11 h-11 rounded-lg ${iconBgColor} flex items-center justify-center flex-shrink-0`}>
             <Icon className={`w-5 h-5 ${iconColor}`} />
           </div>
         </div>
@@ -189,33 +209,43 @@ export default function AdminOverview() {
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <MetricCard 
           label="Users" 
-          value={analytics?.metrics.totalUsers || 0} 
+          value={analytics?.metrics.totalUsers || 0}
+          subLabel={`New this month: ${analytics?.metrics.newUsersThisMonth || 0}`}
           icon={Users}
-          iconColor="text-blue-500"
+          iconBgColor="bg-blue-50 dark:bg-blue-900/20"
+          iconColor="text-blue-600 dark:text-blue-400"
         />
         <MetricCard 
           label="Companies" 
-          value={analytics?.metrics.totalCompanies || 0} 
+          value={analytics?.metrics.totalCompanies || 0}
+          subLabel={`New this month: ${analytics?.metrics.newCompaniesThisMonth || 0}`}
           icon={Building2}
-          iconColor="text-violet-500"
+          iconBgColor="bg-violet-50 dark:bg-violet-900/20"
+          iconColor="text-violet-600 dark:text-violet-400"
         />
         <MetricCard 
           label="Active Studies" 
-          value={analytics?.metrics.activeStudies || 0} 
+          value={analytics?.metrics.activeStudies || 0}
+          subLabel="In progress now"
           icon={FlaskConical}
-          iconColor="text-orange-500"
+          iconBgColor="bg-orange-50 dark:bg-orange-900/20"
+          iconColor="text-orange-600 dark:text-orange-400"
         />
         <MetricCard 
           label="Reports" 
           value={analytics?.metrics.reportsPublished || 0}
+          subLabel={`Free: ${analytics?.metrics.freeReportsCount || 0}`}
           icon={FileCheck}
-          iconColor="text-emerald-500"
+          iconBgColor="bg-emerald-50 dark:bg-emerald-900/20"
+          iconColor="text-emerald-600 dark:text-emerald-400"
         />
         <MetricCard 
           label="Credits Available" 
-          value={`${analytics?.metrics.creditsRemaining.basic || 0} Basic / ${analytics?.metrics.creditsRemaining.pro || 0} Pro`}
+          value={`${analytics?.metrics.creditsRemaining.basic || 0} / ${analytics?.metrics.creditsRemaining.pro || 0}`}
+          subLabel="Basic / Pro across all"
           icon={Zap}
-          iconColor="text-amber-500"
+          iconBgColor="bg-amber-50 dark:bg-amber-900/20"
+          iconColor="text-amber-600 dark:text-amber-400"
         />
       </div>
 
@@ -227,48 +257,93 @@ export default function AdminOverview() {
               Test24 Tracker
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-16 w-full" />
-                ))}
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary" className="text-xs px-3 py-1">
+                Total Basic: {analytics?.test24Stats?.totalBasic || 0}
+              </Badge>
+              <Badge variant="secondary" className="text-xs px-3 py-1">
+                Total Pro: {analytics?.test24Stats?.totalPro || 0}
+              </Badge>
+              <Badge variant="outline" className="text-xs px-3 py-1">
+                This month: {analytics?.test24Stats?.basicThisMonth || 0} Basic / {analytics?.test24Stats?.proThisMonth || 0} Pro
+              </Badge>
+              <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 text-xs px-3 py-1">
+                In progress: {analytics?.test24Stats?.inProgress || 0}
+              </Badge>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div 
+                  className="h-3 bg-blue-500 rounded-l-full transition-all" 
+                  style={{ 
+                    width: `${(analytics?.test24Stats?.totalBasic || 0) / Math.max(1, (analytics?.test24Stats?.totalBasic || 0) + (analytics?.test24Stats?.totalPro || 0)) * 100}%`,
+                    minWidth: analytics?.test24Stats?.totalBasic ? '20%' : '0'
+                  }}
+                />
+                <div 
+                  className="h-3 bg-violet-500 rounded-r-full transition-all" 
+                  style={{ 
+                    width: `${(analytics?.test24Stats?.totalPro || 0) / Math.max(1, (analytics?.test24Stats?.totalBasic || 0) + (analytics?.test24Stats?.totalPro || 0)) * 100}%`,
+                    minWidth: analytics?.test24Stats?.totalPro ? '20%' : '0'
+                  }}
+                />
               </div>
-            ) : analytics?.test24Studies && analytics.test24Studies.length > 0 ? (
-              <div className="space-y-3">
-                {analytics.test24Studies.map((study) => (
-                  <div 
-                    key={study.id} 
-                    className="p-3 border rounded-lg hover-elevate"
-                    data-testid={`study-item-${study.id}`}
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{study.title}</p>
-                        <p className="text-sm text-muted-foreground">{study.companyName}</p>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-blue-500" /> Basic
+                </span>
+                <span className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-violet-500" /> Pro
+                </span>
+                <span>{analytics?.test24Stats?.briefsInPipeline || 0} briefs in pipeline</span>
+              </div>
+            </div>
+
+            <div className="border-t pt-4">
+              {loading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-16 w-full" />
+                  ))}
+                </div>
+              ) : analytics?.test24Studies && analytics.test24Studies.length > 0 ? (
+                <div className="space-y-3">
+                  {analytics.test24Studies.map((study) => (
+                    <div 
+                      key={study.id} 
+                      className="p-3 border rounded-lg hover-elevate"
+                      data-testid={`study-item-${study.id}`}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{study.title}</p>
+                          <p className="text-sm text-muted-foreground">{study.companyName}</p>
+                        </div>
+                        {getStatusBadge(study.status)}
                       </div>
-                      {getStatusBadge(study.status)}
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>
+                          {study.studyType === "basic" ? "Test24 Basic" : "Test24 Pro"}
+                        </span>
+                        <span>
+                          {study.submittedByName}
+                        </span>
+                        {study.deliveryDate && (
+                          <span>Delivered: {formatDate(study.deliveryDate)}</span>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>
-                        {study.studyType === "basic" ? "Test24 Basic" : "Test24 Pro"}
-                      </span>
-                      <span>
-                        {study.submittedByName}
-                      </span>
-                      {study.deliveryDate && (
-                        <span>Delivered: {formatDate(study.deliveryDate)}</span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <FlaskConical className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p>No Test24 studies yet</p>
-              </div>
-            )}
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FlaskConical className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p>No Test24 studies yet</p>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 
