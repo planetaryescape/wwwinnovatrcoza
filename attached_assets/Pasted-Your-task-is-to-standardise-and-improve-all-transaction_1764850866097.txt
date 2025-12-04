@@ -1,0 +1,492 @@
+Your task is to standardise and improve all transactional emails for Innovatr and to implement a full set of reusable HTML templates using the copy provided below.
+
+The goal is that every email sent by the system:
+
+Looks clean, simple and professional (similar to a HubSpot style but without images).
+
+Uses one consistent layout wrapper.
+
+Uses the same button style and typography.
+
+Uses the copy and subject lines below verbatim.
+
+Supports both HTML and a clean text fallback.
+
+Works with the existing email service and database driven user accounts.
+
+1. General design and architecture
+
+Use a single HTML layout wrapper function, for example:
+
+function renderBaseEmail(options: {
+  title: string;
+  greeting?: string;
+  bodyHtml: string;
+  buttonLabel?: string;
+  buttonUrl?: string;
+  showButton?: boolean;
+  footerNote?: string;
+}): string
+
+
+Layout requirements:
+
+White background, dark text, centred container max width ~600px.
+
+Use simple, web safe fonts like system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif.
+
+Header section with the email title in bold.
+
+Greeting line, e.g. Hi {{FirstName}}, with a fallback to Hi there,.
+
+Body copy in left aligned paragraphs with good spacing.
+
+Optional primary button in a single consistent style:
+
+Background colour: use the existing Innovatr brand button colour already used on the website or current password email (do not introduce a new colour variable).
+
+White text, slightly rounded corners.
+
+Under the button, when relevant, include a plain URL fallback line, e.g.
+If the button does not work, copy and paste this link in your browser: followed by the URL.
+
+Footer (always the same):
+
+This is an automated message from Innovatr.
+If you have any questions, contact us at hello@innovatr.co.za.
+© 2025 Innovatr. All rights reserved.
+
+
+Implement a central email template renderer in server/emails/email-service.ts (or the existing email service file) that:
+
+Accepts a template type and a data payload.
+
+Returns subject, html, and text.
+
+Example:
+
+export type EmailTemplateType =
+  | "PASSWORD_RESET_REQUEST"
+  | "PASSWORD_RESET_SUCCESS"
+  | "ACCOUNT_CREATED"
+  | "EMAIL_VERIFICATION"
+  | "BRIEF_SUBMITTED"
+  | "AUDIENCE_LIVE"
+  | "STUDY_COMPLETE"
+  | "SUBSCRIPTION_CONFIRMED"
+  | "SUBSCRIPTION_CANCELLED"
+  | "CREDITS_ADDED"
+  | "CREDITS_LOW"
+  | "PAYMENT_CONFIRMED"
+  | "INVOICE_ISSUED";
+
+export function renderEmailTemplate(
+  type: EmailTemplateType,
+  data: any
+): { subject: string; html: string; text: string } {
+  // implement switch with all templates below
+}
+
+
+Continue using the existing email delivery mechanism (Resend or current provider).
+
+Make sure the email service calls renderEmailTemplate and passes the correct type and data.
+
+Use a single FRONTEND_URL or similar base url from environment. If it does not exist, create one and default to https://www.innovatr.co.za.
+
+Ensure all existing email calls are updated to use these templates:
+
+Password reset requests.
+
+Any current brief submission or system notifications.
+
+Any existing order or subscription related emails.
+
+For every email, also generate a plain text version by stripping tags from the HTML or by composing a minimal text alternative that matches the content.
+
+2. Dynamic fields
+
+For all templates, support these dynamic values where relevant:
+
+firstName (fallback to generic “there”).
+
+resetLink
+
+verifyLink
+
+portalLink (usually ${FRONTEND_URL}/portal/login or ${FRONTEND_URL}/portal/research depending on context)
+
+reportLink if you have a deep link to a specific study or report.
+
+basicCredits, proCredits
+
+invoiceNumber, amount, orderReference
+
+Make sure the renderer handles missing optional fields gracefully.
+
+3. Email templates and copy
+
+Implement all the templates below with exact subjects and wording.
+Use the base layout wrapper for each, providing the specific title, body copy, and optional button.
+
+Where you see {{placeholder}}, keep this as a dynamic variable to be interpolated from the data payload.
+
+3.1 Password reset request
+
+Type: PASSWORD_RESET_REQUEST
+
+Subject:
+Reset Your Innovatr Password
+
+Title:
+Reset Your Password
+
+Greeting:
+Hi {{firstName}},
+
+Body HTML:
+
+Paragraphs:
+
+We received a request to reset your password for your Innovatr account.
+
+Click the button below to create a new password:
+
+Button:
+
+Label: Reset Password
+
+URL: {{resetLink}}
+
+Below button:
+
+This link will expire in 1 hour for security reasons.
+
+If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.
+
+If the button does not work, copy and paste this link in your browser:
+{{resetLink}}
+
+The text version should mirror this content.
+
+3.2 Password successfully reset
+
+Type: PASSWORD_RESET_SUCCESS
+
+Subject:
+Your Innovatr Password Has Been Updated
+
+Title:
+Password Updated Successfully
+
+Body paragraphs:
+
+Your password has been successfully updated. You can now log in to your Innovatr account using your new password.
+
+If you did not make this change or believe your account was accessed without permission, please contact us immediately at hello@innovatr.co.za.
+
+No button needed; just link hello@innovatr.co.za as a mailto: in HTML.
+
+3.3 New account created
+
+Type: ACCOUNT_CREATED
+
+Subject:
+Welcome to Innovatr
+
+Title:
+Your Innovatr Account Is Ready
+
+Body paragraphs:
+
+Your Innovatr account has been successfully created.
+
+You can now log in to your portal to access your research tools, track briefs, and view your insights.
+
+If you did not create this account, please contact us immediately at hello@innovatr.co.za.
+
+Button:
+
+Label: Go to the Portal
+
+URL: {{portalLink}}
+
+3.4 Email verification (optional but implementable)
+
+Type: EMAIL_VERIFICATION
+
+Subject:
+Verify Your Innovatr Account
+
+Title:
+Confirm Your Email Address
+
+Body paragraphs:
+
+Please confirm your email address to complete your Innovatr account setup.
+
+Button:
+
+Label: Verify Email
+
+URL: {{verifyLink}}
+
+Below button:
+
+This link will expire in 1 hour.
+
+If you did not sign up for Innovatr, you can safely ignore this email.
+
+3.5 Brief submission confirmation
+
+Type: BRIEF_SUBMITTED
+
+Subject:
+Your Test24 Brief Has Been Received
+
+Title:
+Brief Submitted Successfully
+
+Body paragraphs:
+
+Thanks for submitting your brief. Everything has been received safely.
+
+Our team is reviewing your details and preparing your study for launch. You will be notified as soon as your audience goes live.
+
+You can view this brief anytime in your Innovatr portal under My Research.
+
+Button:
+
+Label: View My Research
+
+URL: {{portalLink}} (link to the relevant My Research section)
+
+3.6 Audience live notification
+
+Type: AUDIENCE_LIVE
+
+Subject:
+Your Test24 Audience Is Live
+
+Title:
+Your Study Is Now Live
+
+Body paragraphs:
+
+Good news, your audience is officially live.
+
+We are now collecting real consumer data. Your full insights report will be ready within 24 hours.
+
+You can track your project status anytime in your My Research portal.
+
+Button:
+
+Label: View Study Status
+
+URL: {{portalLink}}
+
+3.7 Study complete and report ready
+
+Type: STUDY_COMPLETE
+
+Subject:
+Your Test24 Report Is Ready
+
+Title:
+Your Insights Are Ready
+
+Body paragraphs:
+
+Your study is complete and your insights report is now available in your Innovatr portal.
+
+Go to My Research to view, download, or share your results.
+
+If you would like us to walk you through the findings, simply reply to this email.
+
+Button:
+
+Label: View My Report
+
+URL: {{reportLink}} if available, otherwise {{portalLink}}.
+
+3.8 Subscription confirmed (mailers)
+
+Type: SUBSCRIPTION_CONFIRMED
+
+Subject:
+You Are Now Subscribed to Innovatr Mailers
+
+Title:
+Welcome to Innovatr Intelligence
+
+Body paragraphs:
+
+You are now subscribed to Innovatr mailers.
+
+You will receive fresh insights, trends, and real data from South African markets, all crafted to help you build what people actually want.
+
+You can unsubscribe anytime by clicking the link in any email.
+
+No button required.
+
+3.9 Subscription cancelled
+
+Type: SUBSCRIPTION_CANCELLED
+
+Subject:
+You Have Been Unsubscribed
+
+Title:
+You Are Unsubscribed
+
+Body paragraphs:
+
+You have been successfully unsubscribed from Innovatr mailers.
+
+If this was a mistake or you want to rejoin later, you can subscribe again anytime on our website.
+
+Button:
+
+Label: Visit Innovatr
+
+URL: {{portalLink}} or FRONTEND_URL root.
+
+3.10 Credits added
+
+Type: CREDITS_ADDED
+
+Subject:
+Your Innovatr Credits Have Been Updated
+
+Title:
+Credits Added Successfully
+
+Body paragraphs:
+
+Your Innovatr research credits have been updated.
+
+Available now:
+
+Test24 Basic Credits: {{basicCredits}}
+
+Test24 Pro Credits: {{proCredits}}
+
+These are now ready to use in your portal.
+
+Button:
+
+Label: View Credits
+
+URL: {{portalLink}} to Credits & Billing.
+
+3.11 Credits running low
+
+Type: CREDITS_LOW
+
+Subject:
+You Are Running Low on Research Credits
+
+Title:
+Low Credit Alert
+
+Body paragraphs:
+
+Just a heads up, your Innovatr research credits are running low.
+
+Remaining:
+
+Basic Credits: {{basicCredits}}
+
+Pro Credits: {{proCredits}}
+
+You can top up anytime in your portal under Credits & Billing.
+
+Button:
+
+Label: Top Up Credits
+
+URL: {{portalLink}} to the credits purchase section.
+
+3.12 Payment confirmation (online)
+
+Type: PAYMENT_CONFIRMED
+
+Subject:
+Your Innovatr Order Has Been Confirmed
+
+Title:
+Payment Received
+
+Body paragraphs:
+
+We have received your payment and your order is now confirmed.
+
+Your study will begin as soon as your brief is submitted and approved.
+
+You can track your orders anytime in Credits & Billing.
+
+Button:
+
+Label: View Order
+
+URL: {{portalLink}} to orders or billing.
+
+You can also include optional order reference and amount if available:
+
+Order reference: {{orderReference}}
+
+Amount: {{amount}}
+
+3.13 Invoice issued (invoice option)
+
+Type: INVOICE_ISSUED
+
+Subject:
+Your Innovatr Invoice Is Ready
+
+Title:
+Invoice Issued
+
+Body paragraphs:
+
+Your invoice has been generated and sent to your email.
+
+Your study will begin once payment or a purchase order has been received.
+
+If you need help or require the invoice to be resent, please let us know.
+
+Optional details if available:
+
+Invoice number: {{invoiceNumber}}
+
+Amount: {{amount}}
+
+Button:
+
+Label: View Invoice
+
+URL: {{portalLink}} if there is a billing view.
+
+4. Integration and testing
+
+Make sure each place in the codebase that sends an email now calls renderEmailTemplate with the correct type and data.
+
+Confirm that:
+
+Password reset flow uses PASSWORD_RESET_REQUEST and then PASSWORD_RESET_SUCCESS after change.
+
+Account creation uses ACCOUNT_CREATED (and EMAIL_VERIFICATION if verification is enabled).
+
+Brief submission uses BRIEF_SUBMITTED.
+
+Audience live and study complete flows use AUDIENCE_LIVE and STUDY_COMPLETE.
+
+Credit updates and low credit events call CREDITS_ADDED and CREDITS_LOW.
+
+Payment and invoice flows call PAYMENT_CONFIRMED and INVOICE_ISSUED.
+
+Log sample outputs for at least one example of each template to the server console for review during development.
+
+Ensure no sensitive data such as password or passwordHash is ever included in the email payload or template.
+
+When you are done, the system should be using this unified design and copy for all transactional emails.
