@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -9,10 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Crown, CreditCard, Building2, Grid3x3, List, RefreshCw } from "lucide-react";
+import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Crown, CreditCard, Building2, Grid3x3, List, RefreshCw, Loader2 } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { Link } from "wouter";
-import reportsData from "@/data/reports.json";
 import { useAuth } from "@/contexts/AuthContext";
 import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { useUrlFilters } from "@/hooks/use-url-filters";
@@ -50,7 +49,38 @@ function getCategoryStyle(category: string) {
   return categoryColors[key] || categoryColors.insights;
 }
 
-type AccessLevel = "public" | "member" | "tier" | "paid";
+type AccessLevel = "public" | "member" | "tier" | "paid" | "starter" | "growth" | "scale";
+
+function normalizeAccessLevel(level: string | undefined): string {
+  if (!level) return "public";
+  const lower = level.toLowerCase();
+  if (lower === "public" || lower === "free") return "public";
+  if (lower === "starter" || lower === "member") return "starter";
+  if (lower === "growth") return "growth";
+  if (lower === "scale") return "scale";
+  if (lower === "tier") return "tier";
+  if (lower === "paid") return "paid";
+  return lower;
+}
+
+function normalizeUserTier(tier: string | undefined): string {
+  if (!tier) return "";
+  return tier.toLowerCase();
+}
+
+const tierHierarchy: Record<string, number> = {
+  "": 0,
+  "public": 0,
+  "starter": 1,
+  "growth": 2,
+  "scale": 3,
+};
+
+function canAccessTier(userTier: string, requiredTier: string): boolean {
+  const userLevel = tierHierarchy[normalizeUserTier(userTier)] || 0;
+  const requiredLevel = tierHierarchy[normalizeAccessLevel(requiredTier)] || 0;
+  return userLevel >= requiredLevel;
+}
 
 interface Report {
   id: number | string;
@@ -84,10 +114,11 @@ interface Report {
 }
 
 function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: boolean, userCompanyId?: string) {
-  const accessLevel = report.accessLevel || "PUBLIC";
+  const accessLevel = normalizeAccessLevel(report.accessLevel);
+  const normalizedUserTier = normalizeUserTier(userTier);
   
   // Company-only reports show a building icon
-  if (accessLevel === "companyOnly" || report.isClientReport) {
+  if (accessLevel === "companyonly" || report.isClientReport) {
     return (
       <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Your organization">
         <Building2 className="w-3.5 h-3.5 text-emerald-600" />
@@ -95,11 +126,13 @@ function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: bool
     );
   }
   
-  if (accessLevel === "PUBLIC" || accessLevel === "public") {
+  // Public/free reports show no indicator
+  if (accessLevel === "public") {
     return null;
   }
   
-  if (accessLevel === "STARTER" || accessLevel === "member") {
+  // Starter (base membership) - show lock if not logged in
+  if (accessLevel === "starter") {
     if (!isLoggedIn) {
       return (
         <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Members only">
@@ -110,12 +143,9 @@ function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: bool
     return null;
   }
   
-  if (accessLevel === "GROWTH") {
-    const tierHierarchy = ["STARTER", "GROWTH", "SCALE"];
-    const userTierIndex = userTier ? tierHierarchy.indexOf(userTier) : -1;
-    const requiredTierIndex = tierHierarchy.indexOf("GROWTH");
-    
-    if (!isLoggedIn || userTierIndex < requiredTierIndex) {
+  // Growth tier - show crown if user doesn't have access
+  if (accessLevel === "growth") {
+    if (!isLoggedIn || !canAccessTier(normalizedUserTier, "growth")) {
       return (
         <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Growth+ tier required">
           <Crown className="w-3.5 h-3.5 text-[#5B6EF7]" />
@@ -125,12 +155,9 @@ function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: bool
     return null;
   }
   
-  if (accessLevel === "SCALE") {
-    const tierHierarchy = ["STARTER", "GROWTH", "SCALE"];
-    const userTierIndex = userTier ? tierHierarchy.indexOf(userTier) : -1;
-    const requiredTierIndex = tierHierarchy.indexOf("SCALE");
-    
-    if (!isLoggedIn || userTierIndex < requiredTierIndex) {
+  // Scale tier - show crown if user doesn't have access
+  if (accessLevel === "scale") {
+    if (!isLoggedIn || !canAccessTier(normalizedUserTier, "scale")) {
       return (
         <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Scale tier required">
           <Crown className="w-3.5 h-3.5 text-[#5B6EF7]" />
@@ -140,25 +167,23 @@ function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: bool
     return null;
   }
   
+  // Tier-locked content with specific allowed tiers
   if (accessLevel === "tier") {
     const allowedTiers = report.allowedTiers || [];
-    const tierHierarchy = ["STARTER", "GROWTH", "SCALE"];
-    const userTierIndex = userTier ? tierHierarchy.indexOf(userTier) : -1;
-    
-    const hasAccess = allowedTiers.some(tier => {
-      const requiredTierIndex = tierHierarchy.indexOf(tier);
-      return userTierIndex >= requiredTierIndex;
-    });
+    const hasAccess = allowedTiers.some(tier => canAccessTier(normalizedUserTier, tier));
     
     if (!hasAccess) {
+      const lowestTier = allowedTiers[0] || "starter";
+      const tierLabel = lowestTier.charAt(0).toUpperCase() + lowestTier.slice(1);
       return (
-        <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title={`${allowedTiers[0]}+ tier required`}>
+        <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title={`${tierLabel}+ tier required`}>
           <Crown className="w-3.5 h-3.5 text-[#5B6EF7]" />
         </div>
       );
     }
   }
   
+  // Paid content (requires credits)
   if (accessLevel === "paid") {
     return (
       <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Credits required">
@@ -181,8 +206,8 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId }: { report: R
   const coverImage = getCoverImage(report.category);
   const accessIndicator = getAccessIndicator(report, userTier, isLoggedIn, userCompanyId);
   
-  const accessLevel = report.accessLevel || "PUBLIC";
-  const isPublicWithPdf = (accessLevel === "PUBLIC" || accessLevel === "public") && report.pdfPath;
+  const accessLevel = normalizeAccessLevel(report.accessLevel);
+  const isPublicWithPdf = accessLevel === "public" && report.pdfPath;
   const ctaText = isPublicWithPdf ? "Download full report" : "Read full issue";
 
   return (
@@ -267,7 +292,9 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId }: { report: R
 
 export default function TrendsInsights() {
   const { filters, setFilters, clearFilters } = useUrlFilters();
+  const [reports, setReports] = useState<Report[]>([]);
   const [clientReports, setClientReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [refreshing, setRefreshing] = useState(false);
   const { user } = useAuth();
@@ -276,16 +303,38 @@ export default function TrendsInsights() {
   
   useScrollRestoration("trends-insights");
   
+  const fetchReports = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/reports");
+      if (res.ok) {
+        const data = await res.json();
+        const formattedReports = data.map((r: any) => ({
+          ...r,
+          coverImage: r.thumbnailUrl || getCoverImage(r.category),
+          pdfPath: r.pdfUrl,
+          tags: r.topics || [],
+          isNew: false,
+        }));
+        setReports(formattedReports);
+      }
+    } catch (error) {
+      console.error("Failed to fetch reports:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  
   const handleRefresh = () => {
     setRefreshing(true);
-    // Simulate refresh by clearing and refetching
-    setClientReports([]);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 500);
+    fetchReports().finally(() => setRefreshing(false));
   };
 
-  // Fetch all reports for authenticated user (includes client-specific reports based on their companyId)
+  useEffect(() => {
+    fetchReports();
+  }, [fetchReports]);
+
+  // Fetch client-specific reports for authenticated user
   useEffect(() => {
     const fetchMemberReports = async () => {
       if (!user?.email) {
@@ -303,9 +352,9 @@ export default function TrendsInsights() {
             .map((r: any) => ({
               ...r,
               isClientReport: true,
-              tags: r.tags || [],
+              tags: r.tags || r.topics || [],
               isNew: r.isNew ?? false,
-              status: "live" as const, // API returns published, but frontend uses "live"
+              status: "live" as const,
             }));
           setClientReports(formattedReports);
         }
@@ -318,8 +367,8 @@ export default function TrendsInsights() {
   }, [user?.email]);
 
   const filteredAndSortedReports = useMemo(() => {
-    // Combine static reports with client-specific reports
-    const allReports = [...(reportsData as Report[]), ...clientReports];
+    // Combine database reports with client-specific reports
+    const allReports = [...reports, ...clientReports];
     
     let filtered = allReports.filter((report) => {
       // Only show live reports to public users (status must be "live" or undefined for backwards compatibility)
@@ -348,7 +397,7 @@ export default function TrendsInsights() {
           return 0;
       }
     });
-  }, [filters.search, filters.category, filters.sort, clientReports]);
+  }, [filters.search, filters.category, filters.sort, reports, clientReports]);
 
   const displayedReports = filters.showAll ? filteredAndSortedReports : filteredAndSortedReports.slice(0, 6);
   const hasMoreReports = filteredAndSortedReports.length > 6;

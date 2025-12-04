@@ -34,7 +34,7 @@ import {
 } from "lucide-react";
 
 interface ReportData {
-  id?: number;
+  id?: string;
   title: string;
   category: string;
   series?: string;
@@ -42,11 +42,13 @@ interface ReportData {
   date: string;
   teaser: string;
   slug: string;
+  pdfUrl?: string | null;
   pdfPath?: string | null;
   hasDownload?: boolean;
   videoPaths?: string[];
-  tags: string[];
-  isNew: boolean;
+  topics?: string[];
+  tags?: string[];
+  isNew?: boolean;
   access?: "free" | "members";
   accessLevel?: string;
   status?: string;
@@ -433,8 +435,10 @@ export default function ReportEditorModal({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="public">Public - Anyone can view</SelectItem>
-                      <SelectItem value="member">Member - Login required</SelectItem>
+                      <SelectItem value="public">Free - Anyone can view</SelectItem>
+                      <SelectItem value="starter">Starter - Starter members and above</SelectItem>
+                      <SelectItem value="growth">Growth - Growth members and above</SelectItem>
+                      <SelectItem value="scale">Scale - Scale members only</SelectItem>
                       <SelectItem value="tier">Tier - Specific tiers only</SelectItem>
                       <SelectItem value="paid">Paid - Costs credits</SelectItem>
                     </SelectContent>

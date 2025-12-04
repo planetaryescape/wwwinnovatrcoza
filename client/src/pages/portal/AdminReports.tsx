@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -42,16 +42,17 @@ import {
   ChevronLeft,
   ChevronRight,
   CalendarDays,
+  RefreshCw,
+  Loader2,
 } from "lucide-react";
-import reportsData from "@/data/reports.json";
 import ReportEditorModal from "./ReportEditorModal";
 import { exportReportsToCSV, exportPerformanceToCSV } from "@/lib/csvExport";
 
 type StatusType = "draft" | "scheduled" | "published" | "archived" | "all";
-type AccessLevel = "public" | "member" | "tier" | "paid" | "all";
+type AccessLevel = "public" | "starter" | "growth" | "scale" | "tier" | "paid" | "all";
 
 interface ReportData {
-  id: number;
+  id: string;
   title: string;
   category: string;
   series?: string;
@@ -59,17 +60,23 @@ interface ReportData {
   date: string;
   teaser: string;
   slug: string;
-  coverImage: string;
-  pdfPath: string | null;
+  coverImage?: string;
+  pdfUrl?: string | null;
+  pdfPath?: string | null;
   hasDownload?: boolean;
   videoPaths?: string[];
-  tags: string[];
-  isNew: boolean;
+  topics?: string[];
+  tags?: string[];
+  isNew?: boolean;
   access?: "free" | "members";
   accessLevel?: string;
+  allowedTiers?: string[];
   status?: string;
   viewCount?: number;
   downloadCount?: number;
+  isFeatured?: boolean;
+  creditType?: string;
+  creditCost?: number;
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
@@ -80,11 +87,26 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 };
 
 const accessConfig: Record<string, { label: string; color: string }> = {
-  public: { label: "Public", color: "bg-blue-50 text-[#0033A0]" },
+  public: { label: "Free", color: "bg-blue-50 text-[#0033A0]" },
+  starter: { label: "Starter", color: "bg-violet-50 text-violet-700" },
+  growth: { label: "Growth", color: "bg-orange-50 text-orange-700" },
+  scale: { label: "Scale", color: "bg-emerald-50 text-emerald-700" },
+  tier: { label: "Tier-locked", color: "bg-amber-50 text-amber-700" },
+  paid: { label: "Paid", color: "bg-rose-50 text-rose-700" },
   member: { label: "Members", color: "bg-violet-50 text-violet-700" },
-  tier: { label: "Tier-locked", color: "bg-orange-50 text-orange-700" },
-  paid: { label: "Paid", color: "bg-emerald-50 text-emerald-700" },
 };
+
+function normalizeAccessLevel(level: string | undefined): string {
+  if (!level) return "public";
+  const lower = level.toLowerCase();
+  if (lower === "public" || lower === "free") return "public";
+  if (lower === "starter" || lower === "member") return "starter";
+  if (lower === "growth") return "growth";
+  if (lower === "scale") return "scale";
+  if (lower === "tier") return "tier";
+  if (lower === "paid") return "paid";
+  return lower;
+}
 
 const categoryColors: Record<string, string> = {
   Insights: "bg-blue-50 text-[#0033A0]",
@@ -94,7 +116,8 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function AdminReports() {
-  const [reports, setReports] = useState<ReportData[]>(reportsData as ReportData[]);
+  const [reports, setReports] = useState<ReportData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusType>("all");
   const [accessFilter, setAccessFilter] = useState<AccessLevel>("all");
@@ -106,6 +129,24 @@ export default function AdminReports() {
     const now = new Date();
     return { year: now.getFullYear(), month: now.getMonth() };
   });
+
+  const fetchReports = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/admin/reports");
+      if (!res.ok) throw new Error("Failed to fetch reports");
+      const data = await res.json();
+      setReports(data);
+    } catch (err) {
+      console.error("Failed to fetch reports:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchReports();
+  }, [fetchReports]);
 
   const categories = useMemo(() => 
     Array.from(new Set(reports.map(r => r.category))),
@@ -121,8 +162,10 @@ export default function AdminReports() {
       const reportStatus = report.status || "published";
       const matchesStatus = statusFilter === "all" || reportStatus === statusFilter;
       
-      const reportAccess = report.accessLevel?.toLowerCase() || "public";
-      const matchesAccess = accessFilter === "all" || reportAccess === accessFilter;
+      const reportAccess = normalizeAccessLevel(report.accessLevel);
+      const paidTiers = ["starter", "growth", "scale", "paid", "tier"];
+      const matchesAccess = accessFilter === "all" || 
+        (accessFilter === "paid" ? paidTiers.includes(reportAccess) : reportAccess === accessFilter);
       
       const matchesCategory = categoryFilter === "all" || report.category === categoryFilter;
       
@@ -197,14 +240,23 @@ export default function AdminReports() {
     setModalOpen(true);
   };
 
-  const handleArchive = (reportId: number) => {
-    setReports(reports.map(r => 
-      r.id === reportId ? { ...r, status: "archived" } : r
-    ));
+  const handleArchive = async (reportId: string) => {
+    try {
+      await fetch(`/api/admin/reports/${reportId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "archived" }),
+      });
+      setReports(reports.map(r => 
+        r.id === reportId ? { ...r, status: "archived" } : r
+      ));
+    } catch (err) {
+      console.error("Failed to archive report:", err);
+    }
   };
 
   const handleRefresh = () => {
-    setReports(reportsData as ReportData[]);
+    fetchReports();
     setModalOpen(false);
     setSelectedReport(null);
   };
@@ -349,10 +401,11 @@ export default function AdminReports() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Access</SelectItem>
-                  <SelectItem value="public">Public</SelectItem>
-                  <SelectItem value="member">Members</SelectItem>
-                  <SelectItem value="tier">Tier-locked</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
+                  <SelectItem value="public">Free</SelectItem>
+                  <SelectItem value="starter">Starter+</SelectItem>
+                  <SelectItem value="growth">Growth+</SelectItem>
+                  <SelectItem value="scale">Scale</SelectItem>
+                  <SelectItem value="paid">All Paid</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
@@ -485,7 +538,7 @@ export default function AdminReports() {
               ) : (
                 filteredReports.map((report) => {
                   const reportStatus = report.status || "published";
-                  const reportAccess = report.accessLevel?.toLowerCase() || "public";
+                  const reportAccess = normalizeAccessLevel(report.accessLevel);
                   const statusStyle = statusConfig[reportStatus] || statusConfig.published;
                   const accessStyle = accessConfig[reportAccess] || accessConfig.public;
                   const categoryStyle = categoryColors[report.category] || categoryColors.Insights;
