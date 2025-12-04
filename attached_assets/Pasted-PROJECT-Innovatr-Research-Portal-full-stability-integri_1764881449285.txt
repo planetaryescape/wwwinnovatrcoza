@@ -1,0 +1,222 @@
+PROJECT: Innovatr Research Portal – full stability + integrity check
+Mode: Build
+
+Important – start clean
+• Ignore any previous partially-completed tasks or plans.
+• Do not redesign the UI, refactor everything, or introduce big new features.
+• Focus on: correctness, data integrity, access control, file storage, and error handling.
+
+1. Understand the current system
+
+Scan the codebase structure: backend, frontend, database models, email service, payments, and file storage for reports.
+
+Identify the main entry points:
+• Portal routes (/portal, /portal/admin, /portal/research, etc.)
+• Auth (login, signup, password reset)
+• Reports and client reports
+• Credits, orders, companies, members
+
+Confirm which database is used and how migrations / schemas are managed.
+
+Do not change anything yet – only read and understand.
+
+2. Global safety rules
+
+While working:
+• Do not hard-code any company names, counts, or credit values. Always derive from the database.
+• Do not delete real data or wipe tables. If you need to adjust seed data, keep it backward compatible.
+• Do not change design tokens, colours, typography, or layout unless a bug requires it.
+• Keep existing API shape and routes unless they are clearly broken.
+
+3. Core flows to audit and fix
+
+For each flow below, you must:
+
+Trace the full path end-to-end (frontend → API → DB / storage → response).
+
+Fix any runtime errors, broken links, 404s, or missing data wiring.
+
+Add defensive error handling and clear user feedback where needed.
+
+3.1 Auth, accounts, and permissions
+
+Goals
+• Login, logout, signup, and password reset all work reliably.
+• Wrong passwords show a friendly error.
+• Users can trigger “reset password” and complete the flow successfully.
+• Admins vs normal users have correct access.
+
+Tasks
+
+Verify the login flow:
+• On wrong password, show a clear “incorrect password, please try again” message.
+• After multiple failures, clearly expose a “Reset password” CTA.
+
+Test the password reset flow:
+• Request reset, receive email (use console logs or test transport if real email is disabled).
+• Click reset link, set new password, then confirm that login works.
+
+Permissions:
+• Admin accounts can access /portal/admin and see all admin dashboards.
+• Regular company users can only see:
+– Their own company’s client reports and studies
+– Public / free reports where appropriate
+– They cannot see other companies’ client reports, credits, or admin data.
+• Fix any leaks where users can see cross-company data.
+
+3.2 Users & Pulse membership
+
+Goal: Every portal user is also tracked as a Pulse member (free or paid).
+
+Tasks
+
+Inspect the user creation logic. On signup:
+• Create a portal user record.
+• Ensure there is also a Pulse membership record (or equivalent) with status like “Free” or “Included in membership”.
+
+Backfill if necessary: for existing users, ensure they are marked as Pulse members in a safe, idempotent way.
+
+In the Admin → Members tab, confirm that:
+• Members list shows correct company, tier, credits, studies count.
+• All current users appear and their Pulse column is accurate.
+
+4. Companies, credits, and studies
+
+We already have real companies like Rugani, Greenway Farms, Nando’s, DGB, Revlon, Mitchum, Elizabeth Arden, etc.
+You must not hard-code their numbers, but the system must:
+
+Correctly store and display basic and pro credits.
+
+Correctly count studies completed and studies in progress.
+
+Tasks
+
+Trace the data model for: Company → Credits → Orders → Studies / Reports.
+
+Ensure the Admin → Companies tab:
+• Shows real totals for basic and pro credits (no x/y, just current numbers as designed).
+• Updates correctly when a credit is used by a study.
+
+Ensure the Admin Overview metrics (credits available, number of companies, number of studies, etc.) all aggregate from the same source of truth and do not double-count or include internal / fictional test companies like Innovatr, unless explicitly intended.
+
+Check that “Test24 Tracker” and any study lists are using the correct DB data for:
+• Total Basic vs Pro studies
+• In-progress vs completed
+• Per-company breakdown, if shown.
+
+5. Reports and client reports (including 404 bug)
+
+There is a known issue: some client report downloads lead to a 404 page. Fix this completely.
+
+Tasks
+
+Find where reports and client reports are stored in the DB (table / collection) and how file storage keys or URLs are saved.
+
+Trace the download button:
+• Frontend action → API route → backend controller → file storage (local or cloud) → response.
+
+Fix all causes of 404:
+• Missing or incorrect file key mapping
+• Wrong download route or wrong HTTP method
+• Incorrect access checks that deny valid users
+
+Ensure the system:
+• Validates that a file exists before returning the download link.
+• Returns a clear error message if a file is missing, and logs this for admins.
+
+Confirm that:
+• “Free reports” / public reports in Trends & Insights and My Research download correctly.
+• Client-specific reports attached to a company (via Admin → Companies → Client Reports) download correctly for that company’s users and admins only.
+
+6. Briefs, research pipeline, and the overview widgets
+
+The “Research Pipeline” and related overview cards should be useful, not decorative.
+
+Tasks
+
+Inspect how briefs / studies are stored and what statuses exist (New, In Progress, Completed, Active, etc.).
+
+Confirm that:
+• Admin → Briefs shows accurate counts and statuses.
+• The “Research Pipeline” widget on Admin Overview uses the same logic and is not hard-coded.
+
+If the current pipeline widget is not very useful, you may slightly adjust the content (labels, subtext, small badges) but keep the size and overall layout. Focus on clarity, not decoration.
+
+7. Payments and orders
+
+Payments do not need to hit live gateways, but the flow and data should work end-to-end.
+
+Tasks
+
+Trace how orders are created for:
+• Membership purchases
+• Credit bundles
+
+Confirm that creating an order:
+• Sets the right order status (pending, completed, failed).
+• Adjusts credits and membership tiers correctly on completion.
+
+Ensure Admin → Orders:
+• Lists orders correctly with filters by status and company.
+• Does not show unreliable revenue metrics (if you already removed or disabled them, keep it that way).
+
+If there is a payment provider integration (test keys):
+• Ensure there is clear error handling and logging if a payment fails or the gateway is unreachable.
+
+8. Emails and transactional flows
+
+A unified email system was already implemented. Verify it in practice.
+
+Tasks
+
+For each key event, confirm that emails send (or are logged via a test transport):
+• Account created
+• Password reset requested and completed
+• Brief submitted
+• Study live / study complete
+
+Make sure all email links use the correct FRONTEND_URL (live domain, not localhost) and routes still exist.
+
+Ensure sensitive data is not leaked in emails.
+
+9. Error states, 404s, and robustness
+
+I want the portal to fail gracefully instead of breaking.
+
+Tasks
+
+Add or verify user-facing error messages for:
+• Invalid credentials
+• Expired or invalid password reset link
+• Missing report file
+• No credits available when trying to launch a new study
+
+Confirm all main routes return appropriate HTTP codes (200 / 401 / 403 / 404 / 500).
+
+Check for unhandled promise rejections or console errors in both frontend and backend and fix them.
+
+10. Final checklist and summary
+
+When all of the above is done:
+
+Run through each user type end-to-end:
+• New free user
+• Existing member from a client company
+• Admin
+
+For each, confirm:
+• Login / logout / reset password
+• Access to the correct pages and no access to other companies’ private reports
+• Ability to view and download the reports they are allowed to see
+
+Run the test suite (if present) and fix any failing tests.
+
+Finally, provide a concise written summary:
+
+What you checked (by area: auth, reports, payments, admin, etc.)
+
+What was broken and exactly how you fixed it
+
+Any remaining risks or TODOs I should know about
+
+Do not start any new UI “improvements” or refactors after this. Focus entirely on correctness, data integrity, and making sure the whole portal is stable and predictable.
