@@ -39,22 +39,30 @@ import {
   type InsertBriefFile,
   type Session,
   type InsertSession,
+  users,
+  passwordResets,
+  creditLedger,
+  briefFiles,
+  sessions,
+  couponClaims,
+  mailerSubscriptions,
   orders,
   orderItems,
   paymentIntents,
   paymentEvents,
+  companies,
+  reports,
+  deals,
+  clientReports,
   inquiries,
   subscriptions,
-  reports,
-  companies,
+  briefSubmissions,
+  studies,
 } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { db } from "./db";
 import { randomUUID } from "crypto";
 import { hashPassword } from "./auth/password";
-
-// modify the interface with any CRUD methods
-// you might need
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -130,7 +138,6 @@ export interface IStorage {
   getAllBriefSubmissions(): Promise<BriefSubmission[]>;
   updateBriefSubmission(id: string, updates: Partial<BriefSubmission>): Promise<void>;
 
-  // Studies - unified research project view
   createStudy(study: InsertStudy): Promise<Study>;
   getStudy(id: string): Promise<Study | undefined>;
   getStudyByBriefId(briefId: string): Promise<Study | undefined>;
@@ -140,76 +147,36 @@ export interface IStorage {
   updateStudy(id: string, updates: Partial<Study>): Promise<void>;
   updateStudyStatus(id: string, status: StudyStatus): Promise<Study | undefined>;
 
-  // Password reset operations
   createPasswordReset(reset: InsertPasswordReset): Promise<PasswordReset>;
   getPasswordResetByTokenHash(tokenHash: string): Promise<PasswordReset | undefined>;
   markPasswordResetUsed(id: string): Promise<void>;
   
-  // Session operations
   createSession(session: InsertSession): Promise<Session>;
   getSessionByTokenHash(tokenHash: string): Promise<Session | undefined>;
   deleteSession(id: string): Promise<void>;
   deleteUserSessions(userId: string): Promise<void>;
   
-  // Credit ledger operations
   createCreditLedgerEntry(entry: InsertCreditLedger): Promise<CreditLedgerEntry>;
   getCreditLedgerByCompanyId(companyId: string): Promise<CreditLedgerEntry[]>;
   getCompanyCreditBalance(companyId: string, creditType: 'basic' | 'pro'): Promise<number>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private couponClaims: Map<string, CouponClaim>;
-  private mailerSubscriptions: Map<string, MailerSubscription>;
-  private orders: Map<string, Order>;
-  private orderItems: Map<string, OrderItem>;
-  private paymentIntents: Map<string, PaymentIntent>;
-  private paymentEvents: Map<string, PaymentEvent>;
-  private reports: Map<string, Report>;
-  private deals: Map<string, Deal>;
-  private inquiriesMap: Map<string, Inquiry>;
-  private subscriptionsMap: Map<string, Subscription>;
-  private companiesMap: Map<string, Company>;
-  private clientReportsMap: Map<string, ClientReport>;
-  private briefSubmissionsMap: Map<string, BriefSubmission>;
-  private studiesMap: Map<string, Study>;
-  private passwordResetsMap: Map<string, PasswordReset>;
-  private sessionsMap: Map<string, Session>;
-  private creditLedgerMap: Map<string, CreditLedgerEntry>;
-
-  constructor() {
-    this.users = new Map();
-    this.couponClaims = new Map();
-    this.mailerSubscriptions = new Map();
-    this.orders = new Map();
-    this.orderItems = new Map();
-    this.paymentIntents = new Map();
-    this.paymentEvents = new Map();
-    this.reports = new Map();
-    this.deals = new Map();
-    this.inquiriesMap = new Map();
-    this.subscriptionsMap = new Map();
-    this.companiesMap = new Map();
-    this.clientReportsMap = new Map();
-    this.briefSubmissionsMap = new Map();
-    this.studiesMap = new Map();
-    this.passwordResetsMap = new Map();
-    this.sessionsMap = new Map();
-    this.creditLedgerMap = new Map();
-    
-    this.seedCompaniesAndUsers();
-  }
+export class DatabaseStorage implements IStorage {
   
-  private async seedCompaniesAndUsers() {
+  async seedDatabase(): Promise<void> {
     const existingCompanies = await this.getAllCompanies();
-    if (existingCompanies.length > 0) return;
+    if (existingCompanies.length > 0) {
+      console.log("Database already seeded, skipping...");
+      return;
+    }
 
-    // Create Innovatr company for admin users
+    console.log("Seeding database with initial data...");
+
     const innovatrId = randomUUID();
     const ruganiId = randomUUID();
     const greenwayId = randomUUID();
 
-    const innovatr: Company = {
+    await db.insert(companies).values({
       id: innovatrId,
       name: "Innovatr",
       domain: "innovatr.co.za",
@@ -225,11 +192,9 @@ export class MemStorage implements IStorage {
       proCreditsUsed: 0,
       dealDetails: null,
       notes: "Internal Innovatr team - admin access",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    });
 
-    const rugani: Company = {
+    await db.insert(companies).values({
       id: ruganiId,
       name: "Rugani Juice",
       domain: "ruganijuice.co.za",
@@ -256,11 +221,9 @@ export class MemStorage implements IStorage {
         }
       },
       notes: "Service agreement shared between Greenway Farms (Carrots Division) and Rugani Juice. Includes 2 x Test24 Pro Brand Health Audit studies (300 consumers, 10 minute survey), 2 x Test24 Pro studies (100 consumers, 10 minute survey) and 20 x Test24 Basic idea studies (100 consumers, 5 minute surveys). Additional studies at member rates: Test24 Basic R4,000 and Test24 Pro R45,000 per 100 completes.",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    });
 
-    const greenway: Company = {
+    await db.insert(companies).values({
       id: greenwayId,
       name: "Greenway Farms",
       domain: "greenwayfarm.co.za",
@@ -276,28 +239,22 @@ export class MemStorage implements IStorage {
       proCreditsUsed: 0,
       dealDetails: null,
       notes: "Linked to Rugani Juice service agreement. Greenway users have Scale report access but Rugani holds the pooled Test24 credits.",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    });
 
-    this.companiesMap.set(innovatrId, innovatr);
-    this.companiesMap.set(ruganiId, rugani);
-    this.companiesMap.set(greenwayId, greenway);
-
-    // Hash passwords for seeded users
     const tempPasswordHash = await hashPassword("TempPass123!");
     const adminPasswordHash = await hashPassword("InnovatrAdmin2024!");
 
-    // Admin users with hashed passwords
-    const adminUsers = [
+    const adminUsersData = [
       { name: "HannaH Steven", email: "hannah@innovatr.co.za", username: "hannah.steven", passwordHash: adminPasswordHash, creditsBasic: 25, creditsPro: 4 },
       { name: "Richard Lawrence", email: "richard@innovatr.co.za", username: "richard.lawrence", passwordHash: adminPasswordHash, creditsBasic: 25, creditsPro: 4 },
     ];
 
-    for (const u of adminUsers) {
-      await this.createUserWithHash({
+    for (const u of adminUsersData) {
+      await db.insert(users).values({
+        id: randomUUID(),
         username: u.username,
         email: u.email,
+        password: "",
         passwordHash: u.passwordHash,
         name: u.name,
         company: "Innovatr",
@@ -307,23 +264,29 @@ export class MemStorage implements IStorage {
         role: "ADMIN",
         creditsBasic: u.creditsBasic,
         creditsPro: u.creditsPro,
+        creditsInheritedFromCompany: true,
+        totalSpend: "0",
+        isActive: true,
+        emailVerified: true,
       });
     }
 
-    const greenwayUsers = [
+    const greenwayUsersData = [
       { name: "Duncan Buhr", email: "duncan@greenwayfarm.co.za", username: "duncan.buhr" },
       { name: "Wesley Browne", email: "Wesley@greenwayfarm.co.za", username: "wesley.browne" },
     ];
 
-    const ruganiUsers = [
+    const ruganiUsersData = [
       { name: "Simonne Fourie", email: "simonne@ruganijuice.co.za", username: "simonne.fourie" },
       { name: "Tymon Minaar", email: "tymon@ruganijuice.co.za", username: "tymon.minaar" },
     ];
 
-    for (const u of greenwayUsers) {
-      await this.createUserWithHash({
+    for (const u of greenwayUsersData) {
+      await db.insert(users).values({
+        id: randomUUID(),
         username: u.username,
         email: u.email,
+        password: "",
         passwordHash: tempPasswordHash,
         name: u.name,
         company: "Greenway Farms",
@@ -331,13 +294,21 @@ export class MemStorage implements IStorage {
         membershipTier: "SCALE",
         status: "ACTIVE",
         role: "MEMBER",
+        creditsBasic: 0,
+        creditsPro: 0,
+        creditsInheritedFromCompany: true,
+        totalSpend: "0",
+        isActive: true,
+        emailVerified: true,
       });
     }
 
-    for (const u of ruganiUsers) {
-      await this.createUserWithHash({
+    for (const u of ruganiUsersData) {
+      await db.insert(users).values({
+        id: randomUUID(),
         username: u.username,
         email: u.email,
+        password: "",
         passwordHash: tempPasswordHash,
         name: u.name,
         company: "Rugani Juice",
@@ -345,10 +316,16 @@ export class MemStorage implements IStorage {
         membershipTier: "SCALE",
         status: "ACTIVE",
         role: "MEMBER",
+        creditsBasic: 0,
+        creditsPro: 0,
+        creditsInheritedFromCompany: true,
+        totalSpend: "0",
+        isActive: true,
+        emailVerified: true,
       });
     }
 
-    const clientReportsData: InsertReport[] = [
+    const clientReportsData = [
       {
         title: "Rugani 100% Carrot Juice Concept Test",
         category: "Launch",
@@ -378,12 +355,23 @@ export class MemStorage implements IStorage {
     ];
 
     for (const r of clientReportsData) {
-      await this.createReport(r);
+      await db.insert(reports).values({
+        id: randomUUID(),
+        title: r.title,
+        slug: r.slug,
+        category: r.category,
+        industry: r.industry,
+        date: r.date,
+        teaser: r.teaser,
+        accessLevel: r.accessLevel,
+        creditType: r.creditType,
+        status: r.status,
+        topics: r.topics,
+        clientCompanyIds: r.clientCompanyIds,
+      });
     }
 
-    // Two Rugani Past Research projects added and linked by companyId.
-    // Access is restricted to Rugani users (by company) and admins.
-    const ruganiClientReports: (InsertClientReport & { uploadedAt?: Date })[] = [
+    const ruganiClientReportsData = [
       {
         companyId: ruganiId,
         title: "Rugani x Clicks Wellness Beverage Positioning",
@@ -402,11 +390,20 @@ export class MemStorage implements IStorage {
       },
     ];
 
-    for (const cr of ruganiClientReports) {
-      await this.createClientReport(cr);
+    for (const cr of ruganiClientReportsData) {
+      await db.insert(clientReports).values({
+        id: randomUUID(),
+        companyId: cr.companyId,
+        title: cr.title,
+        description: cr.description,
+        pdfUrl: cr.pdfUrl,
+        tags: cr.tags,
+        uploadedAt: cr.uploadedAt,
+      });
     }
 
-    const sharedDeal: InsertDeal = {
+    await db.insert(deals).values({
+      id: randomUUID(),
       title: "Rugani & Greenway Service Agreement",
       description: "Annual service agreement for Rugani Juice and Greenway Farms. Includes 2 x Test24 Pro Brand Health Audit studies (300 consumers, 10 min), 2 x Test24 Pro studies (100 consumers, 10 min), and 20 x Test24 Basic idea studies (100 consumers, 5 min). Additional studies available at member rates.",
       originalPrice: "630000",
@@ -417,156 +414,116 @@ export class MemStorage implements IStorage {
       validFrom: new Date("2025-12-01"),
       validTo: new Date("2026-11-30"),
       isActive: true,
-    };
-    await this.createDeal(sharedDeal);
+    });
+
+    console.log("Database seeding completed successfully!");
   }
 
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    const result = await db.select().from(users).where(eq(users.id, id));
+    return result[0];
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const result = await db.select().from(users).where(eq(users.username, username));
+    return result[0];
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.email === email,
-    );
+    const result = await db.select().from(users).where(eq(users.email, email));
+    return result[0];
   }
 
   async getAllUsers(): Promise<User[]> {
-    return Array.from(this.users.values());
+    return db.select().from(users);
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
     const now = new Date();
-    const user: User = {
-      id,
-      username: insertUser.username || `user_${Date.now()}`,
-      email: insertUser.email,
-      password: insertUser.password || Math.random().toString(36).slice(-10),
-      passwordHash: null, // Will be set when hashing is implemented
-      name: insertUser.name ?? null,
-      company: insertUser.company ?? null,
-      companyId: (insertUser as any).companyId ?? null,
-      membershipTier: insertUser.membershipTier ?? "STARTER",
-      status: insertUser.status ?? "ACTIVE",
-      role: (insertUser.role as any) ?? "MEMBER",
-      creditsBasic: insertUser.creditsBasic ?? 0,
-      creditsPro: insertUser.creditsPro ?? 0,
-      creditsInheritedFromCompany: (insertUser as any).creditsInheritedFromCompany ?? true,
-      totalSpend: "0",
-      firstProjectDate: null,
-      lastProjectDate: null,
-      lastActivityDate: null,
-      internalNotes: null,
-      isActive: true,
-      emailVerified: false,
-      createdAt: now,
-      updatedAt: now,
-      lastLoginAt: null,
-    };
-    this.users.set(id, user);
-    return user;
-  }
-
-  // Create user with pre-hashed password (used for seeding with bcrypt hashes)
-  private async createUserWithHash(userData: {
-    username: string;
-    email: string;
-    passwordHash: string;
-    name: string;
-    company: string;
-    companyId: string;
-    membershipTier: string;
-    status: string;
-    role: string;
-    creditsBasic?: number;
-    creditsPro?: number;
-  }): Promise<User> {
-    const id = randomUUID();
-    const now = new Date();
-    const user: User = {
-      id,
-      username: userData.username,
-      email: userData.email,
-      password: "", // No plaintext password stored
-      passwordHash: userData.passwordHash,
-      name: userData.name,
-      company: userData.company,
-      companyId: userData.companyId,
-      membershipTier: userData.membershipTier as any,
-      status: userData.status as any,
-      role: userData.role as any,
-      creditsBasic: userData.creditsBasic ?? 0,
-      creditsPro: userData.creditsPro ?? 0,
-      creditsInheritedFromCompany: true,
-      totalSpend: "0",
-      firstProjectDate: null,
-      lastProjectDate: null,
-      lastActivityDate: null,
-      internalNotes: null,
-      isActive: true,
-      emailVerified: true, // Seeded users are pre-verified
-      createdAt: now,
-      updatedAt: now,
-      lastLoginAt: null,
-    };
-    this.users.set(id, user);
-    return user;
+    const result = await db
+      .insert(users)
+      .values({
+        id,
+        username: insertUser.username || `user_${Date.now()}`,
+        email: insertUser.email,
+        password: insertUser.password || Math.random().toString(36).slice(-10),
+        passwordHash: null,
+        name: insertUser.name ?? null,
+        company: insertUser.company ?? null,
+        companyId: (insertUser as any).companyId ?? null,
+        membershipTier: insertUser.membershipTier ?? "STARTER",
+        status: insertUser.status ?? "ACTIVE",
+        role: (insertUser.role as any) ?? "MEMBER",
+        creditsBasic: insertUser.creditsBasic ?? 0,
+        creditsPro: insertUser.creditsPro ?? 0,
+        creditsInheritedFromCompany: (insertUser as any).creditsInheritedFromCompany ?? true,
+        totalSpend: "0",
+        firstProjectDate: null,
+        lastProjectDate: null,
+        lastActivityDate: null,
+        internalNotes: null,
+        isActive: true,
+        emailVerified: false,
+        createdAt: now,
+        updatedAt: now,
+        lastLoginAt: null,
+      })
+      .returning();
+    return result[0];
   }
 
   async updateUser(id: string, updates: Partial<User>): Promise<void> {
-    const user = this.users.get(id);
-    if (user) {
-      this.users.set(id, { ...user, ...updates });
-    }
+    await db
+      .update(users)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(users.id, id));
   }
 
   async createCouponClaim(insertClaim: InsertCouponClaim): Promise<CouponClaim> {
     const id = randomUUID();
     const couponCode = `TEST24-${randomUUID().substring(0, 8).toUpperCase()}`;
-    const claim: CouponClaim = {
-      ...insertClaim,
-      id,
-      couponCode,
-      claimedAt: new Date(),
-    };
-    this.couponClaims.set(id, claim);
-    return claim;
+    const result = await db
+      .insert(couponClaims)
+      .values({
+        id,
+        name: insertClaim.name,
+        email: insertClaim.email,
+        couponCode,
+        claimedAt: new Date(),
+      })
+      .returning();
+    return result[0];
   }
 
   async getCouponClaimByEmail(email: string): Promise<CouponClaim | undefined> {
-    return Array.from(this.couponClaims.values()).find(
-      (claim) => claim.email.toLowerCase() === email.toLowerCase(),
-    );
+    const result = await db.select().from(couponClaims).where(eq(couponClaims.email, email));
+    return result[0];
   }
 
   async createMailerSubscription(insertSubscription: InsertMailerSubscription): Promise<MailerSubscription> {
     const id = randomUUID();
-    const subscription: MailerSubscription = {
-      ...insertSubscription,
-      id,
-      subscribedAt: new Date(),
-    };
-    this.mailerSubscriptions.set(id, subscription);
-    return subscription;
+    const result = await db
+      .insert(mailerSubscriptions)
+      .values({
+        id,
+        name: insertSubscription.name,
+        email: insertSubscription.email,
+        company: insertSubscription.company,
+        industry: insertSubscription.industry,
+        subscribedAt: new Date(),
+      })
+      .returning();
+    return result[0];
   }
 
   async getMailerSubscriptionByEmail(email: string): Promise<MailerSubscription | undefined> {
-    return Array.from(this.mailerSubscriptions.values()).find(
-      (sub) => sub.email.toLowerCase() === email.toLowerCase(),
-    );
+    const result = await db.select().from(mailerSubscriptions).where(eq(mailerSubscriptions.email, email));
+    return result[0];
   }
 
   async getAllMailerSubscriptions(): Promise<MailerSubscription[]> {
-    return Array.from(this.mailerSubscriptions.values()).sort(
-      (a, b) => new Date(b.subscribedAt).getTime() - new Date(a.subscribedAt).getTime()
-    );
+    return db.select().from(mailerSubscriptions);
   }
 
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
@@ -700,7 +657,7 @@ export class MemStorage implements IStorage {
   async createReport(insertReport: InsertReport): Promise<Report> {
     const id = randomUUID();
     const slug = insertReport.slug ?? insertReport.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const [report] = await db.insert(reports).values({
+    const result = await db.insert(reports).values({
       id,
       title: insertReport.title,
       slug,
@@ -715,18 +672,19 @@ export class MemStorage implements IStorage {
       thumbnailUrl: insertReport.thumbnailUrl ?? null,
       accessLevel: insertReport.accessLevel ?? "public",
       allowedTiers: insertReport.allowedTiers ?? [],
+      clientCompanyIds: insertReport.clientCompanyIds ?? [],
       creditType: insertReport.creditType ?? "none",
       creditCost: insertReport.creditCost ?? 0,
       isFeatured: insertReport.isFeatured ?? false,
       status: insertReport.status ?? "published",
       isArchived: insertReport.isArchived ?? false,
     }).returning();
-    return report;
+    return result[0];
   }
 
   async getReport(id: string): Promise<Report | undefined> {
-    const [report] = await db.select().from(reports).where(eq(reports.id, id));
-    return report;
+    const result = await db.select().from(reports).where(eq(reports.id, id));
+    return result[0];
   }
 
   async getAllReports(): Promise<Report[]> {
@@ -740,7 +698,7 @@ export class MemStorage implements IStorage {
   async createDeal(insertDeal: InsertDeal): Promise<Deal> {
     const id = randomUUID();
     const now = new Date();
-    const deal: Deal = {
+    const result = await db.insert(deals).values({
       id,
       title: insertDeal.title,
       description: insertDeal.description ?? null,
@@ -758,24 +716,21 @@ export class MemStorage implements IStorage {
       isActive: insertDeal.isActive ?? true,
       createdAt: now,
       updatedAt: now,
-    };
-    this.deals.set(id, deal);
-    return deal;
+    }).returning();
+    return result[0];
   }
 
   async getDeal(id: string): Promise<Deal | undefined> {
-    return this.deals.get(id);
+    const result = await db.select().from(deals).where(eq(deals.id, id));
+    return result[0];
   }
 
   async getAllDeals(): Promise<Deal[]> {
-    return Array.from(this.deals.values());
+    return db.select().from(deals);
   }
 
   async updateDeal(id: string, updates: Partial<Deal>): Promise<void> {
-    const deal = this.deals.get(id);
-    if (deal) {
-      this.deals.set(id, { ...deal, ...updates, updatedAt: new Date() });
-    }
+    await db.update(deals).set({ ...updates, updatedAt: new Date() }).where(eq(deals.id, id));
   }
 
   async createInquiry(insertInquiry: InsertInquiry): Promise<Inquiry> {
@@ -801,18 +756,18 @@ export class MemStorage implements IStorage {
   }
 
   async createSubscription(insertSubscription: InsertSubscription): Promise<Subscription> {
-    const [subscription] = await db.insert(subscriptions).values(insertSubscription).returning();
-    return subscription;
+    const result = await db.insert(subscriptions).values(insertSubscription).returning();
+    return result[0];
   }
 
   async getSubscription(id: string): Promise<Subscription | undefined> {
-    const [subscription] = await db.select().from(subscriptions).where(eq(subscriptions.id, id));
-    return subscription;
+    const result = await db.select().from(subscriptions).where(eq(subscriptions.id, id));
+    return result[0];
   }
 
   async getSubscriptionByToken(token: string): Promise<Subscription | undefined> {
-    const [subscription] = await db.select().from(subscriptions).where(eq(subscriptions.payfastToken, token));
-    return subscription;
+    const result = await db.select().from(subscriptions).where(eq(subscriptions.payfastToken, token));
+    return result[0];
   }
 
   async getSubscriptionsByEmail(email: string): Promise<Subscription[]> {
@@ -834,7 +789,7 @@ export class MemStorage implements IStorage {
   async createCompany(insertCompany: InsertCompany): Promise<Company> {
     const id = randomUUID();
     const now = new Date();
-    const company: Company = {
+    const result = await db.insert(companies).values({
       id,
       name: insertCompany.name,
       domain: insertCompany.domain ?? null,
@@ -852,50 +807,44 @@ export class MemStorage implements IStorage {
       notes: insertCompany.notes ?? null,
       createdAt: now,
       updatedAt: now,
-    };
-    this.companiesMap.set(id, company);
-    return company;
+    }).returning();
+    return result[0];
   }
 
   async getCompany(id: string): Promise<Company | undefined> {
-    return this.companiesMap.get(id);
+    const result = await db.select().from(companies).where(eq(companies.id, id));
+    return result[0];
   }
 
   async getCompanyByName(name: string): Promise<Company | undefined> {
-    return Array.from(this.companiesMap.values()).find(
-      (company) => company.name.toLowerCase() === name.toLowerCase(),
-    );
+    const result = await db.select().from(companies).where(eq(companies.name, name));
+    return result[0];
   }
 
   async getAllCompanies(): Promise<Company[]> {
-    return Array.from(this.companiesMap.values());
+    return db.select().from(companies);
   }
 
   async updateCompany(id: string, updates: Partial<Company>): Promise<void> {
-    const company = this.companiesMap.get(id);
-    if (company) {
-      this.companiesMap.set(id, { ...company, ...updates, updatedAt: new Date() });
-    }
+    await db.update(companies).set({ ...updates, updatedAt: new Date() }).where(eq(companies.id, id));
   }
 
   async deleteCompany(id: string): Promise<void> {
-    this.companiesMap.delete(id);
+    await db.delete(companies).where(eq(companies.id, id));
   }
 
   async getUsersByCompanyId(companyId: string): Promise<User[]> {
-    return Array.from(this.users.values()).filter(
-      (user) => user.companyId === companyId,
-    );
+    return db.select().from(users).where(eq(users.companyId, companyId));
   }
 
   async deleteUser(id: string): Promise<void> {
-    this.users.delete(id);
+    await db.delete(users).where(eq(users.id, id));
   }
 
   async createClientReport(insertReport: InsertClientReport & { uploadedAt?: Date }): Promise<ClientReport> {
     const id = randomUUID();
     const now = new Date();
-    const report: ClientReport = {
+    const result = await db.insert(clientReports).values({
       id,
       companyId: insertReport.companyId,
       title: insertReport.title,
@@ -906,40 +855,35 @@ export class MemStorage implements IStorage {
       uploadedAt: insertReport.uploadedAt ?? now,
       createdAt: now,
       updatedAt: now,
-    };
-    this.clientReportsMap.set(id, report);
-    return report;
+    }).returning();
+    return result[0];
   }
 
   async getClientReport(id: string): Promise<ClientReport | undefined> {
-    return this.clientReportsMap.get(id);
+    const result = await db.select().from(clientReports).where(eq(clientReports.id, id));
+    return result[0];
   }
 
   async getClientReportsByCompanyId(companyId: string): Promise<ClientReport[]> {
-    return Array.from(this.clientReportsMap.values()).filter(
-      (report) => report.companyId === companyId,
-    );
+    return db.select().from(clientReports).where(eq(clientReports.companyId, companyId));
   }
 
   async getAllClientReports(): Promise<ClientReport[]> {
-    return Array.from(this.clientReportsMap.values());
+    return db.select().from(clientReports);
   }
 
   async updateClientReport(id: string, updates: Partial<ClientReport>): Promise<void> {
-    const report = this.clientReportsMap.get(id);
-    if (report) {
-      this.clientReportsMap.set(id, { ...report, ...updates, updatedAt: new Date() });
-    }
+    await db.update(clientReports).set({ ...updates, updatedAt: new Date() }).where(eq(clientReports.id, id));
   }
 
   async deleteClientReport(id: string): Promise<void> {
-    this.clientReportsMap.delete(id);
+    await db.delete(clientReports).where(eq(clientReports.id, id));
   }
 
   async createBriefSubmission(insertBrief: InsertBriefSubmission): Promise<BriefSubmission> {
     const id = randomUUID();
     const now = new Date();
-    const brief: BriefSubmission = {
+    const result = await db.insert(briefSubmissions).values({
       id,
       submittedByName: insertBrief.submittedByName,
       submittedByEmail: insertBrief.submittedByEmail,
@@ -966,45 +910,35 @@ export class MemStorage implements IStorage {
       notes: insertBrief.notes ?? null,
       createdAt: now,
       updatedAt: now,
-    };
-    this.briefSubmissionsMap.set(id, brief);
-    return brief;
+    }).returning();
+    return result[0];
   }
 
   async getBriefSubmission(id: string): Promise<BriefSubmission | undefined> {
-    return this.briefSubmissionsMap.get(id);
+    const result = await db.select().from(briefSubmissions).where(eq(briefSubmissions.id, id));
+    return result[0];
   }
 
   async getBriefSubmissionsByEmail(email: string): Promise<BriefSubmission[]> {
-    return Array.from(this.briefSubmissionsMap.values())
-      .filter(b => b.submittedByEmail === email)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return db.select().from(briefSubmissions).where(eq(briefSubmissions.submittedByEmail, email));
   }
 
   async getBriefSubmissionsByCompanyId(companyId: string): Promise<BriefSubmission[]> {
-    return Array.from(this.briefSubmissionsMap.values())
-      .filter(b => b.companyId === companyId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return db.select().from(briefSubmissions).where(eq(briefSubmissions.companyId, companyId));
   }
 
   async getAllBriefSubmissions(): Promise<BriefSubmission[]> {
-    return Array.from(this.briefSubmissionsMap.values()).sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    return db.select().from(briefSubmissions);
   }
 
   async updateBriefSubmission(id: string, updates: Partial<BriefSubmission>): Promise<void> {
-    const brief = this.briefSubmissionsMap.get(id);
-    if (brief) {
-      this.briefSubmissionsMap.set(id, { ...brief, ...updates, updatedAt: new Date() });
-    }
+    await db.update(briefSubmissions).set({ ...updates, updatedAt: new Date() }).where(eq(briefSubmissions.id, id));
   }
 
-  // Studies - unified research project view
   async createStudy(insertStudy: InsertStudy): Promise<Study> {
     const id = randomUUID();
     const now = new Date();
-    const study: Study = {
+    const result = await db.insert(studies).values({
       id,
       companyId: insertStudy.companyId ?? null,
       companyName: insertStudy.companyName,
@@ -1023,91 +957,73 @@ export class MemStorage implements IStorage {
       submittedByName: insertStudy.submittedByName ?? null,
       createdAt: now,
       updatedAt: now,
-    };
-    this.studiesMap.set(id, study);
-    return study;
+    }).returning();
+    return result[0];
   }
 
   async getStudy(id: string): Promise<Study | undefined> {
-    return this.studiesMap.get(id);
+    const result = await db.select().from(studies).where(eq(studies.id, id));
+    return result[0];
   }
 
   async getStudyByBriefId(briefId: string): Promise<Study | undefined> {
-    return Array.from(this.studiesMap.values()).find(s => s.briefId === briefId);
+    const result = await db.select().from(studies).where(eq(studies.briefId, briefId));
+    return result[0];
   }
 
   async getStudiesByCompanyId(companyId: string): Promise<Study[]> {
-    return Array.from(this.studiesMap.values())
-      .filter(s => s.companyId === companyId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return db.select().from(studies).where(eq(studies.companyId, companyId));
   }
 
   async getStudiesByEmail(email: string): Promise<Study[]> {
-    return Array.from(this.studiesMap.values())
-      .filter(s => s.submittedByEmail.toLowerCase() === email.toLowerCase())
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return db.select().from(studies).where(eq(studies.submittedByEmail, email));
   }
 
   async getAllStudies(): Promise<Study[]> {
-    return Array.from(this.studiesMap.values())
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return db.select().from(studies);
   }
 
   async updateStudy(id: string, updates: Partial<Study>): Promise<void> {
-    const study = this.studiesMap.get(id);
-    if (study) {
-      this.studiesMap.set(id, { ...study, ...updates, updatedAt: new Date() });
-    }
+    await db.update(studies).set({ ...updates, updatedAt: new Date() }).where(eq(studies.id, id));
   }
 
   async updateStudyStatus(id: string, status: StudyStatus): Promise<Study | undefined> {
-    const study = this.studiesMap.get(id);
-    if (study) {
-      const now = new Date();
-      const updatedStudy: Study = {
-        ...study,
-        status,
-        statusUpdatedAt: now,
-        updatedAt: now,
-      };
-      this.studiesMap.set(id, updatedStudy);
-      return updatedStudy;
-    }
-    return undefined;
+    const now = new Date();
+    const result = await db.update(studies).set({
+      status,
+      statusUpdatedAt: now,
+      updatedAt: now,
+    }).where(eq(studies.id, id)).returning();
+    return result[0];
   }
 
-  // Password reset operations
   async createPasswordReset(reset: InsertPasswordReset): Promise<PasswordReset> {
     const id = randomUUID();
     const now = new Date();
-    const passwordReset: PasswordReset = {
+    const result = await db.insert(passwordResets).values({
       id,
       userId: reset.userId,
       tokenHash: reset.tokenHash,
       expiresAt: reset.expiresAt,
       usedAt: null,
       createdAt: now,
-    };
-    this.passwordResetsMap.set(id, passwordReset);
-    return passwordReset;
+    }).returning();
+    return result[0];
   }
 
   async getPasswordResetByTokenHash(tokenHash: string): Promise<PasswordReset | undefined> {
-    return Array.from(this.passwordResetsMap.values()).find(r => r.tokenHash === tokenHash);
+    const result = await db.select().from(passwordResets).where(eq(passwordResets.tokenHash, tokenHash));
+    return result[0];
   }
 
   async markPasswordResetUsed(id: string): Promise<void> {
-    const reset = this.passwordResetsMap.get(id);
-    if (reset) {
-      this.passwordResetsMap.set(id, { ...reset, usedAt: new Date() });
-    }
+    await db.update(passwordResets).set({ usedAt: new Date() }).where(eq(passwordResets.id, id));
   }
 
-  // Session operations
   async createSession(session: InsertSession): Promise<Session> {
     const id = randomUUID();
     const now = new Date();
-    const newSession: Session = {
+    const result = await db.insert(sessions).values({
       id,
       userId: session.userId,
       companyId: session.companyId ?? null,
@@ -1117,32 +1033,27 @@ export class MemStorage implements IStorage {
       expiresAt: session.expiresAt,
       createdAt: now,
       lastActiveAt: now,
-    };
-    this.sessionsMap.set(id, newSession);
-    return newSession;
+    }).returning();
+    return result[0];
   }
 
   async getSessionByTokenHash(tokenHash: string): Promise<Session | undefined> {
-    return Array.from(this.sessionsMap.values()).find(s => s.tokenHash === tokenHash);
+    const result = await db.select().from(sessions).where(eq(sessions.tokenHash, tokenHash));
+    return result[0];
   }
 
   async deleteSession(id: string): Promise<void> {
-    this.sessionsMap.delete(id);
+    await db.delete(sessions).where(eq(sessions.id, id));
   }
 
   async deleteUserSessions(userId: string): Promise<void> {
-    const entriesToDelete = Array.from(this.sessionsMap.entries())
-      .filter(([_, session]) => session.userId === userId);
-    for (const [id] of entriesToDelete) {
-      this.sessionsMap.delete(id);
-    }
+    await db.delete(sessions).where(eq(sessions.userId, userId));
   }
 
-  // Credit ledger operations
   async createCreditLedgerEntry(entry: InsertCreditLedger): Promise<CreditLedgerEntry> {
     const id = randomUUID();
     const now = new Date();
-    const ledgerEntry: CreditLedgerEntry = {
+    const result = await db.insert(creditLedger).values({
       id,
       companyId: entry.companyId,
       userId: entry.userId ?? null,
@@ -1155,24 +1066,24 @@ export class MemStorage implements IStorage {
       briefId: entry.briefId ?? null,
       metadata: entry.metadata ?? null,
       createdAt: now,
-    };
-    this.creditLedgerMap.set(id, ledgerEntry);
-    return ledgerEntry;
+    }).returning();
+    return result[0];
   }
 
   async getCreditLedgerByCompanyId(companyId: string): Promise<CreditLedgerEntry[]> {
-    return Array.from(this.creditLedgerMap.values())
-      .filter(e => e.companyId === companyId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return db.select().from(creditLedger).where(eq(creditLedger.companyId, companyId));
   }
 
   async getCompanyCreditBalance(companyId: string, creditType: 'basic' | 'pro'): Promise<number> {
     const entries = await this.getCreditLedgerByCompanyId(companyId);
     const filtered = entries.filter(e => e.creditType === creditType);
     if (filtered.length === 0) return 0;
-    // Get the most recent balance
-    return filtered[0].balanceAfter;
+    const sorted = filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return sorted[0].balanceAfter;
   }
 }
 
-export const storage = new MemStorage();
+const databaseStorage = new DatabaseStorage();
+databaseStorage.seedDatabase().catch(console.error);
+
+export const storage = databaseStorage;

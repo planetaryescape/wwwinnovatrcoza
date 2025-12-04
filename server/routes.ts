@@ -696,15 +696,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get user's orders (for Credits & Billing page)
-  app.get("/api/user-orders", async (req, res) => {
+  // Get user's orders (for Credits & Billing page) - protected with session auth
+  app.get("/api/user-orders", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const email = req.query.email as string;
-      if (!email) {
-        return res.status(400).json({ error: "Email is required" });
+      const sessionUser = req.user!;
+      
+      // Admin users can optionally query by email
+      if (isAdminUser(sessionUser.email) && req.query.email) {
+        const orders = await storage.getOrdersByEmail(req.query.email as string);
+        return res.json(orders);
       }
-
-      const orders = await storage.getOrdersByEmail(email);
+      
+      // Regular users get their own orders
+      const orders = await storage.getOrdersByEmail(sessionUser.email);
       res.json(orders);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -967,16 +971,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User lookup endpoint for login
-  app.get("/api/users/email/:email", async (req, res) => {
+  // User lookup endpoint - requires admin access
+  app.get("/api/users/email/:email", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { email } = req.params;
       const user = await storage.getUserByEmail(email);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-      const { password, ...safeUser } = user;
-      res.json(safeUser);
+      res.json(redactUser(user));
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
@@ -1120,22 +1123,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Member reports endpoint (authenticated, includes client-specific reports)
-  app.get("/api/member/reports", async (req, res) => {
+  app.get("/api/member/reports", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      // Get user from query param (for simplicity) - in production this should be from session
-      const { email } = req.query;
-      
-      if (!email) {
-        return res.status(401).json({ error: "Authentication required" });
-      }
-      
-      // Look up user to get their companyId
-      const user = await storage.getUserByEmail(email as string);
-      if (!user) {
-        return res.status(401).json({ error: "User not found" });
-      }
-      
-      const userCompanyId = user.companyId;
+      const sessionUser = req.user!;
+      const userCompanyId = sessionUser.companyId;
       const reports = await storage.getAllReports();
       
       // Filter reports based on access rules
@@ -1224,8 +1215,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/member/deals", async (req, res) => {
+  app.get("/api/member/deals", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      // All authenticated users can see deals (filtered by their membership tier if needed)
       const deals = await storage.getAllDeals();
       res.json(deals);
     } catch (error: any) {
@@ -1233,31 +1225,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get orders for the current user by email
-  app.get("/api/member/orders", async (req, res) => {
+  // Get orders for the authenticated user
+  app.get("/api/member/orders", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const email = req.query.email as string;
-      if (!email) {
-        return res.status(400).json({ error: "Email is required" });
+      const sessionUser = req.user!;
+      
+      // Admin users can optionally query by email
+      if (isAdminUser(sessionUser.email) && req.query.email) {
+        const orders = await storage.getOrdersByEmail(req.query.email as string);
+        return res.json(orders);
       }
-      const orders = await storage.getOrdersByEmail(email);
+      
+      // Regular users get their own orders
+      const orders = await storage.getOrdersByEmail(sessionUser.email);
       res.json(orders);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
   });
 
-  // Get company by ID (for authenticated users to fetch their own company)
-  app.get("/api/companies/:id", async (req, res) => {
+  // Get company by ID - requires authentication
+  app.get("/api/companies/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const sessionUser = req.user!;
       const { id } = req.params;
-      const userEmail = req.query.email as string | undefined;
+      
+      // Only allow admin or users belonging to the company to view it
+      if (!isAdminUser(sessionUser.email) && sessionUser.companyId !== id) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
       const company = await storage.getCompany(id);
       if (!company) {
         return res.status(404).json({ error: "Company not found" });
       }
+      
       // Apply demo minimum credits for Hannah and Richard
-      const adjustedCompany = applyDemoCredits(company, userEmail);
+      const adjustedCompany = applyDemoCredits(company, sessionUser.email);
       res.json(adjustedCompany);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
@@ -1461,18 +1465,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get client reports by company (for member portal)
-  // Two Rugani projects added and linked by companyId.
-  // Access is restricted to company users (by companyId) and admins (via isAdminUser).
-  app.get("/api/member/client-reports", async (req, res) => {
+  // Get client reports for the authenticated user's company
+  app.get("/api/member/client-reports", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const { email } = req.query;
-      if (!email) {
-        return res.status(400).json({ error: "Email is required" });
-      }
+      const sessionUser = req.user!;
       
       // Admin users (@innovatr.co.za) can see all client reports with company names
-      if (isAdminUser(email as string)) {
+      if (isAdminUser(sessionUser.email)) {
         const allReports = await storage.getAllClientReports();
         // Enrich reports with company names for admin view
         const enrichedReports = await Promise.all(
@@ -1487,14 +1486,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(enrichedReports);
       }
       
-      const user = await storage.getUserByEmail(email as string);
-      if (!user || !user.companyId) {
+      // Regular users get their own company's reports
+      if (!sessionUser.companyId) {
         return res.json([]);
       }
       
       // For regular users, get their company name to include in reports
-      const company = await storage.getCompany(user.companyId);
-      const reports = await storage.getClientReportsByCompanyId(user.companyId);
+      const company = await storage.getCompany(sessionUser.companyId);
+      const reports = await storage.getClientReportsByCompanyId(sessionUser.companyId);
       const enrichedReports = reports.map((report) => ({
         ...report,
         companyName: company?.name || "Unknown Company",
@@ -1515,91 +1514,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get company by user's companyId or email (for member portal)
-  app.get("/api/member/company", async (req, res) => {
+  // Get company for the authenticated user (for member portal)
+  app.get("/api/member/company", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const { companyId, email } = req.query;
+      const sessionUser = req.user!;
       
-      // If email is provided, look up user first to get their companyId
-      if (email) {
-        const user = await storage.getUserByEmail(email as string);
-        if (!user || !user.companyId) {
-          return res.status(404).json({ error: "User not found or not associated with a company" });
-        }
-        const company = await storage.getCompany(user.companyId);
+      // Admin users can optionally query by companyId
+      if (isAdminUser(sessionUser.email) && req.query.companyId) {
+        const company = await storage.getCompany(req.query.companyId as string);
         if (!company) {
           return res.status(404).json({ error: "Company not found" });
         }
-        // Apply demo credits for Hannah and Richard
-        const adjustedCompany = applyDemoCredits(company, email as string);
-        return res.json(adjustedCompany);
+        return res.json(company);
       }
       
-      // Fallback to companyId parameter
-      if (!companyId) {
-        return res.status(400).json({ error: "companyId or email is required" });
+      // For regular users, get their own company
+      if (!sessionUser.companyId) {
+        return res.status(404).json({ error: "User not associated with a company" });
       }
-      const company = await storage.getCompany(companyId as string);
+      
+      const company = await storage.getCompany(sessionUser.companyId);
       if (!company) {
         return res.status(404).json({ error: "Company not found" });
       }
-      res.json(company);
+      
+      // Apply demo credits for Hannah and Richard
+      const adjustedCompany = applyDemoCredits(company, sessionUser.email);
+      res.json(adjustedCompany);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
   });
 
-  // Get briefs for logged-in member (by email or companyId)
-  app.get("/api/member/briefs", async (req, res) => {
+  // Get briefs for the authenticated user
+  app.get("/api/member/briefs", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const email = req.query.email as string;
-      const companyId = req.query.companyId as string;
+      const sessionUser = req.user!;
       
-      if (!email && !companyId) {
-        return res.status(400).json({ error: "Email or companyId required" });
-      }
-      
-      // Admin users (@innovatr.co.za) can see all briefs
-      if (email && isAdminUser(email)) {
+      // Admin users can see all briefs
+      if (isAdminUser(sessionUser.email)) {
         const allBriefs = await storage.getAllBriefSubmissions();
         return res.json(allBriefs);
       }
       
-      // For regular users, get briefs by email or company
-      let briefs;
-      if (email) {
-        briefs = await storage.getBriefSubmissionsByEmail(email);
-      } else if (companyId) {
-        briefs = await storage.getBriefSubmissionsByCompanyId(companyId);
+      // For regular users, get briefs by their email and optionally their company
+      let briefs = await storage.getBriefSubmissionsByEmail(sessionUser.email);
+      
+      // If user has a company, also include company briefs
+      if (sessionUser.companyId) {
+        const companyBriefs = await storage.getBriefSubmissionsByCompanyId(sessionUser.companyId);
+        // Merge and deduplicate by ID
+        const briefIds = new Set(briefs.map(b => b.id));
+        for (const brief of companyBriefs) {
+          if (!briefIds.has(brief.id)) {
+            briefs.push(brief);
+          }
+        }
+        // Sort by createdAt descending
+        briefs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       }
       
-      res.json(briefs || []);
+      res.json(briefs);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
   });
 
-  // Get credit ledger history for member's company
-  app.get("/api/member/credit-ledger", async (req, res) => {
+  // Get credit ledger history for the authenticated user's company
+  app.get("/api/member/credit-ledger", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const { email, companyId } = req.query;
+      const sessionUser = req.user!;
       
-      if (!email && !companyId) {
-        return res.status(400).json({ error: "Email or companyId required" });
+      // Admin users can optionally query by companyId
+      if (isAdminUser(sessionUser.email) && req.query.companyId) {
+        const ledgerEntries = await storage.getCreditLedgerByCompanyId(req.query.companyId as string);
+        return res.json(ledgerEntries);
       }
       
-      let targetCompanyId = companyId as string;
-      
-      // If email is provided, look up user's company
-      if (email && !companyId) {
-        const user = await storage.getUserByEmail(email as string);
-        if (!user || !user.companyId) {
-          return res.json([]); // No company, no credit history
-        }
-        targetCompanyId = user.companyId;
+      // For regular users, get their company's credit ledger
+      if (!sessionUser.companyId) {
+        return res.json([]); // No company, no credit history
       }
       
-      const ledgerEntries = await storage.getCreditLedgerByCompanyId(targetCompanyId);
+      const ledgerEntries = await storage.getCreditLedgerByCompanyId(sessionUser.companyId);
       res.json(ledgerEntries);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -1643,10 +1640,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User subscription endpoints (for viewing own subscriptions)
-  app.get("/api/subscriptions/email/:email", async (req, res) => {
+  // User subscription endpoints - require authentication
+  app.get("/api/subscriptions/email/:email", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const sessionUser = req.user!;
       const { email } = req.params;
+      
+      // Only allow admin or the user themselves to view subscriptions
+      if (!isAdminUser(sessionUser.email) && sessionUser.email !== email) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
       const subscriptions = await storage.getSubscriptionsByEmail(email);
       res.json(subscriptions);
     } catch (error: any) {
@@ -1654,9 +1658,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/subscriptions/user/:userId", async (req, res) => {
+  app.get("/api/subscriptions/user/:userId", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const sessionUser = req.user!;
       const { userId } = req.params;
+      
+      // Only allow admin or the user themselves to view subscriptions
+      if (!isAdminUser(sessionUser.email) && sessionUser.id !== userId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
       const subscriptions = await storage.getSubscriptionsByUserId(userId);
       res.json(subscriptions);
     } catch (error: any) {
@@ -1664,13 +1675,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Cancel subscription endpoint
-  app.post("/api/subscriptions/:id/cancel", async (req, res) => {
+  // Cancel subscription endpoint - require authentication and ownership verification
+  app.post("/api/subscriptions/:id/cancel", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const sessionUser = req.user!;
       const { id } = req.params;
       const subscription = await storage.getSubscription(id);
       if (!subscription) {
         return res.status(404).json({ error: "Subscription not found" });
+      }
+      
+      // Verify ownership: user must own the subscription or be an admin
+      if (!isAdminUser(sessionUser.email) && 
+          subscription.userEmail !== sessionUser.email && 
+          subscription.userId !== sessionUser.id) {
+        return res.status(403).json({ error: "Access denied" });
       }
       
       // Update subscription status to cancelled
@@ -1689,8 +1708,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // File upload endpoints for App Storage
-  app.post("/api/upload/thumbnail", fileUpload.single("file"), async (req, res) => {
+  // File upload endpoints for App Storage - require admin access
+  app.post("/api/upload/thumbnail", requireAdmin, fileUpload.single("file"), async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
@@ -1722,7 +1741,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/upload/pdf", fileUpload.single("file"), async (req, res) => {
+  app.post("/api/upload/pdf", requireAdmin, fileUpload.single("file"), async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
@@ -1753,8 +1772,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Client report PDF upload endpoint
-  app.post("/api/upload/client-report", fileUpload.single("file"), async (req, res) => {
+  // Client report PDF upload endpoint - require admin access
+  app.post("/api/upload/client-report", requireAdmin, fileUpload.single("file"), async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
@@ -1786,13 +1805,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Serve files from App Storage
-  app.get("/api/files/*", async (req, res) => {
+  // Serve files from App Storage - require authentication with access control
+  app.get("/api/files/*", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const sessionUser = req.user!;
       const filePath = (req.params as Record<string, string>)[0];
       
       if (!filePath) {
         return res.status(400).json({ error: "File path required" });
+      }
+
+      // Access control: check if user is allowed to view this file
+      // Admins can access all files; regular users can only access:
+      // - Public files (thumbnails, general pdfs)
+      // - Their own company's client reports
+      if (!isAdminUser(sessionUser.email)) {
+        // Check if this is a client report - restrict to company owner
+        if (filePath.startsWith("client_reports/")) {
+          const pathParts = filePath.split("/");
+          const companyId = pathParts[1]; // client_reports/{companyId}/{file}
+          if (sessionUser.companyId !== companyId) {
+            return res.status(403).json({ error: "Access denied" });
+          }
+        }
       }
 
       const exists = await fileExists(filePath);
@@ -1826,7 +1861,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete file from App Storage (admin only)
-  app.delete("/api/files/*", async (req, res) => {
+  app.delete("/api/files/*", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const filePath = (req.params as Record<string, string>)[0];
       
@@ -2185,19 +2220,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== Studies Routes ====================
   // Studies represent the unified view of research projects linking briefs to completed reports
   
-  // Get studies for logged-in member (by email or companyId)
-  app.get("/api/member/studies", async (req, res) => {
+  // Get studies for the authenticated user
+  app.get("/api/member/studies", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const email = req.query.email as string;
-      const companyId = req.query.companyId as string;
+      const sessionUser = req.user!;
       
-      let studies;
-      if (companyId) {
-        studies = await storage.getStudiesByCompanyId(companyId);
-      } else if (email) {
-        studies = await storage.getStudiesByEmail(email);
-      } else {
-        return res.status(400).json({ error: "Email or companyId required" });
+      // Admin users can see all studies or filter by companyId
+      if (isAdminUser(sessionUser.email)) {
+        if (req.query.companyId) {
+          const studies = await storage.getStudiesByCompanyId(req.query.companyId as string);
+          return res.json(studies);
+        }
+        const allStudies = await storage.getAllStudies();
+        return res.json(allStudies);
+      }
+      
+      // For regular users, get studies by their email or company
+      let studies = await storage.getStudiesByEmail(sessionUser.email);
+      
+      // If user has a company, also include company studies
+      if (sessionUser.companyId) {
+        const companyStudies = await storage.getStudiesByCompanyId(sessionUser.companyId);
+        // Merge and deduplicate by ID
+        const studyIds = new Set(studies.map(s => s.id));
+        for (const study of companyStudies) {
+          if (!studyIds.has(study.id)) {
+            studies.push(study);
+          }
+        }
+        // Sort by createdAt descending
+        studies.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       }
       
       res.json(studies);
