@@ -7,9 +7,8 @@ import AdminOverview from "./AdminOverview";
 import AdminOrders from "./AdminOrders";
 import AdminReports from "./AdminReports";
 import AdminDeals from "./AdminDeals";
-import AdminSubscriptions from "./AdminSubscriptions";
 import AdminCompanies from "./AdminCompanies";
-import AdminMailerSubscriptions from "./AdminMailerSubscriptions";
+import AdminMembers from "./AdminMembers";
 import AdminBriefs from "./AdminBriefs";
 
 export default function AdminPortal() {
@@ -38,13 +37,12 @@ export default function AdminPortal() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview" data-testid="tab-admin-overview">Overview</TabsTrigger>
             <TabsTrigger value="companies" data-testid="tab-admin-companies">Companies</TabsTrigger>
             <TabsTrigger value="orders" data-testid="tab-admin-orders">Orders</TabsTrigger>
             <TabsTrigger value="briefs" data-testid="tab-admin-briefs">Briefs</TabsTrigger>
-            <TabsTrigger value="subscriptions" data-testid="tab-admin-subscriptions">Subscriptions</TabsTrigger>
-            <TabsTrigger value="subscribers" data-testid="tab-admin-subscribers">Subscribers</TabsTrigger>
+            <TabsTrigger value="members" data-testid="tab-admin-members">Members</TabsTrigger>
             <TabsTrigger value="reports" data-testid="tab-admin-reports">Reports</TabsTrigger>
             <TabsTrigger value="deals" data-testid="tab-admin-deals">Deals</TabsTrigger>
           </TabsList>
@@ -65,12 +63,8 @@ export default function AdminPortal() {
             <AdminBriefs />
           </TabsContent>
 
-          <TabsContent value="subscriptions">
-            <AdminSubscriptions />
-          </TabsContent>
-
-          <TabsContent value="subscribers">
-            <AdminMailerSubscriptions />
+          <TabsContent value="members">
+            <AdminMembers />
           </TabsContent>
 
           <TabsContent value="reports">
