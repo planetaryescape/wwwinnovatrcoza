@@ -17,10 +17,44 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useQuery } from "@tanstack/react-query";
-import { Mail, Search, Building2, Users, CreditCard, Calendar, RefreshCw, Crown, Zap } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { 
+  Mail, 
+  Search, 
+  Building2, 
+  Users, 
+  CreditCard, 
+  Calendar, 
+  RefreshCw, 
+  Crown, 
+  Zap,
+  MoreVertical,
+  Eye,
+  Edit,
+  Loader2,
+  Activity,
+  Download,
+  FileText,
+} from "lucide-react";
 import { useState, useMemo } from "react";
+import { Label } from "@/components/ui/label";
 import type { MailerSubscription } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface Subscription {
   id: string;
@@ -50,11 +84,24 @@ interface User {
   membershipTier: string;
   companyId: string | null;
   createdAt: string;
+  updatedAt?: string;
 }
 
 interface Company {
   id: string;
   name: string;
+  basicCreditsTotal?: number;
+  basicCreditsUsed?: number;
+  proCreditsTotal?: number;
+  proCreditsUsed?: number;
+}
+
+interface Study {
+  id: string;
+  companyId: string | null;
+  submittedByEmail: string;
+  status: string;
+  createdAt: string;
 }
 
 const industryLabels: Record<string, string> = {
@@ -77,6 +124,12 @@ const tierColors: Record<string, string> = {
 export default function AdminMembers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [tierFilter, setTierFilter] = useState("all");
+  const [companyFilter, setCompanyFilter] = useState("all");
+  const [selectedMember, setSelectedMember] = useState<any | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [editTierOpen, setEditTierOpen] = useState(false);
+  const [newTier, setNewTier] = useState("");
+  const { toast } = useToast();
 
   const { data: pulseSubscribers = [], isLoading: loadingPulse, refetch: refetchPulse } = useQuery<MailerSubscription[]>({
     queryKey: ["/api/admin/mailer-subscriptions"],
@@ -94,7 +147,26 @@ export default function AdminMembers() {
     queryKey: ["/api/admin/companies"],
   });
 
+  const { data: studies = [] } = useQuery<Study[]>({
+    queryKey: ["/api/admin/studies"],
+  });
+
   const isLoading = loadingPulse || loadingSubs || loadingUsers;
+
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ userId, membershipTier }: { userId: string; membershipTier: string }) => {
+      const res = await apiRequest("PATCH", `/api/admin/users/${userId}`, { membershipTier });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setEditTierOpen(false);
+      toast({ title: "Member tier updated", description: "The membership tier has been updated successfully." });
+    },
+    onError: (error: any) => {
+      toast({ title: "Update failed", description: error.message || "Failed to update tier.", variant: "destructive" });
+    },
+  });
 
   const handleRefresh = () => {
     refetchPulse();
@@ -103,9 +175,9 @@ export default function AdminMembers() {
   };
 
   const companyMap = useMemo(() => {
-    const map: Record<string, string> = {};
+    const map: Record<string, Company> = {};
     companies.forEach((c) => {
-      map[c.id] = c.name;
+      map[c.id] = c;
     });
     return map;
   }, [companies]);
@@ -126,22 +198,39 @@ export default function AdminMembers() {
     return map;
   }, [paymentSubscriptions]);
 
+  const studiesByEmail = useMemo(() => {
+    const map: Record<string, number> = {};
+    studies.forEach((s) => {
+      const email = s.submittedByEmail?.toLowerCase();
+      if (email) {
+        map[email] = (map[email] || 0) + 1;
+      }
+    });
+    return map;
+  }, [studies]);
+
   const members = useMemo(() => {
     return users
       .filter((u) => u.role === "MEMBER")
       .map((user) => {
         const pulseInfo = pulseEmailMap[user.email.toLowerCase()];
         const paymentInfo = paymentEmailMap[user.email.toLowerCase()];
+        const company = user.companyId ? companyMap[user.companyId] : null;
+        const studyCount = studiesByEmail[user.email.toLowerCase()] || 0;
         return {
           ...user,
           isPulseSubscriber: !!pulseInfo,
           pulseInfo,
           hasActivePayment: paymentInfo?.status === "active",
           paymentInfo,
-          companyName: user.companyId ? companyMap[user.companyId] : null,
+          companyName: company?.name || null,
+          company,
+          studyCount,
+          basicCreditsRemaining: company ? (company.basicCreditsTotal || 0) - (company.basicCreditsUsed || 0) : 0,
+          proCreditsRemaining: company ? (company.proCreditsTotal || 0) - (company.proCreditsUsed || 0) : 0,
         };
       });
-  }, [users, pulseEmailMap, paymentEmailMap, companyMap]);
+  }, [users, pulseEmailMap, paymentEmailMap, companyMap, studiesByEmail]);
 
   const filteredMembers = useMemo(() => {
     let filtered = members;
@@ -159,11 +248,15 @@ export default function AdminMembers() {
     if (tierFilter !== "all") {
       filtered = filtered.filter((m) => m.membershipTier === tierFilter);
     }
+
+    if (companyFilter !== "all") {
+      filtered = filtered.filter((m) => m.companyId === companyFilter);
+    }
     
     return filtered.sort((a, b) => 
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
-  }, [members, searchTerm, tierFilter]);
+  }, [members, searchTerm, tierFilter, companyFilter]);
 
   const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleDateString("en-ZA", {
@@ -184,14 +277,60 @@ export default function AdminMembers() {
     );
   };
 
+  const handleEditTier = (member: any) => {
+    setSelectedMember(member);
+    setNewTier(member.membershipTier);
+    setEditTierOpen(true);
+  };
+
+  const handleViewDetails = (member: any) => {
+    setSelectedMember(member);
+    setDetailsOpen(true);
+  };
+
+  const handleSaveTier = () => {
+    if (selectedMember && newTier) {
+      updateUserMutation.mutate({ userId: selectedMember.id, membershipTier: newTier });
+    }
+  };
+
+  const handleExportCsv = () => {
+    const headers = ["Name", "Email", "Company", "Tier", "Pulse Subscriber", "Payment Status", "Studies", "Joined"];
+    const rows = filteredMembers.map(m => [
+      m.name,
+      m.email,
+      m.companyName || "",
+      m.membershipTier,
+      m.isPulseSubscriber ? "Yes" : "No",
+      m.hasActivePayment ? "Active" : (m.paymentInfo?.status || "None"),
+      m.studyCount,
+      formatDate(m.createdAt),
+    ]);
+
+    const csvContent = [headers, ...rows].map(row => row.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `members-export-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const activePayments = paymentSubscriptions.filter((s) => s.status === "active").length;
   const pulseCount = pulseSubscribers.length;
   const uniqueCompanies = new Set(members.map((m) => m.companyName).filter(Boolean)).size;
+  const tierCounts = {
+    STARTER: members.filter(m => m.membershipTier === "STARTER").length,
+    GROWTH: members.filter(m => m.membershipTier === "GROWTH").length,
+    SCALE: members.filter(m => m.membershipTier === "SCALE").length,
+  };
 
   if (isLoading) {
     return (
       <Card>
         <CardContent className="p-8 text-center">
+          <Loader2 className="w-8 h-8 mx-auto animate-spin text-muted-foreground mb-2" />
           <p className="text-muted-foreground">Loading members...</p>
         </CardContent>
       </Card>
@@ -200,20 +339,26 @@ export default function AdminMembers() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h2 className="text-2xl font-serif font-bold mb-2">Members & Subscribers</h2>
           <p className="text-muted-foreground">
             All portal members with Pulse Insights subscription status
           </p>
         </div>
-        <Button variant="outline" onClick={handleRefresh} data-testid="button-refresh-members">
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleExportCsv} data-testid="button-export-members">
+            <Download className="w-4 h-4 mr-2" />
+            Export CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleRefresh} data-testid="button-refresh-members">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -222,7 +367,7 @@ export default function AdminMembers() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{members.length}</p>
-                <p className="text-sm text-muted-foreground">Total Members</p>
+                <p className="text-xs text-muted-foreground">Total Members</p>
               </div>
             </div>
           </CardContent>
@@ -236,7 +381,7 @@ export default function AdminMembers() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{pulseCount}</p>
-                <p className="text-sm text-muted-foreground">Pulse Subscribers</p>
+                <p className="text-xs text-muted-foreground">Pulse Subs</p>
               </div>
             </div>
           </CardContent>
@@ -250,7 +395,7 @@ export default function AdminMembers() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{activePayments}</p>
-                <p className="text-sm text-muted-foreground">Active Payments</p>
+                <p className="text-xs text-muted-foreground">Active Payments</p>
               </div>
             </div>
           </CardContent>
@@ -259,12 +404,40 @@ export default function AdminMembers() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-accent" />
+              <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{uniqueCompanies}</p>
-                <p className="text-sm text-muted-foreground">Companies</p>
+                <p className="text-2xl font-bold">{tierCounts.STARTER}</p>
+                <p className="text-xs text-muted-foreground">Starter</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                <Zap className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{tierCounts.GROWTH}</p>
+                <p className="text-xs text-muted-foreground">Growth</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                <Crown className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{tierCounts.SCALE}</p>
+                <p className="text-xs text-muted-foreground">Scale</p>
               </div>
             </div>
           </CardContent>
@@ -278,7 +451,7 @@ export default function AdminMembers() {
               <Users className="w-5 h-5" />
               Portal Members
             </CardTitle>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <div className="relative w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -300,6 +473,17 @@ export default function AdminMembers() {
                   <SelectItem value="SCALE">Scale</SelectItem>
                 </SelectContent>
               </Select>
+              <Select value={companyFilter} onValueChange={setCompanyFilter}>
+                <SelectTrigger className="w-40" data-testid="select-company-filter">
+                  <SelectValue placeholder="All Companies" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Companies</SelectItem>
+                  {companies.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardHeader>
@@ -308,79 +492,130 @@ export default function AdminMembers() {
             <div className="text-center py-8">
               <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
-                {searchTerm || tierFilter !== "all" ? "No members match your filters" : "No members yet"}
+                {searchTerm || tierFilter !== "all" || companyFilter !== "all" ? "No members match your filters" : "No members yet"}
               </p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Member</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Tier</TableHead>
-                  <TableHead>Pulse</TableHead>
-                  <TableHead>Payment</TableHead>
-                  <TableHead>Joined</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredMembers.map((member) => (
-                  <TableRow key={member.id} data-testid={`row-member-${member.id}`}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{member.name}</p>
-                        <a 
-                          href={`mailto:${member.email}`} 
-                          className="text-sm text-primary hover:underline"
-                        >
-                          {member.email}
-                        </a>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {member.companyName || (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {getTierBadge(member.membershipTier)}
-                    </TableCell>
-                    <TableCell>
-                      {member.isPulseSubscriber ? (
-                        <Badge className="bg-[#5865F2]/10 text-[#5865F2] border-[#5865F2]/20">
-                          <Mail className="w-3 h-3 mr-1" />
-                          Subscribed
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-muted-foreground">
-                          Not subscribed
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {member.hasActivePayment ? (
-                        <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
-                          <CreditCard className="w-3 h-3 mr-1" />
-                          Active
-                        </Badge>
-                      ) : member.paymentInfo ? (
-                        <Badge variant="outline" className="text-muted-foreground">
-                          {member.paymentInfo.status}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground text-sm">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {formatDate(member.createdAt)}
-                      </div>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Member</TableHead>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Tier</TableHead>
+                    <TableHead>Credits</TableHead>
+                    <TableHead>Studies</TableHead>
+                    <TableHead>Pulse</TableHead>
+                    <TableHead>Payment</TableHead>
+                    <TableHead>Joined</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredMembers.map((member) => (
+                    <TableRow key={member.id} data-testid={`row-member-${member.id}`}>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{member.name}</p>
+                          <a 
+                            href={`mailto:${member.email}`} 
+                            className="text-sm text-primary hover:underline"
+                          >
+                            {member.email}
+                          </a>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {member.companyName || (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {getTierBadge(member.membershipTier)}
+                      </TableCell>
+                      <TableCell>
+                        {member.company ? (
+                          <div className="flex gap-1">
+                            <Badge variant="secondary" className="text-xs">
+                              {member.basicCreditsRemaining}B
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {member.proCreditsRemaining}P
+                            </Badge>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <FileText className="w-3 h-3 text-muted-foreground" />
+                          <span>{member.studyCount}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {member.isPulseSubscriber ? (
+                          <Badge className="bg-[#5865F2]/10 text-[#5865F2] border-[#5865F2]/20">
+                            <Mail className="w-3 h-3 mr-1" />
+                            Yes
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-muted-foreground">
+                            No
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {member.hasActivePayment ? (
+                          <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
+                            <CreditCard className="w-3 h-3 mr-1" />
+                            Active
+                          </Badge>
+                        ) : member.paymentInfo ? (
+                          <Badge variant="outline" className="text-muted-foreground">
+                            {member.paymentInfo.status}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        <div className="flex items-center gap-1 text-sm">
+                          <Calendar className="w-3 h-3" />
+                          {formatDate(member.createdAt)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" data-testid={`button-member-actions-${member.id}`}>
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleViewDetails(member)}>
+                              <Eye className="w-4 h-4 mr-2" />
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditTier(member)}>
+                              <Edit className="w-4 h-4 mr-2" />
+                              Edit Tier
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                              <a href={`mailto:${member.email}`}>
+                                <Mail className="w-4 h-4 mr-2" />
+                                Send Email
+                              </a>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -441,6 +676,111 @@ export default function AdminMembers() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <DialogContent className="max-w-md" data-testid="dialog-member-details">
+          <DialogHeader>
+            <DialogTitle>Member Details</DialogTitle>
+            <DialogDescription>{selectedMember?.email}</DialogDescription>
+          </DialogHeader>
+          {selectedMember && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Name</Label>
+                  <p className="font-medium">{selectedMember.name}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Tier</Label>
+                  <div className="mt-1">{getTierBadge(selectedMember.membershipTier)}</div>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Company</Label>
+                  <p className="font-medium">{selectedMember.companyName || "Not assigned"}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Joined</Label>
+                  <p>{formatDate(selectedMember.createdAt)}</p>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <Label className="text-xs text-muted-foreground">Credits Remaining</Label>
+                <div className="flex gap-2 mt-1">
+                  <Badge variant="secondary">{selectedMember.basicCreditsRemaining} Basic</Badge>
+                  <Badge variant="outline">{selectedMember.proCreditsRemaining} Pro</Badge>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <Label className="text-xs text-muted-foreground">Activity</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Activity className="w-4 h-4 text-muted-foreground" />
+                  <span>{selectedMember.studyCount} studies submitted</span>
+                </div>
+              </div>
+
+              <div className="border-t pt-4 flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => handleEditTier(selectedMember)}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Tier
+                </Button>
+                <Button variant="outline" size="sm" asChild>
+                  <a href={`mailto:${selectedMember.email}`}>
+                    <Mail className="w-4 h-4 mr-2" />
+                    Email
+                  </a>
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={editTierOpen} onOpenChange={setEditTierOpen}>
+        <DialogContent className="max-w-sm" data-testid="dialog-edit-tier">
+          <DialogHeader>
+            <DialogTitle>Edit Membership Tier</DialogTitle>
+            <DialogDescription>
+              Change tier for {selectedMember?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>New Tier</Label>
+              <Select value={newTier} onValueChange={setNewTier}>
+                <SelectTrigger data-testid="select-new-tier">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="STARTER">Starter</SelectItem>
+                  <SelectItem value="GROWTH">Growth</SelectItem>
+                  <SelectItem value="SCALE">Scale</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setEditTierOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSaveTier} 
+                disabled={updateUserMutation.isPending}
+                data-testid="button-save-tier"
+              >
+                {updateUserMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

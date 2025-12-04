@@ -44,7 +44,6 @@ import {
   User as UserIcon,
   Clock,
   FileText,
-  Eye,
   Upload,
   Download,
   Trash2,
@@ -53,7 +52,6 @@ import {
   Image as ImageIcon
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
 
 interface Company {
@@ -105,7 +103,6 @@ const tierConfig: Record<string, { label: string; color: string; icon: any }> = 
 
 export default function AdminCompanies() {
   const { toast } = useToast();
-  const { impersonateCompany } = useAuth();
   const [, setLocation] = useLocation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
@@ -192,17 +189,6 @@ export default function AdminCompanies() {
     } finally {
       setUploadingLogo(false);
     }
-  };
-
-  const handleViewAsClient = async () => {
-    if (!selectedCompany) return;
-    await impersonateCompany(selectedCompany.id);
-    setDrawerOpen(false);
-    setLocation("/portal");
-    toast({
-      title: "Viewing as Client",
-      description: `Now viewing portal as ${selectedCompany.name}`,
-    });
   };
 
   useEffect(() => {
@@ -501,15 +487,6 @@ export default function AdminCompanies() {
                       <SheetDescription>{selectedCompany.domain || "No domain set"}</SheetDescription>
                     </div>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleViewAsClient}
-                    data-testid="button-view-as-client"
-                  >
-                    <Eye className="w-4 h-4 mr-2" />
-                    View as Client
-                  </Button>
                 </div>
               </SheetHeader>
 

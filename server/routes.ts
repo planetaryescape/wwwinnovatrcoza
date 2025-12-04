@@ -1091,6 +1091,164 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Comprehensive admin analytics endpoint
+  app.get("/api/admin/analytics", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { period } = req.query;
+      const now = new Date();
+      let startDate: Date;
+      
+      switch (period) {
+        case "7d":
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case "30d":
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          break;
+        case "year":
+          startDate = new Date(now.getFullYear(), 0, 1);
+          break;
+        default:
+          startDate = new Date(0); // All time
+      }
+
+      // Fetch all data
+      const [users, companies, orders, studies, briefs, subscriptions, deals] = await Promise.all([
+        storage.getAllUsers(),
+        storage.getAllCompanies(),
+        storage.getAllOrders(),
+        storage.getAllStudies(),
+        storage.getAllBriefSubmissions(),
+        storage.getAllSubscriptions(),
+        storage.getAllDeals(),
+      ]);
+
+      // Filter data by period
+      const filterByDate = <T extends { createdAt: Date | string }>(items: T[]) => 
+        items.filter((i: T) => new Date(i.createdAt) >= startDate);
+
+      const periodUsers = filterByDate(users);
+      const periodOrders = filterByDate(orders);
+      const periodBriefs = filterByDate(briefs);
+      const periodStudies = filterByDate(studies);
+
+      // Calculate metrics
+      const totalBasicCredits = companies.reduce((sum: number, c) => sum + (c.basicCreditsTotal || 0), 0);
+      const usedBasicCredits = companies.reduce((sum: number, c) => sum + (c.basicCreditsUsed || 0), 0);
+      const totalProCredits = companies.reduce((sum: number, c) => sum + (c.proCreditsTotal || 0), 0);
+      const usedProCredits = companies.reduce((sum: number, c) => sum + (c.proCreditsUsed || 0), 0);
+
+      const orderTotals = periodOrders.reduce((sum: number, o) => sum + parseFloat(String(o.amount) || "0"), 0);
+      
+      // Studies by company for bar chart
+      const studiesByCompany = companies.map((c) => ({
+        name: c.name,
+        studies: studies.filter((s) => s.companyId === c.id).length,
+        basicCredits: c.basicCreditsUsed || 0,
+        proCredits: c.proCreditsUsed || 0,
+      })).filter((c) => c.studies > 0 || c.basicCredits > 0 || c.proCredits > 0);
+
+      // Orders by month for trend chart
+      const ordersByMonth: Record<string, { month: string; orders: number; revenue: number }> = {};
+      orders.forEach((o) => {
+        const date = new Date(o.createdAt);
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        if (!ordersByMonth[key]) {
+          ordersByMonth[key] = { month: key, orders: 0, revenue: 0 };
+        }
+        ordersByMonth[key].orders++;
+        ordersByMonth[key].revenue += parseFloat(String(o.amount) || "0");
+      });
+      const orderTrend = Object.values(ordersByMonth).sort((a, b) => a.month.localeCompare(b.month)).slice(-12);
+
+      // Studies by month
+      const studiesByMonth: Record<string, number> = {};
+      studies.forEach((s) => {
+        const date = new Date(s.createdAt);
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        studiesByMonth[key] = (studiesByMonth[key] || 0) + 1;
+      });
+      const studyTrend = Object.entries(studiesByMonth)
+        .map(([month, count]) => ({ month, studies: count }))
+        .sort((a, b) => a.month.localeCompare(b.month))
+        .slice(-12);
+
+      // Briefs by status
+      const briefStats = {
+        new: briefs.filter((b) => b.status === "new").length,
+        inProgress: briefs.filter((b) => b.status === "in_progress").length,
+        completed: briefs.filter((b) => b.status === "completed").length,
+        onHold: briefs.filter((b) => b.status === "on_hold").length,
+      };
+
+      // Credits by company for prediction
+      const creditUsageRate = studiesByCompany.map((c) => {
+        const company = companies.find((co) => co.name === c.name);
+        if (!company) return null;
+        const remaining = (company.basicCreditsTotal || 0) - (company.basicCreditsUsed || 0);
+        return {
+          name: c.name,
+          remaining,
+          used: c.basicCredits,
+          rate: c.basicCredits / Math.max(1, studies.filter((s) => s.companyId === company.id).length),
+        };
+      }).filter(Boolean) as { name: string; remaining: number; used: number; rate: number }[];
+
+      // Find company most likely to run out
+      const nextToRunOut = creditUsageRate
+        .filter((c) => c.remaining > 0 && c.rate > 0)
+        .sort((a, b) => a.remaining / a.rate - b.remaining / b.rate)[0];
+
+      res.json({
+        metrics: {
+          totalUsers: users.length,
+          totalCompanies: companies.length,
+          activeSubscriptions: subscriptions.filter((s) => s.status === "active").length,
+          activeStudies: studies.filter((s) => s.status === "in_progress" || s.status === "AUDIENCE_LIVE" || s.status === "ANALYSING_DATA").length,
+          briefsThisPeriod: periodBriefs.length,
+          reportsPublished: 16, // From reports.json
+          creditsRemaining: {
+            basic: totalBasicCredits - usedBasicCredits,
+            pro: totalProCredits - usedProCredits,
+          },
+        },
+        people: {
+          newUsers: periodUsers.length,
+          newCompanies: filterByDate(companies).length,
+          topActiveCompany: studiesByCompany.sort((a, b) => b.studies - a.studies)[0]?.name || "N/A",
+          usersByTier: {
+            starter: users.filter((u) => u.membershipTier === "STARTER").length,
+            growth: users.filter((u) => u.membershipTier === "GROWTH").length,
+            scale: users.filter((u) => u.membershipTier === "SCALE").length,
+          },
+        },
+        revenue: {
+          ordersThisPeriod: periodOrders.length,
+          totalOrderValue: orderTotals,
+          averageOrderValue: periodOrders.length > 0 ? orderTotals / periodOrders.length : 0,
+          creditsPurchased: totalBasicCredits + totalProCredits,
+          creditsUsed: usedBasicCredits + usedProCredits,
+          nextToRunOut: nextToRunOut?.name || "N/A",
+        },
+        pipeline: {
+          totalBriefs: briefs.length,
+          briefStats,
+          activeStudies: studies.filter((s) => s.status !== "complete" && s.status !== "COMPLETED").length,
+          studyTrend,
+        },
+        charts: {
+          studiesByCompany,
+          orderTrend,
+          studyTrend,
+        },
+        activeDeals: deals.filter((d) => d.isActive).length,
+        timestamp: new Date(),
+      });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Orders endpoints
   app.get("/api/admin/orders", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {

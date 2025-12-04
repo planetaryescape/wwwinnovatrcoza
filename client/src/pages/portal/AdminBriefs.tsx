@@ -51,6 +51,9 @@ import {
   BarChart3,
   Rocket,
   Timer,
+  LayoutGrid,
+  List,
+  GripVertical,
 } from "lucide-react";
 import { format } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -141,6 +144,7 @@ export default function AdminBriefs() {
   const [editNotes, setEditNotes] = useState("");
   const [linkedStudy, setLinkedStudy] = useState<Study | null>(null);
   const [studyStatus, setStudyStatus] = useState<string>("");
+  const [viewMode, setViewMode] = useState<"table" | "pipeline">("table");
 
   const { data: briefs = [], isLoading } = useQuery<BriefSubmission[]>({
     queryKey: ["/api/admin/briefs"],
@@ -349,6 +353,26 @@ export default function AdminBriefs() {
                 <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
+            <div className="flex border rounded-md overflow-hidden">
+              <Button
+                variant={viewMode === "table" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("table")}
+                className="rounded-none"
+                data-testid="button-table-view"
+              >
+                <List className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === "pipeline" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("pipeline")}
+                className="rounded-none"
+                data-testid="button-pipeline-view"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </CardHeader>
 
@@ -359,7 +383,7 @@ export default function AdminBriefs() {
               <p className="font-medium">No brief submissions found</p>
               <p className="text-sm">Briefs will appear here when clients submit research requests</p>
             </div>
-          ) : (
+          ) : viewMode === "table" ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -437,6 +461,137 @@ export default function AdminBriefs() {
                 })}
               </TableBody>
             </Table>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4" data-testid="pipeline-view">
+              {[
+                { status: "new", label: "New", color: "border-blue-400", bgColor: "bg-blue-50 dark:bg-blue-900/20" },
+                { status: "in_progress", label: "In Progress", color: "border-yellow-400", bgColor: "bg-yellow-50 dark:bg-yellow-900/20" },
+                { status: "completed", label: "Completed", color: "border-green-400", bgColor: "bg-green-50 dark:bg-green-900/20" },
+                { status: "on_hold", label: "On Hold", color: "border-orange-400", bgColor: "bg-orange-50 dark:bg-orange-900/20" },
+                { status: "cancelled", label: "Cancelled", color: "border-red-400", bgColor: "bg-red-50 dark:bg-red-900/20" },
+              ].map((column) => {
+                const columnBriefs = (statusFilter === "all" || statusFilter === column.status) 
+                  ? briefs.filter(b => {
+                      const matchesSearch = !searchQuery || 
+                        b.submittedByName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        b.submittedByEmail?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        b.companyName?.toLowerCase().includes(searchQuery.toLowerCase());
+                      return b.status === column.status && matchesSearch;
+                    })
+                  : [];
+                
+                const handleDragOver = (e: React.DragEvent) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const target = e.currentTarget as HTMLElement;
+                  if (!target.classList.contains("ring-2")) {
+                    target.classList.add("ring-2", "ring-primary", "ring-opacity-50");
+                  }
+                };
+
+                const handleDragLeave = (e: React.DragEvent) => {
+                  e.stopPropagation();
+                  const target = e.currentTarget as HTMLElement;
+                  const relatedTarget = e.relatedTarget as HTMLElement;
+                  if (!target.contains(relatedTarget)) {
+                    target.classList.remove("ring-2", "ring-primary", "ring-opacity-50");
+                  }
+                };
+
+                const handleDrop = (e: React.DragEvent) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const target = e.currentTarget as HTMLElement;
+                  target.classList.remove("ring-2", "ring-primary", "ring-opacity-50");
+                  
+                  const briefId = e.dataTransfer.getData("briefId");
+                  const currentStatus = e.dataTransfer.getData("currentStatus");
+                  
+                  if (!briefId || currentStatus === column.status) {
+                    return;
+                  }
+                  
+                  updateBriefMutation.mutate({
+                    id: briefId,
+                    status: column.status,
+                  });
+                };
+
+                return (
+                  <div 
+                    key={column.status} 
+                    className={`rounded-lg border-t-4 ${column.color} ${column.bgColor} p-3 min-h-[300px] transition-all`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    data-testid={`pipeline-column-${column.status}`}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-sm">{column.label}</h3>
+                      <Badge variant="secondary" className="text-xs">{columnBriefs.length}</Badge>
+                    </div>
+                    <div className="space-y-2">
+                      {columnBriefs.map((brief) => {
+                        const fileCount = (brief.files?.length || 0) + (brief.projectFileUrls?.length || 0);
+                        
+                        const handleDragStart = (e: React.DragEvent) => {
+                          e.dataTransfer.setData("briefId", brief.id);
+                          e.dataTransfer.setData("currentStatus", brief.status);
+                          e.dataTransfer.effectAllowed = "move";
+                        };
+
+                        return (
+                          <Card 
+                            key={brief.id} 
+                            className="cursor-grab hover-elevate bg-background active:cursor-grabbing"
+                            onClick={() => openBriefDetail(brief)}
+                            draggable
+                            onDragStart={handleDragStart}
+                            data-testid={`pipeline-card-${brief.id}`}
+                          >
+                            <CardContent className="p-3 space-y-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-1">
+                                  <GripVertical className="w-3 h-3 text-muted-foreground" />
+                                  <Badge variant="outline" className="text-xs">
+                                    {brief.studyType}
+                                  </Badge>
+                                </div>
+                                <span className="text-xs text-muted-foreground">
+                                  {brief.numIdeas} ideas
+                                </span>
+                              </div>
+                              <div>
+                                <p className="font-medium text-sm truncate">{brief.companyName}</p>
+                                {brief.companyBrand && (
+                                  <p className="text-xs text-muted-foreground truncate">{brief.companyBrand}</p>
+                                )}
+                              </div>
+                              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                <span className="truncate flex-1">{brief.submittedByName}</span>
+                                <div className="flex items-center gap-1">
+                                  <FileText className="w-3 h-3" />
+                                  <span>{fileCount}</span>
+                                </div>
+                              </div>
+                              <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {format(new Date(brief.createdAt), "MMM d")}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                      {columnBriefs.length === 0 && (
+                        <p className="text-xs text-muted-foreground text-center py-4">
+                          No briefs
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </CardContent>
       </Card>

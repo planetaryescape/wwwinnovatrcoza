@@ -36,7 +36,12 @@ import {
   TrendingUp,
   FileText,
   Clock,
-  FileSpreadsheet
+  FileSpreadsheet,
+  LayoutGrid,
+  List,
+  ChevronLeft,
+  ChevronRight,
+  CalendarDays,
 } from "lucide-react";
 import reportsData from "@/data/reports.json";
 import ReportEditorModal from "./ReportEditorModal";
@@ -96,6 +101,11 @@ export default function AdminReports() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<ReportData | null>(null);
+  const [viewMode, setViewMode] = useState<"table" | "calendar">("table");
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() };
+  });
 
   const categories = useMemo(() => 
     Array.from(new Set(reports.map(r => r.category))),
@@ -126,6 +136,56 @@ export default function AdminReports() {
     draft: reports.filter(r => r.status === "draft").length,
     scheduled: reports.filter(r => r.status === "scheduled").length,
   }), [reports]);
+
+  const calendarData = useMemo(() => {
+    const { year, month } = calendarMonth;
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startDayOfWeek = firstDay.getDay();
+    
+    const days: { date: number; reports: ReportData[] }[] = [];
+    
+    for (let i = 0; i < startDayOfWeek; i++) {
+      days.push({ date: 0, reports: [] });
+    }
+    
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dayReports = reports.filter(r => {
+        const reportDate = new Date(r.date);
+        return reportDate.getFullYear() === year && 
+               reportDate.getMonth() === month && 
+               reportDate.getDate() === d;
+      });
+      days.push({ date: d, reports: dayReports });
+    }
+    
+    while (days.length % 7 !== 0) {
+      days.push({ date: 0, reports: [] });
+    }
+    
+    return days;
+  }, [reports, calendarMonth]);
+
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  const navigateMonth = (direction: number) => {
+    setCalendarMonth(prev => {
+      let newMonth = prev.month + direction;
+      let newYear = prev.year;
+      if (newMonth < 0) {
+        newMonth = 11;
+        newYear--;
+      } else if (newMonth > 11) {
+        newMonth = 0;
+        newYear++;
+      }
+      return { year: newYear, month: newMonth };
+    });
+  };
 
   const handleEdit = (report: ReportData) => {
     setSelectedReport(report);
@@ -306,11 +366,90 @@ export default function AdminReports() {
                   ))}
                 </SelectContent>
               </Select>
+              <div className="flex border rounded-md overflow-hidden">
+                <Button
+                  variant={viewMode === "table" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("table")}
+                  className="rounded-none"
+                  data-testid="button-table-view"
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === "calendar" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("calendar")}
+                  className="rounded-none"
+                  data-testid="button-calendar-view"
+                >
+                  <CalendarDays className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
+      {viewMode === "calendar" ? (
+        <Card className="bg-white border p-4" data-testid="calendar-view">
+          <div className="flex items-center justify-between mb-4">
+            <Button variant="ghost" size="sm" onClick={() => navigateMonth(-1)}>
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <h3 className="text-lg font-semibold">
+              {monthNames[calendarMonth.month]} {calendarMonth.year}
+            </h3>
+            <Button variant="ghost" size="sm" onClick={() => navigateMonth(1)}>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+          <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground mb-2">
+            <div>Sun</div>
+            <div>Mon</div>
+            <div>Tue</div>
+            <div>Wed</div>
+            <div>Thu</div>
+            <div>Fri</div>
+            <div>Sat</div>
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {calendarData.map((day, idx) => (
+              <div 
+                key={idx} 
+                className={`min-h-[80px] p-1 border rounded-md ${
+                  day.date === 0 ? 'bg-muted/30' : 'bg-background'
+                }`}
+              >
+                {day.date > 0 && (
+                  <>
+                    <span className="text-xs text-muted-foreground">{day.date}</span>
+                    <div className="space-y-1 mt-1">
+                      {day.reports.slice(0, 2).map((report) => (
+                        <div
+                          key={report.id}
+                          onClick={() => handleEdit(report)}
+                          className={`text-[10px] p-1 rounded cursor-pointer truncate ${
+                            categoryColors[report.category] || 'bg-muted'
+                          }`}
+                          title={report.title}
+                        >
+                          {report.title}
+                        </div>
+                      ))}
+                      {day.reports.length > 2 && (
+                        <span className="text-[10px] text-muted-foreground">
+                          +{day.reports.length - 2} more
+                        </span>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        </Card>
+      ) : (
       <Card className="bg-white border overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
@@ -428,6 +567,7 @@ export default function AdminReports() {
           </p>
         </div>
       </Card>
+      )}
 
       <ReportEditorModal 
         open={modalOpen} 

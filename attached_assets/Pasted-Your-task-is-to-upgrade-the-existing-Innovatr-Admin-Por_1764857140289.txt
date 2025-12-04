@@ -1,0 +1,377 @@
+Your task is to upgrade the existing Innovatr Admin Portal WITHOUT breaking any existing functionality.
+Do NOT rebuild the admin section or change the routes, permissions, or design system.
+Only enhance, extend, and add analytics, charts, and useful admin features.
+
+Follow this specification precisely:
+
+PART 1 — ADMIN PERMISSIONS
+
+Only ADMIN users (Hannah Steven + Richard Lawrence) may view the admin tab.
+
+All analytics, charts, CSV/PDF exports, and insights must remain admin-only.
+
+No member should ever see admin data.
+
+PART 2 — OVERVIEW TAB UPGRADE (The Control Room)
+
+Transform the “Overview” tab into a full system summary.
+
+A. Global Controls
+
+Add at the top:
+
+Date filter dropdown (Last 7 days, 30 days, This Year, All Time)
+
+“Download PDF Summary” button
+
+All charts and metrics must update based on the date range
+
+Use live updating (web socket or light polling)
+
+B. Top Metric Strip (Replace existing cards with these)
+
+Total Users
+
+Total Companies
+
+Active Subscriptions
+
+Active Studies
+
+Briefs This Period
+
+Reports Published
+
+Credits Remaining (Basic + Pro summary)
+
+Each metric card must show:
+
+Main number
+
+Small subtitle (“+3 vs last 30 days”)
+
+Clickable to jump to the related tab
+
+C. People & Companies Snapshot
+
+Card named “People and Companies” with:
+
+New users (period)
+
+New companies (period)
+
+Top active company (most studies run)
+
+Bar chart: Studies run per company (date-filtered)
+
+D. Revenue & Credits Snapshot
+
+Card named “Revenue and Credits” with:
+
+Orders this period
+
+Total order value
+
+Average order value
+
+Credits purchased vs used (stacked bar)
+
+Bar chart: Credits used by company
+
+“Next company to run out of credits” prediction based on usage rate
+
+E. Research Pipeline Snapshot
+
+Card named “Research Pipeline” with:
+
+Total briefs
+
+New / In Progress / Completed
+
+Active studies
+
+Mini funnel:
+Brief Submitted → Audience Live → Fieldwork Complete → Report Drafting → Delivered
+
+Line chart: Studies launched by week/month
+
+F. Reports & Content Snapshot
+
+Card named “Reports and Content” with:
+
+Total reports
+
+Published
+
+Scheduled
+
+Drafts
+
+Top downloaded report
+
+Most viewed category
+
+Pie chart: reports by category (Insights, IRL, Launch, Inside)
+
+G. System Health
+
+Small strip at bottom:
+
+Email service status
+
+Database connection status
+
+Last deployment timestamp
+
+Error count for the date period
+
+PART 3 — TAB IMPROVEMENTS (Without breaking existing UI)
+1. Companies Tab Enhancements
+
+Keep current table layout but add:
+
+Total companies
+
+Scale/Growth/Starter counts
+
+Total Basic Credits
+
+Total Pro Credits
+
+Company card/view enhancements:
+
+Tier
+
+Contract (if available)
+
+Credits: “X of Y Basic used, X of Y Pro used”
+
+Active studies
+
+Total briefs
+
+Linked members
+
+“View details” panel with:
+
+Credits history
+
+Orders
+
+Briefs
+
+Studies
+
+Delivered reports
+
+Admin notes
+
+2. Orders Tab Enhancements
+
+Add metric strip:
+
+Orders this month
+
+Total order value
+
+Average order value
+
+New vs renewal split
+
+Add charts:
+
+Orders per month
+
+Revenue by product type
+
+Filters: status, tier, company
+
+3. Briefs Tab Enhancements
+
+Add:
+
+New metrics: New, In Progress, Completed
+
+“Pipeline View” toggle:
+Columns: New → In Progress → Fieldwork Done → Results Ready → Delivered
+Cards show client, company, ideas count, date.
+
+4. Members Tab Enhancements
+
+Add:
+
+Total members
+
+New this month
+
+Companies represented
+
+Members active in last 90 days
+Add columns:
+
+Last login
+
+Studies launched
+
+Credits used
+
+Role
+Admin quick actions:
+
+Reset password
+
+Impersonate user
+
+5. Reports Tab Enhancements
+
+Add:
+
+Total reports
+
+Published
+
+Scheduled
+
+Drafts
+Charts:
+
+Reports published per month
+
+Downloads per month
+Add “Publishing Calendar” view.
+
+PART 4 — LOAD NANDOS + RUGANI INTO DATABASE
+A. Nando’s Account
+
+Create company: Nando’s South Africa
+Domain: nandos.co.za
+Tier: Growth
+Credits:
+
+Basic Credits: 5 total, 5 used
+
+Pro Credits: 0
+
+Create member:
+
+Simone Kakana
+
+Email: simone.kakana@nandos.co.za
+
+Phone: +27 11 216 3300 / +27 82 442 5541
+
+Linked to Nando’s South Africa
+
+Tier: Growth
+
+Load their brief submission (Test24 Basic):
+
+Study type: Test24 Basic
+
+5 Ideas
+
+Files: 0
+
+Status: Completed
+
+Submitted: 20 Nov 2024
+
+Add to “Briefs” tab
+
+Mark it as an ongoing study in “My Research” (admin view)
+
+Create an order:
+
+Company: Nando’s South Africa
+
+Purchase: Growth membership (or equivalent)
+
+Credits loaded: 5 basic
+
+Credits consumed: 5
+
+Order status: Completed
+
+Show in Orders tab
+
+B. Rugani
+
+Company: Rugani Juice
+Domain: rugani.co.za
+Tier: Growth
+Credits:
+
+Basic Credits: 2 total, 2 used
+
+Pro Credits: 0
+
+Members:
+
+Tymon: tymon@rugani.co.za
+
+Simonne: simonne@rugani.co.za
+
+Brief Submission:
+
+Test24 Basic
+
+2 Ideas
+
+Status: In Progress
+
+Submitted: 15 Oct 2024
+
+Mark their study as ongoing too.
+
+Order:
+
+Load an order showing they bought 2 Study Credits
+
+Credits consumed: 2
+
+Show in Orders tab
+
+PART 5 — REMOVE “CLIENT VIEW” FROM ADMIN
+
+Remove or hide the “client view” tab inside admin.
+Admin “My Research” stays as your master view.
+
+PART 6 — FINAL REQUIREMENTS
+
+Do NOT break any frontend authentication.
+
+Keep all existing styles, fonts, and components.
+
+Maintain dark text + clean UI consistent with current design.
+
+Do not alter any functional API except where new analytics endpoints are required.
+
+All new queries must use the PostgreSQL database (not MemStorage).
+
+Everything must stay compatible with existing routes.
+
+Ensure Nando’s and Rugani load correctly and do not overwrite or corrupt existing demo data.
+
+PART 7 — AFTER IMPLEMENTATION
+
+Run a full system check and verify:
+
+All metrics populate correctly
+
+All charts work
+
+Companies show correct credits
+
+Orders appear correctly
+
+Briefs appear correctly
+
+Members appear correctly
+
+Removing “client view” does not break anything
+
+Overview tab summarises ALL data in one place
+
+PDF Summary generation works
+
+Live updating works without errors

@@ -57,14 +57,11 @@ import {
   Crown,
   Zap,
   FileSpreadsheet,
-  Eye,
   Trash2
 } from "lucide-react";
 import NewUserModal from "./NewUserModal";
 import { useToast } from "@/hooks/use-toast";
 import { exportUsersToCSV } from "@/lib/csvExport";
-import { useAuth } from "@/contexts/AuthContext";
-import { useLocation } from "wouter";
 
 interface AdminUser {
   id: string;
@@ -107,8 +104,6 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 
 export default function AdminUsers() {
   const { toast } = useToast();
-  const { impersonateUser } = useAuth();
-  const [, setLocation] = useLocation();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<AdminUser[]>([]);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
@@ -221,17 +216,6 @@ export default function AdminUsers() {
   const handleSaveNotes = async () => {
     if (!selectedUser) return;
     await handleUpdateUser(selectedUser.id, { internalNotes: editNotes });
-  };
-
-  const handleViewAsUser = async () => {
-    if (!selectedUser) return;
-    await impersonateUser(selectedUser.id);
-    setDrawerOpen(false);
-    setLocation("/portal");
-    toast({
-      title: "Viewing as User",
-      description: `Now viewing portal as ${selectedUser.name || selectedUser.email}`,
-    });
   };
 
   const handleDeleteUser = async () => {
@@ -550,26 +534,15 @@ export default function AdminUsers() {
                       <SheetDescription>{selectedUser.email}</SheetDescription>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={handleViewAsUser}
-                      data-testid="button-view-as-user"
-                    >
-                      <Eye className="w-4 h-4 mr-2" />
-                      View as User
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => confirmDelete(selectedUser)}
-                      className="text-destructive hover:text-destructive"
-                      data-testid="button-delete-user"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => confirmDelete(selectedUser)}
+                    className="text-destructive hover:text-destructive"
+                    data-testid="button-delete-user"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               </SheetHeader>
 
