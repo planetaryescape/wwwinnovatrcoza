@@ -25,8 +25,18 @@ export interface Company {
   id: string;
   name: string;
   logoUrl?: string | null;
-  creditsBasic: number;
-  creditsPro: number;
+  basicCreditsTotal: number;
+  basicCreditsUsed: number;
+  proCreditsTotal: number;
+  proCreditsUsed: number;
+}
+
+export function getBasicCreditsRemaining(company: Company): number {
+  return (company.basicCreditsTotal ?? 0) - (company.basicCreditsUsed ?? 0);
+}
+
+export function getProCreditsRemaining(company: Company): number {
+  return (company.proCreditsTotal ?? 0) - (company.proCreditsUsed ?? 0);
 }
 
 interface AuthContextType {

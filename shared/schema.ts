@@ -457,6 +457,7 @@ export const briefSubmissions = pgTable("brief_submissions", {
   submittedByName: text("submitted_by_name").notNull(),
   submittedByEmail: text("submitted_by_email").notNull(),
   submittedByContact: text("submitted_by_contact"),
+  companyId: varchar("company_id"),
   companyName: text("company_name").notNull(),
   companyBrand: text("company_brand"),
   studyType: varchar("study_type", { length: 50 }).notNull(),
@@ -470,6 +471,10 @@ export const briefSubmissions = pgTable("brief_submissions", {
   competitors: text("competitors").array().default([]),
   projectFileUrls: text("project_file_urls").array().default([]),
   files: jsonb("files").default([]),
+  concepts: jsonb("concepts").default([]),
+  paymentMethod: varchar("payment_method", { length: 20 }).notNull().default("online"),
+  basicCreditsUsed: integer("basic_credits_used").notNull().default(0),
+  proCreditsUsed: integer("pro_credits_used").notNull().default(0),
   status: varchar("status", { length: 20 }).notNull().default("new"),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -486,6 +491,13 @@ const briefFileSchema = z.object({
   uploadedAt: z.string(),
 });
 
+// Zod schema for concept validation
+const conceptSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  fileCount: z.number().optional(),
+});
+
 export const insertBriefSubmissionSchema = createInsertSchema(briefSubmissions)
   .omit({
     id: true,
@@ -500,6 +512,10 @@ export const insertBriefSubmissionSchema = createInsertSchema(briefSubmissions)
     researchObjective: z.string().min(1, "Research objective is required"),
     status: z.enum(["new", "in_progress", "completed", "on_hold", "cancelled"]).default("new"),
     files: z.array(briefFileSchema).default([]),
+    concepts: z.array(conceptSchema).default([]),
+    paymentMethod: z.enum(["online", "invoice", "credits"]).default("online"),
+    basicCreditsUsed: z.number().default(0),
+    proCreditsUsed: z.number().default(0),
   });
 
 export type InsertBriefSubmission = z.infer<typeof insertBriefSubmissionSchema>;

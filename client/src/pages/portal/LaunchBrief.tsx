@@ -37,12 +37,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { FileText, Zap, CheckCircle, Upload, ArrowRight, FileUp, X, Download, ChevronDown, Plus, Loader2, Trash2, CreditCard, FileCheck, AlertCircle } from "lucide-react";
+import { FileText, Zap, CheckCircle, Upload, ArrowRight, FileUp, X, Download, ChevronDown, Plus, Loader2, Trash2, CreditCard, FileCheck, AlertCircle, Coins, ShoppingCart } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
+import { useAuth, getBasicCreditsRemaining, getProCreditsRemaining } from "@/contexts/AuthContext";
 
 type BriefType = "basic" | "pro" | null;
 
@@ -190,7 +191,12 @@ const genderOptions: MultiSelectOption[] = [
 // Generate unique ID for concepts
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
+type BillingPreference = "online" | "invoice" | "credits";
+
 export default function LaunchBrief() {
+  const { user, company, isMember } = useAuth();
+  const [, setLocationHook] = useLocation();
+  const queryClient = useQueryClient();
   const [selectedBrief, setSelectedBrief] = useState<BriefType>(null);
   const [additionalFiles, setAdditionalFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -216,12 +222,23 @@ export default function LaunchBrief() {
     income: [] as string[],
     gender: [] as string[],
     competitors: [] as string[],
-    billingPreference: "online" as "online" | "invoice",
+    billingPreference: "online" as BillingPreference,
     confirmAuthorisation: false,
     confirmPaymentTerms: false,
+    confirmCreditsDeduction: false,
     subscribeUpdates: false,
   });
   const { toast } = useToast();
+
+  // Credit calculations
+  const basicCreditsRemaining = company ? getBasicCreditsRemaining(company) : 0;
+  const proCreditsRemaining = company ? getProCreditsRemaining(company) : 0;
+  const creditsRequired = concepts.length;
+  const isBasicStudy = selectedBrief === "basic";
+  const requiredCreditsType = isBasicStudy ? "Basic" : "Pro";
+  const availableCreditsForStudy = isBasicStudy ? basicCreditsRemaining : proCreditsRemaining;
+  const hasEnoughCredits = availableCreditsForStudy >= creditsRequired;
+  const hasAnyCredits = basicCreditsRemaining > 0 || proCreditsRemaining > 0;
 
   const PRICE_PER_CONCEPT = selectedBrief === "basic" ? 5000 : 45000;
   const totalPrice = PRICE_PER_CONCEPT * concepts.length;
@@ -404,6 +421,11 @@ export default function LaunchBrief() {
     onSuccess: () => {
       setShowSuccess(true);
       
+      // Invalidate company data if credits were used
+      if (company) {
+        queryClient.invalidateQueries({ queryKey: ['/api/companies', company.id] });
+      }
+      
       // Reset form
       setSelectedBrief(null);
       setAdditionalFiles([]);
@@ -423,6 +445,7 @@ export default function LaunchBrief() {
         billingPreference: "online",
         confirmAuthorisation: false,
         confirmPaymentTerms: false,
+        confirmCreditsDeduction: false,
         subscribeUpdates: false,
       });
     },
@@ -498,13 +521,21 @@ export default function LaunchBrief() {
       }
     });
 
-    // Validate consent checkboxes
-    if (!formData.confirmAuthorisation) {
-      errors.confirmAuthorisation = "Please confirm project authorisation";
+    // Validate consent checkboxes based on payment method
+    if (formData.billingPreference === "online" || formData.billingPreference === "invoice") {
+      if (!formData.confirmAuthorisation) {
+        errors.confirmAuthorisation = "Please confirm project authorisation";
+      }
     }
 
-    if (formData.billingPreference === "invoice" && !formData.confirmPaymentTerms) {
-      errors.confirmPaymentTerms = "Please agree to the payment terms";
+    if (formData.billingPreference === "credits") {
+      if (!formData.confirmCreditsDeduction) {
+        errors.confirmCreditsDeduction = "Please confirm credits deduction authorisation";
+      }
+      // Double-check credits availability
+      if (!hasEnoughCredits) {
+        errors.credits = "Insufficient credits for this study";
+      }
     }
 
     setValidationErrors(errors);
@@ -549,6 +580,13 @@ export default function LaunchBrief() {
           fileCount: c.files.length,
         })),
         billingPreference: formData.billingPreference,
+        paymentMethod: formData.billingPreference === "credits" ? "credits" : 
+                       formData.billingPreference === "invoice" ? "invoice" : "online",
+        // Credit usage information
+        basicCreditsUsed: formData.billingPreference === "credits" && isBasicStudy ? creditsRequired : 0,
+        proCreditsUsed: formData.billingPreference === "credits" && !isBasicStudy ? creditsRequired : 0,
+        companyId: company?.id || null,
+        userId: user?.id || null,
         projectFileUrls: [],
         files: uploadedFileMetadata,
       };
@@ -1229,7 +1267,7 @@ export default function LaunchBrief() {
           <CardContent className="space-y-6">
             <RadioGroup
               value={formData.billingPreference}
-              onValueChange={(value: "online" | "invoice") => 
+              onValueChange={(value: BillingPreference) => 
                 setFormData({ ...formData, billingPreference: value })
               }
               className="space-y-4"
@@ -1263,51 +1301,184 @@ export default function LaunchBrief() {
                   )}
                 </div>
               </div>
+
+              {/* Use My Credits Option */}
+              {isMember && company && (
+                <div className="flex items-start space-x-3">
+                  <RadioGroupItem 
+                    value="credits" 
+                    id="billing-credits" 
+                    data-testid="radio-billing-credits"
+                    disabled={!hasEnoughCredits}
+                  />
+                  <div className="space-y-2 flex-1">
+                    <Label 
+                      htmlFor="billing-credits" 
+                      className={`font-medium cursor-pointer flex items-center gap-2 ${!hasEnoughCredits ? "text-muted-foreground" : ""}`}
+                    >
+                      <Coins className="w-4 h-4" />
+                      Use My Credits
+                    </Label>
+                    
+                    {formData.billingPreference === "credits" && hasEnoughCredits && (
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground">
+                          Pay using your available Test24 credits. Fast, simple, and no billing required.
+                        </p>
+                        <div className="p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-md">
+                          <p className="text-sm font-medium text-green-700 dark:text-green-300 flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4" />
+                            You have enough credits to launch this study.
+                          </p>
+                          <div className="mt-2 text-sm text-green-600 dark:text-green-400">
+                            <p className="font-medium">Available Credits</p>
+                            <p>Test24 Basic: {basicCreditsRemaining} available</p>
+                            <p>Test24 Pro: {proCreditsRemaining} available</p>
+                          </div>
+                          <p className="mt-2 text-sm text-green-600 dark:text-green-400">
+                            This study will use <strong>{creditsRequired} Test24 {requiredCreditsType}</strong> credit{creditsRequired > 1 ? "s" : ""}.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Show credit status when not selected but has some credits */}
+                    {formData.billingPreference !== "credits" && hasAnyCredits && (
+                      <div className="text-sm text-muted-foreground">
+                        <p>Test24 Basic: {basicCreditsRemaining} | Test24 Pro: {proCreditsRemaining}</p>
+                      </div>
+                    )}
+
+                    {/* Not enough credits of the correct type */}
+                    {!hasEnoughCredits && hasAnyCredits && (
+                      <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-md">
+                        <p className="text-sm font-medium text-amber-700 dark:text-amber-300 flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4" />
+                          You don't have enough credits for this study.
+                        </p>
+                        <div className="mt-2 text-sm text-amber-600 dark:text-amber-400">
+                          <p className="font-medium">Available Credits</p>
+                          <p>Test24 Basic: {basicCreditsRemaining} available</p>
+                          <p>Test24 Pro: {proCreditsRemaining} available</p>
+                        </div>
+                        <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">
+                          Top up your Test24 {requiredCreditsType} credits to launch this project.
+                        </p>
+                        <Link href="/portal/billing">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mt-2"
+                            data-testid="button-topup-credits"
+                          >
+                            <ShoppingCart className="w-4 h-4 mr-2" />
+                            Top Up Credits
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+
+                    {/* No credits at all */}
+                    {!hasAnyCredits && (
+                      <div className="p-3 bg-muted border rounded-md">
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Looks like you don't have any Test24 credits yet.
+                        </p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Top up now to unlock faster launches and member-only pricing.
+                        </p>
+                        <Link href="/portal/billing">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mt-2"
+                            data-testid="button-buy-credits"
+                          >
+                            <ShoppingCart className="w-4 h-4 mr-2" />
+                            Buy Credits
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </RadioGroup>
 
-            {/* Consent Checkboxes */}
+            {/* Consent Checkboxes - Dynamic based on payment method */}
             <div className="space-y-4 pt-4 border-t">
-              <div className="flex items-start space-x-2" data-field="confirmAuthorisation">
-                <Checkbox
-                  id="confirmAuthorisation"
-                  checked={formData.confirmAuthorisation}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, confirmAuthorisation: checked as boolean })
-                  }
-                  data-testid="checkbox-confirm-authorisation"
-                />
-                <div className="space-y-1">
-                  <label
-                    htmlFor="confirmAuthorisation"
-                    className="text-sm leading-tight cursor-pointer"
-                  >
-                    I confirm that this brief is accurate and I authorise Innovatr to prepare the study based on the information supplied. *
-                  </label>
-                  {validationErrors.confirmAuthorisation && (
-                    <p className="text-xs text-destructive">{validationErrors.confirmAuthorisation}</p>
-                  )}
-                </div>
-              </div>
-
-              {formData.billingPreference === "invoice" && (
-                <div className="flex items-start space-x-2" data-field="confirmPaymentTerms">
+              {/* Pay Online Consent */}
+              {formData.billingPreference === "online" && (
+                <div className="flex items-start space-x-2" data-field="confirmAuthorisation">
                   <Checkbox
-                    id="confirmPaymentTerms"
-                    checked={formData.confirmPaymentTerms}
+                    id="confirmAuthorisation"
+                    checked={formData.confirmAuthorisation}
                     onCheckedChange={(checked) =>
-                      setFormData({ ...formData, confirmPaymentTerms: checked as boolean })
+                      setFormData({ ...formData, confirmAuthorisation: checked as boolean })
                     }
-                    data-testid="checkbox-confirm-payment-terms"
+                    data-testid="checkbox-confirm-authorisation"
                   />
                   <div className="space-y-1">
                     <label
-                      htmlFor="confirmPaymentTerms"
+                      htmlFor="confirmAuthorisation"
                       className="text-sm leading-tight cursor-pointer"
                     >
-                      I agree to a 30-day payment term. My project will begin once payment or a purchase order is received. *
+                      I confirm this brief is accurate and I authorise Innovatr to begin the study immediately. Payment will be processed upon submission. *
                     </label>
-                    {validationErrors.confirmPaymentTerms && (
-                      <p className="text-xs text-destructive">{validationErrors.confirmPaymentTerms}</p>
+                    {validationErrors.confirmAuthorisation && (
+                      <p className="text-xs text-destructive">{validationErrors.confirmAuthorisation}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Invoice Me Consent */}
+              {formData.billingPreference === "invoice" && (
+                <>
+                  <div className="flex items-start space-x-2" data-field="confirmAuthorisation">
+                    <Checkbox
+                      id="confirmAuthorisation"
+                      checked={formData.confirmAuthorisation}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, confirmAuthorisation: checked as boolean })
+                      }
+                      data-testid="checkbox-confirm-authorisation"
+                    />
+                    <div className="space-y-1">
+                      <label
+                        htmlFor="confirmAuthorisation"
+                        className="text-sm leading-tight cursor-pointer"
+                      >
+                        I confirm this brief is accurate and I authorise Innovatr to prepare the study. I agree to a 30-day payment term. My project will begin once payment or a purchase order is received. *
+                      </label>
+                      {validationErrors.confirmAuthorisation && (
+                        <p className="text-xs text-destructive">{validationErrors.confirmAuthorisation}</p>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Use My Credits Consent */}
+              {formData.billingPreference === "credits" && (
+                <div className="flex items-start space-x-2" data-field="confirmCreditsDeduction">
+                  <Checkbox
+                    id="confirmCreditsDeduction"
+                    checked={formData.confirmCreditsDeduction}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, confirmCreditsDeduction: checked as boolean })
+                    }
+                    data-testid="checkbox-confirm-credits-deduction"
+                  />
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="confirmCreditsDeduction"
+                      className="text-sm leading-tight cursor-pointer"
+                    >
+                      I confirm this brief is accurate and I authorise Innovatr to deduct {creditsRequired} Test24 {requiredCreditsType} credit{creditsRequired > 1 ? "s" : ""} from my account and begin the study immediately. *
+                    </label>
+                    {validationErrors.confirmCreditsDeduction && (
+                      <p className="text-xs text-destructive">{validationErrors.confirmCreditsDeduction}</p>
                     )}
                   </div>
                 </div>
@@ -1353,18 +1524,34 @@ export default function LaunchBrief() {
               <span className="text-sm text-muted-foreground">Turnaround Time</span>
               <span className="font-semibold">24 hours</span>
             </div>
-            <div className="flex items-center justify-between pt-2 border-t">
-              <span className="font-semibold">Total Cost</span>
-              <span className="text-2xl font-bold text-primary">
-                R{totalPrice.toLocaleString()}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Payment Method</span>
+              <span className="font-semibold">
+                {formData.billingPreference === "online" && "Pay Online"}
+                {formData.billingPreference === "invoice" && "Invoice"}
+                {formData.billingPreference === "credits" && "Use My Credits"}
               </span>
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t">
+              <span className="font-semibold">
+                {formData.billingPreference === "credits" ? "Credits Required" : "Total Cost"}
+              </span>
+              {formData.billingPreference === "credits" ? (
+                <span className="text-2xl font-bold text-primary">
+                  {creditsRequired} {requiredCreditsType} Credit{creditsRequired > 1 ? "s" : ""}
+                </span>
+              ) : (
+                <span className="text-2xl font-bold text-primary">
+                  R{totalPrice.toLocaleString()}
+                </span>
+              )}
             </div>
 
             <Button
               className="w-full"
               size="lg"
               onClick={handleSubmit}
-              disabled={isUploadingFiles || submitBriefMutation.isPending}
+              disabled={isUploadingFiles || submitBriefMutation.isPending || (formData.billingPreference === "credits" && !hasEnoughCredits)}
               data-testid="button-submit-brief"
             >
               {isUploadingFiles ? (
@@ -1379,7 +1566,9 @@ export default function LaunchBrief() {
                 </>
               ) : (
                 <>
-                  {formData.billingPreference === "online" ? "Submit & Pay" : "Submit Brief"}
+                  {formData.billingPreference === "online" && "Submit & Pay"}
+                  {formData.billingPreference === "invoice" && "Submit Brief"}
+                  {formData.billingPreference === "credits" && (hasEnoughCredits ? "Submit Using Credits" : "Top Up Credits")}
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </>
               )}

@@ -94,6 +94,16 @@ Preferred communication style: Simple, everyday language.
 - **Pricing Section**: Defaults to "Members" tab, showing discounted rates for Test24 Basic (R5,000) and Test24 Pro (R45,000).
 - **Member Credit Checkout**: Enforces Entry Plan membership requirement for credit purchases. Displays a notice card, automatically includes Entry Plan in the cart for new members, and allows existing members to opt out of the Entry Plan charge via a checkbox while retaining discounts. Entry Plan is a one-time annual fee.
 - **Coupon Claim System**: Users can claim a R10,000 Test24 Basic coupon via a dedicated `/claim-coupon` page by providing name and email. The system generates unique coupon codes and prevents duplicate claims from the same email.
+- **Launch Brief Payment Options**: Three payment methods for brief submissions:
+  - **Pay Online**: Immediate card payment, project moves into queue immediately
+  - **Invoice Me**: 30-day payment terms, project begins after payment/PO received
+  - **Use My Credits**: Deduct from company pooled credits (Test24 Basic or Pro credits)
+    - Shows available credit balance
+    - Disabled if insufficient credits
+    - Prompts to top up credits if balance is low
+    - Dynamic consent checkbox for credits deduction authorization
+    - Summary section shows credits instead of price when credits selected
+    - Backend validates and atomically deducts credits on submission
 - **Admin Portal**: Full administrative dashboard allowing admins to:
   - View system-wide metrics and user distribution
   - Manage user accounts and membership tiers

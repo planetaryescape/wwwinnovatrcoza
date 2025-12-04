@@ -1602,13 +1602,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
         competitors: z.array(z.string()).default([]),
         projectFileUrls: z.array(z.string()).default([]),
         files: z.array(briefFileSchema).default([]),
+        // Payment and credits fields
+        billingPreference: z.enum(["online", "invoice", "credits"]).optional(),
+        paymentMethod: z.enum(["online", "invoice", "credits"]).optional(),
+        basicCreditsUsed: z.number().default(0),
+        proCreditsUsed: z.number().default(0),
+        companyId: z.number().nullable().optional(),
+        userId: z.number().nullable().optional(),
+        concepts: z.array(z.object({
+          name: z.string(),
+          description: z.string().optional(),
+          fileCount: z.number().optional(),
+        })).optional(),
       });
 
       const validated = briefSchema.parse(req.body);
 
-      // Create brief submission
+      // Server-side credit calculation - derive from brief data, don't trust client
+      const creditsRequired = validated.numIdeas; // 1 credit per concept
+      const isBasicStudy = validated.studyType.toLowerCase().includes("basic");
+      let finalBasicCreditsUsed = 0;
+      let finalProCreditsUsed = 0;
+      let companyIdStr: string | null = null;
+
+      // Handle credit deduction if using credits payment method
+      if (validated.paymentMethod === "credits") {
+        // Early validation: must have company for credits payment
+        if (!validated.companyId) {
+          return res.status(400).json({ 
+            success: false, 
+            error: "Company account required for credit payments" 
+          });
+        }
+
+        companyIdStr = String(validated.companyId);
+        
+        // Refetch company to get current credit state (prevents race conditions)
+        const company = await storage.getCompany(companyIdStr);
+        if (!company) {
+          return res.status(400).json({ success: false, error: "Company not found" });
+        }
+
+        // Calculate available credits based on current database state
+        const basicAvailable = (company.basicCreditsTotal || 0) - (company.basicCreditsUsed || 0);
+        const proAvailable = (company.proCreditsTotal || 0) - (company.proCreditsUsed || 0);
+
+        // Determine which credit bucket to use based on study type (server-side decision)
+        if (isBasicStudy) {
+          if (basicAvailable < creditsRequired) {
+            return res.status(400).json({ 
+              success: false, 
+              error: `Insufficient Basic credits. Available: ${basicAvailable}, Required: ${creditsRequired}` 
+            });
+          }
+          finalBasicCreditsUsed = creditsRequired;
+        } else {
+          if (proAvailable < creditsRequired) {
+            return res.status(400).json({ 
+              success: false, 
+              error: `Insufficient Pro credits. Available: ${proAvailable}, Required: ${creditsRequired}` 
+            });
+          }
+          finalProCreditsUsed = creditsRequired;
+        }
+
+        // Atomic deduction: compute new values based on current DB state
+        const newBasicUsed = (company.basicCreditsUsed || 0) + finalBasicCreditsUsed;
+        const newProUsed = (company.proCreditsUsed || 0) + finalProCreditsUsed;
+        
+        await storage.updateCompany(companyIdStr, {
+          basicCreditsUsed: newBasicUsed,
+          proCreditsUsed: newProUsed,
+        });
+
+        console.log(`Credits deducted for company ${validated.companyId}: Basic ${finalBasicCreditsUsed}, Pro ${finalProCreditsUsed}`);
+      }
+
+      // Create brief submission with server-computed credit values
       const brief = await storage.createBriefSubmission({
         ...validated,
+        concepts: validated.concepts || [],
+        companyId: companyIdStr || (validated.companyId ? String(validated.companyId) : null),
+        paymentMethod: validated.paymentMethod || "online",
+        basicCreditsUsed: finalBasicCreditsUsed,
+        proCreditsUsed: finalProCreditsUsed,
         status: "new",
       });
 

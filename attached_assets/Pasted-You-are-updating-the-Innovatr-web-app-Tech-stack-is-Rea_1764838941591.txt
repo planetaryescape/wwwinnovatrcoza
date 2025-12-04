@@ -1,0 +1,516 @@
+You are updating the Innovatr web app.
+Tech stack is React on the front end with a Node API and database backing the portal.
+Please implement the following changes carefully and consistently.
+
+1. Context and Goals
+
+
+The portal already supports Test24 Basic and Test24 Pro studies, credits, and a launch brief flow.
+
+
+Users can purchase credits and see their remaining Test24 Basic and Pro credits in the Credits & Billing section.
+
+
+There is an existing Submit Your Brief page under /portal/launch used to configure and submit Test24 Basic and Pro projects.
+
+
+There is a My Research tab that shows the client’s completed reports and studies.
+
+
+The Admin Dashboard currently has a Client Reports tab listing reports for all companies.
+
+
+We want to:
+
+
+Add a third payment option to the brief flow: Use My Credits.
+
+
+Ensure that when Use My Credits is chosen, the correct credits are validated, deducted, and persisted.
+
+
+Keep Pay Online and Invoice Me behaviour intact.
+
+
+Simplify the admin experience by moving the Client Reports view into My Research for admin users (for example Hannah and Richard) instead of keeping a separate tab.
+
+
+Make sure the system is robust, optimised, and does not silently lose data.
+
+
+
+2. Data Model and Storage Requirements
+2.1 Credits
+Confirm or create a persistent data model that stores credits at company level (or user level if that is what already exists). For example:
+Company {
+  id: string;
+  name: string;
+  // Existing fields...
+  test24BasicCredits: number;
+  test24ProCredits: number;
+}
+
+Or, if you already use a separate Credits table, reuse that and extend it if needed.
+Requirements:
+
+
+Credits must be persisted in the database, not in memory.
+
+
+Credits must be decremented atomically when used to pay for a project, to prevent race conditions if two tabs or two admins trigger actions at the same time.
+
+
+If there is not enough credit of the correct type, the API must reject the request with a clear error and leave the balances unchanged.
+
+
+
+2.2 Research Projects / Briefs
+Ensure each submitted brief creates or updates a persistent record, for example:
+ResearchProject {
+  id: string;
+  companyId: string;
+  studyType: 'Test24 Basic' | 'Test24 Pro';
+  numberOfConcepts: number;
+  paymentMethod: 'pay_online' | 'invoice' | 'credits';
+  basicCreditsUsed: number; // normally 0 or numberOfConcepts
+  proCreditsUsed: number;   // normally 0 or numberOfConcepts
+  status: 'new' | 'audience_live' | 'analysing_data' | 'completed';
+  createdAt: Date;
+  updatedAt: Date;
+  // Other existing fields like title, tags, links to reports, etc
+}
+
+If a similar model already exists, extend it instead of creating a new one. Persist the chosen payment method and the number of credits consumed (if any) for auditability.
+
+3. Submit Your Brief – Billing Preferences
+On the /portal/launch page, update the Billing Preferences section to support three payment methods with the following exact copy and behaviour.
+3.1 Payment Options (UI Copy)
+Radio options:
+
+
+Pay Online
+Your card will be charged immediately and your project will move into the queue right away.
+
+
+Invoice Me
+You’ll receive an invoice within 1 working day. Your project will begin once payment or a purchase order is received. Standard 30-day payment terms apply.
+
+
+Use My Credits
+Pay using your available Test24 credits. Fast, simple, and no billing required.
+
+
+Only one option can be active at a time.
+
+3.2 Use My Credits – Dynamic States
+The application must detect:
+
+
+Logged in user
+
+
+Associated company
+
+
+Available test24BasicCredits and test24ProCredits
+
+
+The selected studyType for the current brief (Test24 Basic versus Test24 Pro)
+
+
+The number of concepts being tested (if credits are per concept)
+
+
+Then show dynamic microcopy under Use My Credits.
+A. User has enough credits of the correct type
+Example: Test24 Basic study, 1 concept, company has test24BasicCredits >= 1.
+Show:
+
+
+You have enough credits to launch this study.
+
+
+Available Credits
+
+
+Test24 Basic: X available
+
+
+Test24 Pro: Y available
+
+
+
+
+Primary button label when this method is selected:
+
+
+Submit Using Credits →
+
+
+B. User has credits, but not enough of the correct type
+Example: Needs 1 Basic credit, has test24BasicCredits = 0 but test24ProCredits > 0.
+Show:
+
+
+You don’t have enough credits for this study.
+
+
+Available Credits
+
+
+Test24 Basic: X available
+
+
+Test24 Pro: Y available
+
+
+
+
+Message:
+Top up your Test24 [Basic/Pro] credits to launch this project.
+
+
+Primary button label when Use My Credits is selected and balance is insufficient:
+
+
+Top Up Credits →
+Clicking this should navigate to or open the Credits & Billing section or the relevant purchase flow already used in the portal.
+
+
+C. User has zero credits
+If both credit balances are zero:
+Show:
+
+
+Looks like you don’t have any Test24 credits yet.
+
+
+Top up now to unlock faster launches and member-only pricing.
+
+
+Button:
+
+
+Buy Credits → (also linking to the Credits & Billing page or checkout)
+
+
+Validation Messages
+On submit, enforce server side validation:
+
+
+If Basic study and insufficient test24BasicCredits:
+"This study requires Test24 Basic credits. Your current balance is not sufficient."
+
+
+If Pro study and insufficient test24ProCredits:
+"This study requires Test24 Pro credits. Your current balance is not sufficient."
+
+
+These errors should be surfaced in the UI near the payment section as well as handled gracefully in the API response.
+
+4. Credit Deduction Logic
+When Use My Credits is the selected payment method and the user submits the brief:
+
+
+The front end should send paymentMethod: 'credits' in the payload plus any necessary metadata (studyType, companyId, numberOfConcepts, etc).
+
+
+The API must:
+
+
+Start a transaction.
+
+
+Lock or safely update the company row or credits row to avoid concurrent modification issues.
+
+
+Compute the credits required, normally:
+
+
+If studyType = 'Test24 Basic' then basicCreditsRequired = numberOfConcepts and proCreditsRequired = 0.
+
+
+If studyType = 'Test24 Pro' then proCreditsRequired = numberOfConcepts and basicCreditsRequired = 0.
+
+
+
+
+Check balances.
+
+
+If insufficient, abort and return a clear error message (see above).
+
+
+If sufficient:
+
+
+Subtract required credits from the company balance.
+
+
+Create a ResearchProject (or equivalent) record with paymentMethod = 'credits' and basicCreditsUsed / proCreditsUsed fields set.
+
+
+
+
+Commit the transaction.
+
+
+
+
+Return success to the front end.
+
+
+On success, the client should:
+
+
+Show the existing “brief submitted successfully” confirmation, plus:
+We’ve deducted your credits and moved your project into the queue. You’ll receive an email shortly confirming everything. You can track your project anytime in the My Research tab.
+
+
+Important: credits must only be deducted once per accepted submission. Refreshing the page must not cause double deduction.
+
+5. Pay Online and Invoice Me – Preserve Behaviour
+
+
+Pay Online keeps its existing integration with the payment gateway. Button label when this is selected: Submit & Pay →
+
+
+Invoice Me must:
+
+
+Store paymentMethod: 'invoice' in the project record.
+
+
+Trigger the existing or new email workflow for invoices to be sent to the client and to richard@innovatr.co.za and hannah@innovatr.co.za.
+
+
+Not trigger any immediate card charge.
+
+
+
+
+Existing legal text / checkboxes must be wired to the selected payment method, for example:
+
+
+Pay Online:
+[ ] I confirm this brief is accurate and I authorise Innovatr to begin the study immediately. Payment will be processed upon submission.
+
+
+Invoice Me:
+[ ] I confirm this brief is accurate and I authorise Innovatr to prepare the study. I agree to a 30-day payment term. My project will begin once payment or a purchase order is received.
+
+
+Use My Credits:
+[ ] I confirm this brief is accurate and I authorise Innovatr to deduct the required credits from my account and begin the study immediately.
+
+
+
+
+Make sure only the relevant checkbox is required depending on the selected payment method.
+
+6. Admin Experience – Move Client Reports into My Research
+Currently the Admin Dashboard has a Client Reports tab listing client research reports with title, company, tags, uploaded date and actions.
+We want to:
+
+
+Remove or hide the separate Client Reports tab in Admin.
+
+
+Instead, show these reports inside the My Research tab for admin users (for example users with a role of admin or staff).
+
+
+6.1 My Research Behaviour
+
+
+For normal client users:
+
+
+My Research should continue to show only their own projects and reports associated with their company.
+
+
+It can list both:
+
+
+Live projects with status (new, audience live, analysing data).
+
+
+Completed projects with downloadable reports.
+
+
+
+
+
+
+For admin users (Hannah and Richard):
+
+
+My Research becomes a unified research hub that includes all client projects and reports.
+
+
+Add filters:
+
+
+Company (dropdown list of companies).
+
+
+Tags.
+
+
+Status (new, audience live, analysing data, completed).
+
+
+
+
+The cards should show similar information to the current Client Reports list:
+
+
+Title
+
+
+Company
+
+
+Tags
+
+
+Uploaded / delivery date
+
+
+Status badge
+
+
+View and Download actions (reusing existing URLs).
+
+
+
+
+
+
+Reuse as much of the Client Reports rendering code as possible, but centralise it under My Research instead of Admin → Client Reports.
+
+
+Ensure the underlying storage for client research reports is database based, not in memory, and that previously uploaded Rugani and other client reports are still visible.
+
+
+
+7. Performance and Optimisation
+
+
+Add appropriate indexes on key fields: companyId, status, createdAt for fast filters in My Research.
+
+
+Paginate results in My Research and any admin view to avoid loading huge lists in one go.
+
+
+When calculating credit balances, query only the necessary data (do not hydrate large unrelated objects).
+
+
+Keep all heavy logic for credit checks and deductions on the server to avoid exposing sensitive data or business rules in the client.
+
+
+
+8. Error Handling and Edge Cases
+
+
+If the credit validation API fails for any reason, return a user friendly message and prevent credit deduction. The UI should show a message like:
+Something went wrong while validating your credits. Please try again or select another payment method. If the problem persists, contact Hannah at hannah@innovatr.co.za.
+
+
+If email sending fails but the brief and credits have been stored successfully:
+
+
+Do not roll back the brief.
+
+
+Log the error and surface it in admin tooling if possible.
+
+
+Admins can still see the project in My Research and follow up manually.
+
+
+
+
+Ensure that resubmitting or refreshing after a successful submission does not create duplicate projects or double deduct credits. This may require idempotency at either front end or API level.
+
+
+
+9. Testing Checklist
+Before finishing, verify:
+
+
+Use My Credits – Basic and Pro
+
+
+For both Test24 Basic and Pro, confirm:
+
+
+Enough credits: submission succeeds and correct number deducted.
+
+
+Insufficient credits: submission blocked with correct error.
+
+
+Zero credits: “Buy Credits” state shown.
+
+
+
+
+
+
+Pay Online
+
+
+Flow still works end to end, and payment gateway integration is unchanged.
+
+
+
+
+Invoice Me
+
+
+Project stored with paymentMethod = 'invoice'.
+
+
+Invoice emails go to client and both admin addresses.
+
+
+No card charge is attempted.
+
+
+
+
+My Research
+
+
+Regular client sees only their own projects and reports.
+
+
+Admin sees all reports and can filter by company, status, and tags.
+
+
+Reports previously visible under Admin → Client Reports now appear in My Research for admins.
+
+
+
+
+Credits & Billing
+
+
+Credit balances reflect deductions after credit based submissions.
+
+
+Top up flows still work and update balances correctly.
+
+
+
+
+Add concise inline comments where needed explaining:
+
+
+How credit deduction works
+
+
+Any assumptions made about study type, per concept pricing, or company association
+
+
+Do not change any existing visual design beyond what is required to support the three payment options and the updated My Research behaviour.
