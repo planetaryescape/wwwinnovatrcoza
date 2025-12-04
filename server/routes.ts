@@ -12,6 +12,7 @@ import { sendAdminOrderNotification, sendCustomerOrderConfirmation, sendContactF
 import { uploadFile, downloadFile, deleteFile, listFiles, fileExists } from "./app-storage";
 import { generateInvoicePdf } from "./invoices/generator";
 import { hashPassword, verifyPassword, validatePasswordStrength, generateResetToken, hashResetToken, getResetTokenExpiry, generateSessionToken, getSessionExpiry, isExpired, hashSessionToken } from "./auth/password";
+import { requireAuth, requireAdmin, redactUser, redactUsers, isAdminUser as isAdminUserMiddleware, apiError, type AuthenticatedRequest } from "./middleware";
 
 // Multer for handling multipart/form-data (PayFast webhooks and file uploads)
 const upload = multer();
@@ -487,7 +488,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/mailer-subscriptions", async (req, res) => {
+  app.get("/api/admin/mailer-subscriptions", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const subscriptions = await storage.getAllMailerSubscriptions();
       res.json(subscriptions);
@@ -981,53 +982,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin API endpoints
-  app.get("/api/admin/users", async (req, res) => {
+  // Admin API endpoints - All require admin authentication
+  app.get("/api/admin/users", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
-      // In a real app, check session/auth header
-      // For now, just return all users
       const users = await storage.getAllUsers();
-      // Don't expose passwords
-      const safeUsers = users.map(({ password, ...rest }) => rest);
-      res.json(safeUsers);
+      res.json(redactUsers(users));
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
   });
 
-  app.get("/api/admin/users", async (req, res) => {
-    try {
-      const users = await storage.getAllUsers();
-      res.json(users);
-    } catch (error: any) {
-      res.status(400).json({ error: error.message });
-    }
-  });
-
-  app.post("/api/admin/users", async (req, res) => {
+  app.post("/api/admin/users", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const user = await storage.createUser(req.body);
-      res.status(201).json(user);
+      res.status(201).json(redactUser(user));
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
   });
 
-  app.get("/api/admin/users/:id", async (req, res) => {
+  app.get("/api/admin/users/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const user = await storage.getUser(id);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-      const { password, ...safeUser } = user;
-      res.json(safeUser);
+      res.json(redactUser(user));
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
   });
 
-  app.patch("/api/admin/users/:id", async (req, res) => {
+  app.patch("/api/admin/users/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const { membershipTier, status, role, creditsBasic, creditsPro } = req.body;
@@ -1051,7 +1038,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/overview", async (req, res) => {
+  app.get("/api/admin/overview", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const users = await storage.getAllUsers();
       const starterCount = users.filter(u => u.membershipTier === "STARTER").length;
@@ -1077,7 +1064,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Orders endpoints
-  app.get("/api/admin/orders", async (req, res) => {
+  app.get("/api/admin/orders", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const orders = await storage.getAllOrders();
       const ordersWithItems = await Promise.all(
@@ -1092,7 +1079,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/orders/:id", async (req, res) => {
+  app.patch("/api/admin/orders/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const { status } = req.body;
@@ -1170,7 +1157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Reports endpoints
-  app.get("/api/admin/reports", async (req, res) => {
+  app.get("/api/admin/reports", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const reports = await storage.getAllReports();
       res.json(reports);
@@ -1179,7 +1166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/reports", async (req, res) => {
+  app.post("/api/admin/reports", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const validatedData = insertReportSchema.parse(req.body);
       const report = await storage.createReport(validatedData);
@@ -1189,7 +1176,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/reports/:id", async (req, res) => {
+  app.patch("/api/admin/reports/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const report = await storage.getReport(id);
@@ -1204,7 +1191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Deals endpoints
-  app.get("/api/admin/deals", async (req, res) => {
+  app.get("/api/admin/deals", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const deals = await storage.getAllDeals();
       res.json(deals);
@@ -1213,7 +1200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/deals", async (req, res) => {
+  app.post("/api/admin/deals", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const validatedData = insertDealSchema.parse(req.body);
       const deal = await storage.createDeal(validatedData);
@@ -1223,7 +1210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/deals/:id", async (req, res) => {
+  app.patch("/api/admin/deals/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const deal = await storage.getDeal(id);
@@ -1278,7 +1265,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Company management endpoints
-  app.get("/api/admin/companies", async (req, res) => {
+  app.get("/api/admin/companies", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const companies = await storage.getAllCompanies();
       res.json(companies);
@@ -1287,7 +1274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/companies/:id", async (req, res) => {
+  app.get("/api/admin/companies/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const company = await storage.getCompany(id);
@@ -1300,7 +1287,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/companies", async (req, res) => {
+  app.post("/api/admin/companies", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const company = await storage.createCompany(req.body);
       res.status(201).json(company);
@@ -1309,7 +1296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/companies/:id", async (req, res) => {
+  app.patch("/api/admin/companies/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const company = await storage.getCompany(id);
@@ -1324,17 +1311,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/companies/:id/users", async (req, res) => {
+  app.get("/api/admin/companies/:id/users", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const users = await storage.getUsersByCompanyId(id);
-      res.json(users);
+      res.json(redactUsers(users));
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
   });
 
-  app.delete("/api/admin/companies/:id", async (req, res) => {
+  app.delete("/api/admin/companies/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const company = await storage.getCompany(id);
@@ -1349,7 +1336,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Company logo upload
-  app.post("/api/admin/companies/:id/logo", fileUpload.single("logo"), async (req, res) => {
+  app.post("/api/admin/companies/:id/logo", requireAdmin, fileUpload.single("logo"), async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const company = await storage.getCompany(id);
@@ -1374,7 +1361,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete user
-  app.delete("/api/admin/users/:id", async (req, res) => {
+  app.delete("/api/admin/users/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const user = await storage.getUser(id);
@@ -1389,7 +1376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Client Reports CRUD endpoints
-  app.get("/api/admin/client-reports", async (req, res) => {
+  app.get("/api/admin/client-reports", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const reports = await storage.getAllClientReports();
       res.json(reports);
@@ -1398,7 +1385,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/client-reports/:id", async (req, res) => {
+  app.get("/api/admin/client-reports/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const report = await storage.getClientReport(id);
@@ -1411,7 +1398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/client-reports", async (req, res) => {
+  app.post("/api/admin/client-reports", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const report = await storage.createClientReport(req.body);
       res.status(201).json(report);
@@ -1420,7 +1407,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/client-reports/:id", async (req, res) => {
+  app.patch("/api/admin/client-reports/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const report = await storage.getClientReport(id);
@@ -1435,7 +1422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/client-reports/:id", async (req, res) => {
+  app.delete("/api/admin/client-reports/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const report = await storage.getClientReport(id);
@@ -1450,7 +1437,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Client report PDF upload
-  app.post("/api/admin/client-reports/:id/pdf", fileUpload.single("pdf"), async (req, res) => {
+  app.post("/api/admin/client-reports/:id/pdf", requireAdmin, fileUpload.single("pdf"), async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const report = await storage.getClientReport(id);
@@ -1518,7 +1505,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/companies/:companyId/client-reports", async (req, res) => {
+  app.get("/api/admin/companies/:companyId/client-reports", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { companyId } = req.params;
       const reports = await storage.getClientReportsByCompanyId(companyId);
@@ -1546,7 +1533,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Subscription management endpoints
-  app.get("/api/admin/subscriptions", async (req, res) => {
+  app.get("/api/admin/subscriptions", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const subscriptions = await storage.getAllSubscriptions();
       res.json(subscriptions);
@@ -1555,7 +1542,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/subscriptions/:id", async (req, res) => {
+  app.get("/api/admin/subscriptions/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const subscription = await storage.getSubscription(id);
@@ -1568,7 +1555,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/subscriptions/:id", async (req, res) => {
+  app.patch("/api/admin/subscriptions/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const subscription = await storage.getSubscription(id);
@@ -1786,7 +1773,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // List files in App Storage
-  app.get("/api/admin/files", async (req, res) => {
+  app.get("/api/admin/files", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const prefix = req.query.prefix as string | undefined;
       const files = await listFiles(prefix);
@@ -2076,7 +2063,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all brief submissions (admin only)
-  app.get("/api/admin/briefs", async (req, res) => {
+  app.get("/api/admin/briefs", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const briefs = await storage.getAllBriefSubmissions();
       res.json(briefs);
@@ -2086,7 +2073,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get single brief submission
-  app.get("/api/admin/briefs/:id", async (req, res) => {
+  app.get("/api/admin/briefs/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const brief = await storage.getBriefSubmission(req.params.id);
       if (!brief) {
@@ -2099,7 +2086,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update brief submission (admin only - for status updates, notes)
-  app.patch("/api/admin/briefs/:id", async (req, res) => {
+  app.patch("/api/admin/briefs/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { status, notes } = req.body;
       
@@ -2146,7 +2133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all studies (admin only)
-  app.get("/api/admin/studies", async (req, res) => {
+  app.get("/api/admin/studies", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const studies = await storage.getAllStudies();
       res.json(studies);
@@ -2156,7 +2143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create a new study from a brief (admin only)
-  app.post("/api/admin/studies", async (req, res) => {
+  app.post("/api/admin/studies", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const studySchema = z.object({
         briefId: z.string().optional(),
@@ -2185,7 +2172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create a study from an existing brief (admin only)
-  app.post("/api/admin/studies/from-brief/:briefId", async (req, res) => {
+  app.post("/api/admin/studies/from-brief/:briefId", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const brief = await storage.getBriefSubmission(req.params.briefId);
       if (!brief) {
@@ -2219,7 +2206,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get a single study (admin only)
-  app.get("/api/admin/studies/:id", async (req, res) => {
+  app.get("/api/admin/studies/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const study = await storage.getStudy(req.params.id);
       if (!study) {
@@ -2232,7 +2219,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update study (admin only - for general updates)
-  app.patch("/api/admin/studies/:id", async (req, res) => {
+  app.patch("/api/admin/studies/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const study = await storage.getStudy(req.params.id);
       if (!study) {
@@ -2261,7 +2248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update study status (admin only - optionally triggers email notifications)
-  app.patch("/api/admin/studies/:id/status", async (req, res) => {
+  app.patch("/api/admin/studies/:id/status", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const study = await storage.getStudy(req.params.id);
       if (!study) {

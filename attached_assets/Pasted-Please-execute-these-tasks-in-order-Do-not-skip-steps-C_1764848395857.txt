@@ -1,0 +1,132 @@
+Please execute these tasks in order. Do not skip steps. Confirm each phase before moving on. Keep existing working auth/credits intact.
+
+====================================================
+PHASE 0 — SAFETY NET
+====================================================
+• Create a checkpoint/branch.
+• Do NOT regress Phase 1+2 changes (admin names + credits).
+
+====================================================
+PHASE 1 — CRITICAL SECURITY PATCHES
+====================================================
+
+1) Add auth + role middleware (server/routes.ts or server/middleware.ts)
+   - requireAuth(req,res,next): verify session cookie, load user from storage.
+     If missing/invalid => 401 { error:"Not authenticated" }.
+   - requireAdmin(req,res,next): requireAuth + check user.role === "ADMIN".
+     If not admin => 403 { error:"Forbidden" }.
+
+2) Protect ALL /api/admin/* endpoints
+   - Wrap: /api/admin/overview, /api/admin/users, /api/admin/reports, /api/admin/deals, any others.
+   - Remove any duplicate route definitions (audit noted duplicate /api/admin/users).
+
+3) Scrub sensitive fields from every user payload
+   - Create redactUser(user) that removes: password, passwordHash, resetToken, resetTokenExpires, any secret fields.
+   - Use redactUser in ALL responses returning user(s): /api/admin/users, /api/auth/me, /api/companies (if it returns users), etc.
+
+4) Quick regression check (automate):
+   - Unauthed GET /api/admin/overview => 401/403
+   - Member (non-admin) GET /api/admin/overview => 403
+   - Admin GET /api/admin/users => 200 and NO "passwordHash" present
+   - Grep codebase to ensure no response includes "passwordHash" fields.
+
+====================================================
+PHASE 2 — HIGH-PRIORITY FUNCTIONALITY
+====================================================
+
+5) Email service configuration guard
+   - In email-service, if RESEND_API_KEY missing: log warning, still store the email event in DB (emails_outbox table or equivalent) with payload + attachments metadata, status="queued".
+   - When key is present, send and mark status="sent" (or "failed" with error).
+
+6) Brief listing endpoints
+   - Add GET /api/briefs (admin-only) to list briefs (with pagination, newest first).
+   - Add GET /api/member/briefs (authed) that returns briefs for the current user + their company.
+   - Ensure brief records include links to stored attachments (not inline binary), filenames, sizes, uploadedAt.
+   - Confirm briefs appear in “My Research”.
+
+7) Company lookup ergonomics
+   - Update /api/member/company to accept either:
+       a) current session (preferred), OR
+       b) email param (fallback)
+     Resolve companyId internally. Return company and pooled credits.
+
+====================================================
+PHASE 3 — MEDIUM PRIORITY
+====================================================
+
+8) Credit ledger endpoint
+   - Add GET /api/member/credit-ledger (authed; current user) returning recent transactions (type: top_up|deduct|refund|adjust, amount, balance_after, memo, createdAt).
+   - Ensure submissions that use credits create a ledger entry. Same for admin top-ups/adjustments.
+
+9) Studies endpoint + seeding sanity
+   - Verify studies seed links to user/company and include status: "new" | "audience_live" | "analysing" | "completed".
+   - Implement GET /api/member/studies (authed) returning the user/company studies filtered by status (optional query param status).
+   - My Research should show "Live in 24h" countdown when status transitions from "new" → "audience_live".
+
+====================================================
+PHASE 4 — CLEANUPS & DX
+====================================================
+
+10) Remove duplicate routes (noted duplicate /api/admin/users).
+11) Add a single utility for safe error responses with consistent shape: { error, code }.
+12) Add basic rate limits for auth routes (login, reset request) to reduce brute-force.
+13) Ensure CORS + cookie flags are correct (secure, httpOnly) in non-dev.
+
+====================================================
+PHASE 5 — VERIFICATION (RUN ALL)
+====================================================
+Run these once code compiles to verify each fix.
+
+# 1) Admin security
+curl -s http://localhost:5000/api/admin/overview | head -c 120
+# Expect 401/403
+
+# Login as member (Rugani)
+curl -s -c /tmp/mem.cookie -X POST http://localhost:5000/api/auth/login \
+ -H "Content-Type: application/json" \
+ -d '{"email":"simonne@ruganijuice.co.za","password":"TempPass123!""}' >/dev/null
+
+curl -s -b /tmp/mem.cookie http://localhost:5000/api/admin/overview | head -c 120
+# Expect 403
+
+# Login as admin
+curl -s -c /tmp/adm.cookie -X POST http://localhost:5000/api/auth/login \
+ -H "Content-Type: application/json" \
+ -d '{"email":"hannah@innovatr.co.za","password":"InnovatrAdmin2024!"}' >/dev/null
+
+curl -s -b /tmp/adm.cookie http://localhost:5000/api/admin/users | grep -o "passwordHash" | wc -l
+# Expect 0
+
+# 2) Briefs listing
+curl -s -b /tmp/adm.cookie http://localhost:5000/api/briefs | head -c 200
+# Expect JSON array
+curl -s -b /tmp/mem.cookie http://localhost:5000/api/member/briefs | head -c 200
+# Expect briefs for member/company
+
+# 3) Company endpoint ergonomic
+curl -s -b /tmp/mem.cookie http://localhost:5000/api/member/company | head -c 200
+# Expect company without needing explicit companyId
+
+# 4) Credit ledger
+curl -s -b /tmp/mem.cookie http://localhost:5000/api/member/credit-ledger | head -c 200
+# Expect JSON array with type/amount/balance_after
+
+# 5) Studies
+curl -s -b /tmp/mem.cookie "http://localhost:5000/api/member/studies?status=audience_live" | head -c 200
+# Expect filtered list
+
+# 6) Sensitive field audit
+curl -s -b /tmp/adm.cookie http://localhost:5000/api/admin/users | grep -E "password|passwordHash|resetToken" | wc -l
+# Expect 0
+
+# 7) Email key guard
+[ -z "$RESEND_API_KEY" ] && echo "No key set; ensure emails queue to DB, not fail."
+
+====================================================
+DELIVERABLE
+====================================================
+Return:
+1) File + line summary of where middleware was added and which routes were protected.
+2) List of endpoints added/changed with request+response shapes.
+3) Confirmation of each verification check (pass/fail) with outputs.
+4) Any remaining gaps or TODOs flagged for Phase 3+ (e.g., full DB persistence migration).
