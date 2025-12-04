@@ -242,7 +242,7 @@ export class DatabaseStorage implements IStorage {
     });
 
     const tempPasswordHash = await hashPassword("TempPass123!");
-    const adminPasswordHash = await hashPassword("InnovatrAdmin2024!");
+    const adminPasswordHash = await hashPassword("Innovatr@Admin!");
 
     const adminUsersData = [
       { name: "HannaH Steven", email: "hannah@innovatr.co.za", username: "hannah.steven", passwordHash: adminPasswordHash, creditsBasic: 25, creditsPro: 4 },
