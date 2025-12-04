@@ -51,6 +51,7 @@ import {
 import { eq } from "drizzle-orm";
 import { db } from "./db";
 import { randomUUID } from "crypto";
+import { hashPassword } from "./auth/password";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -201,8 +202,30 @@ export class MemStorage implements IStorage {
     const existingCompanies = await this.getAllCompanies();
     if (existingCompanies.length > 0) return;
 
+    // Create Innovatr company for admin users
+    const innovatrId = randomUUID();
     const ruganiId = randomUUID();
     const greenwayId = randomUUID();
+
+    const innovatr: Company = {
+      id: innovatrId,
+      name: "Innovatr",
+      domain: "innovatr.co.za",
+      logoUrl: null,
+      industry: "Market Research",
+      tier: "SCALE",
+      contractStart: null,
+      contractEnd: null,
+      monthlyFee: null,
+      basicCreditsTotal: 999,
+      basicCreditsUsed: 0,
+      proCreditsTotal: 999,
+      proCreditsUsed: 0,
+      dealDetails: null,
+      notes: "Internal Innovatr team - admin access",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
     const rugani: Company = {
       id: ruganiId,
@@ -255,8 +278,33 @@ export class MemStorage implements IStorage {
       updatedAt: new Date(),
     };
 
+    this.companiesMap.set(innovatrId, innovatr);
     this.companiesMap.set(ruganiId, rugani);
     this.companiesMap.set(greenwayId, greenway);
+
+    // Hash passwords for seeded users
+    const tempPasswordHash = await hashPassword("TempPass123!");
+    const adminPasswordHash = await hashPassword("InnovatrAdmin2024!");
+
+    // Admin users with hashed passwords
+    const adminUsers = [
+      { name: "Hannah Sobey", email: "hannah@innovatr.co.za", username: "hannah.sobey", passwordHash: adminPasswordHash },
+      { name: "Richard Sobey", email: "richard@innovatr.co.za", username: "richard.sobey", passwordHash: adminPasswordHash },
+    ];
+
+    for (const u of adminUsers) {
+      await this.createUserWithHash({
+        username: u.username,
+        email: u.email,
+        passwordHash: u.passwordHash,
+        name: u.name,
+        company: "Innovatr",
+        companyId: innovatrId,
+        membershipTier: "SCALE",
+        status: "ACTIVE",
+        role: "ADMIN",
+      });
+    }
 
     const greenwayUsers = [
       { name: "Duncan Buhr", email: "duncan@greenwayfarm.co.za", username: "duncan.buhr" },
@@ -269,10 +317,10 @@ export class MemStorage implements IStorage {
     ];
 
     for (const u of greenwayUsers) {
-      await this.createUser({
+      await this.createUserWithHash({
         username: u.username,
         email: u.email,
-        password: "TempPass123!",
+        passwordHash: tempPasswordHash,
         name: u.name,
         company: "Greenway Farms",
         companyId: greenwayId,
@@ -283,10 +331,10 @@ export class MemStorage implements IStorage {
     }
 
     for (const u of ruganiUsers) {
-      await this.createUser({
+      await this.createUserWithHash({
         username: u.username,
         email: u.email,
-        password: "TempPass123!",
+        passwordHash: tempPasswordHash,
         name: u.name,
         company: "Rugani Juice",
         companyId: ruganiId,
@@ -412,6 +460,50 @@ export class MemStorage implements IStorage {
       internalNotes: null,
       isActive: true,
       emailVerified: false,
+      createdAt: now,
+      updatedAt: now,
+      lastLoginAt: null,
+    };
+    this.users.set(id, user);
+    return user;
+  }
+
+  // Create user with pre-hashed password (used for seeding with bcrypt hashes)
+  private async createUserWithHash(userData: {
+    username: string;
+    email: string;
+    passwordHash: string;
+    name: string;
+    company: string;
+    companyId: string;
+    membershipTier: string;
+    status: string;
+    role: string;
+  }): Promise<User> {
+    const id = randomUUID();
+    const now = new Date();
+    const user: User = {
+      id,
+      username: userData.username,
+      email: userData.email,
+      password: "", // No plaintext password stored
+      passwordHash: userData.passwordHash,
+      name: userData.name,
+      company: userData.company,
+      companyId: userData.companyId,
+      membershipTier: userData.membershipTier as any,
+      status: userData.status as any,
+      role: userData.role as any,
+      creditsBasic: 0,
+      creditsPro: 0,
+      creditsInheritedFromCompany: true,
+      totalSpend: "0",
+      firstProjectDate: null,
+      lastProjectDate: null,
+      lastActivityDate: null,
+      internalNotes: null,
+      isActive: true,
+      emailVerified: true, // Seeded users are pre-verified
       createdAt: now,
       updatedAt: now,
       lastLoginAt: null,
