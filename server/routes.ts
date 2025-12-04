@@ -1132,11 +1132,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const periodBriefs = filterByDate(briefs);
       const periodStudies = filterByDate(studies);
 
-      // Calculate metrics
-      const totalBasicCredits = companies.reduce((sum: number, c) => sum + (c.basicCreditsTotal || 0), 0);
-      const usedBasicCredits = companies.reduce((sum: number, c) => sum + (c.basicCreditsUsed || 0), 0);
-      const totalProCredits = companies.reduce((sum: number, c) => sum + (c.proCreditsTotal || 0), 0);
-      const usedProCredits = companies.reduce((sum: number, c) => sum + (c.proCreditsUsed || 0), 0);
+      // Calculate metrics (exclude Innovatr's fictional credits from totals)
+      const realCompanies = companies.filter(c => c.name !== "Innovatr");
+      const totalBasicCredits = realCompanies.reduce((sum: number, c) => sum + (c.basicCreditsTotal || 0), 0);
+      const usedBasicCredits = realCompanies.reduce((sum: number, c) => sum + (c.basicCreditsUsed || 0), 0);
+      const totalProCredits = realCompanies.reduce((sum: number, c) => sum + (c.proCreditsTotal || 0), 0);
+      const usedProCredits = realCompanies.reduce((sum: number, c) => sum + (c.proCreditsUsed || 0), 0);
 
       const orderTotals = periodOrders.reduce((sum: number, o) => sum + parseFloat(String(o.amount) || "0"), 0);
       
