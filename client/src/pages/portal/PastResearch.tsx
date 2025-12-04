@@ -26,6 +26,7 @@ interface ClientReport {
   title: string;
   description: string | null;
   pdfUrl: string | null;
+  dashboardUrl: string | null;
   thumbnailUrl: string | null;
   tags: string[];
   uploadedAt: string;
@@ -208,6 +209,12 @@ export default function PastResearch() {
   const handleDownload = (report: ClientReport) => {
     if (report.pdfUrl) {
       window.open(report.pdfUrl, '_blank');
+    }
+  };
+
+  const handleViewDashboard = (report: ClientReport) => {
+    if (report.dashboardUrl) {
+      window.open(report.dashboardUrl, '_blank');
     }
   };
 
@@ -705,8 +712,8 @@ export default function PastResearch() {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                onClick={() => handleDownload(report)}
-                                disabled={!report.pdfUrl}
+                                onClick={() => handleViewDashboard(report)}
+                                disabled={!report.dashboardUrl}
                                 data-testid={`button-view-${report.id}`}
                               >
                                 <Eye className="w-4 h-4 mr-1" />
@@ -820,8 +827,8 @@ export default function PastResearch() {
                                 <Button 
                                   variant="outline" 
                                   size="sm"
-                                  onClick={() => handleDownload(report)}
-                                  disabled={!report.pdfUrl}
+                                  onClick={() => handleViewDashboard(report)}
+                                  disabled={!report.dashboardUrl}
                                   data-testid={`button-view-${report.id}`}
                                 >
                                   <Eye className="w-4 h-4 mr-1" />

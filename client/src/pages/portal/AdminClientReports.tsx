@@ -59,6 +59,7 @@ interface ClientReport {
   title: string;
   description: string | null;
   pdfUrl: string | null;
+  dashboardUrl: string | null;
   thumbnailUrl: string | null;
   tags: string[];
   uploadedAt: string;
@@ -91,6 +92,7 @@ export default function AdminClientReports() {
     description: "",
     companyId: "",
     tags: "",
+    dashboardUrl: "",
   });
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -172,6 +174,7 @@ export default function AdminClientReports() {
       description: "",
       companyId: "",
       tags: "",
+      dashboardUrl: "",
     });
     setPdfFile(null);
     setDialogOpen(true);
@@ -184,6 +187,7 @@ export default function AdminClientReports() {
       description: report.description || "",
       companyId: report.companyId,
       tags: report.tags.join(", "),
+      dashboardUrl: report.dashboardUrl || "",
     });
     setPdfFile(null);
     setDialogOpen(true);
@@ -228,6 +232,7 @@ export default function AdminClientReports() {
         description: formData.description || null,
         companyId: formData.companyId,
         pdfUrl,
+        dashboardUrl: formData.dashboardUrl || null,
         tags,
       };
 
@@ -552,6 +557,24 @@ export default function AdminClientReports() {
                 placeholder="market research, consumer insights, Q4 2024"
                 data-testid="input-report-tags"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="dashboardUrl">Dashboard Link (Optional)</Label>
+              <div className="flex items-center gap-2">
+                <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                <Input
+                  id="dashboardUrl"
+                  type="url"
+                  value={formData.dashboardUrl}
+                  onChange={(e) => setFormData({ ...formData, dashboardUrl: e.target.value })}
+                  placeholder="https://upsiide.com/dashboard/..."
+                  data-testid="input-report-dashboard-url"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Link to the client's research dashboard on your platform
+              </p>
             </div>
             
             <div className="space-y-2">

@@ -468,6 +468,7 @@ export const clientReports = pgTable("client_reports", {
   deliveredAt: timestamp("delivered_at"),
   primaryContactEmail: text("primary_contact_email"),
   pdfUrl: text("pdf_url"),
+  dashboardUrl: text("dashboard_url"),
   thumbnailUrl: text("thumbnail_url"),
   tags: text("tags").array().default([]),
   uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
@@ -489,6 +490,7 @@ export const insertClientReportSchema = createInsertSchema(clientReports)
     status: z.string().optional(),
     deliveredAt: z.string().or(z.date()).optional(),
     primaryContactEmail: z.string().email().optional().or(z.literal("")),
+    dashboardUrl: z.string().url().optional().or(z.literal("")),
   });
 
 export type InsertClientReport = z.infer<typeof insertClientReportSchema>;
