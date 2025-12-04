@@ -1,0 +1,582 @@
+You are working on the Innovatr portal project (admin + member portal) that already uses PostgreSQL with Drizzle and the new DatabaseStorage implementation.
+
+Your job now is to:
+
+Correct the data model and seed data for companies, credits, and research projects
+
+Load and connect all real clients and Test24 projects (Rugani, Greenway, Nando’s, DGB, Revlon, Mitchum, Elizabeth Arden)
+
+Fix the Admin analytics so they read the correct data
+
+Simplify and polish the Admin UI, especially the Overview and Companies tabs
+
+Remove revenue analytics from Orders
+
+Leave the email system exactly as it is now
+
+When you are done, the Admin Dashboard must feel clean, professional and minimal, but still informative.
+
+1. GLOBAL RULES
+
+Do not reintroduce MemStorage. Use the existing DatabaseStorage and Drizzle schemas.
+
+Do not change any email templates or email sending logic.
+
+Admin routes must remain protected behind requireAdmin / requireAuth as already implemented.
+
+Keep the existing font and colour tokens. Do not introduce new random colours or gradients. Use the same brand purple and neutrals currently used in the portal.
+
+Prefer simple number cards over heavy visualisations. Only use charts where they clearly add value.
+
+Do not break or remove any existing tabs: Overview, Companies, Orders, Briefs, Members, Reports, Deals. Deals can remain mostly empty for now.
+
+2. DATA MODEL & SEEDING – COMPANIES, CREDITS, MEMBERS
+
+Update the database seed logic (where companies, users, credits and studies are created) so that the following companies and credit balances are represented exactly.
+
+2.1 Companies and Tiers
+
+We should have at least these companies in the DB:
+
+Innovatr
+
+Domain: innovatr.co.za
+
+Tier: Scale
+
+Credits: keep whatever was already seeded for Innovatr (do not change here unless required by your own previous logic)
+
+Rugani Juice
+
+Parent company: Greenway Farms (see below)
+
+Tier: Growth
+
+Credits: 8 Basic, 2 Pro remaining
+
+Note: They originally had 10 Basic, 2 Pro and have already used 2 Basic. Your storage should reflect this correctly (either via credit ledger or derived from used credits).
+
+Has 2 client reports linked to this company.
+
+Greenway Farms
+
+Tier: Growth
+
+Credits: 10 Basic, 2 Pro remaining
+
+No client reports yet
+
+Same parent group as Rugani. For now this can just be metadata (for example a parentCompanyId field) but they must appear as two separate companies in the UI.
+
+Nando’s South Africa
+
+Tier: Growth
+
+Credits originally: 5 Basic
+
+Used: all 5 Basic on one Test24 Basic project
+
+Remaining credits: 0 Basic, 0 Pro
+
+Has 1 Test24 Basic study currently active (ongoing)
+
+Has 1 client report (for that study) considered “live/ongoing”.
+
+DGB
+
+Tier: non member or Growth if your schema requires a tier
+
+This is the client for the pilot Test24 Basic project for Durbanville Hills but the company in the system should be named DGB, not Durbanville Hills.
+
+Credits originally: 1 Basic pilot
+
+Remaining credits: 0 Basic, 0 Pro (pilot once off, completed)
+
+Has 1 completed Test24 Basic report linked.
+
+Revlon
+
+Tier: Scale
+
+Credits: 0 Basic, 0 Pro for now
+
+No contacts yet, no reports yet.
+
+They must appear as a Scale company in the Companies view but with zero credits.
+
+Mitchum
+
+Tier: Scale
+
+Credits: 0 Basic, 0 Pro
+
+No contacts yet, no reports yet.
+
+Elizabeth Arden
+
+Tier: Scale
+
+Credits: 0 Basic, 0 Pro
+
+No contacts yet, no reports yet.
+
+All of these companies must be visible in Admin → Companies with the correct tiers and credit balances.
+
+2.2 Members
+
+Ensure the following members exist and are linked to the right companies:
+
+Simone Kakana
+
+Email: simone.kakana@nandos.co.za
+
+Company: Nando’s South Africa
+
+Tier: Growth
+
+Tymon
+
+Email: tymon@rugani.co.za
+
+Company: Rugani Juice
+
+Tier: Growth
+
+Simonne
+
+Email: simonne@rugani.co.za
+
+Company: Rugani Juice
+
+Tier: Growth
+
+Admins (already seeded earlier):
+
+HannaH Steven – Innovatr Admin
+
+Richard Lawrence – Innovatr Admin
+
+Only admin accounts must be able to see /portal/admin.
+
+3. DATA MODEL – TEST24 PROJECTS & REPORTS
+
+Make sure the research and report data in the DB matches the real Test24 projects.
+
+3.1 Test24 Studies
+
+Create / update your studies (or equivalent entity) so that:
+
+Nando’s Menu Test – Test24 Basic
+
+Company: Nando’s South Africa
+
+Type: test24_basic
+
+Number of ideas: 5
+
+Status: active or in_progress
+
+This must be shown as 1 active study in the research pipeline and in the My Research tab for admins.
+
+It should also decrement Nando’s basic credits by 5 (they started with 5) so they now show 0 Basic remaining.
+
+Rugani Study 1 (e.g. “Rugani x Clicks Wellness Beverage Positioning”)
+
+Company: Rugani Juice
+
+Type: test24_basic or test24_pro based on your earlier implementation – but ensure that Rugani’s Pro usage and Basic usage are correctly counted.
+
+Status: completed
+
+Linked to one of Rugani’s client reports in the Reports system.
+
+Rugani Study 2 (e.g. “Rugani New Key Visual Optimisation”)
+
+Company: Rugani Juice
+
+Type: same as above (likely Pro)
+
+Status: completed
+
+Linked to Rugani’s second client report.
+
+DGB Test24 Basic Pilot
+
+Company: DGB
+
+Type: test24_basic
+
+Status: completed
+
+Linked to the Innovatr x Durbanville Hills Test24 Basic report PPTX (but the company in the system name should be DGB).
+
+You can name the internal slugs as you like, but the admin “My Research” and Admin Overview analytics must pick all of these up correctly.
+
+3.2 My Research Tab (Admin side)
+
+The My Research tab for admins must show:
+
+1 active study: Nando’s Test24 Basic
+
+Completed research: at least
+
+2 Rugani projects
+
+1 DGB project
+
+Make sure the counts in the top row of cards (“Active Studies”, “Completed”, “Total Research”) reflect this and are reading from the same DB tables used for Admin analytics.
+
+4. CREDITS LOGIC & DISPLAY
+4.1 Data correctness
+
+Make sure the credit balances for each company are computed from a single source of truth (either a credits table with “initial” plus “used”, or a ledger that you already implemented) so that:
+
+Rugani Juice: 8 Basic, 2 Pro remaining
+
+Greenway Farms: 10 Basic, 2 Pro remaining
+
+Nando’s South Africa: 0 Basic, 0 Pro remaining but with a record of 5 Basic used
+
+DGB: 0 Basic, 0 Pro remaining with 1 Basic used
+
+Revlon, Mitchum, Elizabeth Arden: 0 Basic, 0 Pro
+
+Innovatr: keep existing values you already seeded.
+
+4.2 Display rules
+
+Across the entire admin portal:
+
+Never display credits as “x / y”.
+
+All existing 7/32, 0/6 type displays must be replaced with simple totals.
+
+Examples:
+
+In the Companies top cards, instead of:
+
+Basic Credits 7/32
+Use:
+
+Basic Credits 7
+
+In the Companies table row for each company, show:
+
+Basic Credits: 8
+
+Pro Credits: 2
+
+No slashes, no “of X” capacity. Just the current remaining value.
+
+5. ADMIN OVERVIEW TAB – DESIGN & ANALYTICS
+
+The Overview tab should act as a Control Room for the whole system: clean, not childish, not overloaded.
+
+5.1 Remove the current busy visuals
+
+Refactor the Overview page so it is:
+
+Light, simple, with plenty of white space
+
+Minimal colour usage (mostly neutrals with a few brand accents)
+
+No giant saturated bars or childish gradients
+
+No fake revenue values such as R675,000 or R96,428.571
+
+5.2 Keep at the top:
+
+Title: Admin Dashboard
+
+Subtitle: “Manage companies, orders, reports, deals, and system overview” (you can reuse or lightly edit the text already there)
+
+Tabs row: Overview, Companies, Orders, Briefs, Members, Reports, Deals
+
+On the right:
+
+Period filter: Last 7 Days, Last 30 Days, Last 12 Months, All Time
+
+Refresh button
+
+Download Summary button (exports a simple PDF or CSV of the current Overview metrics)
+
+5.3 New top row of summary cards
+
+Replace the current metrics with a simpler, accurate set derived from the DB.
+
+Cards (left to right):
+
+Total Users
+
+Count of all users in the system.
+
+Companies
+
+Count of all companies (Innovatr, Rugani, Greenway, Nando’s, DGB, Revlon, Mitchum, Elizabeth Arden, etc.)
+
+Active Subscriptions
+
+Number of active paid memberships (where subscription status is active).
+
+Active Studies
+
+Number of Test24 studies with status active or in_progress.
+
+With current seed data this should show 1 (Nando’s).
+
+Briefs – This Period
+
+Number of briefs created in the selected date range (filter aware).
+
+Reports – Published
+
+Number of published reports (your Insights/Launch/Inside/IRL reports plus client reports that are marked published).
+
+Free Reports
+
+Number of reports where access = public AND they are marked as a free report in your schema.
+
+Clicking this card should scroll or jump to a list of free reports further down the page.
+
+Credits – Total Remaining
+
+Two numbers: Basic: X, Pro: Y
+
+These are sums of all company remaining credits.
+
+Example: Basic = (Innovatr basic remaining + Rugani + Greenway + Nando’s + DGB + Revlon + Mitchum + Elizabeth Arden), same for Pro.
+
+5.4 Middle section – three simple blocks
+
+Under the top row, have three horizontal blocks:
+
+Block 1: People & Companies
+
+Left side: small summary row
+
+New users this period
+
+New companies this period
+
+Right side: a very simple bar chart or table showing companies by “active research count” or “credits used”.
+
+Do not use bright gradients; keep the bars in a single brand colour.
+
+Block 2: Test24 Tracker
+
+This is your Test24 performance tracker.
+
+It should have:
+
+Total Test24 Basic projects (all time)
+
+Total Test24 Pro projects (all time)
+
+This period: number of Basic and Pro studies created
+
+In progress: how many active studies (basic vs pro)
+
+Implementation suggestion:
+
+Use one compact card containing four small chips:
+
+Basic – Total: X
+
+Pro – Total: Y
+
+Basic – This period: A
+
+Pro – This period: B
+
+And a very simple small bar chart below with 2 bars per period (Basic vs Pro), filtered by the date range selector.
+
+The counts must be derived from the studies table, filtered by type and date.
+
+Block 3: Reports & Free Reports
+
+Show totals for:
+
+Total reports
+
+Published
+
+Scheduled
+
+Drafts
+
+Show a small donut chart for category mix: Insights, Launch, Inside, IRL (same as your existing one, but toned down visually).
+
+Below that, show a list of free reports (title + category + published date, limited to maybe 5–10 items) with a “View all free reports” link that jumps to the Reports tab filtered to free/public.
+
+5.5 Lower section – Research Pipeline
+
+At the bottom of the Overview:
+
+A Research Pipeline row with:
+
+New briefs
+
+In progress studies
+
+Completed studies
+
+Active studies
+
+A very simple timeline or trend line over the selected period, showing how many studies moved through the pipeline.
+
+The numbers must match the My Research and Briefs tabs.
+
+6. COMPANIES TAB – CLEANUP
+
+Keep the overall layout but:
+
+Fix the top cards:
+
+Total Companies (just the count)
+
+Scale Accounts (number of Scale tier companies)
+
+Growth Accounts (if you have that metric available)
+
+Basic Credits (sum of all companies’ basic credits)
+
+Pro Credits (sum of all companies’ pro credits)
+
+Remove any x / y style display; show only totals.
+
+In the companies table, each row should show:
+
+Company name + domain
+
+Tier (Starter, Growth, Scale, etc.)
+
+Basic Credits (single number)
+
+Pro Credits (single number)
+
+A “View” link or button that opens the company detail page
+
+Make sure credit values match the DB state defined above.
+
+7. ORDERS TAB – REMOVE REVENUE, KEEP ORDERS
+
+On Admin → Orders:
+
+Keep:
+
+Orders This Month (count)
+
+Total Orders (all time)
+
+Orders list table
+
+Any filters by status and company
+
+Remove everything related to revenue values:
+
+Remove R0, R78,888.889, “Average Order”, “Revenue by Product Type”, revenue axes, etc.
+
+The “Orders & Revenue Trend” chart should become a simple Orders trend chart only, no revenue line.
+
+The orders should still exist and can store price data internally, but UI should not visualize or display any money numbers.
+
+Nando’s membership purchase and the DGB pilot order must exist and show in the Orders list with appropriate labels such as:
+
+“Nando’s South Africa – Growth Membership (includes 5 Test24 Basic credits)”
+
+“DGB – Test24 Basic Pilot”
+
+8. BRIEFS, MEMBERS, REPORTS, DEALS TABS
+Briefs
+
+You like these; keep the current UI.
+
+Ensure the Brief Submissions section shows at least:
+
+Simone Kakana – Nando’s South Africa – Test24 Basic – 5 ideas – Status: Completed
+
+Tymon – Rugani Juice – Test24 Basic – 2 ideas – Status: In Progress
+
+Members
+
+Keep the current Members UI, but ensure the counts at the top reflect:
+
+Total Members: includes Simone, Tymon, Simonne and admin users as appropriate
+
+Companies: at least Rugani, Greenway, Nando’s, DGB, Revlon, Mitchum, Elizabeth Arden, Innovatr
+
+Reports
+
+Keep the existing Reports Management UI with counts for total, published, scheduled, drafts.
+
+Ensure Rugani’s 2 reports, Nando’s 1 live report, and DGB’s 1 pilot report are visible and linked to their companies.
+
+Mark which reports are “client reports” vs “Innovatr Insights” as you already do.
+
+Deals
+
+Leave as is (no deals yet).
+
+Ensure nothing in the Overview depends on Deals.
+
+9. DATA CONSISTENCY & SOURCE OF TRUTH
+
+After making the changes:
+
+All metrics in Overview must be derived from the same tables used in the Companies, Orders, Briefs, Members, Reports, and My Research tabs.
+
+Do not hardcode values in the frontend; always query from the DB via your existing APIs.
+
+Fix any existing mismatches where the Overview showed wrong counts compared to the other tabs (for example, Pro studies for Rugani/Greenway should not show as 0 if they actually exist).
+
+10. FINAL CHECKLIST
+
+Before you stop:
+
+Run the app and log in as HannaH Steven admin.
+
+Go through these views and verify by eye:
+
+Admin → Overview
+
+Clean layout, not busy, no fake revenue, correct counts.
+
+Test24 tracker visible.
+
+Free reports list visible.
+
+Admin → Companies
+
+Shows Innovatr, Rugani Juice, Greenway Farms, Nando’s South Africa, DGB, Revlon, Mitchum, Elizabeth Arden with correct tiers and credits.
+
+Credits displayed as simple numbers (no x/y).
+
+Admin → Orders
+
+No revenue numbers or revenue charts.
+
+Orders list still works and includes Nando’s and DGB orders.
+
+Admin → Briefs
+
+Shows Nando’s and Rugani briefs with correct statuses.
+
+Admin → Members
+
+Shows Simone, Tymon, Simonne and correct company counts.
+
+Admin → Reports
+
+Shows 36 or more reports as before, plus correctly linked client reports for Rugani, Nando’s, DGB.
+
+My Research (portal main nav)
+
+Shows 1 active study (Nando’s) and 3+ completed (Rugani x 2, DGB x 1).
+
+Confirm that only admin users can access /portal/admin.
+
+Confirm credits displayed everywhere match the balances specified above.
+
+Document any assumptions you had to make directly in replit.md under an “Admin Analytics Assumptions” section.
+
+Then stop.

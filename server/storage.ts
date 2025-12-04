@@ -172,81 +172,147 @@ export class DatabaseStorage implements IStorage {
 
     console.log("Seeding database with initial data...");
 
+    // Generate company IDs
     const innovatrId = randomUUID();
     const ruganiId = randomUUID();
     const greenwayId = randomUUID();
+    const nandosId = randomUUID();
+    const dgbId = randomUUID();
+    const revlonId = randomUUID();
+    const mitchumId = randomUUID();
+    const elizabethArdenId = randomUUID();
 
-    await db.insert(companies).values({
-      id: innovatrId,
-      name: "Innovatr",
-      domain: "innovatr.co.za",
-      logoUrl: null,
-      industry: "Market Research",
-      tier: "SCALE",
-      contractStart: null,
-      contractEnd: null,
-      monthlyFee: null,
-      basicCreditsTotal: 25,
-      basicCreditsUsed: 0,
-      proCreditsTotal: 4,
-      proCreditsUsed: 0,
-      dealDetails: null,
-      notes: "Internal Innovatr team - admin access",
-    });
-
-    await db.insert(companies).values({
-      id: ruganiId,
-      name: "Rugani Juice",
-      domain: "ruganijuice.co.za",
-      logoUrl: null,
-      industry: "Beverages",
-      tier: "SCALE",
-      contractStart: new Date("2025-12-01"),
-      contractEnd: new Date("2026-11-30"),
-      monthlyFee: "26250",
-      basicCreditsTotal: 20,
-      basicCreditsUsed: 0,
-      proCreditsTotal: 4,
-      proCreditsUsed: 0,
-      dealDetails: {
-        title: "Annual Service Agreement",
-        features: [
-          "2 x Test24 Pro Brand Health Audit studies (300 consumers, 10 min)",
-          "2 x Test24 Pro studies (100 consumers, 10 min)", 
-          "20 x Test24 Basic idea studies (100 consumers, 5 min)"
-        ],
-        memberRates: {
-          basic: 4000,
-          pro: 45000
-        }
+    // Create all companies per specification
+    const companiesData = [
+      {
+        id: innovatrId,
+        name: "Innovatr",
+        domain: "innovatr.co.za",
+        industry: "Market Research",
+        tier: "SCALE",
+        basicCreditsTotal: 25,
+        basicCreditsUsed: 0,
+        proCreditsTotal: 4,
+        proCreditsUsed: 0,
+        notes: "Internal Innovatr team - admin access",
       },
-      notes: "Service agreement shared between Greenway Farms (Carrots Division) and Rugani Juice. Includes 2 x Test24 Pro Brand Health Audit studies (300 consumers, 10 minute survey), 2 x Test24 Pro studies (100 consumers, 10 minute survey) and 20 x Test24 Basic idea studies (100 consumers, 5 minute surveys). Additional studies at member rates: Test24 Basic R4,000 and Test24 Pro R45,000 per 100 completes.",
-    });
+      {
+        id: ruganiId,
+        name: "Rugani Juice",
+        domain: "ruganijuice.co.za",
+        industry: "Beverages",
+        tier: "GROWTH",
+        contractStart: new Date("2025-12-01"),
+        contractEnd: new Date("2026-11-30"),
+        basicCreditsTotal: 10,
+        basicCreditsUsed: 2,
+        proCreditsTotal: 2,
+        proCreditsUsed: 0,
+        notes: "Parent company: Greenway Farms. Has 2 client reports. Originally 10 Basic, 2 Pro - used 2 Basic.",
+      },
+      {
+        id: greenwayId,
+        name: "Greenway Farms",
+        domain: "greenwayfarm.co.za",
+        industry: "Agriculture",
+        tier: "GROWTH",
+        contractStart: new Date("2025-12-01"),
+        contractEnd: new Date("2026-11-30"),
+        basicCreditsTotal: 10,
+        basicCreditsUsed: 0,
+        proCreditsTotal: 2,
+        proCreditsUsed: 0,
+        notes: "Parent group includes Rugani Juice. Scale report access.",
+      },
+      {
+        id: nandosId,
+        name: "Nando's South Africa",
+        domain: "nandos.co.za",
+        industry: "Quick Service Restaurant",
+        tier: "GROWTH",
+        basicCreditsTotal: 5,
+        basicCreditsUsed: 5,
+        proCreditsTotal: 0,
+        proCreditsUsed: 0,
+        notes: "Used all 5 Basic credits on one Test24 Basic project. 1 active study ongoing.",
+      },
+      {
+        id: dgbId,
+        name: "DGB",
+        domain: "dgb.co.za",
+        industry: "Wine & Spirits",
+        tier: "GROWTH",
+        basicCreditsTotal: 1,
+        basicCreditsUsed: 1,
+        proCreditsTotal: 0,
+        proCreditsUsed: 0,
+        notes: "Durbanville Hills pilot project. 1 completed Test24 Basic report.",
+      },
+      {
+        id: revlonId,
+        name: "Revlon",
+        domain: "revlon.com",
+        industry: "Beauty & Cosmetics",
+        tier: "SCALE",
+        basicCreditsTotal: 0,
+        basicCreditsUsed: 0,
+        proCreditsTotal: 0,
+        proCreditsUsed: 0,
+        notes: "Scale company. No contacts or reports yet.",
+      },
+      {
+        id: mitchumId,
+        name: "Mitchum",
+        domain: "mitchum.com",
+        industry: "Personal Care",
+        tier: "SCALE",
+        basicCreditsTotal: 0,
+        basicCreditsUsed: 0,
+        proCreditsTotal: 0,
+        proCreditsUsed: 0,
+        notes: "Scale company. No contacts or reports yet.",
+      },
+      {
+        id: elizabethArdenId,
+        name: "Elizabeth Arden",
+        domain: "elizabetharden.com",
+        industry: "Beauty & Cosmetics",
+        tier: "SCALE",
+        basicCreditsTotal: 0,
+        basicCreditsUsed: 0,
+        proCreditsTotal: 0,
+        proCreditsUsed: 0,
+        notes: "Scale company. No contacts or reports yet.",
+      },
+    ];
 
-    await db.insert(companies).values({
-      id: greenwayId,
-      name: "Greenway Farms",
-      domain: "greenwayfarm.co.za",
-      logoUrl: null,
-      industry: "Agriculture",
-      tier: "SCALE",
-      contractStart: new Date("2025-12-01"),
-      contractEnd: new Date("2026-11-30"),
-      monthlyFee: "26250",
-      basicCreditsTotal: 0,
-      basicCreditsUsed: 0,
-      proCreditsTotal: 0,
-      proCreditsUsed: 0,
-      dealDetails: null,
-      notes: "Linked to Rugani Juice service agreement. Greenway users have Scale report access but Rugani holds the pooled Test24 credits.",
-    });
+    for (const c of companiesData) {
+      await db.insert(companies).values({
+        id: c.id,
+        name: c.name,
+        domain: c.domain,
+        logoUrl: null,
+        industry: c.industry,
+        tier: c.tier,
+        contractStart: (c as any).contractStart || null,
+        contractEnd: (c as any).contractEnd || null,
+        monthlyFee: null,
+        basicCreditsTotal: c.basicCreditsTotal,
+        basicCreditsUsed: c.basicCreditsUsed,
+        proCreditsTotal: c.proCreditsTotal,
+        proCreditsUsed: c.proCreditsUsed,
+        dealDetails: null,
+        notes: c.notes,
+      });
+    }
 
     const tempPasswordHash = await hashPassword("TempPass123!");
     const adminPasswordHash = await hashPassword("Innovatr@Admin!");
 
+    // Admin users - Innovatr
     const adminUsersData = [
-      { name: "HannaH Steven", email: "hannah@innovatr.co.za", username: "hannah.steven", passwordHash: adminPasswordHash, creditsBasic: 25, creditsPro: 4 },
-      { name: "Richard Lawrence", email: "richard@innovatr.co.za", username: "richard.lawrence", passwordHash: adminPasswordHash, creditsBasic: 25, creditsPro: 4 },
+      { name: "HannaH Steven", email: "hannah@innovatr.co.za", username: "hannah.steven", passwordHash: adminPasswordHash },
+      { name: "Richard Lawrence", email: "richard@innovatr.co.za", username: "richard.lawrence", passwordHash: adminPasswordHash },
     ];
 
     for (const u of adminUsersData) {
@@ -262,8 +328,8 @@ export class DatabaseStorage implements IStorage {
         membershipTier: "SCALE",
         status: "ACTIVE",
         role: "ADMIN",
-        creditsBasic: u.creditsBasic,
-        creditsPro: u.creditsPro,
+        creditsBasic: 0,
+        creditsPro: 0,
         creditsInheritedFromCompany: true,
         totalSpend: "0",
         isActive: true,
@@ -271,14 +337,75 @@ export class DatabaseStorage implements IStorage {
       });
     }
 
+    // Nando's user - Simone Kakana
+    const simoneId = randomUUID();
+    await db.insert(users).values({
+      id: simoneId,
+      username: "simone.kakana",
+      email: "simone.kakana@nandos.co.za",
+      password: "",
+      passwordHash: tempPasswordHash,
+      name: "Simone Kakana",
+      company: "Nando's South Africa",
+      companyId: nandosId,
+      membershipTier: "GROWTH",
+      status: "ACTIVE",
+      role: "MEMBER",
+      creditsBasic: 0,
+      creditsPro: 0,
+      creditsInheritedFromCompany: true,
+      totalSpend: "0",
+      isActive: true,
+      emailVerified: true,
+    });
+
+    // Rugani users - Tymon and Simonne
+    const tymonId = randomUUID();
+    await db.insert(users).values({
+      id: tymonId,
+      username: "tymon",
+      email: "tymon@rugani.co.za",
+      password: "",
+      passwordHash: tempPasswordHash,
+      name: "Tymon",
+      company: "Rugani Juice",
+      companyId: ruganiId,
+      membershipTier: "GROWTH",
+      status: "ACTIVE",
+      role: "MEMBER",
+      creditsBasic: 0,
+      creditsPro: 0,
+      creditsInheritedFromCompany: true,
+      totalSpend: "0",
+      isActive: true,
+      emailVerified: true,
+    });
+
+    const simonneId = randomUUID();
+    await db.insert(users).values({
+      id: simonneId,
+      username: "simonne",
+      email: "simonne@rugani.co.za",
+      password: "",
+      passwordHash: tempPasswordHash,
+      name: "Simonne",
+      company: "Rugani Juice",
+      companyId: ruganiId,
+      membershipTier: "GROWTH",
+      status: "ACTIVE",
+      role: "MEMBER",
+      creditsBasic: 0,
+      creditsPro: 0,
+      creditsInheritedFromCompany: true,
+      totalSpend: "0",
+      isActive: true,
+      emailVerified: true,
+    });
+
+    // Greenway users
     const greenwayUsersData = [
       { name: "Duncan Buhr", email: "duncan@greenwayfarm.co.za", username: "duncan.buhr" },
       { name: "Wesley Browne", email: "Wesley@greenwayfarm.co.za", username: "wesley.browne" },
-    ];
-
-    const ruganiUsersData = [
-      { name: "Simonne Fourie", email: "simonne@ruganijuice.co.za", username: "simonne.fourie" },
-      { name: "Tymon Minaar", email: "tymon@ruganijuice.co.za", username: "tymon.minaar" },
     ];
 
     for (const u of greenwayUsersData) {
@@ -291,7 +418,7 @@ export class DatabaseStorage implements IStorage {
         name: u.name,
         company: "Greenway Farms",
         companyId: greenwayId,
-        membershipTier: "SCALE",
+        membershipTier: "GROWTH",
         status: "ACTIVE",
         role: "MEMBER",
         creditsBasic: 0,
@@ -303,113 +430,214 @@ export class DatabaseStorage implements IStorage {
       });
     }
 
-    for (const u of ruganiUsersData) {
-      await db.insert(users).values({
-        id: randomUUID(),
-        username: u.username,
-        email: u.email,
-        password: "",
-        passwordHash: tempPasswordHash,
-        name: u.name,
-        company: "Rugani Juice",
-        companyId: ruganiId,
-        membershipTier: "SCALE",
-        status: "ACTIVE",
-        role: "MEMBER",
-        creditsBasic: 0,
-        creditsPro: 0,
-        creditsInheritedFromCompany: true,
-        totalSpend: "0",
-        isActive: true,
-        emailVerified: true,
-      });
-    }
+    // Create Test24 Studies
+    // Nando's Menu Test - Test24 Basic (active)
+    const nandosStudyId = randomUUID();
+    await db.insert(studies).values({
+      id: nandosStudyId,
+      companyId: nandosId,
+      companyName: "Nando's South Africa",
+      title: "Nando's Menu Test",
+      description: "Testing new menu items with 5 concepts for consumer feedback.",
+      studyType: "basic",
+      isTest24: true,
+      status: "AUDIENCE_LIVE",
+      submittedByEmail: "simone.kakana@nandos.co.za",
+      submittedByName: "Simone Kakana",
+      tags: ["Menu", "QSR", "Test24 Basic"],
+    });
 
-    const clientReportsData = [
-      {
-        title: "Rugani 100% Carrot Juice Concept Test",
-        category: "Launch",
-        industry: "Beverages",
-        teaser: "Concept testing for new carrot juice product range. Consumer insights on flavour preferences, packaging design, and brand positioning for the South African market.",
-        accessLevel: "companyOnly",
-        creditType: "none",
-        status: "published",
-        slug: "rugani-carrot-juice-concept",
-        date: new Date("2025-11-15"),
-        topics: ["Beverages", "Food", "FMCG"],
-        clientCompanyIds: [ruganiId, greenwayId],
-      },
-      {
-        title: "Greenway Carrots Brand Health Study",
-        category: "Insights",
-        industry: "Agriculture",
-        teaser: "Comprehensive brand health audit tracking consumer perceptions, awareness, and purchase intent for Greenway Farm carrots in retail channels.",
-        accessLevel: "companyOnly",
-        creditType: "none",
-        status: "published",
-        slug: "greenway-carrots-brand-health",
-        date: new Date("2025-11-20"),
-        topics: ["Agriculture", "FMCG", "Retail"],
-        clientCompanyIds: [ruganiId, greenwayId],
-      },
-    ];
+    // Rugani Study 1 - Clicks Wellness (completed)
+    const ruganiStudy1Id = randomUUID();
+    await db.insert(studies).values({
+      id: ruganiStudy1Id,
+      companyId: ruganiId,
+      companyName: "Rugani Juice",
+      title: "Rugani x Clicks Wellness Beverage Positioning",
+      description: "Quant deep dive into how Rugani's formats perform against competitors in Clicks.",
+      studyType: "basic",
+      isTest24: true,
+      status: "COMPLETED",
+      submittedByEmail: "tymon@rugani.co.za",
+      submittedByName: "Tymon",
+      tags: ["Beverages", "Retail", "Test24 Basic"],
+      deliveryDate: new Date("2025-11-07"),
+    });
 
-    for (const r of clientReportsData) {
-      await db.insert(reports).values({
-        id: randomUUID(),
-        title: r.title,
-        slug: r.slug,
-        category: r.category,
-        industry: r.industry,
-        date: r.date,
-        teaser: r.teaser,
-        accessLevel: r.accessLevel,
-        creditType: r.creditType,
-        status: r.status,
-        topics: r.topics,
-        clientCompanyIds: r.clientCompanyIds,
-      });
-    }
+    // Rugani Study 2 - Key Visual (completed)
+    const ruganiStudy2Id = randomUUID();
+    await db.insert(studies).values({
+      id: ruganiStudy2Id,
+      companyId: ruganiId,
+      companyName: "Rugani Juice",
+      title: "Rugani New Key Visual Optimisation",
+      description: "Evaluation of Rugani's new key visual against competitors.",
+      studyType: "basic",
+      isTest24: true,
+      status: "COMPLETED",
+      submittedByEmail: "tymon@rugani.co.za",
+      submittedByName: "Tymon",
+      tags: ["Creative Testing", "Key Visual", "Test24 Basic"],
+      deliveryDate: new Date("2025-11-07"),
+    });
 
-    const ruganiClientReportsData = [
-      {
-        companyId: ruganiId,
-        title: "Rugani x Clicks Wellness Beverage Positioning",
-        description: "Quant deep dive into how Rugani's 330 ml and 750 ml formats perform against LiquiFruit, Coke, Powerade and Red Bull in Clicks. Shows that Rugani's natural positioning fits the Clicks wellness mission and proves the role of each format in fridges, health aisles and checkout.",
-        pdfUrl: "/assets/client-reports/rugani/Rugani_X_Clicks_Test24_Basic.pptx",
-        tags: ["Rugani", "Clicks", "Test24 Basic", "Retail Positioning", "Beverages", "Wellness", "Category Growth"],
-        uploadedAt: new Date("2025-11-07"),
-      },
-      {
-        companyId: ruganiId,
-        title: "Rugani New Key Visual Optimisation",
-        description: "Evaluation of Rugani's new key visual against Sir Fruit, LiquiFruit and Rhodes among heavy juice users. Identifies where the current ad underperforms and gives a roadmap to shift from sport-only energy cues to everyday natural health and refreshment.",
-        pdfUrl: "/assets/client-reports/rugani/Rugani_Test24_X_Ad_Campaign.pptx",
-        tags: ["Rugani", "Creative Testing", "Key Visual", "Test24 Basic", "Juice", "Brand Communication"],
-        uploadedAt: new Date("2025-11-07"),
-      },
-    ];
+    // DGB Pilot Study (completed)
+    const dgbStudyId = randomUUID();
+    await db.insert(studies).values({
+      id: dgbStudyId,
+      companyId: dgbId,
+      companyName: "DGB",
+      title: "Durbanville Hills Test24 Basic Pilot",
+      description: "Pilot Test24 Basic project for Durbanville Hills wine brand.",
+      studyType: "basic",
+      isTest24: true,
+      status: "COMPLETED",
+      submittedByEmail: "pilot@dgb.co.za",
+      submittedByName: "DGB Team",
+      tags: ["Wine", "Pilot", "Test24 Basic"],
+      deliveryDate: new Date("2025-10-15"),
+    });
 
-    for (const cr of ruganiClientReportsData) {
-      await db.insert(clientReports).values({
-        id: randomUUID(),
-        companyId: cr.companyId,
-        title: cr.title,
-        description: cr.description,
-        pdfUrl: cr.pdfUrl,
-        tags: cr.tags,
-        uploadedAt: cr.uploadedAt,
-      });
-    }
+    // Create Brief Submissions
+    // Simone Kakana - Nando's - Test24 Basic - 5 ideas - Completed
+    const nandosBriefId = randomUUID();
+    await db.insert(briefSubmissions).values({
+      id: nandosBriefId,
+      submittedByName: "Simone Kakana",
+      submittedByEmail: "simone.kakana@nandos.co.za",
+      companyId: nandosId,
+      companyName: "Nando's South Africa",
+      studyType: "test24_basic",
+      numIdeas: 5,
+      researchObjective: "Test new menu items for consumer appeal and purchase intent.",
+      regions: ["Gauteng", "Western Cape", "KwaZulu-Natal"],
+      ages: ["18-24", "25-34", "35-44"],
+      genders: ["Male", "Female"],
+      industry: "Quick Service Restaurant",
+      paymentMethod: "credits",
+      basicCreditsUsed: 5,
+      status: "completed",
+    });
 
+    // Tymon - Rugani - Test24 Basic - 2 ideas - In Progress
+    const ruganiBriefId = randomUUID();
+    await db.insert(briefSubmissions).values({
+      id: ruganiBriefId,
+      submittedByName: "Tymon",
+      submittedByEmail: "tymon@rugani.co.za",
+      companyId: ruganiId,
+      companyName: "Rugani Juice",
+      studyType: "test24_basic",
+      numIdeas: 2,
+      researchObjective: "Test new packaging concepts for juice range.",
+      regions: ["Gauteng", "Western Cape"],
+      ages: ["25-34", "35-44", "45-54"],
+      genders: ["Male", "Female"],
+      industry: "Beverages",
+      paymentMethod: "credits",
+      basicCreditsUsed: 2,
+      status: "in_progress",
+    });
+
+    // Create Orders
+    // Nando's membership order
+    const nandosOrderId = randomUUID();
+    await db.insert(orders).values({
+      id: nandosOrderId,
+      userId: simoneId,
+      amount: "45000",
+      currency: "ZAR",
+      purchaseType: "Growth Membership",
+      status: "completed",
+      customerName: "Simone Kakana",
+      customerEmail: "simone.kakana@nandos.co.za",
+      customerCompany: "Nando's South Africa",
+    });
+
+    await db.insert(orderItems).values({
+      id: randomUUID(),
+      orderId: nandosOrderId,
+      type: "membership",
+      description: "Nando's South Africa – Growth Membership (includes 5 Test24 Basic credits)",
+      quantity: 1,
+      unitAmount: "45000",
+    });
+
+    // DGB pilot order
+    const dgbOrderId = randomUUID();
+    await db.insert(orders).values({
+      id: dgbOrderId,
+      amount: "4000",
+      currency: "ZAR",
+      purchaseType: "Test24 Basic Pilot",
+      status: "completed",
+      customerName: "DGB Team",
+      customerEmail: "pilot@dgb.co.za",
+      customerCompany: "DGB",
+    });
+
+    await db.insert(orderItems).values({
+      id: randomUUID(),
+      orderId: dgbOrderId,
+      type: "test24_basic",
+      description: "DGB – Test24 Basic Pilot",
+      quantity: 1,
+      unitAmount: "4000",
+    });
+
+    // Create Client Reports
+    // Rugani's 2 reports
+    await db.insert(clientReports).values({
+      id: randomUUID(),
+      companyId: ruganiId,
+      title: "Rugani x Clicks Wellness Beverage Positioning",
+      description: "Quant deep dive into how Rugani's 330 ml and 750 ml formats perform against LiquiFruit, Coke, Powerade and Red Bull in Clicks.",
+      pdfUrl: "/assets/client-reports/rugani/Rugani_X_Clicks_Test24_Basic.pptx",
+      tags: ["Rugani", "Clicks", "Test24 Basic", "Retail Positioning", "Beverages"],
+      uploadedAt: new Date("2025-11-07"),
+    });
+
+    await db.insert(clientReports).values({
+      id: randomUUID(),
+      companyId: ruganiId,
+      title: "Rugani New Key Visual Optimisation",
+      description: "Evaluation of Rugani's new key visual against Sir Fruit, LiquiFruit and Rhodes among heavy juice users.",
+      pdfUrl: "/assets/client-reports/rugani/Rugani_Test24_X_Ad_Campaign.pptx",
+      tags: ["Rugani", "Creative Testing", "Key Visual", "Test24 Basic"],
+      uploadedAt: new Date("2025-11-07"),
+    });
+
+    // Nando's live report
+    await db.insert(clientReports).values({
+      id: randomUUID(),
+      companyId: nandosId,
+      title: "Nando's Menu Innovation Study - Live Results",
+      description: "Ongoing Test24 Basic study tracking consumer response to new menu concepts. Results updating in real-time.",
+      pdfUrl: null,
+      tags: ["Nando's", "Menu", "Test24 Basic", "Live", "QSR"],
+      uploadedAt: new Date("2025-12-01"),
+    });
+
+    // DGB pilot report
+    await db.insert(clientReports).values({
+      id: randomUUID(),
+      companyId: dgbId,
+      title: "Innovatr x Durbanville Hills Test24 Basic Report",
+      description: "Completed pilot Test24 Basic study for Durbanville Hills wine brand under DGB.",
+      pdfUrl: "/assets/client-reports/dgb/Durbanville_Hills_Test24_Basic.pptx",
+      tags: ["DGB", "Durbanville Hills", "Wine", "Test24 Basic", "Pilot"],
+      uploadedAt: new Date("2025-10-15"),
+    });
+
+    // Create deals
     await db.insert(deals).values({
       id: randomUUID(),
       title: "Rugani & Greenway Service Agreement",
-      description: "Annual service agreement for Rugani Juice and Greenway Farms. Includes 2 x Test24 Pro Brand Health Audit studies (300 consumers, 10 min), 2 x Test24 Pro studies (100 consumers, 10 min), and 20 x Test24 Basic idea studies (100 consumers, 5 min). Additional studies available at member rates.",
+      description: "Annual service agreement for Rugani Juice and Greenway Farms.",
       originalPrice: "630000",
       discountedPrice: "315000",
       creditsIncluded: 26,
-      targetTierKeys: ["SCALE"],
+      targetTierKeys: ["GROWTH", "SCALE"],
       createdByUserId: "system",
       validFrom: new Date("2025-12-01"),
       validTo: new Date("2026-11-30"),
