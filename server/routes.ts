@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
+import crypto from "crypto";
 import { z } from "zod";
 import { storage } from "./storage";
 import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemWithoutOrderIdSchema, insertReportSchema, insertDealSchema, insertInquirySchema } from "@shared/schema";
@@ -10,7 +11,7 @@ import * as emailService from "./emails/email-service";
 import { sendAdminOrderNotification, sendCustomerOrderConfirmation, sendContactFormMessage, sendInvoiceRequestNotification, sendBriefConfirmationEmail, sendBriefAdminNotification } from "./emails/email-service";
 import { uploadFile, downloadFile, deleteFile, listFiles, fileExists } from "./app-storage";
 import { generateInvoicePdf } from "./invoices/generator";
-import { hashPassword, verifyPassword, validatePasswordStrength, generateResetToken, hashResetToken, getResetTokenExpiry, generateSessionToken, getSessionExpiry, isExpired } from "./auth/password";
+import { hashPassword, verifyPassword, validatePasswordStrength, generateResetToken, hashResetToken, getResetTokenExpiry, generateSessionToken, getSessionExpiry, isExpired, hashSessionToken } from "./auth/password";
 
 // Multer for handling multipart/form-data (PayFast webhooks and file uploads)
 const upload = multer();
@@ -153,7 +154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User login endpoint with bcrypt password verification
+  // User login endpoint with bcrypt password verification and session cookie
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
@@ -197,10 +198,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid email or password" });
       }
       
+      // Generate session token
+      const { token, tokenHash } = generateSessionToken();
+      const expiresAt = getSessionExpiry(30); // 30 days
+      
+      // Create session in storage
+      await storage.createSession({
+        userId: user.id,
+        companyId: user.companyId || undefined,
+        tokenHash,
+        ipAddress: req.ip || req.socket.remoteAddress || undefined,
+        userAgent: req.get("User-Agent") || undefined,
+        expiresAt,
+      });
+      
       // Update last login
       await storage.updateUser(user.id, { 
         lastLoginAt: new Date(),
         lastActivityDate: new Date()
+      });
+      
+      // Set HTTP-only secure cookie
+      res.cookie("session", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
+        path: "/",
       });
       
       // Return user without password fields
@@ -212,26 +236,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get current user session
+  // Get current user session - uses HTTP-only session cookie
   app.get("/api/auth/me", async (req, res) => {
     try {
-      const authHeader = req.headers.authorization;
-      const email = req.headers["x-user-email"] as string;
+      // Get session token from cookie
+      const sessionToken = req.cookies?.session;
       
-      if (!email) {
-        return res.status(401).json({ error: "Not authenticated" });
+      if (!sessionToken) {
+        return res.status(401).json({ message: "Not authenticated" });
       }
       
-      const user = await storage.getUserByEmail(email);
+      // Hash the token to look up the session
+      const tokenHash = hashSessionToken(sessionToken);
+      const session = await storage.getSessionByTokenHash(tokenHash);
+      
+      if (!session) {
+        // Clear invalid cookie
+        res.clearCookie("session", { path: "/" });
+        return res.status(401).json({ message: "Session expired or invalid" });
+      }
+      
+      // Check if session has expired
+      if (isExpired(session.expiresAt)) {
+        // Delete expired session and clear cookie
+        await storage.deleteSession(session.id);
+        res.clearCookie("session", { path: "/" });
+        return res.status(401).json({ message: "Session expired" });
+      }
+      
+      // Get user from session
+      const user = await storage.getUser(session.userId);
       if (!user) {
-        return res.status(401).json({ error: "User not found" });
+        await storage.deleteSession(session.id);
+        res.clearCookie("session", { path: "/" });
+        return res.status(401).json({ message: "User not found" });
       }
+      
+      // Update session last active time
+      // (Could be optimized to update less frequently)
       
       // Return user without password fields
       const { password: _, passwordHash: __, ...safeUser } = user;
       res.json(safeUser);
     } catch (error: any) {
-      res.status(400).json({ error: error.message });
+      console.error("Auth check error:", error);
+      res.status(400).json({ message: error.message });
+    }
+  });
+  
+  // Logout endpoint - destroys session and clears cookie
+  app.post("/api/auth/logout", async (req, res) => {
+    try {
+      const sessionToken = req.cookies?.session;
+      
+      if (sessionToken) {
+        // Hash the token to find and delete the session
+        const tokenHash = hashSessionToken(sessionToken);
+        const session = await storage.getSessionByTokenHash(tokenHash);
+        
+        if (session) {
+          await storage.deleteSession(session.id);
+        }
+      }
+      
+      // Clear the cookie regardless
+      res.clearCookie("session", { path: "/" });
+      res.json({ message: "Logged out successfully" });
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      // Still clear the cookie even if there's an error
+      res.clearCookie("session", { path: "/" });
+      res.json({ message: "Logged out" });
     }
   });
 

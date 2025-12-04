@@ -1,0 +1,214 @@
+I want you to ignore any previous task lists, partial checklists, QuickEdit attempts, or multi-phase plans. Start a completely fresh task focused ONLY on finalising and stabilising authentication and account functionality for the Innovatr portal.
+
+Please complete the following:
+
+1. Clean up and finalise real authentication (backend)
+
+We have already implemented bcrypt password hashing and connected the frontend AuthContext to the real API. Now I need you to:
+
+A. Review the entire authentication flow end-to-end
+
+Make sure:
+
+All user passwords are stored as passwordHash only
+
+No old password fields or mock login logic exists anywhere
+
+Login always validates using bcrypt
+
+Signup stores the password hash in one single step
+
+Error messages follow a consistent JSON format
+
+B. Implement proper session management
+
+Use secure HTTP-only cookies.
+
+When a user logs in, create a session token or ID
+
+Store the token server-side
+
+Send an HTTP-only cookie to the frontend
+
+All subsequent authenticated requests must auto-include this cookie
+
+Logout must destroy the session server-side and clear the cookie
+
+C. Add fully functional password reset
+
+User enters email → system sends reset link or temp code
+
+User can set a new password with bcrypt
+
+Update storage accordingly
+
+2. Fix frontend AuthContext to use the new backend auth
+A. Ensure AuthProvider wraps the entire React app
+
+Fix errors like:
+useAuth must be used within an AuthProvider.
+
+B. Update login, signup, logout
+
+The frontend must:
+
+Call the real API (no mock data)
+
+Store logged-in session state correctly
+
+Automatically attach the HTTP-only session cookie
+
+Redirect correctly after login and logout
+
+Prevent protected routes from loading while logged out
+
+3. Functionally connect users to their accounts
+
+Right now the portal behaves like “an illusion.”
+We need REAL user accounts.
+
+A. Ensure every user is stored in the database with:
+
+email
+
+name
+
+company
+
+passwordHash
+
+membership level
+
+credit balance
+
+createdAt
+
+B. When users log in, the system must:
+
+Load their correct stored profile
+
+Show the correct membership
+
+Show stored credits
+
+Allow credits to be used
+
+Deduct credits when used
+
+C. When users purchase credits, they must:
+
+Be tied to that user’s account
+
+Increase their credit balance
+
+Be visible in a “Credit Ledger” for admins
+
+4. Handle brief submissions properly
+
+We already store briefs and handle attachments, but ensure:
+
+Brief submissions are tied to the logged-in account
+
+Attached files are saved properly (PDF, JPG, PNG, XLSX, PPTX, MP4, etc.)
+
+Attachments must allow up to 20MB total
+
+If over 20MB:
+Show this message:
+“Your file is too large. Please try again, and if you still have issues email your materials to richard@innovatr.co.za
+.”
+
+After submission:
+
+Store brief + attachments in the database
+
+Email confirmation to the client
+
+Email notification to admin
+
+Add the brief to Admin → Briefs
+
+Add the brief to the user’s “My Research” tab
+
+Create a “status” (New → Audience Live → Analysing → Completed)
+
+5. Seed correct admin users & demo credits
+
+Please seed:
+
+Admin accounts
+hannah@innovatr.co.za
+richard@innovatr.co.za
+password: InnovatrAdmin2024!
+
+Admin demo credits
+
+These must ALWAYS be available:
+
+22 Basic credits
+
+4 Pro studies
+
+Admins should always see these in their accounts so demos look “normal.”
+
+6. Move client reports into the “My Research” tab for admins
+
+Remove the separate Client Reports page.
+
+Admin users should see client reports under:
+
+Portal → My Research
+
+This keeps the admin experience consistent with real clients.
+
+7. Run a full system audit after changes
+
+Confirm:
+
+Login works
+
+Signup works
+
+Logout works
+
+Reset password works
+
+Brief submission works
+
+Attachments store correctly
+
+Credits are stored per user and deduct correctly
+
+Admin view shows all users and briefs
+
+“My Research” loads properly for both clients and admins
+
+Session cookies persist safely
+
+8. Update documentation
+
+Update replit.md with a new section:
+
+Authentication Overview
+
+How hashing works
+
+How sessions work
+
+How users are stored
+
+How credits are tracked
+
+How to add a new user manually
+
+VERY IMPORTANT RULES
+
+Do not undo any previous fixes like client report dates or portal UI changes.
+
+Do not regenerate the entire codebase.
+
+Keep changes minimal, focused, safe, and consistent.
+
+If missing types or interfaces are required, add them cleanly.
+
+If migrations or schema updates are needed, implement them.

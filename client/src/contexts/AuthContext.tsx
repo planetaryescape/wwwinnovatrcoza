@@ -46,6 +46,7 @@ interface AuthContextType {
   signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
+  isLoading: boolean;
   isMember: boolean;
   isAdmin: boolean;
   membershipTier?: MembershipTier;
@@ -66,8 +67,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
   const [impersonation, setImpersonation] = useState<ImpersonationState>(defaultImpersonation);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Check for existing session on mount using HTTP-only cookie
   useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const res = await fetch("/api/auth/me", {
+          credentials: "include", // Include cookies
+        });
+        
+        if (res.ok) {
+          const dbUser = await res.json();
+          
+          // Check if user has admin role or admin email
+          const isAdmin = dbUser.role === "ADMIN" || 
+            dbUser.email === "hannah@innovatr.co.za" || 
+            dbUser.email === "richard@innovatr.co.za";
+          
+          const tierMap: Record<string, UserTier> = {
+            STARTER: "starter",
+            GROWTH: "growth",
+            SCALE: "scale",
+          };
+          
+          const sessionUser: User = {
+            id: dbUser.id,
+            email: dbUser.email,
+            name: dbUser.name || dbUser.email.split("@")[0],
+            company: dbUser.company,
+            companyId: dbUser.companyId,
+            tier: isAdmin ? "scale" : (tierMap[dbUser.membershipTier] || "starter"),
+            membershipTier: isAdmin ? "SCALE" : dbUser.membershipTier,
+            isAdmin,
+          };
+          
+          setUser(sessionUser);
+          // Also save to localStorage for quick UI restoration
+          localStorage.setItem("innovatr_user", JSON.stringify(sessionUser));
+        } else {
+          // No valid session - clear any stale localStorage
+          localStorage.removeItem("innovatr_user");
+          setUser(null);
+        }
+      } catch (err) {
+        console.log("Session check failed, user not logged in");
+        localStorage.removeItem("innovatr_user");
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    // Try to restore from localStorage first for faster UI
     const savedUser = localStorage.getItem("innovatr_user");
     const savedImpersonation = localStorage.getItem("innovatr_impersonation");
     if (savedUser) {
@@ -76,6 +128,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (savedImpersonation) {
       setImpersonation(JSON.parse(savedImpersonation));
     }
+    
+    // Then verify with server
+    checkSession();
   }, []);
 
   useEffect(() => {
@@ -84,7 +139,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           // Pass user email for demo account credit display
           const emailParam = user.email ? `?email=${encodeURIComponent(user.email)}` : '';
-          const res = await fetch(`/api/companies/${user.companyId}${emailParam}`);
+          const res = await fetch(`/api/companies/${user.companyId}${emailParam}`, {
+            credentials: "include", // Include session cookie
+          });
           if (res.ok) {
             const companyData = await res.json();
             setCompany(companyData);
@@ -101,9 +158,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     // Use real API authentication with bcrypt password validation
+    // Session cookie is set automatically by the server (HTTP-only)
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include", // Include cookies for session management
       body: JSON.stringify({ email, password }),
     });
     
@@ -146,6 +205,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include", // Include cookies for session management
       body: JSON.stringify({ email, password, name }),
     });
     
@@ -159,37 +219,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     const dbUser = await res.json();
     
-    // Check if user has admin role or admin email
-    const isAdmin = dbUser.role === "ADMIN" || 
-      email === "hannah@innovatr.co.za" || 
-      email === "richard@innovatr.co.za";
-    
-    const tierMap: Record<string, UserTier> = {
-      STARTER: "starter",
-      GROWTH: "growth",
-      SCALE: "scale",
-    };
-    
-    const newUser: User = {
-      id: dbUser.id,
-      email: dbUser.email,
-      name: dbUser.name || name,
-      company: dbUser.company,
-      companyId: dbUser.companyId,
-      // Admins get Scale tier, regular users start as starter
-      tier: isAdmin ? "scale" : (tierMap[dbUser.membershipTier] || "starter"),
-      membershipTier: isAdmin ? "SCALE" : (dbUser.membershipTier || "STARTER"),
-      isAdmin,
-    };
-    
-    setUser(newUser);
-    localStorage.setItem("innovatr_user", JSON.stringify(newUser));
+    // After signup, automatically log in to create session
+    await login(email, password);
   };
 
   const logout = async () => {
-    // Call API to invalidate session (best effort)
+    // Call API to invalidate session and clear HTTP-only cookie
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch("/api/auth/logout", { 
+        method: "POST",
+        credentials: "include", // Include session cookie so server can clear it
+      });
     } catch (err) {
       console.log("Logout API call failed, clearing local state");
     }
@@ -205,7 +245,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user?.isAdmin) return;
     
     try {
-      const res = await fetch(`/api/admin/users/${userId}`);
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to fetch user");
       
       const targetUser = await res.json();
@@ -245,7 +287,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user?.isAdmin) return;
     
     try {
-      const companyRes = await fetch(`/api/admin/companies/${companyId}`);
+      const companyRes = await fetch(`/api/admin/companies/${companyId}`, {
+        credentials: "include",
+      });
       if (!companyRes.ok) throw new Error("Failed to fetch company");
       
       const company = await companyRes.json();
@@ -304,7 +348,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       login, 
       signup, 
       logout, 
-      isAuthenticated, 
+      isAuthenticated,
+      isLoading,
       isMember, 
       isAdmin, 
       membershipTier,
