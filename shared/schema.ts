@@ -463,6 +463,10 @@ export const clientReports = pgTable("client_reports", {
   companyId: varchar("company_id").notNull(),
   title: text("title").notNull(),
   description: text("description"),
+  studyType: varchar("study_type", { length: 50 }).default("Test24 Basic"),
+  status: varchar("status", { length: 20 }).default("Completed"),
+  deliveredAt: timestamp("delivered_at"),
+  primaryContactEmail: text("primary_contact_email"),
   pdfUrl: text("pdf_url"),
   thumbnailUrl: text("thumbnail_url"),
   tags: text("tags").array().default([]),
@@ -481,6 +485,10 @@ export const insertClientReportSchema = createInsertSchema(clientReports)
   .extend({
     title: z.string().min(1, "Title is required"),
     companyId: z.string().min(1, "Company ID is required"),
+    studyType: z.string().optional(),
+    status: z.string().optional(),
+    deliveredAt: z.string().or(z.date()).optional(),
+    primaryContactEmail: z.string().email().optional().or(z.literal("")),
   });
 
 export type InsertClientReport = z.infer<typeof insertClientReportSchema>;

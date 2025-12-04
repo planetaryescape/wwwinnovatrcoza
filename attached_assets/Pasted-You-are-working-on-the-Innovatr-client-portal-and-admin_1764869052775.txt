@@ -1,0 +1,412 @@
+You are working on the Innovatr client portal and admin portal codebase hosted in this Replit.
+
+I need you to focus on THREE things and then run a quick sanity check
+
+Make the “Add Report” button in the Company drawer fully functional
+
+Make company profile fields editable and persisted to the database
+
+Restore an “View company portal” experience for admins so they can see the portal as that client
+
+Please follow the steps exactly and keep the current visual design language. Do not introduce new colours or fonts.
+
+0. Understand the current implementation
+
+Find the admin portal code and the Company drawer
+
+Search for the admin portal page
+
+Look for files like client/src/pages/portal/admin/* or similar
+
+Find the component that renders the Companies tab list and the right hand Company drawer panel
+
+Identify
+
+Where the “Add Report” button is rendered in the drawer
+
+Where Client Reports for a company are currently coming from
+
+Where the contract Start Date and End Date fields are defined
+
+Find the models and database tables
+
+Identify how companies are stored in the database
+
+Look for a companies table or similar in the Drizzle schema
+
+Identify how reports are stored
+
+Look for a reports table, client_reports, companyReports, or a “research” table used to build the My Research cards
+
+Identify how a report is currently linked to a company and to a member
+
+If there is already a join table, reuse it
+
+If there is NOT a proper join table, create one as described in section 2
+
+Identify how “My Research” is built
+
+Find the code that renders the My Research page (for portal clients and for admins)
+
+Confirm what data shape it expects for each research card
+
+Title
+
+Client / company name
+
+Study type (Test24 Basic, Test24 Pro, etc)
+
+Status (Completed, Live, etc)
+
+Delivered date
+
+We will reuse this model so that adding a Client Report from the Company drawer automatically shows up wherever it should in My Research
+
+1. Make “Add Report” in the Company drawer fully functional
+1.1 Create or standardise the data model
+
+If a company to report relationship ALREADY exists
+
+Use the existing table or model and DO NOT create a new one
+
+Ensure it can store at least
+
+id
+
+companyId
+
+reportId or studyId
+
+studyType (string, eg "Test24 Basic" or "Test24 Pro")
+
+status (eg "Completed" or "Live")
+
+deliveredAt date
+
+primaryContactEmail or memberId if available
+
+If a proper join table does NOT exist
+
+Create a company_reports table in the Drizzle schema with fields
+
+id primary key
+
+companyId foreign key to companies
+
+reportId foreign key to the main reports table
+
+studyType text
+
+status text
+
+deliveredAt timestamp
+
+primaryContactEmail text nullable
+
+createdAt timestamp default now
+
+Generate migrations and ensure the table is wired into the storage layer
+
+1.2 Implement the “Add Report” flow in the UI
+
+In the Company drawer, under Client Reports
+
+Make the “+ Add Report” button open a small side modal or dialog
+
+Use the existing component system already used in the app (no new library)
+
+In the “Add Client Report” modal include
+
+A select or search input to pick an existing report from the main reports table
+
+Show report title and category so it is easy to pick
+
+A select input for Study type with at least
+
+Test24 Basic
+
+Test24 Pro
+
+Other
+
+A select or tags input for Status with
+
+Live
+
+Completed
+
+A date input for Delivered date
+
+A text input or select for Primary contact email (optional)
+
+When the admin clicks Save
+
+Call a dedicated API endpoint like POST /api/admin/company/:companyId/reports
+
+Validate data on the server
+
+Insert a new row in the company_reports join table (or the existing equivalent)
+
+Return the full list of updated client reports for that company
+
+After save succeeds
+
+Close the modal
+
+Refresh the Client Reports list in the drawer from the server
+
+Each report should show
+
+Title
+
+Study type pill
+
+Status pill
+
+Delivered date
+
+Download or open icon if a file link exists
+
+Do not duplicate card rendering logic. If there is already a component used for research cards, reuse or factor it out so both the Company drawer and My Research use the same component or at least the same mapping.
+
+1.3 Wire reports into My Research
+
+Ensure that any client report linked to a company via the join table appears correctly in
+
+Admin My Research
+
+Client My Research for that companys members
+
+Rules
+
+A report linked to a company should appear once for that company
+
+Status and study type should come from the join record (or consistent source)
+
+Delivered date should be correctly mapped
+
+Nandos reports should appear for Nandos only
+
+Rugani reports should appear for Rugani only
+
+DGB pilot report should appear for DGB only
+
+2. Make company profile fields editable and persisted
+
+In the Company drawer
+
+Find the fields for Contract Period
+
+Start Date
+
+End Date
+
+If they are read only or not wired to the backend
+
+Make them editable date inputs
+
+Add them to the form state that is used to update a company
+
+Implement or reuse an API endpoint, for example
+
+PATCH /api/admin/companies/:companyId
+
+that supports updating
+
+contractStartDate
+
+contractEndDate
+
+Persist these fields in the database
+
+Ensure the companies table has columns for start and end date
+
+If not, add them via the Drizzle schema and migrations
+
+When the admin edits and saves
+
+Save to the database
+
+Immediately update the drawer view
+
+Ensure these dates are available wherever else company contract information is shown
+
+3. Restore “View company portal” for admins
+
+I previously had the ability as an admin to “view the portal from a companys perspective”. This must be restored.
+
+In the Company drawer, add a button near the top, for example
+
+Label
+
+“View client portal”
+
+Functionality
+
+When clicked as an admin
+
+Navigate to the standard client portal view, eg /portal/research
+
+Pass a secure query parameter or route parameter to indicate which company to focus on, eg /portal/research?companyId=...
+
+Do NOT log the admin in as the client user or change underlying auth tokens
+
+Instead, keep admin session but filter the view
+
+Client side behaviour
+
+When companyId is present and the user is an admin
+
+The My Research tab should filter to that companys studies and reports only
+
+If no companyId is present
+
+Show the admins own view
+
+Make sure this button is only visible to admin users
+
+Gate it with the same admin role checks used for the Admin tab
+
+4. Fix report visibility so clients cannot see each others reports
+
+There is an existing bug where all clients can see each others reports. This MUST be fixed.
+
+Audit all endpoints that return reports or research for the portal side
+
+For example
+
+/api/member/reports
+
+/api/member/studies
+
+Any others used by portal research pages
+
+For each of those endpoints
+
+Scope the data strictly by
+
+The authenticated user session
+
+The company or companies that this user is associated with
+
+Do NOT return reports for other companies
+
+Ensure that
+
+Rugani users see only Rugani research and reports
+
+Nandos sees only Nandos
+
+DGB sees only DGB
+
+Scale demo or internal Innovatr content is excluded from client views if that is how the system is designed
+
+Re check the My Research page rendering logic
+
+Confirm it uses the correctly scoped API endpoint and does not merge admin level data into client views
+
+5. Replace the “Research Pipeline” card on Admin Overview
+
+On the Admin Overview page there is a Research Pipeline card that currently shows
+
+New
+
+In Progress
+
+Completed
+
+Active
+
+I do not like the current design. Keep the same card size but change the contents.
+
+Replace it with a compact “Test24 Activity Snapshot” for the selected time range.
+
+Inside the card show
+
+First row, four simple statistic blocks
+
+Total Test24 projects
+
+Test24 Basic this period
+
+Test24 Pro this period
+
+Projects currently live
+
+Second row, a thin horizontal segmented bar
+
+Blue segment for Basic
+
+Purple segment for Pro
+
+Lengths proportional to the counts this period
+
+Third row, a small caption
+
+Example wording
+
+“4 Test24 projects this period 3 Basic 1 Pro”
+
+Use only simple shapes and text, no complex charts, and keep visual weight light so the overview feels clean and not childish. Use existing colour variables used for Basic and Pro credits.
+
+Make sure all counts are calculated from real data
+
+Use the same source as
+
+Credits
+
+Company reports
+
+Studies tables
+
+6. Regression and sanity checks
+
+After implementing everything above, run a full pass and ensure
+
+Adding a Client Report from the Company drawer
+
+Creates a record in the join table
+
+Shows instantly in the Client Reports list for that company
+
+Appears in Admin My Research
+
+Appears in the client portal My Research for that company only
+
+Editing Contract Period dates
+
+Saves and persists after full page refresh
+
+Is visible in the Company drawer when reopened
+
+“View client portal” button
+
+Only visible for admin users
+
+Navigates to client portal filtered to that company
+
+Does not change the underlying auth identity
+
+Report privacy
+
+Log in as a Rugani member confirm you can only see Rugani research
+
+Log in as a Nandos member confirm you only see Nandos research
+
+DGB sees only DGB
+
+Nothing breaks on the existing Admin tabs
+
+Companies
+
+Orders
+
+Briefs
+
+Members
+
+Reports
+
+If any issues are found, fix them before finishing.
+
+When done, update any relevant documentation or comments so that future changes to the portal can reuse these patterns.

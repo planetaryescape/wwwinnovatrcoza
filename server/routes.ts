@@ -1726,11 +1726,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/member/client-reports", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const sessionUser = req.user!;
+      const queryCompanyId = req.query.companyId as string | undefined;
       
-      // Admin users (@innovatr.co.za) can see all client reports with company names
+      // Admin users (@innovatr.co.za) can see reports for a specific company or all
       if (isAdminUser(sessionUser.email)) {
+        if (queryCompanyId) {
+          // Admin viewing a specific company's reports
+          const company = await storage.getCompany(queryCompanyId);
+          const reports = await storage.getClientReportsByCompanyId(queryCompanyId);
+          const enrichedReports = reports.map((report) => ({
+            ...report,
+            companyName: company?.name || "Unknown Company",
+          }));
+          return res.json(enrichedReports);
+        }
+        
+        // Admin viewing all reports
         const allReports = await storage.getAllClientReports();
-        // Enrich reports with company names for admin view
         const enrichedReports = await Promise.all(
           allReports.map(async (report) => {
             const company = await storage.getCompany(report.companyId);

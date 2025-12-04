@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,11 +13,11 @@ import {
 import { 
   Search, FileText, Download, Eye, Grid3x3, List, Lock, RefreshCw, 
   Building2, Calendar, Tag, Clock, Play, BarChart3, CheckCircle2,
-  Loader2, Timer
+  Loader2, Timer, ArrowLeft
 } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { useAuth } from "@/contexts/AuthContext";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 
 interface ClientReport {
   id: string;
@@ -56,6 +56,7 @@ interface Study {
 export default function PastResearch() {
   const { isMember, user, company, isAdmin } = useAuth();
   const [, setLocation] = useLocation();
+  const searchString = useSearch();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterTag, setFilterTag] = useState("all");
@@ -65,6 +66,32 @@ export default function PastResearch() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [, setTimeNow] = useState(Date.now());
+  const [viewingCompany, setViewingCompany] = useState<{ id: string; name: string } | null>(null);
+
+  const viewCompanyId = useMemo(() => {
+    if (!searchString || !isAdmin) return null;
+    const params = new URLSearchParams(searchString);
+    return params.get("companyId");
+  }, [searchString, isAdmin]);
+
+  useEffect(() => {
+    const fetchCompanyName = async () => {
+      if (viewCompanyId && isAdmin) {
+        try {
+          const res = await fetch(`/api/admin/companies/${viewCompanyId}`);
+          if (res.ok) {
+            const data = await res.json();
+            setViewingCompany({ id: viewCompanyId, name: data.name });
+          }
+        } catch (err) {
+          console.error("Failed to fetch company:", err);
+        }
+      } else {
+        setViewingCompany(null);
+      }
+    };
+    fetchCompanyName();
+  }, [viewCompanyId, isAdmin]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -78,9 +105,11 @@ export default function PastResearch() {
       setLoading(true);
       setError(null);
       
+      const targetCompanyId = viewCompanyId || user?.companyId || '';
+      
       const [reportsRes, studiesRes] = await Promise.all([
-        fetch(`/api/member/client-reports?email=${encodeURIComponent(user?.email || '')}`),
-        fetch(`/api/member/studies?email=${encodeURIComponent(user?.email || '')}&companyId=${user?.companyId || ''}`)
+        fetch(`/api/member/client-reports?email=${encodeURIComponent(user?.email || '')}&companyId=${targetCompanyId}`),
+        fetch(`/api/member/studies?email=${encodeURIComponent(user?.email || '')}&companyId=${targetCompanyId}`)
       ]);
       
       if (!reportsRes.ok) {
@@ -105,12 +134,12 @@ export default function PastResearch() {
   };
 
   useEffect(() => {
-    if (user?.email && (user?.companyId || isAdmin)) {
+    if (user?.email && (user?.companyId || isAdmin || viewCompanyId)) {
       fetchData();
     } else if (user?.email) {
       setLoading(false);
     }
-  }, [user?.companyId, user?.email, isAdmin]);
+  }, [user?.companyId, user?.email, isAdmin, viewCompanyId]);
 
   const allTags = Array.from(new Set([
     ...reports.flatMap(r => r.tags),
@@ -282,6 +311,37 @@ export default function PastResearch() {
             </Button>
           </div>
         </div>
+
+        {viewingCompany && isAdmin && (
+          <Card className="border-violet-500 bg-violet-50 dark:bg-violet-950/30">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center">
+                    <Building2 className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-violet-900 dark:text-violet-100">
+                      Viewing: {viewingCompany.name}
+                    </p>
+                    <p className="text-sm text-violet-600 dark:text-violet-300">
+                      You're viewing this company's research as an admin
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => setLocation("/portal/admin?tab=companies")}
+                  className="border-violet-500 text-violet-700 hover:bg-violet-100 dark:hover:bg-violet-900"
+                  data-testid="button-back-to-admin"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Companies
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {showLockedBanner && (
           <Card className="border-primary bg-primary/5">

@@ -26,6 +26,14 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -49,7 +57,9 @@ import {
   Trash2,
   Plus,
   Minus,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ExternalLink,
+  Eye
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -78,10 +88,11 @@ interface ClientReport {
   companyId: string;
   title: string;
   description: string | null;
-  researchType: string;
-  status: string;
+  studyType: string | null;
+  status: string | null;
   pdfUrl: string | null;
   deliveredAt: string | null;
+  primaryContactEmail: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -117,6 +128,17 @@ export default function AdminCompanies() {
   const [editNotes, setEditNotes] = useState("");
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  
+  const [addReportOpen, setAddReportOpen] = useState(false);
+  const [addingReport, setAddingReport] = useState(false);
+  const [newReport, setNewReport] = useState({
+    title: "",
+    description: "",
+    studyType: "Test24 Basic",
+    status: "Completed",
+    deliveredAt: new Date().toISOString().split('T')[0],
+    primaryContactEmail: "",
+  });
 
   const fetchCompanies = async () => {
     try {
@@ -146,7 +168,7 @@ export default function AdminCompanies() {
 
   const fetchCompanyReports = async (companyId: string) => {
     try {
-      const res = await fetch(`/api/admin/client-reports?companyId=${companyId}`);
+      const res = await fetch(`/api/admin/companies/${companyId}/client-reports`);
       if (!res.ok) throw new Error("Failed to fetch company reports");
       const data = await res.json();
       setCompanyReports(data);
@@ -264,6 +286,68 @@ export default function AdminCompanies() {
   const handleSaveNotes = async () => {
     if (!selectedCompany) return;
     await handleUpdateCompany(selectedCompany.id, { notes: editNotes });
+  };
+
+  const handleAddReport = async () => {
+    if (!selectedCompany || !newReport.title.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a report title",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setAddingReport(true);
+    try {
+      const res = await fetch("/api/admin/client-reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          companyId: selectedCompany.id,
+          title: newReport.title,
+          description: newReport.description || null,
+          studyType: newReport.studyType,
+          status: newReport.status,
+          deliveredAt: newReport.deliveredAt || null,
+          primaryContactEmail: newReport.primaryContactEmail || null,
+          tags: [],
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to add report");
+
+      toast({
+        title: "Report Added",
+        description: "Client report has been added successfully",
+      });
+
+      setAddReportOpen(false);
+      setNewReport({
+        title: "",
+        description: "",
+        studyType: "Test24 Basic",
+        status: "Completed",
+        deliveredAt: new Date().toISOString().split('T')[0],
+        primaryContactEmail: "",
+      });
+      
+      await fetchCompanyReports(selectedCompany.id);
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to add report",
+        variant: "destructive",
+      });
+    } finally {
+      setAddingReport(false);
+    }
+  };
+
+  const handleViewClientPortal = () => {
+    if (!selectedCompany) return;
+    setDrawerOpen(false);
+    setLocation(`/portal/research?companyId=${selectedCompany.id}`);
   };
 
   const formatDate = (dateStr: string | null | undefined) => {
@@ -474,6 +558,16 @@ export default function AdminCompanies() {
                     </div>
                   </div>
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3"
+                  onClick={handleViewClientPortal}
+                  data-testid="button-view-client-portal"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Client Portal
+                </Button>
               </SheetHeader>
 
               <div className="mt-6 space-y-6">
@@ -512,11 +606,23 @@ export default function AdminCompanies() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label className="text-xs text-muted-foreground">Start Date</Label>
-                      <p className="font-medium">{formatDate(selectedCompany.contractStart)}</p>
+                      <Input 
+                        type="date" 
+                        value={selectedCompany.contractStart ? new Date(selectedCompany.contractStart).toISOString().split('T')[0] : ""}
+                        onChange={(e) => handleUpdateCompany(selectedCompany.id, { contractStart: e.target.value || null })}
+                        className="mt-1"
+                        data-testid="input-contract-start"
+                      />
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground">End Date</Label>
-                      <p className="font-medium">{formatDate(selectedCompany.contractEnd)}</p>
+                      <Input 
+                        type="date" 
+                        value={selectedCompany.contractEnd ? new Date(selectedCompany.contractEnd).toISOString().split('T')[0] : ""}
+                        onChange={(e) => handleUpdateCompany(selectedCompany.id, { contractEnd: e.target.value || null })}
+                        className="mt-1"
+                        data-testid="input-contract-end"
+                      />
                     </div>
                   </div>
                   <div className="mt-3">
@@ -724,8 +830,8 @@ export default function AdminCompanies() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => setLocation(`/portal/admin?tab=reports&companyId=${selectedCompany.id}`)}
-                      data-testid="button-manage-reports"
+                      onClick={() => setAddReportOpen(true)}
+                      data-testid="button-add-report"
                     >
                       <Plus className="w-4 h-4 mr-1" />
                       Add Report
@@ -745,8 +851,13 @@ export default function AdminCompanies() {
                             <p className="font-medium truncate">{report.title}</p>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <Badge variant="outline" className="text-xs">
-                                {report.researchType === "BASIC" ? "Test24 Basic" : "Test24 Pro"}
+                                {report.studyType || "Test24 Basic"}
                               </Badge>
+                              {report.status && (
+                                <Badge variant={report.status === "Completed" ? "secondary" : "default"} className="text-xs">
+                                  {report.status}
+                                </Badge>
+                              )}
                               <span>{formatDate(report.deliveredAt || report.createdAt)}</span>
                             </div>
                           </div>
@@ -819,6 +930,111 @@ export default function AdminCompanies() {
           )}
         </SheetContent>
       </Sheet>
+
+      <Dialog open={addReportOpen} onOpenChange={setAddReportOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Add Client Report</DialogTitle>
+            <DialogDescription>
+              Add a new research report for {selectedCompany?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="report-title">Report Title *</Label>
+              <Input
+                id="report-title"
+                placeholder="e.g., Consumer Insights Q4 2024"
+                value={newReport.title}
+                onChange={(e) => setNewReport({ ...newReport, title: e.target.value })}
+                data-testid="input-report-title"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="report-description">Description</Label>
+              <Textarea
+                id="report-description"
+                placeholder="Brief description of the research..."
+                value={newReport.description}
+                onChange={(e) => setNewReport({ ...newReport, description: e.target.value })}
+                data-testid="input-report-description"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Study Type</Label>
+                <Select
+                  value={newReport.studyType}
+                  onValueChange={(v) => setNewReport({ ...newReport, studyType: v })}
+                >
+                  <SelectTrigger data-testid="select-study-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Test24 Basic">Test24 Basic</SelectItem>
+                    <SelectItem value="Test24 Pro">Test24 Pro</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select
+                  value={newReport.status}
+                  onValueChange={(v) => setNewReport({ ...newReport, status: v })}
+                >
+                  <SelectTrigger data-testid="select-status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Live">Live</SelectItem>
+                    <SelectItem value="Completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="delivered-at">Delivered Date</Label>
+                <Input
+                  id="delivered-at"
+                  type="date"
+                  value={newReport.deliveredAt}
+                  onChange={(e) => setNewReport({ ...newReport, deliveredAt: e.target.value })}
+                  data-testid="input-delivered-at"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="primary-contact">Primary Contact Email</Label>
+                <Input
+                  id="primary-contact"
+                  type="email"
+                  placeholder="contact@company.com"
+                  value={newReport.primaryContactEmail}
+                  onChange={(e) => setNewReport({ ...newReport, primaryContactEmail: e.target.value })}
+                  data-testid="input-primary-contact"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setAddReportOpen(false)}
+              data-testid="button-cancel-report"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAddReport}
+              disabled={addingReport}
+              data-testid="button-save-report"
+            >
+              {addingReport ? "Adding..." : "Add Report"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
