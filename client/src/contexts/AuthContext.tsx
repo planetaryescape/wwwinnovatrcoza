@@ -82,7 +82,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const fetchCompany = async () => {
       if (user?.companyId) {
         try {
-          const res = await fetch(`/api/companies/${user.companyId}`);
+          // Pass user email for demo account credit display
+          const emailParam = user.email ? `?email=${encodeURIComponent(user.email)}` : '';
+          const res = await fetch(`/api/companies/${user.companyId}${emailParam}`);
           if (res.ok) {
             const companyData = await res.json();
             setCompany(companyData);
@@ -95,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
     fetchCompany();
-  }, [user?.companyId]);
+  }, [user?.companyId, user?.email]);
 
   const login = async (email: string, password: string) => {
     try {

@@ -22,6 +22,7 @@ import { useLocation } from "wouter";
 interface ClientReport {
   id: string;
   companyId: string;
+  companyName?: string;
   title: string;
   description: string | null;
   pdfUrl: string | null;
@@ -600,6 +601,12 @@ export default function PastResearch() {
                           </CardHeader>
                           <CardContent className="flex-1 flex flex-col">
                             <div className="flex-1 space-y-3">
+                              {isAdmin && report.companyName && (
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <Building2 className="w-3 h-3" />
+                                  <span>{report.companyName}</span>
+                                </div>
+                              )}
                               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                 <Calendar className="w-3 h-3" />
                                 <span>Delivered {formatDate(report.uploadedAt)}</span>
@@ -708,6 +715,12 @@ export default function PastResearch() {
                                   <p className="text-sm text-muted-foreground line-clamp-1">{report.description}</p>
                                 )}
                                 <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                                  {isAdmin && report.companyName && (
+                                    <span className="flex items-center gap-1">
+                                      <Building2 className="w-3 h-3" />
+                                      {report.companyName}
+                                    </span>
+                                  )}
                                   <span className="flex items-center gap-1">
                                     <Calendar className="w-3 h-3" />
                                     {formatDate(report.uploadedAt)}

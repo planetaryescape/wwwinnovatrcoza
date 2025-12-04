@@ -969,6 +969,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Demo accounts list - used for minimum credit display
+  const DEMO_ACCOUNTS = ["hannah@innovatr.co.za", "richard@innovatr.co.za"];
+  const DEMO_MIN_BASIC_CREDITS = 22;
+  const DEMO_MIN_PRO_CREDITS = 4;
+  
+  // Helper function to apply demo minimum credits
+  function applyDemoCredits(company: any, userEmail?: string) {
+    if (!company || !userEmail || !DEMO_ACCOUNTS.includes(userEmail)) {
+      return company;
+    }
+    
+    // Ensure minimum credits are displayed for demo accounts
+    const basicRemaining = (company.basicCreditsTotal ?? 0) - (company.basicCreditsUsed ?? 0);
+    const proRemaining = (company.proCreditsTotal ?? 0) - (company.proCreditsUsed ?? 0);
+    
+    return {
+      ...company,
+      basicCreditsTotal: Math.max(company.basicCreditsTotal ?? 0, DEMO_MIN_BASIC_CREDITS + (company.basicCreditsUsed ?? 0)),
+      proCreditsTotal: Math.max(company.proCreditsTotal ?? 0, DEMO_MIN_PRO_CREDITS + (company.proCreditsUsed ?? 0)),
+    };
+  }
+
+  // Get company by ID (for authenticated users to fetch their own company)
+  app.get("/api/companies/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userEmail = req.query.email as string | undefined;
+      const company = await storage.getCompany(id);
+      if (!company) {
+        return res.status(404).json({ error: "Company not found" });
+      }
+      // Apply demo minimum credits for Hannah and Richard
+      const adjustedCompany = applyDemoCredits(company, userEmail);
+      res.json(adjustedCompany);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Company management endpoints
   app.get("/api/admin/companies", async (req, res) => {
     try {
@@ -1176,10 +1215,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Email is required" });
       }
       
-      // Admin users (@innovatr.co.za) can see all client reports
+      // Admin users (@innovatr.co.za) can see all client reports with company names
       if (isAdminUser(email as string)) {
         const allReports = await storage.getAllClientReports();
-        return res.json(allReports);
+        // Enrich reports with company names for admin view
+        const enrichedReports = await Promise.all(
+          allReports.map(async (report) => {
+            const company = await storage.getCompany(report.companyId);
+            return {
+              ...report,
+              companyName: company?.name || "Unknown Company",
+            };
+          })
+        );
+        return res.json(enrichedReports);
       }
       
       const user = await storage.getUserByEmail(email as string);
@@ -1187,8 +1236,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
       
+      // For regular users, get their company name to include in reports
+      const company = await storage.getCompany(user.companyId);
       const reports = await storage.getClientReportsByCompanyId(user.companyId);
-      res.json(reports);
+      const enrichedReports = reports.map((report) => ({
+        ...report,
+        companyName: company?.name || "Unknown Company",
+      }));
+      res.json(enrichedReports);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }

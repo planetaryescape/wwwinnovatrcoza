@@ -1,0 +1,458 @@
+You are updating my Innovatr member portal codebase.
+1. Attach 4 Insight PDFs to their matching Trends & Insights posts
+Context
+
+
+In the Trends & Insights section of the portal, I have insight posts such as
+
+
+“Banking Monogamy Is Dead”
+
+
+“The New Non-Negotiable Treat”
+
+
+“From Vegan to Vital: The Protein Comeback”
+
+
+“The Moderation Movement”
+
+
+
+
+I have now uploaded final PDF reports for these four insights:
+
+
+Innovatr Insights X Banking Monogamy.pdf
+
+
+Innovatr Insights X The New Non Negotiable Treat.pdf
+
+
+Innovatr Insights X From Vegan to Vital.pdf
+
+
+Innovatr Insights X Moderation Movement.pdf
+
+
+These live in the repo already (use or create a consistent folder such as server/files/insights/).
+
+
+Each Trends & Insights post already has:
+
+
+A card view in the portal library
+
+
+A full article view page
+
+
+
+
+The goal is simply to wire these four PDFs into the existing system so that each post shows the correct downloadable report at the end of the article.
+
+Use the same metadata structure and download behaviour as any existing insight report that already works end-to-end. For “The New Non-Negotiable Treat”, use the new snacks insight report PDF as the canonical file. 
+
+What to do
+
+
+Find where insight reports are configured
+
+
+Locate the config / seed data that maps a Trends & Insights post to a downloadable file.
+
+
+This might be something like INSIGHT_REPORTS, reportsBySlug, or a reports table in the DB.
+
+
+
+
+Confirm how posts are identified: id, slug, or postKey.
+
+
+
+
+Register the 4 new files in storage
+Add entries for the four PDFs using whatever structure already exists. Example shape (adapt to actual schema):
+{
+  id: 'insight-banking-monogamy',
+  type: 'insight',
+  title: 'Banking Monogamy Is Dead',
+  company: null,
+  tags: ['Banking', 'Innovation', 'Consumer Behaviour'],
+  filePath: '/files/insights/Innovatr Insights X Banking Monogamy.pdf',
+  fileType: 'application/pdf',
+  sizeBytes: <fill from file or approximate>,
+  deliveredAt: '2025-11-20'
+}
+
+Create one record for each:
+
+
+insight-banking-monogamy → Innovatr Insights X Banking Monogamy.pdf
+
+
+insight-non-negotiable-treat → Innovatr Insights X The New Non Negotiable Treat.pdf
+
+
+insight-from-vegan-to-vital → Innovatr Insights X From Vegan to Vital.pdf
+
+
+insight-moderation-movement → Innovatr Insights X Moderation Movement.pdf
+
+
+Use realistic deliveredAt dates based on when these were actually finalised. If unknown, you can assume Q4 2025.
+
+
+Link reports to their corresponding posts
+
+
+For each of the four posts, ensure the post object (or page config) includes a reference to the correct report id.
+
+
+Example: reportId: 'insight-banking-monogamy'.
+
+
+
+
+Do not change access rules:
+
+
+Keep the same free vs member gating that the Banking Monogamy insight already uses.
+
+
+
+
+The report download CTA must appear only at the end of the full article, not at the top.
+
+
+If there is still a duplicate download button near the top, remove it for these posts.
+
+
+
+
+
+
+Front-end behaviour
+
+
+On the card view in the Trends & Insights library, keep the current design but ensure that:
+
+
+Clicking “View full issue” (or equivalent) opens the article page.
+
+
+
+
+At the end of the article, show a clear download section, for example:
+
+
+Title: Download the full insight report
+
+
+Subcopy: Get the complete slides, data highlights, and Innovatr recommendations for this topic.
+
+
+Button: Download PDF
+
+
+
+
+Reuse existing components and styles for report downloads so everything stays visually consistent.
+
+
+
+
+Permissions & tracking
+
+
+Ensure downloads for these four PDFs are:
+
+
+Logged / tracked in the same way as other reports (if analytics or download counters exist).
+
+
+Only accessible to the same user roles as the article itself.
+
+
+
+
+If a guest user is not allowed to download, re-use the existing “please sign in / become a member” pattern.
+
+
+
+
+
+2. Ensure Hannah and Richard always display base credits for demos
+Context
+
+
+Credits are already tracked per company / user for:
+
+
+Test24 Basic credits
+
+
+Test24 Pro credits
+
+
+
+
+There is UI to:
+
+
+Show available credits in Credits & Billing
+
+
+Use credits when launching a new study
+
+
+
+
+For demo purposes, we want our own profiles to always look like a healthy, “normal” client account.
+
+
+Requirement
+For the users:
+
+
+hannah@innovatr.co.za
+
+
+richard@innovatr.co.za
+
+
+ensure they always display at least:
+
+
+22 Test24 Basic credits
+
+
+4 Test24 Pro credits
+
+
+These are for demo display but should still behave like real credits when used.
+Implementation details
+
+
+Identify where credits are stored
+
+
+Find the table / model that stores credit balances, e.g. CompanyCredits, UserCredits, or similar.
+
+
+Confirm the fields used, e.g.:
+{
+  companyId: string;
+  basicCredits: number;
+  proCredits: number;
+}
+
+
+
+
+
+Create a helper to enforce a minimum demo balance
+Add a small utility that enforces minimum credits only for the two demo users:
+const DEMO_MIN_BASIC = 22;
+const DEMO_MIN_PRO = 4;
+const DEMO_EMAILS = ['hannah@innovatr.co.za', 'richard@innovatr.co.za'];
+
+function ensureDemoMinimumCredits(user, credits) {
+  if (!DEMO_EMAILS.includes(user.email)) return credits;
+
+  return {
+    ...credits,
+    basicCredits: Math.max(credits.basicCredits ?? 0, DEMO_MIN_BASIC),
+    proCredits: Math.max(credits.proCredits ?? 0, DEMO_MIN_PRO),
+  };
+}
+
+
+
+Where to call it
+
+
+After loading credits for the logged-in user (for portal views like Credits & Billing, Launch New Brief, or My Research), run the result through ensureDemoMinimumCredits before sending to the front-end.
+
+
+When using credits to pay for a study:
+
+
+Deduct credits as normal.
+
+
+If the resulting balance for a demo user falls below the minimum, the helper will “top them up” on the next fetch.
+
+
+This way, the system behaves normally but the UI always shows at least 22 / 4 for these two accounts.
+
+
+
+
+
+
+For non-demo users, nothing changes.
+
+
+
+
+Persistence
+
+
+You can choose either:
+
+
+Option A: Actually write the topped-up values back to the DB for these two users (so the stored balance is always ≥ min), or
+
+
+Option B: Keep DB values “real” and only apply the minimum in the read layer for the UI.
+
+
+
+
+Prefer Option B to keep accounting clean. If you choose B:
+
+
+Add a short comment in the credit service explaining that demo users have a display minimum.
+
+
+
+
+
+
+Admin view
+
+
+In the Admin Dashboard → Companies / Credits views, make sure:
+
+
+When you view Hannah’s or Richard’s company, you also see at least 22 basic and 4 pro credits (so it matches the portal).
+
+
+
+
+No changes required for other companies.
+
+
+
+
+
+3. Admin access to client reports via “My Research”
+Context
+
+
+The Admin Dashboard currently has a Client Reports tab that lists reports for each company.
+
+
+Hannah and Richard log in as admins and also have a My Research tab in the main portal sidebar.
+
+
+Goal
+
+
+Instead of managing reports via the separate Client Reports tab, Hannah and Richard should see all client research reports directly in their My Research area when logged in as themselves.
+
+
+What to do
+
+
+Keep the existing Client Reports data model, but:
+
+
+You can optionally hide the Client Reports tab in the Admin UI if it becomes redundant.
+
+
+Do not remove underlying data or APIs.
+
+
+
+
+Extend “My Research” behaviour
+
+
+For normal users:
+
+
+My Research continues to show only their own company’s completed and in-progress studies.
+
+
+
+
+For Hannah and Richard:
+
+
+My Research should show:
+
+
+All their own company’s work plus
+
+
+All client reports (same dataset currently used by Admin → Client Reports).
+
+
+
+
+
+
+
+
+UI labelling
+
+
+Keep the heading as My Research.
+
+
+Add a small sub-label or helper text visible only to admins (Hannah and Richard), e.g.:
+
+Viewing all client research as admin
+
+
+
+Keep filtering and search behaviour consistent.
+
+
+
+
+
+4. Sanity checks
+After implementing everything:
+
+
+Each of the four insights posts:
+
+
+Shows its correct PDF at the bottom of the article.
+
+
+Allows download only for permitted users.
+
+
+Works on both portal and admin views.
+
+
+
+
+Hannah and Richard:
+
+
+Always see at least 22 Basic and 4 Pro credits in Credits & Billing and any related checkouts.
+
+
+Can still “spend” credits for tests; the system does not break or go negative.
+
+
+
+
+Admin:
+
+
+Hannah and Richard see all client reports in My Research.
+
+
+No behaviour changes for non-admin users.
+
+
+
+
+Please keep all styles, components, and existing structures consistent with the rest of the app.
