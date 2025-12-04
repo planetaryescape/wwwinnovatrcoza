@@ -1259,6 +1259,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         s.isTest24 && 
         (s.status === "in_progress" || s.status === "AUDIENCE_LIVE" || s.status === "ANALYSING_DATA" || s.status === "IN_PROGRESS")
       ).length;
+      const test24CompletedBasic = studies.filter((s) => s.isTest24 && s.studyType === "basic" && s.status === "COMPLETED").length;
+      const test24CompletedPro = studies.filter((s) => s.isTest24 && s.studyType === "pro" && s.status === "COMPLETED").length;
+      const test24Completed = test24CompletedBasic + test24CompletedPro;
 
       res.json({
         metrics: {
@@ -1279,6 +1282,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         test24Stats: {
           totalBasic: test24BasicTotal,
           totalPro: test24ProTotal,
+          completedBasic: test24CompletedBasic,
+          completedPro: test24CompletedPro,
+          completed: test24Completed,
           basicThisMonth: test24BasicThisMonth,
           proThisMonth: test24ProThisMonth,
           inProgress: test24InProgress,

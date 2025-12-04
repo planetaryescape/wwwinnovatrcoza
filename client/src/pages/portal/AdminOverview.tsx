@@ -50,6 +50,9 @@ interface BriefStats {
 interface Test24Stats {
   totalBasic: number;
   totalPro: number;
+  completedBasic: number;
+  completedPro: number;
+  completed: number;
   basicThisMonth: number;
   proThisMonth: number;
   inProgress: number;
@@ -382,20 +385,20 @@ export default function AdminOverview() {
               </div>
               <div className="text-center p-3 border rounded-lg bg-green-50 dark:bg-green-900/20">
                 <p className="text-2xl font-bold text-green-700 dark:text-green-400">
-                  {analytics?.pipeline.briefStats.completed || 0}
+                  {analytics?.test24Stats?.completed || 0}
                 </p>
                 <p className="text-xs text-muted-foreground">Completed</p>
               </div>
             </div>
 
             <div className="border-t pt-4">
-              <p className="text-xs font-medium text-muted-foreground mb-3">Basic vs Pro Distribution</p>
+              <p className="text-xs font-medium text-muted-foreground mb-3">Completed Studies Distribution</p>
               {(() => {
-                const basic = analytics?.test24Stats?.totalBasic || 0;
-                const pro = analytics?.test24Stats?.totalPro || 0;
+                const basic = analytics?.test24Stats?.completedBasic || 0;
+                const pro = analytics?.test24Stats?.completedPro || 0;
                 const total = basic + pro;
-                const basicPercent = total > 0 ? (basic / total) * 100 : 50;
-                const proPercent = total > 0 ? (pro / total) * 100 : 50;
+                const basicPercent = total > 0 ? (basic / total) * 100 : 100;
+                const proPercent = total > 0 ? (pro / total) * 100 : 0;
                 
                 return (
                   <div className="space-y-3">
@@ -408,14 +411,16 @@ export default function AdminOverview() {
                           <span className="text-xs font-medium text-white">{basic}</span>
                         )}
                       </div>
-                      <div 
-                        className="bg-violet-500 flex items-center justify-center transition-all duration-300"
-                        style={{ width: `${proPercent}%` }}
-                      >
-                        {proPercent >= 20 && (
-                          <span className="text-xs font-medium text-white">{pro}</span>
-                        )}
-                      </div>
+                      {pro > 0 && (
+                        <div 
+                          className="bg-violet-500 flex items-center justify-center transition-all duration-300"
+                          style={{ width: `${proPercent}%` }}
+                        >
+                          {proPercent >= 20 && (
+                            <span className="text-xs font-medium text-white">{pro}</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="flex justify-between text-xs">
                       <div className="flex items-center gap-2">
