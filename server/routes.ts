@@ -1221,12 +1221,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           deliveryDate: s.deliveryDate,
         }));
 
-      // Get all reports for free reports library
+      // Get all reports for free reports library (only PUBLIC access level)
       const reports = await storage.getAllReports();
       const freeReports = reports
-        .filter((r) => r.status === "published" && !r.isArchived && r.accessLevel !== "companyOnly")
+        .filter((r) => r.status === "published" && !r.isArchived && (r.accessLevel === "PUBLIC" || r.accessLevel === "public"))
         .sort((a, b) => new Date(b.date || b.createdAt).getTime() - new Date(a.date || a.createdAt).getTime())
-        .slice(0, 9)
         .map((r) => ({
           id: r.id,
           title: r.title,
