@@ -379,13 +379,14 @@ export class MemStorage implements IStorage {
 
     // Two Rugani Past Research projects added and linked by companyId.
     // Access is restricted to Rugani users (by company) and admins.
-    const ruganiClientReports: InsertClientReport[] = [
+    const ruganiClientReports: (InsertClientReport & { uploadedAt?: Date })[] = [
       {
         companyId: ruganiId,
         title: "Rugani x Clicks Wellness Beverage Positioning",
         description: "Quant deep dive into how Rugani's 330 ml and 750 ml formats perform against LiquiFruit, Coke, Powerade and Red Bull in Clicks. Shows that Rugani's natural positioning fits the Clicks wellness mission and proves the role of each format in fridges, health aisles and checkout.",
         pdfUrl: "/assets/client-reports/rugani/Rugani_X_Clicks_Test24_Basic.pptx",
         tags: ["Rugani", "Clicks", "Test24 Basic", "Retail Positioning", "Beverages", "Wellness", "Category Growth"],
+        uploadedAt: new Date("2025-11-07"),
       },
       {
         companyId: ruganiId,
@@ -393,6 +394,7 @@ export class MemStorage implements IStorage {
         description: "Evaluation of Rugani's new key visual against Sir Fruit, LiquiFruit and Rhodes among heavy juice users. Identifies where the current ad underperforms and gives a roadmap to shift from sport-only energy cues to everyday natural health and refreshment.",
         pdfUrl: "/assets/client-reports/rugani/Rugani_Test24_X_Ad_Campaign.pptx",
         tags: ["Rugani", "Creative Testing", "Key Visual", "Test24 Basic", "Juice", "Brand Communication"],
+        uploadedAt: new Date("2025-11-07"),
       },
     ];
 
@@ -884,7 +886,7 @@ export class MemStorage implements IStorage {
     this.users.delete(id);
   }
 
-  async createClientReport(insertReport: InsertClientReport): Promise<ClientReport> {
+  async createClientReport(insertReport: InsertClientReport & { uploadedAt?: Date }): Promise<ClientReport> {
     const id = randomUUID();
     const now = new Date();
     const report: ClientReport = {
@@ -895,7 +897,7 @@ export class MemStorage implements IStorage {
       pdfUrl: insertReport.pdfUrl ?? null,
       thumbnailUrl: insertReport.thumbnailUrl ?? null,
       tags: insertReport.tags ?? [],
-      uploadedAt: now,
+      uploadedAt: insertReport.uploadedAt ?? now,
       createdAt: now,
       updatedAt: now,
     };
