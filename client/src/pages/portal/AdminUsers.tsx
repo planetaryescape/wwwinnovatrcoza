@@ -78,6 +78,7 @@ interface AdminUser {
   lastProjectDate?: string | null;
   lastActivityDate?: string | null;
   internalNotes?: string | null;
+  pulseSubscribed?: boolean;
   createdAt: string;
   lastLoginAt: string | null;
 }
@@ -426,6 +427,7 @@ export default function AdminUsers() {
                 <TableHead className="font-medium">User</TableHead>
                 <TableHead className="font-medium w-28">Tier</TableHead>
                 <TableHead className="font-medium w-24">Status</TableHead>
+                <TableHead className="font-medium w-20 text-center">Pulse</TableHead>
                 <TableHead className="font-medium w-28">Subscription</TableHead>
                 <TableHead className="font-medium w-20 text-center">Basic</TableHead>
                 <TableHead className="font-medium w-20 text-center">Pro</TableHead>
@@ -435,13 +437,13 @@ export default function AdminUsers() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     Loading users...
                   </TableCell>
                 </TableRow>
               ) : filteredUsers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     No users found matching your filters
                   </TableCell>
                 </TableRow>
@@ -478,6 +480,16 @@ export default function AdminUsers() {
                         <Badge className={`text-xs ${statusStyle.color} border-0`}>
                           {statusStyle.label}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {user.pulseSubscribed ? (
+                          <Badge className="bg-blue-50 text-blue-700 border-0 text-xs">
+                            <Mail className="w-3 h-3 mr-1" />
+                            Yes
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         {sub ? (

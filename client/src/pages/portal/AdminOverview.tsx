@@ -349,69 +349,72 @@ export default function AdminOverview() {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <FileText className="w-5 h-5 text-blue-500" />
-              Research Pipeline
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-500" />
+                Research Snapshot
+              </CardTitle>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => window.location.href = "/portal/admin?tab=briefs"}
+                data-testid="button-view-all-briefs"
+              >
+                View all
+                <ExternalLink className="w-3 h-3 ml-1" />
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-4 gap-2">
-              <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">
-                  {analytics?.pipeline.briefStats.new || 0}
-                </p>
-                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                  <Clock className="w-3 h-3" /> New
-                </p>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="text-center p-3 border rounded-lg">
+                <p className="text-2xl font-bold">{analytics?.pipeline.totalBriefs || 0}</p>
+                <p className="text-xs text-muted-foreground">Total</p>
               </div>
-              <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                <p className="text-2xl font-bold text-yellow-700 dark:text-yellow-400">
-                  {analytics?.pipeline.briefStats.inProgress || 0}
+              <div className="text-center p-3 border rounded-lg bg-orange-50 dark:bg-orange-900/20">
+                <p className="text-2xl font-bold text-orange-700 dark:text-orange-400">
+                  {analytics?.pipeline.activeStudies || 0}
                 </p>
-                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                  <Loader2 className="w-3 h-3" /> In Progress
-                </p>
+                <p className="text-xs text-muted-foreground">Active</p>
               </div>
-              <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <div className="text-center p-3 border rounded-lg bg-green-50 dark:bg-green-900/20">
                 <p className="text-2xl font-bold text-green-700 dark:text-green-400">
                   {analytics?.pipeline.briefStats.completed || 0}
                 </p>
-                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                  <CheckCircle className="w-3 h-3" /> Completed
-                </p>
-              </div>
-              <div className="text-center p-3 bg-muted/50 rounded-lg">
-                <p className="text-2xl font-bold">{analytics?.pipeline.activeStudies || 0}</p>
-                <p className="text-xs text-muted-foreground">Active</p>
+                <p className="text-xs text-muted-foreground">Completed</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1">
-              <div 
-                className="h-2 bg-blue-500 rounded-l-full transition-all" 
-                style={{ 
-                  width: `${((analytics?.pipeline.briefStats.new || 0) / Math.max(1, analytics?.pipeline.totalBriefs || 1)) * 100}%`,
-                  minWidth: analytics?.pipeline.briefStats.new ? '10%' : '0'
-                }}
-              />
-              <div 
-                className="h-2 bg-yellow-500 transition-all" 
-                style={{ 
-                  width: `${((analytics?.pipeline.briefStats.inProgress || 0) / Math.max(1, analytics?.pipeline.totalBriefs || 1)) * 100}%`,
-                  minWidth: analytics?.pipeline.briefStats.inProgress ? '10%' : '0'
-                }}
-              />
-              <div 
-                className="h-2 bg-green-500 rounded-r-full transition-all" 
-                style={{ 
-                  width: `${((analytics?.pipeline.briefStats.completed || 0) / Math.max(1, analytics?.pipeline.totalBriefs || 1)) * 100}%`,
-                  minWidth: analytics?.pipeline.briefStats.completed ? '10%' : '0'
-                }}
-              />
-            </div>
-
-            <div className="text-sm text-muted-foreground text-center">
-              {analytics?.pipeline.totalBriefs || 0} total briefs in pipeline
+            <div className="border-t pt-4">
+              <p className="text-xs font-medium text-muted-foreground mb-3">Recent Studies</p>
+              {loading ? (
+                <div className="space-y-2">
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-12 w-full" />
+                  ))}
+                </div>
+              ) : analytics?.test24Studies && analytics.test24Studies.length > 0 ? (
+                <div className="space-y-2">
+                  {analytics.test24Studies.slice(0, 3).map((study) => (
+                    <div 
+                      key={study.id} 
+                      className="flex items-center justify-between p-2 rounded-lg border hover-elevate"
+                      data-testid={`snapshot-study-${study.id}`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{study.title}</p>
+                        <p className="text-xs text-muted-foreground">{study.companyName}</p>
+                      </div>
+                      {getStatusBadge(study.status)}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-muted-foreground text-sm">
+                  No recent studies
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
