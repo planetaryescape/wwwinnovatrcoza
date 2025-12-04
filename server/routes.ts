@@ -10,6 +10,7 @@ import * as emailService from "./emails/email-service";
 import { sendAdminOrderNotification, sendCustomerOrderConfirmation, sendContactFormMessage, sendInvoiceRequestNotification, sendBriefConfirmationEmail, sendBriefAdminNotification } from "./emails/email-service";
 import { uploadFile, downloadFile, deleteFile, listFiles, fileExists } from "./app-storage";
 import { generateInvoicePdf } from "./invoices/generator";
+import { hashPassword, verifyPassword, validatePasswordStrength, generateResetToken, hashResetToken, getResetTokenExpiry, generateSessionToken, getSessionExpiry, isExpired } from "./auth/password";
 
 // Multer for handling multipart/form-data (PayFast webhooks and file uploads)
 const upload = multer();
@@ -105,28 +106,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Email and password are required" });
       }
       
+      // Validate password strength
+      const passwordValidation = validatePasswordStrength(password);
+      if (!passwordValidation.valid) {
+        return res.status(400).json({ 
+          error: "Password does not meet requirements",
+          details: passwordValidation.errors 
+        });
+      }
+      
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
         return res.status(409).json({ error: "User with this email already exists" });
       }
       
+      // Hash the password
+      const passwordHash = await hashPassword(password);
+      
       // Create user with default STARTER tier and MEMBER role
       const newUser = await storage.createUser({
-        username: email.split("@")[0] + "_" + Date.now(), // Generate unique username from email
+        username: email.split("@")[0] + "_" + Date.now(),
         email,
-        password, // In production, this should be hashed
+        password: "***hashed***", // Placeholder for legacy field
         name: name || email.split("@")[0],
         company: company || null,
-        membershipTier: "STARTER", // All new signups start as STARTER
+        membershipTier: "STARTER",
         status: "ACTIVE",
         role: "MEMBER",
         creditsBasic: 0,
         creditsPro: 0,
       });
       
-      // Return user without password
-      const { password: _, ...safeUser } = newUser;
+      // Update with password hash
+      await storage.updateUser(newUser.id, { passwordHash });
+      
+      // Return user without password fields
+      const { password: _, passwordHash: __, ...safeUser } = newUser;
       res.status(201).json(safeUser);
     } catch (error: any) {
       console.error("Signup error:", error);
@@ -134,7 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User login endpoint
+  // User login endpoint with bcrypt password verification
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
@@ -148,18 +164,178 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Invalid credentials" });
       }
       
-      // In production, compare hashed passwords
-      if (user.password !== password) {
+      // Check if account is active
+      if (!user.isActive) {
+        return res.status(403).json({ error: "Account is disabled. Please contact support." });
+      }
+      
+      // Verify password - support both hashed and legacy passwords
+      let passwordValid = false;
+      
+      if (user.passwordHash) {
+        // Use bcrypt for hashed passwords
+        passwordValid = await verifyPassword(password, user.passwordHash);
+      } else {
+        // Fallback to plain text for legacy accounts (to be migrated)
+        passwordValid = user.password === password;
+        
+        // If valid, migrate to hashed password
+        if (passwordValid) {
+          const newHash = await hashPassword(password);
+          await storage.updateUser(user.id, { 
+            passwordHash: newHash,
+            password: "***migrated***"
+          });
+        }
+      }
+      
+      if (!passwordValid) {
         return res.status(401).json({ error: "Invalid credentials" });
       }
       
       // Update last login
-      await storage.updateUser(user.id, { lastLoginAt: new Date() });
+      await storage.updateUser(user.id, { 
+        lastLoginAt: new Date(),
+        lastActivityDate: new Date()
+      });
       
-      // Return user without password
-      const { password: _, ...safeUser } = user;
+      // Return user without password fields
+      const { password: _, passwordHash: __, ...safeUser } = user;
       res.json(safeUser);
     } catch (error: any) {
+      console.error("Login error:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Get current user session
+  app.get("/api/auth/me", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      const email = req.headers["x-user-email"] as string;
+      
+      if (!email) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ error: "User not found" });
+      }
+      
+      // Return user without password fields
+      const { password: _, passwordHash: __, ...safeUser } = user;
+      res.json(safeUser);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Request password reset
+  app.post("/api/auth/password-reset/request", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+      
+      const user = await storage.getUserByEmail(email);
+      
+      // Always return success to prevent email enumeration
+      if (!user) {
+        return res.json({ message: "If an account exists with this email, you will receive a password reset link." });
+      }
+      
+      // Generate reset token
+      const { token, tokenHash } = generateResetToken();
+      const expiresAt = getResetTokenExpiry();
+      
+      // Store hashed token in database
+      await storage.createPasswordReset({
+        userId: user.id,
+        tokenHash,
+        expiresAt,
+      });
+      
+      // Send reset email (construct reset URL)
+      const resetUrl = `${process.env.REPLIT_URL || 'https://localhost:5000'}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
+      
+      // Send email via Resend
+      try {
+        await emailService.sendPasswordResetEmail(user.email, user.name || 'User', resetUrl);
+      } catch (emailError) {
+        console.error("Failed to send password reset email:", emailError);
+        // Continue anyway - don't reveal if email was sent
+      }
+      
+      res.json({ message: "If an account exists with this email, you will receive a password reset link." });
+    } catch (error: any) {
+      console.error("Password reset request error:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Confirm password reset
+  app.post("/api/auth/password-reset/confirm", async (req, res) => {
+    try {
+      const { email, token, newPassword } = req.body;
+      
+      if (!email || !token || !newPassword) {
+        return res.status(400).json({ error: "Email, token, and new password are required" });
+      }
+      
+      // Validate new password strength
+      const passwordValidation = validatePasswordStrength(newPassword);
+      if (!passwordValidation.valid) {
+        return res.status(400).json({ 
+          error: "Password does not meet requirements",
+          details: passwordValidation.errors 
+        });
+      }
+      
+      // Find user
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(400).json({ error: "Invalid or expired reset link" });
+      }
+      
+      // Hash the token and find the reset record
+      const tokenHash = hashResetToken(token);
+      const resetRecord = await storage.getPasswordResetByTokenHash(tokenHash);
+      
+      if (!resetRecord) {
+        return res.status(400).json({ error: "Invalid or expired reset link" });
+      }
+      
+      // Check if token is for this user
+      if (resetRecord.userId !== user.id) {
+        return res.status(400).json({ error: "Invalid or expired reset link" });
+      }
+      
+      // Check if token was already used
+      if (resetRecord.usedAt) {
+        return res.status(400).json({ error: "This reset link has already been used" });
+      }
+      
+      // Check if token is expired
+      if (isExpired(resetRecord.expiresAt)) {
+        return res.status(400).json({ error: "Reset link has expired. Please request a new one." });
+      }
+      
+      // Hash new password and update user
+      const passwordHash = await hashPassword(newPassword);
+      await storage.updateUser(user.id, { 
+        passwordHash,
+        password: "***reset***"
+      });
+      
+      // Mark token as used
+      await storage.markPasswordResetUsed(resetRecord.id);
+      
+      res.json({ message: "Password has been reset successfully. You can now log in with your new password." });
+    } catch (error: any) {
+      console.error("Password reset confirm error:", error);
       res.status(400).json({ error: error.message });
     }
   });

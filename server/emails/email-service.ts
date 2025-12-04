@@ -1034,3 +1034,79 @@ export async function sendStudyCompletedNotification(studyData: {
     throw error;
   }
 }
+
+// Password reset email
+export async function sendPasswordResetEmail(
+  email: string,
+  name: string,
+  resetUrl: string
+) {
+  try {
+    const resend = await getResendClient();
+    const fromEmail = await getFromEmail();
+
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: 'Roboto', Arial, sans-serif; color: #333; background-color: #f5f5f5; margin: 0; padding: 20px; }
+            .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+            h1 { color: #1a1a1a; font-family: 'DM Serif Display', Georgia, serif; font-size: 28px; margin-bottom: 20px; }
+            .message { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+            .cta-button { display: inline-block; background: #7c4dff; color: white; text-decoration: none; padding: 14px 28px; border-radius: 6px; font-weight: 600; margin: 20px 0; }
+            .cta-button:hover { background: #651fff; }
+            .warning { color: #e53935; font-size: 14px; margin-top: 20px; }
+            .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #888; }
+            .link-fallback { word-break: break-all; color: #7c4dff; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>Reset Your Password</h1>
+            
+            <p>Hi ${escapeHtml(name)},</p>
+            
+            <div class="message">
+              <p>We received a request to reset your password for your Innovatr account.</p>
+              <p>Click the button below to create a new password:</p>
+            </div>
+            
+            <div style="text-align: center;">
+              <a href="${resetUrl}" class="cta-button">Reset Password</a>
+            </div>
+            
+            <p class="warning">This link will expire in 1 hour for security reasons.</p>
+            
+            <p>If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.</p>
+            
+            <p style="font-size: 12px; color: #666; margin-top: 20px;">
+              If the button doesn't work, copy and paste this link into your browser:<br>
+              <span class="link-fallback">${resetUrl}</span>
+            </p>
+            
+            <div class="footer">
+              <p>This is an automated message from Innovatr.</p>
+              <p>If you have any questions, contact us at hello@innovatr.co.za</p>
+              <p>&copy; ${new Date().getFullYear()} Innovatr. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const response = await resend.emails.send({
+      from: `Innovatr <${fromEmail}>`,
+      to: [email],
+      subject: "Reset Your Innovatr Password",
+      html: emailHtml,
+    });
+
+    console.log("Password reset email sent successfully:", response);
+    return response;
+  } catch (error) {
+    console.error("Failed to send password reset email:", error);
+    throw error;
+  }
+}

@@ -31,6 +31,14 @@ import {
   type Study,
   type InsertStudy,
   type StudyStatus,
+  type PasswordReset,
+  type InsertPasswordReset,
+  type CreditLedgerEntry,
+  type InsertCreditLedger,
+  type BriefFileRecord,
+  type InsertBriefFile,
+  type Session,
+  type InsertSession,
   orders,
   orderItems,
   paymentIntents,
@@ -128,6 +136,22 @@ export interface IStorage {
   getAllStudies(): Promise<Study[]>;
   updateStudy(id: string, updates: Partial<Study>): Promise<void>;
   updateStudyStatus(id: string, status: StudyStatus): Promise<Study | undefined>;
+
+  // Password reset operations
+  createPasswordReset(reset: InsertPasswordReset): Promise<PasswordReset>;
+  getPasswordResetByTokenHash(tokenHash: string): Promise<PasswordReset | undefined>;
+  markPasswordResetUsed(id: string): Promise<void>;
+  
+  // Session operations
+  createSession(session: InsertSession): Promise<Session>;
+  getSessionByTokenHash(tokenHash: string): Promise<Session | undefined>;
+  deleteSession(id: string): Promise<void>;
+  deleteUserSessions(userId: string): Promise<void>;
+  
+  // Credit ledger operations
+  createCreditLedgerEntry(entry: InsertCreditLedger): Promise<CreditLedgerEntry>;
+  getCreditLedgerByCompanyId(companyId: string): Promise<CreditLedgerEntry[]>;
+  getCompanyCreditBalance(companyId: string, creditType: 'basic' | 'pro'): Promise<number>;
 }
 
 export class MemStorage implements IStorage {
@@ -146,6 +170,9 @@ export class MemStorage implements IStorage {
   private clientReportsMap: Map<string, ClientReport>;
   private briefSubmissionsMap: Map<string, BriefSubmission>;
   private studiesMap: Map<string, Study>;
+  private passwordResetsMap: Map<string, PasswordReset>;
+  private sessionsMap: Map<string, Session>;
+  private creditLedgerMap: Map<string, CreditLedgerEntry>;
 
   constructor() {
     this.users = new Map();
@@ -163,6 +190,9 @@ export class MemStorage implements IStorage {
     this.clientReportsMap = new Map();
     this.briefSubmissionsMap = new Map();
     this.studiesMap = new Map();
+    this.passwordResetsMap = new Map();
+    this.sessionsMap = new Map();
+    this.creditLedgerMap = new Map();
     
     this.seedCompaniesAndUsers();
   }
@@ -365,6 +395,7 @@ export class MemStorage implements IStorage {
       username: insertUser.username || `user_${Date.now()}`,
       email: insertUser.email,
       password: insertUser.password || Math.random().toString(36).slice(-10),
+      passwordHash: null, // Will be set when hashing is implemented
       name: insertUser.name ?? null,
       company: insertUser.company ?? null,
       companyId: (insertUser as any).companyId ?? null,
@@ -379,7 +410,10 @@ export class MemStorage implements IStorage {
       lastProjectDate: null,
       lastActivityDate: null,
       internalNotes: null,
+      isActive: true,
+      emailVerified: false,
       createdAt: now,
+      updatedAt: now,
       lastLoginAt: null,
     };
     this.users.set(id, user);
@@ -928,6 +962,104 @@ export class MemStorage implements IStorage {
       return updatedStudy;
     }
     return undefined;
+  }
+
+  // Password reset operations
+  async createPasswordReset(reset: InsertPasswordReset): Promise<PasswordReset> {
+    const id = randomUUID();
+    const now = new Date();
+    const passwordReset: PasswordReset = {
+      id,
+      userId: reset.userId,
+      tokenHash: reset.tokenHash,
+      expiresAt: reset.expiresAt,
+      usedAt: null,
+      createdAt: now,
+    };
+    this.passwordResetsMap.set(id, passwordReset);
+    return passwordReset;
+  }
+
+  async getPasswordResetByTokenHash(tokenHash: string): Promise<PasswordReset | undefined> {
+    return Array.from(this.passwordResetsMap.values()).find(r => r.tokenHash === tokenHash);
+  }
+
+  async markPasswordResetUsed(id: string): Promise<void> {
+    const reset = this.passwordResetsMap.get(id);
+    if (reset) {
+      this.passwordResetsMap.set(id, { ...reset, usedAt: new Date() });
+    }
+  }
+
+  // Session operations
+  async createSession(session: InsertSession): Promise<Session> {
+    const id = randomUUID();
+    const now = new Date();
+    const newSession: Session = {
+      id,
+      userId: session.userId,
+      companyId: session.companyId ?? null,
+      tokenHash: session.tokenHash,
+      ipAddress: session.ipAddress ?? null,
+      userAgent: session.userAgent ?? null,
+      expiresAt: session.expiresAt,
+      createdAt: now,
+      lastActiveAt: now,
+    };
+    this.sessionsMap.set(id, newSession);
+    return newSession;
+  }
+
+  async getSessionByTokenHash(tokenHash: string): Promise<Session | undefined> {
+    return Array.from(this.sessionsMap.values()).find(s => s.tokenHash === tokenHash);
+  }
+
+  async deleteSession(id: string): Promise<void> {
+    this.sessionsMap.delete(id);
+  }
+
+  async deleteUserSessions(userId: string): Promise<void> {
+    const entriesToDelete = Array.from(this.sessionsMap.entries())
+      .filter(([_, session]) => session.userId === userId);
+    for (const [id] of entriesToDelete) {
+      this.sessionsMap.delete(id);
+    }
+  }
+
+  // Credit ledger operations
+  async createCreditLedgerEntry(entry: InsertCreditLedger): Promise<CreditLedgerEntry> {
+    const id = randomUUID();
+    const now = new Date();
+    const ledgerEntry: CreditLedgerEntry = {
+      id,
+      companyId: entry.companyId,
+      userId: entry.userId ?? null,
+      creditType: entry.creditType,
+      transactionType: entry.transactionType,
+      amount: entry.amount,
+      balanceAfter: entry.balanceAfter,
+      description: entry.description ?? null,
+      orderId: entry.orderId ?? null,
+      briefId: entry.briefId ?? null,
+      metadata: entry.metadata ?? null,
+      createdAt: now,
+    };
+    this.creditLedgerMap.set(id, ledgerEntry);
+    return ledgerEntry;
+  }
+
+  async getCreditLedgerByCompanyId(companyId: string): Promise<CreditLedgerEntry[]> {
+    return Array.from(this.creditLedgerMap.values())
+      .filter(e => e.companyId === companyId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getCompanyCreditBalance(companyId: string, creditType: 'basic' | 'pro'): Promise<number> {
+    const entries = await this.getCreditLedgerByCompanyId(companyId);
+    const filtered = entries.filter(e => e.creditType === creditType);
+    if (filtered.length === 0) return 0;
+    // Get the most recent balance
+    return filtered[0].balanceAfter;
   }
 }
 
