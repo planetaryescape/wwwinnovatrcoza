@@ -63,6 +63,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Company {
   id: string;
@@ -115,6 +116,8 @@ const tierConfig: Record<string, { label: string; color: string; icon: any }> = 
 export default function AdminCompanies() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  // Get impersonateCompany to enable "view as company" mode
+  const { impersonateCompany } = useAuth();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [companyUsers, setCompanyUsers] = useState<CompanyUser[]>([]);
@@ -344,10 +347,23 @@ export default function AdminCompanies() {
     }
   };
 
-  const handleViewClientPortal = () => {
+  // Activate view-as-company mode and navigate to portal dashboard
+  const handleViewClientPortal = async () => {
     if (!selectedCompany) return;
     setDrawerOpen(false);
-    setLocation(`/portal/research?companyId=${selectedCompany.id}`);
+    try {
+      // Set impersonation state in AuthContext - this hides Admin tab and shows impersonation banner
+      await impersonateCompany(selectedCompany.id);
+      // Navigate to the company's portal dashboard (not research, to show full experience)
+      setLocation("/portal");
+    } catch (err) {
+      // If impersonation fails, show error and stay in admin view
+      toast({
+        title: "Error",
+        description: "Failed to view company portal. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const formatDate = (dateStr: string | null | undefined) => {

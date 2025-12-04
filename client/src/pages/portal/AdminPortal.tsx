@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PortalLayout from "./PortalLayout";
 import AdminOverview from "./AdminOverview";
@@ -11,18 +11,46 @@ import AdminCompanies from "./AdminCompanies";
 import AdminMembers from "./AdminMembers";
 import AdminBriefs from "./AdminBriefs";
 
+const VALID_TABS = ["overview", "companies", "orders", "briefs", "members", "reports", "deals"];
+
 export default function AdminPortal() {
-  const [, setLocation] = useLocation();
-  const { isAdmin, isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [location, setLocation] = useLocation();
+  const { isAdmin, isAuthenticated, isViewingAsCompany } = useAuth();
+  
+  // Parse tab from current URL search params
+  const getTabFromUrl = useCallback(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    return tab && VALID_TABS.includes(tab) ? tab : "overview";
+  }, []);
+  
+  const [activeTab, setActiveTab] = useState(getTabFromUrl);
 
   useEffect(() => {
-    if (!isAuthenticated || !isAdmin) {
+    // Route protection: redirect if not authenticated, not admin, or currently impersonating a company
+    // When in view-as-company mode, admins should not access admin routes
+    if (!isAuthenticated || !isAdmin || isViewingAsCompany) {
       setLocation("/portal");
     }
-  }, [isAuthenticated, isAdmin, setLocation]);
+  }, [isAuthenticated, isAdmin, isViewingAsCompany, setLocation]);
+  
+  // Sync activeTab with URL when location changes (handles "Back to Companies" navigation)
+  useEffect(() => {
+    const urlTab = getTabFromUrl();
+    if (urlTab !== activeTab) {
+      setActiveTab(urlTab);
+    }
+  }, [location, getTabFromUrl]);
+  
+  // Handle tab change: update state and URL
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
+    // Update URL to reflect new tab (for bookmarking/sharing)
+    setLocation(`/portal/admin?tab=${newTab}`, { replace: true });
+  };
 
-  if (!isAdmin || !isAuthenticated) {
+  // Block rendering if impersonating - prevents flash of admin content
+  if (!isAdmin || !isAuthenticated || isViewingAsCompany) {
     return null;
   }
 
@@ -36,7 +64,7 @@ export default function AdminPortal() {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview" data-testid="tab-admin-overview">Overview</TabsTrigger>
             <TabsTrigger value="companies" data-testid="tab-admin-companies">Companies</TabsTrigger>

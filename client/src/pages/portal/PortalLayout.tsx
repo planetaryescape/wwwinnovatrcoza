@@ -232,8 +232,10 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                 size="sm" 
                 variant="ghost" 
                 onClick={() => {
+                  // Clear impersonation state and navigate back to Admin → Companies tab
                   exitImpersonation();
-                  setLocation("/portal/admin");
+                  // Navigate to admin portal with companies tab active
+                  setLocation("/portal/admin?tab=companies");
                 }}
                 className="text-amber-950 hover:bg-amber-600 hover:text-amber-950"
                 data-testid="button-exit-impersonation"

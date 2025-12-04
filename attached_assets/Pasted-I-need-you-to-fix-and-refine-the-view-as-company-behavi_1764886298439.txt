@@ -1,0 +1,179 @@
+I need you to fix and refine the “view as company” behaviour in the Innovatr portal.
+
+Right now, when I am viewing a client’s account (for example Nando’s South Africa) I still see the Admin tab in the sidebar. I want view-as-company mode to behave like a real client login, with no admin tab, but I still want to move between all client tabs (Dashboard, Trends & Insights, Launch New Brief, Credits & Billing, My Research, Member Deals, Settings).
+
+Use the existing codebase as is, and make the smallest consistent changes needed.
+
+1. Detect “view as company” mode
+
+You already show a banner like:
+
+Viewing: Nando’s South Africa · You’re viewing this company’s research as an admin
+
+Please standardise view-as-company logic as follows:
+
+Introduce a clear helper or state, something like:
+
+isAdminViewingAsCompany or impersonatedCompanyId
+
+This should be set whenever:
+
+The route has a companyId query parameter or
+
+Whatever existing mechanism you already use to open “View portal” from the Admin → Companies page.
+
+The important thing is: we must be able to easily check “admin is impersonating a company” from:
+
+The sidebar/menu component
+
+The route guards / layout that render the portal.
+
+2. Sidebar behaviour in view-as-company mode
+
+Update the sidebar rendering logic:
+
+When isAdminViewingAsCompany === true:
+
+Hide the Admin menu item completely.
+
+Keep all other tabs visible:
+
+Dashboard
+
+Trends & Insights
+
+Launch New Brief
+
+Credits & Billing
+
+My Research
+
+Member Deals
+
+Settings
+
+When not impersonating (normal admin mode), show the Admin tab as usual.
+
+Make sure the Admin tab is not reachable via keyboard focus either in view-as-company mode.
+
+3. Navigation while impersonating a company
+
+Right now, it looks like when I click into other tabs, the company context can be lost and I’m effectively back to normal admin.
+
+I want this behaviour instead:
+
+When isAdminViewingAsCompany is true, and I navigate to any of:
+
+/portal
+
+/portal/trends
+
+/portal/credits
+
+/portal/research
+
+/portal/deals
+
+/portal/settings
+
+The company context must be preserved.
+
+Concrete implementation suggestion (adapt to the existing router):
+
+Use a companyId query param or route segment, for example:
+
+/portal?companyId=<id>
+
+/portal/research?companyId=<id>
+
+Or store impersonatedCompanyId in a global auth / portal context and keep it until “Back to Companies” is clicked.
+
+Ensure that all portal data queries in view-as-company mode use the impersonated company id, not the admin’s own company.
+
+The banner “Viewing: X · You’re viewing this company’s research as an admin” should appear on all relevant pages while impersonating, not just My Research.
+
+4. “Back to Companies” behaviour
+
+The Back to Companies button in the purple banner must:
+
+Clear the impersonation state (isAdminViewingAsCompany = false, remove companyId from context / URL).
+
+Redirect to the Admin → Companies list view (/portal/admin?tab=companies or whatever route is used).
+
+After that:
+
+The normal Admin tab should be visible again.
+
+The sidebar should behave like a normal admin view (no longer impersonating).
+
+5. Route protection in view-as-company
+
+Add a small safety layer so that:
+
+When isAdminViewingAsCompany is true:
+
+If someone tries to navigate directly to any /portal/admin route, they should be redirected back to the company view (e.g. /portal?companyId=...) or forced to click Back to Companies first.
+
+This prevents any weird edge cases where the Admin layout appears while impersonating.
+
+6. Testing
+
+After implementing, please test the following flows in code and using the preview:
+
+Normal admin (no impersonation)
+
+Log in as admin.
+
+Ensure the sidebar shows Admin.
+
+Navigate around the portal and confirm behaviour is unchanged.
+
+Admin → view Nando’s portal
+
+From Admin → Companies, click “View portal” or equivalent for Nando’s.
+
+Confirm:
+
+Purple banner appears (“Viewing: Nando’s South Africa…”).
+
+Admin tab disappears from the sidebar.
+
+Click through all of these tabs while impersonating:
+
+Dashboard
+
+Trends & Insights
+
+Launch New Brief
+
+Credits & Billing
+
+My Research
+
+Member Deals
+
+Settings
+
+Confirm:
+
+The banner persists on each page.
+
+Data shown is Nando’s data (not Innovatr’s internal account).
+
+Admin routes are not accessible.
+
+Exit impersonation
+
+Click Back to Companies from any page.
+
+Confirm:
+
+You are taken back to the Admin → Companies list.
+
+Admin tab reappears in the sidebar.
+
+isAdminViewingAsCompany (or equivalent) is reset.
+
+Please keep the code changes tidy, reuse existing auth / role logic where possible, and leave short comments where you add the new impersonation logic so it is easy to maintain.
+
+End of prompt.
