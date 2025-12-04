@@ -34,15 +34,22 @@ Preferred communication style: Simple, everyday language.
 - **Validation**: Zod schemas integrated with React Hook Form and Drizzle ORM.
 
 ### Authentication & Authorization
-- **Authentication**: Real multi-tenant authentication with bcrypt password hashing
-  - `AuthContext` manages user state (persisted in `localStorage`) with login, signup, and logout
-  - Passwords are hashed using bcrypt with 12 salt rounds via `server/auth/password.ts`
-  - Login/signup calls `/api/auth/login` and `/api/auth/signup` endpoints with proper password validation
-  - Password reset flow with secure token generation and email delivery
+- **Authentication**: Real multi-tenant authentication with HTTP-only cookie session management
+  - **Session Management**: HTTP-only secure cookies with server-side session storage
+    - Login creates a session token, hashes it with SHA-256, stores in `sessions` table
+    - Session cookie set with httpOnly=true, secure=true (production), sameSite=lax, 30-day expiry
+    - `/api/auth/me` validates session by hashing cookie token and looking up session
+    - Logout destroys server-side session and clears cookie
+  - **Password Handling**: Bcrypt with 12 salt rounds via `server/auth/password.ts`
+    - Only `passwordHash` stored (no plaintext passwords)
+    - Password strength validation (8+ chars, uppercase, lowercase, number)
+  - `AuthContext` manages user state on frontend, uses `credentials: 'include'` for cookie auth
+  - Password reset flow with secure SHA-256 hashed tokens (1-hour expiry) and email delivery
+- **Demo Accounts**: Admin users (hannah@innovatr.co.za, richard@innovatr.co.za) always show minimum credits (22 Basic, 4 Pro) for demonstrations via `applyDemoUserCredits()` helper
 - **Database Schema**: 
   - `passwordHash` field stores bcrypt hashes (no plaintext passwords stored)
-  - `password_resets` table for secure password reset tokens
-  - `sessions` table for session management with token hashes
+  - `password_resets` table for secure password reset tokens (SHA-256 hashed, 1-hour expiry)
+  - `sessions` table for session management with SHA-256 hashed tokens, user ID, expiry, IP, user agent
   - `credit_ledger` table for transaction-based credit tracking
 - **Membership Tiers**: Three membership tiers for logged-in users:
   - **STARTER**: Free tier for new signups and basic members
