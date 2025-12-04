@@ -1174,12 +1174,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .sort((a, b) => a.month.localeCompare(b.month))
         .slice(-12);
 
-      // Briefs by status
+      // Study stats for Research Snapshot (using studies table, not briefs)
       const briefStats = {
-        new: briefs.filter((b) => b.status === "new").length,
-        inProgress: briefs.filter((b) => b.status === "in_progress").length,
-        completed: briefs.filter((b) => b.status === "completed").length,
-        onHold: briefs.filter((b) => b.status === "on_hold").length,
+        new: studies.filter((s) => s.status === "NEW" || s.status === "new").length,
+        inProgress: studies.filter((s) => 
+          ["in_progress", "IN_PROGRESS", "AUDIENCE_LIVE", "ANALYSING_DATA"].includes(s.status)
+        ).length,
+        completed: studies.filter((s) => 
+          s.status === "COMPLETED" || s.status === "completed" || s.status === "complete"
+        ).length,
+        onHold: studies.filter((s) => s.status === "ON_HOLD" || s.status === "on_hold").length,
       };
 
       // Credits by company for prediction
@@ -1299,7 +1303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           nextToRunOut: nextToRunOut?.name || "N/A",
         },
         pipeline: {
-          totalBriefs: briefs.length,
+          totalBriefs: studies.length,
           briefStats,
           activeStudies: studies.filter((s) => s.status !== "complete" && s.status !== "COMPLETED").length,
           studyTrend,
