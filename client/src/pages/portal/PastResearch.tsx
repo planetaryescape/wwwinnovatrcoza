@@ -105,11 +105,26 @@ export default function PastResearch() {
       setLoading(true);
       setError(null);
       
-      const targetCompanyId = viewCompanyId || user?.companyId || '';
+      // For admins: use viewCompanyId if provided, otherwise fetch ALL data (no companyId param)
+      // For regular users: use their companyId
+      let queryParams = `email=${encodeURIComponent(user?.email || '')}`;
+      
+      if (isAdmin) {
+        // Admin viewing specific company OR all companies
+        if (viewCompanyId) {
+          queryParams += `&companyId=${viewCompanyId}`;
+        }
+        // If no viewCompanyId, don't add companyId - backend will return ALL data for admin
+      } else {
+        // Regular users always filter by their company
+        if (user?.companyId) {
+          queryParams += `&companyId=${user.companyId}`;
+        }
+      }
       
       const [reportsRes, studiesRes] = await Promise.all([
-        fetch(`/api/member/client-reports?email=${encodeURIComponent(user?.email || '')}&companyId=${targetCompanyId}`),
-        fetch(`/api/member/studies?email=${encodeURIComponent(user?.email || '')}&companyId=${targetCompanyId}`)
+        fetch(`/api/member/client-reports?${queryParams}`),
+        fetch(`/api/member/studies?${queryParams}`)
       ]);
       
       if (!reportsRes.ok) {
@@ -286,7 +301,11 @@ export default function PastResearch() {
               My Research
             </h1>
             <p className="text-lg text-muted-foreground">
-              {company ? (
+              {isAdmin && !viewCompanyId ? (
+                "Track all research across all clients - from active studies to completed reports"
+              ) : viewingCompany ? (
+                <>Track all research for <span className="font-medium">{viewingCompany.name}</span> - from active studies to completed reports</>
+              ) : company ? (
                 <>Track all research for <span className="font-medium">{company.name}</span> - from active studies to completed reports</>
               ) : (
                 "Track your active studies and access completed research reports"
