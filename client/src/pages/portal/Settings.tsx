@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,14 +11,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { User, Building2, Bell, Shield, Users } from "lucide-react";
+import { User, Building2, Bell, Shield, Users, Check, X } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { useToast } from "@/hooks/use-toast";
 import { INDUSTRY_OPTIONS } from "@shared/access";
 
 export default function Settings() {
   const { toast } = useToast();
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+
+  // Password requirements validation
+  const passwordRequirements = useMemo(() => {
+    return {
+      minLength: newPassword.length >= 8,
+      hasUppercase: /[A-Z]/.test(newPassword),
+      hasLowercase: /[a-z]/.test(newPassword),
+      hasNumber: /[0-9]/.test(newPassword),
+    };
+  }, [newPassword]);
+
+  const allRequirementsMet = Object.values(passwordRequirements).every(Boolean);
+  const passwordsMatch = newPassword === confirmPassword && confirmPassword.length > 0;
 
   const handleSaveProfile = () => {
     toast({
@@ -31,6 +58,64 @@ export default function Settings() {
       title: "Preferences Saved",
       description: "Your notification preferences have been updated.",
     });
+  };
+
+  const resetPasswordForm = () => {
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setPasswordError(null);
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError(null);
+
+    if (!currentPassword) {
+      setPasswordError("Please enter your current password.");
+      return;
+    }
+
+    if (!allRequirementsMet) {
+      setPasswordError("Please ensure your new password meets all requirements.");
+      return;
+    }
+
+    if (!passwordsMatch) {
+      setPasswordError("Passwords do not match.");
+      return;
+    }
+
+    setIsChangingPassword(true);
+
+    try {
+      const response = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Password Changed",
+          description: "Your password has been updated successfully.",
+        });
+        setShowPasswordDialog(false);
+        resetPasswordForm();
+      } else {
+        setPasswordError(data.error || "Failed to change password. Please try again.");
+      }
+    } catch (err) {
+      setPasswordError("An error occurred. Please try again later.");
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   return (
@@ -235,12 +320,150 @@ export default function Settings() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button variant="outline" data-testid="button-change-password">
+            <Button 
+              variant="outline" 
+              data-testid="button-change-password"
+              onClick={() => {
+                resetPasswordForm();
+                setShowPasswordDialog(true);
+              }}
+            >
               Change Password
             </Button>
           </CardContent>
         </Card>
       </div>
+
+      {/* Change Password Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={(open) => {
+        setShowPasswordDialog(open);
+        if (!open) resetPasswordForm();
+      }}>
+        <DialogContent className="sm:max-w-md" data-testid="dialog-change-password">
+          <DialogHeader>
+            <DialogTitle>Change Password</DialogTitle>
+            <DialogDescription>
+              Enter your current password and choose a new one.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="currentPassword">Current Password</Label>
+              <Input
+                id="currentPassword"
+                data-testid="input-current-password"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Enter current password"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">New Password</Label>
+              <Input
+                id="newPassword"
+                data-testid="input-new-password"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter new password"
+                required
+              />
+              {newPassword.length > 0 && (
+                <div className="mt-2 space-y-1.5 text-xs" data-testid="password-requirements">
+                  <p className="text-muted-foreground font-medium mb-2">Password must have:</p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <div className={`flex items-center gap-1.5 ${passwordRequirements.minLength ? 'text-green-600' : 'text-muted-foreground'}`}>
+                      {passwordRequirements.minLength ? (
+                        <Check className="w-3.5 h-3.5" />
+                      ) : (
+                        <X className="w-3.5 h-3.5" />
+                      )}
+                      <span>8+ characters</span>
+                    </div>
+                    <div className={`flex items-center gap-1.5 ${passwordRequirements.hasUppercase ? 'text-green-600' : 'text-muted-foreground'}`}>
+                      {passwordRequirements.hasUppercase ? (
+                        <Check className="w-3.5 h-3.5" />
+                      ) : (
+                        <X className="w-3.5 h-3.5" />
+                      )}
+                      <span>Uppercase letter</span>
+                    </div>
+                    <div className={`flex items-center gap-1.5 ${passwordRequirements.hasLowercase ? 'text-green-600' : 'text-muted-foreground'}`}>
+                      {passwordRequirements.hasLowercase ? (
+                        <Check className="w-3.5 h-3.5" />
+                      ) : (
+                        <X className="w-3.5 h-3.5" />
+                      )}
+                      <span>Lowercase letter</span>
+                    </div>
+                    <div className={`flex items-center gap-1.5 ${passwordRequirements.hasNumber ? 'text-green-600' : 'text-muted-foreground'}`}>
+                      {passwordRequirements.hasNumber ? (
+                        <Check className="w-3.5 h-3.5" />
+                      ) : (
+                        <X className="w-3.5 h-3.5" />
+                      )}
+                      <span>Number</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Input
+                id="confirmPassword"
+                data-testid="input-confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+                required
+              />
+              {confirmPassword.length > 0 && (
+                <div className={`flex items-center gap-1.5 text-xs mt-1 ${passwordsMatch ? 'text-green-600' : 'text-destructive'}`}>
+                  {passwordsMatch ? (
+                    <Check className="w-3.5 h-3.5" />
+                  ) : (
+                    <X className="w-3.5 h-3.5" />
+                  )}
+                  <span>{passwordsMatch ? 'Passwords match' : 'Passwords do not match'}</span>
+                </div>
+              )}
+            </div>
+
+            {passwordError && (
+              <div className="rounded-md bg-destructive/10 p-3 text-sm" data-testid="error-change-password">
+                <p className="text-destructive">{passwordError}</p>
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowPasswordDialog(false)}
+                className="flex-1"
+                data-testid="button-cancel-password"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                data-testid="button-submit-password"
+                className="flex-1"
+                disabled={isChangingPassword || !currentPassword || !allRequirementsMet || !passwordsMatch}
+              >
+                {isChangingPassword ? "Changing..." : "Change Password"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </PortalLayout>
   );
 }

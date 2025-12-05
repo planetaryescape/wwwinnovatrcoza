@@ -493,6 +493,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Change password (while logged in)
+  app.post("/api/auth/change-password", requireAuth, async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: "Current password and new password are required" });
+      }
+      
+      // Validate new password strength
+      const passwordValidation = validatePasswordStrength(newPassword);
+      if (!passwordValidation.valid) {
+        return res.status(400).json({ 
+          error: "Password does not meet requirements",
+          details: passwordValidation.errors 
+        });
+      }
+      
+      // Get the current user
+      const user = await storage.getUser(req.user!.id);
+      if (!user || !user.passwordHash) {
+        return res.status(400).json({ error: "User not found" });
+      }
+      
+      // Verify current password
+      const isCurrentPasswordValid = await verifyPassword(currentPassword, user.passwordHash);
+      if (!isCurrentPasswordValid) {
+        return res.status(400).json({ error: "Current password is incorrect" });
+      }
+      
+      // Hash new password and update user
+      const passwordHash = await hashPassword(newPassword);
+      await storage.updateUser(user.id, { 
+        passwordHash,
+        password: "***changed***"
+      });
+      
+      // Send password change success email
+      try {
+        await emailService.sendPasswordResetSuccessEmail(user.email, user.name || 'User');
+      } catch (emailError) {
+        console.error("Failed to send password change success email:", emailError);
+      }
+      
+      res.json({ message: "Password has been changed successfully." });
+    } catch (error: any) {
+      console.error("Password change error:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   app.post("/api/coupon-claims", async (req, res) => {
     try {
       const validatedData = insertCouponClaimSchema.parse(req.body);
