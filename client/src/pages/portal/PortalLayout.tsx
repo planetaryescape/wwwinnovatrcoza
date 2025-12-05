@@ -170,7 +170,11 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                   {menuItems.map((item) => {
                     // Hide admin items for non-admins AND during impersonation mode
                     if (item.adminOnly && (!isAdmin || impersonation.isImpersonating)) return null;
-                    const isLocked = !isMember && item.lockedForFree;
+                    // Paid members (STARTER, GROWTH, SCALE) have full access - no locks
+                    const userTier = (user?.tier || user?.membershipTier || "").toUpperCase();
+                    const paidTiers = ["STARTER", "GROWTH", "SCALE"];
+                    const isPaidMember = paidTiers.includes(userTier);
+                    const isLocked = !isPaidMember && item.lockedForFree;
                     const isActive = item.url === "/portal" 
                       ? (location === "/portal" || location === "/portal/dashboard")
                       : location === item.url;
