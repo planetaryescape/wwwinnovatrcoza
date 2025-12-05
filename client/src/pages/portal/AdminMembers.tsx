@@ -391,7 +391,7 @@ export default function AdminMembers() {
   };
 
   const activePayments = paymentSubscriptions.filter((s) => s.status === "active").length;
-  const pulseCount = pulseSubscribers.length;
+  const pulseCount = members.filter(m => m.isPulseSubscriber).length;
   const uniqueCompanies = new Set(members.map((m) => m.companyName).filter(Boolean)).size;
   const tierCounts = {
     FREE: members.filter(m => m.membershipTier === "FREE").length,
