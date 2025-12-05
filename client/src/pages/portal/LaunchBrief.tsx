@@ -418,13 +418,68 @@ export default function LaunchBrief() {
   // State for file upload in progress
   const [isUploadingFiles, setIsUploadingFiles] = useState(false);
 
+  // State for tracking payment redirect
+  const [isRedirectingToPayment, setIsRedirectingToPayment] = useState(false);
+
   const submitBriefMutation = useMutation({
     mutationFn: async (payload: Record<string, any>) => {
       const response = await apiRequest("POST", "/api/briefs", payload);
       return response.json();
     },
-    onSuccess: () => {
-      setShowSuccess(true);
+    onSuccess: async (data) => {
+      // Check if this requires payment redirect
+      if (data.requiresPayment && data.brief?.id) {
+        setIsRedirectingToPayment(true);
+        
+        try {
+          // Create checkout for the brief
+          const checkoutRes = await fetch(`/api/briefs/${data.brief.id}/checkout`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ providerKey: "payfast" }),
+          });
+          
+          if (!checkoutRes.ok) {
+            throw new Error("Failed to create checkout");
+          }
+          
+          const checkout = await checkoutRes.json();
+          
+          // Handle PayFast form redirect
+          if (checkout.type === "form" && checkout.action && checkout.fields) {
+            // Create a form and submit it to PayFast
+            const form = document.createElement("form");
+            form.method = "POST";
+            form.action = checkout.action;
+            form.style.display = "none";
+            
+            Object.entries(checkout.fields).forEach(([key, value]) => {
+              const input = document.createElement("input");
+              input.type = "hidden";
+              input.name = key;
+              input.value = String(value);
+              form.appendChild(input);
+            });
+            
+            document.body.appendChild(form);
+            form.submit();
+            return; // Don't show success - user is being redirected
+          }
+        } catch (error) {
+          console.error("Payment redirect failed:", error);
+          setIsRedirectingToPayment(false);
+          toast({
+            title: "Payment setup failed",
+            description: "Your brief was saved but we couldn't set up payment. Please try again from your dashboard.",
+            variant: "destructive",
+          });
+          // Still show success since brief was saved
+          setShowSuccess(true);
+        }
+      } else {
+        // Not a payment redirect - show success immediately
+        setShowSuccess(true);
+      }
       
       // Invalidate company data if credits were used
       if (company) {
@@ -455,6 +510,7 @@ export default function LaunchBrief() {
       });
     },
     onError: (error: any) => {
+      setIsRedirectingToPayment(false);
       toast({
         title: "Submission failed",
         description: error.message || "Failed to submit brief. Please try again.",
@@ -1603,13 +1659,18 @@ export default function LaunchBrief() {
               className="w-full"
               size="lg"
               onClick={handleSubmit}
-              disabled={isUploadingFiles || submitBriefMutation.isPending || (formData.billingPreference === "credits" && !hasEnoughCredits)}
+              disabled={isUploadingFiles || submitBriefMutation.isPending || isRedirectingToPayment || (formData.billingPreference === "credits" && !hasEnoughCredits)}
               data-testid="button-submit-brief"
             >
               {isUploadingFiles ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Uploading files...
+                </>
+              ) : isRedirectingToPayment ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Redirecting to payment...
                 </>
               ) : submitBriefMutation.isPending ? (
                 <>

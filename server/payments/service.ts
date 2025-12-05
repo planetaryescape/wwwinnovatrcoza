@@ -126,6 +126,7 @@ export class PaymentService {
       businessRegNumber?: string | null;
       vatNumber?: string | null;
       companyAddress?: string | null;
+      briefId?: string; // For brief payments
     },
     providerKey: string = "payfast",
     subscriptionOptions?: {

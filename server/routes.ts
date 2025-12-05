@@ -893,16 +893,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log("=====================================");
       }
-      
-      // Send emails only after successful payment and order creation
+
+      // Handle brief payments - check if this payment is for a brief
       if (intent && orderCreated) {
-        const order = await storage.getOrder(intent.orderId);
-        if (order) {
-          const items = await storage.getOrderItems(order.id);
+        const metadata = intent.metadata as Record<string, any> | null;
+        const pendingOrder = metadata?.pendingOrder as Record<string, any> | undefined;
+        
+        if (pendingOrder?.briefId) {
+          console.log("=== Processing Brief Payment ===");
+          console.log("Brief ID:", pendingOrder.briefId);
           
-          // Send admin email notification
-          try {
-            await sendAdminOrderNotification({
+          // Update brief payment status to completed
+          const brief = await storage.getBriefSubmission(pendingOrder.briefId);
+          if (brief) {
+            await storage.updateBriefSubmission(pendingOrder.briefId, {
+              paymentStatus: "completed",
+            });
+            console.log("Brief payment status updated to completed");
+            
+            // Get files array for emails (cast to expected type)
+            const briefFiles = (brief.files || []) as Array<{
+              id: string;
+              fileName: string;
+              fileSize: number;
+              mimeType: string;
+              url: string;
+              uploadedAt: string;
+            }>;
+
+            // Send client confirmation email
+            try {
+              await sendBriefConfirmationEmail({
+                submittedByName: brief.submittedByName,
+                submittedByEmail: brief.submittedByEmail,
+                companyName: brief.companyName,
+                studyType: brief.studyType,
+                numIdeas: brief.numIdeas,
+                researchObjective: brief.researchObjective,
+                files: briefFiles,
+              });
+              console.log("Brief confirmation email sent to:", brief.submittedByEmail);
+            } catch (emailError) {
+              console.error("Failed to send brief confirmation email:", emailError);
+            }
+
+            // Send admin notification email
+            try {
+              await sendBriefAdminNotification({
+                id: brief.id,
+                submittedByName: brief.submittedByName,
+                submittedByEmail: brief.submittedByEmail,
+                submittedByContact: brief.submittedByContact,
+                companyName: brief.companyName,
+                companyBrand: brief.companyBrand,
+                studyType: brief.studyType,
+                numIdeas: brief.numIdeas,
+                researchObjective: brief.researchObjective,
+                regions: brief.regions ?? [],
+                ages: brief.ages ?? [],
+                genders: brief.genders ?? [],
+                incomes: brief.incomes ?? [],
+                industry: brief.industry,
+                competitors: brief.competitors ?? [],
+                projectFileUrls: brief.projectFileUrls ?? [],
+                files: briefFiles,
+                createdAt: brief.createdAt,
+              });
+              console.log("Brief admin notification sent");
+            } catch (emailError) {
+              console.error("Failed to send brief admin notification:", emailError);
+            }
+          } else {
+            console.error("Brief not found for ID:", pendingOrder.briefId);
+          }
+          
+          console.log("================================");
+        }
+      }
+      
+      // Send emails only after successful payment and order creation (for non-brief orders)
+      // Skip this block if this was a brief payment - those emails are handled above
+      if (intent && orderCreated) {
+        const intentMetadata = intent.metadata as Record<string, any> | null;
+        const intentPendingOrder = intentMetadata?.pendingOrder as Record<string, any> | undefined;
+        
+        // Only send generic order emails if this is NOT a brief payment
+        if (!intentPendingOrder?.briefId) {
+          const order = await storage.getOrder(intent.orderId);
+          if (order) {
+            const items = await storage.getOrderItems(order.id);
+            
+            // Send admin email notification
+            try {
+              await sendAdminOrderNotification({
               customerName: order.customerName || "Unknown",
               customerEmail: order.customerEmail || "No email provided",
               customerCompany: order.customerCompany || "Company Not Provided",
@@ -965,6 +1048,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           } catch (emailError) {
             console.error("Failed to send customer order confirmation:", emailError);
           }
+          }
         }
       }
       
@@ -993,6 +1077,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).send("OK");
     } catch (error: any) {
       console.error("Apple Pay webhook error:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Brief payment checkout endpoint - creates PayFast checkout for pending brief payments
+  app.post("/api/briefs/:briefId/checkout", async (req, res) => {
+    try {
+      const { briefId } = req.params;
+      const { providerKey = "payfast" } = req.body;
+
+      // Get the brief
+      const brief = await storage.getBriefSubmission(briefId);
+      if (!brief) {
+        return res.status(404).json({ error: "Brief not found" });
+      }
+
+      // Verify the brief is pending payment
+      if (brief.paymentMethod !== "online" || brief.paymentStatus !== "pending") {
+        return res.status(400).json({ error: "Brief does not require online payment or has already been paid" });
+      }
+
+      // Calculate the payment amount
+      const isBasicStudy = brief.studyType.toLowerCase().includes("basic");
+      const BASIC_PRICE = 5500;
+      const PRO_PRICE = 50000;
+      const pricePerConcept = isBasicStudy ? BASIC_PRICE : PRO_PRICE;
+      const totalAmount = pricePerConcept * brief.numIdeas;
+
+      // Create checkout with brief metadata
+      const pendingOrderData = {
+        customerName: brief.submittedByName,
+        customerEmail: brief.submittedByEmail,
+        customerCompany: brief.companyName,
+        amount: totalAmount.toFixed(2),
+        currency: "ZAR",
+        purchaseType: `${brief.studyType} - ${brief.numIdeas} concept${brief.numIdeas > 1 ? "s" : ""}`,
+        items: [{
+          type: "brief_payment",
+          description: `${brief.studyType} Research Study`,
+          quantity: brief.numIdeas,
+          unitAmount: pricePerConcept.toFixed(2),
+        }],
+        briefId: briefId, // Store briefId in metadata for webhook processing
+      };
+
+      const checkout = await paymentService.createCheckoutWithPendingOrder(
+        pendingOrderData,
+        providerKey
+      );
+
+      // Update brief with payment intent ID for tracking
+      await storage.updateBriefSubmission(briefId, {
+        paymentIntentId: checkout.intentId || null,
+      });
+
+      res.status(201).json(checkout);
+    } catch (error: any) {
+      console.error("Brief checkout error:", error);
       res.status(400).json({ error: error.message });
     }
   });
@@ -2475,12 +2617,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`Credits deducted for company ${validated.companyId}: Basic ${finalBasicCreditsUsed}, Pro ${finalProCreditsUsed}`);
       }
 
+      // Determine if this is an online payment that needs checkout redirect
+      const isOnlinePayment = validated.paymentMethod === "online";
+      
+      // Calculate price for online payments
+      const BASIC_PRICE_PER_CONCEPT = 5500; // R5,500 standard or R5,000 member
+      const PRO_PRICE_PER_CONCEPT = 50000;  // R50,000 standard or R45,000 member
+      const pricePerConcept = isBasicStudy ? BASIC_PRICE_PER_CONCEPT : PRO_PRICE_PER_CONCEPT;
+      const totalAmount = pricePerConcept * creditsRequired;
+
       // Create brief submission with server-computed credit values
       const brief = await storage.createBriefSubmission({
         ...validated,
         concepts: validated.concepts || [],
         companyId: companyIdStr || (validated.companyId ? String(validated.companyId) : null),
         paymentMethod: validated.paymentMethod || "online",
+        paymentStatus: isOnlinePayment ? "pending" : null,
         basicCreditsUsed: finalBasicCreditsUsed,
         proCreditsUsed: finalProCreditsUsed,
         status: "new",
@@ -2496,48 +2648,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
         uploadedAt: string;
       }>;
 
-      // Send client confirmation email
-      try {
-        await sendBriefConfirmationEmail({
-          submittedByName: brief.submittedByName,
-          submittedByEmail: brief.submittedByEmail,
-          companyName: brief.companyName,
-          studyType: brief.studyType,
-          numIdeas: brief.numIdeas,
-          researchObjective: brief.researchObjective,
-          files: briefFiles,
-        });
-      } catch (emailError) {
-        console.error("Failed to send brief confirmation email:", emailError);
+      // For online payments, don't send confirmation emails yet - wait for payment success
+      if (!isOnlinePayment) {
+        // Send client confirmation email
+        try {
+          await sendBriefConfirmationEmail({
+            submittedByName: brief.submittedByName,
+            submittedByEmail: brief.submittedByEmail,
+            companyName: brief.companyName,
+            studyType: brief.studyType,
+            numIdeas: brief.numIdeas,
+            researchObjective: brief.researchObjective,
+            files: briefFiles,
+          });
+        } catch (emailError) {
+          console.error("Failed to send brief confirmation email:", emailError);
+        }
+
+        // Send admin notification email
+        try {
+          await sendBriefAdminNotification({
+            id: brief.id,
+            submittedByName: brief.submittedByName,
+            submittedByEmail: brief.submittedByEmail,
+            submittedByContact: brief.submittedByContact,
+            companyName: brief.companyName,
+            companyBrand: brief.companyBrand,
+            studyType: brief.studyType,
+            numIdeas: brief.numIdeas,
+            researchObjective: brief.researchObjective,
+            regions: brief.regions ?? [],
+            ages: brief.ages ?? [],
+            genders: brief.genders ?? [],
+            incomes: brief.incomes ?? [],
+            industry: brief.industry,
+            competitors: brief.competitors ?? [],
+            projectFileUrls: brief.projectFileUrls ?? [],
+            files: briefFiles,
+            createdAt: brief.createdAt,
+          });
+        } catch (emailError) {
+          console.error("Failed to send brief admin notification:", emailError);
+        }
       }
 
-      // Send admin notification email
-      try {
-        await sendBriefAdminNotification({
-          id: brief.id,
-          submittedByName: brief.submittedByName,
-          submittedByEmail: brief.submittedByEmail,
-          submittedByContact: brief.submittedByContact,
-          companyName: brief.companyName,
-          companyBrand: brief.companyBrand,
-          studyType: brief.studyType,
-          numIdeas: brief.numIdeas,
-          researchObjective: brief.researchObjective,
-          regions: brief.regions ?? [],
-          ages: brief.ages ?? [],
-          genders: brief.genders ?? [],
-          incomes: brief.incomes ?? [],
-          industry: brief.industry,
-          competitors: brief.competitors ?? [],
-          projectFileUrls: brief.projectFileUrls ?? [],
-          files: briefFiles,
-          createdAt: brief.createdAt,
+      // For online payments, return payment details for checkout redirect
+      if (isOnlinePayment) {
+        res.status(201).json({ 
+          success: true, 
+          brief,
+          requiresPayment: true,
+          payment: {
+            briefId: brief.id,
+            amount: totalAmount.toFixed(2),
+            currency: "ZAR",
+            description: `${brief.studyType} - ${creditsRequired} concept${creditsRequired > 1 ? 's' : ''}`,
+            customerName: brief.submittedByName,
+            customerEmail: brief.submittedByEmail,
+            customerCompany: brief.companyName,
+          }
         });
-      } catch (emailError) {
-        console.error("Failed to send brief admin notification:", emailError);
+      } else {
+        res.status(201).json({ success: true, brief });
       }
-
-      res.status(201).json({ success: true, brief });
     } catch (error: any) {
       console.error("Brief submission error:", error);
       if (error.name === "ZodError") {
