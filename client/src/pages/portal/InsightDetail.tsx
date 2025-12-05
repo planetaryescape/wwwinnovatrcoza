@@ -3,7 +3,7 @@ import { useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Download, ArrowLeft, Calendar, Briefcase, Lock, Crown, CreditCard, LogIn, Play, ChevronUp, FileText, ExternalLink, Loader2 } from "lucide-react";
+import { Download, ArrowLeft, Calendar, Briefcase, Crown, CreditCard, LogIn, Play, ChevronUp, FileText, ExternalLink, Loader2 } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -96,31 +96,19 @@ function checkReportAccess(
   report: Report,
   user: { membershipTier?: string; creditsBasic?: number; creditsPro?: number } | null
 ): AccessCheckResult {
-  const accessLevel = report.accessLevel || "PUBLIC";
-  
   // Public content is always accessible
+  const accessLevel = report.accessLevel || "PUBLIC";
   if (accessLevel === "PUBLIC" || accessLevel === "public") {
     return { hasAccess: true, reason: "public" };
   }
   
   // Not logged in - require login
   if (!user) {
-    return { hasAccess: false, reason: "not_logged_in", message: "Sign in to access this members-only content" };
+    return { hasAccess: false, reason: "not_logged_in", message: "Sign in to access this content" };
   }
   
-  // Paid members (STARTER, GROWTH, SCALE) have full access to all content - no locks
-  const userTier = (user.membershipTier || "").toUpperCase();
-  const paidTiers = ["STARTER", "GROWTH", "SCALE"];
-  if (paidTiers.includes(userTier)) {
-    return { hasAccess: true, reason: "member" };
-  }
-  
-  // Free users need to upgrade to access member content
-  return { 
-    hasAccess: false, 
-    reason: "membership_required", 
-    message: "Become a member to access this content" 
-  };
+  // All signed-in users have full access to all content
+  return { hasAccess: true, reason: "member" };
 }
 
 function RelatedReportCard({ report }: { report: Report }) {
@@ -177,7 +165,7 @@ function AccessPaywall({
       case "credits_required":
         return <CreditCard className="w-8 h-8 text-[#5B6EF7]" />;
       default:
-        return <Lock className="w-8 h-8 text-[#5B6EF7]" />;
+        return <LogIn className="w-8 h-8 text-[#5B6EF7]" />;
     }
   };
 

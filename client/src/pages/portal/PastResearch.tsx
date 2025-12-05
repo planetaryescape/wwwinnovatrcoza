@@ -311,13 +311,8 @@ export default function PastResearch() {
     );
   };
 
-  // Paid members (STARTER, GROWTH, SCALE) have full access
-  const userTier = (user?.membershipTier || "").toUpperCase();
-  const paidTiers = ["STARTER", "GROWTH", "SCALE"];
-  const isPaidMember = paidTiers.includes(userTier);
-  
-  const showLockedBanner = !isPaidMember;
-  const showNoCompanyBanner = !user?.companyId && isPaidMember && !isAdmin;
+  // All signed-in users have full access - no locks
+  const showNoCompanyBanner = !user?.companyId && !isAdmin;
   const totalItems = studies.length + reports.length;
   const activeCount = inProgressStudies.length;
   const completedCount = completedStudies.length + filteredReports.length;
@@ -405,27 +400,6 @@ export default function PastResearch() {
           </Card>
         )}
 
-        {showLockedBanner && (
-          <Card className="border-primary bg-primary/5">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Lock className="w-6 h-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold mb-2">My Research Dashboard - Members Only</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Track your active studies in real-time and access completed research with full insights, recommendations, and downloadable reports. This feature is exclusive to Innovatr Members.
-                  </p>
-                  <Button onClick={() => setLocation("/#membership")} data-testid="button-upgrade-membership">
-                    Join as a Member
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {showNoCompanyBanner && (
           <Card className="border-accent bg-accent/5">
             <CardContent className="p-6">
@@ -447,7 +421,7 @@ export default function PastResearch() {
           </Card>
         )}
 
-        {isPaidMember && (user?.companyId || isAdmin) && (
+        {(user?.companyId || isAdmin) && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border-blue-200 dark:border-blue-800">

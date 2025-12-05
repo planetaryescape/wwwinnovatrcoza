@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Gift, Sparkles, Clock, TrendingUp, Crown, Lock, ArrowRight } from "lucide-react";
+import { Gift, Sparkles, Clock, TrendingUp, Crown } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -78,90 +78,12 @@ const upcomingDeals = [
 
 export default function MemberDeals() {
   const [, setLocation] = useLocation();
-  const { isFreeUser } = useAuth();
 
   // TODO: Fetch from /api/member/deals and filter by membership tier
   // For now, using mock data from exclusiveDeals
   const displayDeals = exclusiveDeals;
 
-  // Full locked page for free users
-  if (isFreeUser) {
-    return (
-      <PortalLayout>
-        <div className="min-h-[80vh] flex items-center justify-center p-6">
-          <div className="max-w-2xl text-center space-y-8">
-            <div className="w-24 h-24 rounded-full bg-primary/10 mx-auto flex items-center justify-center">
-              <Lock className="w-12 h-12 text-primary" />
-            </div>
-            
-            <div className="space-y-4">
-              <h1 className="text-4xl font-serif font-bold text-foreground">
-                Member Deals
-              </h1>
-              <p className="text-xl text-muted-foreground">
-                Exclusive offers reserved for Innovatr Members
-              </p>
-            </div>
-
-            <Card className="bg-card/50 border-border">
-              <CardContent className="p-8">
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-                    <div className="flex items-start gap-3">
-                      <Gift className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-semibold">Credit Bundles</h4>
-                        <p className="text-sm text-muted-foreground">Save up to R40k on research credits</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Sparkles className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-semibold">Early Access</h4>
-                        <p className="text-sm text-muted-foreground">Beta features before anyone else</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Crown className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-semibold">Exclusive Perks</h4>
-                        <p className="text-sm text-muted-foreground">Consultation credits and more</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="pt-4 border-t">
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Become an Innovatr member to unlock exclusive deals, discounts, and member-only perks.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                      <Button 
-                        size="lg" 
-                        onClick={() => setLocation("/#membership")} 
-                        data-testid="button-become-member"
-                      >
-                        View Membership Plans
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="lg"
-                        onClick={() => setLocation("/portal/trends")}
-                        data-testid="button-browse-free-content"
-                      >
-                        Browse Free Content
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </PortalLayout>
-    );
-  }
-
+  // All signed-in users have full access - no locks
   return (
     <PortalLayout>
       <div className="p-6 max-w-7xl mx-auto space-y-6">
