@@ -156,12 +156,20 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                   <p className="text-xs text-muted-foreground mb-2" data-testid="text-member-company">
                     {user?.company || user?.email}
                   </p>
-                  <Badge 
-                    className={`${isAdmin ? 'bg-primary text-primary-foreground' : isMember ? getTierColor(user?.tier || 'starter') : 'bg-muted text-muted-foreground'} text-xs`}
-                    data-testid={`badge-member-tier-${isAdmin ? 'admin' : user?.tier || 'free'}`}
-                  >
-                    {isAdmin ? 'ADMIN' : isMember ? `${user?.tier?.toUpperCase()} Member` : 'FREE TIER'}
-                  </Badge>
+                  {(() => {
+                    const displayTier = (user?.tier || user?.membershipTier || "").toUpperCase();
+                    const paidTiers = ["STARTER", "GROWTH", "SCALE"];
+                    const isPaidMember = paidTiers.includes(displayTier);
+                    
+                    return (
+                      <Badge 
+                        className={`${isAdmin ? 'bg-primary text-primary-foreground' : isPaidMember ? getTierColor(displayTier) : 'bg-muted text-muted-foreground'} text-xs`}
+                        data-testid={`badge-member-tier-${isAdmin ? 'admin' : displayTier.toLowerCase() || 'free'}`}
+                      >
+                        {isAdmin ? 'ADMIN' : isPaidMember ? `${displayTier} Member` : 'FREE TIER'}
+                      </Badge>
+                    );
+                  })()}
                 </div>
               </div>
               <SidebarGroupLabel data-testid="label-portal-menu">Portal Menu</SidebarGroupLabel>
