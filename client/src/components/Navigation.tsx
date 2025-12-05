@@ -30,6 +30,17 @@ export default function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Check for ?login=true URL parameter to open login dialog
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("login") === "true" && !isAuthenticated) {
+      setShowLoginDialog(true);
+      // Clean up the URL without reloading the page
+      const newUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState({}, "", newUrl || "/");
+    }
+  }, [isAuthenticated]);
+
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     element?.scrollIntoView({ behavior: "smooth" });

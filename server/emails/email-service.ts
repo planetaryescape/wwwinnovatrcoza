@@ -315,7 +315,7 @@ export function renderEmailTemplate(
     }
 
     case "ACCOUNT_CREATED": {
-      const portalLink = data.portalLink || `${FRONTEND_URL}/portal/login`;
+      const portalLink = data.portalLink || `${FRONTEND_URL}/?login=true`;
       const bodyHtml = `
         <p style="margin: 0 0 15px 0;">Your Innovatr account has been successfully created.</p>
         <p style="margin: 0 0 15px 0;">You can now log in to your portal to access your research tools, track briefs, and view your insights.</p>
@@ -900,7 +900,7 @@ export async function sendAccountCreatedEmail(
   try {
     const { subject, html, text } = renderEmailTemplate("ACCOUNT_CREATED", {
       firstName: name,
-      portalLink: `${FRONTEND_URL}/portal/login`,
+      portalLink: `${FRONTEND_URL}/?login=true`,
     });
     
     const response = await sendEmail({
