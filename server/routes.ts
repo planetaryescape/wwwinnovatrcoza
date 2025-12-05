@@ -3398,6 +3398,228 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========================================
+  // Admin Reports Audit Endpoint (Read-Only)
+  // ========================================
+  app.get("/api/admin/reports-audit", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      // Load reports.json for videoPaths data
+      const fs = await import("fs").then(m => m.promises);
+      const path = await import("path");
+      let reportsJsonData: any[] = [];
+      try {
+        const jsonPath = path.join(process.cwd(), "client/src/data/reports.json");
+        const jsonContent = await fs.readFile(jsonPath, "utf-8");
+        reportsJsonData = JSON.parse(jsonContent);
+      } catch (e) {
+        console.log("Could not load reports.json, will rely on database only");
+      }
+
+      // Create a slug-to-videoPaths map from reports.json
+      const videoPathsMap = new Map<string, string[]>();
+      for (const r of reportsJsonData) {
+        if (r.slug && r.videoPaths) {
+          videoPathsMap.set(r.slug, r.videoPaths);
+        }
+      }
+
+      // Get all reports from database (library reports only - exclude companyOnly)
+      const allReports = await storage.getReports();
+      const libraryReports = allReports.filter(r => 
+        r.accessLevel !== "companyOnly"
+      );
+
+      // Expected titles from user's audit request
+      const expectedInsideTitles = [
+        "Fairness Is the New Flex",
+        "The Age of Effortless",
+        "Believability Is the New Branding",
+        "Indulgence Without Guilt",
+        "Simplicity Has Status",
+        "The New Non-Negotiable Treat",
+        "From Vegan to Vital",
+        "Banking Monogamy Is Dead",
+        "The Oat Based Breakfast Revolution",
+        "Cadbury Pocket Sized Joy",
+        "The Return of the Third Place",
+      ];
+
+      const expectedOtherTitles = [
+        "Wine Without Bottles",
+        "Craft Cues",
+        "Greenway Carrots Brand Health Study",
+        "Rugani 100% Carrot Juice Concept Test",
+      ];
+
+      const allExpectedTitles = [...expectedInsideTitles, ...expectedOtherTitles];
+
+      // Audit each library report
+      interface AuditIssue {
+        id: string;
+        title: string;
+        slug: string | null;
+        category: string;
+        problems: string[];
+      }
+
+      interface MissingExpected {
+        title: string;
+        expectedCategory: string;
+        problem: string;
+      }
+
+      const issues: AuditIssue[] = [];
+      const insideReports: any[] = [];
+      const otherLibraryReports: any[] = [];
+
+      for (const report of libraryReports) {
+        const problems: string[] = [];
+        const isInside = report.category === "Inside";
+        
+        if (isInside) {
+          insideReports.push(report);
+        } else {
+          otherLibraryReports.push(report);
+        }
+
+        // Check for full content
+        const hasBody = report.body && report.body.trim().length > 0;
+        const hasContent = report.content && typeof report.content === "object";
+        const hasFullContent = hasBody || hasContent;
+
+        if (!hasFullContent) {
+          problems.push("Missing full content (no body or content object)");
+        }
+
+        if (isInside) {
+          // Inside reports need video
+          const videoPaths = videoPathsMap.get(report.slug || "") || [];
+          const hasVideo = videoPaths.length > 0;
+          if (!hasVideo) {
+            problems.push("Missing video (no videoPaths in reports.json)");
+          }
+        } else {
+          // Non-Inside reports need PDF
+          const hasPdf = report.pdfUrl && report.pdfUrl.trim().length > 0;
+          if (!hasPdf) {
+            problems.push("Missing attached PDF/report file");
+          }
+        }
+
+        if (problems.length > 0) {
+          issues.push({
+            id: report.id,
+            title: report.title,
+            slug: report.slug,
+            category: report.category,
+            problems,
+          });
+        }
+      }
+
+      // Check for missing expected titles
+      const missingExpected: MissingExpected[] = [];
+      const foundTitles = new Set(libraryReports.map(r => r.title.toLowerCase()));
+      
+      for (const title of allExpectedTitles) {
+        // Normalize comparison - handle variations like "Oat Based" vs "Oat-Based"
+        const normalizedTitle = title.toLowerCase().replace(/-/g, " ");
+        const found = libraryReports.some(r => {
+          const reportTitle = r.title.toLowerCase().replace(/-/g, " ");
+          return reportTitle.includes(normalizedTitle.substring(0, 20)) || 
+                 normalizedTitle.includes(reportTitle.substring(0, 20));
+        });
+        
+        if (!found) {
+          const expectedCategory = expectedInsideTitles.includes(title) ? "Inside" : "Other (Insights/Launch/IRL)";
+          missingExpected.push({
+            title,
+            expectedCategory,
+            problem: "Not found in library reports (may be missing or mis-categorised as client report)",
+          });
+        }
+      }
+
+      // Build audit summary
+      const okCount = libraryReports.length - issues.length;
+      const auditResult = {
+        summary: {
+          totalLibraryReports: libraryReports.length,
+          insideReports: insideReports.length,
+          otherLibraryReports: otherLibraryReports.length,
+          ok: okCount,
+          issues: issues.length,
+        },
+        issues,
+        missingExpected,
+        // Additional detail for debugging
+        categoryBreakdown: {
+          Inside: insideReports.length,
+          Insights: libraryReports.filter(r => r.category === "Insights").length,
+          Launch: libraryReports.filter(r => r.category === "Launch").length,
+          IRL: libraryReports.filter(r => r.category === "IRL").length,
+        },
+        videoPathsFromJson: {
+          totalMapped: videoPathsMap.size,
+          withVideos: [...videoPathsMap.entries()].filter(([_, v]) => v.length > 0).length,
+        },
+      };
+
+      // Log full audit to console
+      console.log("\n========================================");
+      console.log("LIBRARY REPORTS AUDIT RESULTS");
+      console.log("========================================\n");
+      console.log("SUMMARY:");
+      console.log(`  Total library reports: ${auditResult.summary.totalLibraryReports}`);
+      console.log(`  Inside reports: ${auditResult.summary.insideReports}`);
+      console.log(`  Other library reports: ${auditResult.summary.otherLibraryReports}`);
+      console.log(`  OK (no issues): ${auditResult.summary.ok}`);
+      console.log(`  With issues: ${auditResult.summary.issues}`);
+      console.log("\nCATEGORY BREAKDOWN:");
+      console.log(`  Inside: ${auditResult.categoryBreakdown.Inside}`);
+      console.log(`  Insights: ${auditResult.categoryBreakdown.Insights}`);
+      console.log(`  Launch: ${auditResult.categoryBreakdown.Launch}`);
+      console.log(`  IRL: ${auditResult.categoryBreakdown.IRL}`);
+      console.log(`\nVIDEO PATHS FROM reports.json:`);
+      console.log(`  Total slugs mapped: ${auditResult.videoPathsFromJson.totalMapped}`);
+      console.log(`  With videos: ${auditResult.videoPathsFromJson.withVideos}`);
+      
+      if (issues.length > 0) {
+        console.log("\n========================================");
+        console.log("ISSUES FOUND:");
+        console.log("========================================");
+        for (const issue of issues) {
+          console.log(`\n[${issue.category}] ${issue.title}`);
+          console.log(`  Slug: ${issue.slug || "(no slug)"}`);
+          console.log(`  Problems:`);
+          for (const p of issue.problems) {
+            console.log(`    - ${p}`);
+          }
+        }
+      }
+
+      if (missingExpected.length > 0) {
+        console.log("\n========================================");
+        console.log("MISSING EXPECTED TITLES:");
+        console.log("========================================");
+        for (const missing of missingExpected) {
+          console.log(`\n  "${missing.title}"`);
+          console.log(`    Expected category: ${missing.expectedCategory}`);
+          console.log(`    Problem: ${missing.problem}`);
+        }
+      }
+
+      console.log("\n========================================");
+      console.log("END OF AUDIT");
+      console.log("========================================\n");
+
+      res.json(auditResult);
+    } catch (error: any) {
+      console.error("Reports audit error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
