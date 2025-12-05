@@ -25,7 +25,7 @@ export const users = pgTable("users", {
   companyId: varchar("company_id"),
   membershipTier: varchar("membership_tier", { length: 20 })
     .notNull()
-    .default("STARTER"),
+    .default("FREE"),
   status: varchar("status", { length: 20 }).notNull().default("ACTIVE"),
   role: varchar("role", { length: 20 }).notNull().default("MEMBER"),
   creditsBasic: integer("credits_basic").notNull().default(0),
@@ -59,7 +59,7 @@ export const insertUserSchema = createInsertSchema(users)
       .min(6, "Password must be at least 6 characters")
       .optional(),
     name: z.string().optional(),
-    membershipTier: z.enum(["STARTER", "GROWTH", "SCALE"]).default("STARTER"),
+    membershipTier: z.enum(["FREE", "STARTER", "GROWTH", "SCALE"]).default("FREE"),
     role: z.enum(["ADMIN", "DEAL_ADMIN", "MEMBER"]).default("MEMBER"),
   });
 
@@ -327,7 +327,7 @@ export const companies = pgTable("companies", {
   domain: text("domain"),
   logoUrl: text("logo_url"),
   industry: text("industry"),
-  tier: varchar("tier", { length: 20 }).notNull().default("STARTER"),
+  tier: varchar("tier", { length: 20 }).notNull().default("FREE"),
   contractStart: timestamp("contract_start"),
   contractEnd: timestamp("contract_end"),
   monthlyFee: decimal("monthly_fee", { precision: 10, scale: 2 }),
@@ -349,7 +349,7 @@ export const insertCompanySchema = createInsertSchema(companies)
   })
   .extend({
     name: z.string().min(1, "Company name is required"),
-    tier: z.enum(["STARTER", "GROWTH", "SCALE"]).default("STARTER"),
+    tier: z.enum(["FREE", "STARTER", "GROWTH", "SCALE"]).default("FREE"),
   });
 
 export type InsertCompany = z.infer<typeof insertCompanySchema>;

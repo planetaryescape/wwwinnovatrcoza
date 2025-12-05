@@ -50,6 +50,7 @@ import { exportReportsToCSV, exportPerformanceToCSV } from "@/lib/csvExport";
 
 type StatusType = "draft" | "scheduled" | "published" | "archived" | "all";
 type AccessLevel = "public" | "starter" | "growth" | "scale" | "tier" | "paid" | "all";
+type ReportType = "all" | "library" | "client";
 
 interface ReportData {
   id: string;
@@ -77,6 +78,8 @@ interface ReportData {
   isFeatured?: boolean;
   creditType?: string;
   creditCost?: number;
+  isClientReport?: boolean;
+  clientCompanyIds?: string[];
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
@@ -122,6 +125,7 @@ export default function AdminReports() {
   const [statusFilter, setStatusFilter] = useState<StatusType>("all");
   const [accessFilter, setAccessFilter] = useState<AccessLevel>("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState<ReportType>("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<ReportData | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "calendar">("table");
@@ -169,15 +173,21 @@ export default function AdminReports() {
       
       const matchesCategory = categoryFilter === "all" || report.category === categoryFilter;
       
-      return matchesSearch && matchesStatus && matchesAccess && matchesCategory;
+      const isClient = report.isClientReport === true;
+      const matchesType = typeFilter === "all" || 
+        (typeFilter === "client" ? isClient : !isClient);
+      
+      return matchesSearch && matchesStatus && matchesAccess && matchesCategory && matchesType;
     });
-  }, [reports, searchQuery, statusFilter, accessFilter, categoryFilter]);
+  }, [reports, searchQuery, statusFilter, accessFilter, categoryFilter, typeFilter]);
 
   const stats = useMemo(() => ({
     total: reports.length,
     published: reports.filter(r => (r.status || "published") === "published").length,
     draft: reports.filter(r => r.status === "draft").length,
     scheduled: reports.filter(r => r.status === "scheduled").length,
+    library: reports.filter(r => !r.isClientReport).length,
+    client: reports.filter(r => r.isClientReport === true).length,
   }), [reports]);
 
   const calendarData = useMemo(() => {
@@ -419,6 +429,16 @@ export default function AdminReports() {
                   ))}
                 </SelectContent>
               </Select>
+              <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as ReportType)}>
+                <SelectTrigger className="w-[130px]" data-testid="select-type-filter">
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="library">Library ({stats.library})</SelectItem>
+                  <SelectItem value="client">Client ({stats.client})</SelectItem>
+                </SelectContent>
+              </Select>
               <div className="flex border rounded-md overflow-hidden">
                 <Button
                   variant={viewMode === "table" ? "default" : "ghost"}
@@ -509,6 +529,7 @@ export default function AdminReports() {
             <TableHeader>
               <TableRow className="bg-gray-50">
                 <TableHead className="font-medium">Report</TableHead>
+                <TableHead className="font-medium w-20">Type</TableHead>
                 <TableHead className="font-medium w-24">Category</TableHead>
                 <TableHead className="font-medium w-24">Status</TableHead>
                 <TableHead className="font-medium w-24">Access</TableHead>
@@ -531,7 +552,7 @@ export default function AdminReports() {
             <TableBody>
               {filteredReports.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                     No reports found matching your filters
                   </TableCell>
                 </TableRow>
@@ -542,6 +563,7 @@ export default function AdminReports() {
                   const statusStyle = statusConfig[reportStatus] || statusConfig.published;
                   const accessStyle = accessConfig[reportAccess] || accessConfig.public;
                   const categoryStyle = categoryColors[report.category] || categoryColors.Insights;
+                  const isClient = report.isClientReport === true;
                   
                   return (
                     <TableRow 
@@ -555,6 +577,11 @@ export default function AdminReports() {
                           <p className="font-medium text-sm text-gray-900 truncate">{report.title}</p>
                           <p className="text-xs text-muted-foreground truncate">{report.teaser}</p>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={`text-xs border-0 ${isClient ? 'bg-indigo-50 text-indigo-700' : 'bg-teal-50 text-teal-700'}`}>
+                          {isClient ? 'Client' : 'Library'}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <Badge className={`text-xs ${categoryStyle} border-0`}>

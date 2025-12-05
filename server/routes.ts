@@ -151,7 +151,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const paymentService = new PaymentService(paymentConfig, storage);
 
-  // User registration endpoint - creates new users with STARTER tier
+  // User registration endpoint - creates new users with FREE tier
   app.post("/api/auth/signup", async (req, res) => {
     try {
       const { email, password, name, company } = req.body;
@@ -178,14 +178,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Hash the password BEFORE creating user (never store plaintext)
       const passwordHash = await hashPassword(password);
       
-      // Create user with empty password field (security: never store plaintext)
+      // Handle company creation/linking
+      let companyId: string | null = null;
+      if (company && company.trim()) {
+        const companyName = company.trim();
+        // Check if company already exists
+        const allCompanies = await storage.getAllCompanies();
+        const existingCompany = allCompanies.find(c => 
+          c.name.toLowerCase() === companyName.toLowerCase()
+        );
+        
+        if (existingCompany) {
+          // Link to existing company
+          companyId = existingCompany.id;
+        } else {
+          // Create a new FREE tier company
+          const newCompany = await storage.createCompany({
+            name: companyName,
+            tier: "FREE",
+            basicCreditsTotal: 0,
+            basicCreditsUsed: 0,
+            proCreditsTotal: 0,
+            proCreditsUsed: 0,
+          });
+          companyId = newCompany.id;
+        }
+      }
+      
+      // Create user with FREE tier (never STARTER for new signups)
       const newUser = await storage.createUser({
         username: email.split("@")[0] + "_" + Date.now(),
         email,
         password: "", // Security: never store plaintext passwords
         name: name || email.split("@")[0],
         company: company || null,
-        membershipTier: "STARTER",
+        companyId: companyId,
+        membershipTier: "FREE",
         status: "ACTIVE",
         role: "MEMBER",
         creditsBasic: 0,

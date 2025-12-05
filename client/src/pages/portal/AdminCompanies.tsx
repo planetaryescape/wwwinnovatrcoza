@@ -110,6 +110,7 @@ interface CompanyUser {
 }
 
 const tierConfig: Record<string, { label: string; color: string; icon: any }> = {
+  FREE: { label: "Free", color: "bg-gray-100 dark:bg-gray-800/30 text-gray-600 dark:text-gray-400", icon: UserIcon },
   STARTER: { label: "Starter", color: "bg-muted text-muted-foreground", icon: UserIcon },
   GROWTH: { label: "Growth", color: "bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300", icon: TrendingUp },
   SCALE: { label: "Scale", color: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300", icon: Crown },
@@ -554,6 +555,7 @@ export default function AdminCompanies() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Tiers</SelectItem>
+                <SelectItem value="FREE">Free</SelectItem>
                 <SelectItem value="STARTER">Starter</SelectItem>
                 <SelectItem value="GROWTH">Growth</SelectItem>
                 <SelectItem value="SCALE">Scale</SelectItem>

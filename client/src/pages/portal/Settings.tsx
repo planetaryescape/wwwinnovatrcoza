@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,13 +19,54 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { User, Building2, Bell, Shield, Users, Check, X } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { User, Building2, Bell, Shield, Users, Check, X, AlertTriangle, Loader2 } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { INDUSTRY_OPTIONS } from "@shared/access";
+
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  company: string | null;
+  membershipTier: string;
+  role: string;
+}
 
 export default function Settings() {
   const { toast } = useToast();
+  const { user, isViewingAsCompany } = useAuth();
+  
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [industry, setIndustry] = useState("Food & Beverage");
+  
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          setProfile(data);
+          const nameParts = (data.name || "").split(" ");
+          setFirstName(nameParts[0] || "");
+          setLastName(nameParts.slice(1).join(" ") || "");
+          setCompanyName(data.company || "");
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -47,6 +88,14 @@ export default function Settings() {
   const passwordsMatch = newPassword === confirmPassword && confirmPassword.length > 0;
 
   const handleSaveProfile = () => {
+    if (isViewingAsCompany) {
+      toast({
+        title: "Cannot Save",
+        description: "Settings cannot be changed while viewing as a company.",
+        variant: "destructive",
+      });
+      return;
+    }
     toast({
       title: "Profile Updated",
       description: "Your profile information has been saved successfully.",
@@ -54,6 +103,14 @@ export default function Settings() {
   };
 
   const handleSavePreferences = () => {
+    if (isViewingAsCompany) {
+      toast({
+        title: "Cannot Save",
+        description: "Settings cannot be changed while viewing as a company.",
+        variant: "destructive",
+      });
+      return;
+    }
     toast({
       title: "Preferences Saved",
       description: "Your notification preferences have been updated.",
@@ -70,6 +127,11 @@ export default function Settings() {
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError(null);
+
+    if (isViewingAsCompany) {
+      setPasswordError("Password cannot be changed while viewing as a company.");
+      return;
+    }
 
     if (!currentPassword) {
       setPasswordError("Please enter your current password.");
@@ -118,6 +180,16 @@ export default function Settings() {
     }
   };
 
+  if (loading) {
+    return (
+      <PortalLayout>
+        <div className="p-6 max-w-5xl mx-auto flex items-center justify-center min-h-[400px]">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </div>
+      </PortalLayout>
+    );
+  }
+
   return (
     <PortalLayout>
       <div className="p-6 max-w-5xl mx-auto space-y-6">
@@ -127,6 +199,15 @@ export default function Settings() {
             Manage your account and preferences
           </p>
         </div>
+
+        {isViewingAsCompany && (
+          <Alert className="bg-amber-50 border-amber-200">
+            <AlertTriangle className="w-4 h-4 text-amber-600" />
+            <AlertDescription className="text-amber-800">
+              You are currently viewing as a company. Settings changes are disabled during impersonation mode.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Profile Information */}
         <Card>
@@ -145,7 +226,9 @@ export default function Settings() {
                 <Label htmlFor="firstName">First Name</Label>
                 <Input
                   id="firstName"
-                  defaultValue="Richard"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  disabled={isViewingAsCompany}
                   data-testid="input-first-name"
                 />
               </div>
@@ -153,7 +236,9 @@ export default function Settings() {
                 <Label htmlFor="lastName">Last Name</Label>
                 <Input
                   id="lastName"
-                  defaultValue="Smith"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  disabled={isViewingAsCompany}
                   data-testid="input-last-name"
                 />
               </div>
@@ -164,9 +249,13 @@ export default function Settings() {
               <Input
                 id="email"
                 type="email"
-                defaultValue="richard@innovatr.co.za"
+                value={profile?.email || ""}
+                disabled
                 data-testid="input-email"
               />
+              <p className="text-xs text-muted-foreground">
+                Contact support to change your email address
+              </p>
             </div>
 
             <Separator />
@@ -181,7 +270,9 @@ export default function Settings() {
                 <Label htmlFor="company">Company Name</Label>
                 <Input
                   id="company"
-                  defaultValue="Innovatr"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  disabled={isViewingAsCompany}
                   data-testid="input-company"
                 />
               </div>
@@ -189,7 +280,9 @@ export default function Settings() {
                 <Label htmlFor="jobTitle">Job Title</Label>
                 <Input
                   id="jobTitle"
-                  defaultValue="Innovation Manager"
+                  value={jobTitle}
+                  onChange={(e) => setJobTitle(e.target.value)}
+                  disabled={isViewingAsCompany}
                   data-testid="input-job-title"
                 />
               </div>
@@ -197,14 +290,14 @@ export default function Settings() {
 
             <div className="space-y-2">
               <Label htmlFor="industry">Industry</Label>
-              <Select defaultValue="Food & Beverage">
+              <Select value={industry} onValueChange={setIndustry} disabled={isViewingAsCompany}>
                 <SelectTrigger id="industry" data-testid="select-industry">
                   <SelectValue placeholder="Select your industry" />
                 </SelectTrigger>
                 <SelectContent>
-                  {INDUSTRY_OPTIONS.map((industry) => (
-                    <SelectItem key={industry} value={industry}>
-                      {industry}
+                  {INDUSTRY_OPTIONS.map((ind) => (
+                    <SelectItem key={ind} value={ind}>
+                      {ind}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -214,7 +307,11 @@ export default function Settings() {
               </p>
             </div>
 
-            <Button onClick={handleSaveProfile} data-testid="button-save-profile">
+            <Button 
+              onClick={handleSaveProfile} 
+              disabled={isViewingAsCompany}
+              data-testid="button-save-profile"
+            >
               Save Changes
             </Button>
           </CardContent>
@@ -278,7 +375,11 @@ export default function Settings() {
               <Switch id="deals" defaultChecked data-testid="switch-deals" />
             </div>
 
-            <Button onClick={handleSavePreferences} data-testid="button-save-preferences">
+            <Button 
+              onClick={handleSavePreferences}
+              disabled={isViewingAsCompany}
+              data-testid="button-save-preferences"
+            >
               Save Preferences
             </Button>
           </CardContent>
@@ -298,11 +399,16 @@ export default function Settings() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between p-4 border rounded-lg">
               <div>
-                <p className="font-medium">richard@innovatr.co.za</p>
+                <p className="font-medium">{profile?.email || "—"}</p>
                 <p className="text-sm text-muted-foreground">Owner</p>
               </div>
             </div>
-            <Button variant="outline" className="w-full" data-testid="button-invite-team">
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              disabled={isViewingAsCompany}
+              data-testid="button-invite-team"
+            >
               Invite Team Member
             </Button>
           </CardContent>
@@ -323,6 +429,7 @@ export default function Settings() {
             <Button 
               variant="outline" 
               data-testid="button-change-password"
+              disabled={isViewingAsCompany}
               onClick={() => {
                 resetPasswordForm();
                 setShowPasswordDialog(true);

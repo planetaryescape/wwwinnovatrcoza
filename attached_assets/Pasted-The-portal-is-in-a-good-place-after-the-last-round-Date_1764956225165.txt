@@ -1,0 +1,373 @@
+The portal is in a good place after the last round:
+
+Date handling in ReportEditorModal and AdminCompanies is fixed
+
+Client reports are no longer shown in Trends & Insights
+
+The Access filter (All / Free / Members) is working
+
+Locked content + TeaseModal for free users is implemented
+
+List view navigation for insights is fixed
+
+Please do not redo any of that. Leave PayFast and all payments as they are and ignore Stripe completely (no Stripe keys, no Stripe logic).
+
+Now I need you to focus on Admin Reports, Admin Members, Companies, client report editing, and correct user profiles.
+
+1. Admin → Reports: fix counts and client report handling
+
+Current problems:
+
+The “Total Reports” number on Admin → Reports is incorrect. It looks like it is counting extra or ghost records (likely client reports or a separate COUNT query) that do not exist in the list.
+
+Client reports should be visible to admin here, but clearly marked and not double-counted.
+
+Please:
+
+Separate library vs client reports in Admin → Reports
+
+Library reports: isClientReport = false
+
+Client reports: isClientReport = true
+
+In the Admin → Reports table:
+
+Add a Type column or badge:
+
+Library for normal insights / IRL / Inside / Launch reports
+
+Client for Nando’s / Rugani / DGB etc client reports
+
+Add a small Type filter near the existing filters:
+
+Options: All Types, Library only, Client only
+
+Fix the counters at the top of Admin → Reports
+
+Right now I see “Total Reports: 42” but there are fewer actual records in the table.
+
+Make Total Reports use the same source as the table rows:
+
+Either count the length of the array returned to the client, or
+
+Make sure the backend COUNT(*) query uses the exact same WHERE conditions as the list endpoint.
+
+Ensure that archived / scheduled items are not double-counted.
+
+If client reports are included in the Total, that’s fine, but then they MUST appear in the table as Client type rows so that the numbers always reconcile.
+
+I must be able to archive or edit any report that is being counted. No unseen or phantom reports.
+
+Keep client reports out of Trends & Insights
+
+Double-check that only isClientReport = false reports can ever appear in TrendsInsights.tsx.
+
+Client reports should appear:
+
+In Admin → Reports (as Type = Client)
+
+Under Admin → Companies → “View” for a specific company
+
+In the company’s “My Research” tab
+
+2. Admin → Members: editing, defaults and columns
+
+Current problems:
+
+On the Admin → Members tab I can’t really edit or update member details beyond the tier.
+
+The table shows a Payments column I do not need.
+
+There is no way to see Free members in this view.
+
+When a user registers, we need better defaults.
+
+2.1 New member defaults
+
+When a user registers through the portal (sign up flow):
+
+Create or store them with:
+
+membershipTier = "free" by default
+
+basicCredits = 0
+
+proCredits = 0
+
+Do not auto-assign Starter / Growth / Scale in any code path – those should only be applied manually by an admin or later by explicit upgrade logic.
+
+Also, during registration:
+
+Collect Company Name and store it.
+
+If there is already a company with that exact name, link the member to that company.
+
+If not, create a simple “Free” company record (see section 3) and link the member.
+
+2.2 Admin Members table behaviour
+
+On Admin → Members:
+
+Table columns should include:
+
+Name
+
+Email
+
+Company
+
+Tier (Free / Starter / Growth / Scale)
+
+Credits (Basic / Pro as a combined “0 Basic / 0 Pro” style)
+
+Studies submitted
+
+Joined date
+
+Actions (more menu)
+
+Remove the Payments column from this table (I don’t need to see payment status here).
+
+Add a Tier filter that supports:
+
+All Tiers
+
+Free
+
+Starter
+
+Growth
+
+Scale
+
+Ensure that “Free” members are included in this table and can be filtered.
+
+2.3 Member details and editing
+
+When I click a member’s “View details”:
+
+Show a modal (or existing panel) with:
+
+Name
+
+Email
+
+Company
+
+Tier
+
+Credits remaining (Basic / Pro)
+
+Joined date
+
+Studies submitted
+
+I must be able to:
+
+Edit their tier (already exists, keep it).
+
+Edit their company (select an existing company from a dropdown or assign “None”).
+
+Adjust credits (Basic and Pro) manually, e.g. increment or set a value.
+
+Keep the UX simple: no payment logic, just admin controls for tier, company and credits.
+
+3. Admin → Companies: include Free companies and filters
+
+Current situation: I can see Starter / Growth / Scale companies, but I also want to see Free-tier companies so we can link everything.
+
+Please:
+
+Ensure that any company created for a free member appears in Admin → Companies with:
+
+Tier = Free
+
+Contract fields can be empty or have a simple default like “—”
+
+Credits = 0 / 0 by default.
+
+In the Companies table:
+
+Add Free as an option in the Tier filter (All Tiers, Free, Starter, Growth, Scale).
+
+Make sure “Total Companies” counts all tiers, including Free.
+
+Keep the fixed date handling for contract start/end that you already implemented – do not break that.
+
+4. Client reports editing (Admin + Client view)
+
+Right now, in the client “My Research” view:
+
+I can see client reports as cards, which is good.
+
+But I can’t click through and edit them.
+
+I need:
+
+4.1 Admin side
+
+In Admin → Companies → [View company] where client reports are listed:
+
+Each client report card (or row) should have a way to edit it.
+
+Clicking Edit should open the same Report editor modal as for library reports but in “Client Report” mode.
+
+Editable fields:
+
+Title
+
+Description
+
+Study type (Basic / Pro)
+
+Status (Active, Archived, etc.)
+
+Delivered date
+
+Primary contact email
+
+PDF / PPT file (upload and replace existing)
+
+Non-essential fields like “client fee” or internal pricing info should not be shown on the client’s card or in My Research.
+
+4.2 Client “My Research” view
+
+When I impersonate a company and go to “My Research”:
+
+Each client report card should be clickable for the admin impersonating.
+
+For the client user, it should just open the view/download panel.
+
+For the admin in impersonation mode, the same click can open an “Edit client report” button or menu option somewhere intuitive.
+
+The client’s My Research cards should NOT show internal fees or internal pricing fields. Only client-facing information like:
+
+Title
+
+Description / summary
+
+Study type
+
+Status (Completed, In progress, etc.)
+
+Delivered date
+
+Download button
+
+5. Correct user profiles & Richard’s details
+
+Right now:
+
+When I’m impersonating a client and go to Settings, it still shows Richard’s name and details.
+
+Richard’s surname and role are also wrong globally.
+
+I need:
+
+User specific settings
+
+The Settings page in /portal/settings must always show the profile of the currently authenticated user:
+
+First name
+
+Last name
+
+Email
+
+Company name
+
+Job title
+
+Industry, etc.
+
+When an admin is impersonating a company:
+
+The Settings page should show the company user’s profile, not Richard’s or Hannah’s.
+
+Use whatever mapping you have between companyId and its primary contact or user account.
+
+If there are multiple users, you can use the one whose email matches the login you used for that company.
+
+Richard’s correct details
+
+Update any seeded / default user row for Richard:
+
+First name: Richard
+
+Last name: Lawrence
+
+Job title: Founder (or Founder & Innovation Director if it fits your pattern)
+
+Make sure this is reflected in:
+
+Admin badge / header where his info is pulled from user data.
+
+Any places where his name appears in seeded data.
+
+Do not hardcode “Richard Smith” anywhere. Everything should pull from the actual user record.
+
+6. Members starting credits and free tier recap
+
+Just to be explicit:
+
+Any new user who signs up via the public site:
+
+membershipTier = "free"
+
+basicCredits = 0
+
+proCredits = 0
+
+A company record is created or linked for them (as a Free company).
+
+They appear in:
+
+Admin → Members as Tier = Free
+
+Admin → Companies as Tier = Free
+
+Paid membership upgrades (Starter / Growth / Scale) are still manual for now – no need to implement self-serve upgrade logic in this task.
+
+7. What has already been done (do NOT change)
+
+Please leave the following as they are, only fixing bugs if something is obviously broken:
+
+TeaseModal for locked content and its behaviour for free vs member users.
+
+Access filter (All / Free / Members) on Trends & Insights.
+
+Date parsing and toISOString fixes for:
+
+ReportEditorModal
+
+AdminCompanies
+
+Removal of client reports from TrendsInsights.tsx.
+
+PayFast integration on the brief submission and email attachments.
+
+Any existing working routing for login, sign-up, password reset.
+
+Do not introduce any Stripe dependency or ask for Stripe keys.
+
+When you are done, please summarise:
+
+What changed in:
+
+Admin → Reports
+
+Admin → Members
+
+Admin → Companies
+
+My Research (client view)
+
+Settings / profile
+
+Exactly how to test:
+
+As a brand new sign-up (Free tier)
+
+As a Starter member
+
+As Admin, impersonating a company with at least one client report

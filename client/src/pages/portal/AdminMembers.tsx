@@ -37,7 +37,6 @@ import {
   Search, 
   Building2, 
   Users, 
-  CreditCard, 
   Calendar, 
   RefreshCw, 
   Crown, 
@@ -117,6 +116,7 @@ const industryLabels: Record<string, string> = {
 };
 
 const tierColors: Record<string, string> = {
+  FREE: "bg-gray-100 text-gray-700 dark:bg-gray-800/30 dark:text-gray-400",
   STARTER: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
   GROWTH: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
   SCALE: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
@@ -322,6 +322,7 @@ export default function AdminMembers() {
   const pulseCount = pulseSubscribers.length;
   const uniqueCompanies = new Set(members.map((m) => m.companyName).filter(Boolean)).size;
   const tierCounts = {
+    FREE: members.filter(m => m.membershipTier === "FREE").length,
     STARTER: members.filter(m => m.membershipTier === "STARTER").length,
     GROWTH: members.filter(m => m.membershipTier === "GROWTH").length,
     SCALE: members.filter(m => m.membershipTier === "SCALE").length,
@@ -469,6 +470,7 @@ export default function AdminMembers() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Tiers</SelectItem>
+                  <SelectItem value="FREE">Free</SelectItem>
                   <SelectItem value="STARTER">Starter</SelectItem>
                   <SelectItem value="GROWTH">Growth</SelectItem>
                   <SelectItem value="SCALE">Scale</SelectItem>
@@ -507,7 +509,6 @@ export default function AdminMembers() {
                     <TableHead>Credits</TableHead>
                     <TableHead>Studies</TableHead>
                     <TableHead>Pulse</TableHead>
-                    <TableHead>Payment</TableHead>
                     <TableHead>Joined</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -564,20 +565,6 @@ export default function AdminMembers() {
                           <Badge variant="outline" className="text-muted-foreground">
                             No
                           </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {member.hasActivePayment ? (
-                          <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
-                            <CreditCard className="w-3 h-3 mr-1" />
-                            Active
-                          </Badge>
-                        ) : member.paymentInfo ? (
-                          <Badge variant="outline" className="text-muted-foreground">
-                            {member.paymentInfo.status}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">—</span>
                         )}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
@@ -754,6 +741,7 @@ export default function AdminMembers() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="FREE">Free</SelectItem>
                   <SelectItem value="STARTER">Starter</SelectItem>
                   <SelectItem value="GROWTH">Growth</SelectItem>
                   <SelectItem value="SCALE">Scale</SelectItem>
