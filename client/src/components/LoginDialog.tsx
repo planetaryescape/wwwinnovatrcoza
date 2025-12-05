@@ -28,6 +28,14 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
 
+  // Email validation
+  const isValidEmail = useMemo(() => {
+    if (!email) return false;
+    // RFC 5322 compliant email regex
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+    return emailRegex.test(email);
+  }, [email]);
+
   // Password requirements validation
   const passwordRequirements = useMemo(() => {
     return {
@@ -38,7 +46,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     };
   }, [password]);
 
-  const allRequirementsMet = Object.values(passwordRequirements).every(Boolean);
+  const allRequirementsMet = Object.values(passwordRequirements).every(Boolean) && isValidEmail;
 
   const handlePasswordResetRequest = async () => {
     if (!email) {
@@ -173,6 +181,18 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
               placeholder="you@company.com"
               required
             />
+            {isSignup && email.length > 0 && !isValidEmail && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="email-validation">
+                <X className="w-3.5 h-3.5" />
+                <span>Please enter a valid email address</span>
+              </div>
+            )}
+            {isSignup && email.length > 0 && isValidEmail && (
+              <div className="flex items-center gap-1.5 text-xs text-green-600" data-testid="email-validation-success">
+                <Check className="w-3.5 h-3.5" />
+                <span>Valid email address</span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
