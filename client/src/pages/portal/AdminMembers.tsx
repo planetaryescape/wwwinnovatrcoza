@@ -93,6 +93,7 @@ interface User {
   name: string;
   role: string;
   membershipTier: string;
+  memberType: string; // 'companyUser' or 'independent'
   companyId: string | null;
   createdAt: string;
   updatedAt?: string;
@@ -146,6 +147,7 @@ export default function AdminMembers() {
   const [editName, setEditName] = useState("");
   const [editCompanyId, setEditCompanyId] = useState("");
   const [editMemberTier, setEditMemberTier] = useState("");
+  const [editMemberType, setEditMemberType] = useState("companyUser");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<any | null>(null);
   const { toast } = useToast();
@@ -173,7 +175,7 @@ export default function AdminMembers() {
   const isLoading = loadingPulse || loadingSubs || loadingUsers;
 
   const updateUserMutation = useMutation({
-    mutationFn: async ({ userId, data }: { userId: string; data: { membershipTier?: string; companyId?: string; name?: string } }) => {
+    mutationFn: async ({ userId, data }: { userId: string; data: { membershipTier?: string; companyId?: string | null; memberType?: string; name?: string } }) => {
       const res = await apiRequest("PATCH", `/api/admin/users/${userId}`, data);
       return res.json();
     },
@@ -221,6 +223,7 @@ export default function AdminMembers() {
       setEditName(selectedMember.name || "");
       setEditCompanyId(selectedMember.companyId || "none");
       setEditMemberTier(selectedMember.membershipTier || "FREE");
+      setEditMemberType(selectedMember.memberType || "companyUser");
       setEditMode(true);
     }
   };
@@ -235,8 +238,9 @@ export default function AdminMembers() {
       userId: selectedMember.id,
       data: {
         name: editName,
-        companyId: editCompanyId,
+        companyId: editMemberType === "independent" ? null : editCompanyId,
         membershipTier: editMemberTier,
+        memberType: editMemberType,
       },
     });
   };
@@ -322,7 +326,9 @@ export default function AdminMembers() {
       filtered = filtered.filter((m) => m.membershipTier === tierFilter);
     }
 
-    if (companyFilter !== "all") {
+    if (companyFilter === "independent") {
+      filtered = filtered.filter((m) => m.memberType === "independent");
+    } else if (companyFilter !== "all") {
       filtered = filtered.filter((m) => m.companyId === companyFilter);
     }
     
@@ -554,6 +560,7 @@ export default function AdminMembers() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Companies</SelectItem>
+                  <SelectItem value="independent">Independent</SelectItem>
                   {[...companies].sort((a, b) => a.name.localeCompare(b.name)).map((c) => (
                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
@@ -600,7 +607,13 @@ export default function AdminMembers() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {member.companyName || (
+                        {member.memberType === "independent" ? (
+                          <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-900/20 dark:text-teal-300 dark:border-teal-700">
+                            Independent
+                          </Badge>
+                        ) : member.companyName ? (
+                          member.companyName
+                        ) : (
                           <span className="text-muted-foreground">—</span>
                         )}
                       </TableCell>
@@ -658,6 +671,7 @@ export default function AdminMembers() {
                               setEditName(member.name || "");
                               setEditCompanyId(member.companyId || "none");
                               setEditMemberTier(member.membershipTier || "FREE");
+                              setEditMemberType(member.memberType || "companyUser");
                               setEditMode(true);
                               setDetailsOpen(true);
                             }}>
@@ -828,6 +842,30 @@ export default function AdminMembers() {
                 </div>
 
                 <div>
+                  <Label htmlFor="edit-member-type">Member Type</Label>
+                  <Select 
+                    value={editMemberType} 
+                    onValueChange={(value) => {
+                      setEditMemberType(value);
+                      if (value === "independent") {
+                        setEditCompanyId("none");
+                      }
+                    }}
+                  >
+                    <SelectTrigger data-testid="select-edit-member-type">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="companyUser">Company User</SelectItem>
+                      <SelectItem value="independent">Independent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Independent members are freelancers or consultants not linked to a company
+                  </p>
+                </div>
+
+                <div>
                   <Label htmlFor="edit-tier">Membership Tier</Label>
                   <Select value={editMemberTier} onValueChange={setEditMemberTier}>
                     <SelectTrigger data-testid="select-edit-tier">
@@ -842,25 +880,27 @@ export default function AdminMembers() {
                   </Select>
                 </div>
 
-                <div>
-                  <Label htmlFor="edit-company">Assign to Company</Label>
-                  <Select value={editCompanyId} onValueChange={setEditCompanyId}>
-                    <SelectTrigger data-testid="select-edit-company">
-                      <SelectValue placeholder="Select a company" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">No company (unassigned)</SelectItem>
-                      {[...companies].sort((a, b) => a.name.localeCompare(b.name)).map((company) => (
-                        <SelectItem key={company.id} value={company.id}>
-                          {company.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Assigning to a company will add this member to the company's user list
-                  </p>
-                </div>
+                {editMemberType === "companyUser" && (
+                  <div>
+                    <Label htmlFor="edit-company">Assign to Company</Label>
+                    <Select value={editCompanyId} onValueChange={setEditCompanyId}>
+                      <SelectTrigger data-testid="select-edit-company">
+                        <SelectValue placeholder="Select a company" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No company (unassigned)</SelectItem>
+                        {[...companies].sort((a, b) => a.name.localeCompare(b.name)).map((company) => (
+                          <SelectItem key={company.id} value={company.id}>
+                            {company.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Assigning to a company will add this member to the company's user list
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="border-t pt-4 flex gap-2 justify-end">

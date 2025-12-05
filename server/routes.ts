@@ -206,6 +206,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create user with FREE tier (never STARTER for new signups)
+      // If no company is provided, they are an independent member
       const newUser = await storage.createUser({
         username: email.split("@")[0] + "_" + Date.now(),
         email,
@@ -214,6 +215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         company: company || null,
         companyId: companyId,
         membershipTier: "FREE",
+        memberType: companyId ? "companyUser" : "independent",
         status: "ACTIVE",
         role: "MEMBER",
         creditsBasic: 0,
@@ -1409,18 +1411,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/users/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
-      const { membershipTier, status, role, creditsBasic, creditsPro, companyId, company, name } = req.body;
+      const { membershipTier, status, role, creditsBasic, creditsPro, companyId, company, name, memberType } = req.body;
       
       const user = await storage.getUser(id);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
 
-      // Validate company exists if provided (skip validation for "none" or "independent")
-      const isIndependent = companyId === "none" || companyId === "independent" || companyId === null;
-      if (companyId && !isIndependent) {
-        const company = await storage.getCompany(companyId);
-        if (!company) {
+      // Determine if this is an independent member
+      const isIndependentType = memberType === "independent";
+      const isIndependentCompany = companyId === "none" || companyId === "independent" || companyId === null;
+      
+      // Validate company exists if provided and not independent
+      if (companyId && !isIndependentType && !isIndependentCompany) {
+        const companyRecord = await storage.getCompany(companyId);
+        if (!companyRecord) {
           return res.status(400).json({ error: "Company not found" });
         }
       }
@@ -1431,9 +1436,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: role || user.role,
         creditsBasic: creditsBasic !== undefined ? creditsBasic : user.creditsBasic,
         creditsPro: creditsPro !== undefined ? creditsPro : user.creditsPro,
-        companyId: isIndependent ? null : (companyId !== undefined ? companyId : user.companyId),
-        company: isIndependent ? null : (company !== undefined ? company : user.company),
+        companyId: isIndependentType ? null : (isIndependentCompany ? null : (companyId !== undefined ? companyId : user.companyId)),
+        company: isIndependentType ? null : (isIndependentCompany ? null : (company !== undefined ? company : user.company)),
         name: name !== undefined ? name : user.name,
+        memberType: memberType || user.memberType || "companyUser",
       });
 
       res.json({ success: true });

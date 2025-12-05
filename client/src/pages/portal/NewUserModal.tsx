@@ -42,6 +42,7 @@ export default function NewUserModal({
     name: "",
     email: "",
     companyId: "independent", // "independent" means no company
+    memberType: "independent", // "independent" or "companyUser"
     membershipTier: "STARTER",
     role: "MEMBER",
     status: "ACTIVE",
@@ -76,10 +77,19 @@ export default function NewUserModal({
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    if (name === "companyId") {
+      // When company changes, update memberType accordingly
+      setFormData({
+        ...formData,
+        companyId: value,
+        memberType: value === "independent" ? "independent" : "companyUser",
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -109,6 +119,7 @@ export default function NewUserModal({
         company: selectedCompany?.name || null,
         companyId: formData.companyId !== "independent" ? formData.companyId : null,
         membershipTier: formData.membershipTier,
+        memberType: formData.memberType,
         role: formData.role,
         status: formData.status,
         creditsBasic: formData.creditsBasic,
@@ -134,6 +145,7 @@ export default function NewUserModal({
         name: "",
         email: "",
         companyId: "independent",
+        memberType: "independent",
         membershipTier: "STARTER",
         role: "MEMBER",
         status: "ACTIVE",
