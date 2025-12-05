@@ -2668,8 +2668,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paymentMethod: z.enum(["online", "invoice", "credits"]).optional(),
         basicCreditsUsed: z.number().default(0),
         proCreditsUsed: z.number().default(0),
-        companyId: z.number().nullable().optional(),
-        userId: z.number().nullable().optional(),
+        companyId: z.string().nullable().optional(),
+        userId: z.string().nullable().optional(),
         concepts: z.array(z.object({
           name: z.string(),
           description: z.string().optional(),
