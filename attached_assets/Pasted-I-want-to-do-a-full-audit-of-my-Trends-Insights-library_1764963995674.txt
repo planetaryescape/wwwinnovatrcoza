@@ -1,0 +1,203 @@
+I want to do a full audit of my Trends & Insights library content.
+Important: this task is read-only. Do not change or delete anything yet, just inspect and report back.
+
+Context of my portal:
+
+Library reports = Innovatr content pieces
+
+isClientReport = false
+
+category is one of: "Insights", "Launch", "Inside", "IRL"
+
+Client reports = brand-specific studies for Nando’s, Rugani, DGB etc
+
+isClientReport = true
+
+they live under My Research for companies and must be excluded from this audit
+
+1. Find the source of truth for library reports
+
+First, in PLAN mode:
+
+Find where library reports are defined:
+
+This might be the reports table in the database, a seed file, or a JSON like reportsData, seedReports, etc.
+
+Confirm which fields exist on a report, especially:
+
+id
+
+title
+
+slug
+
+category
+
+isClientReport
+
+accessLevel
+
+content / body / fullPost
+
+videoUrl or videoEmbed (for Inside pieces)
+
+pdfUrl / filePath / downloadUrl (for attached reports)
+
+Confirm how the Trends & Insights page currently retrieves data (the same data that feeds /portal/insights/{slug}).
+
+Do not change any code yet, just understand the structure and summarise it.
+
+2. Content rules for the audit
+
+For this audit, apply these rules only to library reports (isClientReport = false):
+
+For Inside category:
+
+Must have:
+
+A full content post (non-empty main body / long-form content used on the detail page)
+
+A video attached (either a non-empty videoUrl, videoEmbed, or equivalent field used to show the video)
+
+A PDF report is optional for Inside, I mainly care about the content + video.
+
+For all other library categories (Insights, Launch, IRL):
+
+Must have:
+
+A full content post (the long-form write-up used on the detail page)
+
+An attached report file (PDF or PPT) that users can download.
+This should be a non-empty pdfUrl / filePath / reportUrl field that actually points to a file.
+
+Client reports (isClientReport = true) must be excluded from this audit completely, even if they appear in the same table.
+
+3. Expected list of key library titles
+
+Use whatever the code/database has as the canonical list of library reports.
+
+In addition, I expect these titles to exist as library reports (non-client content). If your canonical list is different, still flag if any of these are missing or mis-categorised:
+
+Inside pieces (must have video + full content)
+
+Fairness Is the New Flex
+
+The Age of Effortless
+
+Believability Is the New Branding
+
+Indulgence Without Guilt
+
+Simplicity Has Status
+
+The New Non-Negotiable Treat
+
+From Vegan to Vital
+
+Banking Monogamy Is Dead
+
+The Oat Based Breakfast Revolution
+
+Cadbury Pocket Sized Joy
+
+The Return of the Third Place
+
+Other library reports (must have full content + attached report file)
+(This list may not be complete, so use the database as primary truth, but still check these:)
+
+Wine Without Bottles
+
+Craft Cues
+
+Greenway Carrots Brand Health Study
+
+Rugani 100% Carrot Juice Concept Test
+
+If any of these are currently marked as isClientReport = true but used as library content, please flag that as a data issue, do not “fix” it yet.
+
+4. Implement a one-off audit (read-only)
+
+In BUILD mode, I want you to implement a small internal audit helper that I can run now and maybe reuse later:
+
+Either:
+
+a small Node/TypeScript script, or
+
+an internal admin-only endpoint (e.g. /api/admin/reports-audit) logged to the server / console
+
+It must:
+
+Query all reports where isClientReport = false.
+
+For each record, derive:
+
+hasFullContent (boolean)
+
+hasVideo (boolean, if category is Inside)
+
+hasReportFile (boolean)
+
+Check against the rules in section 2.
+
+Output a clear audit summary in the console or as JSON with something like:
+
+{
+  "summary": {
+    "totalLibraryReports": 36,
+    "insideReports": 11,
+    "otherLibraryReports": 25,
+    "ok": 30,
+    "issues": 6
+  },
+  "issues": [
+    {
+      "title": "Fairness Is the New Flex",
+      "slug": "fairness-is-the-new-flex",
+      "category": "Inside",
+      "problems": [
+        "Missing videoUrl or embed field",
+        "Has content summary only, no full body"
+      ]
+    },
+    {
+      "title": "Wine Without Bottles",
+      "slug": "wine-without-bottles",
+      "category": "Launch",
+      "problems": [
+        "Missing attached PDF / report file"
+      ]
+    }
+  ],
+  "missingExpected": [
+    {
+      "title": "Believability Is the New Branding",
+      "expectedCategory": "Inside",
+      "problem": "Not found in library reports (may be missing or mis-categorised)"
+    }
+  ]
+}
+
+
+The issues array should list every library report that fails any rule, with a human-readable list of problems.
+
+The missingExpected array should list any title from the expected list that does not appear in the library set or is currently flagged as a client report.
+
+Do not automatically fix data. This step is just to tell me what’s wrong so I can decide whether to reupload content or attach reports manually.
+
+5. How to show the results
+
+After the audit is implemented:
+
+Run it once and show me the exact output in the Replit console or logs.
+
+Summarise in natural language:
+
+How many Inside reports are fully ready vs missing video or content
+
+How many non-Inside reports are missing full content or attached PDFs
+
+Which expected titles are missing or mis-categorised
+
+Do not prompt for Stripe keys or change anything related to payments in this task.
+
+You can stop after the audit is built and the report is printed.
