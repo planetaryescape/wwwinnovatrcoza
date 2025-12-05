@@ -1263,6 +1263,7 @@ export class DatabaseStorage implements IStorage {
       files: insertBrief.files ?? [],
       concepts: insertBrief.concepts ?? [],
       paymentMethod: insertBrief.paymentMethod ?? "online",
+      paymentStatus: insertBrief.paymentStatus ?? null,
       basicCreditsUsed: insertBrief.basicCreditsUsed ?? 0,
       proCreditsUsed: insertBrief.proCreditsUsed ?? 0,
       status: insertBrief.status ?? "new",
