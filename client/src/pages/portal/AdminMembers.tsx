@@ -48,6 +48,7 @@ import {
   Activity,
   Download,
   FileText,
+  CreditCard,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Label } from "@/components/ui/label";
