@@ -166,15 +166,22 @@ function renderBaseEmail(options: BaseEmailOptions): string {
               </td>
             </tr>
             <tr>
+              <td style="padding: 30px 40px 10px 40px;">
+                <p style="margin: 0; font-size: 16px; font-weight: 600; color: ${TEXT_COLOR};">
+                  Innovatr
+                </p>
+              </td>
+            </tr>
+            <tr>
               <td style="background-color: #f9f9f9; padding: 30px 40px; border-top: 1px solid #eeeeee;">
                 <p style="margin: 0 0 10px 0; font-size: 12px; color: ${FOOTER_COLOR};">
                   This is an automated message from Innovatr.
                 </p>
                 <p style="margin: 0 0 10px 0; font-size: 12px; color: ${FOOTER_COLOR};">
-                  If you have any questions, contact us at <a href="mailto:hello@innovatr.co.za" style="color: ${BRAND_COLOR}; text-decoration: none;">hello@innovatr.co.za</a>.
+                  If you have any questions, contact us at <a href="mailto:hannah@innovatr.co.za" style="color: ${BRAND_COLOR}; text-decoration: none;">hannah@innovatr.co.za</a> or <a href="mailto:richard@innovatr.co.za" style="color: ${BRAND_COLOR}; text-decoration: none;">richard@innovatr.co.za</a>.
                 </p>
                 <p style="margin: 0; font-size: 12px; color: ${FOOTER_COLOR};">
-                  &copy; 2025 Innovatr. All rights reserved.
+                  &copy; 2024 Innovatr. All rights reserved.
                 </p>
               </td>
             </tr>
@@ -201,10 +208,12 @@ ${greeting}
 
 ${bodyText}
 ${buttonText}${fallbackText}${footerNoteText}
+Innovatr
+
 ---
 This is an automated message from Innovatr.
-If you have any questions, contact us at hello@innovatr.co.za.
-© 2025 Innovatr. All rights reserved.`;
+If you have any questions, contact us at hannah@innovatr.co.za or richard@innovatr.co.za.
+© 2024 Innovatr. All rights reserved.`;
 }
 
 export type EmailTemplateType =
@@ -271,16 +280,16 @@ export function renderEmailTemplate(
   switch (type) {
     case "PASSWORD_RESET_REQUEST": {
       const bodyHtml = `
-        <p style="margin: 0 0 15px 0;">We received a request to reset your password for your Innovatr account.</p>
-        <p style="margin: 0 0 15px 0;">Click the button below to create a new password:</p>
+        <p style="margin: 0 0 15px 0;">We received a request to reset the password for your Innovatr account.</p>
+        <p style="margin: 0 0 15px 0;">You can create a new password at this link:</p>
       `;
-      const footerNote = "This link will expire in 1 hour for security reasons.\n\nIf you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.";
+      const footerNote = "If you did not request this, you can ignore the message. Your current password will stay the same unless you choose to change it.";
       
       const options: BaseEmailOptions = {
         title: "Reset Your Password",
         greetingName: data.firstName,
         bodyHtml,
-        buttonLabel: "Reset Password",
+        buttonLabel: "Create New Password",
         buttonUrl: data.resetLink,
         showButton: true,
         showLinkFallback: true,
@@ -288,7 +297,7 @@ export function renderEmailTemplate(
       };
       
       return {
-        subject: "Reset Your Innovatr Password",
+        subject: "Reset your Innovatr password",
         html: renderBaseEmail(options),
         text: renderBaseEmailText(options),
       };
@@ -297,7 +306,7 @@ export function renderEmailTemplate(
     case "PASSWORD_RESET_SUCCESS": {
       const bodyHtml = `
         <p style="margin: 0 0 15px 0;">Your password has been successfully updated. You can now log in to your Innovatr account using your new password.</p>
-        <p style="margin: 0 0 15px 0;">If you did not make this change or believe your account was accessed without permission, please contact us immediately at <a href="mailto:hello@innovatr.co.za" style="color: ${BRAND_COLOR};">hello@innovatr.co.za</a>.</p>
+        <p style="margin: 0 0 15px 0;">If you did not make this change or believe your account was accessed without permission, please contact us immediately at <a href="mailto:hannah@innovatr.co.za" style="color: ${BRAND_COLOR};">hannah@innovatr.co.za</a> or <a href="mailto:richard@innovatr.co.za" style="color: ${BRAND_COLOR};">richard@innovatr.co.za</a>.</p>
       `;
       
       const options: BaseEmailOptions = {
@@ -308,7 +317,7 @@ export function renderEmailTemplate(
       };
       
       return {
-        subject: "Your Innovatr Password Has Been Updated",
+        subject: "Your Innovatr password has been updated",
         html: renderBaseEmail(options),
         text: renderBaseEmailText(options),
       };
@@ -317,22 +326,22 @@ export function renderEmailTemplate(
     case "ACCOUNT_CREATED": {
       const portalLink = data.portalLink || `${FRONTEND_URL}/?login=true`;
       const bodyHtml = `
-        <p style="margin: 0 0 15px 0;">Your Innovatr account has been successfully created.</p>
-        <p style="margin: 0 0 15px 0;">You can now log in to your portal to access your research tools, track briefs, and view your insights.</p>
-        <p style="margin: 0 0 15px 0;">If you did not create this account, please contact us immediately at <a href="mailto:hello@innovatr.co.za" style="color: ${BRAND_COLOR};">hello@innovatr.co.za</a>.</p>
+        <p style="margin: 0 0 15px 0;">Your Innovatr account is ready. This is your space to explore research, track your projects and understand what is happening in the market in real time.</p>
+        <p style="margin: 0 0 15px 0;">If you are on a free plan you will see all Inside content and a few unlocked reports. Everything else will show with a gentle lock so you can see what becomes available when you join a membership.</p>
+        <p style="margin: 0 0 15px 0;">If you get stuck or want help planning your first study, just reply. A real person will help.</p>
       `;
       
       const options: BaseEmailOptions = {
         title: "Your Innovatr Account Is Ready",
         greetingName: data.firstName,
         bodyHtml,
-        buttonLabel: "Go to the Portal",
+        buttonLabel: "Log in to your portal",
         buttonUrl: portalLink,
         showButton: true,
       };
       
       return {
-        subject: "Welcome to Innovatr",
+        subject: "Welcome to Innovatr. Your portal is ready",
         html: renderBaseEmail(options),
         text: renderBaseEmailText(options),
       };
@@ -365,13 +374,13 @@ export function renderEmailTemplate(
     case "BRIEF_SUBMITTED": {
       const portalLink = data.portalLink || `${FRONTEND_URL}/portal/research`;
       const bodyHtml = `
-        <p style="margin: 0 0 15px 0;">Thanks for submitting your brief. Everything has been received safely.</p>
-        <p style="margin: 0 0 15px 0;">Our team is reviewing your details and preparing your study for launch. You will be notified as soon as your audience goes live.</p>
-        <p style="margin: 0 0 15px 0;">You can view this brief anytime in your Innovatr portal under My Research.</p>
+        <p style="margin: 0 0 15px 0;">Thank you for sending your Test24 brief. It has been received and added to your portal.</p>
+        <p style="margin: 0 0 15px 0;">You can track your study and download results in My Research.</p>
+        <p style="margin: 0 0 15px 0;">If anything changes, reply to this email as soon as possible so we can adjust the project before it launches.</p>
       `;
       
       const options: BaseEmailOptions = {
-        title: "Brief Submitted Successfully",
+        title: "We Received Your Test24 Brief",
         greetingName: data.firstName,
         bodyHtml,
         buttonLabel: "View My Research",
@@ -380,7 +389,7 @@ export function renderEmailTemplate(
       };
       
       return {
-        subject: "Your Test24 Brief Has Been Received",
+        subject: "We received your Test24 brief",
         html: renderBaseEmail(options),
         text: renderBaseEmailText(options),
       };
@@ -413,22 +422,21 @@ export function renderEmailTemplate(
     case "STUDY_COMPLETE": {
       const buttonUrl = data.reportLink || data.portalLink || `${FRONTEND_URL}/portal/research`;
       const bodyHtml = `
-        <p style="margin: 0 0 15px 0;">Your study is complete and your insights report is now available in your Innovatr portal.</p>
-        <p style="margin: 0 0 15px 0;">Go to My Research to view, download, or share your results.</p>
-        <p style="margin: 0 0 15px 0;">If you would like us to walk you through the findings, simply reply to this email.</p>
+        <p style="margin: 0 0 15px 0;">Your Test24 results are ready in your Innovatr portal. You can open the report, share it with your team and start using the findings.</p>
+        <p style="margin: 0 0 15px 0;">If you would like us to walk you through the results or present them to your team, reply to this email and we will arrange a session.</p>
       `;
       
       const options: BaseEmailOptions = {
-        title: "Your Insights Are Ready",
+        title: "Your Test24 Report Is Ready",
         greetingName: data.firstName,
         bodyHtml,
-        buttonLabel: "View My Report",
+        buttonLabel: "View your report",
         buttonUrl,
         showButton: true,
       };
       
       return {
-        subject: "Your Test24 Report Is Ready",
+        subject: "Your Test24 report is ready",
         html: renderBaseEmail(options),
         text: renderBaseEmailText(options),
       };
