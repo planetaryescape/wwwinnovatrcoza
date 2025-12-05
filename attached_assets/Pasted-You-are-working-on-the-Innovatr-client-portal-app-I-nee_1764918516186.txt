@@ -1,0 +1,283 @@
+You are working on the Innovatr client portal app. I need you to fix and complete the Admin → Companies → client card view so that:
+
+I can add and manage client reports from the company side panel, including uploading a PDF and making it downloadable from the client’s “My Research” tab.
+
+I can successfully update company details (contract dates, credits etc.) on the live site without the “Failed to update company” error.
+
+Please read this very carefully and follow all steps.
+
+1. Understand the current setup
+
+Search the repo for:
+
+The Admin Companies page and the company detail side drawer.
+
+The “Add Client Report” button and modal you already show.
+
+Any ClientReport / CompanyReport / Study / Project models, API routes and database tables.
+
+The My Research page that shows per-company client reports (DGB / Rugani / Nando’s etc.).
+
+Any existing file-upload / report upload logic used for the Trends & Insights reports library (this already works and should be reused).
+
+Confirm:
+
+How companies are stored (companies table / model).
+
+How client reports are currently stored (if there is an existing client_reports or similar table).
+
+How files are currently saved and served for published reports (e.g. local storage, S3, Supabase, etc.).
+
+Do NOT invent a second storage mechanism. Reuse the same approach that the Trends & Insights reports use for their downloadable PDFs.
+
+2. Make “Add Client Report” fully functional
+
+In Admin → Companies → [open a company] side drawer:
+
+The existing “+ Add Report” button should open a modal (already visible in my UI) called “Add Client Report” with these fields:
+
+Report Title (required text)
+
+Description (optional textarea)
+
+Study Type (dropdown: “Test24 Basic”, “Test24 Pro”, “Other”)
+
+Status (dropdown: “In Progress”, “Completed”, “Live”, “Archived”)
+
+Delivered Date (date picker)
+
+Primary Contact Email (email input, optional)
+
+New field: Report File (file upload for a single PDF)
+
+Optional field: External Link for an UpSiide or Storyteller dashboard URL
+
+Backend / DB:
+
+If a client report model/table already exists, extend it to include:
+
+companyId
+
+title
+
+description
+
+studyType
+
+status
+
+deliveredAt
+
+primaryContactEmail
+
+fileUrl (or similar) – points to the uploaded PDF
+
+externalUrl (optional)
+
+If there is no existing table for client reports, create one following the existing ORM / migration pattern in the project.
+
+Ensure this entity is clearly linked to a companyId and not mixed in with public Insights/Launch/Inside/IRL reports.
+
+File upload:
+
+Reuse the same upload pipeline used for existing Trends & Insights report PDFs.
+
+Implement an API endpoint such as POST /api/admin/companies/:companyId/client-reports that:
+
+Accepts form data including metadata + the file.
+
+Stores the file using the existing storage mechanism.
+
+Saves a clientReport record with the resulting fileUrl (download path).
+
+Return the created client report in the response so the UI can update the list without a full page reload.
+
+Frontend behaviour:
+
+On Add Report → Save:
+
+Validate required fields (title, study type, status, delivered date, and file).
+
+Disable the button and show a loading state while the API call runs.
+
+On success:
+
+Close the modal.
+
+Refresh the Client Reports list in the company drawer.
+
+Show a success toast (e.g. “Client report added for Nando’s South Africa”).
+
+On failure:
+
+Show a clear error toast with the summary of the backend error.
+
+Client Reports list:
+
+In the company side drawer under Client Reports, use the clientReports from the API that are associated with that company.
+
+Each row should show:
+
+Title
+
+Study type pill (Test24 Basic / Test24 Pro / Other)
+
+Status pill (Completed / Live / In Progress / Archived)
+
+Delivered date
+
+A Download icon/button that links to the PDF fileUrl
+
+Make sure this download link works and does NOT return 404:
+
+Implement a proper route/handler that serves the file.
+
+Protect it so that only users belonging to that company (or admin impersonating that company) can access the file.
+
+Editing / deleting:
+
+If there is already an edit or delete pattern in the app (for reports, deals, or credits), reuse the same UX.
+
+At a minimum, support deleting a client report from the company drawer, with a confirmation modal.
+
+3. Wire client reports into “My Research”
+
+On the My Research tab:
+
+For regular company users:
+
+Only show client reports that belong to their companyId.
+
+Display them as cards similar to the current view:
+
+Title
+
+Tags (e.g. “Test24 Basic”, “Wine”, “Pilot”)
+
+Status (Completed, Live, etc.)
+
+Delivered date
+
+View + Download buttons.
+
+Admin impersonation:
+
+When an admin clicks “View Portal” from Admin → Companies, they should see exactly what that company would see in their My Research tab (same list, same downloads).
+
+Use the existing impersonation state (impersonatedCompanyId or similar) to filter client reports.
+
+Ensure View and Download both work in impersonation mode and route correctly to the stored file URL.
+
+Fix any remaining 404 issues:
+
+Trace the Download button click path end-to-end:
+
+Frontend route → API endpoint → storage location.
+
+Fix mismatched paths or missing route parameters that cause 404s.
+
+Add basic error handling:
+
+If a file is missing, show a friendly toast like “We could not find this file. Please contact Hannah at Innovatr”.
+
+4. Fix “Failed to update company” on live site
+
+On the live site (innovatr.co.za/portal/admin?tab=companies), updating a company produces a red toast “Failed to update company”.
+
+Investigate:
+
+Find the API endpoint the Company drawer uses for updates (e.g. PUT /api/admin/companies/:id).
+
+Check:
+
+Body payload fields vs backend DTO / schema.
+
+Validation constraints (e.g. missing required fields).
+
+Environment variable differences for the production build (database URL, API base URL, etc.).
+
+Inspect server logs or error messages returned in the JSON response and use those to fix the underlying issue, not just silence it.
+
+Fixes to apply:
+
+Ensure the front end sends the correct shape for:
+
+contractStart
+
+contractEnd
+
+monthlyFee
+
+basicCredits
+
+proCredits
+
+Normalise date formats as expected by the backend (e.g. ISO strings).
+
+Confirm that the API route is not blocked by auth middleware for the current admin user.
+
+Ensure CORS / base URL is correct when running behind innovatr.co.za.
+
+UX:
+
+On a successful update, show a green toast “Company updated”.
+
+On failure, show the real error summary (e.g. “Validation error: contractEnd must be after contractStart”) instead of a generic message.
+
+5. Regression checks
+
+After implementing the above, run a manual and automated check across these flows:
+
+As an Admin:
+
+Open Admin → Companies.
+
+Edit Rugani’s contract dates and credits. Confirm it saves without error.
+
+Use “+ Add Report” to add a new client report for Nando’s with a real PDF.
+
+Confirm it appears in the company drawer and in My Research (when impersonating Nando’s).
+
+Download the PDF from My Research and verify it opens correctly.
+
+As a Company user (e.g. Nando’s or Rugani):
+
+Log in as that company.
+
+Confirm they:
+
+See only their client reports.
+
+Can download their own reports.
+
+Cannot access other companies’ reports via URL guess (backend must check companyId).
+
+Access control:
+
+Verify that when impersonating a company:
+
+The Admin tab is fully hidden.
+
+Navigation menu matches what a normal company user would see.
+
+Leaving impersonation returns to the full admin view.
+
+Tests:
+
+If there are unit or integration tests around companies or reports, extend them to cover:
+
+Creating a client report.
+
+Serving its download URL.
+
+Filtering by companyId.
+
+Only consider this task complete once:
+
+“Add Client Report” works end-to-end with PDF upload and download.
+
+Company updates no longer throw “Failed to update company”.
+
+My Research shows correct client reports and download links for both real users and admin impersonation.
+
+Please implement the changes now.

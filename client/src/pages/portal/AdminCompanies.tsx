@@ -92,6 +92,7 @@ interface ClientReport {
   studyType: string | null;
   status: string | null;
   pdfUrl: string | null;
+  dashboardUrl: string | null;
   deliveredAt: string | null;
   primaryContactEmail: string | null;
   createdAt: string;
@@ -134,6 +135,11 @@ export default function AdminCompanies() {
   
   const [addReportOpen, setAddReportOpen] = useState(false);
   const [addingReport, setAddingReport] = useState(false);
+  const [deleteReportOpen, setDeleteReportOpen] = useState(false);
+  const [reportToDelete, setReportToDelete] = useState<ClientReport | null>(null);
+  const [deletingReport, setDeletingReport] = useState(false);
+  const [reportPdfFile, setReportPdfFile] = useState<File | null>(null);
+  const reportPdfInputRef = useRef<HTMLInputElement>(null);
   const [newReport, setNewReport] = useState({
     title: "",
     description: "",
@@ -141,6 +147,7 @@ export default function AdminCompanies() {
     status: "Completed",
     deliveredAt: new Date().toISOString().split('T')[0],
     primaryContactEmail: "",
+    dashboardUrl: "",
   });
 
   const fetchCompanies = async () => {
@@ -260,17 +267,30 @@ export default function AdminCompanies() {
 
   const handleUpdateCompany = async (companyId: string, updates: Partial<Company>) => {
     try {
+      // Normalize dates to ISO strings if they exist
+      const normalizedUpdates = { ...updates };
+      if (normalizedUpdates.contractStart) {
+        normalizedUpdates.contractStart = new Date(normalizedUpdates.contractStart).toISOString();
+      }
+      if (normalizedUpdates.contractEnd) {
+        normalizedUpdates.contractEnd = new Date(normalizedUpdates.contractEnd).toISOString();
+      }
+
       const res = await fetch(`/api/admin/companies/${companyId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updates),
+        body: JSON.stringify(normalizedUpdates),
       });
 
-      if (!res.ok) throw new Error("Failed to update company");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to update company");
+      }
 
-      setCompanies(companies.map((c) => (c.id === companyId ? { ...c, ...updates } : c)));
+      const updated = await res.json();
+      setCompanies(companies.map((c) => (c.id === companyId ? updated : c)));
       if (selectedCompany?.id === companyId) {
-        setSelectedCompany({ ...selectedCompany, ...updates });
+        setSelectedCompany(updated);
       }
 
       toast({
@@ -278,9 +298,10 @@ export default function AdminCompanies() {
         description: "Changes saved successfully",
       });
     } catch (err) {
+      console.error("Update company error:", err);
       toast({
         title: "Error",
-        description: "Failed to update company",
+        description: err instanceof Error ? err.message : "Failed to update company",
         variant: "destructive",
       });
     }
@@ -303,6 +324,7 @@ export default function AdminCompanies() {
 
     setAddingReport(true);
     try {
+      // Step 1: Create the report record
       const res = await fetch("/api/admin/client-reports", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -314,15 +336,42 @@ export default function AdminCompanies() {
           status: newReport.status,
           deliveredAt: newReport.deliveredAt || null,
           primaryContactEmail: newReport.primaryContactEmail || null,
+          dashboardUrl: newReport.dashboardUrl || null,
           tags: [],
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to add report");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to add report");
+      }
+
+      const createdReport = await res.json();
+
+      // Step 2: If a PDF was selected, upload it
+      if (reportPdfFile) {
+        const formData = new FormData();
+        formData.append("pdf", reportPdfFile);
+
+        const uploadRes = await fetch(`/api/admin/client-reports/${createdReport.id}/pdf`, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!uploadRes.ok) {
+          const errorData = await uploadRes.json().catch(() => ({}));
+          console.error("PDF upload failed:", errorData);
+          toast({
+            title: "Report Created",
+            description: "Report was added but PDF upload failed. You can upload it later.",
+            variant: "default",
+          });
+        }
+      }
 
       toast({
         title: "Report Added",
-        description: "Client report has been added successfully",
+        description: `Client report has been added for ${selectedCompany.name}`,
       });
 
       setAddReportOpen(false);
@@ -333,17 +382,58 @@ export default function AdminCompanies() {
         status: "Completed",
         deliveredAt: new Date().toISOString().split('T')[0],
         primaryContactEmail: "",
+        dashboardUrl: "",
       });
+      setReportPdfFile(null);
+      if (reportPdfInputRef.current) {
+        reportPdfInputRef.current.value = "";
+      }
       
       await fetchCompanyReports(selectedCompany.id);
     } catch (err) {
       toast({
         title: "Error",
-        description: "Failed to add report",
+        description: err instanceof Error ? err.message : "Failed to add report",
         variant: "destructive",
       });
     } finally {
       setAddingReport(false);
+    }
+  };
+
+  const handleDeleteReport = async () => {
+    if (!reportToDelete) return;
+
+    setDeletingReport(true);
+    try {
+      const res = await fetch(`/api/admin/client-reports/${reportToDelete.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to delete report");
+      }
+
+      toast({
+        title: "Report Deleted",
+        description: "Client report has been removed",
+      });
+
+      setDeleteReportOpen(false);
+      setReportToDelete(null);
+      
+      if (selectedCompany) {
+        await fetchCompanyReports(selectedCompany.id);
+      }
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : "Failed to delete report",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingReport(false);
     }
   };
 
@@ -855,7 +945,7 @@ export default function AdminCompanies() {
                     <p className="text-sm text-muted-foreground">No research reports delivered yet</p>
                   ) : (
                     <div className="space-y-2">
-                      {companyReports.slice(0, 3).map((report) => (
+                      {companyReports.slice(0, 5).map((report) => (
                         <div 
                           key={report.id} 
                           className="flex items-center justify-between p-3 rounded-lg bg-muted/30"
@@ -863,7 +953,7 @@ export default function AdminCompanies() {
                         >
                           <div className="flex-1 min-w-0">
                             <p className="font-medium truncate">{report.title}</p>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
                               <Badge variant="outline" className="text-xs">
                                 {report.studyType || "Test24 Basic"}
                               </Badge>
@@ -875,21 +965,48 @@ export default function AdminCompanies() {
                               <span>{formatDate(report.deliveredAt || report.createdAt)}</span>
                             </div>
                           </div>
-                          {report.pdfUrl && (
-                            <a 
-                              href={report.pdfUrl} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="ml-2"
+                          <div className="flex items-center gap-1 ml-2">
+                            {report.dashboardUrl && (
+                              <a 
+                                href={report.dashboardUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                              >
+                                <Button size="icon" variant="ghost" data-testid={`button-dashboard-report-${report.id}`}>
+                                  <ExternalLink className="w-4 h-4" />
+                                </Button>
+                              </a>
+                            )}
+                            {report.pdfUrl ? (
+                              <a 
+                                href={report.pdfUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                              >
+                                <Button size="icon" variant="ghost" data-testid={`button-download-report-${report.id}`}>
+                                  <Download className="w-4 h-4" />
+                                </Button>
+                              </a>
+                            ) : (
+                              <Badge variant="outline" className="text-xs text-muted-foreground">
+                                No PDF
+                              </Badge>
+                            )}
+                            <Button 
+                              size="icon" 
+                              variant="ghost"
+                              onClick={() => {
+                                setReportToDelete(report);
+                                setDeleteReportOpen(true);
+                              }}
+                              data-testid={`button-delete-report-${report.id}`}
                             >
-                              <Button size="icon" variant="ghost">
-                                <Download className="w-4 h-4" />
-                              </Button>
-                            </a>
-                          )}
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
                         </div>
                       ))}
-                      {companyReports.length > 3 && (
+                      {companyReports.length > 5 && (
                         <Button 
                           variant="ghost" 
                           size="sm" 
@@ -1030,6 +1147,53 @@ export default function AdminCompanies() {
                 />
               </div>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="report-pdf">Report PDF</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  ref={reportPdfInputRef}
+                  id="report-pdf"
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={(e) => setReportPdfFile(e.target.files?.[0] || null)}
+                  className="flex-1"
+                  data-testid="input-report-pdf"
+                />
+                {reportPdfFile && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      setReportPdfFile(null);
+                      if (reportPdfInputRef.current) {
+                        reportPdfInputRef.current.value = "";
+                      }
+                    }}
+                    data-testid="button-clear-pdf"
+                  >
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
+                )}
+              </div>
+              {reportPdfFile && (
+                <p className="text-xs text-muted-foreground">
+                  Selected: {reportPdfFile.name} ({(reportPdfFile.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="dashboard-url">External Dashboard URL (optional)</Label>
+              <Input
+                id="dashboard-url"
+                type="url"
+                placeholder="https://upsiide.com/dashboard/..."
+                value={newReport.dashboardUrl}
+                onChange={(e) => setNewReport({ ...newReport, dashboardUrl: e.target.value })}
+                data-testid="input-dashboard-url"
+              />
+              <p className="text-xs text-muted-foreground">Link to UpSiide, Storyteller, or other dashboard</p>
+            </div>
           </div>
           <DialogFooter>
             <Button
@@ -1045,6 +1209,37 @@ export default function AdminCompanies() {
               data-testid="button-save-report"
             >
               {addingReport ? "Adding..." : "Add Report"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteReportOpen} onOpenChange={setDeleteReportOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Delete Client Report</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{reportToDelete?.title}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteReportOpen(false);
+                setReportToDelete(null);
+              }}
+              data-testid="button-cancel-delete"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteReport}
+              disabled={deletingReport}
+              data-testid="button-confirm-delete"
+            >
+              {deletingReport ? "Deleting..." : "Delete Report"}
             </Button>
           </DialogFooter>
         </DialogContent>
