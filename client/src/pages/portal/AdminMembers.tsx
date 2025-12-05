@@ -25,6 +25,16 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -49,6 +59,7 @@ import {
   Download,
   FileText,
   CreditCard,
+  Trash2,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Label } from "@/components/ui/label";
@@ -135,6 +146,8 @@ export default function AdminMembers() {
   const [editName, setEditName] = useState("");
   const [editCompanyId, setEditCompanyId] = useState("");
   const [editMemberTier, setEditMemberTier] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState<any | null>(null);
   const { toast } = useToast();
 
   const { data: pulseSubscribers = [], isLoading: loadingPulse, refetch: refetchPulse } = useQuery<MailerSubscription[]>({
@@ -176,6 +189,32 @@ export default function AdminMembers() {
       toast({ title: "Update failed", description: error.message || "Failed to update member.", variant: "destructive" });
     },
   });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const res = await apiRequest("DELETE", `/api/admin/users/${userId}`);
+      if (!res.ok) {
+        throw new Error("Failed to delete user");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/companies"] });
+      setDeleteDialogOpen(false);
+      setMemberToDelete(null);
+      toast({ title: "Member deleted", description: "The member has been permanently deleted." });
+    },
+    onError: (error: any) => {
+      toast({ title: "Delete failed", description: error.message || "Failed to delete member.", variant: "destructive" });
+    },
+  });
+
+  const handleConfirmDelete = () => {
+    if (memberToDelete) {
+      deleteUserMutation.mutate(memberToDelete.id);
+    }
+  };
 
   const handleStartEdit = () => {
     if (selectedMember) {
@@ -632,6 +671,18 @@ export default function AdminMembers() {
                                 Send Email
                               </a>
                             </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              className="text-destructive focus:text-destructive"
+                              onClick={() => {
+                                setMemberToDelete(member);
+                                setDeleteDialogOpen(true);
+                              }}
+                              data-testid={`button-delete-member-${member.id}`}
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete Member
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -882,6 +933,42 @@ export default function AdminMembers() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to permanently delete this member?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {memberToDelete && (
+                <>
+                  You are about to permanently delete <strong>{memberToDelete.name || memberToDelete.email}</strong>. 
+                  This action cannot be undone and will remove all of their data from the system.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setMemberToDelete(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteUserMutation.isPending}
+              data-testid="button-confirm-delete"
+            >
+              {deleteUserMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Yes, Delete Permanently"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
