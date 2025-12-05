@@ -98,109 +98,29 @@ function checkReportAccess(
 ): AccessCheckResult {
   const accessLevel = report.accessLevel || "PUBLIC";
   
+  // Public content is always accessible
   if (accessLevel === "PUBLIC" || accessLevel === "public") {
     return { hasAccess: true, reason: "public" };
   }
   
+  // Not logged in - require login
   if (!user) {
     return { hasAccess: false, reason: "not_logged_in", message: "Sign in to access this members-only content" };
   }
   
-  if (accessLevel === "STARTER" || accessLevel === "member") {
-    const userTier = user.membershipTier || "STARTER";
-    const tierHierarchy = ["STARTER", "GROWTH", "SCALE"];
-    const userTierIndex = tierHierarchy.indexOf(userTier);
-    
-    if (userTierIndex >= 0) {
-      return { hasAccess: true, reason: "member" };
-    }
-    
-    return { 
-      hasAccess: false, 
-      reason: "membership_required", 
-      message: "Become a member to access this content" 
-    };
+  // Paid members (STARTER, GROWTH, SCALE) have full access to all content - no locks
+  const userTier = (user.membershipTier || "").toUpperCase();
+  const paidTiers = ["STARTER", "GROWTH", "SCALE"];
+  if (paidTiers.includes(userTier)) {
+    return { hasAccess: true, reason: "member" };
   }
   
-  if (accessLevel === "GROWTH") {
-    const userTier = user.membershipTier || "STARTER";
-    const tierHierarchy = ["STARTER", "GROWTH", "SCALE"];
-    const userTierIndex = tierHierarchy.indexOf(userTier);
-    const requiredTierIndex = tierHierarchy.indexOf("GROWTH");
-    
-    if (userTierIndex >= requiredTierIndex) {
-      return { hasAccess: true, reason: "tier_allowed" };
-    }
-    
-    return { 
-      hasAccess: false, 
-      reason: "tier_required", 
-      message: "Upgrade to Growth or higher to access this content" 
-    };
-  }
-  
-  if (accessLevel === "SCALE") {
-    const userTier = user.membershipTier || "STARTER";
-    const tierHierarchy = ["STARTER", "GROWTH", "SCALE"];
-    const userTierIndex = tierHierarchy.indexOf(userTier);
-    const requiredTierIndex = tierHierarchy.indexOf("SCALE");
-    
-    if (userTierIndex >= requiredTierIndex) {
-      return { hasAccess: true, reason: "tier_allowed" };
-    }
-    
-    return { 
-      hasAccess: false, 
-      reason: "tier_required", 
-      message: "Upgrade to Scale to access this content" 
-    };
-  }
-  
-  if (accessLevel === "tier") {
-    const allowedTiers = report.allowedTiers || [];
-    const userTier = user.membershipTier || "STARTER";
-    
-    const tierHierarchy = ["STARTER", "GROWTH", "SCALE"];
-    const userTierIndex = tierHierarchy.indexOf(userTier);
-    
-    const hasAccess = allowedTiers.some(tier => {
-      const requiredTierIndex = tierHierarchy.indexOf(tier);
-      return userTierIndex >= requiredTierIndex;
-    });
-    
-    if (hasAccess) {
-      return { hasAccess: true, reason: "tier_allowed" };
-    }
-    
-    return { 
-      hasAccess: false, 
-      reason: "tier_required", 
-      message: `Upgrade to ${allowedTiers[0]} or higher to access this content` 
-    };
-  }
-  
-  if (accessLevel === "paid") {
-    const creditType = report.creditType || "basic";
-    const creditCost = report.creditCost || 1;
-    
-    if (creditType === "none") {
-      return { hasAccess: true, reason: "credits_available" };
-    }
-    
-    const userCredits = creditType === "basic" ? (user.creditsBasic || 0) : (user.creditsPro || 0);
-    
-    if (userCredits >= creditCost) {
-      return { hasAccess: true, reason: "credits_available" };
-    }
-    
-    return { 
-      hasAccess: false, 
-      reason: "credits_required", 
-      message: `This report requires ${creditCost} ${creditType === "basic" ? "Basic" : "Pro"} credit${creditCost > 1 ? "s" : ""}` 
-    };
-  }
-  
-  return { hasAccess: true, reason: "public" };
+  // Free users need to upgrade to access member content
+  return { 
+    hasAccess: false, 
+    reason: "membership_required", 
+    message: "Become a member to access this content" 
+  };
 }
 
 function RelatedReportCard({ report }: { report: Report }) {
