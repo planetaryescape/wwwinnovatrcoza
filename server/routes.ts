@@ -1053,60 +1053,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Handle failed/cancelled brief payments - clean up uploaded files
-      if (intent && !orderCreated && eventType) {
+      // SECURITY: Only process if intent.status === "failed" since that's only set after
+      // verified payment failure (see PaymentService.handleWebhook line 370-371)
+      // This prevents unverified webhooks from triggering file deletion
+      if (intent && !orderCreated && intent.status === "failed") {
         const failedPaymentEvents = ["payment.failed", "payment.cancelled", "payment.declined"];
-        if (failedPaymentEvents.includes(eventType)) {
+        const isFailedByEventType = eventType && failedPaymentEvents.includes(eventType);
+        
+        // Log if intent.status is failed but eventType doesn't match expected failure events
+        if (!isFailedByEventType) {
+          console.log(`Note: Intent ${intent.id} marked failed but eventType='${eventType}' is not a known failure event`);
+        }
+        
+        // Proceed with cleanup since intent.status === "failed" implies verified failure
+        {
           const metadata = intent.metadata as Record<string, any> | null;
           const pendingOrder = metadata?.pendingOrder as Record<string, any> | undefined;
           
-          if (pendingOrder?.briefId) {
+          // Validate briefId exists and is a valid UUID format
+          const briefId = pendingOrder?.briefId;
+          if (briefId && typeof briefId === "string" && briefId.match(/^[0-9a-f-]{36}$/i)) {
             console.log("=== Processing Failed Brief Payment - Cleaning Up Files ===");
-            console.log("Brief ID:", pendingOrder.briefId);
+            console.log("Brief ID:", briefId);
             console.log("Event Type:", eventType);
             
-            const brief = await storage.getBriefSubmission(pendingOrder.briefId);
+            const brief = await storage.getBriefSubmission(briefId);
             if (brief) {
-              // Update brief payment status to failed
-              await storage.updateBriefSubmission(pendingOrder.briefId, {
-                paymentStatus: "failed",
-              });
-              console.log("Brief payment status updated to failed");
-              
-              // Delete uploaded files from object storage
-              const briefFiles = (brief.files || []) as Array<{
-                id: string;
-                fileName: string;
-                fileSize: number;
-                mimeType: string;
-                url: string;
-                uploadedAt: string;
-              }>;
-              
-              if (briefFiles.length > 0) {
-                console.log(`Deleting ${briefFiles.length} files from failed brief...`);
-                for (const file of briefFiles) {
-                  // Extract storage path from URL (e.g., "/api/files/briefs/uuid-filename" -> "briefs/uuid-filename")
-                  const storagePath = file.url.replace("/api/files/", "");
-                  try {
-                    const deleted = await deleteFile(storagePath);
-                    if (deleted) {
-                      console.log(`Deleted file: ${storagePath}`);
-                    } else {
-                      console.warn(`Failed to delete file: ${storagePath}`);
+              // Only process if brief payment is still pending (prevents duplicate processing)
+              if (brief.paymentStatus === "pending") {
+                // Update brief payment status to failed first
+                await storage.updateBriefSubmission(briefId, {
+                  paymentStatus: "failed",
+                });
+                console.log("Brief payment status updated to failed");
+                
+                // Delete uploaded files from object storage
+                const briefFiles = (brief.files || []) as Array<{
+                  id: string;
+                  fileName: string;
+                  fileSize: number;
+                  mimeType: string;
+                  url: string;
+                  uploadedAt: string;
+                }>;
+                
+                if (briefFiles.length > 0) {
+                  console.log(`Attempting to delete ${briefFiles.length} files from failed brief...`);
+                  const successfullyDeleted: string[] = [];
+                  const failedToDelete: string[] = [];
+                  
+                  for (const file of briefFiles) {
+                    // Extract storage path and validate it starts with "briefs/" (security check)
+                    const storagePath = file.url.replace("/api/files/", "");
+                    
+                    // Security: Only delete files under the briefs/ prefix to prevent path traversal
+                    if (!storagePath.startsWith("briefs/") || storagePath.includes("..")) {
+                      console.warn(`Skipping invalid file path: ${storagePath}`);
+                      failedToDelete.push(file.fileName);
+                      continue;
                     }
-                  } catch (deleteError) {
-                    console.error(`Error deleting file ${storagePath}:`, deleteError);
+                    
+                    try {
+                      const deleted = await deleteFile(storagePath);
+                      if (deleted) {
+                        console.log(`Deleted file: ${storagePath}`);
+                        successfullyDeleted.push(file.id);
+                      } else {
+                        console.warn(`Failed to delete file: ${storagePath}`);
+                        failedToDelete.push(file.fileName);
+                      }
+                    } catch (deleteError) {
+                      console.error(`Error deleting file ${storagePath}:`, deleteError);
+                      failedToDelete.push(file.fileName);
+                    }
+                  }
+                  
+                  // Only remove successfully deleted files from brief record
+                  // Keep references to files that failed to delete for manual cleanup
+                  if (successfullyDeleted.length > 0) {
+                    const remainingFiles = briefFiles.filter(f => !successfullyDeleted.includes(f.id));
+                    await storage.updateBriefSubmission(briefId, {
+                      files: remainingFiles,
+                    });
+                    console.log(`Cleaned up ${successfullyDeleted.length} files, ${remainingFiles.length} remaining`);
+                  }
+                  
+                  if (failedToDelete.length > 0) {
+                    console.warn(`Failed to delete ${failedToDelete.length} files - manual cleanup may be needed:`, failedToDelete);
                   }
                 }
-                
-                // Clear the files array from the brief record
-                await storage.updateBriefSubmission(pendingOrder.briefId, {
-                  files: [],
-                });
-                console.log("Brief files array cleared");
+              } else {
+                console.log(`Brief ${briefId} payment status is already ${brief.paymentStatus}, skipping cleanup`);
               }
             } else {
-              console.error("Brief not found for cleanup:", pendingOrder.briefId);
+              console.error("Brief not found for cleanup:", briefId);
             }
             
             console.log("=== End Failed Brief Cleanup ===");
