@@ -58,7 +58,7 @@ const briefFileUpload = multer({
 // Multer for report file uploads - supports PDF and PPTX
 const reportFileUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max for reports
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB max for reports
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
       "application/pdf",
@@ -1668,7 +1668,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get single report by slug
+  // Get single report by slug (public endpoint - excludes client-specific reports)
   app.get("/api/reports/:slug", async (req, res) => {
     try {
       const { slug } = req.params;
@@ -1676,8 +1676,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const report = reports.find(r => 
         r.slug === slug && 
         r.status === "published" && 
-        !r.isArchived
+        !r.isArchived &&
+        (!r.clientCompanyIds || r.clientCompanyIds.length === 0)
       );
+      
+      if (!report) {
+        return res.status(404).json({ error: "Report not found" });
+      }
+      
+      res.json(report);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Member single report by slug (authenticated, includes client-specific reports for user's company)
+  app.get("/api/member/reports/:slug", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { slug } = req.params;
+      const sessionUser = req.user!;
+      const userCompanyId = sessionUser.companyId;
+      const reports = await storage.getAllReports();
+      
+      // Admin users can see any published report
+      if (isAdminUser(sessionUser.email)) {
+        const report = reports.find(r => 
+          r.slug === slug && 
+          r.status === "published" && 
+          !r.isArchived
+        );
+        if (!report) {
+          return res.status(404).json({ error: "Report not found" });
+        }
+        return res.json(report);
+      }
+      
+      // Regular members can see public reports and their company's client reports
+      const report = reports.find(r => {
+        if (r.slug !== slug || r.status !== "published" || r.isArchived) {
+          return false;
+        }
+        // Public report (no client company IDs)
+        if (!r.clientCompanyIds || r.clientCompanyIds.length === 0) {
+          return true;
+        }
+        // Client-specific report for user's company
+        return userCompanyId && r.clientCompanyIds.includes(userCompanyId);
+      });
       
       if (!report) {
         return res.status(404).json({ error: "Report not found" });

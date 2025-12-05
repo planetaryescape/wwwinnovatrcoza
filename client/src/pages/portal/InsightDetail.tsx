@@ -357,7 +357,13 @@ export default function InsightDetail() {
       
       setLoading(true);
       try {
-        const res = await fetch(`/api/reports/${encodeURIComponent(params.slug)}`);
+        // Use member endpoint if authenticated (includes client-specific reports)
+        // Fall back to public endpoint otherwise
+        const endpoint = isAuthenticated 
+          ? `/api/member/reports/${encodeURIComponent(params.slug)}`
+          : `/api/reports/${encodeURIComponent(params.slug)}`;
+        
+        const res = await fetch(endpoint);
         if (res.ok) {
           const data = await res.json();
           setReport({
@@ -379,14 +385,16 @@ export default function InsightDetail() {
     };
     
     fetchReport();
-  }, [params?.slug]);
+  }, [params?.slug, isAuthenticated]);
 
   useEffect(() => {
     const fetchRelated = async () => {
       if (!report) return;
       
       try {
-        const res = await fetch("/api/reports");
+        // Use member endpoint if authenticated for complete report list
+        const endpoint = isAuthenticated ? "/api/member/reports" : "/api/reports";
+        const res = await fetch(endpoint);
         if (res.ok) {
           const data = await res.json();
           const formatted = data
@@ -407,7 +415,7 @@ export default function InsightDetail() {
     };
     
     fetchRelated();
-  }, [report?.id, report?.category, report?.tags]);
+  }, [report?.id, report?.category, report?.tags, isAuthenticated]);
 
   const accessResult = report 
     ? checkReportAccess(report, user as { membershipTier?: string; creditsBasic?: number; creditsPro?: number } | null)
