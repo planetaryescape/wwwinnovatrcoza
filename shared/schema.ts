@@ -584,6 +584,8 @@ export const briefSubmissions = pgTable("brief_submissions", {
   files: jsonb("files").default([]),
   concepts: jsonb("concepts").default([]),
   paymentMethod: varchar("payment_method", { length: 20 }).notNull().default("online"),
+  paymentStatus: varchar("payment_status", { length: 20 }),
+  paymentIntentId: varchar("payment_intent_id"),
   basicCreditsUsed: integer("basic_credits_used").notNull().default(0),
   proCreditsUsed: integer("pro_credits_used").notNull().default(0),
   status: varchar("status", { length: 20 }).notNull().default("new"),
@@ -625,6 +627,8 @@ export const insertBriefSubmissionSchema = createInsertSchema(briefSubmissions)
     files: z.array(briefFileSchema).default([]),
     concepts: z.array(conceptSchema).default([]),
     paymentMethod: z.enum(["online", "invoice", "credits"]).default("online"),
+    paymentStatus: z.enum(["pending", "completed", "failed"]).nullable().optional(),
+    paymentIntentId: z.string().nullable().optional(),
     basicCreditsUsed: z.number().default(0),
     proCreditsUsed: z.number().default(0),
   });
