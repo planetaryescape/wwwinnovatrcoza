@@ -56,7 +56,7 @@ interface Study {
 }
 
 export default function PastResearch() {
-  const { isMember, user, company, isAdmin } = useAuth();
+  const { user, company, isAdmin } = useAuth();
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -311,8 +311,13 @@ export default function PastResearch() {
     );
   };
 
-  const showLockedBanner = !isMember;
-  const showNoCompanyBanner = !user?.companyId && isMember && !isAdmin;
+  // Paid members (STARTER, GROWTH, SCALE) have full access
+  const userTier = (user?.membershipTier || "").toUpperCase();
+  const paidTiers = ["STARTER", "GROWTH", "SCALE"];
+  const isPaidMember = paidTiers.includes(userTier);
+  
+  const showLockedBanner = !isPaidMember;
+  const showNoCompanyBanner = !user?.companyId && isPaidMember && !isAdmin;
   const totalItems = studies.length + reports.length;
   const activeCount = inProgressStudies.length;
   const completedCount = completedStudies.length + filteredReports.length;
@@ -442,7 +447,7 @@ export default function PastResearch() {
           </Card>
         )}
 
-        {isMember && (user?.companyId || isAdmin) && (
+        {isPaidMember && (user?.companyId || isAdmin) && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border-blue-200 dark:border-blue-800">
