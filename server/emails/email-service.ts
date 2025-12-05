@@ -716,9 +716,21 @@ export function renderEmailTemplate(
         dateStyle: "medium",
         timeStyle: "short",
       }) : "Unknown";
+      
+      // Convert relative file URLs to absolute URLs
+      const getAbsoluteFileUrl = (url: string) => {
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+          return url;
+        }
+        // Use the app's base URL for relative paths
+        const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+          ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+          : FRONTEND_URL;
+        return `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
+      };
 
       const filesHtml = data.files && data.files.length > 0 
-        ? data.files.map(file => `<li><a href="${file.url}" style="color: ${BRAND_COLOR};">${escapeHtml(file.fileName)}</a> (${formatFileSize(file.fileSize)})</li>`).join("")
+        ? data.files.map(file => `<li><a href="${getAbsoluteFileUrl(file.url)}" style="color: ${BRAND_COLOR};">${escapeHtml(file.fileName)}</a> (${formatFileSize(file.fileSize)})</li>`).join("")
         : "<li>No files uploaded</li>";
       
       const competitorsHtml = data.competitors && data.competitors.length > 0 
