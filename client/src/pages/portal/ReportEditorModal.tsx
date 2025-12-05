@@ -758,7 +758,7 @@ export default function ReportEditorModal({
                     <div className="mt-4 pt-4 border-t border-blue-200 dark:border-blue-800">
                       <Label className="text-sm font-medium mb-3 block">Select Client Companies</Label>
                       <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
-                        {companies.map((company) => (
+                        {[...companies].sort((a, b) => a.name.localeCompare(b.name)).map((company) => (
                           <div 
                             key={company.id}
                             className="flex items-center gap-2 p-2 rounded hover:bg-blue-100 dark:hover:bg-blue-900 cursor-pointer"

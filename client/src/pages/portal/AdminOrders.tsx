@@ -290,7 +290,7 @@ export default function AdminOrders() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Companies</SelectItem>
-                {companies.map((company) => (
+                {[...companies].sort((a, b) => a.localeCompare(b)).map((company) => (
                   <SelectItem key={company} value={company}>{company}</SelectItem>
                 ))}
               </SelectContent>

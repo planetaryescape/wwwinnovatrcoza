@@ -379,7 +379,7 @@ export default function AdminClientReports() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Companies</SelectItem>
-                {companies.map((company) => (
+                {[...companies].sort((a, b) => a.name.localeCompare(b.name)).map((company) => (
                   <SelectItem key={company.id} value={company.id}>
                     {company.name}
                   </SelectItem>
@@ -527,7 +527,7 @@ export default function AdminClientReports() {
                   <SelectValue placeholder="Select company" />
                 </SelectTrigger>
                 <SelectContent>
-                  {companies.map((company) => (
+                  {[...companies].sort((a, b) => a.name.localeCompare(b.name)).map((company) => (
                     <SelectItem key={company.id} value={company.id}>
                       {company.name}
                     </SelectItem>

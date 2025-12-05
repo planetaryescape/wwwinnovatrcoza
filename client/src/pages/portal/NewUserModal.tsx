@@ -205,7 +205,7 @@ export default function NewUserModal({
                       <span>Independent</span>
                     </div>
                   </SelectItem>
-                  {companies.map((company) => (
+                  {[...companies].sort((a, b) => a.name.localeCompare(b.name)).map((company) => (
                     <SelectItem key={company.id} value={company.id}>
                       {company.name}
                     </SelectItem>

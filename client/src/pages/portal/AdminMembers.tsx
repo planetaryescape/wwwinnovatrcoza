@@ -554,7 +554,7 @@ export default function AdminMembers() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Companies</SelectItem>
-                  {companies.map((c) => (
+                  {[...companies].sort((a, b) => a.name.localeCompare(b.name)).map((c) => (
                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -850,7 +850,7 @@ export default function AdminMembers() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">No company (unassigned)</SelectItem>
-                      {companies.map((company) => (
+                      {[...companies].sort((a, b) => a.name.localeCompare(b.name)).map((company) => (
                         <SelectItem key={company.id} value={company.id}>
                           {company.name}
                         </SelectItem>
