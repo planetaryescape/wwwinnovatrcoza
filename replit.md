@@ -76,6 +76,7 @@ Preferred communication style: Simple, everyday language.
 - **Mailer Subscription System**: Manages subscriptions for "Pulse Insights Newsletter" with admin view.
 - **Email Notifications**: Admin notifications for new orders via Resend.
 - **API Security**: Strict access control with `requireAuth` and `requireAdmin` middleware, data redaction, and ownership verification.
+- **Report Management System**: Full admin control over reports with PDF/PPTX upload (20MB limit), cover images, thumbnails, external dashboard links, and access level gating. Public reports endpoint excludes client-specific reports; authenticated member endpoint allows access to user's company client reports. Reports support multiple content types, categories, and tags.
 
 ## External Dependencies
 - **Email Service**: Resend (for transactional emails, specifically admin order notifications).
