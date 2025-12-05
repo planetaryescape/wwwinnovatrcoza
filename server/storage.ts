@@ -97,6 +97,7 @@ export interface IStorage {
   getReport(id: string): Promise<Report | undefined>;
   getAllReports(): Promise<Report[]>;
   updateReport(id: string, updates: Partial<Report>): Promise<void>;
+  deleteReport(id: string): Promise<void>;
 
   createDeal(deal: InsertDeal): Promise<Deal>;
   getDeal(id: string): Promise<Deal | undefined>;
@@ -1048,6 +1049,10 @@ export class DatabaseStorage implements IStorage {
 
   async updateReport(id: string, updates: Partial<Report>): Promise<void> {
     await db.update(reports).set({ ...updates, updatedAt: new Date() }).where(eq(reports.id, id));
+  }
+
+  async deleteReport(id: string): Promise<void> {
+    await db.delete(reports).where(eq(reports.id, id));
   }
 
   async createDeal(insertDeal: InsertDeal): Promise<Deal> {

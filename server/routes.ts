@@ -1958,8 +1958,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Report not found" });
       }
       
-      // Soft delete by archiving
-      await storage.updateReport(id, { isArchived: true, status: "archived" });
+      // Permanently delete the report
+      await storage.deleteReport(id);
       res.json({ success: true });
     } catch (error: any) {
       res.status(400).json({ error: error.message });

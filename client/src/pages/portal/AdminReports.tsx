@@ -25,6 +25,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   Plus, 
   Search, 
@@ -44,7 +54,9 @@ import {
   CalendarDays,
   RefreshCw,
   Loader2,
+  Trash2,
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import ReportEditorModal from "./ReportEditorModal";
 import { exportReportsToCSV, exportPerformanceToCSV } from "@/lib/csvExport";
 
@@ -119,6 +131,7 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function AdminReports() {
+  const { toast } = useToast();
   const [reports, setReports] = useState<ReportData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -133,6 +146,8 @@ export default function AdminReports() {
     const now = new Date();
     return { year: now.getFullYear(), month: now.getMonth() };
   });
+  const [reportToDelete, setReportToDelete] = useState<ReportData | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const fetchReports = useCallback(async () => {
     try {
@@ -262,6 +277,37 @@ export default function AdminReports() {
       ));
     } catch (err) {
       console.error("Failed to archive report:", err);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!reportToDelete) return;
+    
+    try {
+      setDeleteLoading(true);
+      const res = await fetch(`/api/admin/reports/${reportToDelete.id}`, {
+        method: "DELETE",
+      });
+      
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+      
+      setReports(prev => prev.filter(r => r.id !== reportToDelete.id));
+      toast({
+        title: "Report deleted",
+        description: `"${reportToDelete.title}" has been permanently deleted.`,
+      });
+    } catch (err) {
+      console.error("Failed to delete report:", err);
+      toast({
+        title: "Error",
+        description: "Failed to delete report. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteLoading(false);
+      setReportToDelete(null);
     }
   };
 
@@ -626,10 +672,18 @@ export default function AdminReports() {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
                               onClick={() => handleArchive(report.id)}
-                              className="text-red-600"
+                              className="text-amber-600"
                             >
                               <Archive className="w-4 h-4 mr-2" />
                               Archive
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => setReportToDelete(report)}
+                              className="text-red-600"
+                              data-testid={`button-delete-${report.id}`}
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -655,6 +709,30 @@ export default function AdminReports() {
         report={selectedReport}
         onSuccess={handleRefresh} 
       />
+
+      <AlertDialog open={!!reportToDelete} onOpenChange={(open) => !open && setReportToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Report</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{reportToDelete?.title}"? This action cannot be undone and will permanently remove the report from the system.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteLoading} data-testid="button-cancel-delete">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              disabled={deleteLoading}
+              className="bg-red-600 hover:bg-red-700"
+              data-testid="button-confirm-delete"
+            >
+              {deleteLoading ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
