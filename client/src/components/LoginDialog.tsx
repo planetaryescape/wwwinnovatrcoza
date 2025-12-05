@@ -111,12 +111,8 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       
       // Progressive error messages
       if (!isSignup) {
-        if (newAttempts === 1) {
-          setLoginError("Incorrect email or password. Please try again.");
-        } else if (newAttempts >= 2) {
-          setLoginError("Incorrect email or password. Please try again.");
-          setShowResetLink(true);
-        }
+        setLoginError("Incorrect email or password. Please try again.");
+        setShowResetLink(true);
       } else {
         // Signup error
         const message = error?.message || "Could not create account. Please try again.";
