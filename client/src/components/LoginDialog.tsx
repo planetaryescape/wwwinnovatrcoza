@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { Check, X } from "lucide-react";
 
 interface LoginDialogProps {
   open: boolean;
@@ -26,6 +27,18 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const { login, signup } = useAuth();
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
+
+  // Password requirements validation
+  const passwordRequirements = useMemo(() => {
+    return {
+      minLength: password.length >= 8,
+      hasUppercase: /[A-Z]/.test(password),
+      hasLowercase: /[a-z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+    };
+  }, [password]);
+
+  const allRequirementsMet = Object.values(passwordRequirements).every(Boolean);
 
   const handlePasswordResetRequest = async () => {
     if (!email) {
@@ -179,6 +192,45 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
               placeholder="Enter password"
               required
             />
+            {isSignup && password.length > 0 && (
+              <div className="mt-2 space-y-1.5 text-xs" data-testid="password-requirements">
+                <p className="text-muted-foreground font-medium mb-2">Password must have:</p>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <div className={`flex items-center gap-1.5 ${passwordRequirements.minLength ? 'text-green-600' : 'text-muted-foreground'}`}>
+                    {passwordRequirements.minLength ? (
+                      <Check className="w-3.5 h-3.5" />
+                    ) : (
+                      <X className="w-3.5 h-3.5" />
+                    )}
+                    <span>8+ characters</span>
+                  </div>
+                  <div className={`flex items-center gap-1.5 ${passwordRequirements.hasUppercase ? 'text-green-600' : 'text-muted-foreground'}`}>
+                    {passwordRequirements.hasUppercase ? (
+                      <Check className="w-3.5 h-3.5" />
+                    ) : (
+                      <X className="w-3.5 h-3.5" />
+                    )}
+                    <span>Uppercase letter</span>
+                  </div>
+                  <div className={`flex items-center gap-1.5 ${passwordRequirements.hasLowercase ? 'text-green-600' : 'text-muted-foreground'}`}>
+                    {passwordRequirements.hasLowercase ? (
+                      <Check className="w-3.5 h-3.5" />
+                    ) : (
+                      <X className="w-3.5 h-3.5" />
+                    )}
+                    <span>Lowercase letter</span>
+                  </div>
+                  <div className={`flex items-center gap-1.5 ${passwordRequirements.hasNumber ? 'text-green-600' : 'text-muted-foreground'}`}>
+                    {passwordRequirements.hasNumber ? (
+                      <Check className="w-3.5 h-3.5" />
+                    ) : (
+                      <X className="w-3.5 h-3.5" />
+                    )}
+                    <span>Number</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {loginError && (
@@ -218,7 +270,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
             type="submit"
             data-testid="button-submit-login"
             className="w-full"
-            disabled={isLoading}
+            disabled={isLoading || (isSignup && !allRequirementsMet)}
           >
             {isLoading ? "Please wait..." : isSignup ? "Create Free Account" : "Sign In"}
           </Button>
