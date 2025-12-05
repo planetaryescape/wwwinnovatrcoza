@@ -9,15 +9,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Building2, Grid3x3, List, RefreshCw, Loader2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Building2, Grid3x3, List, RefreshCw, Loader2, Crown } from "lucide-react";
 import PortalLayout from "./PortalLayout";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { useUrlFilters } from "@/hooks/use-url-filters";
 import { 
   isFreeContent, 
-  getEffectiveAccessLevel
+  getEffectiveAccessLevel,
+  isPaidMember as checkIsPaidMember
 } from "@shared/access";
 import insightsCover from "@assets/insights-cover_1764321138388.png";
 import launchCover from "@assets/launch-cover_1764321848244.png";
@@ -125,7 +133,95 @@ function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: bool
   );
 }
 
-function ReportCard({ report, userTier, isLoggedIn, userCompanyId }: { report: Report; userTier?: string; isLoggedIn?: boolean; userCompanyId?: string }) {
+interface TeaseModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  report: Report | null;
+  isLoggedIn: boolean;
+}
+
+function TeaseModal({ open, onOpenChange, report, isLoggedIn }: TeaseModalProps) {
+  const [, setLocation] = useLocation();
+  
+  if (!report) return null;
+  
+  const categoryStyle = getCategoryStyle(report.category);
+  const coverImage = getCoverImage(report.category);
+  
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <div className="relative h-32 -mx-6 -mt-6 mb-4 overflow-hidden rounded-t-lg">
+            <img
+              src={coverImage}
+              alt={report.category}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+            <Badge 
+              className={`absolute bottom-3 left-4 ${categoryStyle.bg} ${categoryStyle.text} text-xs font-medium px-2.5 py-1 border-0`}
+            >
+              {report.category}
+            </Badge>
+          </div>
+          <DialogTitle 
+            className="text-xl font-bold"
+            style={{ fontFamily: 'DM Serif Display, serif' }}
+          >
+            {report.title}
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground mt-2">
+            {report.teaser}
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="bg-muted/50 rounded-lg p-4 mt-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <Crown className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">Members Only Content</p>
+              <p className="text-xs text-muted-foreground">Upgrade to unlock full access</p>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            This report is available for Innovatr members. Upgrade to Starter or above to unlock it and get access to our full library of insights.
+          </p>
+          <div className="flex gap-2">
+            {!isLoggedIn && (
+              <Button 
+                variant="outline" 
+                className="flex-1"
+                onClick={() => {
+                  onOpenChange(false);
+                  setLocation("/login");
+                }}
+                data-testid="button-tease-login"
+              >
+                Sign In
+              </Button>
+            )}
+            <Button 
+              className="flex-1"
+              onClick={() => {
+                onOpenChange(false);
+                setLocation("/portal/credits");
+              }}
+              data-testid="button-tease-upgrade"
+            >
+              {isLoggedIn ? "View Membership Options" : "Become a Member"}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ReportCard({ report, userTier, isLoggedIn, userCompanyId, onLockedClick }: { report: Report; userTier?: string; isLoggedIn?: boolean; userCompanyId?: string; onLockedClick?: (report: Report) => void }) {
+  const [, setLocation] = useLocation();
   const formattedDate = new Date(report.date).toLocaleDateString('en-GB', {
     day: '2-digit',
     month: '2-digit',
@@ -136,106 +232,138 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId }: { report: R
   const coverImage = getCoverImage(report.category);
   const accessIndicator = getAccessIndicator(report, userTier, isLoggedIn, userCompanyId);
   
-  // Use shared access helper to determine if content is free/public
   const isPublicContent = isFreeContent({
     slug: report.slug,
     title: report.title,
     category: report.category,
     accessLevel: report.accessLevel
   });
+  
+  const normalizedTier = (userTier || "").toUpperCase();
+  const paidTiers = ["STARTER", "GROWTH", "SCALE"];
+  const userIsPaidMember = isLoggedIn && paidTiers.includes(normalizedTier);
+  const isLocked = !isPublicContent && !userIsPaidMember;
+  
   const isPublicWithPdf = isPublicContent && report.pdfPath;
-  const ctaText = isPublicWithPdf ? "Download full report" : "Read full issue";
+  const ctaText = isLocked ? "Members only" : (isPublicWithPdf ? "Download full report" : "Read full issue");
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (isLocked && onLockedClick) {
+      e.preventDefault();
+      onLockedClick(report);
+    } else {
+      setLocation(`/portal/insights/${report.slug}`);
+    }
+  };
 
   return (
-    <Link href={`/portal/insights/${report.slug}`}>
-      <article 
-        className="group bg-card rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden border border-border hover:-translate-y-1 flex flex-col h-full"
-        data-testid={`report-card-${report.id}`}
-      >
-        <div className="p-4 pb-0">
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
+    <article 
+      onClick={handleClick}
+      className="group bg-card rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden border border-border hover:-translate-y-1 flex flex-col h-full"
+      data-testid={`report-card-${report.id}`}
+    >
+      <div className="p-4 pb-0">
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
+          <Badge 
+            className={`${categoryStyle.bg} ${categoryStyle.text} text-xs font-medium px-2.5 py-1 border-0`}
+          >
+            {report.category}
+          </Badge>
+          <Badge 
+            variant="secondary"
+            className="text-xs px-2.5 py-1 bg-muted text-muted-foreground"
+          >
+            {report.industry}
+          </Badge>
+          {isLocked && (
             <Badge 
-              className={`${categoryStyle.bg} ${categoryStyle.text} text-xs font-medium px-2.5 py-1 border-0`}
+              variant="outline"
+              className="text-xs px-2 py-1 border-muted-foreground/50 text-muted-foreground"
             >
-              {report.category}
+              <Lock className="w-3 h-3 mr-1" />
+              Members
             </Badge>
+          )}
+          {report.isNew && (
             <Badge 
-              variant="secondary"
-              className="text-xs px-2.5 py-1 bg-muted text-muted-foreground"
+              className="text-white text-xs font-medium px-2 py-1"
+              style={{ backgroundColor: '#5B6EF7' }}
+              data-testid={`badge-new-${report.id}`}
             >
-              {report.industry}
+              NEW
             </Badge>
-            {report.isNew && (
-              <Badge 
-                className="text-white text-xs font-medium px-2 py-1"
-                style={{ backgroundColor: '#5B6EF7' }}
-                data-testid={`badge-new-${report.id}`}
-              >
-                NEW
-              </Badge>
+          )}
+        </div>
+      </div>
+
+      <div className="relative h-44 mx-4 rounded-lg overflow-hidden">
+        <img
+          src={coverImage}
+          alt={report.category}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+        {accessIndicator}
+      </div>
+      
+      <div className="p-4 flex flex-col flex-1">
+        <h3 
+          className="font-serif text-xl leading-tight mb-2 text-foreground group-hover:text-[#5B6EF7] transition-colors line-clamp-2"
+          style={{ fontFamily: 'DM Serif Display, serif' }}
+        >
+          {report.title}
+        </h3>
+        
+        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 mb-4 flex-1">
+          {report.teaser}
+        </p>
+        
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {report.tags.slice(0, 3).map((tag, index) => (
+            <Badge 
+              key={index} 
+              variant="secondary" 
+              className="text-xs px-2 py-0.5 bg-muted text-muted-foreground hover:bg-muted/80"
+            >
+              {tag}
+            </Badge>
+          ))}
+        </div>
+        
+        <div className="flex items-center justify-between pt-3 border-t border-border">
+          <span className="text-sm text-muted-foreground">{formattedDate}</span>
+          <div 
+            className="flex items-center gap-1 text-sm font-medium transition-colors"
+            style={{ color: isLocked ? 'var(--muted-foreground)' : '#5B6EF7' }}
+          >
+            <span>{ctaText}</span>
+            {isLocked ? (
+              <Lock className="w-4 h-4" />
+            ) : (
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             )}
           </div>
         </div>
-
-        <div className="relative h-44 mx-4 rounded-lg overflow-hidden">
-          <img
-            src={coverImage}
-            alt={report.category}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-          {accessIndicator}
-        </div>
-        
-        <div className="p-4 flex flex-col flex-1">
-          <h3 
-            className="font-serif text-xl leading-tight mb-2 text-foreground group-hover:text-[#5B6EF7] transition-colors line-clamp-2"
-            style={{ fontFamily: 'DM Serif Display, serif' }}
-          >
-            {report.title}
-          </h3>
-          
-          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 mb-4 flex-1">
-            {report.teaser}
-          </p>
-          
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {report.tags.slice(0, 3).map((tag, index) => (
-              <Badge 
-                key={index} 
-                variant="secondary" 
-                className="text-xs px-2 py-0.5 bg-muted text-muted-foreground hover:bg-muted/80"
-              >
-                {tag}
-              </Badge>
-            ))}
-          </div>
-          
-          <div className="flex items-center justify-between pt-3 border-t border-border">
-            <span className="text-sm text-muted-foreground">{formattedDate}</span>
-            <div 
-              className="flex items-center gap-1 text-sm font-medium transition-colors"
-              style={{ color: '#5B6EF7' }}
-            >
-              <span>{ctaText}</span>
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </div>
-          </div>
-        </div>
-      </article>
-    </Link>
+      </div>
+    </article>
   );
 }
 
 export default function TrendsInsights() {
   const { filters, setFilters, clearFilters } = useUrlFilters();
   const [reports, setReports] = useState<Report[]>([]);
-  const [clientReports, setClientReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [refreshing, setRefreshing] = useState(false);
+  const [teaseModalOpen, setTeaseModalOpen] = useState(false);
+  const [teaseReport, setTeaseReport] = useState<Report | null>(null);
   const { user } = useAuth();
   const userTier = user?.membershipTier;
   const userCompanyId = user?.companyId;
+  
+  const handleLockedClick = (report: Report) => {
+    setTeaseReport(report);
+    setTeaseModalOpen(true);
+  };
   
   useScrollRestoration("trends-insights");
   
@@ -270,43 +398,9 @@ export default function TrendsInsights() {
     fetchReports();
   }, [fetchReports]);
 
-  // Fetch client-specific reports for authenticated user
-  useEffect(() => {
-    const fetchMemberReports = async () => {
-      if (!user?.email) {
-        setClientReports([]);
-        return;
-      }
-      
-      try {
-        const res = await fetch(`/api/member/reports?email=${encodeURIComponent(user.email)}`);
-        if (res.ok) {
-          const data = await res.json();
-          // Format client-specific reports (those with clientCompanyIds)
-          const formattedReports = data
-            .filter((r: any) => r.clientCompanyIds && r.clientCompanyIds.length > 0)
-            .map((r: any) => ({
-              ...r,
-              isClientReport: true,
-              tags: r.tags || r.topics || [],
-              isNew: r.isNew ?? false,
-              status: "live" as const,
-            }));
-          setClientReports(formattedReports);
-        }
-      } catch (error) {
-        console.error("Failed to fetch member reports:", error);
-      }
-    };
-    
-    fetchMemberReports();
-  }, [user?.email]);
-
   const filteredAndSortedReports = useMemo(() => {
-    // Combine database reports with client-specific reports
-    const allReports = [...reports, ...clientReports];
-    
-    let filtered = allReports.filter((report) => {
+    let filtered = reports.filter((report) => {
+      if (report.isClientReport) return false;
       // Only show live reports to public users (status must be "live" or undefined for backwards compatibility)
       const isLive = !report.status || report.status === "live" || report.status === "published";
       if (!isLive) return false;
@@ -319,14 +413,19 @@ export default function TrendsInsights() {
       const matchesCategory = filters.category === "all" || 
         report.category.toLowerCase() === filters.category.toLowerCase();
       
-      // Access filter: show all or only free content
-      const matchesAccess = filters.access === "all" || 
-        isFreeContent({
-          slug: report.slug,
-          title: report.title,
-          category: report.category,
-          accessLevel: report.accessLevel
-        });
+      const isReportFree = isFreeContent({
+        slug: report.slug,
+        title: report.title,
+        category: report.category,
+        accessLevel: report.accessLevel
+      });
+      
+      let matchesAccess = true;
+      if (filters.access === "free") {
+        matchesAccess = isReportFree;
+      } else if (filters.access === "members") {
+        matchesAccess = !isReportFree;
+      }
       
       return matchesSearch && matchesCategory && matchesAccess;
     });
@@ -343,7 +442,7 @@ export default function TrendsInsights() {
           return 0;
       }
     });
-  }, [filters.search, filters.category, filters.sort, filters.access, reports, clientReports]);
+  }, [filters.search, filters.category, filters.sort, filters.access, reports]);
 
   const displayedReports = filters.showAll ? filteredAndSortedReports : filteredAndSortedReports.slice(0, 6);
   const hasMoreReports = filteredAndSortedReports.length > 6;
@@ -442,8 +541,9 @@ export default function TrendsInsights() {
                   <SelectValue placeholder="Access" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Access</SelectItem>
-                  <SelectItem value="free">Free Only</SelectItem>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="free">Free</SelectItem>
+                  <SelectItem value="members">Members</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -456,14 +556,37 @@ export default function TrendsInsights() {
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               {displayedReports.map((report) => (
-                <ReportCard key={report.id} report={report} userTier={userTier} isLoggedIn={!!user} userCompanyId={userCompanyId ?? undefined} />
+                <ReportCard 
+                  key={report.id} 
+                  report={report} 
+                  userTier={userTier} 
+                  isLoggedIn={!!user} 
+                  userCompanyId={userCompanyId ?? undefined}
+                  onLockedClick={handleLockedClick}
+                />
               ))}
             </div>
           ) : (
             <div className="space-y-3 mb-8">
-              {displayedReports.map((report) => (
-                <Link key={report.id} href={`/portal/trends/${report.slug}`}>
-                  <div className="flex items-center gap-4 p-4 border rounded-lg hover-elevate bg-card" data-testid={`list-report-${report.id}`}>
+              {displayedReports.map((report) => {
+                const isPublicContent = isFreeContent({
+                  slug: report.slug,
+                  title: report.title,
+                  category: report.category,
+                  accessLevel: report.accessLevel
+                });
+                const normalizedTier = (userTier || "").toUpperCase();
+                const paidTiers = ["STARTER", "GROWTH", "SCALE"];
+                const userIsPaidMember = !!user && paidTiers.includes(normalizedTier);
+                const isLocked = !isPublicContent && !userIsPaidMember;
+                
+                return (
+                  <div 
+                    key={report.id} 
+                    onClick={() => isLocked ? handleLockedClick(report) : window.location.href = `/portal/trends/${report.slug}`}
+                    className="flex items-center gap-4 p-4 border rounded-lg hover-elevate bg-card cursor-pointer" 
+                    data-testid={`list-report-${report.id}`}
+                  >
                     <div 
                       className="w-20 h-14 rounded-md bg-cover bg-center flex-shrink-0"
                       style={{ backgroundImage: `url(${getCoverImage(report.category)})` }}
@@ -473,6 +596,12 @@ export default function TrendsInsights() {
                         <Badge className={`${getCategoryStyle(report.category).bg} ${getCategoryStyle(report.category).text} text-xs`}>
                           {report.category}
                         </Badge>
+                        {isLocked && (
+                          <Badge variant="outline" className="text-xs border-muted-foreground/50 text-muted-foreground">
+                            <Lock className="w-3 h-3 mr-1" />
+                            Members
+                          </Badge>
+                        )}
                         {report.isNew && (
                           <Badge className="bg-[#00D084] text-white text-xs">NEW</Badge>
                         )}
@@ -480,10 +609,14 @@ export default function TrendsInsights() {
                       <h3 className="font-semibold text-foreground truncate">{report.title}</h3>
                       <p className="text-sm text-muted-foreground line-clamp-1">{report.teaser}</p>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    {isLocked ? (
+                      <Lock className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    ) : (
+                      <ArrowRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    )}
                   </div>
-                </Link>
-              ))}
+                );
+              })}
             </div>
           )}
 
@@ -532,6 +665,13 @@ export default function TrendsInsights() {
           )}
         </div>
       </div>
+      
+      <TeaseModal
+        open={teaseModalOpen}
+        onOpenChange={setTeaseModalOpen}
+        report={teaseReport}
+        isLoggedIn={!!user}
+      />
     </PortalLayout>
   );
 }

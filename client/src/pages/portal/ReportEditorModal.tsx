@@ -22,6 +22,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { safeParseDateObject } from "@shared/access";
 import { 
   FileText, 
   Settings, 
@@ -291,6 +292,20 @@ export default function ReportEditorModal({
 
     setLoading(true);
     try {
+      const parsedDate = safeParseDateObject(formData.date);
+      const parsedPublishAt = safeParseDateObject(formData.publishAt);
+      const parsedUnpublishAt = safeParseDateObject(formData.unpublishAt);
+      
+      if (!parsedDate) {
+        toast({
+          title: "Invalid Date",
+          description: "Please enter a valid publication date",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
       const reportPayload = {
         title: formData.title,
         slug: formData.slug || formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
@@ -300,7 +315,7 @@ export default function ReportEditorModal({
         tags: formData.tags ? formData.tags.split(",").map((t) => t.trim()) : [],
         previewText: formData.teaser,
         bodyContent: formData.bodyContent || null,
-        date: new Date(formData.date),
+        date: parsedDate,
         status: formData.status,
         accessLevel: formData.accessLevel,
         allowedTiers: formData.allowedTiers,
@@ -310,8 +325,8 @@ export default function ReportEditorModal({
         pdfUrl: formData.pdfUrl || null,
         dashboardLink: formData.dashboardLink || null,
         coverImageUrl: formData.coverImageUrl || null,
-        publishAt: formData.publishAt ? new Date(formData.publishAt) : null,
-        unpublishAt: formData.unpublishAt ? new Date(formData.unpublishAt) : null,
+        publishAt: parsedPublishAt,
+        unpublishAt: parsedUnpublishAt,
       };
 
       const url = isEditing 

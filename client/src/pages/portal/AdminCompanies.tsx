@@ -64,6 +64,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
+import { safeParseDate } from "@shared/access";
 
 interface Company {
   id: string;
@@ -267,13 +268,13 @@ export default function AdminCompanies() {
 
   const handleUpdateCompany = async (companyId: string, updates: Partial<Company>) => {
     try {
-      // Normalize dates to ISO strings if they exist
       const normalizedUpdates = { ...updates };
-      if (normalizedUpdates.contractStart) {
-        normalizedUpdates.contractStart = new Date(normalizedUpdates.contractStart).toISOString();
+      
+      if ('contractStart' in normalizedUpdates) {
+        normalizedUpdates.contractStart = safeParseDate(normalizedUpdates.contractStart);
       }
-      if (normalizedUpdates.contractEnd) {
-        normalizedUpdates.contractEnd = new Date(normalizedUpdates.contractEnd).toISOString();
+      if ('contractEnd' in normalizedUpdates) {
+        normalizedUpdates.contractEnd = safeParseDate(normalizedUpdates.contractEnd);
       }
 
       const res = await fetch(`/api/admin/companies/${companyId}`, {

@@ -3,6 +3,43 @@
  * Single source of truth for tier hierarchy, access levels, and content gating.
  */
 
+/**
+ * Safely parse a date value, handling strings, Date objects, null, undefined, and invalid dates.
+ * Returns null for invalid/empty values, or an ISO string for valid dates.
+ */
+export function safeParseDate(value: string | Date | null | undefined): string | null {
+  if (!value) return null;
+  if (value === "") return null;
+  
+  try {
+    const date = value instanceof Date ? value : new Date(value);
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+    return date.toISOString();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Safely parse a date for form submission - returns Date object or null.
+ */
+export function safeParseDateObject(value: string | Date | null | undefined): Date | null {
+  if (!value) return null;
+  if (value === "") return null;
+  
+  try {
+    const date = value instanceof Date ? value : new Date(value);
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+    return date;
+  } catch {
+    return null;
+  }
+}
+
 export const TIER_LEVELS = {
   FREE: 0,
   STARTER: 1,
