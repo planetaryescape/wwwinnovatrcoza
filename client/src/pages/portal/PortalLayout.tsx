@@ -96,7 +96,7 @@ interface PortalLayoutProps {
 
 export default function PortalLayout({ children }: PortalLayoutProps) {
   const [location, setLocation] = useLocation();
-  const { user, logout, isAuthenticated, isMember, isAdmin, isFreeUser, impersonation, exitImpersonation, isViewingAsCompany, viewingCompanyName } = useAuth();
+  const { user, logout, isAuthenticated, isMember, isAdmin, isFreeUser, isPaidMember, impersonation, exitImpersonation, isViewingAsCompany, viewingCompanyName } = useAuth();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -157,9 +157,8 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                     {user?.company || user?.email}
                   </p>
                   {(() => {
-                    const displayTier = (user?.tier || user?.membershipTier || "").toUpperCase();
-                    const paidTiers = ["STARTER", "GROWTH", "SCALE"];
-                    const isPaidMember = paidTiers.includes(displayTier);
+                    // Get tier from membershipTier (uppercase) or tier (lowercase) 
+                    const displayTier = (user?.membershipTier || user?.tier || "").toUpperCase();
                     
                     return (
                       <Badge 
@@ -178,10 +177,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                   {menuItems.map((item) => {
                     // Hide admin items for non-admins AND during impersonation mode
                     if (item.adminOnly && (!isAdmin || impersonation.isImpersonating)) return null;
-                    // Paid members (STARTER, GROWTH, SCALE) have full access - no locks
-                    const userTier = (user?.tier || user?.membershipTier || "").toUpperCase();
-                    const paidTiers = ["STARTER", "GROWTH", "SCALE"];
-                    const isPaidMember = paidTiers.includes(userTier);
+                    // Paid members have full access - no locks (uses isPaidMember from AuthContext)
                     const isLocked = !isPaidMember && item.lockedForFree;
                     const isActive = item.url === "/portal" 
                       ? (location === "/portal" || location === "/portal/dashboard")
