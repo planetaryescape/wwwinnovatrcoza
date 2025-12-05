@@ -1,0 +1,463 @@
+I need your help finalising and stabilising my Innovatr portal. This requires work across access control, backend logic, database consistency, admin tooling, report management, client report handling, and UI behaviours.
+Please read everything carefully before building.
+
+Start in PLAN mode
+
+Analyse the system
+
+Summarise the issues
+
+Propose implementation steps
+
+Only then switch to BUILD
+
+Do NOT request Stripe keys. Ignore all previous Stripe instructions. No payment integration is required for this task.
+
+1. CRITICAL FIXES NEEDED
+
+My live portal currently has several broken or inconsistent behaviours:
+
+A. Admin Report Editor Errors
+
+When editing a report in Admin → Reports → Edit Report, saving causes:
+
+{"error":"value.toISOString is not a function"}
+
+
+This comes from Schedule dates (Publish At / Unpublish At).
+Must be fixed properly with robust date parsing (see section 6).
+
+B. Admin → Companies → Update Company fails
+
+Changing contract dates or credit amounts throws:
+
+Error: Failed to update company
+
+
+This must be fixed.
+Company records must update reliably for:
+
+Contract start / end dates
+
+Basic credit pool
+
+Pro credit pool
+
+Company details
+
+This is required for real operations.
+
+C. Library reports and client reports are currently mixed
+
+Client reports appear in the Trends & Insights Library for some users.
+This must NEVER happen.
+
+D. Free users are sometimes classified as Starter
+
+This is incorrect.
+Default must always be:
+
+membershipTier = "free"
+
+E. Locked content does not render correctly for free users
+
+Free users should see all cards but have locked badges + tease modal on restricted content.
+
+F. Client reports must appear in Admin AND in My Research
+
+You recently added client reports to the database, but they must:
+
+Display in Admin → Reports
+
+Display in Admin → Companies → [Company]
+
+Display in My Research for that company's users
+
+NOT display in Trends & Insights
+
+G. Analytics layer must work
+
+Admin → Reports must show functional:
+
+Total views
+
+Unique views
+
+Downloads
+
+Upgrade influence score
+
+2. HIGH-LEVEL SYSTEM RULES
+
+There are two distinct report families in the system.
+
+A. LIBRARY REPORTS (Innovatr content)
+Identifiers:
+isClientReport = false
+category ∈ ["Insights", "Launch", "Inside", "IRL"]
+accessLevel ∈ ["Free", "Starter"]
+
+
+These belong only to the Trends & Insights library.
+
+B. CLIENT REPORTS (Company-specific work)
+Identifiers:
+isClientReport = true
+clientCompanyIds = [list of company IDs]
+
+
+These must ONLY appear:
+
+In Admin → Reports
+
+In Admin → Companies → [Company]
+
+In My Research for users belonging to that company
+
+NEVER in Trends & Insights.
+
+3. USER ROLES
+
+There are exactly three non-admin role states:
+
+1. Admin
+
+Full access
+
+Can impersonate companies
+
+Admin tab visible
+
+While impersonating, Admin tab must be hidden and admin routes must be blocked
+
+"Back to Companies" ends impersonation
+
+2. Free user (default for all signups)
+membershipTier = "free"
+
+3. Paid Member (Starter, Growth, Scale)
+membershipTier ∈ ["starter", "growth", "scale"]
+
+
+Inheritance rule:
+
+Growth inherits all Starter access
+
+Scale inherits all Growth access
+
+No user should ever become Starter automatically.
+
+4. ACCESS RULES
+A. Trends & Insights Library
+Free users can fully open:
+
+All Inside category reports
+
+These 6 free reports:
+
+Banking Monogamy Is Dead
+
+Simplicity Has Status
+
+From Vegan to Vital
+
+Cadbury Pocket Sized Joy
+
+The Oat-Based Breakfast Revolution
+
+The Return of the Third Place
+
+All other library reports:
+
+Appear in the grid
+
+Must be visibly LOCKED:
+
+Overlay
+
+Lock icon
+
+"Members Only" label
+
+Clicking them opens a Tease Modal:
+
+Title
+
+Short description
+
+Message:
+“This report is available for Innovatr members. Upgrade to Starter or above to unlock it.”
+
+Button linking to Credits & Billing
+
+Add an Access Filter:
+
+All
+
+Free
+
+Members
+
+Behaviour:
+
+Free users:
+
+Free = only openable content
+
+All = full grid with locks
+
+Members:
+
+Free = accessLevel Free
+
+Members = accessLevel Starter
+
+All = everything
+
+Below is absolutely mandatory:
+Never return reports where isClientReport = true to this page.
+
+B. My Research
+
+Free or paid users:
+
+See ONLY client reports where:
+
+isClientReport = true
+companyId ∈ clientCompanyIds
+
+
+If a user has no client studies:
+
+Show:
+
+Empty state
+
+Button to Launch New Brief
+
+Message that members save on pricing
+
+IMPORTANT:
+Do NOT break the current card layout in My Research.
+
+C. Member Deals
+
+Free users:
+
+See cards locked
+
+CTA = “See membership options”
+
+Members:
+
+Unlock deals relevant to their tier
+
+D. Launch New Brief — NEW FEATURE REQUEST
+
+In the Client Details section add a checkbox:
+
+[ ] Use my account details
+
+
+When ticked:
+
+Auto fill:
+
+Client Name = user's full name
+
+Client Email = user's email
+
+Client Company = user's company (if exists)
+
+Contact Number = user profile phone (optional: if null keep blank)
+
+If unticked → fields return to manual mode.
+
+This must work without breaking validation.
+
+5. ADMIN REQUIREMENTS
+Admin → Reports must show BOTH:
+
+Library reports (isClientReport = false)
+
+Client reports (isClientReport = true)
+
+Add:
+
+A “Type” badge (“Library” or “Client”)
+
+Filter toggle:
+
+All
+
+Library
+
+Client
+
+Admin must be able to:
+
+Create library reports
+
+Create client reports
+
+Upload PDFs / PPTX files
+
+Attach cover images
+
+Save schedules (fixed dates)
+
+Edit access levels
+
+Publish or unpublish
+
+6. DATE HANDLING FIX (CRITICAL)
+
+The .toISOString() error must be fully eliminated.
+
+Rules:
+
+When parsing admin form dates:
+
+If date value is:
+
+Date → safe to call .toISOString()
+
+string in ISO format → do NOT call .toISOString(), pass through
+
+Empty string or null → send null
+
+"Invalid date" → block submission with clear errors
+
+Back-end must be symmetric:
+
+Accept ISO strings
+
+Accept null
+
+Convert internally to Date objects safely
+
+7. ANALYTICS LAYER
+
+Implement or fix analytics for library reports:
+
+Track:
+
+Total views
+
+Unique views per user
+
+Downloads
+
+Upgrade influence (stub logic is acceptable)
+
+Client reports can track:
+
+Views
+
+Downloads
+
+Exclude:
+
+Admin previews
+
+Impersonation views (if possible)
+
+8. SETTINGS PAGE UPDATE
+
+Replace industry dropdown with a full set of ~20 industries:
+
+Food & Beverage
+Retail
+Financial Services
+Technology
+Telecoms
+Healthcare
+Pharma
+Alcohol & Beverages
+Quick Service Restaurants
+Banking
+Insurance
+Media
+Entertainment
+Personal Care
+Household
+Automotive
+Travel & Tourism
+E commerce
+Education
+NGOs
+Other
+
+9. WHAT I WANT YOU TO DO
+
+In PLAN mode:
+
+Analyse current code
+
+Identify which parts need refactoring
+
+Outline steps in logical order
+
+Validate assumptions about schemas
+
+Confirm feasibility of the new checkbox autofill
+
+Then in BUILD mode:
+
+Implement access rules
+
+Fix date handling
+
+Fix Admin → Companies update
+
+Fix Admin → Reports editor
+
+Implement tease modal + locked card logic
+
+Add Access filter
+
+Add Report Type logic
+
+Add analytics tracking
+
+Add Launch Brief auto-fill checkbox
+
+Ensure client reports appear correctly in Admin and My Research
+
+10. FINAL DELIVERABLES
+
+At the end, provide:
+
+A. Summary of all changes by file
+B. Notes on database adjustments
+C. Complete testing guide:
+1. As a brand new FREE user
+
+What they should see in Trends & Insights
+
+What should be locked
+
+What My Research should display
+
+Launch brief autofill behaviour
+
+2. As a STARTER member
+
+Unlocked library reports
+
+Member deals unlocked
+
+Pricing logic
+
+3. As ADMIN impersonating a company
+
+No admin tab visible
+
+Correct My Research reports visible
+
+Back to Companies resets impersonation
+
+Please begin in PLAN mode.
+
+Do not modify payment systems or request Stripe keys.
+Only implement the functionality described here.
