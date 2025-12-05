@@ -351,7 +351,7 @@ export function renderEmailTemplate(
       const bodyHtml = `
         <p style="margin: 0 0 15px 0;">Please confirm your email address to complete your Innovatr account setup.</p>
       `;
-      const footerNote = "This link will expire in 1 hour.\n\nIf you did not sign up for Innovatr, you can safely ignore this email.";
+      const footerNote = "This link will expire in 1 hour. If you did not sign up for Innovatr, you can safely ignore this email.";
       
       const options: BaseEmailOptions = {
         title: "Confirm Your Email Address",
@@ -365,7 +365,7 @@ export function renderEmailTemplate(
       };
       
       return {
-        subject: "Verify Your Innovatr Account",
+        subject: "Verify your Innovatr account",
         html: renderBaseEmail(options),
         text: renderBaseEmailText(options),
       };
@@ -398,9 +398,9 @@ export function renderEmailTemplate(
     case "AUDIENCE_LIVE": {
       const portalLink = data.portalLink || `${FRONTEND_URL}/portal/research`;
       const bodyHtml = `
-        <p style="margin: 0 0 15px 0;">Good news, your audience is officially live.</p>
+        <p style="margin: 0 0 15px 0;">Good news. Your audience is officially live.</p>
         <p style="margin: 0 0 15px 0;">We are now collecting real consumer data. Your full insights report will be ready within 24 hours.</p>
-        <p style="margin: 0 0 15px 0;">You can track your project status anytime in your My Research portal.</p>
+        <p style="margin: 0 0 15px 0;">You can track your project status anytime in My Research.</p>
       `;
       
       const options: BaseEmailOptions = {
@@ -413,7 +413,7 @@ export function renderEmailTemplate(
       };
       
       return {
-        subject: "Your Test24 Audience Is Live",
+        subject: "Your Test24 audience is live",
         html: renderBaseEmail(options),
         text: renderBaseEmailText(options),
       };
@@ -445,7 +445,7 @@ export function renderEmailTemplate(
     case "SUBSCRIPTION_CONFIRMED": {
       const bodyHtml = `
         <p style="margin: 0 0 15px 0;">You are now subscribed to Innovatr mailers.</p>
-        <p style="margin: 0 0 15px 0;">You will receive fresh insights, trends, and real data from South African markets, all crafted to help you build what people actually want.</p>
+        <p style="margin: 0 0 15px 0;">You will receive fresh insights, trends and real data from South African markets, all crafted to help you build what people actually want.</p>
         <p style="margin: 0 0 15px 0;">You can unsubscribe anytime by clicking the link in any email.</p>
       `;
       
@@ -457,7 +457,7 @@ export function renderEmailTemplate(
       };
       
       return {
-        subject: "You Are Now Subscribed to Innovatr Mailers",
+        subject: "You are now subscribed to Innovatr mailers",
         html: renderBaseEmail(options),
         text: renderBaseEmailText(options),
       };
@@ -479,38 +479,39 @@ export function renderEmailTemplate(
       };
       
       return {
-        subject: "You Have Been Unsubscribed",
+        subject: "You have been unsubscribed",
         html: renderBaseEmail(options),
         text: renderBaseEmailText(options),
       };
     }
 
     case "CREDITS_ADDED": {
-      const creditsLink = `${FRONTEND_URL}/portal/credits`;
+      const launchLink = `${FRONTEND_URL}/portal/launch`;
       const basicCredits = data.basicCredits ?? 0;
       const proCredits = data.proCredits ?? 0;
       
       const bodyHtml = `
-        <p style="margin: 0 0 15px 0;">Your Innovatr research credits have been updated.</p>
+        <p style="margin: 0 0 15px 0;">Good news. Your payment has been confirmed and your credits are now active on your Innovatr account.</p>
         <p style="margin: 0 0 15px 0;"><strong>Available now:</strong></p>
         <ul style="margin: 0 0 15px 20px; padding: 0;">
           <li style="margin: 5px 0;">Test24 Basic Credits: <strong>${basicCredits}</strong></li>
           <li style="margin: 5px 0;">Test24 Pro Credits: <strong>${proCredits}</strong></li>
         </ul>
-        <p style="margin: 0 0 15px 0;">These are now ready to use in your portal.</p>
+        <p style="margin: 0 0 15px 0;">Launch a new Test24 study whenever you are ready.</p>
+        <p style="margin: 0 0 15px 0;">If you want help with what to test next, reply and we will guide you.</p>
       `;
       
       const options: BaseEmailOptions = {
-        title: "Credits Added Successfully",
+        title: "Your Innovatr Credits Are Active",
         greetingName: data.firstName,
         bodyHtml,
-        buttonLabel: "View Credits",
-        buttonUrl: creditsLink,
+        buttonLabel: "Launch a new study",
+        buttonUrl: launchLink,
         showButton: true,
       };
       
       return {
-        subject: "Your Innovatr Credits Have Been Updated",
+        subject: "Your Innovatr credits are active",
         html: renderBaseEmail(options),
         text: renderBaseEmailText(options),
       };
@@ -528,7 +529,7 @@ export function renderEmailTemplate(
           <li style="margin: 5px 0;">Basic Credits: <strong>${basicCredits}</strong></li>
           <li style="margin: 5px 0;">Pro Credits: <strong>${proCredits}</strong></li>
         </ul>
-        <p style="margin: 0 0 15px 0;">You can top up anytime in your portal under Credits & Billing.</p>
+        <p style="margin: 0 0 15px 0;">You can top up anytime in your portal under Credits and Billing.</p>
       `;
       
       const options: BaseEmailOptions = {
@@ -541,7 +542,7 @@ export function renderEmailTemplate(
       };
       
       return {
-        subject: "You Are Running Low on Research Credits",
+        subject: "You are running low on research credits",
         html: renderBaseEmail(options),
         text: renderBaseEmailText(options),
       };
@@ -565,7 +566,7 @@ export function renderEmailTemplate(
       const bodyHtml = `
         <p style="margin: 0 0 15px 0;">We have received your payment and your order is now confirmed.</p>
         <p style="margin: 0 0 15px 0;">Your study will begin as soon as your brief is submitted and approved.</p>
-        <p style="margin: 0 0 15px 0;">You can track your orders anytime in Credits & Billing.</p>
+        <p style="margin: 0 0 15px 0;">You can track your orders anytime in Credits and Billing.</p>
         ${detailsHtml}
       `;
       
@@ -579,7 +580,7 @@ export function renderEmailTemplate(
       };
       
       return {
-        subject: "Your Innovatr Order Has Been Confirmed",
+        subject: "Your Innovatr order has been confirmed",
         html: renderBaseEmail(options),
         text: renderBaseEmailText(options),
       };
@@ -617,7 +618,7 @@ export function renderEmailTemplate(
       };
       
       return {
-        subject: "Your Innovatr Invoice Is Ready",
+        subject: "Your Innovatr invoice is ready",
         html: renderBaseEmail(options),
         text: renderBaseEmailText(options),
       };
@@ -685,34 +686,32 @@ export function renderEmailTemplate(
 
     case "ADMIN_INVOICE_REQUEST": {
       const itemsHtml = data.orderItems?.map(
-        (item) => `<li>${escapeHtml(item.description || item.type || 'Item')} - Qty: ${item.quantity}</li>`
+        (item) => `<li>${escapeHtml(item.description || item.type || 'Item')} (Qty: ${item.quantity})</li>`
       ).join("") || '';
       
       const bodyHtml = `
-        <div style="background-color: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 6px; margin: 15px 0; color: #856404;">
-          <strong>Payment Pending:</strong> This is an invoice request. Credits will NOT be activated until payment is confirmed.
-        </div>
+        <p style="margin: 0 0 15px 0;">A new invoice request has been submitted from the member portal. Credits will only activate once payment reflects on our side. Clients have thirty days to complete payment.</p>
         <div style="background-color: #f9f9f9; padding: 15px; border-radius: 6px; margin: 15px 0;">
           <p style="margin: 5px 0;"><strong>Order ID:</strong> <code style="background-color: #e9ecef; padding: 2px 6px; border-radius: 3px;">${escapeHtml(data.orderId || '')}</code></p>
-          <p style="margin: 5px 0;"><strong>Customer Name:</strong> ${escapeHtml(data.customerName || '')}</p>
-          <p style="margin: 5px 0;"><strong>Customer Email:</strong> ${escapeHtml(data.customerEmail || '')}</p>
+          <p style="margin: 5px 0;"><strong>Customer:</strong> ${escapeHtml(data.customerName || '')}</p>
+          <p style="margin: 5px 0;"><strong>Email:</strong> ${escapeHtml(data.customerEmail || '')}</p>
           <p style="margin: 5px 0;"><strong>Company:</strong> ${escapeHtml(data.customerCompany || '')}</p>
-          <p style="margin: 5px 0;"><strong>Credit Pack:</strong> ${escapeHtml(data.packDescription || '')}</p>
-          <p style="margin: 5px 0;"><strong>Total Amount:</strong> <strong>${escapeHtml(data.amount || '')}</strong></p>
+          <p style="margin: 5px 0;"><strong>Credit pack:</strong> ${escapeHtml(data.packDescription || '')}</p>
+          <p style="margin: 5px 0;"><strong>Total amount:</strong> <strong>${escapeHtml(data.amount || '')}</strong></p>
         </div>
         <p style="margin: 15px 0 10px 0;"><strong>Order Items:</strong></p>
         <ul style="margin: 0 0 15px 20px; padding: 0;">${itemsHtml}</ul>
-        <p style="margin: 0; font-style: italic; color: ${MUTED_COLOR};">Please prepare an invoice for this customer and follow up for payment. Once paid, mark the order as "paid" to activate the credits.</p>
+        <p style="margin: 0; font-style: italic; color: ${MUTED_COLOR};">Once the invoice has been created and payment is confirmed, activate the credits for the account in the admin section.</p>
       `;
       
       const options: BaseEmailOptions = {
-        title: "New Invoice Request from Member Portal",
+        title: "Invoice Request for Credit Pack",
         bodyHtml,
         showButton: false,
       };
       
       return {
-        subject: `Invoice Request: ${data.customerCompany || 'Company'} - ${data.packDescription || 'Credit Pack'}`,
+        subject: `Invoice request for ${data.customerCompany || 'Company'} credit pack`,
         html: renderBaseEmail(options),
         text: renderBaseEmailText(options),
       };
