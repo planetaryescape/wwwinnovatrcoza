@@ -402,8 +402,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expiresAt,
       });
       
-      // Send reset email (construct reset URL using FRONTEND_URL)
-      const resetUrl = `${emailService.FRONTEND_URL}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
+      // Send reset email (construct reset URL using current request origin)
+      const origin = req.get('origin') || `${req.protocol}://${req.get('host')}`;
+      const resetUrl = `${origin}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
       
       // Send email via Resend
       try {
