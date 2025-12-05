@@ -712,7 +712,7 @@ export default function PastResearch() {
                                   +{report.tags.length - 2}
                                 </Badge>
                               )}
-                              {report.status === "completed" && (
+                              {report.status?.toLowerCase() === "completed" && (
                                 <Badge className="bg-green-500/15 text-green-600 border-green-500/30 text-xs">
                                   Complete
                                 </Badge>
@@ -824,7 +824,7 @@ export default function PastResearch() {
                               data-testid={`report-row-${report.id}`}
                             >
                               <div className="flex-shrink-0">
-                                {report.status === "completed" ? (
+                                {report.status?.toLowerCase() === "completed" ? (
                                   <CheckCircle2 className="w-8 h-8 text-green-600" />
                                 ) : (
                                   <FileText className="w-8 h-8 text-muted-foreground" />
