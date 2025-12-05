@@ -1051,6 +1051,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
       }
+
+      // Handle failed/cancelled brief payments - clean up uploaded files
+      if (intent && !orderCreated && eventType) {
+        const failedPaymentEvents = ["payment.failed", "payment.cancelled", "payment.declined"];
+        if (failedPaymentEvents.includes(eventType)) {
+          const metadata = intent.metadata as Record<string, any> | null;
+          const pendingOrder = metadata?.pendingOrder as Record<string, any> | undefined;
+          
+          if (pendingOrder?.briefId) {
+            console.log("=== Processing Failed Brief Payment - Cleaning Up Files ===");
+            console.log("Brief ID:", pendingOrder.briefId);
+            console.log("Event Type:", eventType);
+            
+            const brief = await storage.getBriefSubmission(pendingOrder.briefId);
+            if (brief) {
+              // Update brief payment status to failed
+              await storage.updateBriefSubmission(pendingOrder.briefId, {
+                paymentStatus: "failed",
+              });
+              console.log("Brief payment status updated to failed");
+              
+              // Delete uploaded files from object storage
+              const briefFiles = (brief.files || []) as Array<{
+                id: string;
+                fileName: string;
+                fileSize: number;
+                mimeType: string;
+                url: string;
+                uploadedAt: string;
+              }>;
+              
+              if (briefFiles.length > 0) {
+                console.log(`Deleting ${briefFiles.length} files from failed brief...`);
+                for (const file of briefFiles) {
+                  // Extract storage path from URL (e.g., "/api/files/briefs/uuid-filename" -> "briefs/uuid-filename")
+                  const storagePath = file.url.replace("/api/files/", "");
+                  try {
+                    const deleted = await deleteFile(storagePath);
+                    if (deleted) {
+                      console.log(`Deleted file: ${storagePath}`);
+                    } else {
+                      console.warn(`Failed to delete file: ${storagePath}`);
+                    }
+                  } catch (deleteError) {
+                    console.error(`Error deleting file ${storagePath}:`, deleteError);
+                  }
+                }
+                
+                // Clear the files array from the brief record
+                await storage.updateBriefSubmission(pendingOrder.briefId, {
+                  files: [],
+                });
+                console.log("Brief files array cleared");
+              }
+            } else {
+              console.error("Brief not found for cleanup:", pendingOrder.briefId);
+            }
+            
+            console.log("=== End Failed Brief Cleanup ===");
+          }
+        }
+      }
       
       res.status(200).send("OK");
     } catch (error: any) {
