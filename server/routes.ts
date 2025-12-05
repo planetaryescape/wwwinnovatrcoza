@@ -1098,11 +1098,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Brief does not require online payment or has already been paid" });
       }
 
-      // Calculate the payment amount
+      // Check if user is logged in to determine pricing tier
+      let isMember = false;
+      const sessionToken = req.cookies?.session;
+      if (sessionToken) {
+        try {
+          const tokenHash = hashSessionToken(sessionToken);
+          const session = await storage.getSessionByTokenHash(tokenHash);
+          if (session && !isExpired(session.expiresAt)) {
+            isMember = true;
+          }
+        } catch (e) {
+          // Session check failed, treat as non-member
+        }
+      }
+
+      // Calculate the payment amount - member vs standard pricing
       const isBasicStudy = brief.studyType.toLowerCase().includes("basic");
-      const BASIC_PRICE = 5500;
-      const PRO_PRICE = 50000;
-      const pricePerConcept = isBasicStudy ? BASIC_PRICE : PRO_PRICE;
+      const BASIC_PRICE_STANDARD = 5500;  // R5,500 for non-members
+      const BASIC_PRICE_MEMBER = 5000;    // R5,000 for members
+      const PRO_PRICE_STANDARD = 50000;   // R50,000 for non-members
+      const PRO_PRICE_MEMBER = 45000;     // R45,000 for members
+      
+      const basicPrice = isMember ? BASIC_PRICE_MEMBER : BASIC_PRICE_STANDARD;
+      const proPrice = isMember ? PRO_PRICE_MEMBER : PRO_PRICE_STANDARD;
+      const pricePerConcept = isBasicStudy ? basicPrice : proPrice;
       const totalAmount = pricePerConcept * brief.numIdeas;
 
       // Create checkout with brief metadata
@@ -2620,10 +2640,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Determine if this is an online payment that needs checkout redirect
       const isOnlinePayment = validated.paymentMethod === "online";
       
-      // Calculate price for online payments
-      const BASIC_PRICE_PER_CONCEPT = 5500; // R5,500 standard or R5,000 member
-      const PRO_PRICE_PER_CONCEPT = 50000;  // R50,000 standard or R45,000 member
-      const pricePerConcept = isBasicStudy ? BASIC_PRICE_PER_CONCEPT : PRO_PRICE_PER_CONCEPT;
+      // Check if user is logged in to determine pricing tier
+      let isMember = false;
+      const sessionToken = req.cookies?.session;
+      if (sessionToken) {
+        try {
+          const tokenHash = hashSessionToken(sessionToken);
+          const session = await storage.getSessionByTokenHash(tokenHash);
+          if (session && !isExpired(session.expiresAt)) {
+            isMember = true;
+          }
+        } catch (e) {
+          // Session check failed, treat as non-member
+        }
+      }
+      
+      // Calculate price for online payments - member vs standard pricing
+      const BASIC_PRICE_STANDARD = 5500;  // R5,500 for non-members
+      const BASIC_PRICE_MEMBER = 5000;    // R5,000 for members
+      const PRO_PRICE_STANDARD = 50000;   // R50,000 for non-members
+      const PRO_PRICE_MEMBER = 45000;     // R45,000 for members
+      
+      const basicPrice = isMember ? BASIC_PRICE_MEMBER : BASIC_PRICE_STANDARD;
+      const proPrice = isMember ? PRO_PRICE_MEMBER : PRO_PRICE_STANDARD;
+      const pricePerConcept = isBasicStudy ? basicPrice : proPrice;
       const totalAmount = pricePerConcept * creditsRequired;
 
       // Create brief submission with server-computed credit values

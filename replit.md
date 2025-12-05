@@ -70,7 +70,8 @@ Preferred communication style: Simple, everyday language.
 - **Pricing Section**: Displays discounted rates for members.
 - **Member Credit Checkout**: Requires Entry Plan membership for credit purchases, with automatic inclusion in cart for new members.
 - **Coupon Claim System**: Allows users to claim a unique coupon via a dedicated page.
-- **Launch Brief Payment Options**: Offers "Pay Online", "Invoice Me", or "Use My Credits" with credit balance display and deduction functionality.
+- **Launch Brief Payment Options**: Offers "Pay Online", "Invoice Me", or "Use My Credits" with credit balance display and deduction functionality. Online payments use PayFast with dynamic pricing based on login status.
+- **Member Pricing**: Logged-in users receive discounted rates: Basic R5,000 (vs R5,500), Pro R45,000 (vs R50,000). Pricing is calculated server-side by checking session validity.
 - **Admin Portal**: Comprehensive dashboard for managing users, reports, deals, and system metrics.
 - **Mailer Subscription System**: Manages subscriptions for "Pulse Insights Newsletter" with admin view.
 - **Email Notifications**: Admin notifications for new orders via Resend.

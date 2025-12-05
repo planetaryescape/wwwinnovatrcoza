@@ -245,7 +245,11 @@ export default function LaunchBrief() {
   const hasEnoughCredits = availableCreditsForStudy >= creditsRequired;
   const hasAnyCredits = basicCreditsRemaining > 0 || proCreditsRemaining > 0;
 
-  const PRICE_PER_CONCEPT = selectedBrief === "basic" ? 5000 : 45000;
+  // Use member pricing if user is logged in, otherwise standard pricing
+  const isLoggedIn = !!user;
+  const basicPrice = isLoggedIn ? BASIC_MEMBER_PRICE : BASIC_STANDARD_PRICE;
+  const proPrice = isLoggedIn ? PRO_MEMBER_PRICE : PRO_STANDARD_PRICE;
+  const PRICE_PER_CONCEPT = selectedBrief === "basic" ? basicPrice : proPrice;
   const totalPrice = PRICE_PER_CONCEPT * concepts.length;
 
   // Competitors limit: 2 for Basic, 5 for Pro
