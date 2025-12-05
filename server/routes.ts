@@ -2576,18 +2576,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/briefs/upload", briefFileUpload.array("files", 5), async (req, res) => {
     try {
       const files = req.files as Express.Multer.File[];
+      const companyName = req.body.companyName || "unknown";
       
       if (!files || files.length === 0) {
         return res.status(400).json({ error: "No files uploaded" });
       }
 
       const uploadResults = [];
+      
+      // Sanitize company name for folder path (replace spaces and special chars with hyphens)
+      const sanitizedCompanyName = companyName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+        .slice(0, 50) || "unknown";
 
       for (const file of files) {
-        // Generate a safe storage key: briefs/{uuid}-{sanitized-filename}
+        // Generate timestamp for unique filename
+        const timestamp = Date.now();
         const fileId = randomUUID();
-        const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 100);
-        const storagePath = `briefs/${fileId}-${sanitizedName}`;
+        
+        // Get original filename parts
+        const originalName = file.originalname;
+        const lastDotIndex = originalName.lastIndexOf(".");
+        const baseName = lastDotIndex > 0 ? originalName.slice(0, lastDotIndex) : originalName;
+        const extension = lastDotIndex > 0 ? originalName.slice(lastDotIndex) : "";
+        
+        // Sanitize base name (keep readable but safe for storage)
+        const sanitizedBaseName = baseName
+          .replace(/[^a-zA-Z0-9._-]/g, "_")
+          .slice(0, 80);
+        
+        // Build new filename: {original-name}_{timestamp}{extension}
+        const newFileName = `${sanitizedBaseName}_${timestamp}${extension}`;
+        
+        // Storage path: briefs/{company-name}/{filename}
+        const storagePath = `briefs/${sanitizedCompanyName}/${newFileName}`;
 
         // Upload to Replit Object Storage
         const uploadResult = await uploadFile(Buffer.from(file.buffer), storagePath);

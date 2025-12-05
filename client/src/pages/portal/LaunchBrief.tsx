@@ -536,7 +536,7 @@ export default function LaunchBrief() {
   });
 
   // Upload files to server and return metadata
-  const uploadFilesToServer = async (files: File[]): Promise<{
+  const uploadFilesToServer = async (files: File[], companyName: string): Promise<{
     id: string;
     fileName: string;
     fileSize: number;
@@ -550,6 +550,8 @@ export default function LaunchBrief() {
     files.forEach(file => {
       formDataUpload.append("files", file);
     });
+    // Include company name for organized storage path
+    formDataUpload.append("companyName", companyName);
 
     const response = await fetch("/api/briefs/upload", {
       method: "POST",
@@ -634,8 +636,8 @@ export default function LaunchBrief() {
       const allConceptFiles = concepts.flatMap(c => c.files.map(f => f.file));
       const allFiles = [...allConceptFiles, ...additionalFiles];
 
-      // Upload all files
-      const uploadedFileMetadata = await uploadFilesToServer(allFiles);
+      // Upload all files with company name for organized storage
+      const uploadedFileMetadata = await uploadFilesToServer(allFiles, formData.clientCompany);
 
       // Build the payload matching the backend schema
       const payload = {
