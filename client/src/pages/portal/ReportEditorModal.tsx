@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
@@ -23,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { safeParseDateObject } from "@shared/access";
+import { useQuery } from "@tanstack/react-query";
 import { 
   FileText, 
   Settings, 
@@ -37,7 +39,8 @@ import {
   ExternalLink,
   Loader2,
   X,
-  FileIcon
+  FileIcon,
+  Building2
 } from "lucide-react";
 
 interface ReportData {
@@ -70,6 +73,13 @@ interface ReportData {
   dashboardLink?: string | null;
   coverImageUrl?: string | null;
   thumbnailUrl?: string | null;
+  isClientReport?: boolean;
+  clientCompanyIds?: string[];
+}
+
+interface Company {
+  id: string;
+  name: string;
 }
 
 interface ReportEditorModalProps {
@@ -100,6 +110,8 @@ const defaultFormData = {
   coverImageUrl: "",
   publishAt: "",
   unpublishAt: "",
+  isClientReport: false,
+  clientCompanyIds: [] as string[],
 };
 
 export default function ReportEditorModal({
@@ -119,8 +131,15 @@ export default function ReportEditorModal({
 
   const isEditing = !!report;
 
+  // Fetch companies for client report selection
+  const { data: companies = [] } = useQuery<Company[]>({
+    queryKey: ["/api/admin/companies"],
+    enabled: open,
+  });
+
   useEffect(() => {
     if (report) {
+      const hasClientCompanies = report.clientCompanyIds && report.clientCompanyIds.length > 0;
       setFormData({
         title: report.title || "",
         slug: report.slug || "",
@@ -142,6 +161,8 @@ export default function ReportEditorModal({
         coverImageUrl: report.coverImageUrl || "",
         publishAt: report.publishAt?.split("T")[0] || "",
         unpublishAt: report.unpublishAt?.split("T")[0] || "",
+        isClientReport: report.isClientReport || hasClientCompanies || false,
+        clientCompanyIds: report.clientCompanyIds || [],
       });
     } else {
       setFormData(defaultFormData);
@@ -176,6 +197,21 @@ export default function ReportEditorModal({
       setFormData({
         ...formData,
         allowedTiers: [...current, tier],
+      });
+    }
+  };
+
+  const handleCompanyToggle = (companyId: string) => {
+    const current = formData.clientCompanyIds;
+    if (current.includes(companyId)) {
+      setFormData({
+        ...formData,
+        clientCompanyIds: current.filter(id => id !== companyId),
+      });
+    } else {
+      setFormData({
+        ...formData,
+        clientCompanyIds: [...current, companyId],
       });
     }
   };
@@ -290,6 +326,15 @@ export default function ReportEditorModal({
       return;
     }
 
+    if (formData.isClientReport && formData.clientCompanyIds.length === 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please select at least one client company for this report",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const parsedDate = safeParseDateObject(formData.date);
@@ -317,7 +362,7 @@ export default function ReportEditorModal({
         bodyContent: formData.bodyContent || null,
         date: parsedDate,
         status: formData.status,
-        accessLevel: formData.accessLevel,
+        accessLevel: formData.isClientReport ? "companyOnly" : formData.accessLevel,
         allowedTiers: formData.allowedTiers,
         creditType: formData.creditType,
         creditCost: formData.creditCost,
@@ -327,6 +372,7 @@ export default function ReportEditorModal({
         coverImageUrl: formData.coverImageUrl || null,
         publishAt: parsedPublishAt,
         unpublishAt: parsedUnpublishAt,
+        clientCompanyIds: formData.isClientReport ? formData.clientCompanyIds : [],
       };
 
       const url = isEditing 
@@ -684,80 +730,166 @@ export default function ReportEditorModal({
 
             <TabsContent value="access" className="space-y-6 m-0">
               <div className="space-y-4">
-                <div>
-                  <Label className="text-base font-medium">Access Level</Label>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Control who can view this report
-                  </p>
-                  <Select 
-                    value={formData.accessLevel} 
-                    onValueChange={(val) => handleSelectChange("accessLevel", val)}
-                  >
-                    <SelectTrigger data-testid="select-access-level">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="public">Free - Anyone can view</SelectItem>
-                      <SelectItem value="starter">Starter - Starter members and above</SelectItem>
-                      <SelectItem value="growth">Growth - Growth members and above</SelectItem>
-                      <SelectItem value="scale">Scale - Scale members only</SelectItem>
-                      <SelectItem value="tier">Tier - Specific tiers only</SelectItem>
-                      <SelectItem value="paid">Paid - Costs credits</SelectItem>
-                    </SelectContent>
-                  </Select>
+                {/* Client Report Toggle */}
+                <div className="p-4 border rounded-lg bg-blue-50 dark:bg-blue-950">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Building2 className="w-5 h-5 text-blue-600" />
+                      <div>
+                        <Label className="text-base font-medium">Client Report</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Restrict this report to specific client companies only
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      id="isClientReport"
+                      checked={formData.isClientReport}
+                      onCheckedChange={(checked) => setFormData({ 
+                        ...formData, 
+                        isClientReport: checked,
+                        clientCompanyIds: checked ? formData.clientCompanyIds : []
+                      })}
+                      data-testid="switch-client-report"
+                    />
+                  </div>
+                  
+                  {formData.isClientReport && (
+                    <div className="mt-4 pt-4 border-t border-blue-200 dark:border-blue-800">
+                      <Label className="text-sm font-medium mb-3 block">Select Client Companies</Label>
+                      <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                        {companies.map((company) => (
+                          <div 
+                            key={company.id}
+                            className="flex items-center gap-2 p-2 rounded hover:bg-blue-100 dark:hover:bg-blue-900 cursor-pointer"
+                            onClick={() => handleCompanyToggle(company.id)}
+                            data-testid={`row-company-${company.id}`}
+                          >
+                            <Checkbox
+                              checked={formData.clientCompanyIds.includes(company.id)}
+                              onClick={(e) => e.stopPropagation()}
+                              onCheckedChange={() => handleCompanyToggle(company.id)}
+                              data-testid={`checkbox-company-${company.id}`}
+                            />
+                            <span className="text-sm">{company.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {formData.clientCompanyIds.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-1">
+                          {formData.clientCompanyIds.map((id) => {
+                            const company = companies.find(c => c.id === id);
+                            return company ? (
+                              <Badge 
+                                key={id} 
+                                variant="secondary"
+                                className="text-xs"
+                                data-testid={`badge-company-${id}`}
+                              >
+                                {company.name}
+                                <X 
+                                  className="w-3 h-3 ml-1 cursor-pointer" 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleCompanyToggle(id);
+                                  }}
+                                  data-testid={`button-remove-company-${id}`}
+                                />
+                              </Badge>
+                            ) : null;
+                          })}
+                        </div>
+                      )}
+                      {formData.clientCompanyIds.length === 0 && (
+                        <p className="text-sm text-amber-600 mt-2">
+                          Please select at least one company
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                {formData.accessLevel === "tier" && (
-                  <div className="p-4 border rounded-lg bg-gray-50">
-                    <Label className="text-sm font-medium mb-3 block">Allowed Tiers</Label>
-                    <div className="flex gap-2 flex-wrap">
-                      {["STARTER", "GROWTH", "SCALE"].map((tier) => (
-                        <Badge
-                          key={tier}
-                          variant={formData.allowedTiers.includes(tier) ? "default" : "outline"}
-                          className="cursor-pointer"
-                          onClick={() => handleTierToggle(tier)}
-                        >
-                          {tier}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <Separator />
 
-                {formData.accessLevel === "paid" && (
-                  <div className="p-4 border rounded-lg bg-gray-50 space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="creditType">Credit Type</Label>
+                {/* Standard Access Level - hidden when client report */}
+                {!formData.isClientReport && (
+                  <>
+                    <div>
+                      <Label className="text-base font-medium">Access Level</Label>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Control who can view this report
+                      </p>
                       <Select 
-                        value={formData.creditType} 
-                        onValueChange={(val) => handleSelectChange("creditType", val)}
+                        value={formData.accessLevel} 
+                        onValueChange={(val) => handleSelectChange("accessLevel", val)}
                       >
-                        <SelectTrigger data-testid="select-credit-type">
+                        <SelectTrigger data-testid="select-access-level">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="basic">Basic Credits</SelectItem>
-                          <SelectItem value="pro">Pro Credits</SelectItem>
+                          <SelectItem value="public">Free - Anyone can view</SelectItem>
+                          <SelectItem value="starter">Starter - Starter members and above</SelectItem>
+                          <SelectItem value="growth">Growth - Growth members and above</SelectItem>
+                          <SelectItem value="scale">Scale - Scale members only</SelectItem>
+                          <SelectItem value="tier">Tier - Specific tiers only</SelectItem>
+                          <SelectItem value="paid">Paid - Costs credits</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="creditCost">Credit Cost</Label>
-                      <Input
-                        id="creditCost"
-                        name="creditCost"
-                        type="number"
-                        min="0"
-                        value={formData.creditCost}
-                        onChange={(e) => setFormData({ 
-                          ...formData, 
-                          creditCost: parseInt(e.target.value) || 0 
-                        })}
-                        data-testid="input-credit-cost"
-                      />
-                    </div>
-                  </div>
+
+                    {formData.accessLevel === "tier" && (
+                      <div className="p-4 border rounded-lg bg-gray-50">
+                        <Label className="text-sm font-medium mb-3 block">Allowed Tiers</Label>
+                        <div className="flex gap-2 flex-wrap">
+                          {["STARTER", "GROWTH", "SCALE"].map((tier) => (
+                            <Badge
+                              key={tier}
+                              variant={formData.allowedTiers.includes(tier) ? "default" : "outline"}
+                              className="cursor-pointer"
+                              onClick={() => handleTierToggle(tier)}
+                            >
+                              {tier}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {formData.accessLevel === "paid" && (
+                      <div className="p-4 border rounded-lg bg-gray-50 space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="creditType">Credit Type</Label>
+                          <Select 
+                            value={formData.creditType} 
+                            onValueChange={(val) => handleSelectChange("creditType", val)}
+                          >
+                            <SelectTrigger data-testid="select-credit-type">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="basic">Basic Credits</SelectItem>
+                              <SelectItem value="pro">Pro Credits</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="creditCost">Credit Cost</Label>
+                          <Input
+                            id="creditCost"
+                            name="creditCost"
+                            type="number"
+                            min="0"
+                            value={formData.creditCost}
+                            onChange={(e) => setFormData({ 
+                              ...formData, 
+                              creditCost: parseInt(e.target.value) || 0 
+                            })}
+                            data-testid="input-credit-cost"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </TabsContent>
