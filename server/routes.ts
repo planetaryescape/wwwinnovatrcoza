@@ -3424,8 +3424,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get all reports from database (library reports only - exclude companyOnly)
-      const allReports = await storage.getReports();
-      const libraryReports = allReports.filter(r => 
+      const allReports = await storage.getAllReports();
+      const libraryReports = allReports.filter((r: any) => 
         r.accessLevel !== "companyOnly"
       );
 
@@ -3519,12 +3519,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check for missing expected titles
       const missingExpected: MissingExpected[] = [];
-      const foundTitles = new Set(libraryReports.map(r => r.title.toLowerCase()));
       
       for (const title of allExpectedTitles) {
         // Normalize comparison - handle variations like "Oat Based" vs "Oat-Based"
         const normalizedTitle = title.toLowerCase().replace(/-/g, " ");
-        const found = libraryReports.some(r => {
+        const found = libraryReports.some((r: any) => {
           const reportTitle = r.title.toLowerCase().replace(/-/g, " ");
           return reportTitle.includes(normalizedTitle.substring(0, 20)) || 
                  normalizedTitle.includes(reportTitle.substring(0, 20));
@@ -3555,13 +3554,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Additional detail for debugging
         categoryBreakdown: {
           Inside: insideReports.length,
-          Insights: libraryReports.filter(r => r.category === "Insights").length,
-          Launch: libraryReports.filter(r => r.category === "Launch").length,
-          IRL: libraryReports.filter(r => r.category === "IRL").length,
+          Insights: libraryReports.filter((r: any) => r.category === "Insights").length,
+          Launch: libraryReports.filter((r: any) => r.category === "Launch").length,
+          IRL: libraryReports.filter((r: any) => r.category === "IRL").length,
         },
         videoPathsFromJson: {
           totalMapped: videoPathsMap.size,
-          withVideos: [...videoPathsMap.entries()].filter(([_, v]) => v.length > 0).length,
+          withVideos: Array.from(videoPathsMap.entries()).filter(([_, v]) => v.length > 0).length,
         },
       };
 
