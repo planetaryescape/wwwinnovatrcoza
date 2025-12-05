@@ -1,0 +1,276 @@
+I want your help to upgrade all transactional email templates in my Innovatr portal.
+The goal is to improve the wording, tone, design and footer of every email without changing the underlying logic of when they are triggered or how PayFast or any payment system works. Jesse has already fixed most of the backend functionality. You must keep that intact.
+
+Please collaborate with me. I will give you the tone and copy direction but I want you to suggest improvements where needed. None of us are always right or wrong. We improve this together.
+
+Focus ONLY on the text and layout of the emails. Do not touch payment integrations, triggers, routing, or backend behaviour.
+
+GLOBAL BRAND RULES FOR ALL EMAILS
+
+Apply these rules to every template:
+
+Brand voice
+
+Friendly, confident, conversational
+
+Slightly playful but grown up
+
+Clear and direct
+
+Light humour allowed
+
+SA or UK spelling
+
+No dashes or hyphens in user facing copy. Replace with commas or full stops.
+
+Never wrap subject lines in formatting. No asterisks or symbols.
+
+Layout
+
+Keep the current HTML structure but refresh it
+
+Clear title in the body, not the subject
+
+Clean spacing, readable paragraphs
+
+Consistent CTA button styling
+
+Make emails look good in both HTML and plain text
+
+Add a simple Innovatr footer
+
+Sign off
+
+All emails must end with:
+
+Innovatr
+
+Footer rules
+
+Replace all old footers with the following:
+
+This is an automated message from Innovatr.
+
+If you have any questions, contact us at hannah@innovatr.co.za
+ or richard@innovatr.co.za
+.
+
+© 2024 Innovatr. All rights reserved.
+
+Technical rules
+
+Keep all existing dynamic variables like {name}, {resetLink}, {portalLink}, etc
+
+Do not hard code anything
+
+Do not change any backend logic
+
+Do not modify PayFast or Stripe logic
+
+Ensure all templates compile
+
+If you see missing helper functions for shared layout, create one safely and refactor templates to use it
+
+STEP 1 — Identify ALL email templates in the project
+
+Search the code for:
+
+Nodemailer
+
+sendMail
+
+email templates
+
+HTML in string templates
+
+Subject lines
+
+Templates linked to briefs, credits, payments, reports, memberships, password resets, welcome emails
+
+Create a list of every template you find:
+
+File path
+
+Function name
+
+When it is triggered
+
+What it currently contains
+
+Stop and wait for confirmation before editing.
+
+STEP 2 — Replace the copy of all emails using the updated templates below
+
+Use the following as the base. If you think you can improve clarity or structure, you may suggest small changes, but DO NOT change the intent.
+
+No dashes or hyphens in copy.
+All sign offs must be "Innovatr".
+Footer must use 2024 and hannah@ or richard@.
+
+1. Welcome Email
+
+Subject: Welcome to Innovatr. Your portal is ready
+
+Hi {name}
+
+Your Innovatr account is ready. This is your space to explore research, track your projects and understand what is happening in the market in real time.
+
+Log in to your portal here
+{portalLink}
+
+If you are on a free plan you will see all Inside content and a few unlocked reports. Everything else will show with a gentle lock so you can see what becomes available when you join a membership.
+
+If you get stuck or want help planning your first study, just reply. A real person will help.
+
+Innovatr
+
+2. Password Reset
+
+Subject: Reset your Innovatr password
+
+Hi {name}
+
+We received a request to reset the password for your Innovatr account.
+
+You can create a new password at this link
+{resetLink}
+
+If you did not request this, you can ignore the message. Your current password will stay the same unless you choose to change it.
+
+Innovatr
+
+3. Internal Invoice Request (for your team)
+
+Subject: Invoice request for {companyName} credit pack
+
+Hi team
+
+A new invoice request has been submitted from the member portal. Credits will only activate once payment reflects on our side. Clients have thirty days to complete payment.
+
+Order ID
+{orderId}
+
+Customer
+{customerName}
+
+Email
+{customerEmail}
+
+Company
+{companyName}
+
+Credit pack
+{creditPackName}
+
+Total amount
+R{amount}
+
+Once the invoice has been created and payment is confirmed, activate the credits for the account in the admin section.
+
+Innovatr
+
+4. Client Brief Submission
+
+Subject: We received your Test24 brief
+
+Hi {name}
+
+Thank you for sending your Test24 brief. It has been received and added to your portal.
+
+You can track your study and download results in My Research
+{researchLink}
+
+If anything changes, reply to this email as soon as possible so we can adjust the project before it launches.
+
+Innovatr
+
+5. Report Ready Email
+
+Subject: Your Test24 report is ready
+
+Hi {name}
+
+Your Test24 results are ready in your Innovatr portal. You can open the report, share it with your team and start using the findings.
+
+View your report here
+{reportLink}
+
+If you would like us to walk you through the results or present them to your team, reply to this email and we will arrange a session.
+
+Innovatr
+
+6. Credit Activation
+
+Subject: Your Innovatr credits are active
+
+Hi {name}
+
+Good news. Your payment has been confirmed and your credits are now active on your Innovatr account.
+
+Launch a new Test24 study whenever you are ready
+{launchLink}
+
+If you want help with what to test next, reply and we will guide you.
+
+Innovatr
+
+7. Membership Upgrade
+
+Subject: Your Innovatr membership has been upgraded
+
+Hi {name}
+
+Your membership is now set to the {tierName} plan.
+
+You now have access to more reports in the Trends and Insights library, member pricing for Test24 studies and extra support from the Innovatr team.
+
+Explore your portal here
+{portalLink}
+
+If you would like help planning how to use your membership over the next few months, reply to this message and we will work it out with you.
+
+Innovatr
+
+STEP 3 — Shared Email Layout
+
+Create or update a shared layout so that every template uses:
+
+Innovatr heading or logo
+
+Clean spacing
+
+CTA button component
+
+Updated footer:
+
+This is an automated message from Innovatr.
+
+If you have any questions, contact us at hannah@innovatr.co.za
+ or richard@innovatr.co.za
+.
+
+© 2024 Innovatr. All rights reserved.
+
+STEP 4 — Validate
+
+After updating all templates:
+
+Ensure TypeScript builds
+
+Ensure all variables still work
+
+Ensure no email contains a dash or hyphen in the user text
+
+Ensure all emails render properly in HTML and plain text
+
+Then present a summary of:
+
+All email templates found
+
+All templates updated
+
+Any improvements you made
+
+Any suggestions for future enhancement
+
+Stop after the summary.
