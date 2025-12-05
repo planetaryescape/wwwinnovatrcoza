@@ -29,6 +29,7 @@ interface ClientReport {
   dashboardUrl: string | null;
   thumbnailUrl: string | null;
   tags: string[];
+  status: string | null;
   uploadedAt: string;
   createdAt: string;
   updatedAt: string;
@@ -687,6 +688,11 @@ export default function PastResearch() {
                                   +{report.tags.length - 2}
                                 </Badge>
                               )}
+                              {report.status === "completed" && (
+                                <Badge className="bg-green-500/15 text-green-600 border-green-500/30 text-xs">
+                                  Complete
+                                </Badge>
+                              )}
                             </div>
                             <CardTitle className="text-lg">{report.title}</CardTitle>
                             {report.description && (
@@ -796,7 +802,11 @@ export default function PastResearch() {
                               data-testid={`report-row-${report.id}`}
                             >
                               <div className="flex-shrink-0">
-                                <FileText className="w-8 h-8 text-muted-foreground" />
+                                {report.status === "completed" ? (
+                                  <CheckCircle2 className="w-8 h-8 text-green-600" />
+                                ) : (
+                                  <FileText className="w-8 h-8 text-muted-foreground" />
+                                )}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1 flex-wrap">
