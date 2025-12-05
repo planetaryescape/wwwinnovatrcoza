@@ -569,18 +569,14 @@ export default function AdminMembers() {
                         {getTierBadge(member.membershipTier)}
                       </TableCell>
                       <TableCell>
-                        {member.company ? (
-                          <div className="flex gap-1">
-                            <Badge variant="secondary" className="text-xs">
-                              {member.basicCreditsRemaining}B
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {member.proCreditsRemaining}P
-                            </Badge>
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">—</span>
-                        )}
+                        <div className="flex gap-1">
+                          <Badge variant="secondary" className="text-xs">
+                            {member.basicCreditsRemaining || 0}B
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {member.proCreditsRemaining || 0}P
+                          </Badge>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
