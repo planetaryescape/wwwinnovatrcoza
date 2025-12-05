@@ -76,9 +76,23 @@ const mockBillingHistory = [
 
 export default function CreditsAndBilling() {
   const [, setLocation] = useLocation();
-  const { isMember, user, company } = useAuth();
+  const { isMember, user, company: authCompany } = useAuth();
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [selectedPack, setSelectedPack] = useState<typeof mockCreditPackages[0] | null>(null);
+
+  // Fetch fresh company data to ensure credits are up-to-date
+  const { data: freshCompany } = useQuery({
+    queryKey: ['/api/member/company', user?.companyId],
+    queryFn: async () => {
+      const response = await fetch(`/api/member/company?companyId=${user?.companyId}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    enabled: !!user?.companyId,
+  });
+
+  // Use fresh company data if available, otherwise fall back to auth context
+  const company = freshCompany || authCompany;
 
   // Fetch user's orders
   const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
