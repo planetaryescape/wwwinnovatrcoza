@@ -37,7 +37,7 @@ export default function HeroSection() {
           <div className="mt-6 md:mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button 
               size="default"
-              className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-primary hover:bg-primary/90 border border-primary-border backdrop-blur-sm w-full sm:w-auto"
+              className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-primary hover:bg-primary/90 backdrop-blur-sm w-full sm:w-auto border-0"
               onClick={handleTestNow}
               data-testid="button-test-now"
             >
