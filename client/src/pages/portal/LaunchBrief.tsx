@@ -468,7 +468,6 @@ export default function LaunchBrief() {
             form.method = "POST";
             form.action = checkout.data.action;
             form.target = "_blank"; // Open in new tab since PayFast doesn't work in iframes
-            form.style.display = "none";
             
             Object.entries(checkout.data.fields).forEach(([key, value]) => {
               const input = document.createElement("input");
@@ -480,12 +479,12 @@ export default function LaunchBrief() {
             
             document.body.appendChild(form);
             form.submit();
-            document.body.removeChild(form); // Clean up after submission
+            // Don't remove the form immediately - browser needs time to process
             
             // Show a message that payment is processing in new tab
             toast({
-              title: "Payment page opened",
-              description: "Complete your payment in the new tab. You can close this message.",
+              title: "Payment Window Opened",
+              description: "Complete your payment in the new tab.",
             });
             setIsRedirectingToPayment(false);
             return;
