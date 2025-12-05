@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,12 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { UserMinus } from "lucide-react";
+
+interface Company {
+  id: string;
+  name: string;
+}
 
 interface NewUserModalProps {
   open: boolean;
@@ -31,16 +37,35 @@ export default function NewUserModal({
 }: NewUserModalProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    company: "",
+    companyId: "independent", // "independent" means no company
     membershipTier: "STARTER",
     role: "MEMBER",
     status: "ACTIVE",
     creditsBasic: 0,
     creditsPro: 0,
   });
+
+  useEffect(() => {
+    if (open) {
+      fetchCompanies();
+    }
+  }, [open]);
+
+  const fetchCompanies = async () => {
+    try {
+      const res = await fetch("/api/admin/companies");
+      if (res.ok) {
+        const data = await res.json();
+        setCompanies(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch companies:", error);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -71,12 +96,18 @@ export default function NewUserModal({
 
     setLoading(true);
     try {
+      // Find company name if a company is selected
+      const selectedCompany = formData.companyId !== "independent" 
+        ? companies.find(c => c.id === formData.companyId)
+        : null;
+      
       const userData = {
         username: formData.email.split("@")[0],
         email: formData.email,
         password: Math.random().toString(36).slice(-10),
         name: formData.name || null,
-        company: formData.company || null,
+        company: selectedCompany?.name || null,
+        companyId: formData.companyId !== "independent" ? formData.companyId : null,
         membershipTier: formData.membershipTier,
         role: formData.role,
         status: formData.status,
@@ -102,7 +133,7 @@ export default function NewUserModal({
       setFormData({
         name: "",
         email: "",
-        company: "",
+        companyId: "independent",
         membershipTier: "STARTER",
         role: "MEMBER",
         status: "ACTIVE",
@@ -160,14 +191,27 @@ export default function NewUserModal({
 
             <div className="space-y-2">
               <Label htmlFor="company">Company</Label>
-              <Input
-                id="company"
-                name="company"
-                value={formData.company}
-                onChange={handleChange}
-                placeholder="e.g., Acme Corp"
-                data-testid="input-company"
-              />
+              <Select
+                value={formData.companyId}
+                onValueChange={(val) => handleSelectChange("companyId", val)}
+              >
+                <SelectTrigger data-testid="select-company">
+                  <SelectValue placeholder="Select company..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="independent">
+                    <div className="flex items-center gap-2">
+                      <UserMinus className="w-4 h-4 text-muted-foreground" />
+                      <span>Independent</span>
+                    </div>
+                  </SelectItem>
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">

@@ -1409,15 +1409,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/users/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
-      const { membershipTier, status, role, creditsBasic, creditsPro, companyId, name } = req.body;
+      const { membershipTier, status, role, creditsBasic, creditsPro, companyId, company, name } = req.body;
       
       const user = await storage.getUser(id);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
 
-      // Validate company exists if provided
-      if (companyId && companyId !== "none") {
+      // Validate company exists if provided (skip validation for "none" or "independent")
+      const isIndependent = companyId === "none" || companyId === "independent" || companyId === null;
+      if (companyId && !isIndependent) {
         const company = await storage.getCompany(companyId);
         if (!company) {
           return res.status(400).json({ error: "Company not found" });
@@ -1430,7 +1431,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: role || user.role,
         creditsBasic: creditsBasic !== undefined ? creditsBasic : user.creditsBasic,
         creditsPro: creditsPro !== undefined ? creditsPro : user.creditsPro,
-        companyId: companyId === "none" ? null : (companyId !== undefined ? companyId : user.companyId),
+        companyId: isIndependent ? null : (companyId !== undefined ? companyId : user.companyId),
+        company: isIndependent ? null : (company !== undefined ? company : user.company),
         name: name !== undefined ? name : user.name,
       });
 

@@ -57,7 +57,8 @@ import {
   Crown,
   Zap,
   FileSpreadsheet,
-  Trash2
+  Trash2,
+  UserMinus
 } from "lucide-react";
 import NewUserModal from "./NewUserModal";
 import { useToast } from "@/hooks/use-toast";
@@ -68,6 +69,7 @@ interface AdminUser {
   name: string | null;
   email: string;
   company: string | null;
+  companyId: string | null;
   membershipTier: string;
   role: string;
   status: string;
@@ -81,6 +83,11 @@ interface AdminUser {
   pulseSubscribed?: boolean;
   createdAt: string;
   lastLoginAt: string | null;
+}
+
+interface Company {
+  id: string;
+  name: string;
 }
 
 interface Subscription {
@@ -108,6 +115,7 @@ export default function AdminUsers() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<AdminUser[]>([]);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [search, setSearch] = useState("");
   const [tierFilter, setTierFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -123,9 +131,10 @@ export default function AdminUsers() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [usersRes, subsRes] = await Promise.all([
+      const [usersRes, subsRes, companiesRes] = await Promise.all([
         fetch("/api/admin/users"),
         fetch("/api/admin/subscriptions"),
+        fetch("/api/admin/companies"),
       ]);
       if (!usersRes.ok) throw new Error("Failed to fetch users");
       const usersData = await usersRes.json();
@@ -134,6 +143,11 @@ export default function AdminUsers() {
       if (subsRes.ok) {
         const subsData = await subsRes.json();
         setSubscriptions(subsData);
+      }
+
+      if (companiesRes.ok) {
+        const companiesData = await companiesRes.json();
+        setCompanies(companiesData);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load users");
@@ -559,18 +573,46 @@ export default function AdminUsers() {
               </SheetHeader>
 
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                      <Building2 className="w-4 h-4" />
-                      <span className="text-xs">Company</span>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-muted-foreground" />
+                      <Label className="text-sm">Company</Label>
                     </div>
-                    <p className="text-sm font-medium">{selectedUser.company || "—"}</p>
+                    <Select
+                      value={selectedUser.companyId || "independent"}
+                      onValueChange={(val) => {
+                        const selectedCompany = val !== "independent" 
+                          ? companies.find(c => c.id === val) 
+                          : null;
+                        handleUpdateUser(selectedUser.id, { 
+                          companyId: val !== "independent" ? val : null,
+                          company: selectedCompany?.name || null
+                        });
+                      }}
+                    >
+                      <SelectTrigger className="w-40" data-testid="drawer-select-company">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="independent">
+                          <div className="flex items-center gap-2">
+                            <UserMinus className="w-4 h-4 text-muted-foreground" />
+                            <span>Independent</span>
+                          </div>
+                        </SelectItem>
+                        {companies.map((company) => (
+                          <SelectItem key={company.id} value={company.id}>
+                            {company.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                      <DollarSign className="w-4 h-4" />
-                      <span className="text-xs">Total Spend</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="w-4 h-4 text-muted-foreground" />
+                      <Label className="text-sm">Total Spend</Label>
                     </div>
                     <p className="text-sm font-medium">{formatCurrency(selectedUser.totalSpend)}</p>
                   </div>
