@@ -28,6 +28,7 @@ export const users = pgTable("users", {
     .default("FREE"),
   status: varchar("status", { length: 20 }).notNull().default("ACTIVE"),
   role: varchar("role", { length: 20 }).notNull().default("MEMBER"),
+  memberType: varchar("member_type", { length: 20 }).notNull().default("companyUser"), // 'companyUser' or 'independent'
   creditsBasic: integer("credits_basic").notNull().default(0),
   creditsPro: integer("credits_pro").notNull().default(0),
   creditsInheritedFromCompany: boolean("credits_inherited_from_company").notNull().default(true),
@@ -60,6 +61,7 @@ export const insertUserSchema = createInsertSchema(users)
       .optional(),
     name: z.string().optional(),
     membershipTier: z.enum(["FREE", "STARTER", "GROWTH", "SCALE"]).default("FREE"),
+    memberType: z.enum(["companyUser", "independent"]).default("companyUser"),
     role: z.enum(["ADMIN", "DEAL_ADMIN", "MEMBER"]).default("MEMBER"),
   });
 

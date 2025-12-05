@@ -1,0 +1,203 @@
+The portal now supports free members, paid tiers, and company users. I need to add a first-class “Independent” member type for people who are not attached to a company (freelancers, consultants, etc) but still want access to reports and once-off studies.
+
+Please read everything carefully and then implement the changes step by step.
+
+Goal
+Create an Independent member type that:
+
+Does not require a company
+
+Shows clearly as “Independent” in the Admin → Members table
+
+Uses the same tier system (Free, Starter, Growth, Scale)
+
+Can access the Trends & Insights library according to tier
+
+Can launch briefs and pay once-off
+
+Does not appear as a Company under Admin → Companies
+
+Ignore Stripe completely. We are not using Stripe in this project.
+
+1. Data model changes
+Add a new field on members (users) to indicate member type. Call it something like:
+
+member_type in the database (text)
+
+memberType in TypeScript models
+
+Allowed values:
+
+"companyUser" – default, current behaviour
+
+"independent" – new type for people not linked to a company
+
+Defaults:
+
+For existing records: treat NULL as "companyUser"
+
+For new signups:
+
+If they are not assigned to a company, set member_type = "independent"
+
+membershipTier should still default to "free"
+
+Credits should default to 0 basic, 0 pro
+
+company_id should remain nullable:
+
+companyUser typically has a company_id
+
+independent must have company_id = NULL
+
+Please update:
+
+The members table migration / schema
+
+Any TypeScript types for Member, PortalMember, etc
+
+Any API responses that return member data
+
+2. Admin → Members UX updates
+File(s) to update:
+client/src/pages/portal/AdminMembers.tsx (and any related modals/components)
+
+2.1 Edit Member modal
+When I click Admin → Members → … → Edit Tier (or Edit Member), I want:
+
+A new field called “Member type” with a dropdown:
+
+Company user
+
+Independent
+
+Behaviour:
+
+If Member type = Company user:
+
+Show the Assign to Company dropdown as it currently exists
+
+If Member type = Independent:
+
+Set companyId to null
+
+Disable or hide the “Assign to Company” control
+
+Save the member with member_type = "independent"
+
+When saving:
+
+Update both membershipTier and memberType correctly
+
+Leave credits unchanged unless I edit them separately
+
+2.2 Members table display
+In the Admin → Members table:
+
+Company column rules:
+
+If memberType = "independent":
+
+Show “Independent” instead of the dash
+
+If memberType = "companyUser" and company exists:
+
+Show the company name (current behaviour)
+
+If memberType = "companyUser" and no company:
+
+Show — (dash) as before
+
+2.3 Company filter
+In the All Companies filter dropdown:
+
+Add an option called “Independent”
+
+Behaviour:
+
+All Companies – show all members
+
+A specific company – filter by that companyId (current behaviour)
+
+Independent – show only members where member_type = "independent"
+
+3. Signup / default behaviour
+Wherever a new portal member is created (signup endpoint):
+
+Set:
+
+member_type = "independent" if there is no company assignment
+
+membershipTier = "free" by default
+
+Credits: 0 basic, 0 pro
+
+This matches how I want “freelancer” users to start:
+
+Free tier
+
+No company
+
+Independent member type
+
+Please check all code paths where members are created (signup, admin invite, manual creation) and ensure:
+
+If a company is provided, use member_type = "companyUser"
+
+If no company is provided, use member_type = "independent"
+
+4. My Research and access rules
+Do not change the company logic in My Research right now.
+
+For this iteration:
+
+companyUser members keep their current My Research behaviour (company studies)
+
+independent members:
+
+If they have no studies, they see the usual empty state
+
+You do not need to add any special extra behaviour yet
+
+Trends & Insights access for independent members should still be based purely on membershipTier and accessLevel, using the rules you implemented earlier (Free vs locked member content with tease modal).
+
+5. Safety checks and tests
+Please add some basic checks or console logs to verify:
+
+Creating a brand new signup with no company:
+
+Shows as Free and Independent in Admin → Members
+
+Company column shows “Independent”
+
+All Companies filter → “Independent” shows them
+
+Converting an existing member from company user to independent:
+
+Sets member_type = "independent"
+
+Clears companyId
+
+Company column updates to “Independent”
+
+Converting back from independent to company user:
+
+member_type = "companyUser"
+
+Allows selecting a company again
+
+No new “Independent” entries appear in Admin → Companies. These members must not create a fake company.
+
+When you are done, summarise:
+
+Which files you changed
+
+How to:
+
+Create an independent member
+
+Filter for independent members in Admin → Members
+
+Switch a member between independent and company user
+
+Again, please ignore any Stripe test keys or Stripe setup prompts; we are not using Stripe.
