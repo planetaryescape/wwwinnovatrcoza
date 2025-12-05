@@ -55,6 +55,25 @@ const briefFileUpload = multer({
   },
 });
 
+// Multer for report file uploads - supports PDF and PPTX
+const reportFileUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max for reports
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/vnd.ms-powerpoint",
+      "image/jpeg", "image/png", "image/gif", "image/webp",
+    ];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error(`Invalid file type: ${file.mimetype}. Supported types: PDF, PowerPoint (PPTX, PPT), and images.`));
+    }
+  },
+});
+
 // Helper to check if user is admin
 const isAdminUser = (email?: string) => {
   return email === "hannah@innovatr.co.za" || email === "richard@innovatr.co.za";
@@ -1649,6 +1668,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get single report by slug
+  app.get("/api/reports/:slug", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const reports = await storage.getAllReports();
+      const report = reports.find(r => 
+        r.slug === slug && 
+        r.status === "published" && 
+        !r.isArchived
+      );
+      
+      if (!report) {
+        return res.status(404).json({ error: "Report not found" });
+      }
+      
+      res.json(report);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Member reports endpoint (authenticated, includes client-specific reports)
   app.get("/api/member/reports", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
@@ -1710,6 +1750,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Report not found" });
       }
       await storage.updateReport(id, req.body);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Report file upload endpoint (PDF, PPTX, images)
+  app.post("/api/admin/reports/upload", requireAdmin, reportFileUpload.single("file"), async (req: AuthenticatedRequest, res) => {
+    try {
+      const file = req.file;
+      const fileType = req.body.fileType || "pdf"; // "pdf", "thumbnail", "cover"
+      
+      if (!file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      const timestamp = Date.now();
+      const originalName = file.originalname;
+      const lastDotIndex = originalName.lastIndexOf(".");
+      const baseName = lastDotIndex > 0 ? originalName.slice(0, lastDotIndex) : originalName;
+      const extension = lastDotIndex > 0 ? originalName.slice(lastDotIndex) : "";
+      
+      // Sanitize filename
+      const sanitizedBaseName = baseName
+        .replace(/[^a-zA-Z0-9._-]/g, "-")
+        .replace(/--+/g, "-")
+        .replace(/^-|-$/g, "")
+        .slice(0, 100);
+      
+      // Determine storage path based on file type
+      let storagePath: string;
+      if (fileType === "thumbnail" || fileType === "cover") {
+        storagePath = `reports/images/${sanitizedBaseName}_${timestamp}${extension}`;
+      } else {
+        storagePath = `reports/${sanitizedBaseName}_${timestamp}${extension}`;
+      }
+
+      // Upload to object storage
+      await uploadFile(file.buffer, storagePath);
+
+      // Return the URL path
+      const fileUrl = `/api/files/${storagePath}`;
+      
+      res.json({
+        success: true,
+        url: fileUrl,
+        fileName: originalName,
+        fileSize: file.size,
+        mimeType: file.mimetype,
+      });
+    } catch (error: any) {
+      console.error("Report file upload error:", error);
+      res.status(500).json({ error: error.message || "File upload failed" });
+    }
+  });
+
+  // Delete report
+  app.delete("/api/admin/reports/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const report = await storage.getReport(id);
+      if (!report) {
+        return res.status(404).json({ error: "Report not found" });
+      }
+      
+      // Soft delete by archiving
+      await storage.updateReport(id, { isArchived: true, status: "archived" });
       res.json({ success: true });
     } catch (error: any) {
       res.status(400).json({ error: error.message });

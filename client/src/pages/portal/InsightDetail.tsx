@@ -3,10 +3,9 @@ import { useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Download, ArrowLeft, Calendar, Briefcase, Lock, Crown, CreditCard, LogIn, Play, ChevronUp, FileText } from "lucide-react";
+import { Download, ArrowLeft, Calendar, Briefcase, Lock, Crown, CreditCard, LogIn, Play, ChevronUp, FileText, ExternalLink, Loader2 } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { Link } from "wouter";
-import reportsData from "@/data/reports.json";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import insightsHeader from "@assets/insights-header_1764322405058.png";
@@ -52,28 +51,34 @@ type AccessLevel = "public" | "member" | "tier" | "paid";
 type CreditType = "none" | "basic" | "pro";
 
 interface Report {
-  id: number;
+  id: number | string;
   category: string;
   series?: string;
   displayCategories?: string[];
   industry: string;
   date: string;
   publishDate?: string;
-  status?: "live" | "scheduled" | "draft";
+  status?: "live" | "scheduled" | "draft" | "published";
   title: string;
   teaser: string;
   slug: string;
   coverImage: string;
   pdfPath: string | null;
+  pdfUrl?: string | null;
+  dashboardLink?: string | null;
+  coverImageUrl?: string | null;
   hasDownload?: boolean;
   videoPaths?: string[];
   tags: string[];
+  topics?: string[];
   isNew: boolean;
   access?: "free" | "members";
   accessLevel?: string;
   allowedTiers?: string[];
   creditType?: CreditType;
   creditCost?: number;
+  bodyContent?: string | null;
+  previewText?: string | null;
   content?: {
     intro: string;
     sections: ReportSection[];
@@ -342,18 +347,71 @@ export default function InsightDetail() {
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [report, setReport] = useState<Report | null>(null);
+  const [relatedReports, setRelatedReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const report = (reportsData as Report[]).find((r) => r.slug === params?.slug);
+  useEffect(() => {
+    const fetchReport = async () => {
+      if (!params?.slug) return;
+      
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/reports/${encodeURIComponent(params.slug)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setReport({
+            ...data,
+            coverImage: data.coverImageUrl || getCoverImage(data.category),
+            pdfPath: data.pdfUrl,
+            tags: data.tags || data.topics || [],
+            isNew: data.isNew ?? false,
+          });
+        } else {
+          setReport(null);
+        }
+      } catch (error) {
+        console.error("Failed to fetch report:", error);
+        setReport(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchReport();
+  }, [params?.slug]);
+
+  useEffect(() => {
+    const fetchRelated = async () => {
+      if (!report) return;
+      
+      try {
+        const res = await fetch("/api/reports");
+        if (res.ok) {
+          const data = await res.json();
+          const formatted = data
+            .filter((r: any) => r.id !== report.id && (r.category === report.category || (r.tags || r.topics || []).some((t: string) => report.tags.includes(t))))
+            .slice(0, 3)
+            .map((r: any) => ({
+              ...r,
+              coverImage: r.coverImageUrl || getCoverImage(r.category),
+              pdfPath: r.pdfUrl,
+              tags: r.tags || r.topics || [],
+              isNew: r.isNew ?? false,
+            }));
+          setRelatedReports(formatted);
+        }
+      } catch (error) {
+        console.error("Failed to fetch related reports:", error);
+      }
+    };
+    
+    fetchRelated();
+  }, [report?.id, report?.category, report?.tags]);
 
   const accessResult = report 
     ? checkReportAccess(report, user as { membershipTier?: string; creditsBasic?: number; creditsPro?: number } | null)
     : { hasAccess: true, reason: "public" as const };
-
-  const relatedReports = report 
-    ? (reportsData as Report[])
-        .filter((r) => r.id !== report.id && (r.category === report.category || r.tags.some(t => report.tags.includes(t))))
-        .slice(0, 3)
-    : [];
 
   // Show back to top button after scrolling down one viewport height
   useEffect(() => {
@@ -387,6 +445,19 @@ export default function InsightDetail() {
   const handlePurchaseCredits = () => {
     setLocation("/portal/billing");
   };
+
+  if (loading) {
+    return (
+      <PortalLayout>
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="flex items-center gap-3">
+            <Loader2 className="w-6 h-6 animate-spin text-[#5B6EF7]" />
+            <span className="text-muted-foreground">Loading report...</span>
+          </div>
+        </div>
+      </PortalLayout>
+    );
+  }
 
   if (!report) {
     return (
@@ -519,8 +590,8 @@ export default function InsightDetail() {
             {report.teaser}
           </p>
 
-          {/* Jump to report link - visible when there's a downloadable report */}
-          {report.pdfPath && (
+          {/* Jump to report link - visible when there's a downloadable report or dashboard */}
+          {(report.pdfPath || report.dashboardLink) && (
             <div className="mb-8">
               <button
                 onClick={scrollToDownload}
@@ -574,7 +645,7 @@ export default function InsightDetail() {
                 </article>
               )}
 
-              {report.pdfPath && (
+              {(report.pdfPath || report.dashboardLink) && (
                 <div id="report-download" className="mt-12 pt-8 border-t border-gray-100 text-center">
                   <h3 
                     className="text-2xl font-bold mb-2 text-gray-900"
@@ -583,18 +654,34 @@ export default function InsightDetail() {
                     Go deeper with the full report
                   </h3>
                   <p className="text-gray-600 mb-6">
-                    This article gives you the full story. If you need all diagnostics, numbers, and charts, download the full research report.
+                    This article gives you the full story. If you need all diagnostics, numbers, and charts, access the full research report.
                   </p>
-                  <Button 
-                    size="lg"
-                    onClick={handleDownload}
-                    className="rounded-full"
-                    style={{ backgroundColor: '#5B6EF7' }}
-                    data-testid="button-download-footer"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Download full report
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    {report.pdfPath && (
+                      <Button 
+                        size="lg"
+                        onClick={handleDownload}
+                        className="rounded-full"
+                        style={{ backgroundColor: '#5B6EF7' }}
+                        data-testid="button-download-footer"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Download full report
+                      </Button>
+                    )}
+                    {report.dashboardLink && (
+                      <Button 
+                        size="lg"
+                        onClick={() => window.open(report.dashboardLink!, '_blank')}
+                        variant="outline"
+                        className="rounded-full border-[#5B6EF7] text-[#5B6EF7] hover:bg-[#5B6EF7]/10"
+                        data-testid="button-open-dashboard"
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Open Interactive Dashboard
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
 

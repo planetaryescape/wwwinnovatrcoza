@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -30,7 +30,13 @@ import {
   Eye,
   Download,
   TrendingUp,
-  Zap
+  Zap,
+  Upload,
+  Image,
+  ExternalLink,
+  Loader2,
+  X,
+  FileIcon
 } from "lucide-react";
 
 interface ReportData {
@@ -60,6 +66,9 @@ interface ReportData {
   isFeatured?: boolean;
   publishAt?: string;
   unpublishAt?: string;
+  dashboardLink?: string | null;
+  coverImageUrl?: string | null;
+  thumbnailUrl?: string | null;
 }
 
 interface ReportEditorModalProps {
@@ -86,6 +95,8 @@ const defaultFormData = {
   creditCost: 0,
   isFeatured: false,
   pdfUrl: "",
+  dashboardLink: "",
+  coverImageUrl: "",
   publishAt: "",
   unpublishAt: "",
 };
@@ -100,6 +111,10 @@ export default function ReportEditorModal({
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("content");
   const [formData, setFormData] = useState(defaultFormData);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const isEditing = !!report;
 
@@ -121,7 +136,9 @@ export default function ReportEditorModal({
         creditType: report.creditType || "none",
         creditCost: report.creditCost || 0,
         isFeatured: report.isFeatured || false,
-        pdfUrl: "",
+        pdfUrl: report.pdfUrl || "",
+        dashboardLink: report.dashboardLink || "",
+        coverImageUrl: report.coverImageUrl || "",
         publishAt: report.publishAt?.split("T")[0] || "",
         unpublishAt: report.unpublishAt?.split("T")[0] || "",
       });
@@ -129,6 +146,8 @@ export default function ReportEditorModal({
       setFormData(defaultFormData);
     }
     setActiveTab("content");
+    setUploadingPdf(false);
+    setUploadingImage(false);
   }, [report, open]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -168,6 +187,96 @@ export default function ReportEditorModal({
     setFormData({ ...formData, slug });
   };
 
+  const handleFileUpload = async (file: File, fileType: "pdf" | "cover" | "thumbnail") => {
+    const formDataPayload = new FormData();
+    formDataPayload.append("file", file);
+    formDataPayload.append("fileType", fileType);
+
+    const response = await fetch("/api/admin/reports/upload", {
+      method: "POST",
+      body: formDataPayload,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Upload failed");
+    }
+
+    return response.json();
+  };
+
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = [
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/vnd.ms-powerpoint",
+    ];
+    
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a PDF or PowerPoint file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploadingPdf(true);
+    try {
+      const result = await handleFileUpload(file, "pdf");
+      setFormData({ ...formData, pdfUrl: result.url });
+      toast({
+        title: "File uploaded",
+        description: `${result.fileName} uploaded successfully`,
+      });
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "Could not upload file",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingPdf(false);
+      if (pdfInputRef.current) pdfInputRef.current.value = "";
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const result = await handleFileUpload(file, "cover");
+      setFormData({ ...formData, coverImageUrl: result.url });
+      toast({
+        title: "Image uploaded",
+        description: `${result.fileName} uploaded successfully`,
+      });
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "Could not upload image",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingImage(false);
+      if (imageInputRef.current) imageInputRef.current.value = "";
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -199,6 +308,8 @@ export default function ReportEditorModal({
         creditCost: formData.creditCost,
         isFeatured: formData.isFeatured,
         pdfUrl: formData.pdfUrl || null,
+        dashboardLink: formData.dashboardLink || null,
+        coverImageUrl: formData.coverImageUrl || null,
         publishAt: formData.publishAt ? new Date(formData.publishAt) : null,
         unpublishAt: formData.unpublishAt ? new Date(formData.unpublishAt) : null,
       };
@@ -393,20 +504,156 @@ export default function ReportEditorModal({
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="pdfUrl">PDF URL (optional)</Label>
-                <Input
-                  id="pdfUrl"
-                  name="pdfUrl"
-                  value={formData.pdfUrl}
-                  onChange={handleChange}
-                  placeholder="https://example.com/report.pdf"
-                  type="url"
-                  data-testid="input-pdf-url"
-                />
+              <Separator className="my-4" />
+              
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Report Files</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>PDF/PowerPoint Upload</Label>
+                    <input
+                      ref={pdfInputRef}
+                      type="file"
+                      accept=".pdf,.pptx,.ppt"
+                      onChange={handlePdfUpload}
+                      className="hidden"
+                      data-testid="input-pdf-file"
+                    />
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => pdfInputRef.current?.click()}
+                        disabled={uploadingPdf}
+                        className="flex-shrink-0"
+                        data-testid="button-upload-pdf"
+                      >
+                        {uploadingPdf ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4 mr-2" />
+                            Upload File
+                          </>
+                        )}
+                      </Button>
+                      {formData.pdfUrl && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded flex-1 min-w-0">
+                          <FileIcon className="w-4 h-4 flex-shrink-0" />
+                          <span className="truncate">{formData.pdfUrl.split('/').pop()}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 flex-shrink-0"
+                            onClick={() => setFormData({ ...formData, pdfUrl: "" })}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Or enter URL manually:
+                    </p>
+                    <Input
+                      id="pdfUrl"
+                      name="pdfUrl"
+                      value={formData.pdfUrl}
+                      onChange={handleChange}
+                      placeholder="https://example.com/report.pdf"
+                      className="text-sm"
+                      data-testid="input-pdf-url"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Cover Image</Label>
+                    <input
+                      ref={imageInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      data-testid="input-cover-image"
+                    />
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => imageInputRef.current?.click()}
+                        disabled={uploadingImage}
+                        className="flex-shrink-0"
+                        data-testid="button-upload-image"
+                      >
+                        {uploadingImage ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Image className="w-4 h-4 mr-2" />
+                            Upload Image
+                          </>
+                        )}
+                      </Button>
+                      {formData.coverImageUrl && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded flex-1 min-w-0">
+                          <Image className="w-4 h-4 flex-shrink-0" />
+                          <span className="truncate">{formData.coverImageUrl.split('/').pop()}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 flex-shrink-0"
+                            onClick={() => setFormData({ ...formData, coverImageUrl: "" })}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    {formData.coverImageUrl && (
+                      <div className="mt-2 relative w-32 h-20 rounded overflow-hidden bg-gray-100 dark:bg-gray-800">
+                        <img 
+                          src={formData.coverImageUrl} 
+                          alt="Cover preview" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="dashboardLink">External Dashboard Link</Label>
+                  <div className="flex items-center gap-2">
+                    <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="dashboardLink"
+                      name="dashboardLink"
+                      value={formData.dashboardLink}
+                      onChange={handleChange}
+                      placeholder="https://app.powerbi.com/... or Google Data Studio link"
+                      data-testid="input-dashboard-link"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Link to external dashboard (Power BI, Google Data Studio, Tableau, etc.)
+                  </p>
+                </div>
               </div>
 
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <Separator className="my-4" />
+
+              <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <Switch
                   id="isFeatured"
                   checked={formData.isFeatured}

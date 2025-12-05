@@ -380,6 +380,8 @@ export const reports = pgTable("reports", {
   topics: text("topics").array().default([]),
   pdfUrl: text("pdf_url"),
   thumbnailUrl: text("thumbnail_url"),
+  coverImageUrl: text("cover_image_url"),
+  dashboardUrl: text("dashboard_url"),
   accessLevel: varchar("access_level", { length: 20 })
     .notNull()
     .default("public"),
