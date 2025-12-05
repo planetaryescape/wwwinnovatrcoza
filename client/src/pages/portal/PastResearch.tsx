@@ -674,8 +674,7 @@ export default function PastResearch() {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                onClick={() => study.reportUrl && window.open(study.reportUrl, '_blank')}
-                                disabled={!study.reportUrl}
+                                onClick={() => window.open('https://diginsights.com/upsiide/', '_blank')}
                                 data-testid={`button-view-study-${study.id}`}
                               >
                                 <Eye className="w-4 h-4 mr-1" />
@@ -743,8 +742,7 @@ export default function PastResearch() {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                onClick={() => handleViewDashboard(report)}
-                                disabled={!report.dashboardUrl}
+                                onClick={() => window.open('https://diginsights.com/upsiide/', '_blank')}
                                 data-testid={`button-view-${report.id}`}
                               >
                                 <Eye className="w-4 h-4 mr-1" />
@@ -801,8 +799,7 @@ export default function PastResearch() {
                                 <Button 
                                   variant="outline" 
                                   size="sm"
-                                  onClick={() => study.reportUrl && window.open(study.reportUrl, '_blank')}
-                                  disabled={!study.reportUrl}
+                                  onClick={() => window.open('https://diginsights.com/upsiide/', '_blank')}
                                   data-testid={`button-view-study-${study.id}`}
                                 >
                                   <Eye className="w-4 h-4 mr-1" />
@@ -862,8 +859,7 @@ export default function PastResearch() {
                                 <Button 
                                   variant="outline" 
                                   size="sm"
-                                  onClick={() => handleViewDashboard(report)}
-                                  disabled={!report.dashboardUrl}
+                                  onClick={() => window.open('https://diginsights.com/upsiide/', '_blank')}
                                   data-testid={`button-view-${report.id}`}
                                 >
                                   <Eye className="w-4 h-4 mr-1" />
