@@ -356,6 +356,7 @@ export default function TrendsInsights() {
   const [refreshing, setRefreshing] = useState(false);
   const [teaseModalOpen, setTeaseModalOpen] = useState(false);
   const [teaseReport, setTeaseReport] = useState<Report | null>(null);
+  const [, navigate] = useLocation();
   const { user } = useAuth();
   const userTier = user?.membershipTier;
   const userCompanyId = user?.companyId;
@@ -363,6 +364,10 @@ export default function TrendsInsights() {
   const handleLockedClick = (report: Report) => {
     setTeaseReport(report);
     setTeaseModalOpen(true);
+  };
+  
+  const handleUnlockedClick = (report: Report) => {
+    navigate(`/portal/insights/${report.slug}`);
   };
   
   useScrollRestoration("trends-insights");
@@ -583,7 +588,7 @@ export default function TrendsInsights() {
                 return (
                   <div 
                     key={report.id} 
-                    onClick={() => isLocked ? handleLockedClick(report) : window.location.href = `/portal/trends/${report.slug}`}
+                    onClick={() => isLocked ? handleLockedClick(report) : handleUnlockedClick(report)}
                     className="flex items-center gap-4 p-4 border rounded-lg hover-elevate bg-card cursor-pointer" 
                     data-testid={`list-report-${report.id}`}
                   >
