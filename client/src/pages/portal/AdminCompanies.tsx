@@ -486,7 +486,6 @@ export default function AdminCompanies() {
                   <TableHead>Contract</TableHead>
                   <TableHead>Basic Credits</TableHead>
                   <TableHead>Pro Credits</TableHead>
-                  <TableHead>Monthly Fee</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
@@ -517,7 +516,6 @@ export default function AdminCompanies() {
                       <TableCell>
                         <span className="font-medium">{company.proCreditsTotal - company.proCreditsUsed}</span>
                       </TableCell>
-                      <TableCell>{company.monthlyFee ? formatCurrency(company.monthlyFee) : "—"}</TableCell>
                       <TableCell>
                         <Button 
                           variant="ghost" 
