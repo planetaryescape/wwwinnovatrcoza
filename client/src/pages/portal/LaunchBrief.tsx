@@ -463,29 +463,41 @@ export default function LaunchBrief() {
           
           // Handle PayFast form redirect - data is nested under checkout.data
           if (checkout.type === "form" && checkout.data?.action && checkout.data?.fields) {
-            // Create a form and submit it to PayFast in a new tab
-            const form = document.createElement("form");
-            form.method = "POST";
-            form.action = checkout.data.action;
-            form.target = "_blank"; // Open in new tab since PayFast doesn't work in iframes
-            
-            Object.entries(checkout.data.fields).forEach(([key, value]) => {
-              const input = document.createElement("input");
-              input.type = "hidden";
-              input.name = key;
-              input.value = String(value);
-              form.appendChild(input);
-            });
-            
-            document.body.appendChild(form);
-            form.submit();
-            // Don't remove the form immediately - browser needs time to process
-            
-            // Show a message that payment is processing in new tab
-            toast({
-              title: "Payment Window Opened",
-              description: "Complete your payment in the new tab.",
-            });
+            // Open new window and write form directly to it
+            const paymentWindow = window.open("", "_blank");
+            if (paymentWindow) {
+              // Build form HTML
+              const fieldsHtml = Object.entries(checkout.data.fields)
+                .map(([key, value]) => `<input type="hidden" name="${key}" value="${String(value).replace(/"/g, '&quot;')}" />`)
+                .join("");
+              
+              paymentWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head><title>Redirecting to PayFast...</title></head>
+                <body>
+                  <p>Redirecting to PayFast payment page...</p>
+                  <form id="payfast-form" method="POST" action="${checkout.data.action}">
+                    ${fieldsHtml}
+                  </form>
+                  <script>document.getElementById('payfast-form').submit();</script>
+                </body>
+                </html>
+              `);
+              paymentWindow.document.close();
+              
+              toast({
+                title: "Payment Window Opened",
+                description: "Complete your payment in the new tab.",
+              });
+            } else {
+              // Popup was blocked
+              toast({
+                title: "Popup Blocked",
+                description: "Please allow popups for this site and try again.",
+                variant: "destructive",
+              });
+            }
             setIsRedirectingToPayment(false);
             return;
           }
