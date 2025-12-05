@@ -199,7 +199,7 @@ const PRO_MEMBER_PRICE = 45000;
 const PRO_STANDARD_PRICE = 50000;
 
 export default function LaunchBrief() {
-  const { user, company, isMember, isFreeUser } = useAuth();
+  const { user, company, isPaidMember, isFreeUser } = useAuth();
   const [, setLocationHook] = useLocation();
   const queryClient = useQueryClient();
   const [selectedBrief, setSelectedBrief] = useState<BriefType>(null);
@@ -1504,7 +1504,7 @@ export default function LaunchBrief() {
               </div>
 
               {/* Use My Credits Option */}
-              {isMember && company && (
+              {isPaidMember && company && (
                 <div className="flex items-start space-x-3">
                   <RadioGroupItem 
                     value="credits" 

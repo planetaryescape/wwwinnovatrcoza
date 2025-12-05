@@ -270,7 +270,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       const targetUser = await res.json();
       const tierMap: Record<string, UserTier> = {
-        STARTER: "free",
+        STARTER: "starter",
         GROWTH: "growth",
         SCALE: "scale",
       };
@@ -312,7 +312,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       const company = await companyRes.json();
       const tierMap: Record<string, UserTier> = {
-        STARTER: "free",
+        STARTER: "starter",
         GROWTH: "growth",
         SCALE: "scale",
       };

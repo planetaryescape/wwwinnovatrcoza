@@ -96,7 +96,7 @@ interface PortalLayoutProps {
 
 export default function PortalLayout({ children }: PortalLayoutProps) {
   const [location, setLocation] = useLocation();
-  const { user, logout, isAuthenticated, isMember, isAdmin, isFreeUser, impersonation, exitImpersonation, isViewingAsCompany, viewingCompanyName } = useAuth();
+  const { user, logout, isAuthenticated, isPaidMember, isAdmin, impersonation, exitImpersonation, isViewingAsCompany, viewingCompanyName } = useAuth();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -118,12 +118,12 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
   };
 
   const getTierColor = (tier: string) => {
-    switch (tier?.toLowerCase()) {
-      case "scale":
+    switch (tier?.toUpperCase()) {
+      case "SCALE":
         return "bg-primary text-primary-foreground";
-      case "growth":
+      case "GROWTH":
         return "bg-accent text-accent-foreground";
-      case "starter":
+      case "STARTER":
         return "bg-primary/60 text-primary-foreground";
       default:
         return "bg-muted text-muted-foreground";
@@ -157,10 +157,10 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                     {user?.company || user?.email}
                   </p>
                   <Badge 
-                    className={`${isAdmin ? 'bg-primary text-primary-foreground' : isMember ? getTierColor(user?.tier || 'starter') : 'bg-muted text-muted-foreground'} text-xs`}
-                    data-testid={`badge-member-tier-${isAdmin ? 'admin' : user?.tier || 'free'}`}
+                    className={`${isAdmin ? 'bg-primary text-primary-foreground' : isPaidMember ? getTierColor(user?.membershipTier || 'STARTER') : 'bg-muted text-muted-foreground'} text-xs`}
+                    data-testid={`badge-member-tier-${isAdmin ? 'admin' : user?.membershipTier?.toLowerCase() || 'free'}`}
                   >
-                    {isAdmin ? 'ADMIN' : isMember ? `${user?.tier?.toUpperCase()} Member` : 'FREE TIER'}
+                    {isAdmin ? 'ADMIN' : isPaidMember ? `${user?.membershipTier?.toUpperCase() || 'STARTER'} MEMBER` : 'FREE TIER'}
                   </Badge>
                 </div>
               </div>
@@ -170,7 +170,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                   {menuItems.map((item) => {
                     // Hide admin items for non-admins AND during impersonation mode
                     if (item.adminOnly && (!isAdmin || impersonation.isImpersonating)) return null;
-                    const isLocked = !isMember && item.lockedForFree;
+                    const isLocked = !isPaidMember && item.lockedForFree;
                     const isActive = item.url === "/portal" 
                       ? (location === "/portal" || location === "/portal/dashboard")
                       : location === item.url;

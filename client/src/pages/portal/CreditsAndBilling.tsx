@@ -76,7 +76,7 @@ const mockBillingHistory = [
 
 export default function CreditsAndBilling() {
   const [, setLocation] = useLocation();
-  const { isMember, user, company: authCompany } = useAuth();
+  const { isPaidMember, user, company: authCompany } = useAuth();
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [selectedPack, setSelectedPack] = useState<typeof mockCreditPackages[0] | null>(null);
 
@@ -202,7 +202,7 @@ export default function CreditsAndBilling() {
   const proPercentage = proCredits.total > 0 ? (proCredits.remaining / proCredits.total) * 100 : 0;
 
   // Free users can access this page to purchase memberships/credits
-  if (!isMember) {
+  if (!isPaidMember) {
     return (
       <PortalLayout>
         <div className="p-6 max-w-7xl mx-auto space-y-6">

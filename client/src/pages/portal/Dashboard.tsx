@@ -61,7 +61,7 @@ const mockCredits = {
 function canAccessReport(
   report: Report,
   userTier: string | undefined,
-  isMember: boolean
+  isPaidMember: boolean
 ): boolean {
   const accessLevel = (report.accessLevel || "PUBLIC").toUpperCase();
   const accessField = (report.access || "free").toLowerCase();
@@ -70,24 +70,13 @@ function canAccessReport(
     return true;
   }
   
-  if (!isMember) {
+  // Paid members (STARTER, GROWTH, SCALE) have full access to all content
+  if (!isPaidMember) {
     return false;
   }
   
-  if (accessLevel === "STARTER" || accessLevel === "MEMBER" || accessField === "members") {
-    return true;
-  }
-  
-  const tierHierarchy: Record<string, number> = {
-    "STARTER": 1,
-    "GROWTH": 2,
-    "SCALE": 3,
-  };
-  
-  const userLevel = tierHierarchy[userTier?.toUpperCase() || "STARTER"] || 1;
-  const requiredLevel = tierHierarchy[accessLevel] || 1;
-  
-  return userLevel >= requiredLevel;
+  // All paid members can access all content - no tier hierarchy
+  return true;
 }
 
 function isNewReport(publishDate: string): boolean {
@@ -100,11 +89,11 @@ function isNewReport(publishDate: string): boolean {
 function getRecommendedReports(
   reports: Report[],
   userTier: string | undefined,
-  isMember: boolean,
+  isPaidMember: boolean,
   userIndustry: string | undefined
 ): Report[] {
   const accessibleReports = reports.filter(report => 
-    report.status === "live" && canAccessReport(report, userTier, isMember)
+    report.status === "live" && canAccessReport(report, userTier, isPaidMember)
   );
   
   const sortedByDate = [...accessibleReports].sort(
@@ -154,7 +143,7 @@ const mockDeals = [
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
-  const { user, isMember } = useAuth();
+  const { user, isPaidMember } = useAuth();
 
   const { data: company, isLoading: isLoadingCompany } = useQuery<Company>({
     queryKey: ["/api/member/company", user?.companyId],
@@ -177,10 +166,10 @@ export default function Dashboard() {
     return getRecommendedReports(
       reportsData as Report[],
       user?.membershipTier,
-      isMember,
+      isPaidMember,
       userIndustry
     );
-  }, [user?.membershipTier, isMember, userIndustry]);
+  }, [user?.membershipTier, isPaidMember, userIndustry]);
 
   const handleReportClick = (report: Report, event: React.MouseEvent) => {
     event.stopPropagation();
@@ -211,16 +200,16 @@ export default function Dashboard() {
         <div className="mb-8" data-testid="section-welcome">
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-4xl font-serif font-bold" data-testid="text-welcome-name">
-              Welcome{isMember ? " back" : ""}, {user?.name}
+              Welcome{isPaidMember ? " back" : ""}, {user?.name}
             </h1>
-            {!isMember && (
+            {!isPaidMember && (
               <Badge variant="secondary" className="text-sm" data-testid="badge-free-account">
                 Free Account
               </Badge>
             )}
           </div>
           <p className="text-lg text-muted-foreground" data-testid="text-welcome-subtitle">
-            {isMember ? "Your research command centre" : "You're exploring the Innovatr Portal"}
+            {isPaidMember ? "Your research command centre" : "You're exploring the Innovatr Portal"}
           </p>
         </div>
 
@@ -291,7 +280,7 @@ export default function Dashboard() {
             {user?.companyId && <CompanyCreditsCard companyId={user.companyId} />}
 
             {/* Credit Summary Widget */}
-            {isMember && !user?.companyId ? (
+            {isPaidMember && !user?.companyId ? (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2" data-testid="text-credits-title">
@@ -376,7 +365,7 @@ export default function Dashboard() {
             ) : null}
 
             {/* Personalized Recommendations Feed */}
-            {isMember ? (
+            {isPaidMember ? (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -485,7 +474,7 @@ export default function Dashboard() {
           {/* Right Column - Deals & Notifications */}
           <div className="space-y-6">
             {/* Member Deals Box */}
-            {isMember ? (
+            {isPaidMember ? (
               <Card className="border-primary">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -549,7 +538,7 @@ export default function Dashboard() {
             )}
 
             {/* Quick Stats */}
-            {isMember ? (
+            {isPaidMember ? (
               <Card>
                 <CardHeader>
                   <CardTitle className="text-sm">Your Activity</CardTitle>
