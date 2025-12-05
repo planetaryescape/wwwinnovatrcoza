@@ -207,9 +207,29 @@ export default function PastResearch() {
     });
   };
 
-  const handleDownload = (report: ClientReport) => {
-    if (report.pdfUrl) {
-      window.open(report.pdfUrl, '_blank');
+  const handleDownload = async (report: ClientReport) => {
+    if (!report.pdfUrl) return;
+    
+    try {
+      // Fetch the file from the API
+      const response = await fetch(`/api/files/${encodeURIComponent(report.pdfUrl)}`);
+      if (!response.ok) throw new Error('Download failed');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary link and trigger download
+      const a = document.createElement('a');
+      a.href = url;
+      // Extract filename from path or use report title
+      const fileName = report.pdfUrl.split('/').pop() || `${report.title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download failed:', error);
     }
   };
 
