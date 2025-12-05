@@ -23,7 +23,7 @@
  * - If backend expects different formats, modify only the handleSubmit function.
  */
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -234,6 +234,18 @@ export default function LaunchBrief() {
     subscribeUpdates: false,
   });
   const { toast } = useToast();
+
+  // Pre-populate client details from user and company data
+  useEffect(() => {
+    if (user || company) {
+      setFormData(prev => ({
+        ...prev,
+        clientName: prev.clientName || user?.name || "",
+        clientEmail: prev.clientEmail || user?.email || "",
+        clientCompany: prev.clientCompany || company?.name || user?.company || "",
+      }));
+    }
+  }, [user, company]);
 
   // Credit calculations
   const basicCreditsRemaining = company ? getBasicCreditsRemaining(company) : 0;
