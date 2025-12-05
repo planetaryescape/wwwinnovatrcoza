@@ -23,7 +23,7 @@
  * - If backend expects different formats, modify only the handleSubmit function.
  */
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, MutableRefObject } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -210,6 +210,7 @@ export default function LaunchBrief() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLDivElement>(null);
+  const paymentWindowRef = useRef<Window | null>(null);
 
   // Concepts state
   const [concepts, setConcepts] = useState<Concept[]>([
@@ -463,14 +464,16 @@ export default function LaunchBrief() {
           
           // Handle PayFast form redirect - data is nested under checkout.data
           if (checkout.type === "form" && checkout.data?.action && checkout.data?.fields) {
-            // Open new window and write form directly to it
-            const paymentWindow = window.open("", "_blank");
-            if (paymentWindow) {
+            // Use the pre-opened payment window
+            const paymentWindow = paymentWindowRef.current;
+            if (paymentWindow && !paymentWindow.closed) {
               // Build form HTML
               const fieldsHtml = Object.entries(checkout.data.fields)
                 .map(([key, value]) => `<input type="hidden" name="${key}" value="${String(value).replace(/"/g, '&quot;')}" />`)
                 .join("");
               
+              // Clear the loading screen and write the payment form
+              paymentWindow.document.open();
               paymentWindow.document.write(`
                 <!DOCTYPE html>
                 <html>
@@ -485,16 +488,17 @@ export default function LaunchBrief() {
                 </html>
               `);
               paymentWindow.document.close();
+              paymentWindowRef.current = null; // Clear the ref
               
               toast({
                 title: "Payment Window Opened",
                 description: "Complete your payment in the new tab.",
               });
             } else {
-              // Popup was blocked
+              // Window was closed by user
               toast({
-                title: "Popup Blocked",
-                description: "Please allow popups for this site and try again.",
+                title: "Payment Cancelled",
+                description: "The payment window was closed. Please try again.",
                 variant: "destructive",
               });
             }
@@ -504,6 +508,11 @@ export default function LaunchBrief() {
         } catch (error) {
           console.error("Payment redirect failed:", error);
           setIsRedirectingToPayment(false);
+          // Close the payment window if it's still open
+          if (paymentWindowRef.current && !paymentWindowRef.current.closed) {
+            paymentWindowRef.current.close();
+            paymentWindowRef.current = null;
+          }
           toast({
             title: "Payment setup failed",
             description: "Your brief was saved but we couldn't set up payment. Please try again from your dashboard.",
@@ -547,6 +556,11 @@ export default function LaunchBrief() {
     },
     onError: (error: any) => {
       setIsRedirectingToPayment(false);
+      // Close the payment window if it's still open
+      if (paymentWindowRef.current && !paymentWindowRef.current.closed) {
+        paymentWindowRef.current.close();
+        paymentWindowRef.current = null;
+      }
       toast({
         title: "Submission failed",
         description: error.message || "Failed to submit brief. Please try again.",
@@ -649,6 +663,42 @@ export default function LaunchBrief() {
       return;
     }
 
+    // IMPORTANT: Open payment window IMMEDIATELY for online payments
+    // This must happen synchronously in response to user click to avoid popup blockers
+    if (formData.billingPreference === "online") {
+      const paymentWindow = window.open("about:blank", "_blank");
+      if (!paymentWindow) {
+        toast({
+          title: "Popup Blocked",
+          description: "Please allow popups for this site and try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+      // Show loading message in the new window
+      paymentWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Preparing Payment...</title>
+          <style>
+            body { font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f5f5f5; }
+            .loader { text-align: center; }
+            .spinner { width: 40px; height: 40px; border: 3px solid #e0e0e0; border-top-color: #333; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+            @keyframes spin { to { transform: rotate(360deg); } }
+          </style>
+        </head>
+        <body>
+          <div class="loader">
+            <div class="spinner"></div>
+            <p>Preparing your payment...</p>
+          </div>
+        </body>
+        </html>
+      `);
+      paymentWindowRef.current = paymentWindow;
+    }
+
     try {
       setIsUploadingFiles(true);
 
@@ -692,6 +742,11 @@ export default function LaunchBrief() {
 
       submitBriefMutation.mutate(payload);
     } catch (error: any) {
+      // Close the payment window if it's still open
+      if (paymentWindowRef.current && !paymentWindowRef.current.closed) {
+        paymentWindowRef.current.close();
+        paymentWindowRef.current = null;
+      }
       toast({
         title: "File upload failed",
         description: error.message || "Failed to upload files. Please try again.",
