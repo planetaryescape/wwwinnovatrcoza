@@ -463,10 +463,11 @@ export default function LaunchBrief() {
           
           // Handle PayFast form redirect - data is nested under checkout.data
           if (checkout.type === "form" && checkout.data?.action && checkout.data?.fields) {
-            // Create a form and submit it to PayFast
+            // Create a form and submit it to PayFast in a new tab
             const form = document.createElement("form");
             form.method = "POST";
             form.action = checkout.data.action;
+            form.target = "_blank"; // Open in new tab since PayFast doesn't work in iframes
             form.style.display = "none";
             
             Object.entries(checkout.data.fields).forEach(([key, value]) => {
@@ -479,7 +480,15 @@ export default function LaunchBrief() {
             
             document.body.appendChild(form);
             form.submit();
-            return; // Don't show success - user is being redirected
+            document.body.removeChild(form); // Clean up after submission
+            
+            // Show a message that payment is processing in new tab
+            toast({
+              title: "Payment page opened",
+              description: "Complete your payment in the new tab. You can close this message.",
+            });
+            setIsRedirectingToPayment(false);
+            return;
           }
         } catch (error) {
           console.error("Payment redirect failed:", error);
