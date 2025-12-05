@@ -20,6 +20,7 @@ import {
   Gift,
   Settings,
   LogOut,
+  Lock,
   Shield,
   Eye,
   X,
@@ -31,14 +32,62 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 
 const menuItems = [
-  { title: "Dashboard", url: "/portal", icon: LayoutDashboard },
-  { title: "Trends & Insights", url: "/portal/trends", icon: TrendingUp },
-  { title: "Launch New Brief", url: "/portal/launch", icon: FileText },
-  { title: "Credits & Billing", url: "/portal/credits", icon: CreditCard },
-  { title: "My Research", url: "/portal/research", icon: Archive },
-  { title: "Member Deals", url: "/portal/deals", icon: Gift },
-  { title: "Admin", url: "/portal/admin", icon: Shield, adminOnly: true },
-  { title: "Settings", url: "/portal/settings", icon: Settings },
+  {
+    title: "Dashboard",
+    url: "/portal",
+    icon: LayoutDashboard,
+    lockedForFree: true,
+    adminOnly: false,
+  },
+  {
+    title: "Trends & Insights",
+    url: "/portal/trends",
+    icon: TrendingUp,
+    lockedForFree: false,
+    adminOnly: false,
+  },
+  {
+    title: "Launch New Brief",
+    url: "/portal/launch",
+    icon: FileText,
+    lockedForFree: false,
+    adminOnly: false,
+  },
+  {
+    title: "Credits & Billing",
+    url: "/portal/credits",
+    icon: CreditCard,
+    lockedForFree: false,
+    adminOnly: false,
+  },
+  {
+    title: "My Research",
+    url: "/portal/research",
+    icon: Archive,
+    lockedForFree: true,
+    adminOnly: false,
+  },
+  {
+    title: "Member Deals",
+    url: "/portal/deals",
+    icon: Gift,
+    lockedForFree: true,
+    adminOnly: false,
+  },
+  {
+    title: "Admin",
+    url: "/portal/admin",
+    icon: Shield,
+    lockedForFree: false,
+    adminOnly: true,
+  },
+  {
+    title: "Settings",
+    url: "/portal/settings",
+    icon: Settings,
+    lockedForFree: false,
+    adminOnly: false,
+  },
 ];
 
 interface PortalLayoutProps {
@@ -47,7 +96,7 @@ interface PortalLayoutProps {
 
 export default function PortalLayout({ children }: PortalLayoutProps) {
   const [location, setLocation] = useLocation();
-  const { user, logout, isAuthenticated, isAdmin, impersonation, exitImpersonation, isViewingAsCompany, viewingCompanyName } = useAuth();
+  const { user, logout, isAuthenticated, isMember, isAdmin, isFreeUser, impersonation, exitImpersonation, isViewingAsCompany, viewingCompanyName } = useAuth();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -107,19 +156,12 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                   <p className="text-xs text-muted-foreground mb-2" data-testid="text-member-company">
                     {user?.company || user?.email}
                   </p>
-                  {(() => {
-                    // Get tier from membershipTier (uppercase) or tier (lowercase), default to STARTER
-                    const displayTier = (user?.membershipTier || user?.tier || "STARTER").toUpperCase();
-                    
-                    return (
-                      <Badge 
-                        className={`${isAdmin ? 'bg-primary text-primary-foreground' : getTierColor(displayTier)} text-xs`}
-                        data-testid={`badge-member-tier-${isAdmin ? 'admin' : displayTier.toLowerCase()}`}
-                      >
-                        {isAdmin ? 'ADMIN' : `${displayTier} Member`}
-                      </Badge>
-                    );
-                  })()}
+                  <Badge 
+                    className={`${isAdmin ? 'bg-primary text-primary-foreground' : isMember ? getTierColor(user?.tier || 'starter') : 'bg-muted text-muted-foreground'} text-xs`}
+                    data-testid={`badge-member-tier-${isAdmin ? 'admin' : user?.tier || 'free'}`}
+                  >
+                    {isAdmin ? 'ADMIN' : isMember ? `${user?.tier?.toUpperCase()} Member` : 'FREE TIER'}
+                  </Badge>
                 </div>
               </div>
               <SidebarGroupLabel data-testid="label-portal-menu">Portal Menu</SidebarGroupLabel>
@@ -128,6 +170,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                   {menuItems.map((item) => {
                     // Hide admin items for non-admins AND during impersonation mode
                     if (item.adminOnly && (!isAdmin || impersonation.isImpersonating)) return null;
+                    const isLocked = !isMember && item.lockedForFree;
                     const isActive = item.url === "/portal" 
                       ? (location === "/portal" || location === "/portal/dashboard")
                       : location === item.url;
@@ -144,6 +187,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                           >
                             <item.icon className="h-4 w-4" />
                             <span className="flex-1 text-left">{item.title}</span>
+                            {isLocked && <Lock className="h-3 w-3 ml-auto text-muted-foreground" />}
                           </button>
                         </SidebarMenuButton>
                       </SidebarMenuItem>

@@ -9,13 +9,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, ArrowRight, ChevronDown, ChevronUp, Building2, Grid3x3, List, RefreshCw, Loader2 } from "lucide-react";
+import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Building2, Grid3x3, List, RefreshCw, Loader2 } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { Link } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { useUrlFilters } from "@/hooks/use-url-filters";
-import { isFreeContent } from "@shared/access";
+import { 
+  isFreeContent, 
+  getEffectiveAccessLevel
+} from "@shared/access";
 import insightsCover from "@assets/insights-cover_1764321138388.png";
 import launchCover from "@assets/launch-cover_1764321848244.png";
 import insideCover from "@assets/inside-cover_1764321472939.png";
@@ -83,7 +86,7 @@ interface Report {
 }
 
 function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: boolean, userCompanyId?: string) {
-  // Company-only reports show a building icon for user's organization
+  // Company-only reports show a building icon
   if (report.isClientReport) {
     return (
       <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Your organization">
@@ -92,8 +95,34 @@ function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: bool
     );
   }
   
-  // All signed-in users have full access - no lock indicators
-  return null;
+  // Paid members (STARTER, GROWTH, SCALE) have full access - no lock indicators
+  const normalizedTier = (userTier || "").toUpperCase();
+  const paidTiers = ["STARTER", "GROWTH", "SCALE"];
+  const isPaidMember = isLoggedIn && paidTiers.includes(normalizedTier);
+  
+  if (isPaidMember) {
+    return null; // No locks for paid members
+  }
+  
+  // Use shared access helpers for consistent tier gating
+  const effectiveAccess = getEffectiveAccessLevel({
+    slug: report.slug,
+    title: report.title,
+    category: report.category,
+    accessLevel: report.accessLevel
+  });
+  
+  // Free/public content - no indicator
+  if (effectiveAccess === "PUBLIC") {
+    return null;
+  }
+  
+  // Show lock for non-public content when user is not a paid member
+  return (
+    <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Members only">
+      <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+    </div>
+  );
 }
 
 function ReportCard({ report, userTier, isLoggedIn, userCompanyId }: { report: Report; userTier?: string; isLoggedIn?: boolean; userCompanyId?: string }) {
