@@ -190,7 +190,12 @@ export class PaymentService {
     // PayFast provider accepts subscription options as third parameter
     const checkoutPayload = await (provider as any).getCheckoutPayload(intent, mockOrder, subscriptionOptions);
 
-    return checkoutPayload;
+    // Return both checkout payload and intent ID for tracking
+    return {
+      ...checkoutPayload,
+      intentId: intent.id,
+      pendingId: pendingId,
+    };
   }
 
   async handleWebhook(
