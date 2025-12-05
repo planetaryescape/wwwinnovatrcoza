@@ -1409,11 +1409,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/users/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
-      const { membershipTier, status, role, creditsBasic, creditsPro } = req.body;
+      const { membershipTier, status, role, creditsBasic, creditsPro, companyId, name } = req.body;
       
       const user = await storage.getUser(id);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
+      }
+
+      // Validate company exists if provided
+      if (companyId && companyId !== "none") {
+        const company = await storage.getCompany(companyId);
+        if (!company) {
+          return res.status(400).json({ error: "Company not found" });
+        }
       }
 
       await storage.updateUser(id, {
@@ -1422,6 +1430,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: role || user.role,
         creditsBasic: creditsBasic !== undefined ? creditsBasic : user.creditsBasic,
         creditsPro: creditsPro !== undefined ? creditsPro : user.creditsPro,
+        companyId: companyId === "none" ? null : (companyId !== undefined ? companyId : user.companyId),
+        name: name !== undefined ? name : user.name,
       });
 
       res.json({ success: true });

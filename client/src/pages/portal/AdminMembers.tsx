@@ -131,6 +131,10 @@ export default function AdminMembers() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editTierOpen, setEditTierOpen] = useState(false);
   const [newTier, setNewTier] = useState("");
+  const [editMode, setEditMode] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editCompanyId, setEditCompanyId] = useState("");
+  const [editMemberTier, setEditMemberTier] = useState("");
   const { toast } = useToast();
 
   const { data: pulseSubscribers = [], isLoading: loadingPulse, refetch: refetchPulse } = useQuery<MailerSubscription[]>({
@@ -156,19 +160,47 @@ export default function AdminMembers() {
   const isLoading = loadingPulse || loadingSubs || loadingUsers;
 
   const updateUserMutation = useMutation({
-    mutationFn: async ({ userId, membershipTier }: { userId: string; membershipTier: string }) => {
-      const res = await apiRequest("PATCH", `/api/admin/users/${userId}`, { membershipTier });
+    mutationFn: async ({ userId, data }: { userId: string; data: { membershipTier?: string; companyId?: string; name?: string } }) => {
+      const res = await apiRequest("PATCH", `/api/admin/users/${userId}`, data);
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/companies"] });
       setEditTierOpen(false);
-      toast({ title: "Member tier updated", description: "The membership tier has been updated successfully." });
+      setEditMode(false);
+      setDetailsOpen(false);
+      toast({ title: "Member updated", description: "Member details have been updated successfully." });
     },
     onError: (error: any) => {
-      toast({ title: "Update failed", description: error.message || "Failed to update tier.", variant: "destructive" });
+      toast({ title: "Update failed", description: error.message || "Failed to update member.", variant: "destructive" });
     },
   });
+
+  const handleStartEdit = () => {
+    if (selectedMember) {
+      setEditName(selectedMember.name || "");
+      setEditCompanyId(selectedMember.companyId || "none");
+      setEditMemberTier(selectedMember.membershipTier || "FREE");
+      setEditMode(true);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditMode(false);
+  };
+
+  const handleSaveMember = () => {
+    if (!selectedMember) return;
+    updateUserMutation.mutate({
+      userId: selectedMember.id,
+      data: {
+        name: editName,
+        companyId: editCompanyId,
+        membershipTier: editMemberTier,
+      },
+    });
+  };
 
   const handleRefresh = () => {
     refetchPulse();
@@ -292,7 +324,7 @@ export default function AdminMembers() {
 
   const handleSaveTier = () => {
     if (selectedMember && newTier) {
-      updateUserMutation.mutate({ userId: selectedMember.id, membershipTier: newTier });
+      updateUserMutation.mutate({ userId: selectedMember.id, data: { membershipTier: newTier } });
     }
   };
 
@@ -586,9 +618,16 @@ export default function AdminMembers() {
                               <Eye className="w-4 h-4 mr-2" />
                               View Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditTier(member)}>
+                            <DropdownMenuItem onClick={() => {
+                              setSelectedMember(member);
+                              setEditName(member.name || "");
+                              setEditCompanyId(member.companyId || "none");
+                              setEditMemberTier(member.membershipTier || "FREE");
+                              setEditMode(true);
+                              setDetailsOpen(true);
+                            }}>
                               <Edit className="w-4 h-4 mr-2" />
-                              Edit Tier
+                              Edit Member
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem asChild>
@@ -666,13 +705,16 @@ export default function AdminMembers() {
         </CardContent>
       </Card>
 
-      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+      <Dialog open={detailsOpen} onOpenChange={(open) => {
+        setDetailsOpen(open);
+        if (!open) setEditMode(false);
+      }}>
         <DialogContent className="max-w-md" data-testid="dialog-member-details">
           <DialogHeader>
-            <DialogTitle>Member Details</DialogTitle>
+            <DialogTitle>{editMode ? "Edit Member" : "Member Details"}</DialogTitle>
             <DialogDescription>{selectedMember?.email}</DialogDescription>
           </DialogHeader>
-          {selectedMember && (
+          {selectedMember && !editMode && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -710,15 +752,88 @@ export default function AdminMembers() {
               </div>
 
               <div className="border-t pt-4 flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => handleEditTier(selectedMember)}>
+                <Button variant="default" size="sm" onClick={handleStartEdit} data-testid="button-edit-member">
                   <Edit className="w-4 h-4 mr-2" />
-                  Edit Tier
+                  Edit Member
                 </Button>
                 <Button variant="outline" size="sm" asChild>
                   <a href={`mailto:${selectedMember.email}`}>
                     <Mail className="w-4 h-4 mr-2" />
                     Email
                   </a>
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {selectedMember && editMode && (
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="edit-name">Name</Label>
+                  <Input
+                    id="edit-name"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="Member name"
+                    data-testid="input-edit-name"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-tier">Membership Tier</Label>
+                  <Select value={editMemberTier} onValueChange={setEditMemberTier}>
+                    <SelectTrigger data-testid="select-edit-tier">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="FREE">Free</SelectItem>
+                      <SelectItem value="STARTER">Starter</SelectItem>
+                      <SelectItem value="GROWTH">Growth</SelectItem>
+                      <SelectItem value="SCALE">Scale</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-company">Assign to Company</Label>
+                  <Select value={editCompanyId} onValueChange={setEditCompanyId}>
+                    <SelectTrigger data-testid="select-edit-company">
+                      <SelectValue placeholder="Select a company" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No company (unassigned)</SelectItem>
+                      {companies.map((company) => (
+                        <SelectItem key={company.id} value={company.id}>
+                          {company.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Assigning to a company will add this member to the company's user list
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-t pt-4 flex gap-2 justify-end">
+                <Button variant="outline" size="sm" onClick={handleCancelEdit}>
+                  Cancel
+                </Button>
+                <Button 
+                  size="sm" 
+                  onClick={handleSaveMember}
+                  disabled={updateUserMutation.isPending}
+                  data-testid="button-save-member"
+                >
+                  {updateUserMutation.isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
                 </Button>
               </div>
             </div>
