@@ -461,15 +461,15 @@ export default function LaunchBrief() {
           
           const checkout = await checkoutRes.json();
           
-          // Handle PayFast form redirect
-          if (checkout.type === "form" && checkout.action && checkout.fields) {
+          // Handle PayFast form redirect - data is nested under checkout.data
+          if (checkout.type === "form" && checkout.data?.action && checkout.data?.fields) {
             // Create a form and submit it to PayFast
             const form = document.createElement("form");
             form.method = "POST";
-            form.action = checkout.action;
+            form.action = checkout.data.action;
             form.style.display = "none";
             
-            Object.entries(checkout.fields).forEach(([key, value]) => {
+            Object.entries(checkout.data.fields).forEach(([key, value]) => {
               const input = document.createElement("input");
               input.type = "hidden";
               input.name = key;
