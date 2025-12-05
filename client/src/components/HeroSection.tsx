@@ -25,7 +25,7 @@ export default function HeroSection() {
       />
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex items-center justify-center">
-        <div className="inline-block rounded-lg bg-black/20 px-6 py-6 md:px-10 md:py-8 backdrop-blur-[2px]">
+        <div>
           <h1 className="text-4xl md:text-6xl font-serif font-semibold text-white tracking-tight leading-tight text-center">
             Launch Better Innovation
           </h1>
