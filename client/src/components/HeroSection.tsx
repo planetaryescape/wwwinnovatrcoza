@@ -37,7 +37,7 @@ export default function HeroSection() {
           <div className="mt-6 md:mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button 
               size="default"
-              className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-primary hover:bg-primary/90 backdrop-blur-sm w-full sm:w-auto border-0"
+              className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-primary hover:bg-primary/90 backdrop-blur-sm border-0"
               onClick={handleTestNow}
               data-testid="button-test-now"
             >
@@ -47,7 +47,7 @@ export default function HeroSection() {
             <Button 
               size="default"
               variant="outline" 
-              className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20 w-full sm:w-auto"
+              className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20"
               onClick={handleMembership}
               data-testid="button-membership"
             >
