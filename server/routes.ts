@@ -2067,7 +2067,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/companies", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const companies = await storage.getAllCompanies();
-      res.json(companies);
+      // Get study counts for each company
+      const companiesWithStudyCounts = await Promise.all(
+        companies.map(async (company) => {
+          const briefs = await storage.getBriefSubmissionsByCompanyId(company.id);
+          return {
+            ...company,
+            studyCount: briefs.length,
+          };
+        })
+      );
+      res.json(companiesWithStudyCounts);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }

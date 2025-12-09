@@ -81,6 +81,7 @@ interface Company {
   notes: string | null;
   logoUrl: string | null;
   dealDetails: string | null;
+  studyCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -579,6 +580,7 @@ export default function AdminCompanies() {
                   <TableHead>Contract</TableHead>
                   <TableHead>Basic Credits</TableHead>
                   <TableHead>Pro Credits</TableHead>
+                  <TableHead>Studies</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
@@ -608,6 +610,12 @@ export default function AdminCompanies() {
                       </TableCell>
                       <TableCell>
                         <span className="font-medium">{company.proCreditsTotal - company.proCreditsUsed}</span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <FileText className="w-3 h-3 text-muted-foreground" />
+                          <span>{company.studyCount || 0}</span>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Button 

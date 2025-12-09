@@ -593,7 +593,6 @@ export default function AdminMembers() {
                     <TableHead>Company</TableHead>
                     <TableHead>Tier</TableHead>
                     <TableHead>Credits</TableHead>
-                    <TableHead>Studies</TableHead>
                     <TableHead>Pulse</TableHead>
                     <TableHead>Joined</TableHead>
                     <TableHead>Actions</TableHead>
@@ -635,12 +634,6 @@ export default function AdminMembers() {
                           <Badge variant="outline" className="text-xs">
                             {member.proCreditsRemaining || 0}P
                           </Badge>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <FileText className="w-3 h-3 text-muted-foreground" />
-                          <span>{member.studyCount}</span>
                         </div>
                       </TableCell>
                       <TableCell>
