@@ -268,7 +268,7 @@ export default function NewDealModal({
           <div className="space-y-3">
             <Label>Target Membership Tiers</Label>
             <div className="flex gap-4">
-              {["STARTER", "GROWTH", "SCALE"].map((tier) => (
+              {["FREE", "STARTER", "GROWTH", "SCALE"].map((tier) => (
                 <div key={tier} className="flex items-center gap-2">
                   <Checkbox
                     id={`tier-${tier}`}
