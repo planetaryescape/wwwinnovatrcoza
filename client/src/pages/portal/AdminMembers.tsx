@@ -145,6 +145,7 @@ export default function AdminMembers() {
   const [newTier, setNewTier] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
   const [editCompanyId, setEditCompanyId] = useState("");
   const [editMemberTier, setEditMemberTier] = useState("");
   const [editMemberType, setEditMemberType] = useState("companyUser");
@@ -175,7 +176,7 @@ export default function AdminMembers() {
   const isLoading = loadingPulse || loadingSubs || loadingUsers;
 
   const updateUserMutation = useMutation({
-    mutationFn: async ({ userId, data }: { userId: string; data: { membershipTier?: string; companyId?: string | null; memberType?: string; name?: string } }) => {
+    mutationFn: async ({ userId, data }: { userId: string; data: { membershipTier?: string; companyId?: string | null; memberType?: string; name?: string; email?: string } }) => {
       const res = await apiRequest("PATCH", `/api/admin/users/${userId}`, data);
       return res.json();
     },
@@ -221,6 +222,7 @@ export default function AdminMembers() {
   const handleStartEdit = () => {
     if (selectedMember) {
       setEditName(selectedMember.name || "");
+      setEditEmail(selectedMember.email || "");
       setEditCompanyId(selectedMember.companyId || "none");
       setEditMemberTier(selectedMember.membershipTier || "FREE");
       setEditMemberType(selectedMember.memberType || "companyUser");
@@ -238,6 +240,7 @@ export default function AdminMembers() {
       userId: selectedMember.id,
       data: {
         name: editName,
+        email: editEmail,
         companyId: editMemberType === "independent" ? null : editCompanyId,
         membershipTier: editMemberTier,
         memberType: editMemberType,
@@ -838,6 +841,18 @@ export default function AdminMembers() {
                     onChange={(e) => setEditName(e.target.value)}
                     placeholder="Member name"
                     data-testid="input-edit-name"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-email">Email</Label>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    value={editEmail}
+                    onChange={(e) => setEditEmail(e.target.value)}
+                    placeholder="Member email"
+                    data-testid="input-edit-email"
                   />
                 </div>
 

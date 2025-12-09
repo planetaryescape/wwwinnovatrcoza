@@ -1411,11 +1411,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/users/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
-      const { membershipTier, status, role, creditsBasic, creditsPro, companyId, company, name, memberType } = req.body;
+      const { membershipTier, status, role, creditsBasic, creditsPro, companyId, company, name, memberType, email } = req.body;
       
       const user = await storage.getUser(id);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
+      }
+
+      // Validate email if being changed
+      if (email && email !== user.email) {
+        const existingUser = await storage.getUserByEmail(email);
+        if (existingUser && existingUser.id !== id) {
+          return res.status(400).json({ error: "Email is already in use by another user" });
+        }
       }
 
       // Determine if this is an independent member
@@ -1439,6 +1447,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         companyId: isIndependentType ? null : (isIndependentCompany ? null : (companyId !== undefined ? companyId : user.companyId)),
         company: isIndependentType ? null : (isIndependentCompany ? null : (company !== undefined ? company : user.company)),
         name: name !== undefined ? name : user.name,
+        email: email || user.email,
         memberType: memberType || user.memberType || "companyUser",
       });
 
