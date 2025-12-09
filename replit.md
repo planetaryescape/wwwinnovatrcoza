@@ -44,7 +44,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Admin Portal B2B Client System
 - **Overview Tab**: Clean, simplified design with Test24 Tracker (active/completed studies), Free Reports library, and Research Snapshot (brief status counts). Credit totals exclude Innovatr's fictional demo credits.
-- **Companies Tab**: Company accounts with pooled credits. Credit display shows only remaining credits (not x/y format). Companies: Innovatr, Rugani Juice, Greenway Farms, Nando's South Africa, DGB, Revlon, Mitchum, Elizabeth Arden.
+- **Companies Tab**: Company accounts with pooled credits. Credit display shows only remaining credits (not x/y format). Companies: Innovatr, Rugani Juice, Greenway Farms, Nando's South Africa, DGB, Revlon, Mitchum, Elizabeth Arden. Includes "Create New Company" feature to set up new B2B clients with an initial user who receives a welcome email with password setup link.
 - **Orders Tab**: Order management without revenue analytics. Shows order counts only (total, this month, completed, pending). No revenue values, charts, or averages.
 - **Briefs Tab**: Pipeline view with 5 columns (New, In Progress, Under Review, Completed, On Hold) with drag-and-drop functionality.
 - **Design Principles**: Clean, uncluttered interface focused on operational metrics. Data consistency across all tabs from same database tables.
