@@ -143,6 +143,25 @@ export default function AdminCompanies() {
   const [deletingReport, setDeletingReport] = useState(false);
   const [reportPdfFile, setReportPdfFile] = useState<File | null>(null);
   const reportPdfInputRef = useRef<HTMLInputElement>(null);
+  
+  // Create new company state
+  const [createCompanyOpen, setCreateCompanyOpen] = useState(false);
+  const [creatingCompany, setCreatingCompany] = useState(false);
+  const [newCompany, setNewCompany] = useState({
+    name: "",
+    domain: "",
+    tier: "STARTER" as string,
+    contractStart: "",
+    contractEnd: "",
+    basicCreditsTotal: 0,
+    proCreditsTotal: 0,
+    notes: "",
+    // Initial user details
+    userName: "",
+    userEmail: "",
+    userPhone: "",
+  });
+
   const [newReport, setNewReport] = useState({
     title: "",
     description: "",
@@ -440,6 +459,87 @@ export default function AdminCompanies() {
     }
   };
 
+  const handleCreateCompany = async () => {
+    if (!newCompany.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Company name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!newCompany.userName.trim() || !newCompany.userEmail.trim()) {
+      toast({
+        title: "Error",
+        description: "User name and email are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCreatingCompany(true);
+    try {
+      const res = await fetch("/api/admin/companies/with-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          company: {
+            name: newCompany.name,
+            domain: newCompany.domain || null,
+            tier: newCompany.tier,
+            contractStart: newCompany.contractStart || null,
+            contractEnd: newCompany.contractEnd || null,
+            basicCreditsTotal: newCompany.basicCreditsTotal || 0,
+            proCreditsTotal: newCompany.proCreditsTotal || 0,
+            notes: newCompany.notes || null,
+          },
+          user: {
+            name: newCompany.userName,
+            email: newCompany.userEmail,
+            phone: newCompany.userPhone || null,
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to create company");
+      }
+
+      const data = await res.json();
+      
+      toast({
+        title: "Company Created",
+        description: `${data.company.name} has been created and a password setup email was sent to ${data.user.email}`,
+      });
+
+      setCreateCompanyOpen(false);
+      setNewCompany({
+        name: "",
+        domain: "",
+        tier: "STARTER",
+        contractStart: "",
+        contractEnd: "",
+        basicCreditsTotal: 0,
+        proCreditsTotal: 0,
+        notes: "",
+        userName: "",
+        userEmail: "",
+        userPhone: "",
+      });
+      
+      await fetchCompanies();
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : "Failed to create company",
+        variant: "destructive",
+      });
+    } finally {
+      setCreatingCompany(false);
+    }
+  };
+
   // Activate view-as-company mode and navigate to portal dashboard
   const handleViewClientPortal = async () => {
     if (!selectedCompany) return;
@@ -485,10 +585,16 @@ export default function AdminCompanies() {
           <h2 className="text-2xl font-serif font-bold">Company Accounts</h2>
           <p className="text-muted-foreground">Manage company contracts and credit pools</p>
         </div>
-        <Button onClick={fetchCompanies} variant="outline" size="sm" data-testid="button-refresh-companies">
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={fetchCompanies} variant="outline" size="sm" data-testid="button-refresh-companies">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+          <Button onClick={() => setCreateCompanyOpen(true)} size="sm" data-testid="button-create-company">
+            <Plus className="w-4 h-4 mr-2" />
+            Create New Company
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -1251,6 +1357,175 @@ export default function AdminCompanies() {
               data-testid="button-confirm-delete"
             >
               {deletingReport ? "Deleting..." : "Delete Report"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={createCompanyOpen} onOpenChange={setCreateCompanyOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Company</DialogTitle>
+            <DialogDescription>
+              Set up a new company account with an initial user. The user will receive an email to set their password.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">Company Details</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="company-name">Company Name *</Label>
+                  <Input
+                    id="company-name"
+                    placeholder="e.g., Acme Corporation"
+                    value={newCompany.name}
+                    onChange={(e) => setNewCompany({ ...newCompany, name: e.target.value })}
+                    data-testid="input-company-name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="company-domain">Domain</Label>
+                  <Input
+                    id="company-domain"
+                    placeholder="e.g., acme.com"
+                    value={newCompany.domain}
+                    onChange={(e) => setNewCompany({ ...newCompany, domain: e.target.value })}
+                    data-testid="input-company-domain"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Membership Tier</Label>
+                  <Select
+                    value={newCompany.tier}
+                    onValueChange={(v) => setNewCompany({ ...newCompany, tier: v })}
+                  >
+                    <SelectTrigger data-testid="select-company-tier">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="FREE">Free</SelectItem>
+                      <SelectItem value="STARTER">Starter</SelectItem>
+                      <SelectItem value="GROWTH">Growth</SelectItem>
+                      <SelectItem value="SCALE">Scale</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contract-start">Contract Start</Label>
+                  <Input
+                    id="contract-start"
+                    type="date"
+                    value={newCompany.contractStart}
+                    onChange={(e) => setNewCompany({ ...newCompany, contractStart: e.target.value })}
+                    data-testid="input-contract-start"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contract-end">Contract End</Label>
+                  <Input
+                    id="contract-end"
+                    type="date"
+                    value={newCompany.contractEnd}
+                    onChange={(e) => setNewCompany({ ...newCompany, contractEnd: e.target.value })}
+                    data-testid="input-contract-end"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="basic-credits">Basic Credits</Label>
+                  <Input
+                    id="basic-credits"
+                    type="number"
+                    min="0"
+                    value={newCompany.basicCreditsTotal}
+                    onChange={(e) => setNewCompany({ ...newCompany, basicCreditsTotal: parseInt(e.target.value) || 0 })}
+                    data-testid="input-basic-credits"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="pro-credits">Pro Credits</Label>
+                  <Input
+                    id="pro-credits"
+                    type="number"
+                    min="0"
+                    value={newCompany.proCreditsTotal}
+                    onChange={(e) => setNewCompany({ ...newCompany, proCreditsTotal: parseInt(e.target.value) || 0 })}
+                    data-testid="input-pro-credits"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">Initial User</h4>
+              <p className="text-sm text-muted-foreground">This user will receive an email to set up their password and access the portal.</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="user-name">Full Name *</Label>
+                  <Input
+                    id="user-name"
+                    placeholder="e.g., John Smith"
+                    value={newCompany.userName}
+                    onChange={(e) => setNewCompany({ ...newCompany, userName: e.target.value })}
+                    data-testid="input-user-name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="user-email">Email Address *</Label>
+                  <Input
+                    id="user-email"
+                    type="email"
+                    placeholder="john@acme.com"
+                    value={newCompany.userEmail}
+                    onChange={(e) => setNewCompany({ ...newCompany, userEmail: e.target.value })}
+                    data-testid="input-user-email"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="user-phone">Phone Number (optional)</Label>
+                <Input
+                  id="user-phone"
+                  type="tel"
+                  placeholder="+27 12 345 6789"
+                  value={newCompany.userPhone}
+                  onChange={(e) => setNewCompany({ ...newCompany, userPhone: e.target.value })}
+                  data-testid="input-user-phone"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="company-notes">Notes (optional)</Label>
+              <Textarea
+                id="company-notes"
+                placeholder="Internal notes about this company..."
+                value={newCompany.notes}
+                onChange={(e) => setNewCompany({ ...newCompany, notes: e.target.value })}
+                data-testid="input-company-notes"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCreateCompanyOpen(false)}
+              data-testid="button-cancel-create-company"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateCompany}
+              disabled={creatingCompany}
+              data-testid="button-submit-create-company"
+            >
+              {creatingCompany ? "Creating..." : "Create Company"}
             </Button>
           </DialogFooter>
         </DialogContent>

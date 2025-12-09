@@ -2105,6 +2105,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create company with initial user and send password setup email
+  app.post("/api/admin/companies/with-user", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { company: companyData, user: userData } = req.body;
+      
+      if (!companyData?.name) {
+        return res.status(400).json({ error: "Company name is required" });
+      }
+      if (!userData?.email) {
+        return res.status(400).json({ error: "User email is required" });
+      }
+      if (!userData?.name) {
+        return res.status(400).json({ error: "User name is required" });
+      }
+      
+      // Check if user email already exists
+      const existingUser = await storage.getUserByEmail(userData.email);
+      if (existingUser) {
+        return res.status(409).json({ error: "A user with this email already exists" });
+      }
+      
+      // Check if company name already exists
+      const existingCompany = await storage.getCompanyByName(companyData.name);
+      if (existingCompany) {
+        return res.status(409).json({ error: "A company with this name already exists" });
+      }
+      
+      // Create the company
+      const company = await storage.createCompany({
+        name: companyData.name,
+        domain: companyData.domain || null,
+        tier: companyData.tier || "STARTER",
+        contractStart: companyData.contractStart || null,
+        contractEnd: companyData.contractEnd || null,
+        monthlyFee: companyData.monthlyFee || null,
+        basicCreditsTotal: companyData.basicCreditsTotal || 0,
+        proCreditsTotal: companyData.proCreditsTotal || 0,
+        notes: companyData.notes || null,
+      });
+      
+      // Create the user with a temporary placeholder password 
+      // Following the same pattern as signup: create with temp password, then update with hash
+      const placeholderPassword = `PENDING_SETUP_${Date.now()}_${crypto.randomBytes(16).toString('hex')}`;
+      const placeholderPasswordHash = await hashPassword(placeholderPassword);
+      
+      const user = await storage.createUser({
+        email: userData.email,
+        name: userData.name,
+        username: userData.email.split('@')[0] + '_' + Date.now(),
+        password: "", // Empty password during creation
+        membershipTier: companyData.tier || "STARTER",
+        memberType: userData.memberType || "companyUser",
+        status: "ACTIVE",
+        role: "MEMBER",
+      } as any);
+      
+      // Update the user with the hashed password and company link (matches signup flow)
+      await storage.updateUser(user.id, {
+        passwordHash: placeholderPasswordHash,
+        password: "", // Clear plaintext password field
+        companyId: company.id,
+        phone: userData.phone || null,
+      });
+      
+      // Generate password reset token for initial setup
+      const { token, tokenHash } = generateResetToken();
+      const expiresAt = getResetTokenExpiry();
+      
+      // Store hashed token in database
+      await storage.createPasswordReset({
+        userId: user.id,
+        tokenHash,
+        expiresAt,
+      });
+      
+      // Send welcome email with password setup link
+      const origin = req.get('origin') || `${req.protocol}://${req.get('host')}`;
+      const setupUrl = `${origin}/reset-password?token=${token}&email=${encodeURIComponent(userData.email)}`;
+      
+      try {
+        await emailService.sendWelcomeWithPasswordSetup(
+          userData.email,
+          userData.name,
+          company.name,
+          setupUrl
+        );
+      } catch (emailError) {
+        console.error("Failed to send welcome email:", emailError);
+        // Continue - the user can still request a password reset manually
+      }
+      
+      res.status(201).json({ 
+        company, 
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          companyId: user.companyId,
+        },
+        message: "Company and user created. Password setup email sent."
+      });
+    } catch (error: any) {
+      console.error("Create company with user error:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   app.patch("/api/admin/companies/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;

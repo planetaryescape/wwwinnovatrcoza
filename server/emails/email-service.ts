@@ -220,6 +220,7 @@ export type EmailTemplateType =
   | "PASSWORD_RESET_REQUEST"
   | "PASSWORD_RESET_SUCCESS"
   | "ACCOUNT_CREATED"
+  | "WELCOME_PASSWORD_SETUP"
   | "EMAIL_VERIFICATION"
   | "BRIEF_SUBMITTED"
   | "AUDIENCE_LIVE"
@@ -342,6 +343,35 @@ export function renderEmailTemplate(
       
       return {
         subject: "Welcome to Innovatr. Your portal is ready",
+        html: renderBaseEmail(options),
+        text: renderBaseEmailText(options),
+      };
+    }
+
+    case "WELCOME_PASSWORD_SETUP": {
+      const setupLink = data.resetLink;
+      const companyName = data.companyName || "your company";
+      const bodyHtml = `
+        <p style="margin: 0 0 15px 0;">Welcome to Innovatr. An account has been created for you as part of ${companyName}'s membership.</p>
+        <p style="margin: 0 0 15px 0;">To get started, please set up your password using the button below. This link will expire in 24 hours.</p>
+        <p style="margin: 0 0 15px 0;">Once you have set your password, you will have full access to your company's research portal, including trend reports, insights library, and past research.</p>
+        <p style="margin: 0 0 15px 0;">If you have any questions, just reply to this email. A real person will help.</p>
+      `;
+      const footerNote = "This link will expire in 24 hours. If you did not expect this email, please contact us at hannah@innovatr.co.za.";
+      
+      const options: BaseEmailOptions = {
+        title: "Set Up Your Innovatr Account",
+        greetingName: data.firstName,
+        bodyHtml,
+        buttonLabel: "Set Up Your Password",
+        buttonUrl: setupLink,
+        showButton: true,
+        showLinkFallback: true,
+        footerNote,
+      };
+      
+      return {
+        subject: "Welcome to Innovatr. Set up your account",
         html: renderBaseEmail(options),
         text: renderBaseEmailText(options),
       };
@@ -921,6 +951,34 @@ export async function sendAccountCreatedEmail(
     return response;
   } catch (error) {
     console.error("Failed to send account created email:", error);
+    throw error;
+  }
+}
+
+export async function sendWelcomeWithPasswordSetup(
+  email: string,
+  name: string,
+  companyName: string,
+  setupUrl: string
+) {
+  try {
+    const { subject, html, text } = renderEmailTemplate("WELCOME_PASSWORD_SETUP", {
+      firstName: name,
+      companyName: companyName,
+      resetLink: setupUrl,
+    });
+    
+    const response = await sendEmail({
+      to: email,
+      subject,
+      html,
+      text,
+    });
+    
+    console.log("Welcome with password setup email sent successfully:", response);
+    return response;
+  } catch (error) {
+    console.error("Failed to send welcome with password setup email:", error);
     throw error;
   }
 }
