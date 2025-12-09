@@ -18,6 +18,7 @@ export const users = pgTable("users", {
     .default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
   email: text("email").notNull().unique(),
+  phone: text("phone"),
   password: text("password").notNull(), // Legacy field - will be deprecated
   passwordHash: text("password_hash"), // New bcrypt hashed password
   name: text("name"),

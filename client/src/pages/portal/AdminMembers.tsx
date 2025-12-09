@@ -90,6 +90,7 @@ interface Subscription {
 interface User {
   id: string;
   email: string;
+  phone: string | null;
   name: string;
   role: string;
   membershipTier: string;
@@ -146,6 +147,7 @@ export default function AdminMembers() {
   const [editMode, setEditMode] = useState(false);
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
+  const [editPhone, setEditPhone] = useState("");
   const [editCompanyId, setEditCompanyId] = useState("");
   const [editMemberTier, setEditMemberTier] = useState("");
   const [editMemberType, setEditMemberType] = useState("companyUser");
@@ -176,7 +178,7 @@ export default function AdminMembers() {
   const isLoading = loadingPulse || loadingSubs || loadingUsers;
 
   const updateUserMutation = useMutation({
-    mutationFn: async ({ userId, data }: { userId: string; data: { membershipTier?: string; companyId?: string | null; memberType?: string; name?: string; email?: string } }) => {
+    mutationFn: async ({ userId, data }: { userId: string; data: { membershipTier?: string; companyId?: string | null; memberType?: string; name?: string; email?: string; phone?: string } }) => {
       const res = await apiRequest("PATCH", `/api/admin/users/${userId}`, data);
       return res.json();
     },
@@ -223,6 +225,7 @@ export default function AdminMembers() {
     if (selectedMember) {
       setEditName(selectedMember.name || "");
       setEditEmail(selectedMember.email || "");
+      setEditPhone(selectedMember.phone || "");
       setEditCompanyId(selectedMember.companyId || "none");
       setEditMemberTier(selectedMember.membershipTier || "FREE");
       setEditMemberType(selectedMember.memberType || "companyUser");
@@ -241,6 +244,7 @@ export default function AdminMembers() {
       data: {
         name: editName,
         email: editEmail,
+        phone: editPhone,
         companyId: editMemberType === "independent" ? null : editCompanyId,
         membershipTier: editMemberTier,
         memberType: editMemberType,
@@ -853,6 +857,18 @@ export default function AdminMembers() {
                     onChange={(e) => setEditEmail(e.target.value)}
                     placeholder="Member email"
                     data-testid="input-edit-email"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-phone">Phone</Label>
+                  <Input
+                    id="edit-phone"
+                    type="tel"
+                    value={editPhone}
+                    onChange={(e) => setEditPhone(e.target.value)}
+                    placeholder="Member phone number"
+                    data-testid="input-edit-phone"
                   />
                 </div>
 
