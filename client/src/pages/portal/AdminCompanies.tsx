@@ -847,10 +847,6 @@ export default function AdminCompanies() {
                       />
                     </div>
                   </div>
-                  <div className="mt-3">
-                    <Label className="text-xs text-muted-foreground">Monthly Fee</Label>
-                    <p className="font-medium text-lg">{selectedCompany.monthlyFee ? formatCurrency(selectedCompany.monthlyFee) : "—"}</p>
-                  </div>
                 </div>
 
                 <Separator />
