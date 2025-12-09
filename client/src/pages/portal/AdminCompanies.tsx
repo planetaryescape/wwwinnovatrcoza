@@ -808,6 +808,7 @@ export default function AdminCompanies() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="FREE">Free</SelectItem>
                           <SelectItem value="STARTER">Starter</SelectItem>
                           <SelectItem value="GROWTH">Growth</SelectItem>
                           <SelectItem value="SCALE">Scale</SelectItem>
