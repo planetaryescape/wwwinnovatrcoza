@@ -50,6 +50,11 @@ interface AdminOrder {
   items: OrderItem[];
 }
 
+interface StudyStats {
+  completed: number;
+  pending: number;
+}
+
 export default function AdminOrders() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<AdminOrder[]>([]);
@@ -61,6 +66,7 @@ export default function AdminOrders() {
   const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [studyStats, setStudyStats] = useState<StudyStats>({ completed: 0, pending: 0 });
 
   const fetchOrders = async () => {
     try {
@@ -76,8 +82,25 @@ export default function AdminOrders() {
     }
   };
 
+  const fetchStudyStats = async () => {
+    try {
+      const res = await fetch("/api/admin/studies");
+      if (res.ok) {
+        const studies = await res.json();
+        const completed = studies.filter((s: { status: string }) => s.status === "COMPLETED").length;
+        const pending = studies.filter((s: { status: string }) => 
+          s.status === "NEW" || s.status === "AUDIENCE_LIVE" || s.status === "ANALYSING_DATA"
+        ).length;
+        setStudyStats({ completed, pending });
+      }
+    } catch (err) {
+      console.error("Failed to fetch study stats:", err);
+    }
+  };
+
   useEffect(() => {
     fetchOrders();
+    fetchStudyStats();
   }, []);
 
   useEffect(() => {
@@ -232,8 +255,8 @@ export default function AdminOrders() {
                 <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{stats.completed}</p>
-                <p className="text-xs text-muted-foreground">Completed</p>
+                <p className="text-2xl font-bold">{studyStats.completed}</p>
+                <p className="text-xs text-muted-foreground">Completed Studies</p>
               </div>
             </div>
           </CardContent>
@@ -246,8 +269,8 @@ export default function AdminOrders() {
                 <Clock className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{stats.pending}</p>
-                <p className="text-xs text-muted-foreground">Pending</p>
+                <p className="text-2xl font-bold">{studyStats.pending}</p>
+                <p className="text-xs text-muted-foreground">In Progress</p>
               </div>
             </div>
           </CardContent>
