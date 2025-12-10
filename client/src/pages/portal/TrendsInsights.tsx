@@ -28,7 +28,7 @@ import {
   isPaidMember as checkIsPaidMember
 } from "@shared/access";
 import insightsCover from "@assets/insights-cover_1764321138388.png";
-import launchCover from "@assets/launch-cover_1764321848244.png";
+import launchCover from "@assets/Innovatr_Launch_1765389741317.png";
 import insideCover from "@assets/inside-cover_1764321472939.png";
 import irlCover from "@assets/irl-cover_1764322310189.png";
 
