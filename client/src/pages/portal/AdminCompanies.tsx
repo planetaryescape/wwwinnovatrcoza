@@ -570,6 +570,26 @@ export default function AdminCompanies() {
     });
   };
 
+  const getContractDaysRemaining = (contractStart: string | null | undefined) => {
+    if (!contractStart) return null;
+    const start = new Date(contractStart);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 365);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffTime = end.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const getContractEndDate = (contractStart: string | null | undefined) => {
+    if (!contractStart) return null;
+    const start = new Date(contractStart);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 365);
+    return end.toISOString();
+  };
+
   const formatCurrency = (amount: string | number | undefined) => {
     const num = typeof amount === 'string' ? parseFloat(amount) : (amount || 0);
     return `R${num.toLocaleString('en-ZA', { minimumFractionDigits: 0 })}`;
@@ -710,7 +730,8 @@ export default function AdminCompanies() {
                 <TableRow>
                   <TableHead>Company</TableHead>
                   <TableHead>Tier</TableHead>
-                  <TableHead>Contract</TableHead>
+                  <TableHead>Contract Start</TableHead>
+                  <TableHead>Days Left</TableHead>
                   <TableHead>Basic Credits</TableHead>
                   <TableHead>Pro Credits</TableHead>
                   <TableHead>Studies</TableHead>
@@ -735,8 +756,18 @@ export default function AdminCompanies() {
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          {formatDate(company.contractStart)} - {formatDate(company.contractEnd)}
+                          {formatDate(company.contractStart)}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        {(() => {
+                          const daysLeft = getContractDaysRemaining(company.contractStart);
+                          if (daysLeft === null) return <span className="text-muted-foreground">—</span>;
+                          if (daysLeft <= 0) return <Badge variant="destructive">Expired</Badge>;
+                          if (daysLeft <= 30) return <Badge variant="destructive">{daysLeft} days</Badge>;
+                          if (daysLeft <= 90) return <Badge variant="secondary" className="bg-amber-100 text-amber-800">{daysLeft} days</Badge>;
+                          return <span className="font-medium">{daysLeft} days</span>;
+                        })()}
                       </TableCell>
                       <TableCell>
                         <span className="font-medium">{company.basicCreditsTotal - company.basicCreditsUsed}</span>
@@ -849,7 +880,7 @@ export default function AdminCompanies() {
                 <div>
                   <h4 className="font-medium flex items-center gap-2 mb-3">
                     <Calendar className="w-4 h-4" />
-                    Contract Period
+                    Contract Period (365 days)
                   </h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -863,16 +894,24 @@ export default function AdminCompanies() {
                       />
                     </div>
                     <div>
-                      <Label className="text-xs text-muted-foreground">End Date</Label>
-                      <Input 
-                        type="date" 
-                        value={selectedCompany.contractEnd ? new Date(selectedCompany.contractEnd).toISOString().split('T')[0] : ""}
-                        onChange={(e) => handleUpdateCompany(selectedCompany.id, { contractEnd: e.target.value || null })}
-                        className="mt-1"
-                        data-testid="input-contract-end"
-                      />
+                      <Label className="text-xs text-muted-foreground">End Date (Auto)</Label>
+                      <p className="font-medium mt-2">
+                        {formatDate(getContractEndDate(selectedCompany.contractStart))}
+                      </p>
                     </div>
                   </div>
+                  {selectedCompany.contractStart && (
+                    <div className="mt-3 p-3 rounded-lg bg-muted/50">
+                      {(() => {
+                        const daysLeft = getContractDaysRemaining(selectedCompany.contractStart);
+                        if (daysLeft === null) return null;
+                        if (daysLeft <= 0) return <p className="text-sm text-destructive font-medium">Contract expired</p>;
+                        if (daysLeft <= 30) return <p className="text-sm text-destructive font-medium">{daysLeft} days remaining</p>;
+                        if (daysLeft <= 90) return <p className="text-sm text-amber-600 font-medium">{daysLeft} days remaining</p>;
+                        return <p className="text-sm text-muted-foreground">{daysLeft} days remaining</p>;
+                      })()}
+                    </div>
+                  )}
                 </div>
 
                 <Separator />
@@ -1415,7 +1454,7 @@ export default function AdminCompanies() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Membership Tier</Label>
                   <Select
@@ -1434,7 +1473,7 @@ export default function AdminCompanies() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="contract-start">Contract Start</Label>
+                  <Label htmlFor="contract-start">Contract Start (365 day term)</Label>
                   <Input
                     id="contract-start"
                     type="date"
@@ -1442,16 +1481,11 @@ export default function AdminCompanies() {
                     onChange={(e) => setNewCompany({ ...newCompany, contractStart: e.target.value })}
                     data-testid="input-contract-start"
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="contract-end">Contract End</Label>
-                  <Input
-                    id="contract-end"
-                    type="date"
-                    value={newCompany.contractEnd}
-                    onChange={(e) => setNewCompany({ ...newCompany, contractEnd: e.target.value })}
-                    data-testid="input-contract-end"
-                  />
+                  {newCompany.contractStart && (
+                    <p className="text-xs text-muted-foreground">
+                      Ends: {formatDate(getContractEndDate(newCompany.contractStart))}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">

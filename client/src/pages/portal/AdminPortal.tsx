@@ -58,9 +58,7 @@ export default function AdminPortal() {
       <div className="p-6 max-w-7xl mx-auto space-y-6">
         <div>
           <h1 className="text-4xl font-serif font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-lg text-muted-foreground">
-            Manage companies, orders, reports, deals, and system overview
-          </p>
+          <p className="text-muted-foreground text-[16px]">Our dashboard to oversee companies, briefs, orders, reports, deals, and the smooth running of… everything.</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
