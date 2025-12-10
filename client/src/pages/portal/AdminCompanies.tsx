@@ -268,6 +268,7 @@ export default function AdminCompanies() {
 
   const stats = {
     total: companies.length,
+    free: companies.filter(c => c.tier === "FREE").length,
     starter: companies.filter(c => c.tier === "STARTER").length,
     growth: companies.filter(c => c.tier === "GROWTH").length,
     scale: companies.filter(c => c.tier === "SCALE").length,
@@ -609,11 +610,28 @@ export default function AdminCompanies() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Scale Accounts</CardTitle>
-            <Crown className="h-4 w-4 text-amber-500" />
+            <CardTitle className="text-sm font-medium">Membership Tiers</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold" data-testid="text-scale-companies">{stats.scale}</div>
+            <div className="grid grid-cols-4 gap-1 text-center">
+              <div>
+                <div className="text-lg font-bold" data-testid="text-free-companies">{stats.free}</div>
+                <div className="text-[10px] text-muted-foreground">Free</div>
+              </div>
+              <div>
+                <div className="text-lg font-bold" data-testid="text-starter-companies">{stats.starter}</div>
+                <div className="text-[10px] text-muted-foreground">Starter</div>
+              </div>
+              <div>
+                <div className="text-lg font-bold" data-testid="text-growth-companies">{stats.growth}</div>
+                <div className="text-[10px] text-muted-foreground">Growth</div>
+              </div>
+              <div>
+                <div className="text-lg font-bold" data-testid="text-scale-companies">{stats.scale}</div>
+                <div className="text-[10px] text-muted-foreground">Scale</div>
+              </div>
+            </div>
           </CardContent>
         </Card>
         <Card>
