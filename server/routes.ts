@@ -2267,7 +2267,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const filePath = `company_logos/${filename}`;
       
       await uploadFile(req.file.buffer, filePath);
-      await storage.updateCompany(id, { logoUrl: `/assets/${filePath}` });
+      await storage.updateCompany(id, { logoUrl: `/api/files/${filePath}` });
       
       const updated = await storage.getCompany(id);
       res.json(updated);
