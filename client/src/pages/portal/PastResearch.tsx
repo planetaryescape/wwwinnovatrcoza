@@ -743,11 +743,6 @@ export default function PastResearch() {
                                 className="w-full h-full object-cover"
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                              <div className="absolute bottom-2 left-3">
-                                <span className="text-white text-xs font-medium drop-shadow-md">
-                                  {formatStudyType(report.studyType)}
-                                </span>
-                              </div>
                             </div>
                           )}
                           <CardHeader className={headerImage ? "pt-3" : ""}>
