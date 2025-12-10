@@ -1,0 +1,281 @@
+You are a senior full stack developer working on the Innovatr member portal repo in Replit.
+Your task is to update all “Innovatr Inside” posts in the Trends & Insights section so that:
+
+
+Each post has the correct card view teaser and full issue body text.
+
+
+Each post is correctly tagged as an Inside piece (category and any other tags should follow the existing schema).
+
+
+Each post is wired up to the right video file(s), using the same pattern and schema that is already working for “Innovatr Inside: Storyteller”.
+
+
+Nothing else in the portal is broken or changed unnecessarily.
+
+
+
+Step 1: Understand the existing schema
+
+
+Locate where the Trends & Insights content lives in the repo.
+
+
+Look for files like trends.json, insights.json, inside.ts, content/trends, server/trends.ts or similar.
+
+
+Also inspect any React components that render the Trends & Insights list and detail pages, for example TrendsList, TrendCard, TrendDetail, or similar.
+
+
+
+
+Identify one of the existing Innovatr Inside posts that is working correctly (for example Storyteller) and use it as the template.
+
+
+Note the exact fields used in the data model – for example things like id, slug, type, category, title, summary or teaser, body, video, videos, videoUrl, videoTitle, ctaLabel, publishedAt, etc.
+
+
+Note how a video is attached to the article (path, filename, field name, etc.).
+
+
+
+
+Do not invent a new schema. Reuse the existing one exactly so that the portal continues to work.
+
+
+
+Step 2: Wire up the video files
+Hannah will upload / has uploaded MP4 files for each Inside post into the same folder structure used by the Storyteller demo video.
+Your job is to reference the correct filenames in the appropriate field(s), following the exact same pattern used by Storyteller.
+Use these mappings:
+
+
+Innovatr Inside: Storyteller
+
+
+Already working.
+
+
+Do not change the video wiring, but you may update the text content to match the copy below if there are differences.
+
+
+
+
+Innovatr Inside: Market Simulator
+
+
+Video title: Market Simulator Demo
+
+
+File name: Innovatr Inside X Market Simulator Demo.mp4
+
+
+
+
+Innovatr Inside: Idea Screen
+
+
+Video title: Idea Screen Reporting Walkthrough
+
+
+File name: Innovatr Inside X Idea Screen Walkthrough.mp4
+
+
+Use the title “Innovatr Inside: Idea Screen” everywhere (not “Idea Screening”).
+
+
+
+
+Innovatr Inside: Upsiide Overview
+This post has two videos, attached in the same way Storyteller attaches its video, but as an array or second field if the schema allows it.
+
+
+Video A title: Upsiide Overview
+
+
+File A name: Innovatr Inside X Upsiide Overview.mp4
+
+
+Video B title: Why Upsiide
+
+
+File B name: Innovatr Inside X Why Upsiide.mp4
+
+
+
+
+Innovatr Inside: Building Tests with Upsiide
+
+
+Video title: Upsiide Creation Experience
+
+
+File name: Innovatr Inside X Upsiide Creation Experience.mp4
+
+
+
+
+Innovatr Inside: The Respondent Experience
+
+
+Video title: Upsiide Respondent Experience
+
+
+File name: Innovatr Inside X Upsiide Respondent Experience.mp4
+
+
+
+
+Innovatr Inside: The Analysis Engine
+
+
+Video title: Upsiide Analysis Experience
+
+
+File name: Innovatr Inside X Upsiide Analysis Experience.mp4
+
+
+
+
+Innovatr Inside: How Innovatr Research Works
+
+
+Video title: Agile Research Explained
+
+
+File name: Innovatr Inside X Agile Research Explained.mp4
+
+
+
+
+Innovatr Inside: AI Qual
+
+
+Video title: AI Video Interview
+
+
+File name: Innovatr Inside X AI Video Interview.mp4
+
+
+
+
+If the schema expects relative paths (for example /videos/... or /assets/videos/...), follow the same pattern used by Storyteller.
+
+Step 3: Update the content for each post
+For each of the following posts:
+
+
+Make sure the title matches exactly.
+
+
+Set the category / tag so that they appear under Inside and show up when searching inside in the portal.
+
+
+Use the “Teaser” text for the card view teaser / summary field.
+
+
+Use the “Full Issue” text for the detailed body field (markdown or rich text depending on the existing schema).
+
+
+If the schema has a separate CTA field like ctaLabel, set it to “Read full issue” where relevant. Do not add “Read full issue” inside the teaser text itself unless the schema specifically requires it.
+
+
+Preserve all paragraph breaks and bullet points from the copy below.
+
+
+Use this exact content:
+
+1. Innovatr Inside: Storyteller
+Teaser:
+
+What if your research report wrote itself while you were still finishing your coffee? Storyteller is the engine inside Upsiide that turns raw data into clear, confident and boardroom ready stories within minutes. No chaos. No formatting. No waiting for someone to build forty slides from scratch.
+
+Full issue body:
+
+Innovatr Inside: Storyteller
+If you have ever waited for a research report that took so long you forgot what the study was even about, Storyteller is the reason that era is finally ending. Storyteller is the narrative engine built inside Upsiide that turns finished studies into structured stories as soon as fieldwork closes. It does the heavy lifting so your team can focus on decisions, not deck building.
+Storyteller analyses every part of a completed study at once and produces a clean, readable and strategically sound narrative. It is not a page of fluffy highlights or a pile of disconnected charts. It is a report that already feels like someone understood the brief, spotted the important patterns and shaped a flow that leadership will actually follow.
+Because Innovatr holds the licence for South Africa and Southern Africa, Storyteller is a capability that very few insight or innovation teams in the region have access to. It is trained on thousands of real research projects, strategic frameworks and the way strong insights are written. This means the starting point is already meaningful. It behaves like a junior consultant who arrives with a first draft that is surprisingly sharp.
+Where Storyteller fits in your business life cycle
+In Innovatr language, Storyteller sits mainly in How to win and What is working.
+• In How to win, it turns test results into business cases, launch stories and clear recommendations.
+• In What is working, it helps teams track shifts over time and translate tracking data into simple internal stories.
+So Storyteller is not just a reporting feature. It is one of the ways we help you move from data to decision across your business.
+What Storyteller is built to do
+These are the moments where Storyteller shines:
+• It turns messy data into smart, structured insight blocks with the right charts and plain language explanations.
+• It builds a narrative that lands with teams beyond research. If your CFO or creative director reads it, they will follow it.
+• It flags meaningful differences and strengths and it does that with statistical confidence rather than intuition.
+• It can create focused versions of the story for specific audiences or segments without starting again from zero.
+This is the kind of reporting that keeps everyone aligned without adding weeks of manual work.
+What this feels like when you work with us
+A typical Innovatr workflow is simple.
+We launch your study to our South African panel of around eight hundred thousand people who represent the demographic profile of the country. If you are working across markets, we extend fieldwork into Zimbabwe, Zambia, Namibia, Rwanda, DRC or Tunisia, and use our recruitment team for audiences panels cannot reach.
+Once fieldwork finishes, Storyteller produces the first draft of the report within minutes. The Innovatr team then reviews the system generated insights, sharpens the message, adds local category context and provides commercial clarity. The result is a narrative that is quick but considered. It lands with senior teams because it has been shaped with real experience.
+This is also why Test24 feels fast without feeling lightweight. By automating the mechanical work inside Upsiide we free the team to focus on the thinking. Member pricing from about R15 000 for Basic and about R45 000 for Pro becomes possible because we are not spending days building slides. You are paying for interpretation, judgement and relevance, not formatting.
+When you should use Storyteller
+Storyteller is ideal when you want to reduce the time between insight and action. Use it when you need clarity within a short window, when you are testing multiple ideas or formats, when you have several audiences that each need a tailored view or when you want something better than a long document no one will finish.
+Storyteller creates reports that travel easily inside organisations. They are clean, confident and simple to follow. For teams that work at the pace of modern marketing, this is a major advantage.
+If you want to explore Storyteller, see it in action or talk about how it can support your next study, you can contact me at hannah@innovatr.co.za.
+The full Storyteller demo video sits directly below this post.
+
+
+2. Innovatr Inside: Market Simulator
+Use the “Market Simulator” Card View teaser and Full Issue body exactly as provided in Hannah’s brief.
+
+3. Innovatr Inside: Idea Screen
+Use the “Idea Screen” Card View teaser and Full Issue body exactly as provided in Hannah’s brief.
+
+4. Innovatr Inside: Upsiide Overview
+Use the “UpSiide Overview” Card View teaser and Full Issue body exactly as provided in Hannah’s brief. Remember to attach two videos as described earlier.
+
+5. Innovatr Inside: Building Tests with Upsiide
+Use the “Building tests with UpSiide” Card View teaser and Full Issue body exactly as provided in Hannah’s brief.
+
+6. Innovatr Inside: The Respondent Experience
+Use “The Respondent Experience” Card View teaser and Full Issue body exactly as provided.
+
+7. Innovatr Inside: The Analysis Engine
+Use “The Analysis Engine” Card View teaser and Full Issue body exactly as provided.
+
+8. Innovatr Inside: How Innovatr Research Works
+Use “How Innovatr Research Works” Card View teaser and Full Issue body exactly as provided.
+
+9. Innovatr Inside: AI Qual
+Use the “Ai Qual” Card View teaser and Full Issue body exactly as provided.
+
+Step 4: Quality checks
+
+
+Run the project locally in Replit and:
+
+
+Open the member portal.
+
+
+Navigate to Trends & Insights → Inside.
+
+
+Confirm that all nine Innovatr Inside posts appear with the correct titles and card teasers.
+
+
+
+
+Click into each post and confirm:
+
+
+The full article text displays correctly and in full.
+
+
+The correct video(s) appear directly below the post as per Storyteller.
+
+
+
+
+Fix any TypeScript or lint errors introduced by the changes.
+
+
+Keep your edits minimal and focused only on the Inside content and video wiring.
+
+
+Once everything passes, save all files.
