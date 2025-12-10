@@ -71,6 +71,7 @@ import {
   Loader2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import PortalLayout from "./PortalLayout";
 import { safeParseDate } from "@shared/access";
 
@@ -132,6 +133,7 @@ const tierConfig: Record<string, { label: string; color: string; icon: any }> = 
 
 export default function AdminCompanyDetail() {
   const { toast } = useToast();
+  const { impersonateCompany } = useAuth();
   const [, setLocation] = useLocation();
   const [match, params] = useRoute("/portal/admin/companies/:companyId");
   
@@ -592,16 +594,38 @@ export default function AdminCompanyDetail() {
                 </div>
               </div>
 
-              {/* Delete Button */}
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setDeleteCompanyOpen(true)}
-                data-testid="button-delete-company"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete Company
-              </Button>
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      await impersonateCompany(company.id);
+                      setLocation("/portal");
+                    } catch (err) {
+                      toast({
+                        title: "Error",
+                        description: "Failed to view as company",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  data-testid="button-view-company-lens"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Company Lens
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setDeleteCompanyOpen(true)}
+                  data-testid="button-delete-company"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Company
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
