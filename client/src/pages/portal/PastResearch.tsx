@@ -47,6 +47,17 @@ interface ClientReport {
   uploadedAt: string;
   createdAt: string;
   updatedAt: string;
+  // Structured data fields
+  topIdeaLabel: string | null;
+  topIdeaIdeaScore: number | null;
+  topIdeaInterest: number | null;
+  topIdeaCommitment: number | null;
+  lowestIdeaLabel: string | null;
+  lowestIdeaIdeaScore: number | null;
+  lowestIdeaInterest: number | null;
+  lowestIdeaCommitment: number | null;
+  verbatim1: string | null;
+  verbatim2: string | null;
 }
 
 interface Study {
@@ -769,6 +780,55 @@ export default function PastResearch() {
                                 <Calendar className="w-3 h-3" />
                                 <span>Delivered {formatDate(report.uploadedAt)}</span>
                               </div>
+
+                              {/* Key Insights Section */}
+                              {(report.topIdeaLabel || report.lowestIdeaLabel) && (
+                                <div className="space-y-2 pt-2 border-t">
+                                  {report.topIdeaLabel && (
+                                    <div className="bg-green-50 dark:bg-green-900/20 rounded-md p-2">
+                                      <div className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Top Performer</div>
+                                      <div className="text-sm font-medium">{report.topIdeaLabel}</div>
+                                      {report.topIdeaIdeaScore !== null && (
+                                        <div className="text-xs text-muted-foreground mt-1">
+                                          Score: {report.topIdeaIdeaScore}%
+                                          {report.topIdeaInterest !== null && ` | Interest: ${report.topIdeaInterest}%`}
+                                          {report.topIdeaCommitment !== null && ` | Commitment: ${report.topIdeaCommitment}%`}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                  {report.lowestIdeaLabel && (
+                                    <div className="bg-amber-50 dark:bg-amber-900/20 rounded-md p-2">
+                                      <div className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-1">Lowest Performer</div>
+                                      <div className="text-sm font-medium">{report.lowestIdeaLabel}</div>
+                                      {report.lowestIdeaIdeaScore !== null && (
+                                        <div className="text-xs text-muted-foreground mt-1">
+                                          Score: {report.lowestIdeaIdeaScore}%
+                                          {report.lowestIdeaInterest !== null && ` | Interest: ${report.lowestIdeaInterest}%`}
+                                          {report.lowestIdeaCommitment !== null && ` | Commitment: ${report.lowestIdeaCommitment}%`}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Consumer Verbatims */}
+                              {(report.verbatim1 || report.verbatim2) && (
+                                <div className="space-y-2 pt-2 border-t">
+                                  <div className="text-xs font-medium text-muted-foreground">Consumer Voice</div>
+                                  {report.verbatim1 && (
+                                    <div className="text-xs italic text-muted-foreground bg-muted/50 rounded p-2">
+                                      "{report.verbatim1}"
+                                    </div>
+                                  )}
+                                  {report.verbatim2 && (
+                                    <div className="text-xs italic text-muted-foreground bg-muted/50 rounded p-2">
+                                      "{report.verbatim2}"
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </div>
                             <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t">
                               <Button 
