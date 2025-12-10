@@ -13,8 +13,12 @@ import {
 import { 
   Search, FileText, Download, Eye, Grid3x3, List, Lock, RefreshCw, 
   Building2, Calendar, Tag, Clock, Play, BarChart3, CheckCircle2,
-  Loader2, Timer, ArrowLeft
+  Loader2, Timer, ArrowLeft, Edit, Save
 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 import PortalLayout from "./PortalLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation, useSearch } from "wouter";
@@ -95,6 +99,7 @@ interface Study {
 
 export default function PastResearch() {
   const { user, company, isAdmin } = useAuth();
+  const { toast } = useToast();
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -107,6 +112,29 @@ export default function PastResearch() {
   const [error, setError] = useState<string | null>(null);
   const [, setTimeNow] = useState(Date.now());
   const [viewingCompany, setViewingCompany] = useState<{ id: string; name: string } | null>(null);
+  
+  // Edit report state
+  const [editReportOpen, setEditReportOpen] = useState(false);
+  const [editingReport, setEditingReport] = useState<ClientReport | null>(null);
+  const [savingReport, setSavingReport] = useState(false);
+  const [editForm, setEditForm] = useState({
+    title: "",
+    description: "",
+    studyType: "",
+    industry: "",
+    status: "",
+    upsiideUrl: "",
+    topIdeaLabel: "",
+    topIdeaIdeaScore: "",
+    topIdeaInterest: "",
+    topIdeaCommitment: "",
+    lowestIdeaLabel: "",
+    lowestIdeaIdeaScore: "",
+    lowestIdeaInterest: "",
+    lowestIdeaCommitment: "",
+    verbatim1: "",
+    verbatim2: "",
+  });
 
   const viewCompanyId = useMemo(() => {
     if (!searchString || !isAdmin) return null;
@@ -280,6 +308,66 @@ export default function PastResearch() {
   const handleViewDashboard = (report: ClientReport) => {
     if (report.dashboardUrl) {
       window.open(report.dashboardUrl, '_blank');
+    }
+  };
+
+  const handleEditReport = (report: ClientReport) => {
+    setEditingReport(report);
+    setEditForm({
+      title: report.title || "",
+      description: report.description || "",
+      studyType: report.studyType || "",
+      industry: report.industry || "",
+      status: report.status || "",
+      upsiideUrl: report.upsiideUrl || "",
+      topIdeaLabel: report.topIdeaLabel || "",
+      topIdeaIdeaScore: report.topIdeaIdeaScore?.toString() || "",
+      topIdeaInterest: report.topIdeaInterest?.toString() || "",
+      topIdeaCommitment: report.topIdeaCommitment?.toString() || "",
+      lowestIdeaLabel: report.lowestIdeaLabel || "",
+      lowestIdeaIdeaScore: report.lowestIdeaIdeaScore?.toString() || "",
+      lowestIdeaInterest: report.lowestIdeaInterest?.toString() || "",
+      lowestIdeaCommitment: report.lowestIdeaCommitment?.toString() || "",
+      verbatim1: report.verbatim1 || "",
+      verbatim2: report.verbatim2 || "",
+    });
+    setEditReportOpen(true);
+  };
+
+  const handleSaveReport = async () => {
+    if (!editingReport) return;
+    setSavingReport(true);
+    try {
+      const response = await fetch(`/api/admin/client-reports/${editingReport.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: editForm.title,
+          description: editForm.description || null,
+          studyType: editForm.studyType || null,
+          industry: editForm.industry || null,
+          status: editForm.status || null,
+          upsiideUrl: editForm.upsiideUrl || null,
+          topIdeaLabel: editForm.topIdeaLabel || null,
+          topIdeaIdeaScore: editForm.topIdeaIdeaScore ? parseInt(editForm.topIdeaIdeaScore) : null,
+          topIdeaInterest: editForm.topIdeaInterest ? parseInt(editForm.topIdeaInterest) : null,
+          topIdeaCommitment: editForm.topIdeaCommitment ? parseInt(editForm.topIdeaCommitment) : null,
+          lowestIdeaLabel: editForm.lowestIdeaLabel || null,
+          lowestIdeaIdeaScore: editForm.lowestIdeaIdeaScore ? parseInt(editForm.lowestIdeaIdeaScore) : null,
+          lowestIdeaInterest: editForm.lowestIdeaInterest ? parseInt(editForm.lowestIdeaInterest) : null,
+          lowestIdeaCommitment: editForm.lowestIdeaCommitment ? parseInt(editForm.lowestIdeaCommitment) : null,
+          verbatim1: editForm.verbatim1 || null,
+          verbatim2: editForm.verbatim2 || null,
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to update report");
+      toast({ title: "Report updated", description: "Changes saved successfully" });
+      setEditReportOpen(false);
+      fetchData();
+    } catch (err) {
+      toast({ title: "Error", description: "Failed to save changes", variant: "destructive" });
+    } finally {
+      setSavingReport(false);
     }
   };
 
@@ -746,34 +834,50 @@ export default function PastResearch() {
                             </div>
                           )}
                           <CardHeader className={headerImage ? "pt-3" : ""}>
-                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                              {report.studyType && (
-                                <Badge variant="secondary" className="text-xs">
-                                  {formatStudyType(report.studyType)}
-                                </Badge>
+                            <div className="flex items-center justify-between gap-2 mb-2">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {report.studyType && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {formatStudyType(report.studyType)}
+                                  </Badge>
+                                )}
+                                {report.industry && (
+                                  <Badge variant="outline" className="text-xs">
+                                    {report.industry}
+                                  </Badge>
+                                )}
+                                {report.status?.toLowerCase() === "completed" ? (
+                                  <Badge className="bg-green-500/15 text-green-600 border-green-500/30 text-xs">
+                                    Complete
+                                  </Badge>
+                                ) : report.status === "Brief Submitted" ? (
+                                  <Badge className="bg-blue-500/15 text-blue-600 border-blue-500/30 text-xs">
+                                    Brief Submitted
+                                  </Badge>
+                                ) : report.status === "Audience Live" ? (
+                                  <Badge className="bg-amber-500/15 text-amber-600 border-amber-500/30 text-xs">
+                                    Audience Live
+                                  </Badge>
+                                ) : report.status === "Building Report" ? (
+                                  <Badge className="bg-purple-500/15 text-purple-600 border-purple-500/30 text-xs">
+                                    Building Report
+                                  </Badge>
+                                ) : null}
+                              </div>
+                              {isAdmin && (
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-6 w-6 flex-shrink-0"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditReport(report);
+                                  }}
+                                  data-testid={`button-edit-report-${report.id}`}
+                                >
+                                  <Edit className="w-3.5 h-3.5" />
+                                </Button>
                               )}
-                              {report.industry && (
-                                <Badge variant="outline" className="text-xs">
-                                  {report.industry}
-                                </Badge>
-                              )}
-                              {report.status?.toLowerCase() === "completed" ? (
-                                <Badge className="bg-green-500/15 text-green-600 border-green-500/30 text-xs">
-                                  Complete
-                                </Badge>
-                              ) : report.status === "Brief Submitted" ? (
-                                <Badge className="bg-blue-500/15 text-blue-600 border-blue-500/30 text-xs">
-                                  Brief Submitted
-                                </Badge>
-                              ) : report.status === "Audience Live" ? (
-                                <Badge className="bg-amber-500/15 text-amber-600 border-amber-500/30 text-xs">
-                                  Audience Live
-                                </Badge>
-                              ) : report.status === "Building Report" ? (
-                                <Badge className="bg-purple-500/15 text-purple-600 border-purple-500/30 text-xs">
-                                  Building Report
-                                </Badge>
-                              ) : null}
                             </div>
                             <CardTitle className="text-lg">{report.title}</CardTitle>
                             {/* Show description only if no structured summary data */}
@@ -978,6 +1082,16 @@ export default function PastResearch() {
                                 </div>
                               </div>
                               <div className="flex gap-2 flex-shrink-0">
+                                {isAdmin && (
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() => handleEditReport(report)}
+                                    data-testid={`button-edit-report-list-${report.id}`}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                )}
                                 <Button 
                                   variant="outline" 
                                   size="sm"
@@ -1009,6 +1123,216 @@ export default function PastResearch() {
           </>
         )}
       </div>
+
+      {/* Edit Report Dialog */}
+      <Dialog open={editReportOpen} onOpenChange={setEditReportOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Report</DialogTitle>
+            <DialogDescription>Update the report information visible to clients</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-title">Title</Label>
+              <Input
+                id="edit-title"
+                value={editForm.title}
+                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                data-testid="input-edit-title"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={editForm.description}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                rows={2}
+                data-testid="input-edit-description"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-studyType">Study Type</Label>
+                <Select
+                  value={editForm.studyType}
+                  onValueChange={(val) => setEditForm({ ...editForm, studyType: val })}
+                >
+                  <SelectTrigger data-testid="select-edit-studyType">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="test24_basic">Test24 Basic</SelectItem>
+                    <SelectItem value="test24_pro">Test24 Pro</SelectItem>
+                    <SelectItem value="consult">Consult</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-status">Status</Label>
+                <Select
+                  value={editForm.status}
+                  onValueChange={(val) => setEditForm({ ...editForm, status: val })}
+                >
+                  <SelectTrigger data-testid="select-edit-status">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Completed">Completed</SelectItem>
+                    <SelectItem value="Brief Submitted">Brief Submitted</SelectItem>
+                    <SelectItem value="Audience Live">Audience Live</SelectItem>
+                    <SelectItem value="Building Report">Building Report</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-industry">Industry</Label>
+              <Input
+                id="edit-industry"
+                value={editForm.industry}
+                onChange={(e) => setEditForm({ ...editForm, industry: e.target.value })}
+                data-testid="input-edit-industry"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-upsiideUrl">Upsiide URL</Label>
+              <Input
+                id="edit-upsiideUrl"
+                value={editForm.upsiideUrl}
+                onChange={(e) => setEditForm({ ...editForm, upsiideUrl: e.target.value })}
+                placeholder="https://app.upsiide.com/..."
+                data-testid="input-edit-upsiideUrl"
+              />
+            </div>
+
+            <div className="border-t pt-4 mt-2">
+              <h4 className="text-sm font-medium mb-3">Top Performer</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2 col-span-2">
+                  <Label htmlFor="edit-topIdeaLabel">Idea Label</Label>
+                  <Input
+                    id="edit-topIdeaLabel"
+                    value={editForm.topIdeaLabel}
+                    onChange={(e) => setEditForm({ ...editForm, topIdeaLabel: e.target.value })}
+                    data-testid="input-edit-topIdeaLabel"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-topIdeaIdeaScore">Idea Score (%)</Label>
+                  <Input
+                    id="edit-topIdeaIdeaScore"
+                    type="number"
+                    value={editForm.topIdeaIdeaScore}
+                    onChange={(e) => setEditForm({ ...editForm, topIdeaIdeaScore: e.target.value })}
+                    data-testid="input-edit-topIdeaIdeaScore"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-topIdeaInterest">Interest (%)</Label>
+                  <Input
+                    id="edit-topIdeaInterest"
+                    type="number"
+                    value={editForm.topIdeaInterest}
+                    onChange={(e) => setEditForm({ ...editForm, topIdeaInterest: e.target.value })}
+                    data-testid="input-edit-topIdeaInterest"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-topIdeaCommitment">Commitment (%)</Label>
+                  <Input
+                    id="edit-topIdeaCommitment"
+                    type="number"
+                    value={editForm.topIdeaCommitment}
+                    onChange={(e) => setEditForm({ ...editForm, topIdeaCommitment: e.target.value })}
+                    data-testid="input-edit-topIdeaCommitment"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t pt-4 mt-2">
+              <h4 className="text-sm font-medium mb-3">Lowest Performer</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2 col-span-2">
+                  <Label htmlFor="edit-lowestIdeaLabel">Idea Label</Label>
+                  <Input
+                    id="edit-lowestIdeaLabel"
+                    value={editForm.lowestIdeaLabel}
+                    onChange={(e) => setEditForm({ ...editForm, lowestIdeaLabel: e.target.value })}
+                    data-testid="input-edit-lowestIdeaLabel"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-lowestIdeaIdeaScore">Idea Score (%)</Label>
+                  <Input
+                    id="edit-lowestIdeaIdeaScore"
+                    type="number"
+                    value={editForm.lowestIdeaIdeaScore}
+                    onChange={(e) => setEditForm({ ...editForm, lowestIdeaIdeaScore: e.target.value })}
+                    data-testid="input-edit-lowestIdeaIdeaScore"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-lowestIdeaInterest">Interest (%)</Label>
+                  <Input
+                    id="edit-lowestIdeaInterest"
+                    type="number"
+                    value={editForm.lowestIdeaInterest}
+                    onChange={(e) => setEditForm({ ...editForm, lowestIdeaInterest: e.target.value })}
+                    data-testid="input-edit-lowestIdeaInterest"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-lowestIdeaCommitment">Commitment (%)</Label>
+                  <Input
+                    id="edit-lowestIdeaCommitment"
+                    type="number"
+                    value={editForm.lowestIdeaCommitment}
+                    onChange={(e) => setEditForm({ ...editForm, lowestIdeaCommitment: e.target.value })}
+                    data-testid="input-edit-lowestIdeaCommitment"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t pt-4 mt-2">
+              <h4 className="text-sm font-medium mb-3">Consumer Verbatims</h4>
+              <div className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-verbatim1">Verbatim 1</Label>
+                  <Textarea
+                    id="edit-verbatim1"
+                    value={editForm.verbatim1}
+                    onChange={(e) => setEditForm({ ...editForm, verbatim1: e.target.value })}
+                    rows={2}
+                    data-testid="input-edit-verbatim1"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-verbatim2">Verbatim 2</Label>
+                  <Textarea
+                    id="edit-verbatim2"
+                    value={editForm.verbatim2}
+                    onChange={(e) => setEditForm({ ...editForm, verbatim2: e.target.value })}
+                    rows={2}
+                    data-testid="input-edit-verbatim2"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditReportOpen(false)} data-testid="button-cancel-edit">
+              Cancel
+            </Button>
+            <Button onClick={handleSaveReport} disabled={savingReport} data-testid="button-save-edit">
+              {savingReport ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PortalLayout>
   );
 }
