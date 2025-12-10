@@ -1,0 +1,308 @@
+You are editing a TypeScript React app for the Innovatr client portal. 
+The app uses Vite, TailwindCSS, Drizzle ORM and a shared design system.
+
+Do NOT change any authentication, routing, database table names, or membership logic. 
+Do NOT remove any existing fields from the database. Only add optional fields or front end changes.
+
+GOAL
+I want to improve the “My Research” page cards and the way I manage client reports in the Admin area, WITHOUT breaking any existing flows.
+
+High level:
+- Standardise the research cards under My Research.
+- Keep my existing status logic (Brief Submitted, Audience Live, Building Report, Complete).
+- Add project type and industry tags to each card.
+- Replace the current description snippet on the card with a structured summary for:
+  - Top performing idea (Idea Score, Interest, Commitment) – IDEA SCORE MUST BE VISIBLE ON THE CARD
+  - Lowest idea (Idea Score, Interest, Commitment) – IDEA SCORE MUST BE VISIBLE ON THE CARD
+  - 2 short verbatim quotes
+- Ensure the “View” button on cards always opens UpSiide in a new tab.
+- Let me EDIT all of this metadata from Admin → Companies → Client Reports.
+- Do NOT add a new “Add report” button on My Research. I only want to create and edit reports from the Admin area.
+
+------------------------------------------------
+1. FIND CURRENT IMPLEMENTATION
+------------------------------------------------
+
+1. Find the member “My Research” page (route like /portal/research). It is the page that shows:
+   - “My Research” as the H1
+   - three summary tiles (Active Studies, Completed, Total Research)
+   - filters for title / company / tags
+   - a “Completed Research” section with a grid of cards:
+     - title
+     - paragraph description
+     - company name
+     - delivered date
+     - status chip (Brief Submitted / Audience is Live / Building Report / Complete)
+     - View and Download buttons.
+
+2. Identify the component that renders a SINGLE research card in this grid
+   (something like `ResearchCard`, `MemberReportCard`, `ClientReportCard`, etc).
+   This is the ONLY component whose layout you must modify for the card UI.
+
+3. Do NOT rename this component and do NOT change how the list is fetched or mapped.
+   Assume the props already include the extended report fields described below.
+
+------------------------------------------------
+2. DATA MODEL EXTENSIONS (OPTIONAL FIELDS ONLY)
+------------------------------------------------
+
+The underlying report / client report model has already been extended (or must be extended) with these OPTIONAL fields:
+
+- `projectType`: enum or string with allowed values:
+  - "test24_basic"
+  - "test24_pro"
+  - "consult"
+
+- `industry`: enum or string with allowed values:
+  - "food"
+  - "beverage"
+  - "alcohol"
+  - "services"
+  - "financial"
+  - "agency"
+  - "beauty"
+  - "fmcg"
+
+- `topIdeaLabel`: string | null
+- `topIdeaIdeaScore`: number | null
+- `topIdeaInterest`: number | null
+- `topIdeaCommitment`: number | null
+
+- `lowestIdeaLabel`: string | null
+- `lowestIdeaIdeaScore`: number | null
+- `lowestIdeaInterest`: number | null
+- `lowestIdeaCommitment`: number | null
+
+- `verbatim1`: string | null
+- `verbatim2`: string | null
+
+Implementation rules:
+- Add them as OPTIONAL columns / fields only. Do not make anything required.
+- Do not rename or remove any existing DB columns or TypeScript fields.
+
+------------------------------------------------
+3. ADMIN → COMPANIES → CLIENT REPORTS EDITING
+------------------------------------------------
+
+In the Admin page under **Admin → Companies**, when I click a company and see the right-hand drawer with:
+- Company Users
+- Client Reports
+- Notes
+
+I need to be able to create AND EDIT these new metadata fields for each report.
+
+1. Keep the existing list of reports exactly as it is visually (title, status, etc).
+
+2. Next to each report row in “Client Reports”, add a small **Edit** icon button (e.g. a pencil) that opens an “Edit Report” modal or slide-over.
+
+3. In BOTH the **Add Report** and **Edit Report** forms, include:
+
+   - Project type
+     - Dropdown
+     - Label: “Project type”
+     - Options shown to user: “Test24 Basic”, “Test24 Pro”, “Consult”
+     - Values stored: "test24_basic", "test24_pro", "consult"
+
+   - Industry
+     - Dropdown (single select)
+     - Label: “Industry”
+     - Options shown: “Food”, “Beverage”, “Alcohol”, “Services”, “Financial”, “Agency”, “Beauty”, “FMCG”
+     - Values stored: "food", "beverage", "alcohol", "services", "financial", "agency", "beauty", "fmcg"
+
+   - Top idea block
+     - Text input: `topIdeaLabel` – label “Top idea name”
+     - Number input: `topIdeaIdeaScore` – label “Top idea – Idea Score (%)”
+     - Number input: `topIdeaInterest` – label “Top idea – Interest (%)”
+     - Number input: `topIdeaCommitment` – label “Top idea – Commitment (%)”
+
+   - Lowest idea block
+     - Text input: `lowestIdeaLabel` – label “Lowest idea name”
+     - Number input: `lowestIdeaIdeaScore` – label “Lowest idea – Idea Score (%)”
+     - Number input: `lowestIdeaInterest` – label “Lowest idea – Interest (%)”
+     - Number input: `lowestIdeaCommitment` – label “Lowest idea – Commitment (%)”
+
+   - Verbatims
+     - Textarea: `verbatim1` – label “Verbatim 1”
+     - Textarea: `verbatim2` – label “Verbatim 2”
+
+4. Behaviour requirements:
+   - Creating a new report must still work exactly as before (no required new fields).
+   - Editing a report must persist the new fields.
+   - If I leave ALL new fields empty, nothing should break and the report should still render on My Research using the old layout.
+
+------------------------------------------------
+4. MY RESEARCH CARD DESIGN AND BEHAVIOUR
+------------------------------------------------
+
+Update the card component identified in step 1.
+
+### 4.1 Tag row at top of card
+
+At the top of each card there is a row of tags / chips.
+
+Extend this row WITHOUT removing existing tags:
+
+- If `projectType` is set:
+  - Render a chip at the **start** of the row:
+    - "test24_basic" → label: `Test24 Basic`
+    - "test24_pro" → label: `Test24 Pro`
+    - "consult" → label: `Consult`
+
+- If `industry` is set:
+  - Render another chip immediately after the project type chip:
+    - Label: capitalised form of the value, e.g. `Beverage`, `Food`, `Alcohol`, etc.
+
+- After these, render the existing tags exactly as they are now (e.g. “Rugani”, “Clicks”, `+3` chip etc).
+
+Do NOT change the status chip logic:
+- It must remain one of “Brief Submitted”, “Audience is Live”, “Building Report”, “Complete” with the same styles.
+
+### 4.2 Main content: structured summary with IDEA SCORES
+
+Right now, each card shows a paragraph description.
+We want to show a structured summary instead, BUT only when we have data.
+
+Create a helper:
+
+```ts
+const hasStructuredSummary =
+  report.topIdeaLabel ||
+  report.lowestIdeaLabel ||
+  report.verbatim1 ||
+  report.verbatim2 ||
+  report.topIdeaIdeaScore != null ||
+  report.lowestIdeaIdeaScore != null ||
+  report.topIdeaInterest != null ||
+  report.topIdeaCommitment != null ||
+  report.lowestIdeaInterest != null ||
+  report.lowestIdeaCommitment != null;
+Then in the JSX where the description currently renders:
+
+If hasStructuredSummary is true, render the structured layout described below.
+
+If hasStructuredSummary is false, render the EXISTING description block exactly as it is today.
+
+Structured layout spec:
+
+Use existing typography and spacing classes (no need to invent new components). For example:
+
+tsx
+Copy code
+{hasStructuredSummary ? (
+  <div className="space-y-3">
+    {/* Top idea */}
+    {report.topIdeaLabel && (
+      <div>
+        <p className="text-xs font-semibold text-slate-500">Top idea</p>
+        <p className="text-sm font-medium text-slate-900">
+          {report.topIdeaLabel}
+        </p>
+        {(report.topIdeaIdeaScore != null ||
+          report.topIdeaInterest != null ||
+          report.topIdeaCommitment != null) && (
+          <p className="mt-0.5 text-xs text-slate-600">
+            {/* IDEA SCORE MUST BE VISIBLE */}
+            {report.topIdeaIdeaScore != null && `Idea ${report.topIdeaIdeaScore}%`}
+            {report.topIdeaInterest != null &&
+              (report.topIdeaIdeaScore != null ? " · " : "")}
+            {report.topIdeaInterest != null && `Interest ${report.topIdeaInterest}%`}
+            {report.topIdeaCommitment != null &&
+              ((report.topIdeaIdeaScore != null || report.topIdeaInterest != null) ? " · " : "")}
+            {report.topIdeaCommitment != null && `Commitment ${report.topIdeaCommitment}%`}
+          </p>
+        )}
+      </div>
+    )}
+
+    {/* Lowest idea */}
+    {report.lowestIdeaLabel && (
+      <div>
+        <p className="text-xs font-semibold text-slate-500">Lowest idea</p>
+        <p className="text-sm font-medium text-slate-900">
+          {report.lowestIdeaLabel}
+        </p>
+        {(report.lowestIdeaIdeaScore != null ||
+          report.lowestIdeaInterest != null ||
+          report.lowestIdeaCommitment != null) && (
+          <p className="mt-0.5 text-xs text-slate-600">
+            {/* IDEA SCORE MUST BE VISIBLE */}
+            {report.lowestIdeaIdeaScore != null && `Idea ${report.lowestIdeaIdeaScore}%`}
+            {report.lowestIdeaInterest != null &&
+              (report.lowestIdeaIdeaScore != null ? " · " : "")}
+            {report.lowestIdeaInterest != null && `Interest ${report.lowestIdeaInterest}%`}
+            {report.lowestIdeaCommitment != null &&
+              ((report.lowestIdeaIdeaScore != null || report.lowestIdeaInterest != null) ? " · " : "")}
+            {report.lowestIdeaCommitment != null && `Commitment ${report.lowestIdeaCommitment}%`}
+          </p>
+        )}
+      </div>
+    )}
+
+    {/* Consumer voice */}
+    {(report.verbatim1 || report.verbatim2) && (
+      <div>
+        <p className="text-xs font-semibold text-slate-500">Consumer voice</p>
+        {report.verbatim1 && (
+          <p className="text-xs text-slate-700 leading-snug">
+            {report.verbatim1}
+          </p>
+        )}
+        {report.verbatim2 && (
+          <p className="mt-1 text-xs text-slate-700 leading-snug">
+            {report.verbatim2}
+          </p>
+        )}
+      </div>
+    )}
+  </div>
+) : (
+  // ORIGINAL DESCRIPTION BLOCK HERE, UNCHANGED
+)}
+Key requirement:
+Idea Score must always be visible in the stats line whenever that number is present, for both top and lowest idea.
+
+4.3 Buttons
+Keep the Download button behaviour exactly as it is today.
+
+For the View button:
+
+Always open UpSiide in a new tab.
+
+If a specific URL field exists for this report (e.g. report.upsiideUrl), use it.
+
+Otherwise default to https://app.upsiide.com/.
+
+Example:
+
+tsx
+Copy code
+const upsiideUrl = report.upsiideUrl || "https://app.upsiide.com/";
+
+<button
+  type="button"
+  onClick={() => window.open(upsiideUrl, "_blank")}
+  // existing classes and icon remain the same
+>
+  View
+</button>
+Do not change the styling of the buttons.
+
+SAFETY AND NON-BREAKING CHANGES
+
+Do NOT change any routing paths (e.g. /portal/research, /portal/admin).
+
+Do NOT change any authentication or membership checks.
+
+Do NOT remove or rename any existing fields or database columns.
+
+All new fields are optional and must be handled null-safe in the UI.
+
+If a report has NO new metadata, its card must look and behave EXACTLY as it does today.
+
+After implementing:
+
+/portal/research must load without errors.
+
+Existing 5 studies must render correctly.
+
+Editing a report in Admin → Companies → Client Reports and saving should update the My Research card view with the new tags and structured content.
