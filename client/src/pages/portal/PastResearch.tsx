@@ -814,7 +814,7 @@ export default function PastResearch() {
                                 <Button 
                                   variant="outline" 
                                   size="sm"
-                                  onClick={() => window.open('https://diginsights.com/upsiide/', '_blank')}
+                                  onClick={() => window.open('https://app.upsiide.com/', '_blank')}
                                   data-testid={`button-view-study-${study.id}`}
                                 >
                                   <Eye className="w-4 h-4 mr-1" />
