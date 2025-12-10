@@ -730,7 +730,6 @@ export default function AdminCompanies() {
                 <TableRow>
                   <TableHead>Company</TableHead>
                   <TableHead>Tier</TableHead>
-                  <TableHead>Contract Start</TableHead>
                   <TableHead>Days Left</TableHead>
                   <TableHead>Basic Credits</TableHead>
                   <TableHead>Pro Credits</TableHead>
@@ -753,11 +752,6 @@ export default function AdminCompanies() {
                           <TierIcon className="w-3 h-3 mr-1" />
                           {tierInfo.label}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          {formatDate(company.contractStart)}
-                        </div>
                       </TableCell>
                       <TableCell>
                         {(() => {
