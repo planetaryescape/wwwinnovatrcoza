@@ -2132,13 +2132,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(409).json({ error: "A company with this name already exists" });
       }
       
-      // Create the company
+      // Create the company - convert date strings to Date objects
       const company = await storage.createCompany({
         name: companyData.name,
         domain: companyData.domain || null,
         tier: companyData.tier || "STARTER",
-        contractStart: companyData.contractStart || null,
-        contractEnd: companyData.contractEnd || null,
+        contractStart: companyData.contractStart ? new Date(companyData.contractStart) : null,
+        contractEnd: companyData.contractEnd ? new Date(companyData.contractEnd) : null,
         monthlyFee: companyData.monthlyFee || null,
         basicCreditsTotal: companyData.basicCreditsTotal || 0,
         proCreditsTotal: companyData.proCreditsTotal || 0,

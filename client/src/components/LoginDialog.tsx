@@ -18,6 +18,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [company, setCompany] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -93,7 +94,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
 
     try {
       if (isSignup) {
-        await signup(email, password, name);
+        await signup(email, password, name, company);
         toast({
           title: "Welcome to Innovatr!",
           description: "Your free account has been created. Access trend reports now!",
@@ -153,19 +154,33 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {isSignup && (
-            <div className="space-y-2">
-              <Label htmlFor="name" data-testid="label-name">
-                Full Name
-              </Label>
-              <Input
-                id="name"
-                data-testid="input-name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter your name"
-                required
-              />
-            </div>
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="name" data-testid="label-name">
+                  Full Name
+                </Label>
+                <Input
+                  id="name"
+                  data-testid="input-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your name"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="company" data-testid="label-company">
+                  Company Name <span className="text-muted-foreground text-xs">(optional)</span>
+                </Label>
+                <Input
+                  id="company"
+                  data-testid="input-company"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  placeholder="Your company or organization"
+                />
+              </div>
+            </>
           )}
 
           <div className="space-y-2">
