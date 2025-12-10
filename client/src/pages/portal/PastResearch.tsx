@@ -225,8 +225,14 @@ export default function PastResearch() {
     if (!report.pdfUrl) return;
     
     try {
+      // Normalize the pdfUrl - strip /api/files/ prefix if present to avoid double-prefixing
+      let storagePath = report.pdfUrl;
+      if (storagePath.startsWith('/api/files/')) {
+        storagePath = storagePath.replace('/api/files/', '');
+      }
+      
       // Fetch the file from the API
-      const response = await fetch(`/api/files/${encodeURIComponent(report.pdfUrl)}`);
+      const response = await fetch(`/api/files/${encodeURIComponent(storagePath)}`);
       if (!response.ok) throw new Error('Download failed');
       
       const blob = await response.blob();
@@ -236,7 +242,7 @@ export default function PastResearch() {
       const a = document.createElement('a');
       a.href = url;
       // Extract filename from path or use report title
-      const fileName = report.pdfUrl.split('/').pop() || `${report.title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+      const fileName = storagePath.split('/').pop() || `${report.title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
       a.download = fileName;
       document.body.appendChild(a);
       a.click();
