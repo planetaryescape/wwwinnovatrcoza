@@ -598,7 +598,6 @@ export default function AdminCompanies() {
           </Button>
         </div>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
@@ -646,7 +645,7 @@ export default function AdminCompanies() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Credits Remaining</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Credits</CardTitle>
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -673,7 +672,6 @@ export default function AdminCompanies() {
           </CardContent>
         </Card>
       </div>
-
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between flex-wrap gap-4">
@@ -773,7 +771,6 @@ export default function AdminCompanies() {
           )}
         </CardContent>
       </Card>
-
       <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
         <SheetContent className="w-[500px] sm:max-w-[500px] overflow-y-auto">
           {selectedCompany && (
@@ -1207,7 +1204,6 @@ export default function AdminCompanies() {
           )}
         </SheetContent>
       </Sheet>
-
       <Dialog open={addReportOpen} onOpenChange={setAddReportOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
@@ -1359,7 +1355,6 @@ export default function AdminCompanies() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
       <Dialog open={deleteReportOpen} onOpenChange={setDeleteReportOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
@@ -1390,7 +1385,6 @@ export default function AdminCompanies() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
       <Dialog open={createCompanyOpen} onOpenChange={setCreateCompanyOpen}>
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
