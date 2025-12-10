@@ -585,13 +585,13 @@ export default function AdminCompanies() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <h2 className="text-2xl font-serif font-bold">Company Accounts</h2>
         <div className="flex items-center gap-2">
-          <Button onClick={fetchCompanies} variant="outline" size="sm" data-testid="button-refresh-companies">
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh
-          </Button>
           <Button onClick={() => setCreateCompanyOpen(true)} size="sm" data-testid="button-create-company">
             <Plus className="w-4 h-4 mr-2" />
             Create New Company
+          </Button>
+          <Button onClick={fetchCompanies} variant="outline" size="sm" data-testid="button-refresh-companies">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
           </Button>
         </div>
       </div>
