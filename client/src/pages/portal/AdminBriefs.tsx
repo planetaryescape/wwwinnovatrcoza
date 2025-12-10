@@ -13,6 +13,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -54,6 +64,7 @@ import {
   LayoutGrid,
   List,
   GripVertical,
+  Trash2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -145,6 +156,8 @@ export default function AdminBriefs() {
   const [linkedStudy, setLinkedStudy] = useState<Study | null>(null);
   const [studyStatus, setStudyStatus] = useState<string>("");
   const [viewMode, setViewMode] = useState<"table" | "pipeline">("table");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingBrief, setDeletingBrief] = useState(false);
 
   const { data: briefs = [], isLoading } = useQuery<BriefSubmission[]>({
     queryKey: ["/api/admin/briefs"],
@@ -230,6 +243,32 @@ export default function AdminBriefs() {
       });
     },
   });
+
+  const handleDeleteBrief = async () => {
+    if (!selectedBrief) return;
+    
+    setDeletingBrief(true);
+    try {
+      await apiRequest("DELETE", `/api/admin/briefs/${selectedBrief.id}`);
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/briefs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/studies"] });
+      toast({
+        title: "Brief deleted",
+        description: "The brief has been permanently deleted.",
+      });
+      setDeleteDialogOpen(false);
+      setIsDetailOpen(false);
+      setSelectedBrief(null);
+    } catch (error: any) {
+      toast({
+        title: "Delete failed",
+        description: error.message || "Failed to delete brief.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingBrief(false);
+    }
+  };
 
   const filteredBriefs = briefs.filter((brief) => {
     const matchesSearch =
@@ -611,8 +650,19 @@ export default function AdminBriefs() {
                 <Badge variant="outline" className="text-base px-3 py-1">
                   {selectedBrief.studyType}
                 </Badge>
-                <div className="text-sm text-muted-foreground">
-                  Submitted: {format(new Date(selectedBrief.createdAt), "MMMM d, yyyy 'at' h:mm a")}
+                <div className="flex items-center gap-3">
+                  <div className="text-sm text-muted-foreground">
+                    Submitted: {format(new Date(selectedBrief.createdAt), "MMMM d, yyyy 'at' h:mm a")}
+                  </div>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setDeleteDialogOpen(true)}
+                    data-testid="button-delete-brief"
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Delete
+                  </Button>
                 </div>
               </div>
 
@@ -1004,6 +1054,35 @@ export default function AdminBriefs() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Brief</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this brief from {selectedBrief?.companyName}? 
+              This will permanently remove the brief and all uploaded files. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingBrief}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteBrief}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deletingBrief}
+            >
+              {deletingBrief ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete Brief"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

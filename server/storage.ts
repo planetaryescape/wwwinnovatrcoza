@@ -138,6 +138,7 @@ export interface IStorage {
   getBriefSubmissionsByCompanyId(companyId: string): Promise<BriefSubmission[]>;
   getAllBriefSubmissions(): Promise<BriefSubmission[]>;
   updateBriefSubmission(id: string, updates: Partial<BriefSubmission>): Promise<void>;
+  deleteBriefSubmission(id: string): Promise<void>;
 
   createStudy(study: InsertStudy): Promise<Study>;
   getStudy(id: string): Promise<Study | undefined>;
@@ -1315,6 +1316,10 @@ export class DatabaseStorage implements IStorage {
 
   async updateBriefSubmission(id: string, updates: Partial<BriefSubmission>): Promise<void> {
     await db.update(briefSubmissions).set({ ...updates, updatedAt: new Date() }).where(eq(briefSubmissions.id, id));
+  }
+
+  async deleteBriefSubmission(id: string): Promise<void> {
+    await db.delete(briefSubmissions).where(eq(briefSubmissions.id, id));
   }
 
   async createStudy(insertStudy: InsertStudy): Promise<Study> {

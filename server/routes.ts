@@ -3468,6 +3468,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete brief submission (admin only)
+  app.delete("/api/admin/briefs/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const brief = await storage.getBriefSubmission(req.params.id);
+      if (!brief) {
+        return res.status(404).json({ error: "Brief not found" });
+      }
+
+      // Delete any associated files from object storage
+      if (brief.projectFileUrls && brief.projectFileUrls.length > 0) {
+        for (const url of brief.projectFileUrls) {
+          // Extract the file path from the URL (e.g., /api/files/briefs/... -> briefs/...)
+          const match = url.match(/\/api\/files\/(.+)$/);
+          if (match) {
+            try {
+              await deleteFile(match[1]);
+            } catch (e) {
+              console.warn(`Failed to delete file: ${match[1]}`, e);
+            }
+          }
+        }
+      }
+
+      await storage.deleteBriefSubmission(req.params.id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // ==================== Studies Routes ====================
   // Studies represent the unified view of research projects linking briefs to completed reports
   
