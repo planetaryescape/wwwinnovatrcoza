@@ -599,7 +599,7 @@ export default function AdminCompanies() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Overview</CardTitle>
@@ -646,26 +646,30 @@ export default function AdminCompanies() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Basic Credits</CardTitle>
-            <Zap className="h-4 w-4 text-blue-500" />
+            <CardTitle className="text-sm font-medium">Credits Remaining</CardTitle>
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold" data-testid="text-basic-credits">
-              {stats.totalBasicCredits - stats.usedBasicCredits}
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div>
+                <div className="flex items-center justify-center gap-1">
+                  <Zap className="h-3 w-3 text-blue-500" />
+                  <span className="text-lg font-bold" data-testid="text-basic-credits">
+                    {stats.totalBasicCredits - stats.usedBasicCredits}
+                  </span>
+                </div>
+                <div className="text-[10px] text-muted-foreground">Basic</div>
+              </div>
+              <div>
+                <div className="flex items-center justify-center gap-1">
+                  <Crown className="h-3 w-3 text-purple-500" />
+                  <span className="text-lg font-bold" data-testid="text-pro-credits">
+                    {stats.totalProCredits - stats.usedProCredits}
+                  </span>
+                </div>
+                <div className="text-[10px] text-muted-foreground">Pro</div>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">remaining</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pro Credits</CardTitle>
-            <Crown className="h-4 w-4 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold" data-testid="text-pro-credits">
-              {stats.totalProCredits - stats.usedProCredits}
-            </div>
-            <p className="text-xs text-muted-foreground">remaining</p>
           </CardContent>
         </Card>
       </div>
