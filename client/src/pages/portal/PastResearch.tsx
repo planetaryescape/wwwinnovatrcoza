@@ -19,6 +19,17 @@ import PortalLayout from "./PortalLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation, useSearch } from "wouter";
 
+const formatStudyType = (studyType: string | null): string => {
+  if (!studyType) return "";
+  const typeMap: Record<string, string> = {
+    "test24_basic": "Test24 Basic",
+    "test24_pro": "Test24 Pro",
+    "basic": "Test24 Basic",
+    "pro": "Test24 Pro",
+  };
+  return typeMap[studyType.toLowerCase()] || studyType;
+};
+
 interface ClientReport {
   id: string;
   companyId: string;
@@ -707,7 +718,7 @@ export default function PastResearch() {
                             <div className="flex items-center gap-2 mb-2 flex-wrap">
                               {report.studyType && (
                                 <Badge variant="secondary" className="text-xs">
-                                  {report.studyType}
+                                  {formatStudyType(report.studyType)}
                                 </Badge>
                               )}
                               {report.industry && (
