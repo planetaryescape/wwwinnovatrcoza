@@ -529,8 +529,8 @@ export default function AdminCompanyDetail() {
   return (
     <PortalLayout>
       <div className="p-6 max-w-6xl mx-auto space-y-6">
-        {/* Header with Back Button */}
-        <div className="flex items-center gap-4">
+        {/* Header with Back Button and Delete */}
+        <div className="flex items-center justify-between">
           <Button 
             variant="ghost" 
             onClick={() => setLocation("/portal/admin?tab=companies")}
@@ -538,6 +538,15 @@ export default function AdminCompanyDetail() {
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Companies
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => setDeleteCompanyOpen(true)}
+            data-testid="button-delete-company"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete Company
           </Button>
         </div>
 
@@ -594,38 +603,27 @@ export default function AdminCompanyDetail() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={async () => {
-                    try {
-                      await impersonateCompany(company.id);
-                      setLocation("/portal");
-                    } catch (err) {
-                      toast({
-                        title: "Error",
-                        description: "Failed to view as company",
-                        variant: "destructive",
-                      });
-                    }
-                  }}
-                  data-testid="button-view-company-lens"
-                >
-                  <Eye className="w-4 h-4 mr-2" />
-                  View Company Lens
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setDeleteCompanyOpen(true)}
-                  data-testid="button-delete-company"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete Company
-                </Button>
-              </div>
+              {/* Action Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    await impersonateCompany(company.id);
+                    setLocation("/portal");
+                  } catch (err) {
+                    toast({
+                      title: "Error",
+                      description: "Failed to view as company",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                data-testid="button-view-company-lens"
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                View Company Lens
+              </Button>
             </div>
           </CardContent>
         </Card>
