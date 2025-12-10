@@ -194,7 +194,7 @@ const generateId = () => Math.random().toString(36).substring(2, 9);
 type BillingPreference = "online" | "invoice" | "credits";
 
 const BASIC_MEMBER_PRICE = 5000;
-const BASIC_STANDARD_PRICE = 5500;
+const BASIC_STANDARD_PRICE = 10000;
 const PRO_MEMBER_PRICE = 45000;
 const PRO_STANDARD_PRICE = 50000;
 
@@ -258,10 +258,9 @@ export default function LaunchBrief() {
   const hasEnoughCredits = availableCreditsForStudy >= creditsRequired;
   const hasAnyCredits = basicCreditsRemaining > 0 || proCreditsRemaining > 0;
 
-  // Use member pricing if user is logged in, otherwise standard pricing
-  const isLoggedIn = !!user;
-  const basicPrice = isLoggedIn ? BASIC_MEMBER_PRICE : BASIC_STANDARD_PRICE;
-  const proPrice = isLoggedIn ? PRO_MEMBER_PRICE : PRO_STANDARD_PRICE;
+  // Use member pricing only for paid members, otherwise standard pricing for free users
+  const basicPrice = isPaidMember ? BASIC_MEMBER_PRICE : BASIC_STANDARD_PRICE;
+  const proPrice = isPaidMember ? PRO_MEMBER_PRICE : PRO_STANDARD_PRICE;
   const PRICE_PER_CONCEPT = selectedBrief === "basic" ? basicPrice : proPrice;
   const totalPrice = PRICE_PER_CONCEPT * concepts.length;
 
