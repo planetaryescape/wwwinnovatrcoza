@@ -16,7 +16,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-[70vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[70vh] md:min-h-[80vh] flex flex-col overflow-hidden">
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{ 
@@ -24,15 +24,11 @@ export default function HeroSection() {
         }}
       />
       
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex items-center justify-center">
+      <div className="relative z-10 flex-1 flex items-center justify-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div>
           <h1 className="text-4xl md:text-6xl font-serif font-semibold text-white tracking-tight leading-tight text-center">
             Launch Better Innovation
           </h1>
-          
-          <p className="mt-8 md:mt-6 max-w-[640px] mx-auto text-base md:text-lg text-slate-50 leading-relaxed text-center drop-shadow-[0_1px_8px_rgba(0,0,0,0.7)]">
-            Smart, Affordable Research in 24hrs
-          </p>
           
           <div className="mt-6 md:mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button 
@@ -55,6 +51,12 @@ export default function HeroSection() {
             </Button>
           </div>
         </div>
+      </div>
+      
+      <div className="relative z-10 w-full py-3 bg-white/90 backdrop-blur-sm">
+        <p className="text-center text-base md:text-lg font-medium text-primary tracking-wide">
+          Smart, Affordable Research in 24hrs
+        </p>
       </div>
     </section>
   );
