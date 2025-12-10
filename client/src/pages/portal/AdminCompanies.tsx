@@ -268,6 +268,7 @@ export default function AdminCompanies() {
 
   const stats = {
     total: companies.length,
+    totalStudies: companies.reduce((sum, c) => sum + (c.studyCount || 0), 0),
     free: companies.filter(c => c.tier === "FREE").length,
     starter: companies.filter(c => c.tier === "STARTER").length,
     growth: companies.filter(c => c.tier === "GROWTH").length,
@@ -601,11 +602,20 @@ export default function AdminCompanies() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Companies</CardTitle>
+            <CardTitle className="text-sm font-medium">Overview</CardTitle>
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold" data-testid="text-total-companies">{stats.total}</div>
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div>
+                <div className="text-lg font-bold" data-testid="text-total-companies">{stats.total}</div>
+                <div className="text-[10px] text-muted-foreground">Companies</div>
+              </div>
+              <div>
+                <div className="text-lg font-bold" data-testid="text-total-studies">{stats.totalStudies}</div>
+                <div className="text-[10px] text-muted-foreground">Studies</div>
+              </div>
+            </div>
           </CardContent>
         </Card>
         <Card>
