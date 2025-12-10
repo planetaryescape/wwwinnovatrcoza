@@ -832,9 +832,9 @@ export default function AdminCompanyDetail() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => setLocation(`/portal/admin?tab=reports&editReport=${report.id}`)}
+                            onClick={() => setLocation("/portal/research")}
                           >
-                            <Edit className="w-4 h-4" />
+                            <Eye className="w-4 h-4" />
                           </Button>
                           <Button
                             variant="ghost"

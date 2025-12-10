@@ -1,0 +1,120 @@
+You are editing a TypeScript React app for the Innovatr client portal.
+The app uses Vite, TailwindCSS, Drizzle ORM and a shared design system.
+
+IMPORTANT
+- Do NOT change any authentication, routing, membership logic or credit logic.
+- Do NOT remove or rename any existing DB columns.
+- Assume the client report model ALREADY has these OPTIONAL fields available to the front end:
+
+  projectType: "test24_basic" | "test24_pro" | "consult" | null
+  industry: "food" | "beverage" | "alcohol" | "services" | "financial" | "agency" | "beauty" | "fmcg" | null
+
+  topIdeaLabel: string | null
+  topIdeaIdeaScore: number | null
+  topIdeaInterest: number | null
+  topIdeaCommitment: number | null
+
+  lowestIdeaLabel: string | null
+  lowestIdeaIdeaScore: number | null
+  lowestIdeaInterest: number | null
+  lowestIdeaCommitment: number | null
+
+  verbatim1: string | null
+  verbatim2: string | null
+
+All of these are optional and may be null. You must handle null values safely.
+
+GOAL
+Update ONLY the member “My Research” page so that completed research cards:
+
+- Show standardised tags for:
+  - Project type (Test24 Basic, Test24 Pro, Consult)
+  - Industry (Food, Beverage, Alcohol, Services, Financial, Agency, Beauty, FMCG)
+- Replace the old description paragraph with a structured summary that includes:
+  - Top idea name
+  - Top idea IDEA SCORE clearly shown on the card
+  - Optional Interest and Commitment for the top idea
+  - Optional lowest idea block with its scores
+  - Up to two short “Consumer voice” verbatims
+- Keep the existing status chips (Brief Submitted, Audience is Live, Building Report, Complete)
+- Keep the delivered date as is
+- Make the View button open UpSiide in a new tab
+- Fall back to the original description layout if none of the new fields are populated
+
+------------------------------------------------
+1. FIND THE MY RESEARCH PAGE AND CARD COMPONENT
+------------------------------------------------
+
+1. Locate the member “My Research” page. It is the page that shows:
+   - H1: “My Research”
+   - Summary counters (Active Studies, Completed, Total Research)
+   - Filters for title / company / tags
+   - A “Completed Research” section with a grid of cards.
+
+2. Identify the React component that renders a **single research card** in that grid.
+   The name will be something like:
+   - ResearchCard
+   - MemberReportCard
+   - ClientReportCard
+   - ReportCard
+
+   This is the ONLY UI component you need to modify.
+
+3. Do NOT change how the list of reports is fetched or mapped.
+   Assume each card component receives a `report` prop (or similar) that already includes all the fields listed above.
+
+------------------------------------------------
+2. TAG ROW AT THE TOP OF EACH CARD
+------------------------------------------------
+
+At the top of each completed research card there is an existing row of chips / tags
+(e.g. “Rugani”, “Clicks”, “+3”, etc.). Extend that row as follows:
+
+1. If `report.projectType` is set:
+
+   - Render a chip at the **start** of the tag row with label:
+
+     - "Test24 Basic" when projectType === "test24_basic"
+     - "Test24 Pro"   when projectType === "test24_pro"
+     - "Consult"      when projectType === "consult"
+
+2. If `report.industry` is set:
+
+   - Render a second chip immediately after the project type chip with a capitalised label, for example:
+     - "Beverage", "Food", "Alcohol", "Financial", etc.
+
+3. After these two chips, render any existing tags exactly as they work today (e.g. company tags, “+3” summary chip).
+
+4. Do NOT change the existing **status chip** logic:
+   - Status must still be one of:
+     - Brief Submitted
+     - Audience is Live
+     - Building Report
+     - Complete
+   - Keep the same colours and component.
+
+------------------------------------------------
+3. REPLACE THE DESCRIPTION AREA WITH STRUCTURED SUMMARY
+------------------------------------------------
+
+Currently there is a paragraph describing the project (e.g. “Quant deep dive into how Rugani’s 330 ml and 750 ml formats…”).
+
+We want to conditionally replace that paragraph with a structured block built from the new fields.
+However, if no new fields are present, we must show the original description unchanged.
+
+1. In the card component, find the JSX block that renders the description paragraph.
+
+2. Wrap it in a conditional that checks for the presence of any new structured fields:
+
+```ts
+const hasStructuredSummary =
+  !!report.topIdeaLabel ||
+  !!report.lowestIdeaLabel ||
+  !!report.verbatim1 ||
+  !!report.verbatim2 ||
+  report.topIdeaIdeaScore != null ||
+  report.lowestIdeaIdeaScore != null ||
+  report.topIdeaInterest != null ||
+  report.topIdeaCommitment != null ||
+  report.lowestIdeaInterest != null ||
+  report.lowestIdeaCommitment != null;
