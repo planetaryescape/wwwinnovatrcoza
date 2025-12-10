@@ -200,7 +200,7 @@ export default function Dashboard() {
         <div className="mb-8" data-testid="section-welcome">
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-4xl font-serif font-bold" data-testid="text-welcome-name">
-              Welcome{isPaidMember ? " back" : ""}, {user?.name}
+              Welcome{isPaidMember ? " back" : ""}, {user?.name?.split(' ')[0] || user?.name}
             </h1>
             {!isPaidMember && (
               <Badge variant="secondary" className="text-sm" data-testid="badge-free-account">
