@@ -609,85 +609,69 @@ export default function AdminCompanyDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Credits Section */}
+            {/* Credits Section - Compact */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="w-5 h-5" />
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <CreditCard className="w-4 h-4" />
                   Credits
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Basic Credits */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Test24 Basic</span>
-                    <div className="flex items-center gap-2">
+              <CardContent className="pt-0">
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Basic Credits */}
+                  <div className="flex items-center justify-between p-2 rounded-md border">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Test24 Basic</p>
+                      <p className="text-lg font-semibold">{basicRemaining}</p>
+                    </div>
+                    <div className="flex items-center gap-1">
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-7 w-7"
                         onClick={() => handleUpdateCredits("basic", -1)}
                         disabled={company.basicCreditsTotal <= 0}
                       >
-                        <Minus className="w-4 h-4" />
+                        <Minus className="w-3 h-3" />
                       </Button>
-                      <span className="w-20 text-center font-medium">
-                        {basicRemaining} remaining
-                      </span>
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-7 w-7"
                         onClick={() => handleUpdateCredits("basic", 1)}
                       >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-3 h-3" />
                       </Button>
                     </div>
                   </div>
-                  <Progress 
-                    value={company.basicCreditsTotal > 0 ? (basicRemaining / company.basicCreditsTotal) * 100 : 0} 
-                    className="h-2" 
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {company.basicCreditsUsed} used of {company.basicCreditsTotal} total
-                  </p>
-                </div>
 
-                {/* Pro Credits */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Test24 Pro</span>
-                    <div className="flex items-center gap-2">
+                  {/* Pro Credits */}
+                  <div className="flex items-center justify-between p-2 rounded-md border">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Test24 Pro</p>
+                      <p className="text-lg font-semibold">{proRemaining}</p>
+                    </div>
+                    <div className="flex items-center gap-1">
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-7 w-7"
                         onClick={() => handleUpdateCredits("pro", -1)}
                         disabled={company.proCreditsTotal <= 0}
                       >
-                        <Minus className="w-4 h-4" />
+                        <Minus className="w-3 h-3" />
                       </Button>
-                      <span className="w-20 text-center font-medium">
-                        {proRemaining} remaining
-                      </span>
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-7 w-7"
                         onClick={() => handleUpdateCredits("pro", 1)}
                       >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-3 h-3" />
                       </Button>
                     </div>
                   </div>
-                  <Progress 
-                    value={company.proCreditsTotal > 0 ? (proRemaining / company.proCreditsTotal) * 100 : 0} 
-                    className="h-2" 
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {company.proCreditsUsed} used of {company.proCreditsTotal} total
-                  </p>
                 </div>
               </CardContent>
             </Card>
