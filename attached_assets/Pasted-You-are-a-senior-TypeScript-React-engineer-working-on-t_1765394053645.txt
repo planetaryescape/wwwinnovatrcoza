@@ -1,0 +1,330 @@
+You are a senior TypeScript + React engineer working on the Innovatr portal in this Replit project.
+
+The goal is to standardise the “My Research” card layout and enable editing client reports from the Admin → Companies drawer, without breaking any existing flows or schemas.
+
+Please follow these instructions carefully. Do not rename or remove any existing types, tables, or routes unless explicitly stated.
+
+0. Context
+
+The My Research page (/portal/research) shows cards like:
+
+“Click’s Positioning”
+
+“Durbanville Hills X Diemersdal”
+
+“Ad Creative Testing”
+
+“DGB Ideation Concepts Screening”
+
+“Wrap Menu Item’s”
+
+Each card currently shows:
+
+A row of tags at the top (e.g. Rugani, Clicks, +3, Complete OR Test24 Basic, Consumer Research, +1, Complete).
+
+A title and description.
+
+Company name and delivered date.
+
+Buttons: View and Download.
+
+In the Admin → Companies drawer, each company has a Client Reports section with:
+
+A list of reports.
+
+A “+ Add Report” button opening a modal to create a new report.
+
+Action icons for download and delete.
+
+Currently there is no way to edit an existing report.
+
+Please keep the underlying data model and relationships intact (companies ↔ reports ↔ My Research). Only extend it where explicitly required.
+
+1. Standardise the My Research card tags
+1.1 Find the card component
+
+Locate the React component that renders each My Research card.
+
+It will be used on /portal/research.
+
+It may be named something like ResearchCard, StudyCard, ReportCard, or similar.
+
+Confirm that this is the component responsible for:
+
+Showing the top row of tags.
+
+Rendering the title, description, company, date, and buttons.
+
+1.2 Introduce a studyType field
+
+We want every report / study to have one of three types:
+
+Test24 Basic
+
+Test24 Pro
+
+Consult
+
+Find the type / interface or DB model that represents a client report / study.
+
+It might be in a schema.ts, drizzle schema, or a shared types.ts file.
+
+It is the same entity used for:
+
+My Research cards
+
+Admin → Companies → Client Reports
+
+Extend this model by adding a new field. Do not remove or rename anything.
+
+Example (adapt to actual names):
+
+// Example: in your report / study schema or type
+studyType: "test24_basic" | "test24_pro" | "consult"
+
+
+If you need to migrate existing data, keep it simple:
+
+For now, assign:
+
+test24_basic to anything clearly marked as Test24 Basic
+
+test24_pro to anything clearly marked as Pro
+
+consult to everything else
+
+You can use defaults when the field is missing, but the system should not crash if older records do not have studyType yet.
+
+1.3 Introduce an industry field
+
+We also want each study to have an industry tag.
+
+In the same report / study model, add:
+
+industry: string  // simple string for now, e.g. "Beverage", "Alcohol", "Financial", etc.
+
+
+This should be nullable/optional at DB level so existing rows do not break, but the frontend should treat it as “nice to have” not mandatory.
+
+1.4 Standardise the card header tags
+
+Update the My Research card component so the top row behaves as follows:
+
+Keep the existing status tag (e.g. Brief Submitted, Audience is Live, Building Report, Complete).
+
+Do not change the status logic or labels.
+
+Replace the current mishmash of tags with a consistent pattern:
+
+Top row should be:
+
+A tag for studyType, mapped as:
+
+test24_basic → Test24 Basic
+
+test24_pro → Test24 Pro
+
+consult → Consult
+
+A tag for industry (if present), showing the raw string value (e.g. Beverage, Financial, Snacks, etc).
+
+The status tag (e.g. Complete) on the far right, in the same position and style you already have.
+
+Remove the old +1, +3 count tags from this card header – they are no longer needed here.
+
+Cards that have no industry yet should simply omit that tag; do not break layout.
+
+2. Make all “View” buttons go to Upsiide
+
+We want all View buttons on My Research cards to open Upsiide, not a local page (for now).
+
+In the My Research card component, update the View button:
+
+If the report entity already has a field like upsiideUrl, use that:
+
+If upsiideUrl exists, open that URL in a new tab.
+
+Else, default to https://app.upsiide.com/.
+
+If no such field exists yet, add an optional string field upsiideUrl to the report / study model, but default the View button to https://app.upsiide.com/ until populated.
+
+The button should:
+
+Use target="_blank" and rel="noopener noreferrer" if using an <a> tag.
+
+Keep the same visual style and icon as currently.
+
+Do not introduce a new internal detail page for now. The only change is where the View button points.
+
+3. Enable editing client reports from Admin → Companies
+
+Right now, inside Admin → Companies → Client Reports, you can:
+
+See a list of reports.
+
+Add a new report.
+
+Download or delete a report.
+
+You cannot edit an existing report. We need to add that.
+
+3.1 Locate the Client Reports section
+
+Find the component that renders the Client Reports block inside the company drawer / panel.
+
+It includes a header like Client Reports and a + Add Report button.
+
+Each report row currently shows:
+
+Title
+
+Tags / status
+
+Date
+
+Icons (download, delete)
+
+Find the modal / form component used when you click + Add Report.
+
+3.2 Reuse the existing form for editing
+
+We want to reuse the same form for both create and edit:
+
+Modify or wrap the existing form component so it accepts:
+
+mode: "create" | "edit"
+initialValues?: Report // or equivalent type
+onSave: (updatedReport: Report) => void
+
+
+When mode === "create":
+
+Behaviour stays exactly as it is now (create a new report linked to the company).
+
+When mode === "edit":
+
+Pre-fill the form with initialValues for:
+
+Title
+
+Description
+
+studyType (Test24 Basic / Test24 Pro / Consult)
+
+industry
+
+upsiideUrl (if present)
+
+Status (Brief Submitted / Audience Live / Building Report / Complete)
+
+Delivery date
+
+On submit, call an update API / server action instead of create.
+
+3.3 Add an “Edit” action per report
+
+In the Client Reports list for each report row, add a small Edit icon/button (for example a pencil) alongside the existing download and delete actions.
+
+Clicking Edit should:
+
+Open the same modal as “Add Report”, but:
+
+mode="edit"
+
+initialValues set to the current report.
+
+After a successful update:
+
+Close the modal.
+
+Refresh the company drawer’s Client Reports list.
+
+Ensure the My Research cards for that report reflect the updated information (because they come from the same data source).
+
+Make sure the edit action is only available to admins, using the same auth / access checks you already use.
+
+4. Expose studyType, industry, and upsiideUrl in the Admin form
+
+When creating or editing a report from the company drawer:
+
+Add a dropdown for Study Type with options:
+
+Test24 Basic
+
+Test24 Pro
+
+Consult
+
+Add a text input or dropdown for Industry.
+
+For now a simple text input is acceptable (e.g. “Beverage”, “Alcohol”, “Financial”, etc.).
+
+Add an optional text input for Upsiide link:
+
+Label: Upsiide link (optional)
+
+Stored in upsiideUrl.
+
+Keep all existing fields (title, description, date, attachments, status, etc.) exactly as they are today.
+
+On save, ensure these new fields are persisted to the report record and visible on both:
+
+My Research card
+
+The Client Reports list
+
+5. Do not add “Add report” from My Research (for now)
+
+There was previously an attempt to add reports directly from My Research that did not work.
+
+For now:
+
+Do not add a creation flow on the My Research page.
+
+Creation should remain only in Admin → Companies → Client Reports.
+
+My Research is a view onto that same data.
+
+6. Safety + regression checks
+
+Before considering this done:
+
+Open Admin → Companies → [a company]:
+
+Verify you can still:
+
+Add a new report.
+
+Download and delete as before.
+
+Verify you can now:
+
+Edit an existing report.
+
+See updated title, study type, industry, status, and Upsiide link in both:
+
+Company drawer
+
+My Research cards.
+
+Open My Research:
+
+Each card should now show:
+
+A studyType tag (Test24 Basic, Test24 Pro, or Consult).
+
+An industry tag if set.
+
+The status tag (Complete, Brief Submitted, etc.) in the same place as before.
+
+The View button should open:
+
+upsiideUrl if present, otherwise https://app.upsiide.com/.
+
+Download should work as it did previously.
+
+Confirm no TypeScript errors or runtime errors arise from missing fields:
+
+All new fields should be optional or have safe defaults in DB and TypeScript types.
+
+Do not modify any unrelated behaviour, styling, or pages.

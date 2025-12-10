@@ -25,8 +25,11 @@ interface ClientReport {
   companyName?: string;
   title: string;
   description: string | null;
+  studyType: string | null;
+  industry: string | null;
   pdfUrl: string | null;
   dashboardUrl: string | null;
+  upsiideUrl: string | null;
   thumbnailUrl: string | null;
   tags: string[];
   status: string | null;
@@ -674,7 +677,7 @@ export default function PastResearch() {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                onClick={() => window.open('https://diginsights.com/upsiide/', '_blank')}
+                                onClick={() => window.open('https://app.upsiide.com/', '_blank')}
                                 data-testid={`button-view-study-${study.id}`}
                               >
                                 <Eye className="w-4 h-4 mr-1" />
@@ -702,21 +705,33 @@ export default function PastResearch() {
                         >
                           <CardHeader>
                             <div className="flex items-center gap-2 mb-2 flex-wrap">
-                              {report.tags.slice(0, 2).map(tag => (
-                                <Badge key={tag} variant="secondary" className="text-xs">
-                                  {tag}
-                                </Badge>
-                              ))}
-                              {report.tags.length > 2 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{report.tags.length - 2}
+                              {report.studyType && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {report.studyType}
                                 </Badge>
                               )}
-                              {report.status?.toLowerCase() === "completed" && (
+                              {report.industry && (
+                                <Badge variant="outline" className="text-xs">
+                                  {report.industry}
+                                </Badge>
+                              )}
+                              {report.status?.toLowerCase() === "completed" ? (
                                 <Badge className="bg-green-500/15 text-green-600 border-green-500/30 text-xs">
                                   Complete
                                 </Badge>
-                              )}
+                              ) : report.status === "Brief Submitted" ? (
+                                <Badge className="bg-blue-500/15 text-blue-600 border-blue-500/30 text-xs">
+                                  Brief Submitted
+                                </Badge>
+                              ) : report.status === "Audience Live" ? (
+                                <Badge className="bg-amber-500/15 text-amber-600 border-amber-500/30 text-xs">
+                                  Audience Live
+                                </Badge>
+                              ) : report.status === "Building Report" ? (
+                                <Badge className="bg-purple-500/15 text-purple-600 border-purple-500/30 text-xs">
+                                  Building Report
+                                </Badge>
+                              ) : null}
                             </div>
                             <CardTitle className="text-lg">{report.title}</CardTitle>
                             {report.description && (
@@ -742,7 +757,7 @@ export default function PastResearch() {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                onClick={() => window.open('https://diginsights.com/upsiide/', '_blank')}
+                                onClick={() => window.open(report.upsiideUrl || 'https://app.upsiide.com/', '_blank')}
                                 data-testid={`button-view-${report.id}`}
                               >
                                 <Eye className="w-4 h-4 mr-1" />
@@ -833,11 +848,16 @@ export default function PastResearch() {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                                   <h3 className="font-semibold truncate">{report.title}</h3>
-                                  {report.tags.slice(0, 2).map(tag => (
-                                    <Badge key={tag} variant="secondary" className="text-xs">
-                                      {tag}
+                                  {report.studyType && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      {report.studyType}
                                     </Badge>
-                                  ))}
+                                  )}
+                                  {report.industry && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {report.industry}
+                                    </Badge>
+                                  )}
                                 </div>
                                 {report.description && (
                                   <p className="text-sm text-muted-foreground line-clamp-1">{report.description}</p>
@@ -859,7 +879,7 @@ export default function PastResearch() {
                                 <Button 
                                   variant="outline" 
                                   size="sm"
-                                  onClick={() => window.open('https://diginsights.com/upsiide/', '_blank')}
+                                  onClick={() => window.open(report.upsiideUrl || 'https://app.upsiide.com/', '_blank')}
                                   data-testid={`button-view-${report.id}`}
                                 >
                                   <Eye className="w-4 h-4 mr-1" />

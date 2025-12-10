@@ -49,7 +49,8 @@ import {
   Upload,
   Trash2,
   ExternalLink,
-  Tag
+  Tag,
+  Pencil
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -58,8 +59,12 @@ interface ClientReport {
   companyId: string;
   title: string;
   description: string | null;
+  studyType: string | null;
+  industry: string | null;
+  status: string | null;
   pdfUrl: string | null;
   dashboardUrl: string | null;
+  upsiideUrl: string | null;
   thumbnailUrl: string | null;
   tags: string[];
   uploadedAt: string;
@@ -91,8 +96,12 @@ export default function AdminClientReports() {
     title: "",
     description: "",
     companyId: "",
+    studyType: "Test24 Basic",
+    industry: "",
+    status: "Completed",
     tags: "",
     dashboardUrl: "",
+    upsiideUrl: "",
   });
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -173,8 +182,12 @@ export default function AdminClientReports() {
       title: "",
       description: "",
       companyId: "",
+      studyType: "Test24 Basic",
+      industry: "",
+      status: "Completed",
       tags: "",
       dashboardUrl: "",
+      upsiideUrl: "",
     });
     setPdfFile(null);
     setDialogOpen(true);
@@ -186,8 +199,12 @@ export default function AdminClientReports() {
       title: report.title,
       description: report.description || "",
       companyId: report.companyId,
+      studyType: report.studyType || "Test24 Basic",
+      industry: report.industry || "",
+      status: report.status || "Completed",
       tags: report.tags.join(", "),
       dashboardUrl: report.dashboardUrl || "",
+      upsiideUrl: report.upsiideUrl || "",
     });
     setPdfFile(null);
     setDialogOpen(true);
@@ -231,8 +248,12 @@ export default function AdminClientReports() {
         title: formData.title,
         description: formData.description || null,
         companyId: formData.companyId,
+        studyType: formData.studyType || "Test24 Basic",
+        industry: formData.industry || null,
+        status: formData.status || "Completed",
         pdfUrl,
         dashboardUrl: formData.dashboardUrl || null,
+        upsiideUrl: formData.upsiideUrl || null,
         tags,
       };
 
@@ -466,7 +487,7 @@ export default function AdminClientReports() {
                             onClick={() => openEditReportDialog(report)}
                             data-testid={`button-edit-${report.id}`}
                           >
-                            <FileText className="w-4 h-4" />
+                            <Pencil className="w-4 h-4" />
                           </Button>
                           <Button 
                             variant="ghost" 
@@ -547,6 +568,54 @@ export default function AdminClientReports() {
                 data-testid="textarea-report-description"
               />
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="studyType">Study Type</Label>
+                <Select 
+                  value={formData.studyType} 
+                  onValueChange={(value) => setFormData({ ...formData, studyType: value })}
+                >
+                  <SelectTrigger data-testid="select-study-type">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Test24 Basic">Test24 Basic</SelectItem>
+                    <SelectItem value="Test24 Pro">Test24 Pro</SelectItem>
+                    <SelectItem value="Consult">Consult</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select 
+                  value={formData.status} 
+                  onValueChange={(value) => setFormData({ ...formData, status: value })}
+                >
+                  <SelectTrigger data-testid="select-status">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Brief Submitted">Brief Submitted</SelectItem>
+                    <SelectItem value="Audience Live">Audience Live</SelectItem>
+                    <SelectItem value="Building Report">Building Report</SelectItem>
+                    <SelectItem value="Completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="industry">Industry (Optional)</Label>
+              <Input
+                id="industry"
+                value={formData.industry}
+                onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                placeholder="Beverage, Alcohol, Financial, Snacks..."
+                data-testid="input-report-industry"
+              />
+            </div>
             
             <div className="space-y-2">
               <Label htmlFor="tags">Tags (comma separated)</Label>
@@ -560,6 +629,24 @@ export default function AdminClientReports() {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="upsiideUrl">Upsiide Link (Optional)</Label>
+              <div className="flex items-center gap-2">
+                <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                <Input
+                  id="upsiideUrl"
+                  type="url"
+                  value={formData.upsiideUrl}
+                  onChange={(e) => setFormData({ ...formData, upsiideUrl: e.target.value })}
+                  placeholder="https://app.upsiide.com/..."
+                  data-testid="input-report-upsiide-url"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Link to view the research on Upsiide
+              </p>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="dashboardUrl">Dashboard Link (Optional)</Label>
               <div className="flex items-center gap-2">
                 <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
@@ -568,12 +655,12 @@ export default function AdminClientReports() {
                   type="url"
                   value={formData.dashboardUrl}
                   onChange={(e) => setFormData({ ...formData, dashboardUrl: e.target.value })}
-                  placeholder="https://upsiide.com/dashboard/..."
+                  placeholder="https://example.com/dashboard/..."
                   data-testid="input-report-dashboard-url"
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Link to the client's research dashboard on your platform
+                Additional dashboard or report link
               </p>
             </div>
             
