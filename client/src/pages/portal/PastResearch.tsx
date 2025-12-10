@@ -19,6 +19,19 @@ import PortalLayout from "./PortalLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation, useSearch } from "wouter";
 
+import test24BasicImage from "@assets/Test24_Basic_1765398265879.png";
+import test24ProImage from "@assets/Test24_Pro_1765398265879.png";
+import consultImage from "@assets/Consult_1765398265878.png";
+
+const getStudyTypeImage = (studyType: string | null): string | null => {
+  if (!studyType) return null;
+  const type = studyType.toLowerCase();
+  if (type.includes("basic") || type === "test24_basic") return test24BasicImage;
+  if (type.includes("pro") || type === "test24_pro") return test24ProImage;
+  if (type.includes("consult")) return consultImage;
+  return null;
+};
+
 const formatStudyType = (studyType: string | null): string => {
   if (!studyType) return "";
   const typeMap: Record<string, string> = {
@@ -714,13 +727,30 @@ export default function PastResearch() {
                           </CardContent>
                         </Card>
                       ))}
-                      {filteredReports.map((report) => (
+                      {filteredReports.map((report) => {
+                        const headerImage = getStudyTypeImage(report.studyType);
+                        return (
                         <Card
                           key={`report-${report.id}`}
-                          className="hover-elevate flex flex-col"
+                          className="hover-elevate flex flex-col overflow-hidden"
                           data-testid={`report-card-${report.id}`}
                         >
-                          <CardHeader>
+                          {headerImage && (
+                            <div className="relative h-24 w-full overflow-hidden">
+                              <img 
+                                src={headerImage} 
+                                alt={formatStudyType(report.studyType)} 
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                              <div className="absolute bottom-2 left-3">
+                                <span className="text-white text-xs font-medium drop-shadow-md">
+                                  {formatStudyType(report.studyType)}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                          <CardHeader className={headerImage ? "pt-3" : ""}>
                             <div className="flex items-center gap-2 mb-2 flex-wrap">
                               {report.studyType && (
                                 <Badge variant="secondary" className="text-xs">
@@ -852,7 +882,8 @@ export default function PastResearch() {
                             </div>
                           </CardContent>
                         </Card>
-                      ))}
+                      );
+                      })}
                     </div>
                   ) : (
                     <Card>
