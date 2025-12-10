@@ -762,7 +762,8 @@ export default function PastResearch() {
                               ) : null}
                             </div>
                             <CardTitle className="text-lg">{report.title}</CardTitle>
-                            {report.description && (
+                            {/* Show description only if no structured summary data */}
+                            {!report.topIdeaLabel && !report.lowestIdeaLabel && !report.verbatim1 && !report.verbatim2 && report.description && (
                               <CardDescription className="line-clamp-2">
                                 {report.description}
                               </CardDescription>
@@ -781,33 +782,42 @@ export default function PastResearch() {
                                 <span>Delivered {formatDate(report.uploadedAt)}</span>
                               </div>
 
-                              {/* Key Insights Section */}
-                              {(report.topIdeaLabel || report.lowestIdeaLabel) && (
-                                <div className="space-y-2 pt-2 border-t">
-                                  {report.topIdeaLabel && (
-                                    <div className="bg-green-50 dark:bg-green-900/20 rounded-md p-2">
-                                      <div className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Top Performer</div>
-                                      <div className="text-sm font-medium">{report.topIdeaLabel}</div>
-                                      {report.topIdeaIdeaScore !== null && (
-                                        <div className="text-xs text-muted-foreground mt-1">
-                                          Score: {report.topIdeaIdeaScore}%
-                                          {report.topIdeaInterest !== null && ` | Interest: ${report.topIdeaInterest}%`}
-                                          {report.topIdeaCommitment !== null && ` | Commitment: ${report.topIdeaCommitment}%`}
-                                        </div>
-                                      )}
+                              {/* Key Insights Section - Structured Summary */}
+                              {report.topIdeaLabel && (
+                                <div className="bg-green-50 dark:bg-green-900/20 rounded-md p-3">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <div className="text-xs font-medium text-green-700 dark:text-green-400">Top Performer</div>
+                                    {report.topIdeaIdeaScore !== null && (
+                                      <div className="text-lg font-bold text-green-700 dark:text-green-400">
+                                        {report.topIdeaIdeaScore}%
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="text-sm font-medium">{report.topIdeaLabel}</div>
+                                  {(report.topIdeaInterest !== null || report.topIdeaCommitment !== null) && (
+                                    <div className="text-xs text-muted-foreground mt-1 flex gap-3">
+                                      {report.topIdeaInterest !== null && <span>Interest: {report.topIdeaInterest}%</span>}
+                                      {report.topIdeaCommitment !== null && <span>Commitment: {report.topIdeaCommitment}%</span>}
                                     </div>
                                   )}
-                                  {report.lowestIdeaLabel && (
-                                    <div className="bg-amber-50 dark:bg-amber-900/20 rounded-md p-2">
-                                      <div className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-1">Lowest Performer</div>
-                                      <div className="text-sm font-medium">{report.lowestIdeaLabel}</div>
-                                      {report.lowestIdeaIdeaScore !== null && (
-                                        <div className="text-xs text-muted-foreground mt-1">
-                                          Score: {report.lowestIdeaIdeaScore}%
-                                          {report.lowestIdeaInterest !== null && ` | Interest: ${report.lowestIdeaInterest}%`}
-                                          {report.lowestIdeaCommitment !== null && ` | Commitment: ${report.lowestIdeaCommitment}%`}
-                                        </div>
-                                      )}
+                                </div>
+                              )}
+                              
+                              {report.lowestIdeaLabel && (
+                                <div className="bg-amber-50 dark:bg-amber-900/20 rounded-md p-3">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <div className="text-xs font-medium text-amber-700 dark:text-amber-400">Lowest Performer</div>
+                                    {report.lowestIdeaIdeaScore !== null && (
+                                      <div className="text-lg font-bold text-amber-700 dark:text-amber-400">
+                                        {report.lowestIdeaIdeaScore}%
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="text-sm font-medium">{report.lowestIdeaLabel}</div>
+                                  {(report.lowestIdeaInterest !== null || report.lowestIdeaCommitment !== null) && (
+                                    <div className="text-xs text-muted-foreground mt-1 flex gap-3">
+                                      {report.lowestIdeaInterest !== null && <span>Interest: {report.lowestIdeaInterest}%</span>}
+                                      {report.lowestIdeaCommitment !== null && <span>Commitment: {report.lowestIdeaCommitment}%</span>}
                                     </div>
                                   )}
                                 </div>
@@ -815,15 +825,15 @@ export default function PastResearch() {
 
                               {/* Consumer Verbatims */}
                               {(report.verbatim1 || report.verbatim2) && (
-                                <div className="space-y-2 pt-2 border-t">
+                                <div className="space-y-2">
                                   <div className="text-xs font-medium text-muted-foreground">Consumer Voice</div>
                                   {report.verbatim1 && (
-                                    <div className="text-xs italic text-muted-foreground bg-muted/50 rounded p-2">
+                                    <div className="text-xs italic text-muted-foreground bg-muted/50 rounded p-2 line-clamp-2">
                                       "{report.verbatim1}"
                                     </div>
                                   )}
                                   {report.verbatim2 && (
-                                    <div className="text-xs italic text-muted-foreground bg-muted/50 rounded p-2">
+                                    <div className="text-xs italic text-muted-foreground bg-muted/50 rounded p-2 line-clamp-2">
                                       "{report.verbatim2}"
                                     </div>
                                   )}
