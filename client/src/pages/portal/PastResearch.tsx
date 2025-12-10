@@ -364,17 +364,6 @@ export default function PastResearch() {
             >
               My Research
             </h1>
-            <p className="text-lg text-muted-foreground">
-              {isAdmin && !viewCompanyId ? (
-                "Track all research across all clients - from active studies to completed reports"
-              ) : viewingCompany ? (
-                <>Track all research for <span className="font-medium">{viewingCompany.name}</span> - from active studies to completed reports</>
-              ) : company ? (
-                <>Track all research for <span className="font-medium">{company.name}</span> - from active studies to completed reports</>
-              ) : (
-                "Track your active studies and access completed research reports"
-              )}
-            </p>
           </div>
           <div className="flex items-center gap-2">
             <Button
