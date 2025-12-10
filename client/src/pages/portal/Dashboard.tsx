@@ -209,7 +209,7 @@ export default function Dashboard() {
             )}
           </div>
           <p className="text-lg text-muted-foreground" data-testid="text-welcome-subtitle">
-            {isPaidMember ? "Your research command centre" : "You're exploring the Innovatr Portal"}
+            {isPaidMember ? "Your personal dashboard for innovation" : "You're exploring the Innovatr Portal"}
           </p>
         </div>
 
