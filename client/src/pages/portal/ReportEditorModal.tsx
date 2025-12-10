@@ -40,8 +40,10 @@ import {
   Loader2,
   X,
   FileIcon,
-  Building2
+  Building2,
+  Tag
 } from "lucide-react";
+import { INDUSTRY_TAGS, THEME_TAGS, METHOD_TAGS } from "@shared/tagConfig";
 
 interface ReportData {
   id?: string;
@@ -75,6 +77,9 @@ interface ReportData {
   thumbnailUrl?: string | null;
   isClientReport?: boolean;
   clientCompanyIds?: string[];
+  industryTag?: string | null;
+  themeTags?: string[];
+  methodTags?: string[];
 }
 
 interface Company {
@@ -114,6 +119,9 @@ const defaultFormData = {
   unpublishAt: "",
   isClientReport: false,
   clientCompanyIds: [] as string[],
+  industryTag: "",
+  themeTags: [] as string[],
+  methodTags: [] as string[],
 };
 
 export default function ReportEditorModal({
@@ -167,6 +175,9 @@ export default function ReportEditorModal({
         unpublishAt: report.unpublishAt?.split("T")[0] || "",
         isClientReport: report.isClientReport || hasClientCompanies || false,
         clientCompanyIds: report.clientCompanyIds || [],
+        industryTag: report.industryTag || "",
+        themeTags: report.themeTags || [],
+        methodTags: report.methodTags || [],
       });
     } else {
       setFormData(defaultFormData);
@@ -216,6 +227,36 @@ export default function ReportEditorModal({
       setFormData({
         ...formData,
         clientCompanyIds: [...current, companyId],
+      });
+    }
+  };
+
+  const handleThemeTagToggle = (tag: string) => {
+    const current = formData.themeTags;
+    if (current.includes(tag)) {
+      setFormData({
+        ...formData,
+        themeTags: current.filter(t => t !== tag),
+      });
+    } else {
+      setFormData({
+        ...formData,
+        themeTags: [...current, tag],
+      });
+    }
+  };
+
+  const handleMethodTagToggle = (tag: string) => {
+    const current = formData.methodTags;
+    if (current.includes(tag)) {
+      setFormData({
+        ...formData,
+        methodTags: current.filter(t => t !== tag),
+      });
+    } else {
+      setFormData({
+        ...formData,
+        methodTags: [...current, tag],
       });
     }
   };
@@ -379,6 +420,9 @@ export default function ReportEditorModal({
         publishAt: parsedPublishAt,
         unpublishAt: parsedUnpublishAt,
         clientCompanyIds: formData.isClientReport ? formData.clientCompanyIds : [],
+        industryTag: formData.industryTag || null,
+        themeTags: formData.themeTags,
+        methodTags: formData.methodTags,
       };
 
       const url = isEditing 
@@ -569,6 +613,114 @@ export default function ReportEditorModal({
                   className="h-40"
                   data-testid="textarea-body"
                 />
+              </div>
+
+              <Separator className="my-4" />
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-muted-foreground" />
+                  <h3 className="text-sm font-medium">Content Tags</h3>
+                </div>
+                <p className="text-xs text-muted-foreground -mt-2">
+                  Tags help power related content recommendations
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="industryTag">Industry Tag *</Label>
+                    <Select 
+                      value={formData.industryTag} 
+                      onValueChange={(val) => handleSelectChange("industryTag", val)}
+                    >
+                      <SelectTrigger data-testid="select-industry-tag">
+                        <SelectValue placeholder="Select industry" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {INDUSTRY_TAGS.map(tag => (
+                          <SelectItem key={tag} value={tag}>{tag}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Theme Tags</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Choose 1 to 2 behavioural themes that best describe this content
+                  </p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2 max-h-48 overflow-y-auto p-2 border rounded-md bg-gray-50 dark:bg-gray-800">
+                    {THEME_TAGS.map(tag => (
+                      <div 
+                        key={tag}
+                        className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded"
+                        onClick={() => handleThemeTagToggle(tag)}
+                      >
+                        <Checkbox
+                          checked={formData.themeTags.includes(tag)}
+                          onCheckedChange={() => handleThemeTagToggle(tag)}
+                          data-testid={`checkbox-theme-${tag.replace(/\s+/g, '-').toLowerCase()}`}
+                        />
+                        <span className="text-xs">{tag}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {formData.themeTags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {formData.themeTags.map(tag => (
+                        <Badge 
+                          key={tag} 
+                          variant="secondary"
+                          className="text-xs cursor-pointer"
+                          onClick={() => handleThemeTagToggle(tag)}
+                        >
+                          {tag}
+                          <X className="w-3 h-3 ml-1" />
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {(formData.category === "Inside" || formData.series === "Inside") && (
+                  <div className="space-y-2">
+                    <Label>Method Tags</Label>
+                    <p className="text-xs text-muted-foreground">
+                      For Inside / method content, select relevant research methods
+                    </p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2 max-h-40 overflow-y-auto p-2 border rounded-md bg-violet-50 dark:bg-violet-900/20">
+                      {METHOD_TAGS.map(tag => (
+                        <div 
+                          key={tag}
+                          className="flex items-center gap-2 cursor-pointer hover:bg-violet-100 dark:hover:bg-violet-800/30 p-1 rounded"
+                          onClick={() => handleMethodTagToggle(tag)}
+                        >
+                          <Checkbox
+                            checked={formData.methodTags.includes(tag)}
+                            onCheckedChange={() => handleMethodTagToggle(tag)}
+                            data-testid={`checkbox-method-${tag.replace(/\s+/g, '-').toLowerCase()}`}
+                          />
+                          <span className="text-xs">{tag}</span>
+                        </div>
+                      ))}
+                    </div>
+                    {formData.methodTags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {formData.methodTags.map(tag => (
+                          <Badge 
+                            key={tag} 
+                            className="text-xs cursor-pointer bg-violet-100 text-violet-800 dark:bg-violet-800 dark:text-violet-100"
+                            onClick={() => handleMethodTagToggle(tag)}
+                          >
+                            {tag}
+                            <X className="w-3 h-3 ml-1" />
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <Separator className="my-4" />

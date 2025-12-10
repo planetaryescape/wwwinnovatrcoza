@@ -12,6 +12,7 @@ import insightsHeader from "@assets/insights-header_1764322405058.png";
 import launchCover from "@assets/launch-cover_1764321848244.png";
 import insideCover from "@assets/inside-cover_1764321472939.png";
 import irlCover from "@assets/irl-cover_1764322310189.png";
+import { getRelatedArticles } from "@/lib/getRelatedArticles";
 
 const categoryCoverImages: Record<string, string> = {
   insights: insightsHeader,
@@ -83,6 +84,9 @@ interface Report {
     intro: string;
     sections: ReportSection[];
   };
+  industryTag?: string | null;
+  themeTags?: string[];
+  methodTags?: string[];
 }
 
 interface AccessCheckResult {
@@ -317,16 +321,48 @@ export default function InsightDetail() {
         const res = await fetch(endpoint);
         if (res.ok) {
           const data = await res.json();
-          const formatted = data
-            .filter((r: any) => r.id !== report.id && (r.category === report.category || (r.tags || r.topics || []).some((t: string) => report.tags.includes(t))))
-            .slice(0, 3)
-            .map((r: any) => ({
-              ...r,
-              coverImage: r.coverImageUrl || getCoverImage(r.category),
-              pdfPath: r.pdfUrl,
-              tags: r.tags || r.topics || [],
-              isNew: r.isNew ?? false,
-            }));
+          // Format all reports for the related articles helper
+          const allReports = data.map((r: any) => ({
+            id: String(r.id),
+            slug: r.slug,
+            title: r.title,
+            category: r.category,
+            series: r.series,
+            industryTag: r.industryTag,
+            themeTags: r.themeTags || [],
+            methodTags: r.methodTags || [],
+            date: r.date,
+          }));
+          
+          // Get related using the tag-aware helper
+          const related = getRelatedArticles(
+            {
+              id: String(report.id),
+              slug: report.slug,
+              title: report.title,
+              category: report.category,
+              series: report.series,
+              industryTag: report.industryTag,
+              themeTags: report.themeTags || [],
+              methodTags: report.methodTags || [],
+              date: report.date,
+            },
+            allReports,
+            3
+          );
+          
+          // Map back to full report objects for display
+          const formatted = related.map(rel => {
+            const fullReport = data.find((r: any) => String(r.id) === rel.id);
+            return fullReport ? {
+              ...fullReport,
+              coverImage: fullReport.coverImageUrl || getCoverImage(fullReport.category),
+              pdfPath: fullReport.pdfUrl,
+              tags: fullReport.tags || fullReport.topics || [],
+              isNew: fullReport.isNew ?? false,
+            } : null;
+          }).filter(Boolean) as Report[];
+          
           setRelatedReports(formatted);
         }
       } catch (error) {
@@ -335,7 +371,7 @@ export default function InsightDetail() {
     };
     
     fetchRelated();
-  }, [report?.id, report?.category, report?.tags, isAuthenticated]);
+  }, [report?.id, report?.category, report?.industryTag, report?.themeTags, isAuthenticated]);
 
   const accessResult = report 
     ? checkReportAccess(report, user as { membershipTier?: string; creditsBasic?: number; creditsPro?: number } | null)

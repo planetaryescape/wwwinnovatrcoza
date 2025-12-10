@@ -399,6 +399,10 @@ export const reports = pgTable("reports", {
   viewCount: integer("view_count").notNull().default(0),
   downloadCount: integer("download_count").notNull().default(0),
   isArchived: boolean("is_archived").notNull().default(false),
+  // Tagging system for related content
+  industryTag: varchar("industry_tag", { length: 50 }),
+  themeTags: text("theme_tags").array().default([]),
+  methodTags: text("method_tags").array().default([]),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -419,6 +423,10 @@ export const insertReportSchema = createInsertSchema(reports)
     creditType: z.enum(["none", "basic", "pro"]).default("none"),
     status: z.enum(["draft", "scheduled", "published", "archived"]).default("published"),
     date: z.date().optional(),
+    // Tag fields for related content
+    industryTag: z.string().nullable().optional(),
+    themeTags: z.array(z.string()).optional().default([]),
+    methodTags: z.array(z.string()).optional().default([]),
   });
 
 export type InsertReport = z.infer<typeof insertReportSchema>;

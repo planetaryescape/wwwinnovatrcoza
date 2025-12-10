@@ -1034,6 +1034,9 @@ export class DatabaseStorage implements IStorage {
       isFeatured: insertReport.isFeatured ?? false,
       status: insertReport.status ?? "published",
       isArchived: insertReport.isArchived ?? false,
+      industryTag: insertReport.industryTag ?? null,
+      themeTags: insertReport.themeTags ?? [],
+      methodTags: insertReport.methodTags ?? [],
     }).returning();
     return result[0];
   }

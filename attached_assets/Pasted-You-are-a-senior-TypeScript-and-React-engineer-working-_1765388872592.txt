@@ -1,0 +1,467 @@
+You are a senior TypeScript and React engineer working on the Innovatr member portal repo.
+
+Your tasks:
+
+Add a light-touch tagging system to all articles in a backwards compatible way.
+
+Update the admin content editor so that when admins create or edit posts, they can select tags easily and consistently.
+
+Improve the “Related content” section so it recommends content by industry + themes, not only by category.
+
+Ensure nothing in the code expects a field that the admin UI does not collect (avoid the previous “company vs member” problem).
+
+Do NOT break any existing layouts, flows or components. Only extend.
+
+You must:
+
+Keep all existing categories and series (Inside, IRL, Insights, Launch etc).
+
+Keep all existing article layouts and URLs.
+
+Keep the Innovatr Inside videos working as they do now.
+
+1. Understand the current content + admin setup
+
+Find the article content model and storage:
+
+Search for files like:
+insights.ts, articles.ts, trends.ts, content/trends, server/trends.ts, trends-and-insights, or similar.
+
+Confirm the article shape: fields like id, slug, title, category, series, summary, body, publishedAt, etc.
+
+Find the admin side where you create and edit content:
+
+Look for an admin routes folder or similar:
+admin, pages/admin, app/admin, AdminInsightsForm, AdminPostForm, AdminTrendsForm, etc.
+
+Identify the React form component used to:
+
+Create a new article
+
+Edit an existing article
+
+Identify how the form sends data to the backend:
+
+API route, server action, or direct file write.
+
+Identify the existing “Related content” logic:
+
+Search for "Related content" and "Back to Trends Library" in the repo.
+
+Find the component that renders the related cards.
+
+Confirm how related items are currently selected (likely by category or series only).
+
+Do not change any routing, page names or high-level structure.
+
+2. Extend the article model (non-breaking)
+
+Extend the article type/interface by adding three optional fields. Do not remove or rename anything.
+
+Example (adapt to your actual type name):
+
+// Existing article type – extend it
+type Article = {
+  // existing fields…
+  industryTag?: "Food" | "Beverage" | "Alcohol" | "Financial" | "Services" | "Beauty" | "FMCG" | "Agency"
+  themeTags?: string[]     // high level behavioural themes
+  methodTags?: string[]    // mostly for Innovatr Inside
+}
+
+
+Key requirements:
+
+These fields are optional at type level for backwards compatibility.
+
+Existing content without these fields must still render correctly.
+
+No existing field is renamed or removed.
+
+3. Create a central tag config (for admin + logic)
+
+Add a config file, for example lib/tagConfig.ts:
+
+export const INDUSTRY_TAGS = [
+  "Food",
+  "Beverage",
+  "Alcohol",
+  "Financial",
+  "Services",
+  "Beauty",
+  "FMCG",
+  "Agency",
+] as const
+
+export type IndustryTag = typeof INDUSTRY_TAGS[number]
+
+export const THEME_TAGS = [
+  "Calm and control",
+  "Indulgence and reward",
+  "Value and fairness",
+  "Simplicity and clarity",
+  "Convenience and on demand",
+  "Moderation and balance",
+  "Trust and believability",
+  "Local and cultural",
+  "Health and vitality",
+  "Status and identity",
+  "Connection and community",
+  "Innovation and experimentation",
+] as const
+
+export const METHOD_TAGS = [
+  "Behavioural testing",
+  "Market simulation",
+  "Automated reporting",
+  "Qual depth",
+  "Analysis engine",
+  "Platform overview",
+  "Research setup",
+  "Respondent experience",
+] as const
+
+
+This config will be used in:
+
+The admin form (dropdowns, multi-selects)
+
+The related content helper (type safety, scoring)
+
+4. Update the admin UI so tags are editable
+
+This is the critical part to avoid the “company not captured but used later” problem.
+
+Find the admin form where posts are created/edited. Then:
+
+4.1 Industry tag field
+
+Add a required dropdown/select in the admin form:
+
+Label: Industry
+
+Options: values from INDUSTRY_TAGS
+
+When editing an existing article, pre-select the current industryTag if present.
+
+When creating a new article, require an industry to be selected before saving.
+
+Implementation sketch:
+
+import { INDUSTRY_TAGS } from "@/lib/tagConfig" // adjust path
+
+// inside your admin form JSX
+<select
+  name="industryTag"
+  value={formState.industryTag ?? ""}
+  onChange={handleChange}
+  required
+>
+  <option value="">Select industry</option>
+  {INDUSTRY_TAGS.map(tag => (
+    <option key={tag} value={tag}>{tag}</option>
+  ))}
+</select>
+
+
+Validation:
+
+On submit, if no industryTag is selected, show a clear inline error and prevent save.
+
+On backend, treat industryTag as required for new content, but keep optional in the type so old content still loads.
+
+4.2 Theme tags multi-select
+
+Add a multi-select UI (either checkboxes or a simple multi-select) for themeTags:
+
+Label: Themes (choose one or two)
+
+Options: from THEME_TAGS
+
+Allow 1–3 selections; more is unnecessary.
+
+Example using checkboxes:
+
+import { THEME_TAGS } from "@/lib/tagConfig"
+
+{THEME_TAGS.map(tag => (
+  <label key={tag}>
+    <input
+      type="checkbox"
+      name="themeTags"
+      value={tag}
+      checked={formState.themeTags?.includes(tag) ?? false}
+      onChange={handleThemeToggle}
+    />
+    {tag}
+  </label>
+))}
+
+
+handleThemeToggle should add/remove tags from formState.themeTags.
+
+No hard validation is strictly required, but ideally:
+
+Show a hint: “Recommended: 1–2 themes per article.”
+
+You can optionally block saving if more than e.g. 3 are selected.
+
+4.3 Method tags multi-select (Inside / method-heavy posts only)
+
+For Innovatr Inside (or any method heavy posts), add a method tags section:
+
+Label: Method tags (for Inside / method content)
+
+Options: values from METHOD_TAGS
+
+It can be shown for all articles, or only for category Inside.
+
+Multi-select just like theme tags.
+
+This allows the admin to capture Storyteller vs Market Simulator vs AI Qual nuance without hardcoding.
+
+5. Ensure admin form values are actually saved
+
+Wherever the admin form submits:
+
+Update the DTO / payload / API type to include:
+
+industryTag?: IndustryTag
+themeTags?: string[]
+methodTags?: string[]
+
+
+Make sure you are actually:
+
+Reading these fields from the request body
+
+Writing them to your storage (JSON, DB, CMS, etc) as part of the article object
+
+This is where your previous “company mismatch” happened: the UI never collected the field, but the rest of the system assumed it existed.
+
+Checklist:
+
+ Admin create flow passes industryTag, themeTags, methodTags to the backend
+
+ Admin edit flow initialises the form with existing values, and saves changes correctly
+
+ No code path assumes tags exist if the admin never set them (we handle that in the related logic)
+
+6. Implement getRelatedArticles helper (tag-aware)
+
+Create lib/getRelatedArticles.ts:
+
+import { IndustryTag } from "./tagConfig"
+
+export type RelatedArticle = {
+  id: string
+  slug: string
+  title: string
+  category?: string
+  series?: string
+  industryTag?: IndustryTag
+  themeTags?: string[]
+  methodTags?: string[]
+  publishedAt?: string | Date
+}
+
+function computeScore(current: RelatedArticle, candidate: RelatedArticle): number {
+  let score = 0
+
+  // Industry priority
+  if (current.industryTag && candidate.industryTag && current.industryTag === candidate.industryTag) {
+    score += 5
+  }
+
+  // Shared themes
+  const currentThemes = current.themeTags ?? []
+  const candidateThemes = candidate.themeTags ?? []
+  const sharedThemes = candidateThemes.filter(t => currentThemes.includes(t))
+  score += sharedThemes.length * 2
+
+  // Shared methods
+  const currentMethods = current.methodTags ?? []
+  const candidateMethods = candidate.methodTags ?? []
+  const sharedMethods = candidateMethods.filter(m => currentMethods.includes(m))
+  score += sharedMethods.length * 1
+
+  return score
+}
+
+function shuffle<T>(arr: T[]): T[] {
+  const copy = [...arr]
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[copy[i], copy[j]] = [copy[j], copy[i]]
+  }
+  return copy
+}
+
+export function getRelatedArticles(
+  current: RelatedArticle,
+  all: RelatedArticle[],
+  maxResults: number = 3
+): RelatedArticle[] {
+  const candidates = all.filter(a => a.id !== current.id)
+  if (!candidates.length) return []
+
+  const scored = candidates.map(c => ({
+    article: c,
+    score: computeScore(current, c),
+  }))
+
+  scored.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score
+    const dateA = a.article.publishedAt ? new Date(a.article.publishedAt).getTime() : 0
+    const dateB = b.article.publishedAt ? new Date(b.article.publishedAt).getTime() : 0
+    return dateB - dateA
+  })
+
+  const topPool = shuffle(scored.slice(0, 8))
+
+  const sameIndustry = topPool.filter(
+    s => current.industryTag && s.article.industryTag === current.industryTag
+  )
+
+  const result: RelatedArticle[] = []
+
+  // 1. Try to ensure at least one same industry article
+  for (const item of sameIndustry) {
+    if (result.length >= 1) break
+    result.push(item.article)
+  }
+
+  // 2. Try to ensure at least one article from a different category when possible
+  for (const item of topPool) {
+    if (result.length >= maxResults) break
+    const already = result.some(r => r.id === item.article.id)
+    const isDifferentCategory =
+      current.category && item.article.category && current.category !== item.article.category
+
+    if (!already && isDifferentCategory) {
+      result.push(item.article)
+      break
+    }
+  }
+
+  // 3. Fill remaining slots with best remaining articles
+  for (const item of topPool) {
+    if (result.length >= maxResults) break
+    const already = result.some(r => r.id === item.article.id)
+    if (!already) {
+      result.push(item.article)
+    }
+  }
+
+  // 4. Fallback: if we still have fewer than maxResults and tags are very sparse,
+  // we can fall back to simple category match to avoid empty rows.
+  if (result.length < maxResults && current.category) {
+    const categoryFallbacks = candidates.filter(c =>
+      c.category === current.category && !result.some(r => r.id === c.id)
+    )
+
+    for (const f of categoryFallbacks) {
+      if (result.length >= maxResults) break
+      result.push(f)
+    }
+  }
+
+  return result.slice(0, maxResults)
+}
+
+
+Important:
+
+The helper is tolerant of missing tags.
+
+If tags are not set yet (before you backfill via admin), it falls back to category so nothing breaks.
+
+7. Hook getRelatedArticles into the Related Content component
+
+Open the component that shows “Related content” and the three cards above “Back to Trends Library”.
+
+Replace the existing filter logic (likely all.filter(a => a.category === current.category)) with:
+
+import { getRelatedArticles } from "@/lib/getRelatedArticles" // adjust path
+
+const related = getRelatedArticles(currentArticle, allArticles, 3)
+
+
+Pass related into the card rendering as before.
+
+Do not change:
+
+The heading text
+
+Card layout
+
+Button text
+
+Back link
+
+Download report behaviour
+
+Only change the selection of which articles are shown.
+
+8. Ensure Inside videos are unaffected
+
+If you see any code around Innovatr Inside posts and videos:
+
+Do not modify the video field names, paths or how they are rendered.
+
+Only extend the article objects with industryTag, themeTags, methodTags.
+
+If you touch any seed data or fixtures for Inside posts, double check that:
+
+Storyteller still shows its video
+
+Market Simulator, Upsiide Overview etc still work as before
+
+9. Final sanity checks
+
+Before committing these changes:
+
+Admin journey
+
+Create a new article in the admin area.
+
+Confirm that:
+
+You must choose an industry in the form.
+
+You can tick 1–3 themes.
+
+For Inside/method content, you can tick method tags.
+
+Save it and confirm that:
+
+The article appears on the public side.
+
+The tags are persisted (inspect the JSON / API response).
+
+Related content updates based on the new tags.
+
+Existing content
+
+Open several existing posts (IRL, Inside, Insights, Launch).
+
+They must still render correctly even if they have no tags yet.
+
+Related content should still show something (tags if present, category fallback if not).
+
+No “company-style” mismatch
+
+There must be no place where industryTag is assumed to exist without the admin form collecting it.
+
+Any field used in logic must either:
+
+Be set via admin, or
+
+Have a safe fallback.
+
+Once this is done, the portal will:
+
+Let admins control tags cleanly via the admin tab.
+
+Use those tags plus industry to power smarter related content.
+
+Avoid the “field used in logic but never captured in UI” trap you had with companies and members.
