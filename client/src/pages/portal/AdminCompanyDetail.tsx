@@ -185,6 +185,10 @@ export default function AdminCompanyDetail() {
   const [deleteUserOpen, setDeleteUserOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<CompanyUser | null>(null);
   const [deletingUser, setDeletingUser] = useState(false);
+  
+  // Delete company dialog
+  const [deleteCompanyOpen, setDeleteCompanyOpen] = useState(false);
+  const [deletingCompany, setDeletingCompany] = useState(false);
 
   const companyId = params?.companyId;
 
@@ -441,6 +445,25 @@ export default function AdminCompanyDetail() {
     }
   };
 
+  const handleDeleteCompany = async () => {
+    if (!company) return;
+    setDeletingCompany(true);
+    try {
+      const res = await fetch(`/api/admin/companies/${company.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to delete company");
+      }
+      toast({ title: "Company Deleted", description: `${company.name} has been removed` });
+      setLocation("/portal/admin?tab=companies");
+    } catch (err) {
+      toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to delete company", variant: "destructive" });
+    } finally {
+      setDeletingCompany(false);
+      setDeleteCompanyOpen(false);
+    }
+  };
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString("en-GB", {
@@ -568,6 +591,17 @@ export default function AdminCompanyDetail() {
                   )}
                 </div>
               </div>
+
+              {/* Delete Button */}
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setDeleteCompanyOpen(true)}
+                data-testid="button-delete-company"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Company
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -1092,6 +1126,29 @@ export default function AdminCompanyDetail() {
             >
               {deletingReport ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Company Confirmation */}
+      <AlertDialog open={deleteCompanyOpen} onOpenChange={setDeleteCompanyOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Company</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{company.name}</strong>? This will permanently remove the company and all associated data including users and reports. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteCompany}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deletingCompany}
+            >
+              {deletingCompany ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Delete Company
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
