@@ -23,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -60,9 +61,11 @@ import {
   FileText,
   CreditCard,
   Trash2,
+  UserPlus,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { MailerSubscription } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -153,6 +156,17 @@ export default function AdminMembers() {
   const [editMemberType, setEditMemberType] = useState("companyUser");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<any | null>(null);
+  const [createMemberOpen, setCreateMemberOpen] = useState(false);
+  const [creatingMember, setCreatingMember] = useState(false);
+  const [newMember, setNewMember] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    companyId: "none",
+    membershipTier: "FREE",
+    memberType: "companyUser",
+    sendWelcomeEmail: true,
+  });
   const { toast } = useToast();
 
   const { data: pulseSubscribers = [], isLoading: loadingPulse, refetch: refetchPulse } = useQuery<MailerSubscription[]>({
@@ -218,6 +232,78 @@ export default function AdminMembers() {
   const handleConfirmDelete = () => {
     if (memberToDelete) {
       deleteUserMutation.mutate(memberToDelete.id);
+    }
+  };
+
+  const handleCreateMember = async () => {
+    if (!newMember.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!newMember.email.trim()) {
+      toast({
+        title: "Error",
+        description: "Email is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCreatingMember(true);
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          name: newMember.name,
+          email: newMember.email,
+          phone: newMember.phone || null,
+          companyId: newMember.memberType === "independent" ? null : (newMember.companyId !== "none" ? newMember.companyId : null),
+          membershipTier: newMember.membershipTier,
+          memberType: newMember.memberType,
+          sendWelcomeEmail: newMember.sendWelcomeEmail,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to create member");
+      }
+
+      const data = await res.json();
+      
+      toast({
+        title: "Member Created",
+        description: newMember.sendWelcomeEmail 
+          ? `${data.user.name} has been created and a password setup email was sent.`
+          : `${data.user.name} has been created.`,
+      });
+
+      setCreateMemberOpen(false);
+      setNewMember({
+        name: "",
+        email: "",
+        phone: "",
+        companyId: "none",
+        membershipTier: "FREE",
+        memberType: "companyUser",
+        sendWelcomeEmail: true,
+      });
+      
+      refetchUsers();
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : "Failed to create member",
+        variant: "destructive",
+      });
+    } finally {
+      setCreatingMember(false);
     }
   };
 
@@ -441,6 +527,10 @@ export default function AdminMembers() {
           <Button variant="outline" size="sm" onClick={handleRefresh} data-testid="button-refresh-members">
             <RefreshCw className="w-4 h-4 mr-2" />
             Refresh
+          </Button>
+          <Button onClick={() => setCreateMemberOpen(true)} data-testid="button-create-member">
+            <UserPlus className="w-4 h-4 mr-2" />
+            Create New Member
           </Button>
         </div>
       </div>
@@ -1033,6 +1123,157 @@ export default function AdminMembers() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={createMemberOpen} onOpenChange={setCreateMemberOpen}>
+        <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto" data-testid="dialog-create-member">
+          <DialogHeader>
+            <DialogTitle>Create New Member</DialogTitle>
+            <DialogDescription>
+              Add a new member to the portal. They will receive an email to set up their password.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-name">Full Name *</Label>
+                <Input
+                  id="new-name"
+                  value={newMember.name}
+                  onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
+                  placeholder="John Smith"
+                  data-testid="input-new-member-name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-email">Email Address *</Label>
+                <Input
+                  id="new-email"
+                  type="email"
+                  value={newMember.email}
+                  onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
+                  placeholder="john@company.com"
+                  data-testid="input-new-member-email"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="new-phone">Phone Number (optional)</Label>
+              <Input
+                id="new-phone"
+                type="tel"
+                value={newMember.phone}
+                onChange={(e) => setNewMember({ ...newMember, phone: e.target.value })}
+                placeholder="+27 12 345 6789"
+                data-testid="input-new-member-phone"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Member Type</Label>
+                <Select 
+                  value={newMember.memberType} 
+                  onValueChange={(value) => {
+                    setNewMember({ 
+                      ...newMember, 
+                      memberType: value,
+                      companyId: value === "independent" ? "none" : newMember.companyId
+                    });
+                  }}
+                >
+                  <SelectTrigger data-testid="select-new-member-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="companyUser">Company User</SelectItem>
+                    <SelectItem value="independent">Independent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Membership Tier</Label>
+                <Select 
+                  value={newMember.membershipTier} 
+                  onValueChange={(value) => setNewMember({ ...newMember, membershipTier: value })}
+                >
+                  <SelectTrigger data-testid="select-new-member-tier">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FREE">Free</SelectItem>
+                    <SelectItem value="STARTER">Starter</SelectItem>
+                    <SelectItem value="GROWTH">Growth</SelectItem>
+                    <SelectItem value="SCALE">Scale</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {newMember.memberType === "companyUser" && (
+              <div className="space-y-2">
+                <Label>Assign to Company</Label>
+                <Select 
+                  value={newMember.companyId} 
+                  onValueChange={(value) => setNewMember({ ...newMember, companyId: value })}
+                >
+                  <SelectTrigger data-testid="select-new-member-company">
+                    <SelectValue placeholder="Select a company" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No company (unassigned)</SelectItem>
+                    {[...companies].sort((a, b) => a.name.localeCompare(b.name)).map((company) => (
+                      <SelectItem key={company.id} value={company.id}>
+                        {company.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Company users share credits from their company pool
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-center space-x-2 pt-2">
+              <Checkbox
+                id="send-welcome-email"
+                checked={newMember.sendWelcomeEmail}
+                onCheckedChange={(checked) => setNewMember({ ...newMember, sendWelcomeEmail: checked === true })}
+                data-testid="checkbox-send-welcome-email"
+              />
+              <Label htmlFor="send-welcome-email" className="text-sm font-normal cursor-pointer">
+                Send welcome email with password setup link
+              </Label>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCreateMemberOpen(false)}
+              data-testid="button-cancel-create-member"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateMember}
+              disabled={creatingMember}
+              data-testid="button-submit-create-member"
+            >
+              {creatingMember ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create Member"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

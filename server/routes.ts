@@ -2276,6 +2276,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create user (admin)
+  app.post("/api/admin/users", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { name, email, phone, companyId, membershipTier, memberType, sendWelcomeEmail } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+      if (!name) {
+        return res.status(400).json({ error: "Name is required" });
+      }
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({ error: "A user with this email already exists" });
+      }
+      
+      // Get company name if companyId provided
+      let companyName = "Innovatr";
+      if (companyId) {
+        const company = await storage.getCompany(companyId);
+        if (company) {
+          companyName = company.name;
+        }
+      }
+      
+      // Create the user with a temporary placeholder password 
+      const placeholderPassword = `PENDING_SETUP_${Date.now()}_${crypto.randomBytes(16).toString('hex')}`;
+      const placeholderPasswordHash = await hashPassword(placeholderPassword);
+      
+      const user = await storage.createUser({
+        email,
+        name,
+        username: email.split('@')[0] + '_' + Date.now(),
+        password: "", // Empty password during creation
+        membershipTier: membershipTier || "FREE",
+        memberType: memberType || (companyId ? "companyUser" : "independent"),
+        status: "ACTIVE",
+        role: "MEMBER",
+      } as any);
+      
+      // Update the user with the hashed password and company link
+      await storage.updateUser(user.id, {
+        passwordHash: placeholderPasswordHash,
+        password: "", // Clear plaintext password field
+        companyId: companyId || null,
+        phone: phone || null,
+      });
+      
+      // Send welcome email with password setup link if requested
+      if (sendWelcomeEmail !== false) {
+        // Generate password reset token for initial setup
+        const { token, tokenHash } = generateResetToken();
+        const expiresAt = getResetTokenExpiry();
+        
+        // Store hashed token in database
+        await storage.createPasswordReset({
+          userId: user.id,
+          tokenHash,
+          expiresAt,
+        });
+        
+        // Send welcome email with password setup link
+        const origin = req.get('origin') || `${req.protocol}://${req.get('host')}`;
+        const setupUrl = `${origin}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
+        
+        try {
+          await emailService.sendWelcomeWithPasswordSetup(
+            email,
+            name,
+            companyName,
+            setupUrl
+          );
+        } catch (emailError) {
+          console.error("Failed to send welcome email:", emailError);
+          // Continue - the user can still request a password reset manually
+        }
+      }
+      
+      // Fetch the updated user
+      const createdUser = await storage.getUser(user.id);
+      
+      res.status(201).json({ 
+        user: {
+          id: createdUser?.id,
+          email: createdUser?.email,
+          name: createdUser?.name,
+          companyId: createdUser?.companyId,
+          membershipTier: createdUser?.membershipTier,
+          memberType: createdUser?.memberType,
+        },
+        message: sendWelcomeEmail !== false ? "Member created. Password setup email sent." : "Member created."
+      });
+    } catch (error: any) {
+      console.error("Create user error:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Delete user
   app.delete("/api/admin/users/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
