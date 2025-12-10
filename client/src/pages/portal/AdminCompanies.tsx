@@ -583,10 +583,7 @@ export default function AdminCompanies() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h2 className="text-2xl font-serif font-bold">Company Accounts</h2>
-          <p className="text-muted-foreground">Manage company contracts and credit pools</p>
-        </div>
+        <h2 className="text-2xl font-serif font-bold">Company Accounts</h2>
         <div className="flex items-center gap-2">
           <Button onClick={fetchCompanies} variant="outline" size="sm" data-testid="button-refresh-companies">
             <RefreshCw className="w-4 h-4 mr-2" />
