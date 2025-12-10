@@ -93,6 +93,7 @@ const defaultFormData = {
   title: "",
   slug: "",
   category: "Insights",
+  series: "",
   industry: "",
   topics: "",
   tags: "",
@@ -107,6 +108,7 @@ const defaultFormData = {
   isFeatured: false,
   pdfUrl: "",
   dashboardLink: "",
+  videoPaths: "",
   coverImageUrl: "",
   publishAt: "",
   unpublishAt: "",
@@ -144,6 +146,7 @@ export default function ReportEditorModal({
         title: report.title || "",
         slug: report.slug || "",
         category: report.category || "Insights",
+        series: report.series || "",
         industry: report.industry || "",
         topics: "",
         tags: report.tags?.join(", ") || "",
@@ -158,6 +161,7 @@ export default function ReportEditorModal({
         isFeatured: report.isFeatured || false,
         pdfUrl: report.pdfUrl || "",
         dashboardLink: report.dashboardLink || "",
+        videoPaths: report.videoPaths?.join(", ") || "",
         coverImageUrl: report.coverImageUrl || "",
         publishAt: report.publishAt?.split("T")[0] || "",
         unpublishAt: report.unpublishAt?.split("T")[0] || "",
@@ -355,6 +359,7 @@ export default function ReportEditorModal({
         title: formData.title,
         slug: formData.slug || formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         category: formData.category,
+        series: formData.series || null,
         industry: formData.industry || null,
         topics: formData.topics ? formData.topics.split(",").map((t) => t.trim()) : [],
         tags: formData.tags ? formData.tags.split(",").map((t) => t.trim()) : [],
@@ -369,6 +374,7 @@ export default function ReportEditorModal({
         isFeatured: formData.isFeatured,
         pdfUrl: formData.pdfUrl || null,
         dashboardLink: formData.dashboardLink || null,
+        videoPaths: formData.videoPaths ? formData.videoPaths.split(",").map((v) => v.trim()).filter(v => v) : [],
         coverImageUrl: formData.coverImageUrl || null,
         publishAt: parsedPublishAt,
         unpublishAt: parsedUnpublishAt,
@@ -708,6 +714,43 @@ export default function ReportEditorModal({
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Link to external dashboard (Power BI, Google Data Studio, Tableau, etc.)
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="series">Series</Label>
+                  <Select
+                    value={formData.series}
+                    onValueChange={(value) => handleSelectChange("series", value)}
+                  >
+                    <SelectTrigger data-testid="select-series">
+                      <SelectValue placeholder="Select a series (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="Inside">Inside (Product Demos)</SelectItem>
+                      <SelectItem value="Insights">Insights</SelectItem>
+                      <SelectItem value="Launch">Launch</SelectItem>
+                      <SelectItem value="IRL">IRL</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Series determines special display features (e.g., Inside shows demo videos)
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="videoPaths">Video URLs</Label>
+                  <Input
+                    id="videoPaths"
+                    name="videoPaths"
+                    value={formData.videoPaths}
+                    onChange={handleChange}
+                    placeholder="https://example.com/video.mp4, https://example.com/video2.mp4"
+                    data-testid="input-video-paths"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Comma separated list of video URLs. Videos appear in the Inside series demo section.
                   </p>
                 </div>
               </div>
