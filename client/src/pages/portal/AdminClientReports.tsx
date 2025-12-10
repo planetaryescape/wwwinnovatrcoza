@@ -67,6 +67,19 @@ interface ClientReport {
   upsiideUrl: string | null;
   thumbnailUrl: string | null;
   tags: string[];
+  // Top idea metadata
+  topIdeaLabel: string | null;
+  topIdeaIdeaScore: number | null;
+  topIdeaInterest: number | null;
+  topIdeaCommitment: number | null;
+  // Lowest idea metadata
+  lowestIdeaLabel: string | null;
+  lowestIdeaIdeaScore: number | null;
+  lowestIdeaInterest: number | null;
+  lowestIdeaCommitment: number | null;
+  // Consumer verbatims
+  verbatim1: string | null;
+  verbatim2: string | null;
   uploadedAt: string;
   createdAt: string;
   updatedAt: string;
@@ -102,6 +115,19 @@ export default function AdminClientReports() {
     tags: "",
     dashboardUrl: "",
     upsiideUrl: "",
+    // Top idea fields
+    topIdeaLabel: "",
+    topIdeaIdeaScore: "",
+    topIdeaInterest: "",
+    topIdeaCommitment: "",
+    // Lowest idea fields
+    lowestIdeaLabel: "",
+    lowestIdeaIdeaScore: "",
+    lowestIdeaInterest: "",
+    lowestIdeaCommitment: "",
+    // Verbatims
+    verbatim1: "",
+    verbatim2: "",
   });
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -188,6 +214,16 @@ export default function AdminClientReports() {
       tags: "",
       dashboardUrl: "",
       upsiideUrl: "",
+      topIdeaLabel: "",
+      topIdeaIdeaScore: "",
+      topIdeaInterest: "",
+      topIdeaCommitment: "",
+      lowestIdeaLabel: "",
+      lowestIdeaIdeaScore: "",
+      lowestIdeaInterest: "",
+      lowestIdeaCommitment: "",
+      verbatim1: "",
+      verbatim2: "",
     });
     setPdfFile(null);
     setDialogOpen(true);
@@ -205,6 +241,16 @@ export default function AdminClientReports() {
       tags: report.tags.join(", "),
       dashboardUrl: report.dashboardUrl || "",
       upsiideUrl: report.upsiideUrl || "",
+      topIdeaLabel: report.topIdeaLabel || "",
+      topIdeaIdeaScore: report.topIdeaIdeaScore?.toString() || "",
+      topIdeaInterest: report.topIdeaInterest?.toString() || "",
+      topIdeaCommitment: report.topIdeaCommitment?.toString() || "",
+      lowestIdeaLabel: report.lowestIdeaLabel || "",
+      lowestIdeaIdeaScore: report.lowestIdeaIdeaScore?.toString() || "",
+      lowestIdeaInterest: report.lowestIdeaInterest?.toString() || "",
+      lowestIdeaCommitment: report.lowestIdeaCommitment?.toString() || "",
+      verbatim1: report.verbatim1 || "",
+      verbatim2: report.verbatim2 || "",
     });
     setPdfFile(null);
     setDialogOpen(true);
@@ -255,6 +301,19 @@ export default function AdminClientReports() {
         dashboardUrl: formData.dashboardUrl || null,
         upsiideUrl: formData.upsiideUrl || null,
         tags,
+        // Top idea data
+        topIdeaLabel: formData.topIdeaLabel || null,
+        topIdeaIdeaScore: formData.topIdeaIdeaScore ? parseInt(formData.topIdeaIdeaScore) : null,
+        topIdeaInterest: formData.topIdeaInterest ? parseInt(formData.topIdeaInterest) : null,
+        topIdeaCommitment: formData.topIdeaCommitment ? parseInt(formData.topIdeaCommitment) : null,
+        // Lowest idea data
+        lowestIdeaLabel: formData.lowestIdeaLabel || null,
+        lowestIdeaIdeaScore: formData.lowestIdeaIdeaScore ? parseInt(formData.lowestIdeaIdeaScore) : null,
+        lowestIdeaInterest: formData.lowestIdeaInterest ? parseInt(formData.lowestIdeaInterest) : null,
+        lowestIdeaCommitment: formData.lowestIdeaCommitment ? parseInt(formData.lowestIdeaCommitment) : null,
+        // Verbatims
+        verbatim1: formData.verbatim1 || null,
+        verbatim2: formData.verbatim2 || null,
       };
 
       let res;
@@ -514,7 +573,7 @@ export default function AdminClientReports() {
       </Card>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingReport ? "Edit Report" : "Add New Report"}
@@ -663,8 +722,150 @@ export default function AdminClientReports() {
                 Additional dashboard or report link
               </p>
             </div>
+
+            <div className="border-t pt-4 mt-4">
+              <h4 className="font-medium text-sm mb-3">Top Performing Idea</h4>
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="topIdeaLabel">Idea Name</Label>
+                  <Input
+                    id="topIdeaLabel"
+                    value={formData.topIdeaLabel}
+                    onChange={(e) => setFormData({ ...formData, topIdeaLabel: e.target.value })}
+                    placeholder="e.g. Caesar Parmesan Wrap"
+                    data-testid="input-top-idea-label"
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="topIdeaIdeaScore">Idea Score (%)</Label>
+                    <Input
+                      id="topIdeaIdeaScore"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.topIdeaIdeaScore}
+                      onChange={(e) => setFormData({ ...formData, topIdeaIdeaScore: e.target.value })}
+                      placeholder="0-100"
+                      data-testid="input-top-idea-score"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="topIdeaInterest">Interest (%)</Label>
+                    <Input
+                      id="topIdeaInterest"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.topIdeaInterest}
+                      onChange={(e) => setFormData({ ...formData, topIdeaInterest: e.target.value })}
+                      placeholder="0-100"
+                      data-testid="input-top-idea-interest"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="topIdeaCommitment">Commitment (%)</Label>
+                    <Input
+                      id="topIdeaCommitment"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.topIdeaCommitment}
+                      onChange={(e) => setFormData({ ...formData, topIdeaCommitment: e.target.value })}
+                      placeholder="0-100"
+                      data-testid="input-top-idea-commitment"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t pt-4">
+              <h4 className="font-medium text-sm mb-3">Lowest Performing Idea</h4>
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="lowestIdeaLabel">Idea Name</Label>
+                  <Input
+                    id="lowestIdeaLabel"
+                    value={formData.lowestIdeaLabel}
+                    onChange={(e) => setFormData({ ...formData, lowestIdeaLabel: e.target.value })}
+                    placeholder="e.g. Hot Honey Pineapple"
+                    data-testid="input-lowest-idea-label"
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="lowestIdeaIdeaScore">Idea Score (%)</Label>
+                    <Input
+                      id="lowestIdeaIdeaScore"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.lowestIdeaIdeaScore}
+                      onChange={(e) => setFormData({ ...formData, lowestIdeaIdeaScore: e.target.value })}
+                      placeholder="0-100"
+                      data-testid="input-lowest-idea-score"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lowestIdeaInterest">Interest (%)</Label>
+                    <Input
+                      id="lowestIdeaInterest"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.lowestIdeaInterest}
+                      onChange={(e) => setFormData({ ...formData, lowestIdeaInterest: e.target.value })}
+                      placeholder="0-100"
+                      data-testid="input-lowest-idea-interest"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lowestIdeaCommitment">Commitment (%)</Label>
+                    <Input
+                      id="lowestIdeaCommitment"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={formData.lowestIdeaCommitment}
+                      onChange={(e) => setFormData({ ...formData, lowestIdeaCommitment: e.target.value })}
+                      placeholder="0-100"
+                      data-testid="input-lowest-idea-commitment"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t pt-4">
+              <h4 className="font-medium text-sm mb-3">Consumer Voice</h4>
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="verbatim1">Verbatim 1</Label>
+                  <Textarea
+                    id="verbatim1"
+                    value={formData.verbatim1}
+                    onChange={(e) => setFormData({ ...formData, verbatim1: e.target.value })}
+                    placeholder="Short consumer quote..."
+                    className="h-16"
+                    data-testid="textarea-verbatim1"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="verbatim2">Verbatim 2</Label>
+                  <Textarea
+                    id="verbatim2"
+                    value={formData.verbatim2}
+                    onChange={(e) => setFormData({ ...formData, verbatim2: e.target.value })}
+                    placeholder="Another consumer quote..."
+                    className="h-16"
+                    data-testid="textarea-verbatim2"
+                  />
+                </div>
+              </div>
+            </div>
             
-            <div className="space-y-2">
+            <div className="space-y-2 border-t pt-4">
               <Label>PDF File</Label>
               <div 
                 className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"

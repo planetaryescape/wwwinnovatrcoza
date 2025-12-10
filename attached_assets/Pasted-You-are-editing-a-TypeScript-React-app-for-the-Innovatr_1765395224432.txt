@@ -1,0 +1,217 @@
+You are editing a TypeScript React app for the Innovatr client portal. 
+The app uses Vite, Tailwind, Drizzle ORM and a shared design system. 
+Do NOT change any authentication, routing, database table names, or membership logic. 
+Do NOT remove any existing fields from the database. Only add optional fields or front end changes.
+
+GOAL
+I want to improve the “My Research” page cards and the way I manage client reports in the Admin area, WITHOUT breaking any existing flows.
+
+High level:
+- Standardise the research cards under My Research.
+- Keep my existing status logic (Brief Submitted, Audience Live, Building Report, Complete).
+- Add project type and industry tags to each card.
+- Replace the current description snippet on the card with a structured summary for:
+  - Top performing idea (Idea Score, Interest, Commitment)
+  - Lowest idea (Idea Score, Interest, Commitment)
+  - 2 short verbatim quotes
+- Ensure the “View” button on cards always opens UpSiide in a new tab.
+- Let me EDIT all of this metadata from Admin → Companies → Client Reports.
+- Do NOT add a new “Add report” button on My Research. I only want to create and edit reports from the Admin area.
+
+------------------------------------------------
+1. FIND CURRENT IMPLEMENTATION
+------------------------------------------------
+
+1. Find the code for the member “My Research” page (the one that shows:
+   - Active Studies
+   - Completed
+   - Total Research
+   - Filter by title / company / tags
+   - Grid of cards with title, paragraph description, company, date, status chip and View / Download buttons).
+
+2. Identify the type or interface that represents a single research item on that page 
+   (it might come from a Drizzle query, an API route, or a shared type like `Report`, `ClientReport`, `MemberReportCard` etc).
+
+3. Find the Admin page for **Admin → Companies** where:
+   - I can see a list of companies (tier, contract dates, credits, etc).
+   - Clicking a company opens a right-hand drawer / slide-over with:
+     - Company Users
+     - Client Reports (and an “Add Report” button)
+     - Notes.
+
+4. Identify the model / type that powers “Client Reports” in that Admin drawer. 
+   This is the same data that should drive the “My Research” cards.
+
+DO NOT rename these core models or tables. Only extend them.
+
+------------------------------------------------
+2. DATA MODEL EXTENSIONS (OPTIONAL FIELDS ONLY)
+------------------------------------------------
+
+Extend the report / client report model (wherever it is defined) with the following OPTIONAL fields:
+
+- `projectType`: enum or string with allowed values:
+  - "test24_basic"
+  - "test24_pro"
+  - "consult"
+- `industry`: enum or string with allowed values:
+  - "food"
+  - "beverage"
+  - "alcohol"
+  - "services"
+  - "financial"
+  - "agency"
+  - "beauty"
+  - "fmcg"
+
+- `topIdeaLabel`: string        // e.g. "Caesar Parmesan wrap" or "Gorgeous Spritz B"
+- `topIdeaIdeaScore`: number | null
+- `topIdeaInterest`: number | null
+- `topIdeaCommitment`: number | null
+
+- `lowestIdeaLabel`: string     // e.g. "Hot Honey Pineapple" or "Savage Flora A"
+- `lowestIdeaIdeaScore`: number | null
+- `lowestIdeaInterest`: number | null
+- `lowestIdeaCommitment`: number | null
+
+- `verbatim1`: string | null    // short consumer quote
+- `verbatim2`: string | null    // short consumer quote
+
+Implementation rules:
+- Add these as new columns if they live in a Drizzle table, or new fields on the TypeScript type if they live in JSON.
+- Make them OPTIONAL everywhere. Do not make them required in forms or database migrations.
+- Do not remove or rename any existing columns or fields.
+
+------------------------------------------------
+3. ADMIN → COMPANIES → CLIENT REPORTS EDITING
+------------------------------------------------
+
+In the Admin drawer for a single company, under **Client Reports**:
+
+1. Keep the existing list of reports exactly as it is now (title, status, test type chip etc).
+
+2. Next to each report row, add a small **Edit** icon button (for example a pencil) that opens an “Edit Report” modal or slide-over.
+
+3. In the **Add Report** and **Edit Report** forms, include fields for the new metadata:
+
+   - Project type:
+     - Component: dropdown
+     - Label: “Project type”
+     - Options:
+       - Test24 Basic
+       - Test24 Pro
+       - Consult
+     - Store as `projectType` with values "test24_basic", "test24_pro", "consult".
+
+   - Industry:
+     - Component: dropdown (single select)
+     - Label: “Industry”
+     - Options:
+       - Food
+       - Beverage
+       - Alcohol
+       - Services
+       - Financial
+       - Agency
+       - Beauty
+       - FMCG
+     - Store as `industry` with values as defined above.
+
+   - Top idea block:
+     - Text input: `topIdeaLabel` (Label: “Top idea name”)
+     - Number input: `topIdeaIdeaScore` (Label: “Top idea – Idea Score (%)”)
+     - Number input: `topIdeaInterest` (Label: “Top idea – Interest (%)”)
+     - Number input: `topIdeaCommitment` (Label: “Top idea – Commitment (%)”)
+
+   - Lowest idea block:
+     - Text input: `lowestIdeaLabel` (Label: “Lowest idea name”)
+     - Number input: `lowestIdeaIdeaScore` (Label: “Lowest idea – Idea Score (%)”)
+     - Number input: `lowestIdeaInterest` (Label: “Lowest idea – Interest (%)”)
+     - Number input: `lowestIdeaCommitment` (Label: “Lowest idea – Commitment (%)”)
+
+   - Verbatims:
+     - Textarea: `verbatim1` (Label: “Verbatim 1”)
+     - Textarea: `verbatim2` (Label: “Verbatim 2”)
+
+4. Ensure that:
+   - Creating a new report still works exactly as before.
+   - If I leave all new fields empty, nothing breaks and the report still appears in My Research.
+   - Editing a report updates these fields and they are used in the My Research cards (see next section).
+
+------------------------------------------------
+4. MY RESEARCH CARD DESIGN AND BEHAVIOUR
+------------------------------------------------
+
+On the member **My Research** page, for each **Completed Research** card:
+
+1. **Tag row at the top of the card**
+   - Keep any existing tag logic, but extend it as follows:
+     - If `projectType` is set, show a chip at the start of the tag row with:
+       - Label:
+         - "Test24 Basic" when projectType === "test24_basic"
+         - "Test24 Pro" when projectType === "test24_pro"
+         - "Consult" when projectType === "consult"
+     - If `industry` is set, show a second chip with a capitalised label, e.g. "Beverage", "Food", "Alcohol" etc.
+     - Keep any existing company tags or “+3” summary chips as they are, after these two chips.
+
+2. **Status chip**
+   - Keep the status chip logic exactly as it is today:
+     - Brief Submitted
+     - Audience is Live
+     - Building Report
+     - Complete
+   - Do not rename these. Do not change the colours or states.
+
+3. **Main content area: replace description**
+   - Replace the current long description paragraph with a compact, structured block using the new fields.
+   - Layout example (use the design system components already present; you do NOT need to invent new components):
+
+     - Small heading: “Top idea”
+       - If `topIdeaLabel` exists:
+         - Show: `<topIdeaLabel>`
+         - On the next line, if any of the numeric fields exist, render a tiny stat line:
+           - Format: `Idea <value>% · Interest <value>% · Commitment <value>%`
+           - Only render pieces that are not null.
+       - If `topIdeaLabel` is missing:
+         - Fall back to the old description behaviour (whatever text was there before).
+
+     - Small heading: “Lowest idea”
+       - Same pattern as above using the `lowestIdea*` fields.
+       - If there is no lowest idea data, hide this block completely.
+
+     - Small heading: “Consumer voice”
+       - If `verbatim1` exists, render it as a short quoted line (no quotation marks needed stylistically if they clash with design).
+       - If `verbatim2` exists, render it as a second line.
+       - If both verbatims are missing, hide this section.
+
+   - Important:
+     - If **all** of the new fields are empty for a report (no project type, no industry, no top/lowest idea, no verbatims), render the card exactly as it behaves today (original description paragraph etc). This protects existing reports.
+
+4. **Buttons**
+   - Keep the **Download** button behaviour exactly as it is (still downloads the same report file).
+
+   - For the **View** button:
+     - Always open `https://app.upsiide.com/` in a new tab.
+     - If there is already a field for a specific UpSiide URL for that report, you may keep using it, but the default must be `https://app.upsiide.com/` so nothing breaks.
+
+------------------------------------------------
+5. SAFETY AND NON-BREAKING CHANGES
+------------------------------------------------
+
+- Do NOT change any routing paths (e.g. /portal/research, /portal/admin).
+- Do NOT change any authentication or membership checks.
+- Do NOT remove any existing fields or columns from the database.
+- All new fields must be optional and nullable so existing data stays valid.
+- If there is any mismatch between Admin → Client Reports and My Research, always prefer to:
+  - Extend the mapping layer instead of rewriting it.
+- After implementing:
+  - Run the project locally.
+  - Check:
+    - My Research loads with the existing 5 studies and shows the new layout where data exists.
+    - Admin → Companies → Client Reports still loads and lets me:
+      - Add a report
+      - Edit a report
+      - Save and reload the page without errors
+    - When I edit top idea / lowest idea / verbatims fields and save, those updates appear on the relevant card in My Research.
+
+End of instructions.

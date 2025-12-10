@@ -488,6 +488,19 @@ export const clientReports = pgTable("client_reports", {
   upsiideUrl: text("upsiide_url"),
   thumbnailUrl: text("thumbnail_url"),
   tags: text("tags").array().default([]),
+  // Top performing idea metadata
+  topIdeaLabel: text("top_idea_label"),
+  topIdeaIdeaScore: integer("top_idea_idea_score"),
+  topIdeaInterest: integer("top_idea_interest"),
+  topIdeaCommitment: integer("top_idea_commitment"),
+  // Lowest performing idea metadata
+  lowestIdeaLabel: text("lowest_idea_label"),
+  lowestIdeaIdeaScore: integer("lowest_idea_idea_score"),
+  lowestIdeaInterest: integer("lowest_idea_interest"),
+  lowestIdeaCommitment: integer("lowest_idea_commitment"),
+  // Consumer verbatims
+  verbatim1: text("verbatim_1"),
+  verbatim2: text("verbatim_2"),
   uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -510,6 +523,19 @@ export const insertClientReportSchema = createInsertSchema(clientReports)
     primaryContactEmail: z.string().email().optional().or(z.literal("")),
     dashboardUrl: z.string().url().optional().or(z.literal("")),
     upsiideUrl: z.string().url().optional().or(z.literal("")),
+    // Top idea fields
+    topIdeaLabel: z.string().optional(),
+    topIdeaIdeaScore: z.number().min(0).max(100).optional().nullable(),
+    topIdeaInterest: z.number().min(0).max(100).optional().nullable(),
+    topIdeaCommitment: z.number().min(0).max(100).optional().nullable(),
+    // Lowest idea fields
+    lowestIdeaLabel: z.string().optional(),
+    lowestIdeaIdeaScore: z.number().min(0).max(100).optional().nullable(),
+    lowestIdeaInterest: z.number().min(0).max(100).optional().nullable(),
+    lowestIdeaCommitment: z.number().min(0).max(100).optional().nullable(),
+    // Verbatims
+    verbatim1: z.string().optional(),
+    verbatim2: z.string().optional(),
   });
 
 export type InsertClientReport = z.infer<typeof insertClientReportSchema>;
