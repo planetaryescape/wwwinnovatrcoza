@@ -273,7 +273,7 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId, onLockedClick
             variant="secondary"
             className="text-xs px-2.5 py-1 bg-muted text-muted-foreground"
           >
-            {report.industry}
+            {report.category.toLowerCase() === "inside" ? "Products" : report.industry}
           </Badge>
           {isLocked && (
             <Badge 
