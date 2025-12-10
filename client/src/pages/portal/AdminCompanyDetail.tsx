@@ -855,8 +855,35 @@ export default function AdminCompanyDetail() {
             </Card>
           </div>
 
-          {/* Right Column - Notes */}
+          {/* Right Column - Quick Stats & Notes */}
           <div className="space-y-6">
+            {/* Quick Stats */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Quick Stats</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Total Studies</span>
+                  <span className="font-medium">{company.studyCount || 0}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Team Size</span>
+                  <span className="font-medium">{users.length}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Reports</span>
+                  <span className="font-medium">{reports.length}</span>
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Created</span>
+                  <span className="font-medium">{formatDate(company.createdAt)}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Notes */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-sm">Notes</CardTitle>
@@ -883,32 +910,6 @@ export default function AdminCompanyDetail() {
                     {company.notes || "No notes yet. Click edit to add notes."}
                   </p>
                 )}
-              </CardContent>
-            </Card>
-
-            {/* Quick Stats */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Quick Stats</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Total Studies</span>
-                  <span className="font-medium">{company.studyCount || 0}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Team Size</span>
-                  <span className="font-medium">{users.length}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Reports</span>
-                  <span className="font-medium">{reports.length}</span>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Created</span>
-                  <span className="font-medium">{formatDate(company.createdAt)}</span>
-                </div>
               </CardContent>
             </Card>
           </div>
