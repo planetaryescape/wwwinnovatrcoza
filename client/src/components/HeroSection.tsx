@@ -23,14 +23,13 @@ export default function HeroSection() {
           backgroundImage: `url(${heroBackground})`
         }}
       />
-      
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex items-center justify-center">
         <div>
           <h1 className="text-4xl md:text-6xl font-serif font-semibold text-white tracking-tight leading-tight text-center">
             Launch Better Innovation
           </h1>
           
-          <p className="mt-8 md:mt-6 max-w-[640px] mx-auto text-base md:text-lg text-slate-50 leading-relaxed text-center drop-shadow-[0_1px_8px_rgba(0,0,0,0.7)]">
+          <p className="mt-8 md:mt-6 max-w-[640px] mx-auto md:text-lg text-slate-50 text-center drop-shadow-[0_1px_8px_rgba(0,0,0,0.7)] font-extrabold text-[20px]">
             Smart, Affordable Research in 24hrs
           </p>
           
