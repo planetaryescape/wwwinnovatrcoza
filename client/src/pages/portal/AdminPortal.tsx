@@ -3,7 +3,6 @@ import { useLocation } from "wouter";
 import { useEffect, useState, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PortalLayout from "./PortalLayout";
-import AdminOverview from "./AdminOverview";
 import AdminOrders from "./AdminOrders";
 import AdminReports from "./AdminReports";
 import AdminDeals from "./AdminDeals";
@@ -11,7 +10,7 @@ import AdminCompanies from "./AdminCompanies";
 import AdminMembers from "./AdminMembers";
 import AdminBriefs from "./AdminBriefs";
 
-const VALID_TABS = ["overview", "companies", "orders", "briefs", "members", "reports", "deals"];
+const VALID_TABS = ["companies", "orders", "briefs", "members", "reports", "deals"];
 
 export default function AdminPortal() {
   const [location, setLocation] = useLocation();
@@ -21,7 +20,7 @@ export default function AdminPortal() {
   const getTabFromUrl = useCallback(() => {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get("tab");
-    return tab && VALID_TABS.includes(tab) ? tab : "overview";
+    return tab && VALID_TABS.includes(tab) ? tab : "companies";
   }, []);
   
   const [activeTab, setActiveTab] = useState(getTabFromUrl);
@@ -65,8 +64,7 @@ export default function AdminPortal() {
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="overview" data-testid="tab-admin-overview">Overview</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="companies" data-testid="tab-admin-companies">Companies</TabsTrigger>
             <TabsTrigger value="orders" data-testid="tab-admin-orders">Orders</TabsTrigger>
             <TabsTrigger value="briefs" data-testid="tab-admin-briefs">Briefs</TabsTrigger>
@@ -74,10 +72,6 @@ export default function AdminPortal() {
             <TabsTrigger value="reports" data-testid="tab-admin-reports">Reports</TabsTrigger>
             <TabsTrigger value="deals" data-testid="tab-admin-deals">Deals</TabsTrigger>
           </TabsList>
-
-          <TabsContent value="overview">
-            <AdminOverview />
-          </TabsContent>
 
           <TabsContent value="companies">
             <AdminCompanies />
