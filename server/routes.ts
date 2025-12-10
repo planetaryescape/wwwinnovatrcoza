@@ -2923,6 +2923,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Serve video assets from attached_assets folder (public access for demo videos)
+  app.get("/api/assets/videos/:filename", async (req, res) => {
+    try {
+      const { filename } = req.params;
+      const fs = await import("fs/promises");
+      const path = await import("path");
+      
+      // Validate filename to prevent path traversal
+      if (filename.includes("..") || filename.includes("/") || filename.includes("\\")) {
+        return res.status(400).json({ error: "Invalid filename" });
+      }
+      
+      const filePath = path.resolve(process.cwd(), "attached_assets", filename);
+      
+      // Check if file exists
+      try {
+        await fs.access(filePath);
+      } catch {
+        return res.status(404).json({ error: "Video not found" });
+      }
+      
+      const stat = await fs.stat(filePath);
+      const fileSize = stat.size;
+      const range = req.headers.range;
+      
+      // Handle range requests for video streaming
+      if (range) {
+        const parts = range.replace(/bytes=/, "").split("-");
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+        const chunkSize = end - start + 1;
+        
+        const { createReadStream } = await import("fs");
+        const file = createReadStream(filePath, { start, end });
+        
+        res.writeHead(206, {
+          "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+          "Accept-Ranges": "bytes",
+          "Content-Length": chunkSize,
+          "Content-Type": "video/mp4",
+        });
+        
+        file.pipe(res);
+      } else {
+        res.writeHead(200, {
+          "Content-Length": fileSize,
+          "Content-Type": "video/mp4",
+        });
+        
+        const { createReadStream } = await import("fs");
+        createReadStream(filePath).pipe(res);
+      }
+    } catch (error: any) {
+      console.error("Video serve error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Serve files from App Storage - require authentication with access control
   app.get("/api/files/*", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
