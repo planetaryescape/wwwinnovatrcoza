@@ -1,0 +1,150 @@
+REPLIT PROMPT – ADD “UPLOAD RESEARCH” ENTRY POINT ON MY RESEARCH PAGE
+
+You are a senior TypeScript + React engineer working on the Innovatr client portal in this Replit project.
+
+Goal
+
+Add a small, safe enhancement to the My Research page:
+
+As an admin, I want to be able to upload a new research study / client portal directly from the My Research screen, without changing any existing flows.
+
+This must reuse the same upload flow that currently exists in Admin → Companies → [Company] → Upload report / portal, so we do not duplicate logic or break anything.
+
+Do not modify any schemas, database structure, or existing functionality. This should only add a new entry point that calls the existing flow.
+
+1. Locate the My Research page
+
+Find the React page component that renders the My Research screen.
+
+It is the page that shows:
+
+The header My Research
+
+The counters for Active Studies, Completed, Total Research
+
+The filter bar and the Completed Research grid of cards.
+
+The route is /portal/research in the browser.
+
+Confirm this is the correct component and note its file path (do not change the route).
+
+2. Locate the existing “upload research / report” flow
+
+Find the code used in Admin → Companies to upload a completed study or research report for a specific company.
+
+This will be on a company detail page or in a Companies tab.
+
+Look for components, modals, or forms related to:
+
+“Upload report”
+
+“Upload research”
+
+“Add study”
+
+Or similar wording.
+
+Identify the modal or form component that actually handles the upload.
+
+It should already:
+
+Accept or derive the company
+
+Capture title, description, tags and file or report link
+
+Call the API / server action to create the research record.
+
+Do not create a new upload implementation.
+
+Reuse this exact component or extract it into a shared component if it is currently nested inside a page.
+
+If needed, create a small wrapper like <UploadResearchModal /> that can be used both from the Companies view and from the My Research page, but keep all business logic in one place.
+
+3. Add a new “Upload Research” button on My Research
+
+On the My Research page component:
+
+Under the main heading My Research, aligned to the right of the header area, add a new primary button:
+
+Label: Upload research
+
+This button should only be visible if the current user is an admin (use the same admin check / access logic you already use elsewhere in the portal).
+
+When the button is clicked:
+
+Open the same upload modal / form used in the Companies flow.
+
+This must be done via local state in the My Research component, e.g. const [isUploadOpen, setIsUploadOpen] = useState(false).
+
+Mount the modal at the bottom of the My Research page component:
+
+<UploadResearchModal
+  isOpen={isUploadOpen}
+  onClose={() => setIsUploadOpen(false)}
+  // pass any required props such as selected company, if needed
+/>
+
+
+Because we are starting from the My Research page (not a specific company):
+
+If the existing modal expects a company, update it so that:
+
+It can optionally show a company selector (dropdown or search) when no company is preselected.
+
+When launched from a company page, it still behaves exactly as before (company is prefilled and not editable).
+
+When launched from My Research, the admin must choose the company from the dropdown before submitting.
+
+Keep the company selection requirement so that every research item is still linked to a company in the database.
+
+4. After successful upload
+
+When the upload completes successfully from the My Research page:
+
+Close the modal.
+
+Refresh or update the My Research list:
+
+Either trigger a data refetch, or
+
+Reload the page (router.refresh() or equivalent in this project).
+
+The newly created study should appear under Completed Research (or whatever status is correct) without the admin needing to navigate away.
+
+5. Styling and UX
+
+Match the existing button styling used throughout the portal (same button component, size and colour as other primary actions on dashboard pages).
+
+Place the button in the header bar area so the layout still feels clean:
+
+Left: My Research title and subtitle.
+
+Right: the new Upload research button.
+
+Do not change any other copy, card styles, spacing or layout on the My Research page.
+
+6. Safety and regression checks
+
+Before finishing:
+
+Confirm that uploading from Admin → Companies → [Company] still works exactly as before.
+
+Same fields
+
+Same behaviour
+
+Same links in the My Research list.
+
+Confirm that uploading from My Research:
+
+Forces the admin to pick a company if one is not already provided.
+
+Creates a study that shows correctly in:
+
+My Research
+
+The relevant company view in Admin → Companies.
+
+Make sure no code path assumes a company when it might be undefined. Add clear types and guard clauses if necessary.
+
+Do not modify any database schema, Drizzle config, API routes or types outside what is strictly needed to pass the company ID (if that is already part of the existing modal).
