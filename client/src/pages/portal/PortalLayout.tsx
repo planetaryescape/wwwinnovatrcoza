@@ -36,7 +36,7 @@ const menuItems = [
     title: "Dashboard",
     url: "/portal",
     icon: LayoutDashboard,
-    lockedForFree: true,
+    lockedForFree: false,
     adminOnly: false,
   },
   {
@@ -64,7 +64,7 @@ const menuItems = [
     title: "My Research",
     url: "/portal/research",
     icon: Archive,
-    lockedForFree: true,
+    lockedForFree: false,
     adminOnly: false,
   },
   {
