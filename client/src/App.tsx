@@ -27,6 +27,7 @@ import PastResearch from "@/pages/portal/PastResearch";
 import MemberDeals from "@/pages/portal/MemberDeals";
 import Settings from "@/pages/portal/Settings";
 import AdminPortal from "@/pages/portal/AdminPortal";
+import AdminCompanyDetail from "@/pages/portal/AdminCompanyDetail";
 import CouponSignup from "@/pages/CouponSignup";
 import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/not-found";
@@ -60,6 +61,7 @@ function Router() {
       <Route path="/portal/research" component={PastResearch} />
       <Route path="/portal/deals" component={MemberDeals} />
       <Route path="/portal/admin" component={AdminPortal} />
+      <Route path="/portal/admin/companies/:companyId" component={AdminCompanyDetail} />
       <Route path="/portal/settings" component={Settings} />
       <Route path="/claim-coupon" component={CouponSignup} />
       <Route path="/reset-password" component={ResetPassword} />

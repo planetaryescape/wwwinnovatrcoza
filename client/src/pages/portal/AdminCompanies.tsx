@@ -785,7 +785,7 @@ export default function AdminCompanies() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          onClick={() => handleOpenProfile(company)}
+                          onClick={() => setLocation(`/portal/admin/companies/${company.id}`)}
                           data-testid={`button-view-company-${company.id}`}
                         >
                           View
