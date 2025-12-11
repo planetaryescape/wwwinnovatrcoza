@@ -1,9 +1,30 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { ArrowLeft, Check, Zap, ShoppingCart } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import OrderFormDialog from "@/components/OrderFormDialog";
+
+const BASE_PRICE_PER_CREDIT = 10000;
+
+const calculateCustomPrice = (credits: number) => {
+  if (credits < 1) return { price: 0, discount: 0, originalPrice: 0, perCredit: 0 };
+  
+  const originalPrice = credits * BASE_PRICE_PER_CREDIT;
+  let discount = 0;
+  
+  if (credits >= 20) {
+    discount = 15;
+  } else if (credits >= 10) {
+    discount = 10;
+  }
+  
+  const price = Math.round(originalPrice * (1 - discount / 100));
+  const perCredit = Math.round(price / credits);
+  
+  return { price, discount, originalPrice, perCredit };
+};
 
 const creditPackages = [
   {
@@ -42,6 +63,7 @@ const features = [
 export default function CheckoutBasicPAYG() {
   const [, setLocation] = useLocation();
   const [selectedPackage, setSelectedPackage] = useState("10x");
+  const [customCredits, setCustomCredits] = useState<number>(4);
   const [showOrderForm, setShowOrderForm] = useState(false);
 
   useEffect(() => {
@@ -52,19 +74,48 @@ export default function CheckoutBasicPAYG() {
     setShowOrderForm(true);
   };
 
-  const selectedPkg = creditPackages.find((p) => p.id === selectedPackage);
-  const totalAmount = selectedPkg?.price || 0;
+  const isCustomSelected = selectedPackage === "custom";
+  const customPricing = calculateCustomPrice(customCredits);
+  
+  const getSelectedCredits = () => {
+    if (isCustomSelected) return customCredits;
+    return creditPackages.find((p) => p.id === selectedPackage)?.credits || 1;
+  };
+  
+  const getSelectedPrice = () => {
+    if (isCustomSelected) return customPricing.price;
+    return creditPackages.find((p) => p.id === selectedPackage)?.price || 0;
+  };
+  
+  const getSelectedDiscount = () => {
+    if (isCustomSelected) return customPricing.discount;
+    return creditPackages.find((p) => p.id === selectedPackage)?.discount || 0;
+  };
+  
+  const getSelectedOriginalPrice = () => {
+    if (isCustomSelected) return customPricing.originalPrice;
+    return creditPackages.find((p) => p.id === selectedPackage)?.originalPrice || 0;
+  };
+
+  const totalAmount = getSelectedPrice();
   const orderItems = [
     {
       type: "credits_basic",
-      description: `${selectedPkg?.credits}x Test24 Basic Credits (Pay As You Go)`,
-      quantity: selectedPkg?.credits || 1,
-      unitAmount: String(totalAmount / (selectedPkg?.credits || 1)),
+      description: `${getSelectedCredits()}x Test24 Basic Credits (Pay As You Go)`,
+      quantity: getSelectedCredits(),
+      unitAmount: String(Math.round(totalAmount / getSelectedCredits())),
     },
   ];
 
   const formatPrice = (price: number) => {
     return `R${price.toLocaleString()}`;
+  };
+
+  const handleCustomCreditsChange = (value: string) => {
+    const num = parseInt(value) || 0;
+    if (num >= 0 && num <= 100) {
+      setCustomCredits(num);
+    }
   };
 
   return (
@@ -166,6 +217,82 @@ export default function CheckoutBasicPAYG() {
                     </div>
                   </div>
                 ))}
+
+                <div
+                  className={`relative border-2 rounded-lg p-6 cursor-pointer transition-all ${
+                    selectedPackage === "custom"
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover-elevate"
+                  }`}
+                  onClick={() => setSelectedPackage("custom")}
+                  data-testid="package-custom"
+                >
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex-1 min-w-[200px]">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                            selectedPackage === "custom"
+                              ? "border-primary bg-primary"
+                              : "border-border"
+                          }`}
+                        >
+                          {selectedPackage === "custom" && (
+                            <div className="w-2 h-2 bg-white rounded-full" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold">Custom Quantity</h3>
+                          {customPricing.discount > 0 && isCustomSelected && (
+                            <p className="text-sm text-accent font-semibold">
+                              Save {customPricing.discount}%
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground ml-8 mb-3">
+                        Enter your own credit quantity
+                      </p>
+                      <div className="ml-8 flex items-center gap-3">
+                        <Input
+                          type="number"
+                          min="1"
+                          max="100"
+                          value={customCredits}
+                          onChange={(e) => handleCustomCreditsChange(e.target.value)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedPackage("custom");
+                          }}
+                          className="w-24"
+                          data-testid="input-custom-credits"
+                        />
+                        <span className="text-sm text-muted-foreground">credits</span>
+                      </div>
+                      <div className="ml-8 mt-3 text-xs text-muted-foreground space-y-0.5">
+                        <p>1-9 credits: R10,000/credit</p>
+                        <p>10-19 credits: 10% off (R9,000/credit)</p>
+                        <p>20+ credits: 15% off (R8,500/credit)</p>
+                      </div>
+                    </div>
+                    
+                    {isCustomSelected && customCredits > 0 && (
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-primary">
+                          {formatPrice(customPricing.price)}
+                        </div>
+                        {customPricing.discount > 0 && (
+                          <div className="text-sm text-muted-foreground line-through">
+                            {formatPrice(customPricing.originalPrice)}
+                          </div>
+                        )}
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {formatPrice(customPricing.perCredit)} per credit
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
@@ -199,7 +326,7 @@ export default function CheckoutBasicPAYG() {
                   <h3 className="font-semibold mb-2">Selected Package</h3>
                   <div className="bg-muted/50 rounded-lg p-4">
                     <p className="font-medium">
-                      {creditPackages.find((p) => p.id === selectedPackage)?.credits}x Test24 Basic Credits
+                      {getSelectedCredits()}x Test24 Basic Credits
                     </p>
                     <p className="text-sm text-muted-foreground mt-1">
                       Pay As You Go
@@ -210,29 +337,20 @@ export default function CheckoutBasicPAYG() {
                 <div className="space-y-2 pt-4 border-t">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>
-                      {formatPrice(
-                        creditPackages.find((p) => p.id === selectedPackage)?.price || 0
-                      )}
-                    </span>
+                    <span>{formatPrice(getSelectedOriginalPrice() || getSelectedPrice())}</span>
                   </div>
-                  {(creditPackages.find((p) => p.id === selectedPackage)?.discount ?? 0) > 0 && (
+                  {getSelectedDiscount() > 0 && (
                     <div className="flex justify-between text-sm text-accent">
-                      <span>Discount ({creditPackages.find((p) => p.id === selectedPackage)?.discount}%)</span>
+                      <span>Discount ({getSelectedDiscount()}%)</span>
                       <span>
-                        -{formatPrice(
-                          (creditPackages.find((p) => p.id === selectedPackage)?.originalPrice || 0) -
-                          (creditPackages.find((p) => p.id === selectedPackage)?.price || 0)
-                        )}
+                        -{formatPrice(getSelectedOriginalPrice() - getSelectedPrice())}
                       </span>
                     </div>
                   )}
                   <div className="flex justify-between text-lg font-bold pt-2 border-t">
                     <span>Total</span>
                     <span className="text-primary">
-                      {formatPrice(
-                        creditPackages.find((p) => p.id === selectedPackage)?.price || 0
-                      )}
+                      {formatPrice(getSelectedPrice())}
                     </span>
                   </div>
                 </div>
@@ -241,6 +359,7 @@ export default function CheckoutBasicPAYG() {
                   className="w-full"
                   size="lg"
                   onClick={handleCheckout}
+                  disabled={isCustomSelected && customCredits < 1}
                   data-testid="button-proceed-checkout"
                 >
                   Proceed to Payment
