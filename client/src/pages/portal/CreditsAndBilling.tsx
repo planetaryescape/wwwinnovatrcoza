@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -18,6 +19,27 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import OrderFormDialog from "@/components/OrderFormDialog";
 import type { Order } from "@shared/schema";
+
+const BASIC_MEMBER_PRICE = 5000;
+const PRO_MEMBER_PRICE = 45000;
+
+const calculateCustomPrice = (credits: number, basePricePerCredit: number) => {
+  if (credits < 1) return { price: 0, discount: 0, originalPrice: 0, perCredit: 0 };
+  
+  const originalPrice = credits * basePricePerCredit;
+  let discount = 0;
+  
+  if (credits >= 20) {
+    discount = 15;
+  } else if (credits >= 10) {
+    discount = 10;
+  }
+  
+  const price = Math.round(originalPrice * (1 - discount / 100));
+  const perCredit = Math.round(price / credits);
+  
+  return { price, discount, originalPrice, perCredit };
+};
 
 const mockCreditPackages = [
   {
@@ -79,6 +101,9 @@ export default function CreditsAndBilling() {
   const { isPaidMember, user, company: authCompany } = useAuth();
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [selectedPack, setSelectedPack] = useState<typeof mockCreditPackages[0] | null>(null);
+  const [customBasicCredits, setCustomBasicCredits] = useState<number>(4);
+  const [customProCredits, setCustomProCredits] = useState<number>(2);
+  const [customOrderType, setCustomOrderType] = useState<"basic" | "pro" | null>(null);
 
   // Fetch fresh company data to ensure credits are up-to-date
   const { data: freshCompany } = useQuery({
@@ -173,17 +198,65 @@ export default function CreditsAndBilling() {
 
   const handlePurchasePack = (pack: typeof mockCreditPackages[0]) => {
     setSelectedPack(pack);
+    setCustomOrderType(null);
     setShowOrderForm(true);
   };
 
+  const handlePurchaseCustomBasic = () => {
+    setSelectedPack(null);
+    setCustomOrderType("basic");
+    setShowOrderForm(true);
+  };
+
+  const handlePurchaseCustomPro = () => {
+    setSelectedPack(null);
+    setCustomOrderType("pro");
+    setShowOrderForm(true);
+  };
+
+  const customBasicPricing = calculateCustomPrice(customBasicCredits, BASIC_MEMBER_PRICE);
+  const customProPricing = calculateCustomPrice(customProCredits, PRO_MEMBER_PRICE);
+
   const getOrderItems = () => {
-    if (!selectedPack) return [];
-    return [{
-      type: "credit_pack",
-      description: `Test24 ${selectedPack.type} Credit${selectedPack.credits > 1 ? 's' : ''} (${selectedPack.credits}x)`,
-      quantity: 1,
-      unitAmount: selectedPack.price.toString(),
-    }];
+    if (selectedPack) {
+      return [{
+        type: "credit_pack",
+        description: `Test24 ${selectedPack.type} Credit${selectedPack.credits > 1 ? 's' : ''} (${selectedPack.credits}x)`,
+        quantity: 1,
+        unitAmount: selectedPack.price.toString(),
+      }];
+    }
+    if (customOrderType === "basic") {
+      return [{
+        type: "credits_basic",
+        description: `Test24 Basic Credits (${customBasicCredits}x)`,
+        quantity: customBasicCredits,
+        unitAmount: customBasicPricing.perCredit.toString(),
+      }];
+    }
+    if (customOrderType === "pro") {
+      return [{
+        type: "credits_pro",
+        description: `Test24 Pro Credits (${customProCredits}x)`,
+        quantity: customProCredits,
+        unitAmount: customProPricing.perCredit.toString(),
+      }];
+    }
+    return [];
+  };
+
+  const getOrderTotal = () => {
+    if (selectedPack) return selectedPack.price;
+    if (customOrderType === "basic") return customBasicPricing.price;
+    if (customOrderType === "pro") return customProPricing.price;
+    return 0;
+  };
+
+  const getOrderPurchaseType = () => {
+    if (selectedPack) return `Test24 ${selectedPack.type} Credit Pack`;
+    if (customOrderType === "basic") return "Test24 Basic Credits (Custom)";
+    if (customOrderType === "pro") return "Test24 Pro Credits (Custom)";
+    return "";
   };
 
   // Calculate credits from actual company data
@@ -401,6 +474,135 @@ export default function CreditsAndBilling() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+
+            {/* Custom Credit Quantity Section */}
+            <div className="mt-8 pt-6 border-t">
+              <h3 className="text-lg font-semibold mb-4">Custom Credit Quantity</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Need a specific number of credits? Enter your own quantity with volume discounts:
+                1-9 credits (no extra discount), 10-19 credits (10% off), 20+ credits (15% off)
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Custom Basic Credits */}
+                <Card className="border-accent/50">
+                  <CardHeader>
+                    <Badge variant="secondary" className="w-fit">Basic</Badge>
+                    <CardTitle className="text-xl mt-2">Custom Basic Credits</CardTitle>
+                    <CardDescription>R5,000 per credit (member price)</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <Input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={customBasicCredits}
+                        onChange={(e) => setCustomBasicCredits(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))}
+                        className="w-24"
+                        data-testid="input-custom-basic-credits"
+                      />
+                      <span className="text-sm text-muted-foreground">credits</span>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      {customBasicPricing.discount > 0 ? (
+                        <>
+                          <p className="text-2xl font-bold text-primary">
+                            {formatPrice(customBasicPricing.price)}
+                          </p>
+                          <p className="text-sm text-muted-foreground line-through">
+                            {formatPrice(customBasicPricing.originalPrice)}
+                          </p>
+                          <div className="bg-accent/10 rounded-lg p-2 text-center">
+                            <p className="text-sm font-semibold text-accent">
+                              Save {customBasicPricing.discount}% ({formatPrice(customBasicPricing.perCredit)}/credit)
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-2xl font-bold text-primary">
+                            {formatPrice(customBasicPricing.price)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {formatPrice(customBasicPricing.perCredit)} per credit
+                          </p>
+                        </>
+                      )}
+                    </div>
+                    
+                    <Button 
+                      className="w-full" 
+                      onClick={handlePurchaseCustomBasic}
+                      disabled={customBasicCredits < 1}
+                      data-testid="button-buy-custom-basic"
+                    >
+                      Purchase {customBasicCredits} Basic Credit{customBasicCredits > 1 ? 's' : ''}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Custom Pro Credits */}
+                <Card className="border-primary/50">
+                  <CardHeader>
+                    <Badge variant="default" className="w-fit">Pro</Badge>
+                    <CardTitle className="text-xl mt-2">Custom Pro Credits</CardTitle>
+                    <CardDescription>R45,000 per credit (member price)</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <Input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={customProCredits}
+                        onChange={(e) => setCustomProCredits(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))}
+                        className="w-24"
+                        data-testid="input-custom-pro-credits"
+                      />
+                      <span className="text-sm text-muted-foreground">credits</span>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      {customProPricing.discount > 0 ? (
+                        <>
+                          <p className="text-2xl font-bold text-primary">
+                            {formatPrice(customProPricing.price)}
+                          </p>
+                          <p className="text-sm text-muted-foreground line-through">
+                            {formatPrice(customProPricing.originalPrice)}
+                          </p>
+                          <div className="bg-accent/10 rounded-lg p-2 text-center">
+                            <p className="text-sm font-semibold text-accent">
+                              Save {customProPricing.discount}% ({formatPrice(customProPricing.perCredit)}/credit)
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-2xl font-bold text-primary">
+                            {formatPrice(customProPricing.price)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {formatPrice(customProPricing.perCredit)} per credit
+                          </p>
+                        </>
+                      )}
+                    </div>
+                    
+                    <Button 
+                      className="w-full" 
+                      onClick={handlePurchaseCustomPro}
+                      disabled={customProCredits < 1}
+                      data-testid="button-buy-custom-pro"
+                    >
+                      Purchase {customProCredits} Pro Credit{customProCredits > 1 ? 's' : ''}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </CardContent>
         </Card>
