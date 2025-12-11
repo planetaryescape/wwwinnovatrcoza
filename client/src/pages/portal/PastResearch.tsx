@@ -636,43 +636,37 @@ export default function PastResearch() {
               </Card>
 
               <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border-blue-200 dark:border-blue-800">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-                      <Play className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <CardContent className="p-3 h-full flex items-center justify-center">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center mb-2">
+                      <Play className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <div>
-                      <p className="text-xl font-bold text-blue-700 dark:text-blue-300">{activeCount}</p>
-                      <p className="text-xs text-blue-600/80 dark:text-blue-400/80">Active Studies</p>
-                    </div>
+                    <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{activeCount}</p>
+                    <p className="text-xs text-blue-600/80 dark:text-blue-400/80">Active Studies</p>
                   </div>
                 </CardContent>
               </Card>
               
               <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20 border-green-200 dark:border-green-800">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                      <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
+                <CardContent className="p-3 h-full flex items-center justify-center">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center mb-2">
+                      <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
                     </div>
-                    <div>
-                      <p className="text-xl font-bold text-green-700 dark:text-green-300">{completedCount}</p>
-                      <p className="text-xs text-green-600/80 dark:text-green-400/80">Completed</p>
-                    </div>
+                    <p className="text-2xl font-bold text-green-700 dark:text-green-300">{completedCount}</p>
+                    <p className="text-xs text-green-600/80 dark:text-green-400/80">Completed</p>
                   </div>
                 </CardContent>
               </Card>
               
               <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/20 border-purple-200 dark:border-purple-800">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
-                      <FileText className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <CardContent className="p-3 h-full flex items-center justify-center">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center mb-2">
+                      <FileText className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                     </div>
-                    <div>
-                      <p className="text-xl font-bold text-purple-700 dark:text-purple-300">{totalItems}</p>
-                      <p className="text-xs text-purple-600/80 dark:text-purple-400/80">Total Research</p>
-                    </div>
+                    <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">{totalItems}</p>
+                    <p className="text-xs text-purple-600/80 dark:text-purple-400/80">Total Research</p>
                   </div>
                 </CardContent>
               </Card>
