@@ -259,6 +259,15 @@ export default function PastResearch() {
     return matchesSearch && matchesTag;
   });
 
+  // Separate reports into active (in-progress) and completed
+  const activeReportStatuses = ["Brief Submitted", "Audience Live", "Building Report"];
+  const activeReports = filteredReports.filter(r => 
+    activeReportStatuses.includes(r.status || "")
+  );
+  const completedReports = filteredReports.filter(r => 
+    r.status?.toLowerCase() === "completed" || !activeReportStatuses.includes(r.status || "")
+  );
+
   // Filter completed studies, excluding those that have a matching client report
   // to avoid showing duplicates (when a study is completed AND a client report is uploaded with the same title)
   const completedStudies = studies.filter(s => {
@@ -482,9 +491,12 @@ export default function PastResearch() {
   
   const showLockedBanner = !isPaidMember;
   const showNoCompanyBanner = !user?.companyId && isPaidMember && !isAdmin;
-  const totalItems = studies.length + reports.length;
-  const activeCount = inProgressStudies.length;
-  const completedCount = completedStudies.length + filteredReports.length;
+  // Active = in-progress studies + reports with active statuses (Brief Submitted, Audience Live, Building Report)
+  const activeCount = inProgressStudies.length + activeReports.length;
+  // Completed = completed studies + completed reports
+  const completedCount = completedStudies.length + completedReports.length;
+  // Total = all active + all completed
+  const totalItems = activeCount + completedCount;
 
   return (
     <PortalLayout>
@@ -706,11 +718,12 @@ export default function PastResearch() {
               </Card>
             ) : (
               <>
-                {inProgressStudies.length > 0 && (
+                {activeCount > 0 && (
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold flex items-center gap-2">
                       <Loader2 className="w-5 h-5 animate-spin text-primary" />
                       Active Studies
+                      <Badge variant="secondary" className="ml-2">{activeCount}</Badge>
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {inProgressStudies.map((study) => (
@@ -758,6 +771,95 @@ export default function PastResearch() {
                                   ))}
                                 </div>
                               </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                      {activeReports.map((report) => (
+                        <Card 
+                          key={`active-report-${report.id}`}
+                          className="border-l-4 border-l-primary hover-elevate"
+                          data-testid={`active-report-card-${report.id}`}
+                        >
+                          <CardContent className="p-5">
+                            <div className="flex items-start gap-4">
+                              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                {report.status === "Brief Submitted" ? (
+                                  <FileText className="w-5 h-5 text-blue-600" />
+                                ) : report.status === "Audience Live" ? (
+                                  <Play className="w-5 h-5 text-amber-600" />
+                                ) : (
+                                  <Loader2 className="w-5 h-5 text-purple-600" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                  <h3 className="font-semibold truncate">{report.title}</h3>
+                                  {report.status === "Brief Submitted" && (
+                                    <Badge className="bg-blue-500/15 text-blue-600 border-blue-500/30 text-xs">
+                                      Brief Submitted
+                                    </Badge>
+                                  )}
+                                  {report.status === "Audience Live" && (
+                                    <Badge className="bg-amber-500/15 text-amber-600 border-amber-500/30 text-xs">
+                                      Audience Live
+                                    </Badge>
+                                  )}
+                                  {report.status === "Building Report" && (
+                                    <Badge className="bg-purple-500/15 text-purple-600 border-purple-500/30 text-xs">
+                                      Building Report
+                                    </Badge>
+                                  )}
+                                  {report.studyType && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {formatStudyType(report.studyType)}
+                                    </Badge>
+                                  )}
+                                </div>
+                                {isAdmin && report.companyName && (
+                                  <p className="text-sm text-muted-foreground mb-2">{report.companyName}</p>
+                                )}
+                                
+                                {report.status === "Brief Submitted" && (
+                                  <p className="text-sm text-muted-foreground">
+                                    Submitted {formatDate(report.uploadedAt)} - awaiting launch
+                                  </p>
+                                )}
+                                
+                                {report.status === "Audience Live" && (
+                                  <p className="text-sm text-amber-600">
+                                    Fieldwork in progress
+                                  </p>
+                                )}
+                                
+                                {report.status === "Building Report" && (
+                                  <p className="text-sm text-purple-600">
+                                    Data analysis in progress - report coming soon
+                                  </p>
+                                )}
+                                
+                                <div className="flex items-center gap-2 mt-3 flex-wrap">
+                                  {report.tags.slice(0, 3).map(tag => (
+                                    <Badge key={tag} variant="secondary" className="text-xs">
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                              {isAdmin && (
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-6 w-6 flex-shrink-0"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditReport(report);
+                                  }}
+                                  data-testid={`button-edit-active-report-${report.id}`}
+                                >
+                                  <Edit className="w-3.5 h-3.5" />
+                                </Button>
+                              )}
                             </div>
                           </CardContent>
                         </Card>
@@ -847,7 +949,7 @@ export default function PastResearch() {
                           </CardContent>
                         </Card>
                       ))}
-                      {filteredReports.map((report) => {
+                      {completedReports.map((report) => {
                         const headerImage = getStudyTypeImage(report.studyType);
                         return (
                         <Card
@@ -1070,7 +1172,7 @@ export default function PastResearch() {
                               </div>
                             </div>
                           ))}
-                          {filteredReports.map((report) => (
+                          {completedReports.map((report) => (
                             <div
                               key={`report-${report.id}`}
                               className="p-4 hover-elevate flex items-center gap-4"
