@@ -946,12 +946,12 @@ export default function PastResearch() {
                                 <div className="space-y-2">
                                   <div className="text-xs font-medium text-muted-foreground">Consumer Voice</div>
                                   {report.verbatim1 && (
-                                    <div className="text-xs italic text-muted-foreground bg-muted/50 rounded p-2 line-clamp-2">
+                                    <div className="text-xs italic text-muted-foreground bg-muted/50 rounded p-2 line-clamp-3">
                                       "{report.verbatim1}"
                                     </div>
                                   )}
                                   {report.verbatim2 && (
-                                    <div className="text-xs italic text-muted-foreground bg-muted/50 rounded p-2 line-clamp-2">
+                                    <div className="text-xs italic text-muted-foreground bg-muted/50 rounded p-2 line-clamp-3">
                                       "{report.verbatim2}"
                                     </div>
                                   )}
