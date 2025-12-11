@@ -816,9 +816,7 @@ export default function LaunchBrief() {
                   </div>
                   <div>
                     <p className="font-semibold text-foreground">Save with Innovatr Membership</p>
-                    <p className="text-sm text-muted-foreground">
-                      Members save R500 on every Basic credit and 10% on Pro studies
-                    </p>
+                    <p className="text-sm text-muted-foreground">Members save R5000 on every Basic credit and 10% on Pro studies</p>
                   </div>
                 </div>
                 <Link href="/#membership">
