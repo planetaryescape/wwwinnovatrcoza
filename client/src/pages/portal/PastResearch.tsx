@@ -13,9 +13,19 @@ import {
 import { 
   Search, FileText, Download, Eye, Grid3x3, List, Lock, RefreshCw, 
   Building2, Calendar, Tag, Clock, Play, BarChart3, CheckCircle2,
-  Loader2, Timer, ArrowLeft, Edit, Save
+  Loader2, Timer, ArrowLeft, Edit, Save, Trash2
 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -117,6 +127,8 @@ export default function PastResearch() {
   const [editReportOpen, setEditReportOpen] = useState(false);
   const [editingReport, setEditingReport] = useState<ClientReport | null>(null);
   const [savingReport, setSavingReport] = useState(false);
+  const [deleteReportOpen, setDeleteReportOpen] = useState(false);
+  const [deletingReport, setDeletingReport] = useState(false);
   const [editForm, setEditForm] = useState({
     title: "",
     description: "",
@@ -368,6 +380,26 @@ export default function PastResearch() {
       toast({ title: "Error", description: "Failed to save changes", variant: "destructive" });
     } finally {
       setSavingReport(false);
+    }
+  };
+
+  const handleDeleteReport = async () => {
+    if (!editingReport) return;
+    setDeletingReport(true);
+    try {
+      const response = await fetch(`/api/admin/client-reports/${editingReport.id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete report");
+      toast({ title: "Report deleted", description: "The report has been permanently removed" });
+      setDeleteReportOpen(false);
+      setEditReportOpen(false);
+      setEditingReport(null);
+      fetchData();
+    } catch (err) {
+      toast({ title: "Error", description: "Failed to delete report", variant: "destructive" });
+    } finally {
+      setDeletingReport(false);
     }
   };
 
@@ -1127,9 +1159,20 @@ export default function PastResearch() {
       {/* Edit Report Dialog */}
       <Dialog open={editReportOpen} onOpenChange={setEditReportOpen}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Report</DialogTitle>
-            <DialogDescription>Update the report information visible to clients</DialogDescription>
+          <DialogHeader className="flex flex-row items-start justify-between gap-4">
+            <div>
+              <DialogTitle>Edit Report</DialogTitle>
+              <DialogDescription>Update the report information visible to clients</DialogDescription>
+            </div>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setDeleteReportOpen(true)}
+              data-testid="button-delete-report-dialog"
+            >
+              <Trash2 className="w-4 h-4 mr-1" />
+              Delete
+            </Button>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
@@ -1333,6 +1376,35 @@ export default function PastResearch() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Report Confirmation */}
+      <AlertDialog open={deleteReportOpen} onOpenChange={setDeleteReportOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Report</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{editingReport?.title}"? This will permanently remove the report and any associated files. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingReport}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteReport}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deletingReport}
+            >
+              {deletingReport ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete Report"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PortalLayout>
   );
 }
