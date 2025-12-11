@@ -167,6 +167,44 @@ export default function AdminBriefs() {
     queryKey: ["/api/admin/studies"],
   });
 
+  // Log studies data for debugging
+  useEffect(() => {
+    if (studies.length > 0) {
+      console.log("=== STUDIES DATA ===");
+      console.log("Total studies:", studies.length);
+      console.table(studies.map(s => ({
+        id: s.id,
+        title: s.title,
+        companyName: s.companyName,
+        studyType: s.studyType,
+        status: s.status,
+        briefId: s.briefId,
+        createdAt: s.createdAt,
+      })));
+      console.log("Full studies data:", studies);
+    } else {
+      console.log("=== No studies found ===");
+    }
+  }, [studies]);
+
+  // Log briefs data for debugging
+  useEffect(() => {
+    if (briefs.length > 0) {
+      console.log("=== BRIEFS DATA ===");
+      console.log("Total briefs:", briefs.length);
+      console.table(briefs.map(b => ({
+        id: b.id,
+        companyName: b.companyName,
+        studyType: b.studyType,
+        numIdeas: b.numIdeas,
+        status: b.status,
+        submittedByName: b.submittedByName,
+        createdAt: b.createdAt,
+      })));
+      console.log("Full briefs data:", briefs);
+    }
+  }, [briefs]);
+
   useEffect(() => {
     if (selectedBrief && studies.length > 0) {
       const study = studies.find(s => s.briefId === selectedBrief.id);
