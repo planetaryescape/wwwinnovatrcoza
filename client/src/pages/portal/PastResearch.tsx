@@ -1341,9 +1341,15 @@ export default function PastResearch() {
 
             <div className="border-t pt-4 mt-2">
               <h4 className="text-sm font-medium mb-3">Consumer Verbatims</h4>
+              <p className="text-xs text-muted-foreground mb-3">Card view shows approximately 120-150 characters (3 lines)</p>
               <div className="grid gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-verbatim1">Verbatim 1</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="edit-verbatim1">Verbatim 1</Label>
+                    <span className={`text-xs ${editForm.verbatim1.length > 150 ? 'text-amber-600' : 'text-muted-foreground'}`}>
+                      {editForm.verbatim1.length} characters
+                    </span>
+                  </div>
                   <Textarea
                     id="edit-verbatim1"
                     value={editForm.verbatim1}
@@ -1353,7 +1359,12 @@ export default function PastResearch() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-verbatim2">Verbatim 2</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="edit-verbatim2">Verbatim 2</Label>
+                    <span className={`text-xs ${editForm.verbatim2.length > 150 ? 'text-amber-600' : 'text-muted-foreground'}`}>
+                      {editForm.verbatim2.length} characters
+                    </span>
+                  </div>
                   <Textarea
                     id="edit-verbatim2"
                     value={editForm.verbatim2}
