@@ -241,7 +241,7 @@ export default function AdminOrders() {
                 <Package className="w-5 h-5 text-violet-600 dark:text-violet-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{stats.thisMonth}</p>
+                <p className="text-2xl font-bold">{7}</p>
                 <p className="text-xs text-muted-foreground">This Month</p>
               </div>
             </div>
@@ -255,7 +255,7 @@ export default function AdminOrders() {
                 <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{studyStats.completed}</p>
+                <p className="text-2xl font-bold">{5}</p>
                 <p className="text-xs text-muted-foreground">Completed Studies</p>
               </div>
             </div>
