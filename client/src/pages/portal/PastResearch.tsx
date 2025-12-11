@@ -489,19 +489,18 @@ export default function PastResearch() {
   const paidTiers = ["STARTER", "GROWTH", "SCALE"];
   const isPaidMember = paidTiers.includes(userTier);
   
-  // Free users can also view their own research (one-time purchases)
-  // Only show locked banner if not a paid member AND not an admin
-  const showLockedBanner = false; // Free users can now access this page
-  const showNoCompanyBanner = !user?.companyId && isPaidMember && !isAdmin;
-  
-  // Check if user has any research at all
-  const hasAnyResearch = totalItems > 0 || reports.length > 0 || studies.length > 0;
   // Active = in-progress studies + reports with active statuses (Brief Submitted, Audience Live, Building Report)
   const activeCount = inProgressStudies.length + activeReports.length;
   // Completed = completed studies + completed reports
   const completedCount = completedStudies.length + completedReports.length;
   // Total = all active + all completed
   const totalItems = activeCount + completedCount;
+  
+  // Free users can also view their own research (one-time purchases)
+  const showNoCompanyBanner = !user?.companyId && isPaidMember && !isAdmin;
+  
+  // Check if user has any research at all
+  const hasAnyResearch = totalItems > 0 || reports.length > 0 || studies.length > 0;
 
   return (
     <PortalLayout>
