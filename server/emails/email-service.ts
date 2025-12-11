@@ -754,7 +754,7 @@ export function renderEmailTemplate(
         timeStyle: "short",
       }) : "Unknown";
       
-      // Convert relative file URLs to absolute URLs
+      // Convert relative file URLs to absolute public URLs for email links
       const getAbsoluteFileUrl = (url: string) => {
         if (url.startsWith("http://") || url.startsWith("https://")) {
           return url;
@@ -763,6 +763,13 @@ export function renderEmailTemplate(
         const baseUrl = process.env.REPLIT_DEV_DOMAIN 
           ? `https://${process.env.REPLIT_DEV_DOMAIN}`
           : FRONTEND_URL;
+        
+        // Convert /api/files/briefs/... to /api/public/brief-files/briefs/... for public access
+        if (url.includes("/api/files/briefs/")) {
+          const publicUrl = url.replace("/api/files/", "/api/public/brief-files/");
+          return `${baseUrl}${publicUrl.startsWith("/") ? "" : "/"}${publicUrl}`;
+        }
+        
         return `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
       };
 

@@ -3027,6 +3027,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public endpoint for brief files - accessible from email links without authentication
+  // Brief files are stored as: briefs/{companyName}/{filename}
+  app.get("/api/public/brief-files/*", async (req, res) => {
+    try {
+      const filePath = (req.params as Record<string, string>)[0];
+      
+      if (!filePath) {
+        return res.status(400).json({ error: "File path required" });
+      }
+
+      // Validate this is a brief file path (security: only allow access to brief files)
+      if (!filePath.startsWith("briefs/")) {
+        return res.status(403).json({ error: "Access denied - invalid file path" });
+      }
+
+      const exists = await fileExists(filePath);
+      if (!exists) {
+        console.log(`Brief file not found: ${filePath}`);
+        return res.status(404).json({ error: "File not found" });
+      }
+
+      const fileBuffer = await downloadFile(filePath);
+      if (!fileBuffer) {
+        return res.status(500).json({ error: "Failed to download file" });
+      }
+
+      // Set content type based on file extension
+      const ext = filePath.split(".").pop()?.toLowerCase();
+      const contentTypes: Record<string, string> = {
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        png: "image/png",
+        gif: "image/gif",
+        webp: "image/webp",
+        pdf: "application/pdf",
+        docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        mp4: "video/mp4",
+        mp3: "audio/mpeg",
+        txt: "text/plain",
+      };
+
+      // Extract original filename from path for Content-Disposition
+      const originalFileName = filePath.split("/").pop() || "download";
+      
+      res.setHeader("Content-Type", contentTypes[ext || ""] || "application/octet-stream");
+      res.setHeader("Content-Disposition", `attachment; filename="${originalFileName}"`);
+      res.setHeader("Cache-Control", "private, max-age=3600"); // 1 hour cache
+      res.send(fileBuffer);
+    } catch (error: any) {
+      console.error("Public brief file serve error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Serve files from App Storage - require authentication with access control
   app.get("/api/files/*", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
