@@ -1204,7 +1204,7 @@ export default function PastResearch() {
                                   <h3 className="font-semibold truncate">{report.title}</h3>
                                   {report.studyType && (
                                     <Badge variant="secondary" className="text-xs">
-                                      {report.studyType}
+                                      {formatStudyType(report.studyType)}
                                     </Badge>
                                   )}
                                   {report.industry && (
