@@ -271,7 +271,7 @@ export default function CheckoutBasicPAYG() {
                       </div>
                       <div className="ml-8 mt-3 text-xs text-muted-foreground space-y-0.5">
                         <p>1-9 credits: R10,000/credit</p>
-                        <p>10-19 credits: 10% off (R9,000/credit)</p>
+                        <p>10-19 credits: 10% off (R9,000/ idea)</p>
                         <p>20+ credits: 15% off (R8,500/ idea)</p>
                       </div>
                     </div>
