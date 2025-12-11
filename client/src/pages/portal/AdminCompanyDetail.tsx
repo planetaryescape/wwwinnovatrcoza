@@ -70,12 +70,18 @@ import {
   RefreshCw,
   Mail,
   Phone,
-  Loader2
+  Loader2,
+  Zap,
+  Paperclip,
+  Target,
+  Lightbulb
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import PortalLayout from "./PortalLayout";
 import { safeParseDate } from "@shared/access";
+import test24BasicImage from "@assets/Test24_Basic_1765398265879.png";
+import test24ProImage from "@assets/Test24_Pro_1765398265879.png";
 
 interface Company {
   id: string;
@@ -127,6 +133,75 @@ interface CompanyUser {
   companyId?: string | null;
 }
 
+interface BriefSubmission {
+  id: string;
+  submittedByName: string;
+  submittedByEmail: string;
+  submittedByContact: string | null;
+  companyId: string | null;
+  companyName: string;
+  companyBrand: string | null;
+  studyType: string;
+  numIdeas: number;
+  researchObjective: string;
+  regions: string[];
+  ages: string[];
+  genders: string[];
+  incomes: string[];
+  industry: string | null;
+  competitors: string[];
+  projectFileUrls: string[];
+  files: any[];
+  concepts: any[];
+  paymentMethod: string;
+  paymentStatus: string | null;
+  paymentIntentId: string | null;
+  basicCreditsUsed: number;
+  proCreditsUsed: number;
+  status: string;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const getStudyTypeImage = (studyType: string | null): string | null => {
+  if (!studyType) return null;
+  const type = studyType.toLowerCase();
+  if (type.includes("basic") || type === "test24_basic") return test24BasicImage;
+  if (type.includes("pro") || type === "test24_pro") return test24ProImage;
+  return null;
+};
+
+const formatStudyType = (studyType: string | null): string => {
+  if (!studyType) return "Unknown";
+  if (studyType === "test24_basic") return "Test24 Basic";
+  if (studyType === "test24_pro") return "Test24 Pro";
+  if (studyType === "consult") return "Consult";
+  return studyType;
+};
+
+const getBriefStatusColor = (status: string): string => {
+  switch (status.toLowerCase()) {
+    case "new": return "bg-blue-100 text-blue-700 border-blue-200";
+    case "in_progress": return "bg-amber-100 text-amber-700 border-amber-200";
+    case "under_review": return "bg-purple-100 text-purple-700 border-purple-200";
+    case "completed": return "bg-green-100 text-green-700 border-green-200";
+    case "on_hold": return "bg-gray-100 text-gray-600 border-gray-200";
+    default: return "bg-muted text-muted-foreground";
+  }
+};
+
+const formatBriefStatus = (status: string): string => {
+  switch (status.toLowerCase()) {
+    case "new": return "New";
+    case "in_progress": return "In Progress";
+    case "under_review": return "Under Review";
+    case "completed": return "Completed";
+    case "on_hold": return "On Hold";
+    default: return status;
+  }
+};
+
 const tierConfig: Record<string, { label: string; color: string; icon: any }> = {
   FREE: { label: "Free", color: "bg-gray-100 dark:bg-gray-800/30 text-gray-600 dark:text-gray-400", icon: UserIcon },
   STARTER: { label: "Starter", color: "bg-muted text-muted-foreground", icon: UserIcon },
@@ -143,8 +218,23 @@ export default function AdminCompanyDetail() {
   const [company, setCompany] = useState<Company | null>(null);
   const [users, setUsers] = useState<CompanyUser[]>([]);
   const [reports, setReports] = useState<ClientReport[]>([]);
+  const [briefs, setBriefs] = useState<BriefSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Edit brief dialog
+  const [editBriefOpen, setEditBriefOpen] = useState(false);
+  const [editingBrief, setEditingBrief] = useState<BriefSubmission | null>(null);
+  const [savingBrief, setSavingBrief] = useState(false);
+  const [briefEditForm, setBriefEditForm] = useState({
+    status: "",
+    notes: "",
+  });
+  
+  // Delete brief dialog
+  const [deleteBriefOpen, setDeleteBriefOpen] = useState(false);
+  const [briefToDelete, setBriefToDelete] = useState<BriefSubmission | null>(null);
+  const [deletingBrief, setDeletingBrief] = useState(false);
   
   // Edit states
   const [editingNotes, setEditingNotes] = useState(false);
@@ -239,10 +329,23 @@ export default function AdminCompanyDetail() {
     }
   };
 
+  const fetchBriefs = async () => {
+    if (!companyId) return;
+    try {
+      const res = await fetch(`/api/admin/briefs`);
+      if (!res.ok) throw new Error("Failed to fetch briefs");
+      const allBriefs = await res.json();
+      const companyBriefs = allBriefs.filter((b: BriefSubmission) => b.companyId === companyId);
+      setBriefs(companyBriefs);
+    } catch (err) {
+      console.error("Failed to fetch briefs:", err);
+    }
+  };
+
   const fetchAllData = async () => {
     setLoading(true);
     setError(null);
-    await Promise.all([fetchCompany(), fetchUsers(), fetchReports()]);
+    await Promise.all([fetchCompany(), fetchUsers(), fetchReports(), fetchBriefs()]);
     setLoading(false);
   };
 
@@ -530,7 +633,53 @@ export default function AdminCompanyDetail() {
       toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to delete company", variant: "destructive" });
     } finally {
       setDeletingCompany(false);
-      setDeleteCompanyOpen(false);
+    }
+  };
+
+  const handleEditBrief = (brief: BriefSubmission) => {
+    setEditingBrief(brief);
+    setBriefEditForm({
+      status: brief.status,
+      notes: brief.notes || "",
+    });
+    setEditBriefOpen(true);
+  };
+
+  const handleSaveBrief = async () => {
+    if (!editingBrief) return;
+    setSavingBrief(true);
+    try {
+      const res = await fetch(`/api/admin/briefs/${editingBrief.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(briefEditForm),
+      });
+      if (!res.ok) throw new Error("Failed to update brief");
+      await fetchBriefs();
+      setEditBriefOpen(false);
+      setEditingBrief(null);
+      toast({ title: "Brief Updated" });
+    } catch (err) {
+      toast({ title: "Error", description: "Failed to update brief", variant: "destructive" });
+    } finally {
+      setSavingBrief(false);
+    }
+  };
+
+  const handleDeleteBrief = async () => {
+    if (!briefToDelete) return;
+    setDeletingBrief(true);
+    try {
+      const res = await fetch(`/api/admin/briefs/${briefToDelete.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete brief");
+      await fetchBriefs();
+      setDeleteBriefOpen(false);
+      setBriefToDelete(null);
+      toast({ title: "Brief Deleted" });
+    } catch (err) {
+      toast({ title: "Error", description: "Failed to delete brief", variant: "destructive" });
+    } finally {
+      setDeletingBrief(false);
     }
   };
 
@@ -695,6 +844,112 @@ export default function AdminCompanyDetail() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Live Briefs Section */}
+        {briefs.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-primary" />
+                Live Briefs
+              </CardTitle>
+              <CardDescription>{briefs.length} active brief(s) from this company</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2">
+                {briefs.map((brief) => {
+                  const studyImage = getStudyTypeImage(brief.studyType);
+                  const totalCredits = brief.basicCreditsUsed + brief.proCreditsUsed;
+                  const attachmentCount = (brief.files?.length || 0) + (brief.projectFileUrls?.length || 0);
+                  const conceptCount = brief.concepts?.length || brief.numIdeas || 0;
+                  const competitorCount = brief.competitors?.length || 0;
+                  
+                  return (
+                    <Card key={brief.id} className="overflow-hidden border-2">
+                      <div className="flex">
+                        {studyImage && (
+                          <div className="w-24 h-full flex-shrink-0">
+                            <img 
+                              src={studyImage} 
+                              alt={formatStudyType(brief.studyType)} 
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                        <div className="flex-1 p-4">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Badge variant="secondary" className="text-xs">
+                                  {formatStudyType(brief.studyType)}
+                                </Badge>
+                                <Badge className={`text-xs ${getBriefStatusColor(brief.status)}`}>
+                                  {formatBriefStatus(brief.status)}
+                                </Badge>
+                              </div>
+                              <p className="text-sm font-medium truncate" title={brief.researchObjective}>
+                                {brief.researchObjective.slice(0, 80)}{brief.researchObjective.length > 80 ? "..." : ""}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Submitted by {brief.submittedByName}
+                              </p>
+                            </div>
+                            <div className="flex gap-1 flex-shrink-0">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={() => handleEditBrief(brief)}
+                                data-testid={`button-edit-brief-${brief.id}`}
+                              >
+                                <Edit className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={() => {
+                                  setBriefToDelete(brief);
+                                  setDeleteBriefOpen(true);
+                                }}
+                                data-testid={`button-delete-brief-${brief.id}`}
+                              >
+                                <Trash2 className="w-3 h-3 text-destructive" />
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-4 gap-2 mt-3 text-xs">
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                              <Lightbulb className="w-3 h-3" />
+                              <span>{conceptCount} concept{conceptCount !== 1 ? "s" : ""}</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                              <Target className="w-3 h-3" />
+                              <span>{competitorCount} comp{competitorCount !== 1 ? "s" : ""}</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                              <Paperclip className="w-3 h-3" />
+                              <span>{attachmentCount} file{attachmentCount !== 1 ? "s" : ""}</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                              <CreditCard className="w-3 h-3" />
+                              <span>{totalCredits} credit{totalCredits !== 1 ? "s" : ""}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="text-xs text-muted-foreground mt-2">
+                            {formatDate(brief.createdAt)}
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column */}
@@ -1312,6 +1567,112 @@ export default function AdminCompanyDetail() {
             >
               {deletingCompany ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Delete Company
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Edit Brief Dialog */}
+      <Dialog open={editBriefOpen} onOpenChange={setEditBriefOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Brief</DialogTitle>
+            <DialogDescription>
+              Update the status and notes for this brief submission.
+            </DialogDescription>
+          </DialogHeader>
+          {editingBrief && (
+            <div className="space-y-4 py-4">
+              <div className="bg-muted/50 rounded-lg p-3 mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant="secondary" className="text-xs">
+                    {formatStudyType(editingBrief.studyType)}
+                  </Badge>
+                </div>
+                <p className="text-sm font-medium">{editingBrief.researchObjective}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Submitted by {editingBrief.submittedByName} on {formatDate(editingBrief.createdAt)}
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select
+                  value={briefEditForm.status}
+                  onValueChange={(value) => setBriefEditForm({ ...briefEditForm, status: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="new">New</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="under_review">Under Review</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="on_hold">On Hold</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Admin Notes</Label>
+                <Textarea
+                  value={briefEditForm.notes}
+                  onChange={(e) => setBriefEditForm({ ...briefEditForm, notes: e.target.value })}
+                  placeholder="Add internal notes about this brief..."
+                  className="min-h-[100px]"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+                <div>
+                  <span className="font-medium">Concepts:</span> {editingBrief.concepts?.length || editingBrief.numIdeas}
+                </div>
+                <div>
+                  <span className="font-medium">Competitors:</span> {editingBrief.competitors?.length || 0}
+                </div>
+                <div>
+                  <span className="font-medium">Basic Credits:</span> {editingBrief.basicCreditsUsed}
+                </div>
+                <div>
+                  <span className="font-medium">Pro Credits:</span> {editingBrief.proCreditsUsed}
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditBriefOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveBrief} disabled={savingBrief}>
+              {savingBrief ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Brief Confirmation */}
+      <AlertDialog open={deleteBriefOpen} onOpenChange={setDeleteBriefOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Brief</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this brief submission? This action cannot be undone.
+              {briefToDelete && (
+                <div className="mt-2 p-2 bg-muted rounded text-sm">
+                  <strong>{formatStudyType(briefToDelete.studyType)}</strong>: {briefToDelete.researchObjective.slice(0, 100)}...
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteBrief}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deletingBrief}
+            >
+              {deletingBrief ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Delete Brief
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
