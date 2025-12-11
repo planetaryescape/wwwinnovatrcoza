@@ -856,19 +856,27 @@ export default function AdminCompanyDetail() {
               <CardDescription>{briefs.length} active brief(s) from this company</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-4">
                 {briefs.map((brief) => {
                   const studyImage = getStudyTypeImage(brief.studyType);
                   const totalCredits = brief.basicCreditsUsed + brief.proCreditsUsed;
-                  const attachmentCount = (brief.files?.length || 0) + (brief.projectFileUrls?.length || 0);
+                  const allFiles = [...(brief.files || []), ...(brief.projectFileUrls || []).map((url, idx) => ({ 
+                    id: `legacy-${idx}`, 
+                    fileName: url.split("/").pop() || "file", 
+                    url,
+                    fileSize: 0,
+                    mimeType: "application/octet-stream"
+                  }))];
+                  const attachmentCount = allFiles.length;
                   const conceptCount = brief.concepts?.length || brief.numIdeas || 0;
                   const competitorCount = brief.competitors?.length || 0;
                   
                   return (
-                    <Card key={brief.id} className="overflow-hidden border-2">
-                      <div className="flex">
+                    <Card key={brief.id} className="overflow-hidden border" data-testid={`card-brief-${brief.id}`}>
+                      <div className="flex flex-col md:flex-row">
+                        {/* Study Type Image */}
                         {studyImage && (
-                          <div className="w-24 h-full flex-shrink-0">
+                          <div className="w-full md:w-32 h-24 md:h-auto flex-shrink-0 bg-muted">
                             <img 
                               src={studyImage} 
                               alt={formatStudyType(brief.studyType)} 
@@ -876,71 +884,112 @@ export default function AdminCompanyDetail() {
                             />
                           </div>
                         )}
+                        
+                        {/* Main Content */}
                         <div className="flex-1 p-4">
-                          <div className="flex items-start justify-between gap-2 mb-2">
+                          {/* Header Row */}
+                          <div className="flex items-start justify-between gap-4 mb-3">
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Badge variant="secondary" className="text-xs">
+                              <div className="flex items-center gap-2 flex-wrap mb-2">
+                                <Badge variant="secondary" className="text-xs font-medium">
                                   {formatStudyType(brief.studyType)}
                                 </Badge>
                                 <Badge className={`text-xs ${getBriefStatusColor(brief.status)}`}>
                                   {formatBriefStatus(brief.status)}
                                 </Badge>
+                                <span className="text-xs text-muted-foreground">
+                                  {formatDate(brief.createdAt)}
+                                </span>
                               </div>
-                              <p className="text-sm font-medium truncate" title={brief.researchObjective}>
-                                {brief.researchObjective.slice(0, 80)}{brief.researchObjective.length > 80 ? "..." : ""}
-                              </p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Submitted by {brief.submittedByName}
+                              <h4 className="font-medium text-sm mb-1 line-clamp-2" title={brief.researchObjective}>
+                                {brief.researchObjective}
+                              </h4>
+                              <p className="text-xs text-muted-foreground">
+                                Submitted by <span className="font-medium">{brief.submittedByName}</span>
+                                {brief.submittedByEmail && <span className="ml-1">({brief.submittedByEmail})</span>}
                               </p>
                             </div>
+                            
+                            {/* Action Buttons */}
                             <div className="flex gap-1 flex-shrink-0">
                               <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7"
+                                variant="outline"
+                                size="sm"
                                 onClick={() => handleEditBrief(brief)}
                                 data-testid={`button-edit-brief-${brief.id}`}
                               >
-                                <Edit className="w-3 h-3" />
+                                <Edit className="w-3 h-3 mr-1" />
+                                Edit
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7"
                                 onClick={() => {
                                   setBriefToDelete(brief);
                                   setDeleteBriefOpen(true);
                                 }}
                                 data-testid={`button-delete-brief-${brief.id}`}
                               >
-                                <Trash2 className="w-3 h-3 text-destructive" />
+                                <Trash2 className="w-4 h-4 text-destructive" />
                               </Button>
                             </div>
                           </div>
                           
-                          <div className="grid grid-cols-4 gap-2 mt-3 text-xs">
-                            <div className="flex items-center gap-1 text-muted-foreground">
+                          {/* Stats Row */}
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3 flex-wrap">
+                            <div className="flex items-center gap-1">
                               <Lightbulb className="w-3 h-3" />
                               <span>{conceptCount} concept{conceptCount !== 1 ? "s" : ""}</span>
                             </div>
-                            <div className="flex items-center gap-1 text-muted-foreground">
+                            <div className="flex items-center gap-1">
                               <Target className="w-3 h-3" />
-                              <span>{competitorCount} comp{competitorCount !== 1 ? "s" : ""}</span>
+                              <span>{competitorCount} competitor{competitorCount !== 1 ? "s" : ""}</span>
                             </div>
-                            <div className="flex items-center gap-1 text-muted-foreground">
+                            <div className="flex items-center gap-1">
                               <Paperclip className="w-3 h-3" />
                               <span>{attachmentCount} file{attachmentCount !== 1 ? "s" : ""}</span>
                             </div>
-                            <div className="flex items-center gap-1 text-muted-foreground">
+                            <div className="flex items-center gap-1">
                               <CreditCard className="w-3 h-3" />
                               <span>{totalCredits} credit{totalCredits !== 1 ? "s" : ""}</span>
                             </div>
                           </div>
                           
-                          <div className="text-xs text-muted-foreground mt-2">
-                            {formatDate(brief.createdAt)}
-                          </div>
+                          {/* Files Download Section */}
+                          {allFiles.length > 0 && (
+                            <div className="border-t pt-3">
+                              <p className="text-xs font-medium mb-2 flex items-center gap-1">
+                                <Download className="w-3 h-3" />
+                                Attached Files
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {allFiles.map((file, idx) => {
+                                  const fileUrl = typeof file === 'string' ? file : file.url;
+                                  const fileName = typeof file === 'string' 
+                                    ? file.split("/").pop() || "file" 
+                                    : file.fileName;
+                                  const publicUrl = fileUrl.includes("/api/files/briefs/") 
+                                    ? fileUrl.replace("/api/files/", "/api/public/brief-files/")
+                                    : fileUrl;
+                                  
+                                  return (
+                                    <Button
+                                      key={typeof file === 'string' ? idx : file.id}
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-7 text-xs"
+                                      asChild
+                                    >
+                                      <a href={publicUrl} target="_blank" rel="noopener noreferrer" download>
+                                        <Download className="w-3 h-3 mr-1" />
+                                        {fileName.length > 20 ? fileName.slice(0, 17) + "..." : fileName}
+                                      </a>
+                                    </Button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </Card>
