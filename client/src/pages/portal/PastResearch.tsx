@@ -489,8 +489,13 @@ export default function PastResearch() {
   const paidTiers = ["STARTER", "GROWTH", "SCALE"];
   const isPaidMember = paidTiers.includes(userTier);
   
-  const showLockedBanner = !isPaidMember;
+  // Free users can also view their own research (one-time purchases)
+  // Only show locked banner if not a paid member AND not an admin
+  const showLockedBanner = false; // Free users can now access this page
   const showNoCompanyBanner = !user?.companyId && isPaidMember && !isAdmin;
+  
+  // Check if user has any research at all
+  const hasAnyResearch = totalItems > 0 || reports.length > 0 || studies.length > 0;
   // Active = in-progress studies + reports with active statuses (Brief Submitted, Audience Live, Building Report)
   const activeCount = inProgressStudies.length + activeReports.length;
   // Completed = completed studies + completed reports
@@ -570,23 +575,18 @@ export default function PastResearch() {
           </Card>
         )}
 
-        {showLockedBanner && (
-          <Card className="border-primary bg-primary/5">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Lock className="w-6 h-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold mb-2">My Research Dashboard - Members Only</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Track your active studies in real-time and access completed research with full insights, recommendations, and downloadable reports. This feature is exclusive to Innovatr Members.
-                  </p>
-                  <Button onClick={() => setLocation("/#membership")} data-testid="button-upgrade-membership">
-                    Join as a Member
-                  </Button>
-                </div>
-              </div>
+        {/* Empty state for free users with no research */}
+        {!isPaidMember && !isAdmin && !loading && !hasAnyResearch && (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-semibold mb-2">You currently have no research with us</h3>
+              <p className="text-muted-foreground mb-6">
+                Launch your first research brief to get started with consumer testing.
+              </p>
+              <Button onClick={() => setLocation("/portal/launch")} data-testid="button-launch-first-brief">
+                Launch First Brief
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -612,7 +612,8 @@ export default function PastResearch() {
           </Card>
         )}
 
-        {isPaidMember && (user?.companyId || isAdmin) && (
+        {/* Show research content for paid members OR free users with research */}
+        {((isPaidMember && (user?.companyId || isAdmin)) || (!isPaidMember && hasAnyResearch)) && (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <Card className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950/30 dark:to-slate-900/20 border-slate-200 dark:border-slate-800">
