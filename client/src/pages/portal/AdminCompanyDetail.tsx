@@ -43,6 +43,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   ArrowLeft,
   Building2,
@@ -122,6 +124,7 @@ interface CompanyUser {
   memberType: string | null;
   status: string;
   lastLoginAt: string | null;
+  companyId?: string | null;
 }
 
 const tierConfig: Record<string, { label: string; color: string; icon: any }> = {
@@ -154,12 +157,17 @@ export default function AdminCompanyDetail() {
   
   // Add user dialog
   const [addUserOpen, setAddUserOpen] = useState(false);
+  const [addUserTab, setAddUserTab] = useState<"create" | "existing">("create");
   const [addingUser, setAddingUser] = useState(false);
   const [newUser, setNewUser] = useState({
     name: "",
     email: "",
     phone: "",
   });
+  const [availableUsers, setAvailableUsers] = useState<CompanyUser[]>([]);
+  const [loadingAvailableUsers, setLoadingAvailableUsers] = useState(false);
+  const [selectedExistingUser, setSelectedExistingUser] = useState<string>("");
+  const [existingUserSearch, setExistingUserSearch] = useState("");
   
   // Add report dialog
   const [addReportOpen, setAddReportOpen] = useState(false);
@@ -352,6 +360,66 @@ export default function AdminCompanyDetail() {
       setAddingUser(false);
     }
   };
+
+  const fetchAvailableUsers = async () => {
+    if (!company) return;
+    setLoadingAvailableUsers(true);
+    try {
+      const res = await fetch(`/api/admin/users/available-for-company/${company.id}`);
+      if (!res.ok) throw new Error("Failed to fetch users");
+      const data = await res.json();
+      setAvailableUsers(data);
+    } catch (err) {
+      console.error("Failed to fetch available users:", err);
+      setAvailableUsers([]);
+    } finally {
+      setLoadingAvailableUsers(false);
+    }
+  };
+
+  const handleAssignExistingUser = async () => {
+    if (!company || !selectedExistingUser) {
+      toast({ title: "Error", description: "Please select a user to add", variant: "destructive" });
+      return;
+    }
+    setAddingUser(true);
+    try {
+      const res = await fetch(`/api/admin/companies/${company.id}/assign-user`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: selectedExistingUser }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to assign user");
+      }
+      await fetchUsers();
+      setAddUserOpen(false);
+      setSelectedExistingUser("");
+      setExistingUserSearch("");
+      toast({ title: "User Assigned", description: "Existing user has been added to this company" });
+    } catch (err) {
+      toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to assign user", variant: "destructive" });
+    } finally {
+      setAddingUser(false);
+    }
+  };
+
+  // Fetch available users when dialog opens
+  useEffect(() => {
+    if (addUserOpen && addUserTab === "existing") {
+      fetchAvailableUsers();
+    }
+  }, [addUserOpen, addUserTab, company?.id]);
+
+  const filteredAvailableUsers = availableUsers.filter(u => {
+    if (!existingUserSearch) return true;
+    const search = existingUserSearch.toLowerCase();
+    return (
+      (u.name?.toLowerCase().includes(search)) ||
+      (u.email?.toLowerCase().includes(search))
+    );
+  });
 
   const handleDeleteUser = async () => {
     if (!userToDelete) return;
@@ -923,46 +991,134 @@ export default function AdminCompanyDetail() {
       </div>
 
       {/* Add User Dialog */}
-      <Dialog open={addUserOpen} onOpenChange={setAddUserOpen}>
-        <DialogContent>
+      <Dialog open={addUserOpen} onOpenChange={(open) => {
+        setAddUserOpen(open);
+        if (!open) {
+          setAddUserTab("create");
+          setNewUser({ name: "", email: "", phone: "" });
+          setSelectedExistingUser("");
+          setExistingUserSearch("");
+        }
+      }}>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Add Team Member</DialogTitle>
-            <DialogDescription>Add a new user to {company.name}</DialogDescription>
+            <DialogDescription>Add a user to {company.name}</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Name</Label>
-              <Input
-                value={newUser.name}
-                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                placeholder="Full name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Email *</Label>
-              <Input
-                type="email"
-                value={newUser.email}
-                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                placeholder="email@company.com"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Phone</Label>
-              <Input
-                value={newUser.phone}
-                onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
-                placeholder="+27..."
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAddUserOpen(false)}>Cancel</Button>
-            <Button onClick={handleAddUser} disabled={addingUser}>
-              {addingUser ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              Add User
-            </Button>
-          </DialogFooter>
+          
+          <Tabs value={addUserTab} onValueChange={(v) => setAddUserTab(v as "create" | "existing")} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="create" data-testid="tab-create-user">Create New</TabsTrigger>
+              <TabsTrigger value="existing" data-testid="tab-existing-user">Add Existing</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="create" className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Name</Label>
+                <Input
+                  value={newUser.name}
+                  onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                  placeholder="Full name"
+                  data-testid="input-new-user-name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Email *</Label>
+                <Input
+                  type="email"
+                  value={newUser.email}
+                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                  placeholder="email@company.com"
+                  data-testid="input-new-user-email"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Phone</Label>
+                <Input
+                  value={newUser.phone}
+                  onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                  placeholder="+27..."
+                  data-testid="input-new-user-phone"
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" onClick={() => setAddUserOpen(false)}>Cancel</Button>
+                <Button onClick={handleAddUser} disabled={addingUser} data-testid="button-create-new-user">
+                  {addingUser ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                  Create User
+                </Button>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="existing" className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Search Users</Label>
+                <Input
+                  placeholder="Search by name or email..."
+                  value={existingUserSearch}
+                  onChange={(e) => setExistingUserSearch(e.target.value)}
+                  data-testid="input-search-existing-users"
+                />
+              </div>
+              
+              {loadingAvailableUsers ? (
+                <div className="py-4 text-center text-sm text-muted-foreground">
+                  <Loader2 className="w-4 h-4 animate-spin mx-auto mb-2" />
+                  Loading users...
+                </div>
+              ) : filteredAvailableUsers.length === 0 ? (
+                <div className="py-4 text-center text-sm text-muted-foreground">
+                  {existingUserSearch ? "No matching users found" : "No available users to assign"}
+                </div>
+              ) : (
+                <ScrollArea className="h-[200px] border rounded-md">
+                  <div className="p-2 space-y-1">
+                    {filteredAvailableUsers.map((user) => (
+                      <div
+                        key={user.id}
+                        onClick={() => setSelectedExistingUser(user.id)}
+                        className={`p-2 rounded-md cursor-pointer transition-colors ${
+                          selectedExistingUser === user.id 
+                            ? "bg-primary/10 border border-primary" 
+                            : "hover-elevate border border-transparent"
+                        }`}
+                        data-testid={`select-user-${user.id}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="text-xs">
+                              {(user.name || user.email || "?").slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{user.name || "No name"}</p>
+                            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                          </div>
+                          {user.companyId && (
+                            <Badge variant="outline" className="text-xs shrink-0">
+                              Has company
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              )}
+              
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" onClick={() => setAddUserOpen(false)}>Cancel</Button>
+                <Button 
+                  onClick={handleAssignExistingUser} 
+                  disabled={addingUser || !selectedExistingUser}
+                  data-testid="button-assign-existing-user"
+                >
+                  {addingUser ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                  Add to Company
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
 

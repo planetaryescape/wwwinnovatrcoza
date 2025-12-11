@@ -2237,6 +2237,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get users available to assign to a company (unassigned or from other companies)
+  app.get("/api/admin/users/available-for-company/:companyId", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { companyId } = req.params;
+      const allUsers = await storage.getAllUsers();
+      // Filter to users not already in this company
+      const availableUsers = allUsers.filter(u => u.companyId !== companyId);
+      res.json(redactUsers(availableUsers));
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Assign existing user to a company
+  app.post("/api/admin/companies/:id/assign-user", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const { userId } = req.body;
+      
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+      
+      const company = await storage.getCompany(id);
+      if (!company) {
+        return res.status(404).json({ error: "Company not found" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Update user's company assignment
+      await storage.updateUser(userId, { 
+        companyId: id,
+        memberType: "companyUser"
+      });
+      
+      const updated = await storage.getUser(userId);
+      res.json(redactUser(updated!));
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   app.delete("/api/admin/companies/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
