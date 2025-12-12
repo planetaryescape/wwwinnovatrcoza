@@ -29,7 +29,7 @@ export default function HeroSection() {
             Launch Better Innovation
           </h1>
           
-          <p className="mt-8 md:mt-6 max-w-[640px] mx-auto md:text-lg text-slate-50 text-center drop-shadow-[0_1px_8px_rgba(0,0,0,0.7)] font-extrabold text-[22px]">
+          <p className="mt-8 md:mt-6 max-w-[640px] mx-auto text-slate-50 text-center drop-shadow-[0_1px_8px_rgba(0,0,0,0.7)] font-extrabold text-[16px] sm:text-[18px] md:text-[22px] whitespace-nowrap">
             Smart, Affordable Research in 24hrs
           </p>
           
