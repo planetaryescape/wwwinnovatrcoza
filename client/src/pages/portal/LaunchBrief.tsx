@@ -656,6 +656,16 @@ export default function LaunchBrief() {
       }
     }
 
+    if (formData.billingPreference === "credits_plus_payment") {
+      if (!formData.confirmCreditsDeduction) {
+        errors.confirmCreditsDeduction = "Please confirm credits deduction and payment authorisation";
+      }
+      // Verify partial credits are available
+      if (!hasPartialCredits) {
+        errors.credits = "Invalid credit state for partial payment";
+      }
+    }
+
     setValidationErrors(errors);
 
     if (Object.keys(errors).length > 0) {
@@ -668,9 +678,9 @@ export default function LaunchBrief() {
       return;
     }
 
-    // IMPORTANT: Open payment window IMMEDIATELY for online payments
+    // IMPORTANT: Open payment window IMMEDIATELY for online payments or credits_plus_payment
     // This must happen synchronously in response to user click to avoid popup blockers
-    if (formData.billingPreference === "online") {
+    if (formData.billingPreference === "online" || formData.billingPreference === "credits_plus_payment") {
       const paymentWindow = window.open("about:blank", "_blank");
       if (!paymentWindow) {
         toast({
@@ -735,10 +745,16 @@ export default function LaunchBrief() {
         })),
         billingPreference: formData.billingPreference,
         paymentMethod: formData.billingPreference === "credits" ? "credits" : 
+                       formData.billingPreference === "credits_plus_payment" ? "credits_plus_payment" :
                        formData.billingPreference === "invoice" ? "invoice" : "online",
-        // Credit usage information
-        basicCreditsUsed: formData.billingPreference === "credits" && isBasicStudy ? creditsRequired : 0,
-        proCreditsUsed: formData.billingPreference === "credits" && !isBasicStudy ? creditsRequired : 0,
+        // Credit usage information - for partial payments, only use available credits
+        basicCreditsUsed: (formData.billingPreference === "credits" && isBasicStudy) ? creditsRequired : 
+                          (formData.billingPreference === "credits_plus_payment" && isBasicStudy) ? creditsToUse : 0,
+        proCreditsUsed: (formData.billingPreference === "credits" && !isBasicStudy) ? creditsRequired : 
+                        (formData.billingPreference === "credits_plus_payment" && !isBasicStudy) ? creditsToUse : 0,
+        // Partial payment info
+        creditsToPayFor: formData.billingPreference === "credits_plus_payment" ? creditsToPayFor : 0,
+        amountToPayFor: formData.billingPreference === "credits_plus_payment" ? amountToPayFor : 0,
         companyId: company?.id || null,
         userId: user?.id || null,
         projectFileUrls: [],
@@ -1553,20 +1569,16 @@ export default function LaunchBrief() {
                       </div>
                     )}
 
-                    {/* Not enough credits of the correct type */}
-                    {!hasEnoughCredits && hasAnyCredits && (
+                    {/* Not enough credits - show info message, partial payment option is separate */}
+                    {!hasEnoughCredits && hasAnyCredits && formData.billingPreference === "credits" && (
                       <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-md">
                         <p className="text-sm font-medium text-amber-700 dark:text-amber-300 flex items-center gap-2">
                           <AlertCircle className="w-4 h-4" />
                           You don't have enough credits for this study.
                         </p>
-                        <div className="mt-2 text-sm text-amber-600 dark:text-amber-400">
-                          <p className="font-medium">Available Credits</p>
-                          <p>Test24 Basic: {basicCreditsRemaining} available</p>
-                          <p>Test24 Pro: {proCreditsRemaining} available</p>
-                        </div>
                         <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">
-                          Top up your Test24 {requiredCreditsType} credits to launch this project.
+                          You have {availableCreditsForStudy} Test24 {requiredCreditsType} credit{availableCreditsForStudy !== 1 ? "s" : ""} but need {creditsRequired}.
+                          Use the "Use Credits + Pay Remainder" option below, or top up your credits.
                         </p>
                         <Link href="/portal/billing">
                           <Button 
@@ -1602,6 +1614,61 @@ export default function LaunchBrief() {
                             Buy Credits
                           </Button>
                         </Link>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Use Credits + Pay Remainder Option - Only shown when user has some but not enough credits */}
+              {isPaidMember && company && hasPartialCredits && (
+                <div className="flex items-start space-x-3">
+                  <RadioGroupItem 
+                    value="credits_plus_payment" 
+                    id="billing-credits-plus-payment" 
+                    data-testid="radio-billing-credits-plus-payment"
+                  />
+                  <div className="space-y-2 flex-1">
+                    <Label 
+                      htmlFor="billing-credits-plus-payment" 
+                      className="font-medium cursor-pointer flex items-center gap-2"
+                    >
+                      <Coins className="w-4 h-4" />
+                      Use Credits + Pay Remainder
+                    </Label>
+                    
+                    {formData.billingPreference === "credits_plus_payment" && (
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground">
+                          Use your available credits and pay for the remainder online.
+                        </p>
+                        <div className="p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-md">
+                          <p className="text-sm font-medium text-blue-700 dark:text-blue-300 flex items-center gap-2">
+                            <Coins className="w-4 h-4" />
+                            Partial Credit Payment
+                          </p>
+                          <div className="mt-2 text-sm text-blue-600 dark:text-blue-400 space-y-1">
+                            <p>
+                              <strong>{creditsToUse}</strong> Test24 {requiredCreditsType} credit{creditsToUse !== 1 ? "s" : ""} will be deducted from your balance
+                            </p>
+                            <p>
+                              <strong>{creditsToPayFor}</strong> credit{creditsToPayFor !== 1 ? "s" : ""} to pay at checkout 
+                              <span className="font-semibold"> (R{amountToPayFor.toLocaleString()})</span>
+                            </p>
+                          </div>
+                          <div className="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
+                            <p className="text-sm text-blue-600 dark:text-blue-400">
+                              <span className="font-medium">Your balance:</span> {availableCreditsForStudy} Test24 {requiredCreditsType} credit{availableCreditsForStudy !== 1 ? "s" : ""}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Show summary when not selected */}
+                    {formData.billingPreference !== "credits_plus_payment" && (
+                      <div className="text-sm text-muted-foreground">
+                        <p>Use {creditsToUse} credit{creditsToUse !== 1 ? "s" : ""} + pay R{amountToPayFor.toLocaleString()} for remaining {creditsToPayFor}</p>
                       </div>
                     )}
                   </div>
@@ -1688,6 +1755,31 @@ export default function LaunchBrief() {
                 </div>
               )}
 
+              {/* Use Credits + Pay Remainder Consent */}
+              {formData.billingPreference === "credits_plus_payment" && (
+                <div className="flex items-start space-x-2" data-field="confirmCreditsDeduction">
+                  <Checkbox
+                    id="confirmCreditsDeduction"
+                    checked={formData.confirmCreditsDeduction}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, confirmCreditsDeduction: checked as boolean })
+                    }
+                    data-testid="checkbox-confirm-credits-plus-payment"
+                  />
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="confirmCreditsDeduction"
+                      className="text-sm leading-tight cursor-pointer"
+                    >
+                      I confirm this brief is accurate and I authorise Innovatr to deduct {creditsToUse} Test24 {requiredCreditsType} credit{creditsToUse !== 1 ? "s" : ""} from my account. My card will be charged R{amountToPayFor.toLocaleString()} for the remaining {creditsToPayFor} credit{creditsToPayFor !== 1 ? "s" : ""} and the study will begin immediately. *
+                    </label>
+                    {validationErrors.confirmCreditsDeduction && (
+                      <p className="text-xs text-destructive">{validationErrors.confirmCreditsDeduction}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-start space-x-2">
                 <Checkbox
                   id="subscribeUpdates"
@@ -1734,15 +1826,35 @@ export default function LaunchBrief() {
                 {formData.billingPreference === "online" && "Pay Online"}
                 {formData.billingPreference === "invoice" && "Invoice"}
                 {formData.billingPreference === "credits" && "Use My Credits"}
+                {formData.billingPreference === "credits_plus_payment" && "Credits + Payment"}
               </span>
             </div>
+            {formData.billingPreference === "credits_plus_payment" && (
+              <div className="p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-md">
+                <div className="text-sm space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-blue-600 dark:text-blue-400">Credits to use:</span>
+                    <span className="font-medium text-blue-700 dark:text-blue-300">{creditsToUse} {requiredCreditsType}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-blue-600 dark:text-blue-400">Amount to pay:</span>
+                    <span className="font-medium text-blue-700 dark:text-blue-300">R{amountToPayFor.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="flex items-center justify-between pt-2 border-t">
               <span className="font-semibold">
-                {formData.billingPreference === "credits" ? "Credits Required" : "Total Cost"}
+                {formData.billingPreference === "credits" ? "Credits Required" : 
+                 formData.billingPreference === "credits_plus_payment" ? "Total to Pay" : "Total Cost"}
               </span>
               {formData.billingPreference === "credits" ? (
                 <span className="text-2xl font-bold text-primary">
                   {creditsRequired} {requiredCreditsType} Credit{creditsRequired > 1 ? "s" : ""}
+                </span>
+              ) : formData.billingPreference === "credits_plus_payment" ? (
+                <span className="text-2xl font-bold text-primary">
+                  R{amountToPayFor.toLocaleString()}
                 </span>
               ) : (
                 <span className="text-2xl font-bold text-primary">
@@ -1778,6 +1890,7 @@ export default function LaunchBrief() {
                   {formData.billingPreference === "online" && "Submit & Pay"}
                   {formData.billingPreference === "invoice" && "Submit Brief"}
                   {formData.billingPreference === "credits" && (hasEnoughCredits ? "Submit Using Credits" : "Top Up Credits")}
+                  {formData.billingPreference === "credits_plus_payment" && "Use Credits & Pay"}
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </>
               )}
