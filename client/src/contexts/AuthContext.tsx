@@ -89,6 +89,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Check for existing session on mount using HTTP-only cookie
   useEffect(() => {
+    // Try to restore from localStorage first for faster UI
+    const savedUser = localStorage.getItem("innovatr_user");
+    const savedImpersonation = localStorage.getItem("innovatr_impersonation");
+    let restoredImpersonation: ImpersonationState = defaultImpersonation;
+    
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+    if (savedImpersonation) {
+      restoredImpersonation = JSON.parse(savedImpersonation);
+      setImpersonation(restoredImpersonation);
+    }
+    
     const checkSession = async () => {
       try {
         const res = await fetch("/api/auth/me", {
@@ -120,34 +133,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             isAdmin,
           };
           
-          setUser(sessionUser);
-          // Also save to localStorage for quick UI restoration
-          localStorage.setItem("innovatr_user", JSON.stringify(sessionUser));
+          // If impersonation is active, don't overwrite the impersonated user
+          // Just verify the session is valid (admin is still logged in)
+          if (restoredImpersonation?.isImpersonating && restoredImpersonation.originalAdmin) {
+            // Session is valid - keep the impersonated user from localStorage
+            // The impersonated user was already set above from savedUser
+          } else {
+            // No active impersonation - use the real session user
+            setUser(sessionUser);
+            localStorage.setItem("innovatr_user", JSON.stringify(sessionUser));
+          }
         } else {
-          // No valid session - clear any stale localStorage
+          // No valid session - clear everything including impersonation
           localStorage.removeItem("innovatr_user");
+          localStorage.removeItem("innovatr_impersonation");
           setUser(null);
+          setImpersonation(defaultImpersonation);
         }
       } catch (err) {
         console.log("Session check failed, user not logged in");
         localStorage.removeItem("innovatr_user");
+        localStorage.removeItem("innovatr_impersonation");
         setUser(null);
+        setImpersonation(defaultImpersonation);
       } finally {
         setIsLoading(false);
       }
     };
     
-    // Try to restore from localStorage first for faster UI
-    const savedUser = localStorage.getItem("innovatr_user");
-    const savedImpersonation = localStorage.getItem("innovatr_impersonation");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    if (savedImpersonation) {
-      setImpersonation(JSON.parse(savedImpersonation));
-    }
-    
-    // Then verify with server
+    // Verify session with server
     checkSession();
   }, []);
 
