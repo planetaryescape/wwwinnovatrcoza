@@ -304,8 +304,11 @@ export default function PastResearch() {
         storagePath = storagePath.replace('/api/files/', '');
       }
       
+      // Encode each path segment individually to preserve slashes
+      const encodedPath = storagePath.split('/').map(segment => encodeURIComponent(segment)).join('/');
+      
       // Fetch the file from the API
-      const response = await fetch(`/api/files/${encodeURIComponent(storagePath)}`);
+      const response = await fetch(`/api/files/${encodedPath}`);
       if (!response.ok) throw new Error('Download failed');
       
       const blob = await response.blob();
