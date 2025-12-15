@@ -1713,6 +1713,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         test24Studies,
         freeReports,
         activeDeals: deals.filter((d) => d.isActive).length,
+        reportEngagement: await storage.getGlobalReportEngagement(),
         timestamp: new Date(),
       });
     } catch (error: any) {

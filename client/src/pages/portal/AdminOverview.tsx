@@ -16,6 +16,9 @@ import {
   FileCheck,
   ExternalLink,
   FlaskConical,
+  Eye,
+  Download,
+  TrendingUp,
 } from "lucide-react";
 
 interface Study {
@@ -81,6 +84,13 @@ interface AnalyticsData {
   };
   test24Studies: Study[];
   freeReports: Report[];
+  reportEngagement?: {
+    totalViews: number;
+    totalDownloads: number;
+    viewsThisMonth: number;
+    downloadsThisMonth: number;
+    mostPopularReport: { id: string; title: string; views: number } | null;
+  };
   timestamp: string;
 }
 
@@ -209,47 +219,140 @@ export default function AdminOverview() {
         </Card>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <MetricCard 
-          label="Users" 
-          value={analytics?.metrics.totalUsers || 0}
-          subLabel={`New this month: ${analytics?.metrics.newUsersThisMonth || 0}`}
-          icon={Users}
-          iconBgColor="bg-blue-50 dark:bg-blue-900/20"
-          iconColor="text-blue-600 dark:text-blue-400"
-        />
-        <MetricCard 
-          label="Companies" 
-          value={analytics?.metrics.totalCompanies || 0}
-          subLabel={`New this month: ${analytics?.metrics.newCompaniesThisMonth || 0}`}
-          icon={Building2}
-          iconBgColor="bg-violet-50 dark:bg-violet-900/20"
-          iconColor="text-violet-600 dark:text-violet-400"
-        />
-        <MetricCard 
-          label="Active Studies" 
-          value={analytics?.metrics.activeStudies || 0}
-          subLabel="In progress now"
-          icon={FlaskConical}
-          iconBgColor="bg-orange-50 dark:bg-orange-900/20"
-          iconColor="text-orange-600 dark:text-orange-400"
-        />
-        <MetricCard 
-          label="Reports" 
-          value={analytics?.metrics.reportsPublished || 0}
-          subLabel={`Free: ${analytics?.metrics.freeReportsCount || 0}`}
-          icon={FileCheck}
-          iconBgColor="bg-emerald-50 dark:bg-emerald-900/20"
-          iconColor="text-emerald-600 dark:text-emerald-400"
-        />
-        <MetricCard 
-          label="Credits Available" 
-          value={`${analytics?.metrics.creditsRemaining.basic || 0} / ${analytics?.metrics.creditsRemaining.pro || 0}`}
-          subLabel="Basic / Pro across all"
-          icon={Zap}
-          iconBgColor="bg-amber-50 dark:bg-amber-900/20"
-          iconColor="text-amber-600 dark:text-amber-400"
-        />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card data-testid="card-platform-overview">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-blue-500" />
+              Platform Overview
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div className="space-y-1" data-testid="stat-users">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                    <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Users</p>
+                    {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.metrics.totalUsers || 0}</p>}
+                  </div>
+                </div>
+                {!loading && <p className="text-xs text-muted-foreground pl-10">+{analytics?.metrics.newUsersThisMonth || 0} this month</p>}
+              </div>
+              
+              <div className="space-y-1" data-testid="stat-companies">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center">
+                    <Building2 className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Companies</p>
+                    {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.metrics.totalCompanies || 0}</p>}
+                  </div>
+                </div>
+                {!loading && <p className="text-xs text-muted-foreground pl-10">+{analytics?.metrics.newCompaniesThisMonth || 0} this month</p>}
+              </div>
+              
+              <div className="space-y-1" data-testid="stat-studies">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center">
+                    <FlaskConical className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Active Studies</p>
+                    {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.metrics.activeStudies || 0}</p>}
+                  </div>
+                </div>
+                {!loading && <p className="text-xs text-muted-foreground pl-10">In progress now</p>}
+              </div>
+              
+              <div className="space-y-1" data-testid="stat-reports">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
+                    <FileCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Reports</p>
+                    {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.metrics.reportsPublished || 0}</p>}
+                  </div>
+                </div>
+                {!loading && <p className="text-xs text-muted-foreground pl-10">{analytics?.metrics.freeReportsCount || 0} free</p>}
+              </div>
+              
+              <div className="space-y-1 col-span-2 sm:col-span-1" data-testid="stat-credits">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Credits Available</p>
+                    {loading ? <Skeleton className="h-6 w-16" /> : <p className="text-xl font-bold">{analytics?.metrics.creditsRemaining.basic || 0} / {analytics?.metrics.creditsRemaining.pro || 0}</p>}
+                  </div>
+                </div>
+                {!loading && <p className="text-xs text-muted-foreground pl-10">Basic / Pro</p>}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card data-testid="card-report-engagement">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-emerald-500" />
+              Report Engagement
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1" data-testid="stat-total-views">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                    <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Total Views</p>
+                    {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.reportEngagement?.totalViews || 0}</p>}
+                  </div>
+                </div>
+                {!loading && <p className="text-xs text-muted-foreground pl-10">+{analytics?.reportEngagement?.viewsThisMonth || 0} this month</p>}
+              </div>
+              
+              <div className="space-y-1" data-testid="stat-total-downloads">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
+                    <Download className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Total Downloads</p>
+                    {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.reportEngagement?.totalDownloads || 0}</p>}
+                  </div>
+                </div>
+                {!loading && <p className="text-xs text-muted-foreground pl-10">+{analytics?.reportEngagement?.downloadsThisMonth || 0} this month</p>}
+              </div>
+            </div>
+            
+            <div className="mt-4 pt-4 border-t" data-testid="stat-most-popular">
+              <p className="text-xs font-medium text-muted-foreground mb-2">Most Popular Report This Month</p>
+              {loading ? (
+                <Skeleton className="h-12 w-full" />
+              ) : analytics?.reportEngagement?.mostPopularReport ? (
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <p className="font-medium text-sm truncate">{analytics.reportEngagement.mostPopularReport.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                    <Eye className="w-3 h-3" />
+                    {analytics.reportEngagement.mostPopularReport.views} views
+                  </p>
+                </div>
+              ) : (
+                <div className="p-3 bg-muted/50 rounded-lg text-center text-sm text-muted-foreground">
+                  No report engagement data yet
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

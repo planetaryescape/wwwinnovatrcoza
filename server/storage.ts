@@ -182,6 +182,13 @@ export interface IStorage {
   }>;
   upsertReportLastViewed(data: { reportId: string; userId: string; userName?: string; userEmail?: string; memberTier?: string; companyName?: string }): Promise<ReportLastViewed>;
   getReportViewers(reportId: string): Promise<ReportLastViewed[]>;
+  getGlobalReportEngagement(): Promise<{
+    totalViews: number;
+    totalDownloads: number;
+    viewsThisMonth: number;
+    downloadsThisMonth: number;
+    mostPopularReport: { id: string; title: string; views: number } | null;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1659,6 +1666,68 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(reportLastViewed)
       .where(eq(reportLastViewed.reportId, reportId))
       .orderBy(desc(reportLastViewed.lastViewedAt));
+  }
+
+  async getGlobalReportEngagement(): Promise<{
+    totalViews: number;
+    totalDownloads: number;
+    viewsThisMonth: number;
+    downloadsThisMonth: number;
+    mostPopularReport: { id: string; title: string; views: number } | null;
+  }> {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Get all report events
+    const allEvents = await db.select().from(reportEvents);
+    
+    // Calculate totals
+    const totalViews = allEvents.filter(e => e.eventType === 'view').length;
+    const totalDownloads = allEvents.filter(e => e.eventType === 'download').length;
+    
+    // Calculate this month's stats
+    const viewsThisMonth = allEvents.filter(e => 
+      e.eventType === 'view' && new Date(e.createdAt) >= monthStart
+    ).length;
+    const downloadsThisMonth = allEvents.filter(e => 
+      e.eventType === 'download' && new Date(e.createdAt) >= monthStart
+    ).length;
+    
+    // Find most popular report this month (by views)
+    const thisMonthViews = allEvents.filter(e => 
+      e.eventType === 'view' && new Date(e.createdAt) >= monthStart
+    );
+    
+    const viewsByReport: Record<string, number> = {};
+    thisMonthViews.forEach(e => {
+      viewsByReport[e.reportId] = (viewsByReport[e.reportId] || 0) + 1;
+    });
+    
+    let mostPopularReport: { id: string; title: string; views: number } | null = null;
+    
+    if (Object.keys(viewsByReport).length > 0) {
+      const topReportId = Object.entries(viewsByReport)
+        .sort((a, b) => b[1] - a[1])[0][0];
+      const topViews = viewsByReport[topReportId];
+      
+      // Get report title
+      const report = await this.getReport(topReportId);
+      if (report) {
+        mostPopularReport = {
+          id: topReportId,
+          title: report.title,
+          views: topViews,
+        };
+      }
+    }
+    
+    return {
+      totalViews,
+      totalDownloads,
+      viewsThisMonth,
+      downloadsThisMonth,
+      mostPopularReport,
+    };
   }
 }
 
