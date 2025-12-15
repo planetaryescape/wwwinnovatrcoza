@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +13,7 @@ import {
 import { 
   Search, FileText, Download, Eye, Grid3x3, List, Lock, RefreshCw, 
   Building2, Calendar, Tag, Clock, Play, BarChart3, CheckCircle2,
-  Loader2, Timer, ArrowLeft, Edit, Save, Trash2
+  Loader2, Timer, ArrowLeft, Edit, Save, Trash2, Upload
 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -129,6 +129,9 @@ export default function PastResearch() {
   const [savingReport, setSavingReport] = useState(false);
   const [deleteReportOpen, setDeleteReportOpen] = useState(false);
   const [deletingReport, setDeletingReport] = useState(false);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [editForm, setEditForm] = useState({
     title: "",
     description: "",
@@ -337,6 +340,7 @@ export default function PastResearch() {
 
   const handleEditReport = (report: ClientReport) => {
     setEditingReport(report);
+    setPdfFile(null); // Clear any previously selected file
     setEditForm({
       title: report.title || "",
       description: report.description || "",
@@ -362,6 +366,24 @@ export default function PastResearch() {
     if (!editingReport) return;
     setSavingReport(true);
     try {
+      // First, upload PDF if a new file was selected
+      if (pdfFile) {
+        setUploadingPdf(true);
+        const formData = new FormData();
+        formData.append("pdf", pdfFile);
+        
+        const uploadRes = await fetch(`/api/admin/client-reports/${editingReport.id}/pdf`, {
+          method: "POST",
+          body: formData,
+        });
+        
+        if (!uploadRes.ok) {
+          throw new Error("Failed to upload PDF file");
+        }
+        setUploadingPdf(false);
+      }
+      
+      // Then update the report metadata
       const response = await fetch(`/api/admin/client-reports/${editingReport.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -385,13 +407,15 @@ export default function PastResearch() {
         }),
       });
       if (!response.ok) throw new Error("Failed to update report");
-      toast({ title: "Report updated", description: "Changes saved successfully" });
+      toast({ title: "Report updated", description: pdfFile ? "Report and PDF saved successfully" : "Changes saved successfully" });
+      setPdfFile(null);
       setEditReportOpen(false);
       fetchData();
     } catch (err) {
       toast({ title: "Error", description: "Failed to save changes", variant: "destructive" });
     } finally {
       setSavingReport(false);
+      setUploadingPdf(false);
     }
   };
 
@@ -1369,6 +1393,53 @@ export default function PastResearch() {
             </div>
 
             <div className="border-t pt-4 mt-2">
+              <Label className="mb-2 block">Report PDF</Label>
+              <div 
+                className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf"
+                  className="hidden"
+                  onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
+                  data-testid="input-edit-pdf"
+                />
+                {pdfFile ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <FileText className="w-5 h-5 text-primary" />
+                    <span className="font-medium text-sm">{pdfFile.name}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPdfFile(null);
+                        if (fileInputRef.current) fileInputRef.current.value = "";
+                      }}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ) : editingReport?.pdfUrl ? (
+                  <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                    <FileText className="w-5 h-5" />
+                    <span className="text-sm">Current PDF attached. Click to replace.</span>
+                  </div>
+                ) : (
+                  <div className="text-muted-foreground">
+                    <Upload className="w-6 h-6 mx-auto mb-1" />
+                    <p className="text-sm">Click to upload PDF</p>
+                    <p className="text-xs">Maximum file size: 10MB</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="border-t pt-4 mt-2">
               <h4 className="text-sm font-medium mb-3">Top Performer</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2 col-span-2">
@@ -1499,9 +1570,9 @@ export default function PastResearch() {
             <Button variant="outline" onClick={() => setEditReportOpen(false)} data-testid="button-cancel-edit">
               Cancel
             </Button>
-            <Button onClick={handleSaveReport} disabled={savingReport} data-testid="button-save-edit">
-              {savingReport ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-              Save Changes
+            <Button onClick={handleSaveReport} disabled={savingReport || uploadingPdf} data-testid="button-save-edit">
+              {(savingReport || uploadingPdf) ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+              {uploadingPdf ? "Uploading PDF..." : "Save Changes"}
             </Button>
           </DialogFooter>
         </DialogContent>
