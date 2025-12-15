@@ -399,6 +399,9 @@ export const reports = pgTable("reports", {
   viewCount: integer("view_count").notNull().default(0),
   downloadCount: integer("download_count").notNull().default(0),
   isArchived: boolean("is_archived").notNull().default(false),
+  // Scheduling fields for automated publishing
+  publishAt: timestamp("publish_at"),
+  unpublishAt: timestamp("unpublish_at"),
   // Tagging system for related content
   industryTag: varchar("industry_tag", { length: 50 }),
   themeTags: text("theme_tags").array().default([]),
@@ -423,6 +426,9 @@ export const insertReportSchema = createInsertSchema(reports)
     creditType: z.enum(["none", "basic", "pro"]).default("none"),
     status: z.enum(["draft", "scheduled", "published", "archived"]).default("published"),
     date: z.date().optional(),
+    // Scheduling fields
+    publishAt: z.date().nullable().optional(),
+    unpublishAt: z.date().nullable().optional(),
     // Tag fields for related content
     industryTag: z.string().nullable().optional(),
     themeTags: z.array(z.string()).optional().default([]),
