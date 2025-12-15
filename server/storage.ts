@@ -39,6 +39,10 @@ import {
   type InsertBriefFile,
   type Session,
   type InsertSession,
+  type ReportEvent,
+  type InsertReportEvent,
+  type ReportLastViewed,
+  type InsertReportLastViewed,
   users,
   passwordResets,
   creditLedger,
@@ -58,8 +62,10 @@ import {
   subscriptions,
   briefSubmissions,
   studies,
+  reportEvents,
+  reportLastViewed,
 } from "@shared/schema";
-import { eq, and, lte } from "drizzle-orm";
+import { eq, and, lte, gte, desc, sql } from "drizzle-orm";
 import { db } from "./db";
 import { randomUUID } from "crypto";
 import { hashPassword } from "./auth/password";
@@ -162,6 +168,20 @@ export interface IStorage {
   createCreditLedgerEntry(entry: InsertCreditLedger): Promise<CreditLedgerEntry>;
   getCreditLedgerByCompanyId(companyId: string): Promise<CreditLedgerEntry[]>;
   getCompanyCreditBalance(companyId: string, creditType: 'basic' | 'pro'): Promise<number>;
+  
+  // Report Analytics
+  createReportEvent(event: InsertReportEvent): Promise<ReportEvent>;
+  getReportEvents(reportId: string, options?: { eventType?: string; startDate?: Date; endDate?: Date }): Promise<ReportEvent[]>;
+  getReportAnalytics(reportId: string, range: 'today' | '30d' | '12m'): Promise<{
+    totalViews: number;
+    memberViews: number;
+    guestViews: number;
+    totalDownloads: number;
+    memberDownloads: number;
+    guestDownloads: number;
+  }>;
+  upsertReportLastViewed(data: { reportId: string; userId: string; userName?: string; userEmail?: string; memberTier?: string; companyName?: string }): Promise<ReportLastViewed>;
+  getReportViewers(reportId: string): Promise<ReportLastViewed[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1516,6 +1536,129 @@ export class DatabaseStorage implements IStorage {
     if (filtered.length === 0) return 0;
     const sorted = filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     return sorted[0].balanceAfter;
+  }
+
+  // Report Analytics Methods
+  async createReportEvent(event: InsertReportEvent): Promise<ReportEvent> {
+    const id = randomUUID();
+    const result = await db.insert(reportEvents).values({
+      id,
+      reportId: event.reportId,
+      userId: event.userId ?? null,
+      sessionId: event.sessionId ?? null,
+      eventType: event.eventType,
+      actorType: event.actorType,
+      memberTier: event.memberTier ?? null,
+      metadata: event.metadata ?? null,
+      occurredAt: event.occurredAt ?? new Date(),
+    }).returning();
+    return result[0];
+  }
+
+  async getReportEvents(reportId: string, options?: { eventType?: string; startDate?: Date; endDate?: Date }): Promise<ReportEvent[]> {
+    let query = db.select().from(reportEvents).where(eq(reportEvents.reportId, reportId));
+    
+    const events = await query;
+    
+    // Filter in memory for flexibility
+    let filtered = events;
+    if (options?.eventType) {
+      filtered = filtered.filter(e => e.eventType === options.eventType);
+    }
+    if (options?.startDate) {
+      filtered = filtered.filter(e => new Date(e.occurredAt) >= options.startDate!);
+    }
+    if (options?.endDate) {
+      filtered = filtered.filter(e => new Date(e.occurredAt) <= options.endDate!);
+    }
+    
+    return filtered.sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime());
+  }
+
+  async getReportAnalytics(reportId: string, range: 'today' | '30d' | '12m'): Promise<{
+    totalViews: number;
+    memberViews: number;
+    guestViews: number;
+    totalDownloads: number;
+    memberDownloads: number;
+    guestDownloads: number;
+  }> {
+    const now = new Date();
+    let startDate: Date;
+    
+    switch (range) {
+      case 'today':
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        break;
+      case '30d':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case '12m':
+        startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        break;
+    }
+    
+    const events = await this.getReportEvents(reportId, { startDate });
+    
+    const views = events.filter(e => e.eventType === 'view');
+    const downloads = events.filter(e => e.eventType === 'download');
+    
+    return {
+      totalViews: views.length,
+      memberViews: views.filter(e => e.actorType === 'member').length,
+      guestViews: views.filter(e => e.actorType === 'guest').length,
+      totalDownloads: downloads.length,
+      memberDownloads: downloads.filter(e => e.actorType === 'member').length,
+      guestDownloads: downloads.filter(e => e.actorType === 'guest').length,
+    };
+  }
+
+  async upsertReportLastViewed(data: { reportId: string; userId: string; userName?: string; userEmail?: string; memberTier?: string; companyName?: string }): Promise<ReportLastViewed> {
+    // Check if record exists
+    const existing = await db.select().from(reportLastViewed)
+      .where(and(
+        eq(reportLastViewed.reportId, data.reportId),
+        eq(reportLastViewed.userId, data.userId)
+      ));
+    
+    if (existing.length > 0) {
+      // Update existing record
+      const result = await db.update(reportLastViewed)
+        .set({
+          userName: data.userName ?? existing[0].userName,
+          userEmail: data.userEmail ?? existing[0].userEmail,
+          memberTier: data.memberTier ?? existing[0].memberTier,
+          companyName: data.companyName ?? existing[0].companyName,
+          viewCount: existing[0].viewCount + 1,
+          lastViewedAt: new Date(),
+        })
+        .where(eq(reportLastViewed.id, existing[0].id))
+        .returning();
+      return result[0];
+    } else {
+      // Insert new record
+      const id = randomUUID();
+      const now = new Date();
+      const result = await db.insert(reportLastViewed).values({
+        id,
+        reportId: data.reportId,
+        userId: data.userId,
+        userName: data.userName ?? null,
+        userEmail: data.userEmail ?? null,
+        memberTier: data.memberTier ?? null,
+        companyName: data.companyName ?? null,
+        viewCount: 1,
+        lastViewedAt: now,
+        firstViewedAt: now,
+      }).returning();
+      return result[0];
+    }
+  }
+
+  async getReportViewers(reportId: string): Promise<ReportLastViewed[]> {
+    return db.select().from(reportLastViewed)
+      .where(eq(reportLastViewed.reportId, reportId))
+      .orderBy(desc(reportLastViewed.lastViewedAt));
   }
 }
 

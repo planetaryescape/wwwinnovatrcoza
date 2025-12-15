@@ -2009,6 +2009,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Report Analytics Endpoints
+  app.get("/api/admin/reports/:id/analytics", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const range = (req.query.range as 'today' | '30d' | '12m') || '30d';
+      
+      const report = await storage.getReport(id);
+      if (!report) {
+        return res.status(404).json({ error: "Report not found" });
+      }
+      
+      const analytics = await storage.getReportAnalytics(id, range);
+      res.json(analytics);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/admin/reports/:id/viewers", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      
+      const report = await storage.getReport(id);
+      if (!report) {
+        return res.status(404).json({ error: "Report not found" });
+      }
+      
+      const viewers = await storage.getReportViewers(id);
+      res.json(viewers);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Record report event (public endpoint with optional authentication)
+  app.post("/api/reports/:id/events", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { eventType, sessionId, metadata } = req.body;
+      
+      if (!eventType || !['view', 'download'].includes(eventType)) {
+        return res.status(400).json({ error: "Invalid event type" });
+      }
+      
+      const report = await storage.getReport(id);
+      if (!report) {
+        return res.status(404).json({ error: "Report not found" });
+      }
+      
+      // Determine if this is a member or guest
+      let userId: string | null = null;
+      let actorType: 'member' | 'guest' = 'guest';
+      let memberTier: string | null = null;
+      let userName: string | null = null;
+      let userEmail: string | null = null;
+      let companyName: string | null = null;
+      
+      // Check for session cookie
+      const sessionToken = req.cookies?.session;
+      if (sessionToken) {
+        const { hashSessionToken } = await import("./auth/password");
+        const tokenHash = hashSessionToken(sessionToken);
+        const session = await storage.getSessionByTokenHash(tokenHash);
+        if (session) {
+          const user = await storage.getUser(session.userId);
+          if (user) {
+            userId = user.id;
+            actorType = 'member';
+            memberTier = user.membershipTier;
+            userName = user.name || null;
+            userEmail = user.email;
+            if (user.companyId) {
+              const company = await storage.getCompany(user.companyId);
+              companyName = company?.name || null;
+            }
+          }
+        }
+      }
+      
+      // Create the event
+      const event = await storage.createReportEvent({
+        reportId: id,
+        userId,
+        sessionId: sessionId || null,
+        eventType,
+        actorType,
+        memberTier,
+        metadata: metadata || null,
+      });
+      
+      // If member viewed, also update the last viewed record
+      if (userId && eventType === 'view') {
+        await storage.upsertReportLastViewed({
+          reportId: id,
+          userId,
+          userName: userName || undefined,
+          userEmail: userEmail || undefined,
+          memberTier: memberTier || undefined,
+          companyName: companyName || undefined,
+        });
+      }
+      
+      res.json({ success: true, eventId: event.id });
+    } catch (error: any) {
+      console.error("Report event tracking error:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Deals endpoints
   app.get("/api/admin/deals", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {

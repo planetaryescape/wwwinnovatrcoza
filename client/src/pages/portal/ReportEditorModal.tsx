@@ -25,6 +25,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { safeParseDateObject } from "@shared/access";
 import { useQuery } from "@tanstack/react-query";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   FileText, 
   Settings, 
@@ -41,7 +42,11 @@ import {
   X,
   FileIcon,
   Building2,
-  Tag
+  Tag,
+  Users,
+  UserCheck,
+  UserX,
+  Calendar
 } from "lucide-react";
 import { INDUSTRY_TAGS, THEME_TAGS, METHOD_TAGS } from "@shared/tagConfig";
 
@@ -123,6 +128,248 @@ const defaultFormData = {
   themeTags: [] as string[],
   methodTags: [] as string[],
 };
+
+// Types for analytics data
+interface AnalyticsData {
+  totalViews: number;
+  memberViews: number;
+  guestViews: number;
+  totalDownloads: number;
+  memberDownloads: number;
+  guestDownloads: number;
+}
+
+interface ViewerData {
+  id: string;
+  reportId: string;
+  userId: string | null;
+  userName: string | null;
+  userEmail: string | null;
+  memberTier: string | null;
+  companyName: string | null;
+  viewCount: number;
+  lastViewedAt: string;
+  firstViewedAt: string;
+}
+
+type TimeRange = "today" | "30d" | "12m";
+
+function ReportAnalyticsTab({ reportId }: { reportId?: string }) {
+  const [timeRange, setTimeRange] = useState<TimeRange>("30d");
+
+  // Fetch analytics data
+  const { data: analytics, isLoading: analyticsLoading } = useQuery<AnalyticsData>({
+    queryKey: ["/api/admin/reports", reportId, "analytics", timeRange],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/reports/${reportId}/analytics?range=${timeRange}`);
+      if (!res.ok) throw new Error("Failed to fetch analytics");
+      return res.json();
+    },
+    enabled: !!reportId,
+  });
+
+  // Fetch viewer list
+  const { data: viewers = [], isLoading: viewersLoading } = useQuery<ViewerData[]>({
+    queryKey: ["/api/admin/reports", reportId, "viewers"],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/reports/${reportId}/viewers`);
+      if (!res.ok) throw new Error("Failed to fetch viewers");
+      return res.json();
+    },
+    enabled: !!reportId,
+  });
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("en-ZA", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const timeRangeLabels: Record<TimeRange, string> = {
+    today: "Today",
+    "30d": "Last 30 Days",
+    "12m": "Last 12 Months",
+  };
+
+  return (
+    <TabsContent value="analytics" className="space-y-6 m-0">
+      {/* Time Range Toggle */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm font-medium">Time Range:</span>
+        </div>
+        <div className="flex gap-1">
+          {(["today", "30d", "12m"] as TimeRange[]).map((range) => (
+            <Button
+              key={range}
+              type="button"
+              variant={timeRange === range ? "default" : "outline"}
+              size="sm"
+              onClick={() => setTimeRange(range)}
+              data-testid={`button-range-${range}`}
+            >
+              {timeRangeLabels[range]}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Analytics Stats Grid */}
+      {analyticsLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {/* Total Views */}
+          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Eye className="w-4 h-4 text-[#0033A0]" />
+              <span className="text-xs text-muted-foreground font-medium">Total Views</span>
+            </div>
+            <p className="text-2xl font-bold" data-testid="text-total-views">
+              {analytics?.totalViews || 0}
+            </p>
+          </div>
+
+          {/* Member Views */}
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <UserCheck className="w-4 h-4 text-blue-600" />
+              <span className="text-xs text-muted-foreground font-medium">Member Views</span>
+            </div>
+            <p className="text-2xl font-bold text-blue-600" data-testid="text-member-views">
+              {analytics?.memberViews || 0}
+            </p>
+          </div>
+
+          {/* Guest Views */}
+          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <UserX className="w-4 h-4 text-gray-500" />
+              <span className="text-xs text-muted-foreground font-medium">Guest Views</span>
+            </div>
+            <p className="text-2xl font-bold text-gray-600" data-testid="text-guest-views">
+              {analytics?.guestViews || 0}
+            </p>
+          </div>
+
+          {/* Total Downloads */}
+          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Download className="w-4 h-4 text-[#0033A0]" />
+              <span className="text-xs text-muted-foreground font-medium">Total Downloads</span>
+            </div>
+            <p className="text-2xl font-bold" data-testid="text-total-downloads">
+              {analytics?.totalDownloads || 0}
+            </p>
+          </div>
+
+          {/* Member Downloads */}
+          <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Download className="w-4 h-4 text-green-600" />
+              <span className="text-xs text-muted-foreground font-medium">Member Downloads</span>
+            </div>
+            <p className="text-2xl font-bold text-green-600" data-testid="text-member-downloads">
+              {analytics?.memberDownloads || 0}
+            </p>
+          </div>
+
+          {/* Guest Downloads */}
+          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Download className="w-4 h-4 text-gray-500" />
+              <span className="text-xs text-muted-foreground font-medium">Guest Downloads</span>
+            </div>
+            <p className="text-2xl font-bold text-gray-600" data-testid="text-guest-downloads">
+              {analytics?.guestDownloads || 0}
+            </p>
+          </div>
+        </div>
+      )}
+
+      <Separator />
+
+      {/* Viewer List */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <Users className="w-4 h-4 text-muted-foreground" />
+          <h4 className="font-medium">Recent Viewers</h4>
+          <Badge variant="secondary" className="text-xs">
+            {viewers.length} {viewers.length === 1 ? "viewer" : "viewers"}
+          </Badge>
+        </div>
+
+        {viewersLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : viewers.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No viewers recorded yet</p>
+          </div>
+        ) : (
+          <ScrollArea className="h-[200px]">
+            <div className="space-y-2">
+              {viewers.map((viewer) => (
+                <div
+                  key={viewer.id}
+                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                  data-testid={`viewer-row-${viewer.id}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-[#0033A0] flex items-center justify-center text-white text-xs font-medium">
+                      {viewer.userName ? viewer.userName.charAt(0).toUpperCase() : "G"}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">
+                        {viewer.userName || "Guest User"}
+                      </p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        {viewer.userEmail && <span>{viewer.userEmail}</span>}
+                        {viewer.companyName && (
+                          <>
+                            <span className="text-muted-foreground/50">|</span>
+                            <span className="flex items-center gap-1">
+                              <Building2 className="w-3 h-3" />
+                              {viewer.companyName}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="flex items-center gap-2">
+                      {viewer.memberTier && (
+                        <Badge variant="outline" className="text-xs">
+                          {viewer.memberTier}
+                        </Badge>
+                      )}
+                      <Badge variant="secondary" className="text-xs">
+                        {viewer.viewCount} {viewer.viewCount === 1 ? "view" : "views"}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Last: {formatDate(viewer.lastViewedAt)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        )}
+      </div>
+    </TabsContent>
+  );
+}
 
 export default function ReportEditorModal({
   open,
@@ -1186,41 +1433,7 @@ export default function ReportEditorModal({
             </TabsContent>
 
             {isEditing && (
-              <TabsContent value="analytics" className="space-y-6 m-0">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-4 bg-gray-50 rounded-lg text-center">
-                    <Eye className="w-5 h-5 mx-auto mb-2 text-[#0033A0]" />
-                    <p className="text-2xl font-bold">{report?.viewCount || 0}</p>
-                    <p className="text-xs text-muted-foreground">Total Views</p>
-                  </div>
-                  <div className="p-4 bg-gray-50 rounded-lg text-center">
-                    <Download className="w-5 h-5 mx-auto mb-2 text-[#0033A0]" />
-                    <p className="text-2xl font-bold">{report?.downloadCount || 0}</p>
-                    <p className="text-xs text-muted-foreground">Downloads</p>
-                  </div>
-                  <div className="p-4 bg-gray-50 rounded-lg text-center">
-                    <TrendingUp className="w-5 h-5 mx-auto mb-2 text-green-600" />
-                    <p className="text-2xl font-bold">0</p>
-                    <p className="text-xs text-muted-foreground">Unique Views</p>
-                  </div>
-                  <div className="p-4 bg-gray-50 rounded-lg text-center">
-                    <Zap className="w-5 h-5 mx-auto mb-2 text-amber-500" />
-                    <p className="text-2xl font-bold">0</p>
-                    <p className="text-xs text-muted-foreground">Upgrade Influence</p>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div>
-                  <h4 className="font-medium mb-3">Performance Notes</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Analytics data is collected automatically as users interact with this report.
-                    The upgrade influence score tracks how often users upgraded their membership
-                    after viewing this content.
-                  </p>
-                </div>
-              </TabsContent>
+              <ReportAnalyticsTab reportId={report?.id} />
             )}
 
             <div className="flex justify-end gap-2 pt-6 mt-4 border-t">
