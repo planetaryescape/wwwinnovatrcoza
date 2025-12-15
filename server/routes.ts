@@ -3274,6 +3274,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.setHeader("Content-Type", contentTypes[ext || ""] || "application/octet-stream");
       res.setHeader("Cache-Control", "public, max-age=31536000");
+      
+      // Support custom download filename via query parameter
+      // Usage: /api/files/path/to/file.pdf?download=My%20Report%20Name.pdf
+      const downloadName = req.query.download as string | undefined;
+      if (downloadName) {
+        // Sanitize filename for Content-Disposition header
+        const sanitizedName = downloadName.replace(/[^\w\s.-]/g, '').trim() || 'download';
+        const finalName = sanitizedName.endsWith(`.${ext}`) ? sanitizedName : `${sanitizedName}.${ext}`;
+        res.setHeader("Content-Disposition", `attachment; filename="${finalName}"`);
+      }
+      
       res.send(fileBuffer);
     } catch (error: any) {
       console.error("File serve error:", error);

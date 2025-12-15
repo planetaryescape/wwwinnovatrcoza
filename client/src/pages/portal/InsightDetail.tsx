@@ -458,7 +458,11 @@ export default function InsightDetail() {
       title: "Download Started",
       description: "Your report is being downloaded.",
     });
-    window.open(report.pdfPath, '_blank');
+    // Add download query param with report title for proper filename
+    const ext = report.pdfPath.split('.').pop() || 'pdf';
+    const downloadName = encodeURIComponent(`${report.title}.${ext}`);
+    const downloadUrl = `${report.pdfPath}${report.pdfPath.includes('?') ? '&' : '?'}download=${downloadName}`;
+    window.open(downloadUrl, '_blank');
   };
 
   const formattedDate = new Date(report.date).toLocaleDateString('en-GB', {

@@ -310,18 +310,21 @@ export default function PastResearch() {
       // Encode each path segment individually to preserve slashes
       const encodedPath = storagePath.split('/').map(segment => encodeURIComponent(segment)).join('/');
       
-      // Fetch the file from the API
-      const response = await fetch(`/api/files/${encodedPath}`);
+      // Generate filename from report title with proper extension
+      const ext = storagePath.split('.').pop() || 'pdf';
+      const fileName = `${report.title.replace(/[^a-zA-Z0-9\s.-]/g, '').trim()}.${ext}`;
+      const downloadParam = encodeURIComponent(fileName);
+      
+      // Fetch the file from the API with download parameter for proper filename
+      const response = await fetch(`/api/files/${encodedPath}?download=${downloadParam}`);
       if (!response.ok) throw new Error('Download failed');
       
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       
-      // Create a temporary link and trigger download
+      // Create a temporary link and trigger download with report title as filename
       const a = document.createElement('a');
       a.href = url;
-      // Extract filename from path or use report title
-      const fileName = storagePath.split('/').pop() || `${report.title.replace(/[^a-z0-9]/gi, '_')}.pdf`;
       a.download = fileName;
       document.body.appendChild(a);
       a.click();
