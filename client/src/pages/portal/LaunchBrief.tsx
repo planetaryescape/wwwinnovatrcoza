@@ -191,7 +191,7 @@ const genderOptions: MultiSelectOption[] = [
 // Generate unique ID for concepts
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
-type BillingPreference = "online" | "invoice" | "credits";
+type BillingPreference = "online" | "invoice" | "credits" | "credits_plus_payment";
 
 const BASIC_MEMBER_PRICE = 5000;
 const BASIC_STANDARD_PRICE = 10000;
@@ -263,6 +263,12 @@ export default function LaunchBrief() {
   const proPrice = isPaidMember ? PRO_MEMBER_PRICE : PRO_STANDARD_PRICE;
   const PRICE_PER_CONCEPT = selectedBrief === "basic" ? basicPrice : proPrice;
   const totalPrice = PRICE_PER_CONCEPT * concepts.length;
+
+  // Partial credit calculations for "credits + payment" option
+  const creditsToUse = Math.min(availableCreditsForStudy, creditsRequired);
+  const creditsToPayFor = creditsRequired - creditsToUse;
+  const hasPartialCredits = availableCreditsForStudy > 0 && !hasEnoughCredits;
+  const amountToPayFor = creditsToPayFor * PRICE_PER_CONCEPT;
 
   // Competitors limit: 2 for Basic, 5 for Pro
   const isBasic = selectedBrief === "basic";
