@@ -1113,7 +1113,7 @@ export default function ReportEditorModal({
                 </div>
 
                 {formData.status === "scheduled" && (
-                  <div className="p-4 border rounded-lg bg-gray-50 space-y-4">
+                  <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800 space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="publishAt">Publish At</Label>
                       <Input
@@ -1136,6 +1136,50 @@ export default function ReportEditorModal({
                         data-testid="input-unpublish-at"
                       />
                     </div>
+                  </div>
+                )}
+
+                {isEditing && formData.status !== "published" && (
+                  <div className="p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-blue-600" />
+                      <Label className="text-base font-medium">Quick Publish</Label>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Make this report live immediately, bypassing any scheduled date.
+                    </p>
+                    <Button
+                      type="button"
+                      variant="default"
+                      onClick={async () => {
+                        try {
+                          setLoading(true);
+                          const res = await fetch(`/api/admin/reports/${report?.id}/publish-now`, {
+                            method: "POST",
+                          });
+                          if (!res.ok) throw new Error("Failed to publish");
+                          toast({
+                            title: "Published!",
+                            description: "Report is now live.",
+                          });
+                          setFormData({ ...formData, status: "published", publishAt: "" });
+                          onSuccess();
+                        } catch (error) {
+                          toast({
+                            title: "Error",
+                            description: "Could not publish report",
+                            variant: "destructive",
+                          });
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
+                      disabled={loading}
+                      data-testid="button-publish-now"
+                    >
+                      {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Zap className="w-4 h-4 mr-2" />}
+                      Publish Now
+                    </Button>
                   </div>
                 )}
               </div>

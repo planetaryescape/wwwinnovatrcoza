@@ -59,7 +59,7 @@ import {
   briefSubmissions,
   studies,
 } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, lte } from "drizzle-orm";
 import { db } from "./db";
 import { randomUUID } from "crypto";
 import { hashPassword } from "./auth/password";
@@ -98,6 +98,7 @@ export interface IStorage {
   getAllReports(): Promise<Report[]>;
   updateReport(id: string, updates: Partial<Report>): Promise<void>;
   deleteReport(id: string): Promise<void>;
+  processScheduledReports(): Promise<{ published: number; unpublished: number }>;
 
   createDeal(deal: InsertDeal): Promise<Deal>;
   getDeal(id: string): Promise<Deal | undefined>;
@@ -1057,6 +1058,54 @@ export class DatabaseStorage implements IStorage {
 
   async deleteReport(id: string): Promise<void> {
     await db.delete(reports).where(eq(reports.id, id));
+  }
+
+  async processScheduledReports(): Promise<{ published: number; unpublished: number }> {
+    const now = new Date();
+    let publishedCount = 0;
+    let unpublishedCount = 0;
+
+    // Find reports that are scheduled and should be published
+    const scheduledReports = await db
+      .select()
+      .from(reports)
+      .where(
+        and(
+          eq(reports.status, "scheduled"),
+          lte(reports.publishAt, now)
+        )
+      );
+
+    // Publish scheduled reports
+    for (const report of scheduledReports) {
+      await db
+        .update(reports)
+        .set({ status: "published", updatedAt: now })
+        .where(eq(reports.id, report.id));
+      publishedCount++;
+    }
+
+    // Find reports that are published and should be unpublished
+    const toUnpublishReports = await db
+      .select()
+      .from(reports)
+      .where(
+        and(
+          eq(reports.status, "published"),
+          lte(reports.unpublishAt, now)
+        )
+      );
+
+    // Unpublish reports that have passed their unpublish date
+    for (const report of toUnpublishReports) {
+      await db
+        .update(reports)
+        .set({ status: "archived", updatedAt: now })
+        .where(eq(reports.id, report.id));
+      unpublishedCount++;
+    }
+
+    return { published: publishedCount, unpublished: unpublishedCount };
   }
 
   async createDeal(insertDeal: InsertDeal): Promise<Deal> {

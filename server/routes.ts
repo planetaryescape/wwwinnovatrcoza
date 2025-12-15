@@ -1762,6 +1762,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public reports endpoint (excludes company-only reports)
   app.get("/api/reports", async (req, res) => {
     try {
+      // Auto-process scheduled reports before returning results
+      await storage.processScheduledReports();
+      
       const reports = await storage.getAllReports();
       // Filter to only published, non-archived reports for public access
       // Exclude any reports with clientCompanyIds (those are company-specific)
@@ -1904,6 +1907,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       await storage.updateReport(id, req.body);
       res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Publish report immediately
+  app.post("/api/admin/reports/:id/publish-now", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const report = await storage.getReport(id);
+      if (!report) {
+        return res.status(404).json({ error: "Report not found" });
+      }
+      await storage.updateReport(id, { status: "published", publishAt: null });
+      res.json({ success: true, message: "Report published successfully" });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Process scheduled reports (auto-publish and auto-unpublish)
+  app.post("/api/admin/reports/process-scheduled", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const result = await storage.processScheduledReports();
+      res.json({ 
+        success: true, 
+        published: result.published, 
+        unpublished: result.unpublished,
+        message: `Processed ${result.published} published, ${result.unpublished} unpublished`
+      });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
