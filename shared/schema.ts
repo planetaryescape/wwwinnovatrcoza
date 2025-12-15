@@ -738,3 +738,48 @@ export const insertStudySchema = createInsertSchema(studies)
 
 export type InsertStudy = z.infer<typeof insertStudySchema>;
 export type Study = typeof studies.$inferSelect;
+
+// Report Analytics - Individual events for views and downloads
+export const reportEvents = pgTable("report_events", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  reportId: varchar("report_id").notNull(),
+  userId: varchar("user_id"), // Null for anonymous/guest viewers
+  sessionId: text("session_id"), // Track anonymous sessions
+  eventType: varchar("event_type", { length: 20 }).notNull(), // 'view' or 'download'
+  actorType: varchar("actor_type", { length: 20 }).notNull(), // 'member' or 'guest'
+  memberTier: varchar("member_tier", { length: 20 }), // e.g., 'STARTER', 'GROWTH', 'SCALE'
+  metadata: jsonb("metadata"), // Additional context (device, referrer, etc.)
+  occurredAt: timestamp("occurred_at").defaultNow().notNull(),
+});
+
+export const insertReportEventSchema = createInsertSchema(reportEvents).omit({
+  id: true,
+});
+
+export type InsertReportEvent = z.infer<typeof insertReportEventSchema>;
+export type ReportEvent = typeof reportEvents.$inferSelect;
+
+// Track who viewed what reports (last viewed timestamp per user/report)
+export const reportLastViewed = pgTable("report_last_viewed", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  reportId: varchar("report_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  userName: text("user_name"),
+  userEmail: text("user_email"),
+  memberTier: varchar("member_tier", { length: 20 }),
+  companyName: text("company_name"),
+  viewCount: integer("view_count").notNull().default(1),
+  lastViewedAt: timestamp("last_viewed_at").defaultNow().notNull(),
+  firstViewedAt: timestamp("first_viewed_at").defaultNow().notNull(),
+});
+
+export const insertReportLastViewedSchema = createInsertSchema(reportLastViewed).omit({
+  id: true,
+});
+
+export type InsertReportLastViewed = z.infer<typeof insertReportLastViewedSchema>;
+export type ReportLastViewed = typeof reportLastViewed.$inferSelect;
