@@ -1,5 +1,4 @@
 import neonLightsBackground from "@assets/pexels-chris-f-8344064_1763492180742.jpeg";
-import circlesBackground from "@assets/pexels-pixabay-247676_1763492180745.jpeg";
 import differenceBackground from "@assets/pexels-merlin-lightpainting-10874566_1764656420841.jpeg";
 
 const features = [
@@ -59,16 +58,6 @@ export default function MethodologySection() {
         </div>
 
         <div className="relative p-4 sm:p-8 md:p-12 overflow-hidden mt-20">
-          <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ 
-              backgroundImage: `url(${circlesBackground})`,
-              filter: 'blur(1px)',
-              opacity: 0.08
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/80 to-background" />
-          
           <div className="relative z-10">
             <div className="text-center mb-6 sm:mb-8">
               <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
