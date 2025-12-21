@@ -1,14 +1,13 @@
 import { Card } from "@/components/ui/card";
-import { Sparkles, TrendingUp, MessageSquare, BarChart3, Zap, Clock } from "lucide-react";
 import neonLightsBackground from "@assets/pexels-chris-f-8344064_1763492180742.jpeg";
 import circlesBackground from "@assets/pexels-pixabay-247676_1763492180745.jpeg";
 import differenceBackground from "@assets/pexels-merlin-lightpainting-10874566_1764656420841.jpeg";
 
 const features = [
-  { icon: Clock, label: "SPEED", subtitle: "24hr Turn-Around" },
-  { icon: Zap, label: "EASY", subtitle: "Automated Briefing" },
-  { icon: TrendingUp, label: "SMART", subtitle: "Quant + AI Qual" },
-  { icon: BarChart3, label: "+25 MARKETS", subtitle: "44M panel" },
+  { label: "SPEED", subtitle: "24hr Turn-Around" },
+  { label: "EASY", subtitle: "Automated Briefing" },
+  { label: "SMART", subtitle: "Quant + AI Qual" },
+  { label: "+25 MARKETS", subtitle: "44M panel" },
 ];
 
 export default function MethodologySection() {
@@ -51,9 +50,6 @@ export default function MethodologySection() {
                   className="text-center transition-all duration-300"
                   data-testid={`feature-${index}`}
                 >
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center">
-                    <feature.icon className="w-8 h-8 text-white" />
-                  </div>
                   <div className="text-2xl font-serif font-bold mb-1 text-white">{index + 1}</div>
                   <h3 className="font-bold mb-1 text-white">{feature.label}</h3>
                   <p className="text-sm text-white">{feature.subtitle}</p>
@@ -98,6 +94,8 @@ export default function MethodologySection() {
                 data-testid="video-upsiide-vimeo"
                 title="Upsiide Demo Video"
               />
+              {/* Overlay to hide Vimeo three-dots menu in top-right corner */}
+              <div className="absolute top-0 right-0 w-16 h-12 bg-black pointer-events-none z-10" />
             </div>
           </div>
         </div>
