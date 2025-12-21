@@ -58,7 +58,7 @@ export default function MethodologySection() {
           </div>
         </div>
 
-        <div className="relative bg-card border border-card-border rounded-lg p-4 sm:p-8 md:p-12 overflow-hidden mt-20">
+        <div className="relative p-4 sm:p-8 md:p-12 overflow-hidden mt-20">
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{ 
@@ -67,7 +67,7 @@ export default function MethodologySection() {
               opacity: 0.08
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-card/80 to-card" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/80 to-background" />
           
           <div className="relative z-10">
             <div className="text-center mb-6 sm:mb-8">
