@@ -63,7 +63,7 @@ export default function MethodologySection() {
           </div>
         </div>
 
-        <div className="relative bg-card border border-card-border rounded-lg p-8 md:p-12 overflow-hidden">
+        <div className="relative bg-card border border-card-border rounded-lg p-4 sm:p-8 md:p-12 overflow-hidden">
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{ 
@@ -75,7 +75,7 @@ export default function MethodologySection() {
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-card/80 to-card" />
           
           <div className="relative z-10">
-            <div className="text-center mb-8">
+            <div className="text-center mb-6 sm:mb-8">
               <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
                 02 — The Proof
               </div>
@@ -83,13 +83,13 @@ export default function MethodologySection() {
                 Don't Guess. Test.
               </h2>
             </div>
-            <p className="text-lg text-muted-foreground text-center max-w-2xl mx-auto mb-8">
+            <p className="text-lg text-muted-foreground text-center max-w-2xl mx-auto mb-6 sm:mb-8 px-2">
               Partnering with Upsiide we have made rapid testing truly AGILE
             </p>
             
-            <div className="relative aspect-video rounded-lg overflow-hidden bg-muted/50 border border-border">
+            <div className="relative aspect-video rounded-lg overflow-hidden bg-muted/50 border border-border -mx-2 sm:mx-0">
               <iframe
-                src="https://player.vimeo.com/video/1138122776?badge=0&autopause=0&player_id=0&app_id=58479&title=0&byline=0&portrait=0"
+                src="https://player.vimeo.com/video/1138122776?badge=0&autopause=0&player_id=0&app_id=58479&title=0&byline=0&portrait=0&vimeo_logo=0&dnt=1"
                 className="w-full h-full absolute top-0 left-0"
                 frameBorder="0"
                 allow="fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
