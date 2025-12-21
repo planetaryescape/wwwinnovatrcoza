@@ -58,7 +58,7 @@ export default function MethodologySection() {
           </div>
         </div>
 
-        <div className="relative bg-card border border-card-border rounded-lg p-4 sm:p-8 md:p-12 overflow-hidden">
+        <div className="relative bg-card border border-card-border rounded-lg p-4 sm:p-8 md:p-12 overflow-hidden mt-20">
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{ 
