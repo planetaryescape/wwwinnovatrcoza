@@ -86,7 +86,13 @@ export default function MethodologySection() {
             <div className="relative aspect-video rounded-lg overflow-hidden bg-muted/50 border border-border -mx-2 sm:mx-0">
               <iframe
                 src="https://player.vimeo.com/video/1138122776?badge=0&autopause=0&player_id=0&app_id=58479&title=0&byline=0&portrait=0&vimeo_logo=0&dnt=1"
-                className="w-full h-full absolute top-0 left-0"
+                className="absolute top-0 left-0"
+                style={{ 
+                  width: 'calc(100% + 80px)', 
+                  height: 'calc(100% + 40px)',
+                  marginLeft: '-40px',
+                  marginTop: '-20px'
+                }}
                 frameBorder="0"
                 allow="fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
                 referrerPolicy="strict-origin-when-cross-origin"
@@ -94,8 +100,6 @@ export default function MethodologySection() {
                 data-testid="video-upsiide-vimeo"
                 title="Upsiide Demo Video"
               />
-              {/* Overlay to hide Vimeo three-dots menu in top-right corner */}
-              <div className="absolute top-0 right-0 w-16 h-12 bg-black pointer-events-none z-10" />
             </div>
           </div>
         </div>
