@@ -314,7 +314,7 @@ export default function CreditsAndBilling() {
               </div>
               <div className="pt-2">
                 <p className="text-sm text-muted-foreground">
-                  Member rate: R5,000 per credit (50% off)
+                  Member rate: {formatPriceLocal(5000)} per credit (50% off)
                 </p>
               </div>
             </CardContent>
@@ -342,7 +342,7 @@ export default function CreditsAndBilling() {
               </div>
               <div className="pt-2">
                 <p className="text-sm text-muted-foreground">
-                  Member rate: R45,000 per credit (10% off)
+                  Member rate: {formatPriceLocal(45000)} per credit (10% off)
                 </p>
               </div>
             </CardContent>

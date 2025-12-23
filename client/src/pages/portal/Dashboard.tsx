@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { useQuery } from "@tanstack/react-query";
 import PortalLayout from "./PortalLayout";
 import LockedFeature from "@/components/LockedFeature";
@@ -128,14 +129,15 @@ function getRecommendedReports(
   return recommended.slice(0, 3);
 }
 
-const mockDeals = [
+const mockDealsData = [
   {
     title: "Buy 3 Test24 Basic, Get 1 Free",
     description: "Limited time offer for Growth members",
     expires: "5 days",
   },
   {
-    title: "Upgrade to Scale - Save R40k",
+    titleTemplate: "Upgrade to Scale - Save {amount}",
+    savingsZAR: 40000,
     description: "Unlock 15 Basic + 3 Pro studies annually",
     expires: "This month only",
   },
@@ -144,6 +146,16 @@ const mockDeals = [
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { user, isPaidMember } = useAuth();
+  const { formatShortPrice } = useCurrency();
+
+  // Format mock deals with currency context
+  const mockDeals = mockDealsData.map(deal => ({
+    title: (deal as any).titleTemplate 
+      ? (deal as any).titleTemplate.replace("{amount}", formatShortPrice((deal as any).savingsZAR))
+      : deal.title,
+    description: deal.description,
+    expires: deal.expires,
+  }));
 
   const { data: company, isLoading: isLoadingCompany } = useQuery<Company>({
     queryKey: ["/api/member/company", user?.companyId],
@@ -554,7 +566,7 @@ export default function Dashboard() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Value unlocked</span>
-                    <span className="text-lg font-bold text-primary">R240k</span>
+                    <span className="text-lg font-bold text-primary">{formatShortPrice(240000)}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -575,7 +587,7 @@ export default function Dashboard() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Value unlocked</span>
-                    <span className="text-lg font-bold text-primary">R240k</span>
+                    <span className="text-lg font-bold text-primary">{formatShortPrice(240000)}</span>
                   </div>
                 </div>
               </LockedFeature>

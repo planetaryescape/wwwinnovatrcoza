@@ -5,6 +5,7 @@ import { ArrowLeft, Check, Zap, ShoppingCart } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import OrderFormDialog from "@/components/OrderFormDialog";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 const BASE_PRICE_PER_CREDIT = 10000;
 
@@ -62,6 +63,7 @@ const features = [
 
 export default function CheckoutBasicPAYG() {
   const [, setLocation] = useLocation();
+  const { formatPrice } = useCurrency();
   const [selectedPackage, setSelectedPackage] = useState("10x");
   const [customCredits, setCustomCredits] = useState<number>(4);
   const [showOrderForm, setShowOrderForm] = useState(false);
@@ -106,10 +108,6 @@ export default function CheckoutBasicPAYG() {
       unitAmount: String(Math.round(totalAmount / getSelectedCredits())),
     },
   ];
-
-  const formatPrice = (price: number) => {
-    return `R${price.toLocaleString()}`;
-  };
 
   const handleCustomCreditsChange = (value: string) => {
     const num = parseInt(value) || 0;
@@ -270,9 +268,9 @@ export default function CheckoutBasicPAYG() {
                         <span className="text-sm text-muted-foreground">credits</span>
                       </div>
                       <div className="ml-8 mt-3 text-xs text-muted-foreground space-y-0.5">
-                        <p>1-9 credits: 0% off (R10,000/ idea)</p>
-                        <p>10-19 credits: 10% off (R9,000/ idea)</p>
-                        <p>20+ credits: 15% off (R8,500/ idea)</p>
+                        <p>1-9 credits: 0% off ({formatPrice(10000)}/ idea)</p>
+                        <p>10-19 credits: 10% off ({formatPrice(9000)}/ idea)</p>
+                        <p>20+ credits: 15% off ({formatPrice(8500)}/ idea)</p>
                       </div>
                     </div>
                     

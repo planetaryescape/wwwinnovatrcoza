@@ -44,6 +44,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Link, useLocation } from "wouter";
 import { useAuth, getBasicCreditsRemaining, getProCreditsRemaining } from "@/contexts/AuthContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 type BriefType = "basic" | "pro" | null;
 
@@ -777,6 +778,7 @@ const PRO_STANDARD_PRICE = 50000;
 
 export default function LaunchBrief() {
   const { user, company, isPaidMember, isFreeUser } = useAuth();
+  const { formatPrice } = useCurrency();
   const [, setLocationHook] = useLocation();
   const queryClient = useQueryClient();
   const [selectedBrief, setSelectedBrief] = useState<BriefType>(null);
@@ -1434,7 +1436,7 @@ export default function LaunchBrief() {
                   </div>
                   <div>
                     <p className="font-semibold text-foreground">Save with Innovatr Membership</p>
-                    <p className="text-sm text-muted-foreground">Members save R5000 on every Basic credit and 10% on Pro studies</p>
+                    <p className="text-sm text-muted-foreground">Members save {formatPrice(5000)} on every Basic credit and 10% on Pro studies</p>
                   </div>
                 </div>
                 <Link href="/#membership">

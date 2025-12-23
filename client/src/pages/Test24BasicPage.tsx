@@ -3,9 +3,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Users, Clock, CheckCircle2, Zap, Target, Download } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 export default function Test24BasicPage() {
   const [, setLocation] = useLocation();
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -37,7 +39,7 @@ export default function Test24BasicPage() {
           </div>
           
           <p className="text-2xl font-medium mb-2">
-            24hr Pay Per Idea Testing – R5,000 per idea (members)
+            24hr Pay Per Idea Testing – {formatPrice(5000)} per idea (members)
           </p>
           <p className="text-xl text-muted-foreground">
             Idea, Design, Creative rapid testing in any format

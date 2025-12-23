@@ -5,43 +5,65 @@ import { Gift, Sparkles, Clock, TrendingUp, Crown, Lock, ArrowRight } from "luci
 import PortalLayout from "./PortalLayout";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
-const exclusiveDeals = [
+interface ExclusiveDeal {
+  id: number;
+  title: string;
+  descriptionTemplate: string;
+  savingsZAR: number;
+  expires: string;
+  badge: string;
+  ctaText: string;
+}
+
+interface MonthlyOffer {
+  id: number;
+  title: string;
+  description: string;
+  valueZAR: number | null;
+  valueText: string | null;
+  price: string;
+  icon: typeof TrendingUp;
+}
+
+const exclusiveDealsData: ExclusiveDeal[] = [
   {
     id: 1,
     title: "Buy 3 Test24 Basic, Get 1 Free",
-    description: "Perfect for testing multiple concepts. Save R5,000 instantly.",
-    savings: "R5,000",
+    descriptionTemplate: "Perfect for testing multiple concepts. Save {savings} instantly.",
+    savingsZAR: 5000,
     expires: "5 days",
     badge: "Limited Time",
     ctaText: "Claim Deal",
   },
   {
     id: 2,
-    title: "Pro Study Bundle - 3x for R120k",
-    description: "Save R15k on 3 Test24 Pro studies. Ideal for quarterly campaigns.",
-    savings: "R15,000",
+    title: "Pro Study Bundle - 3x",
+    descriptionTemplate: "Save {savings} on 3 Test24 Pro studies. Ideal for quarterly campaigns.",
+    savingsZAR: 15000,
     expires: "This month",
     badge: "Best Value",
     ctaText: "Get Bundle",
   },
   {
     id: 3,
-    title: "Upgrade to Scale - Save R40k",
-    description: "Unlock 15 Basic + 3 Pro studies annually. Best ROI for active teams.",
-    savings: "R40,000+",
+    title: "Upgrade to Scale",
+    descriptionTemplate: "Unlock 15 Basic + 3 Pro studies annually. Best ROI for active teams.",
+    savingsZAR: 40000,
     expires: "30 days",
     badge: "Premium",
     ctaText: "Upgrade Now",
   },
 ];
 
-const monthlyOffers = [
+const monthlyOffersData: MonthlyOffer[] = [
   {
     id: 4,
     title: "December Special: Industry Reports Bundle",
     description: "Access all Q4 2024 trend reports across 5 industries.",
-    value: "R25k value",
+    valueZAR: 25000,
+    valueText: null,
     price: "Free for members",
     icon: TrendingUp,
   },
@@ -49,7 +71,8 @@ const monthlyOffers = [
     id: 5,
     title: "Early Access: AI Qual Beta Features",
     description: "Be first to test new VOC analysis tools launching in January.",
-    value: "Beta access",
+    valueZAR: null,
+    valueText: "Beta access",
     price: "Growth+ members",
     icon: Sparkles,
   },
@@ -57,7 +80,8 @@ const monthlyOffers = [
     id: 6,
     title: "Year-End Consultation Credit",
     description: "30-min strategy session with Innovatr insights team included.",
-    value: "R5k value",
+    valueZAR: 5000,
+    valueText: null,
     price: "All members",
     icon: Crown,
   },
@@ -79,10 +103,20 @@ const upcomingDeals = [
 export default function MemberDeals() {
   const [, setLocation] = useLocation();
   const { isFreeUser } = useAuth();
+  const { formatPrice, formatShortPrice } = useCurrency();
 
-  // TODO: Fetch from /api/member/deals and filter by membership tier
-  // For now, using mock data from exclusiveDeals
-  const displayDeals = exclusiveDeals;
+  // Format exclusive deals with currency context
+  const displayDeals = exclusiveDealsData.map(deal => ({
+    ...deal,
+    savings: formatPrice(deal.savingsZAR),
+    description: deal.descriptionTemplate.replace("{savings}", formatPrice(deal.savingsZAR)),
+  }));
+
+  // Format monthly offers with currency context
+  const monthlyOffers = monthlyOffersData.map(offer => ({
+    ...offer,
+    value: offer.valueZAR ? `${formatShortPrice(offer.valueZAR)} value` : offer.valueText,
+  }));
 
   // Full locked page for free users
   if (isFreeUser) {
@@ -111,7 +145,7 @@ export default function MemberDeals() {
                       <Gift className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
                       <div>
                         <h4 className="font-semibold">Credit Bundles</h4>
-                        <p className="text-sm text-muted-foreground">Save up to R40k on research credits</p>
+                        <p className="text-sm text-muted-foreground">Save up to {formatShortPrice(40000)} on research credits</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">

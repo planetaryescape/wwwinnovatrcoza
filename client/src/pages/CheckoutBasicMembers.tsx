@@ -16,6 +16,7 @@ import { Link } from "wouter";
 import OrderFormDialog from "@/components/OrderFormDialog";
 import { LoginDialog } from "@/components/LoginDialog";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 const MEMBER_PRICE_PER_CREDIT = 5000;
 const REGULAR_PRICE_PER_CREDIT = 5500;
@@ -45,19 +46,20 @@ const creditPackages = [
   },
 ];
 
-const features = [
+const featuresBase = [
   "24hr turnaround for rapid validation",
   "Flexible idea volume with no minimum",
   "X100 Consumer Reach, 5min Survey",
   "Automated brief upload portal saving you time",
   "Final Reports emailed 24hrs later",
-  "R5,000 per idea member rate",
+  "{memberRate} per idea member rate",
   "Priority support",
 ];
 
 export default function CheckoutBasicMembers() {
   const [, setLocation] = useLocation();
   const { user, isAuthenticated, isMember, membershipTier } = useAuth();
+  const { formatPrice } = useCurrency();
   
   const [selectedPackage, setSelectedPackage] = useState("10x");
   const [addMembership, setAddMembership] = useState(false);
@@ -69,16 +71,17 @@ export default function CheckoutBasicMembers() {
     isLoggedIn && isMember && membershipTier && membershipTier !== "STARTER"
   );
 
+  // Generate features with formatted currency
+  const features = featuresBase.map(f => 
+    f.replace("{memberRate}", formatPrice(MEMBER_PRICE_PER_CREDIT))
+  );
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const handleCheckout = () => {
     setShowOrderForm(true);
-  };
-
-  const formatPrice = (price: number) => {
-    return `R${price.toLocaleString()}`;
   };
 
   const getTierLabel = (tier: string | undefined) => {
@@ -166,7 +169,7 @@ export default function CheckoutBasicMembers() {
                     <p className="font-semibold text-accent">Member pricing applied</p>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    You already have an active {getTierLabel(membershipTier)} Membership. Your Test24 Basic credits are at the R5,000 member rate.
+                    You already have an active {getTierLabel(membershipTier)} Membership. Your Test24 Basic credits are at the {formatPrice(MEMBER_PRICE_PER_CREDIT)} member rate.
                   </p>
                 </div>
               ) : isLoggedIn ? (
@@ -176,13 +179,13 @@ export default function CheckoutBasicMembers() {
                     <p className="font-semibold text-primary">Save with member pricing</p>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Become a member today and save R500 on every Test24 Basic credit.
+                    Become a member today and save {formatPrice(REGULAR_PRICE_PER_CREDIT - MEMBER_PRICE_PER_CREDIT)} on every Test24 Basic credit.
                   </p>
                 </div>
               ) : (
                 <div className="bg-muted/50 border rounded-lg p-4">
                   <p className="text-sm font-medium">
-                    Members save R500 per Test24 Basic credit
+                    Members save {formatPrice(REGULAR_PRICE_PER_CREDIT - MEMBER_PRICE_PER_CREDIT)} per Test24 Basic credit
                   </p>
                 </div>
               )}
@@ -306,7 +309,7 @@ export default function CheckoutBasicMembers() {
                             Log in or create an account to unlock member pricing on Test24 Basic.
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            Members save R500 per Test24 Basic credit.
+                            Members save {formatPrice(REGULAR_PRICE_PER_CREDIT - MEMBER_PRICE_PER_CREDIT)} per Test24 Basic credit.
                           </p>
                         </div>
                       </div>
@@ -461,7 +464,7 @@ export default function CheckoutBasicMembers() {
                           <Check className="w-4 h-4 text-accent" />
                           <p className="font-semibold text-accent">Active {getTierLabel(membershipTier)} Membership</p>
                         </div>
-                        <p className="text-xs text-muted-foreground">Enjoying R5,000 per credit member rate</p>
+                        <p className="text-xs text-muted-foreground">Enjoying {formatPrice(MEMBER_PRICE_PER_CREDIT)} per credit member rate</p>
                       </div>
                     ) : addMembership ? (
                       <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
