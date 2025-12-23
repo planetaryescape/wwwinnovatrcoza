@@ -3,36 +3,47 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Crown, Star, Gem } from "lucide-react";
 import { useLocation } from "wouter";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
-const membershipPlans = [
+interface MembershipPlan {
+  name: string;
+  icon: typeof Star;
+  priceZAR: number;
+  starterPriceZAR?: number;
+  additionalPriceZAR?: number;
+  monthlyZAR?: number;
+  badge: string | null;
+  description: string;
+  savings: string;
+  features: string[];
+  valueZAR?: number;
+  basicPriceZAR: number;
+  proPriceZAR: number;
+}
+
+const membershipPlansData: MembershipPlan[] = [
   {
     name: "Starter",
     icon: Star,
-    price: "R60k",
-    priceBreakdown: null,
-    totalPrice: "R60k",
-    period: "per year",
-    monthly: "R5k/month",
+    priceZAR: 60000,
+    monthlyZAR: 5000,
     badge: null,
     description: "For startups & small teams",
     savings: "Save up to 40%",
     features: [
       "Trends Report Access",
       "Discounted Research",
-      "Test24 Basic: R5,000 per idea",
-      "Test24 Pro: R45,000 per study",
       "Private Dashboard Access",
     ],
-    value: null,
+    basicPriceZAR: 5000,
+    proPriceZAR: 45000,
   },
   {
     name: "Growth",
     icon: Crown,
-    price: "R180k",
-    priceBreakdown: "Starter (R60k) + Growth (R120k)",
-    totalPrice: "R180k",
-    period: "per year",
-    monthly: null,
+    priceZAR: 180000,
+    starterPriceZAR: 60000,
+    additionalPriceZAR: 120000,
     badge: "Most Popular",
     description: "For growing businesses",
     savings: "Best for scale",
@@ -41,16 +52,16 @@ const membershipPlans = [
       "x10 Test24 Basic ideas / year",
       "x2 Test24 Pro Studies / year",
     ],
-    value: "~R260k value",
+    valueZAR: 260000,
+    basicPriceZAR: 5000,
+    proPriceZAR: 45000,
   },
   {
     name: "Scale",
     icon: Gem,
-    price: "R255k",
-    priceBreakdown: "Starter (R60k) + Scale (R195k)",
-    totalPrice: "R255k",
-    period: "per year",
-    monthly: null,
+    priceZAR: 255000,
+    starterPriceZAR: 60000,
+    additionalPriceZAR: 195000,
     badge: "Best Value",
     description: "Enterprise-level insights",
     savings: "Maximum value",
@@ -60,12 +71,15 @@ const membershipPlans = [
       "x3 Test24 Pro Studies / year",
       "Dedicated Insights Support",
     ],
-    value: "~R360k value",
+    valueZAR: 360000,
+    basicPriceZAR: 5000,
+    proPriceZAR: 45000,
   },
 ];
 
 export default function MembershipSection() {
   const [, setLocation] = useLocation();
+  const { formatPrice } = useCurrency();
 
   const handleBecomeMember = (planName: string) => {
     if (planName === "Starter") {
@@ -75,6 +89,30 @@ export default function MembershipSection() {
     } else if (planName === "Scale") {
       setLocation("/checkout/membership-scale");
     }
+  };
+
+  const formatShortPrice = (zarAmount: number) => {
+    const formatted = formatPrice(zarAmount);
+    if (zarAmount >= 1000) {
+      const numericValue = zarAmount >= 1000 ? zarAmount / 1000 : zarAmount;
+      const prefix = formatted.startsWith('$') ? '$' : 'R';
+      const convertedValue = formatted.startsWith('$') 
+        ? Math.round(zarAmount * 0.055) / 1000 
+        : numericValue;
+      return `${prefix}${Math.round(convertedValue)}k`;
+    }
+    return formatted;
+  };
+
+  const getFeatures = (plan: MembershipPlan) => {
+    if (plan.name === "Starter") {
+      return [
+        ...plan.features,
+        `Test24 Basic: ${formatPrice(plan.basicPriceZAR)} per idea`,
+        `Test24 Pro: ${formatPrice(plan.proPriceZAR)} per study`,
+      ];
+    }
+    return plan.features;
   };
 
   return (
@@ -91,7 +129,7 @@ export default function MembershipSection() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {membershipPlans.map((plan, index) => (
+          {membershipPlansData.map((plan, index) => (
             <Card 
               key={index}
               className={`hover-elevate transition-all duration-300 relative flex flex-col ${
@@ -113,33 +151,33 @@ export default function MembershipSection() {
                 <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
                 <CardDescription className="text-base">{plan.description}</CardDescription>
                 <div className="mt-4">
-                  {plan.priceBreakdown ? (
+                  {plan.starterPriceZAR && plan.additionalPriceZAR ? (
                     <div className="space-y-2">
                       <div className="text-sm text-muted-foreground">
-                        {plan.priceBreakdown}
+                        Starter ({formatShortPrice(plan.starterPriceZAR)}) + {plan.name} ({formatShortPrice(plan.additionalPriceZAR)})
                       </div>
                       <div>
-                        <span className="text-4xl font-bold text-primary">{plan.totalPrice}</span>
-                        <span className="text-muted-foreground ml-2">{plan.period}</span>
+                        <span className="text-4xl font-bold text-primary">{formatShortPrice(plan.priceZAR)}</span>
+                        <span className="text-muted-foreground ml-2">per year</span>
                       </div>
                     </div>
                   ) : (
                     <div>
-                      <span className="text-4xl font-bold text-primary">{plan.price}</span>
-                      <span className="text-muted-foreground ml-2">{plan.period}</span>
-                      {plan.monthly && (
-                        <div className="text-sm text-muted-foreground mt-1">{plan.monthly}</div>
+                      <span className="text-4xl font-bold text-primary">{formatShortPrice(plan.priceZAR)}</span>
+                      <span className="text-muted-foreground ml-2">per year</span>
+                      {plan.monthlyZAR && (
+                        <div className="text-sm text-muted-foreground mt-1">{formatShortPrice(plan.monthlyZAR)}/month</div>
                       )}
                     </div>
                   )}
                 </div>
-                {plan.value && (
-                  <div className="text-sm font-semibold text-accent mt-2">{plan.value}</div>
+                {plan.valueZAR && (
+                  <div className="text-sm font-semibold text-accent mt-2">~{formatShortPrice(plan.valueZAR)} value</div>
                 )}
               </CardHeader>
               <CardContent className="space-y-6 flex flex-col flex-1">
                 <ul className="space-y-3 flex-1">
-                  {plan.features.map((feature, fIndex) => (
+                  {getFeatures(plan).map((feature, fIndex) => (
                     <li key={fIndex} className="flex items-start gap-3">
                       <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                       <span className="text-sm">{feature}</span>
