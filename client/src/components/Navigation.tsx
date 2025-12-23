@@ -3,6 +3,7 @@ import { Menu, X, User, LogOut, LayoutDashboard } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import ThemeToggle from "./ThemeToggle";
+import { CurrencyToggle } from "./CurrencyToggle";
 import { LoginDialog } from "./LoginDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
@@ -116,6 +117,7 @@ export default function Navigation() {
             </div>
 
             <div className="hidden md:flex items-center gap-4">
+              <CurrencyToggle />
               <ThemeToggle />
               
               {isAuthenticated ? (
@@ -219,6 +221,11 @@ export default function Navigation() {
               >
                 Contact
               </button>
+              
+              <div className="pt-3 border-t flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Currency</span>
+                <CurrencyToggle />
+              </div>
               
               {isAuthenticated ? (
                 <>
