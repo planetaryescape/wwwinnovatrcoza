@@ -4,13 +4,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Check, Zap, Target } from "lucide-react";
 import { useLocation } from "wouter";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import { CurrencyToggle } from "@/components/CurrencyToggle";
 
+// Prices in ZAR (base currency)
 const pricingPlans = {
   payg: [
     {
       name: "Test24 Basic",
       icon: Zap,
-      price: "R10,000",
+      priceZAR: 10000,
       unit: "per idea",
       description: "24hr Pay Per Idea Testing",
       features: [
@@ -24,7 +27,7 @@ const pricingPlans = {
     {
       name: "Test24 Pro",
       icon: Target,
-      price: "R50,000",
+      priceZAR: 50000,
       unit: "per study",
       description: "Custom Quant & AI Qual",
       features: [
@@ -40,7 +43,7 @@ const pricingPlans = {
     {
       name: "Test24 Basic",
       icon: Zap,
-      price: "R5,000",
+      priceZAR: 5000,
       unit: "per idea",
       description: "24hr Pay Per Idea Testing",
       badge: "50% OFF",
@@ -55,7 +58,7 @@ const pricingPlans = {
     {
       name: "Test24 Pro",
       icon: Target,
-      price: "R45,000",
+      priceZAR: 45000,
       unit: "per study",
       description: "Custom Quant & AI Qual",
       badge: "10% OFF",
@@ -73,6 +76,7 @@ const pricingPlans = {
 export default function PricingSection() {
   const [activeTab, setActiveTab] = useState("members");
   const [, setLocation] = useLocation();
+  const { formatPrice } = useCurrency();
   
   const handleBuyNow = (planName: string) => {
     if (activeTab === "payg") {
@@ -98,6 +102,9 @@ export default function PricingSection() {
             04 — Pricing
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6" style={{ color: '#4D5FF1' }}>Flexible pricing for any business</h2>
+          <div className="flex justify-center mt-4">
+            <CurrencyToggle />
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-5xl mx-auto">
@@ -121,7 +128,7 @@ export default function PricingSection() {
                     <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
                     <CardDescription className="text-base">{plan.description}</CardDescription>
                     <div className="mt-4">
-                      <span className="text-4xl font-bold text-primary">{plan.price}</span>
+                      <span className="text-4xl font-bold text-primary">{formatPrice(plan.priceZAR)}</span>
                       <span className="text-muted-foreground ml-2">{plan.unit}</span>
                     </div>
                   </CardHeader>
@@ -170,7 +177,7 @@ export default function PricingSection() {
                     <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
                     <CardDescription className="text-base">{plan.description}</CardDescription>
                     <div className="mt-4">
-                      <span className="text-4xl font-bold text-primary">{plan.price}</span>
+                      <span className="text-4xl font-bold text-primary">{formatPrice(plan.priceZAR)}</span>
                       <span className="text-muted-foreground ml-2">{plan.unit}</span>
                     </div>
                   </CardHeader>

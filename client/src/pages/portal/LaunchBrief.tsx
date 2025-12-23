@@ -153,17 +153,310 @@ function MultiSelect({ options, selected, onChange, placeholder, testId, error }
   );
 }
 
-const regionOptions: MultiSelectOption[] = [
-  { value: "eastern-cape", label: "Eastern Cape" },
-  { value: "free-state", label: "Free State" },
-  { value: "gauteng", label: "Gauteng" },
-  { value: "kwazulu-natal", label: "KwaZulu-Natal" },
-  { value: "limpopo", label: "Limpopo" },
-  { value: "mpumalanga", label: "Mpumalanga" },
-  { value: "northern-cape", label: "Northern Cape" },
-  { value: "north-west", label: "North West" },
-  { value: "western-cape", label: "Western Cape" },
+// Countries with their regions/provinces
+const countryOptions: MultiSelectOption[] = [
+  { value: "ZA", label: "South Africa" },
+  { value: "US", label: "United States" },
+  { value: "GB", label: "United Kingdom" },
+  { value: "AU", label: "Australia" },
+  { value: "CA", label: "Canada" },
+  { value: "DE", label: "Germany" },
+  { value: "FR", label: "France" },
+  { value: "NL", label: "Netherlands" },
+  { value: "BE", label: "Belgium" },
+  { value: "ES", label: "Spain" },
+  { value: "IT", label: "Italy" },
+  { value: "BR", label: "Brazil" },
+  { value: "MX", label: "Mexico" },
+  { value: "IN", label: "India" },
+  { value: "CN", label: "China" },
+  { value: "JP", label: "Japan" },
+  { value: "KR", label: "South Korea" },
+  { value: "SG", label: "Singapore" },
+  { value: "AE", label: "United Arab Emirates" },
+  { value: "NG", label: "Nigeria" },
+  { value: "KE", label: "Kenya" },
+  { value: "EG", label: "Egypt" },
+  { value: "NZ", label: "New Zealand" },
+  { value: "IE", label: "Ireland" },
+  { value: "SE", label: "Sweden" },
+  { value: "NO", label: "Norway" },
+  { value: "DK", label: "Denmark" },
+  { value: "FI", label: "Finland" },
+  { value: "PL", label: "Poland" },
+  { value: "CH", label: "Switzerland" },
+  { value: "AT", label: "Austria" },
+  { value: "PT", label: "Portugal" },
 ];
+
+const regionsByCountry: Record<string, MultiSelectOption[]> = {
+  ZA: [
+    { value: "eastern-cape", label: "Eastern Cape" },
+    { value: "free-state", label: "Free State" },
+    { value: "gauteng", label: "Gauteng" },
+    { value: "kwazulu-natal", label: "KwaZulu-Natal" },
+    { value: "limpopo", label: "Limpopo" },
+    { value: "mpumalanga", label: "Mpumalanga" },
+    { value: "northern-cape", label: "Northern Cape" },
+    { value: "north-west", label: "North West" },
+    { value: "western-cape", label: "Western Cape" },
+  ],
+  US: [
+    { value: "northeast", label: "Northeast" },
+    { value: "midwest", label: "Midwest" },
+    { value: "south", label: "South" },
+    { value: "west", label: "West" },
+    { value: "california", label: "California" },
+    { value: "texas", label: "Texas" },
+    { value: "florida", label: "Florida" },
+    { value: "new-york", label: "New York" },
+    { value: "illinois", label: "Illinois" },
+    { value: "pennsylvania", label: "Pennsylvania" },
+  ],
+  GB: [
+    { value: "england", label: "England" },
+    { value: "scotland", label: "Scotland" },
+    { value: "wales", label: "Wales" },
+    { value: "northern-ireland", label: "Northern Ireland" },
+    { value: "london", label: "Greater London" },
+    { value: "south-east", label: "South East" },
+    { value: "north-west", label: "North West" },
+    { value: "midlands", label: "Midlands" },
+  ],
+  AU: [
+    { value: "nsw", label: "New South Wales" },
+    { value: "vic", label: "Victoria" },
+    { value: "qld", label: "Queensland" },
+    { value: "wa", label: "Western Australia" },
+    { value: "sa", label: "South Australia" },
+    { value: "tas", label: "Tasmania" },
+    { value: "act", label: "Australian Capital Territory" },
+    { value: "nt", label: "Northern Territory" },
+  ],
+  CA: [
+    { value: "ontario", label: "Ontario" },
+    { value: "quebec", label: "Quebec" },
+    { value: "british-columbia", label: "British Columbia" },
+    { value: "alberta", label: "Alberta" },
+    { value: "manitoba", label: "Manitoba" },
+    { value: "saskatchewan", label: "Saskatchewan" },
+    { value: "nova-scotia", label: "Nova Scotia" },
+    { value: "new-brunswick", label: "New Brunswick" },
+  ],
+  DE: [
+    { value: "bavaria", label: "Bavaria" },
+    { value: "berlin", label: "Berlin" },
+    { value: "hamburg", label: "Hamburg" },
+    { value: "hesse", label: "Hesse" },
+    { value: "north-rhine-westphalia", label: "North Rhine-Westphalia" },
+    { value: "baden-wurttemberg", label: "Baden-Württemberg" },
+    { value: "lower-saxony", label: "Lower Saxony" },
+  ],
+  FR: [
+    { value: "ile-de-france", label: "Île-de-France" },
+    { value: "provence", label: "Provence-Alpes-Côte d'Azur" },
+    { value: "auvergne", label: "Auvergne-Rhône-Alpes" },
+    { value: "nouvelle-aquitaine", label: "Nouvelle-Aquitaine" },
+    { value: "occitanie", label: "Occitanie" },
+    { value: "bretagne", label: "Bretagne" },
+  ],
+  NL: [
+    { value: "north-holland", label: "North Holland" },
+    { value: "south-holland", label: "South Holland" },
+    { value: "utrecht", label: "Utrecht" },
+    { value: "gelderland", label: "Gelderland" },
+    { value: "north-brabant", label: "North Brabant" },
+    { value: "limburg", label: "Limburg" },
+  ],
+  BE: [
+    { value: "brussels", label: "Brussels" },
+    { value: "flanders", label: "Flanders" },
+    { value: "wallonia", label: "Wallonia" },
+    { value: "antwerp", label: "Antwerp" },
+    { value: "east-flanders", label: "East Flanders" },
+  ],
+  ES: [
+    { value: "madrid", label: "Madrid" },
+    { value: "catalonia", label: "Catalonia" },
+    { value: "andalusia", label: "Andalusia" },
+    { value: "valencia", label: "Valencia" },
+    { value: "basque-country", label: "Basque Country" },
+    { value: "galicia", label: "Galicia" },
+  ],
+  IT: [
+    { value: "lombardy", label: "Lombardy" },
+    { value: "lazio", label: "Lazio" },
+    { value: "veneto", label: "Veneto" },
+    { value: "emilia-romagna", label: "Emilia-Romagna" },
+    { value: "piedmont", label: "Piedmont" },
+    { value: "tuscany", label: "Tuscany" },
+  ],
+  BR: [
+    { value: "sao-paulo", label: "São Paulo" },
+    { value: "rio-de-janeiro", label: "Rio de Janeiro" },
+    { value: "minas-gerais", label: "Minas Gerais" },
+    { value: "bahia", label: "Bahia" },
+    { value: "rio-grande-do-sul", label: "Rio Grande do Sul" },
+    { value: "parana", label: "Paraná" },
+  ],
+  MX: [
+    { value: "mexico-city", label: "Mexico City" },
+    { value: "jalisco", label: "Jalisco" },
+    { value: "nuevo-leon", label: "Nuevo León" },
+    { value: "mexico-state", label: "State of Mexico" },
+    { value: "veracruz", label: "Veracruz" },
+    { value: "puebla", label: "Puebla" },
+  ],
+  IN: [
+    { value: "maharashtra", label: "Maharashtra" },
+    { value: "delhi", label: "Delhi" },
+    { value: "karnataka", label: "Karnataka" },
+    { value: "tamil-nadu", label: "Tamil Nadu" },
+    { value: "uttar-pradesh", label: "Uttar Pradesh" },
+    { value: "gujarat", label: "Gujarat" },
+    { value: "west-bengal", label: "West Bengal" },
+  ],
+  CN: [
+    { value: "beijing", label: "Beijing" },
+    { value: "shanghai", label: "Shanghai" },
+    { value: "guangdong", label: "Guangdong" },
+    { value: "jiangsu", label: "Jiangsu" },
+    { value: "zhejiang", label: "Zhejiang" },
+    { value: "shandong", label: "Shandong" },
+  ],
+  JP: [
+    { value: "tokyo", label: "Tokyo" },
+    { value: "osaka", label: "Osaka" },
+    { value: "kanagawa", label: "Kanagawa" },
+    { value: "aichi", label: "Aichi" },
+    { value: "hokkaido", label: "Hokkaido" },
+    { value: "fukuoka", label: "Fukuoka" },
+  ],
+  KR: [
+    { value: "seoul", label: "Seoul" },
+    { value: "busan", label: "Busan" },
+    { value: "gyeonggi", label: "Gyeonggi" },
+    { value: "incheon", label: "Incheon" },
+    { value: "daegu", label: "Daegu" },
+  ],
+  SG: [
+    { value: "central", label: "Central Region" },
+    { value: "east", label: "East Region" },
+    { value: "north", label: "North Region" },
+    { value: "north-east", label: "North-East Region" },
+    { value: "west", label: "West Region" },
+  ],
+  AE: [
+    { value: "dubai", label: "Dubai" },
+    { value: "abu-dhabi", label: "Abu Dhabi" },
+    { value: "sharjah", label: "Sharjah" },
+    { value: "ajman", label: "Ajman" },
+    { value: "ras-al-khaimah", label: "Ras Al Khaimah" },
+  ],
+  NG: [
+    { value: "lagos", label: "Lagos" },
+    { value: "abuja", label: "Abuja (FCT)" },
+    { value: "rivers", label: "Rivers" },
+    { value: "kano", label: "Kano" },
+    { value: "oyo", label: "Oyo" },
+  ],
+  KE: [
+    { value: "nairobi", label: "Nairobi" },
+    { value: "mombasa", label: "Mombasa" },
+    { value: "kisumu", label: "Kisumu" },
+    { value: "nakuru", label: "Nakuru" },
+    { value: "coast", label: "Coast Province" },
+  ],
+  EG: [
+    { value: "cairo", label: "Cairo" },
+    { value: "alexandria", label: "Alexandria" },
+    { value: "giza", label: "Giza" },
+    { value: "sharm-el-sheikh", label: "Sharm El-Sheikh" },
+  ],
+  NZ: [
+    { value: "auckland", label: "Auckland" },
+    { value: "wellington", label: "Wellington" },
+    { value: "canterbury", label: "Canterbury" },
+    { value: "waikato", label: "Waikato" },
+    { value: "otago", label: "Otago" },
+  ],
+  IE: [
+    { value: "dublin", label: "Dublin" },
+    { value: "cork", label: "Cork" },
+    { value: "galway", label: "Galway" },
+    { value: "limerick", label: "Limerick" },
+    { value: "leinster", label: "Leinster" },
+    { value: "munster", label: "Munster" },
+  ],
+  SE: [
+    { value: "stockholm", label: "Stockholm" },
+    { value: "vastra-gotaland", label: "Västra Götaland" },
+    { value: "skane", label: "Skåne" },
+    { value: "ostergotland", label: "Östergötland" },
+  ],
+  NO: [
+    { value: "oslo", label: "Oslo" },
+    { value: "bergen", label: "Bergen" },
+    { value: "trondheim", label: "Trondheim" },
+    { value: "stavanger", label: "Stavanger" },
+  ],
+  DK: [
+    { value: "copenhagen", label: "Copenhagen" },
+    { value: "central-jutland", label: "Central Jutland" },
+    { value: "southern-denmark", label: "Southern Denmark" },
+    { value: "zealand", label: "Zealand" },
+  ],
+  FI: [
+    { value: "uusimaa", label: "Uusimaa (Helsinki)" },
+    { value: "pirkanmaa", label: "Pirkanmaa" },
+    { value: "varsinais-suomi", label: "Varsinais-Suomi" },
+    { value: "oulu", label: "Oulu" },
+  ],
+  PL: [
+    { value: "mazovia", label: "Mazovia (Warsaw)" },
+    { value: "lesser-poland", label: "Lesser Poland" },
+    { value: "silesia", label: "Silesia" },
+    { value: "greater-poland", label: "Greater Poland" },
+    { value: "pomerania", label: "Pomerania" },
+  ],
+  CH: [
+    { value: "zurich", label: "Zurich" },
+    { value: "bern", label: "Bern" },
+    { value: "geneva", label: "Geneva" },
+    { value: "basel", label: "Basel" },
+    { value: "vaud", label: "Vaud" },
+  ],
+  AT: [
+    { value: "vienna", label: "Vienna" },
+    { value: "lower-austria", label: "Lower Austria" },
+    { value: "upper-austria", label: "Upper Austria" },
+    { value: "salzburg", label: "Salzburg" },
+    { value: "tyrol", label: "Tyrol" },
+  ],
+  PT: [
+    { value: "lisbon", label: "Lisbon" },
+    { value: "porto", label: "Porto" },
+    { value: "algarve", label: "Algarve" },
+    { value: "centro", label: "Centro" },
+    { value: "norte", label: "Norte" },
+  ],
+};
+
+// Helper to get regions for selected countries
+const getRegionsForCountries = (countries: string[]): MultiSelectOption[] => {
+  const regions: MultiSelectOption[] = [];
+  countries.forEach(country => {
+    const countryRegions = regionsByCountry[country] || [];
+    countryRegions.forEach(region => {
+      // Prefix region value with country code to avoid duplicates
+      regions.push({
+        value: `${country}-${region.value}`,
+        label: `${region.label}`,
+      });
+    });
+  });
+  return regions;
+};
 
 const ageOptions: MultiSelectOption[] = [
   { value: "18-24", label: "18-24" },
@@ -223,6 +516,7 @@ export default function LaunchBrief() {
     clientContact: "",
     clientCompany: "",
     researchObjective: "",
+    country: [] as string[],
     region: [] as string[],
     age: [] as string[],
     income: [] as string[],
@@ -234,6 +528,22 @@ export default function LaunchBrief() {
     confirmCreditsDeduction: false,
     subscribeUpdates: false,
   });
+
+  // Dynamic region options based on selected countries
+  const regionOptions = getRegionsForCountries(formData.country);
+
+  // Clear regions when country changes (if regions no longer valid)
+  const handleCountryChange = (selectedCountries: string[]) => {
+    const newRegionOptions = getRegionsForCountries(selectedCountries);
+    const validRegionValues = new Set(newRegionOptions.map(r => r.value));
+    const validRegions = formData.region.filter(r => validRegionValues.has(r));
+    
+    setFormData({
+      ...formData,
+      country: selectedCountries,
+      region: validRegions,
+    });
+  };
   const { toast } = useToast();
 
   // Pre-populate client details from user and company data
@@ -547,6 +857,7 @@ export default function LaunchBrief() {
         clientContact: "",
         clientCompany: "",
         researchObjective: "",
+        country: [],
         region: [],
         age: [],
         income: [],
@@ -627,6 +938,7 @@ export default function LaunchBrief() {
 
     // Validate research details
     if (!formData.researchObjective.trim()) errors.researchObjective = "Research Objective is required";
+    if (formData.country.length === 0) errors.country = "Select at least one country";
     if (formData.region.length === 0) errors.region = "Select at least one region";
     if (formData.age.length === 0) errors.age = "Select at least one age range";
     if (formData.income.length === 0) errors.income = "Select at least one income range";
@@ -1153,17 +1465,39 @@ export default function LaunchBrief() {
               )}
             </div>
 
+            {/* Country selector - full width */}
+            <div className="space-y-2" data-field="country">
+              <Label htmlFor="country">Country *</Label>
+              <MultiSelect
+                options={countryOptions}
+                selected={formData.country}
+                onChange={handleCountryChange}
+                placeholder="Select countries"
+                testId="select-country"
+                error={!!validationErrors.country}
+              />
+              {validationErrors.country && (
+                <p className="text-xs text-destructive">{validationErrors.country}</p>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2" data-field="region">
-                <Label htmlFor="region">Region *</Label>
-                <MultiSelect
-                  options={regionOptions}
-                  selected={formData.region}
-                  onChange={(selected) => setFormData({ ...formData, region: selected })}
-                  placeholder="Select regions"
-                  testId="select-region"
-                  error={!!validationErrors.region}
-                />
+                <Label htmlFor="region">Region/Province *</Label>
+                {formData.country.length === 0 ? (
+                  <div className="border rounded-md p-3 text-sm text-muted-foreground bg-muted/30">
+                    Please select a country first
+                  </div>
+                ) : (
+                  <MultiSelect
+                    options={regionOptions}
+                    selected={formData.region}
+                    onChange={(selected) => setFormData({ ...formData, region: selected })}
+                    placeholder="Select regions"
+                    testId="select-region"
+                    error={!!validationErrors.region}
+                  />
+                )}
                 {validationErrors.region && (
                   <p className="text-xs text-destructive">{validationErrors.region}</p>
                 )}

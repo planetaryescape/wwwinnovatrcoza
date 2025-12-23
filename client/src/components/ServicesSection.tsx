@@ -3,14 +3,31 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Zap, Target, Rocket, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
-const services = [
+interface Service {
+  icon: typeof Zap;
+  number: string;
+  title: string;
+  description: string;
+  priceZAR: number | null;
+  pricePrefix?: string;
+  priceSuffix?: string;
+  customPrice?: string;
+  link: string;
+  features: string[];
+  color: string;
+  isNew: boolean;
+}
+
+const services: Service[] = [
   {
     icon: Zap,
     number: "1",
     title: "Innovatr Test24 Basic",
     description: "24hr Pay Per Idea Quant Testing",
-    price: "R5,000 / idea",
+    priceZAR: 5000,
+    priceSuffix: " / idea",
     link: "/test24-basic",
     features: [
       "Lite Testing (x100 consumers)",
@@ -25,7 +42,9 @@ const services = [
     number: "2",
     title: "Innovatr Test24 Pro",
     description: "24hr Custom Quant & AI Qual",
-    price: "From R45,000 / study",
+    priceZAR: 45000,
+    pricePrefix: "From ",
+    priceSuffix: " / study",
     link: "/test24-pro",
     features: [
       "Full Testing (+100)",
@@ -40,7 +59,8 @@ const services = [
     number: "3",
     title: "Innovatr Intelligence",
     description: "Bi-weekly insights, trends and reports",
-    price: "R5,000 / month",
+    priceZAR: 5000,
+    priceSuffix: " / month",
     link: "/innovatr-intelligence",
     features: [
       "Monitor trends & competitor launch alerts",
@@ -55,7 +75,8 @@ const services = [
     number: "4",
     title: "Innovatr Consult",
     description: "Enterprise Level Strategic Problem Solving",
-    price: "Custom Pricing",
+    priceZAR: null,
+    customPrice: "Custom Pricing",
     link: "/innovatr-consult",
     features: [
       "Idea to Market Consulting",
@@ -67,6 +88,16 @@ const services = [
 ];
 
 export default function ServicesSection() {
+  const { formatPrice } = useCurrency();
+  
+  const getDisplayPrice = (service: Service) => {
+    if (service.customPrice) return service.customPrice;
+    if (service.priceZAR === null) return "Custom Pricing";
+    const prefix = service.pricePrefix || "";
+    const suffix = service.priceSuffix || "";
+    return `${prefix}${formatPrice(service.priceZAR)}${suffix}`;
+  };
+  
   return (
     <section id="services" className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -111,7 +142,7 @@ export default function ServicesSection() {
                   {service.title}
                 </CardTitle>
                 <CardDescription className="text-base">{service.description}</CardDescription>
-                <div className="text-lg font-bold pt-2" style={{ color: service.color }}>{service.price}</div>
+                <div className="text-lg font-bold pt-2" style={{ color: service.color }}>{getDisplayPrice(service)}</div>
               </CardHeader>
               <CardContent className="flex flex-col flex-1 space-y-4">
                 <ul className="space-y-2 flex-1">
