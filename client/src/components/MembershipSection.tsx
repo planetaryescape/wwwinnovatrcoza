@@ -79,7 +79,7 @@ const membershipPlansData: MembershipPlan[] = [
 
 export default function MembershipSection() {
   const [, setLocation] = useLocation();
-  const { formatPrice } = useCurrency();
+  const { formatPrice, formatShortPrice } = useCurrency();
 
   const handleBecomeMember = (planName: string) => {
     if (planName === "Starter") {
@@ -89,19 +89,6 @@ export default function MembershipSection() {
     } else if (planName === "Scale") {
       setLocation("/checkout/membership-scale");
     }
-  };
-
-  const formatShortPrice = (zarAmount: number) => {
-    const formatted = formatPrice(zarAmount);
-    if (zarAmount >= 1000) {
-      const numericValue = zarAmount >= 1000 ? zarAmount / 1000 : zarAmount;
-      const prefix = formatted.startsWith('$') ? '$' : 'R';
-      const convertedValue = formatted.startsWith('$') 
-        ? Math.round(zarAmount * 0.055) / 1000 
-        : numericValue;
-      return `${prefix}${Math.round(convertedValue)}k`;
-    }
-    return formatted;
   };
 
   const getFeatures = (plan: MembershipPlan) => {

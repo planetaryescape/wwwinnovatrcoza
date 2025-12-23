@@ -16,6 +16,7 @@ import { CreditCard, Download, Package, CheckCircle, Clock, AlertCircle, FileTex
 import PortalLayout from "./PortalLayout";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import OrderFormDialog from "@/components/OrderFormDialog";
 import type { Order } from "@shared/schema";
 
@@ -77,6 +78,7 @@ const mockBillingHistory = [
 export default function CreditsAndBilling() {
   const [, setLocation] = useLocation();
   const { isPaidMember, user, company: authCompany } = useAuth();
+  const { formatPrice } = useCurrency();
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [selectedPack, setSelectedPack] = useState<typeof mockCreditPackages[0] | null>(null);
 
@@ -118,9 +120,9 @@ export default function CreditsAndBilling() {
     .filter((order) => !(order.invoiceRequested === true && order.status === 'pending'))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-  const formatPrice = (amount: number | string) => {
+  const formatPriceLocal = (amount: number | string) => {
     const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-    return `R${num.toLocaleString()}`;
+    return formatPrice(num);
   };
 
   const formatDate = (date: Date | string) => {
@@ -380,10 +382,10 @@ export default function CreditsAndBilling() {
                   <CardContent className="space-y-4">
                     <div>
                       <p className="text-3xl font-bold text-primary">
-                        {formatPrice(pack.price)}
+                        {formatPriceLocal(pack.price)}
                       </p>
                       <p className="text-sm text-muted-foreground line-through">
-                        {formatPrice(pack.regularPrice)}
+                        {formatPriceLocal(pack.regularPrice)}
                       </p>
                     </div>
                     <div className="bg-accent/10 rounded-lg p-2 text-center">
@@ -435,7 +437,7 @@ export default function CreditsAndBilling() {
                       <TableCell>{formatDate(order.createdAt)}</TableCell>
                       <TableCell>{order.purchaseType}</TableCell>
                       <TableCell className="text-right font-semibold">
-                        {formatPrice(order.amount)}
+                        {formatPriceLocal(order.amount)}
                       </TableCell>
                       <TableCell className="text-right">
                         {getStatusBadge(order.status, order.invoiceRequested)}
@@ -482,7 +484,7 @@ export default function CreditsAndBilling() {
                     <TableCell>{formatDate(order.createdAt)}</TableCell>
                     <TableCell>{order.purchaseType}</TableCell>
                     <TableCell className="text-right font-semibold">
-                      {formatPrice(order.amount)}
+                      {formatPriceLocal(order.amount)}
                     </TableCell>
                     <TableCell className="text-right">
                       {getStatusBadge(order.status, order.invoiceRequested)}
@@ -507,7 +509,7 @@ export default function CreditsAndBilling() {
                     </TableCell>
                     <TableCell>{invoice.description}</TableCell>
                     <TableCell className="text-right font-semibold">
-                      {formatPrice(invoice.amount)}
+                      {formatPriceLocal(invoice.amount)}
                     </TableCell>
                     <TableCell className="text-right">
                       <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">

@@ -4,21 +4,12 @@ import { ArrowLeft, Check, Gem, ShoppingCart, Star } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import OrderFormDialog from "@/components/OrderFormDialog";
-
-const scaleFeatures = [
-  "Everything in Starter membership",
-  "15x Test24 Basic ideas included (~R75k value)",
-  "3x Test24 Pro Studies included (~R135k value)",
-  "Dedicated Insights Support Team",
-  "White-label reporting options",
-  "Custom audience segmentation",
-  "Bi-weekly strategy calls",
-  "Early access to new features",
-];
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 export default function CheckoutMembershipPlatinum() {
   const [, setLocation] = useLocation();
   const [showOrderForm, setShowOrderForm] = useState(false);
+  const { formatPrice, formatShortPrice } = useCurrency();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -28,15 +19,24 @@ export default function CheckoutMembershipPlatinum() {
     setShowOrderForm(true);
   };
 
-  const formatPrice = (price: number) => {
-    return `R${price.toLocaleString()}`;
-  };
+  const entryPriceZAR = 60000;
+  const scaleUpgradeZAR = 195000;
+  const totalPriceZAR = 255000;
+  const totalValueZAR = 360000;
+  const basicValueZAR = 75000;
+  const proValueZAR = 135000;
+  const savingsZAR = totalValueZAR - totalPriceZAR;
 
-  const entryPrice = 60000;
-  const scaleUpgrade = 195000;
-  const totalPrice = 255000;
-  const totalValue = 360000;
-  const savings = totalValue - totalPrice;
+  const scaleFeatures = [
+    "Everything in Starter membership",
+    `15x Test24 Basic ideas included (~${formatShortPrice(basicValueZAR)} value)`,
+    `3x Test24 Pro Studies included (~${formatShortPrice(proValueZAR)} value)`,
+    "Dedicated Insights Support Team",
+    "White-label reporting options",
+    "Custom audience segmentation",
+    "Bi-weekly strategy calls",
+    "Early access to new features",
+  ];
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -107,7 +107,7 @@ export default function CheckoutMembershipPlatinum() {
                         <li>• 15 Basic credits included</li>
                         <li>• 3 Pro studies included</li>
                         <li>• Dedicated support team</li>
-                        <li>• ~R360k total value</li>
+                        <li>• ~{formatShortPrice(totalValueZAR)} total value</li>
                       </ul>
                     </div>
                   </div>
@@ -116,15 +116,15 @@ export default function CheckoutMembershipPlatinum() {
                     <h3 className="font-semibold text-primary mb-1">Included Credits</h3>
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-sm">15x Test24 Basic ideas</span>
-                      <span className="font-semibold">~R75,000 value</span>
+                      <span className="font-semibold">~{formatPrice(basicValueZAR)} value</span>
                     </div>
                     <div className="flex items-center justify-between mt-1">
                       <span className="text-sm">3x Test24 Pro studies</span>
-                      <span className="font-semibold">~R135,000 value</span>
+                      <span className="font-semibold">~{formatPrice(proValueZAR)} value</span>
                     </div>
                     <div className="flex items-center justify-between mt-1 pt-2 border-t">
                       <span className="text-sm font-medium">Total Credits Value</span>
-                      <span className="font-bold text-primary">~R210,000</span>
+                      <span className="font-bold text-primary">~{formatPrice(basicValueZAR + proValueZAR)}</span>
                     </div>
                   </div>
                 </div>
@@ -176,24 +176,24 @@ export default function CheckoutMembershipPlatinum() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Starter Membership Base</span>
-                    <span className="font-semibold" data-testid="text-entry-price">{formatPrice(entryPrice)}</span>
+                    <span className="font-semibold" data-testid="text-entry-price">{formatPrice(entryPriceZAR)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Scale Tier Upgrade</span>
-                    <span className="font-semibold" data-testid="text-platinum-upgrade">{formatPrice(scaleUpgrade)}</span>
+                    <span className="font-semibold" data-testid="text-platinum-upgrade">{formatPrice(scaleUpgradeZAR)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-accent font-medium pt-2 border-t">
                     <span>Total Package Value</span>
-                    <span data-testid="text-total-value">{formatPrice(totalValue)}</span>
+                    <span data-testid="text-total-value">{formatPrice(totalValueZAR)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-primary">
                     <span>Your Savings</span>
-                    <span data-testid="text-savings">{formatPrice(savings)}</span>
+                    <span data-testid="text-savings">{formatPrice(savingsZAR)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t">
                     <span>Total Due Today</span>
                     <span className="text-primary" data-testid="text-total">
-                      {formatPrice(totalPrice)}
+                      {formatPrice(totalPriceZAR)}
                     </span>
                   </div>
                 </div>
@@ -229,16 +229,16 @@ export default function CheckoutMembershipPlatinum() {
             type: "membership",
             description: "Starter Membership (Annual)",
             quantity: 1,
-            unitAmount: String(entryPrice),
+            unitAmount: String(entryPriceZAR),
           },
           {
             type: "membership_upgrade",
             description: "Scale Tier Upgrade (15x Basic + 3x Pro)",
             quantity: 1,
-            unitAmount: String(scaleUpgrade),
+            unitAmount: String(scaleUpgradeZAR),
           },
         ]}
-        totalAmount={totalPrice}
+        totalAmount={totalPriceZAR}
         purchaseType="Scale Membership (Annual)"
       />
     </div>

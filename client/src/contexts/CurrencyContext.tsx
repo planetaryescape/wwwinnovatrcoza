@@ -6,6 +6,7 @@ interface CurrencyContextType {
   currency: Currency;
   setCurrency: (currency: Currency) => void;
   formatPrice: (zarAmount: number) => string;
+  formatShortPrice: (zarAmount: number) => string;
   convertToDisplay: (zarAmount: number) => number;
 }
 
@@ -36,17 +37,23 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const formatPrice = (zarAmount: number): string => {
     const amount = convertToDisplay(zarAmount);
     if (currency === "USD") {
-      // Format USD with proper decimal places for amounts under $1000
-      if (amount < 1000) {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
-      }
       return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
     }
     return new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
   };
 
+  const formatShortPrice = (zarAmount: number): string => {
+    const amount = convertToDisplay(zarAmount);
+    const prefix = currency === "USD" ? "$" : "R";
+    if (amount >= 1000) {
+      const shortened = Math.round(amount / 1000);
+      return `${prefix}${shortened}k`;
+    }
+    return `${prefix}${Math.round(amount)}`;
+  };
+
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency, formatPrice, convertToDisplay }}>
+    <CurrencyContext.Provider value={{ currency, setCurrency, formatPrice, formatShortPrice, convertToDisplay }}>
       {children}
     </CurrencyContext.Provider>
   );

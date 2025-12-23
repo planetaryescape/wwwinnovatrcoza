@@ -4,12 +4,11 @@ import { ArrowLeft, Check, Star, ShoppingCart } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import OrderFormDialog from "@/components/OrderFormDialog";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
-const starterFeatures = [
+const starterFeaturesBase = [
   "Trends Report Access",
   "Discounted Research Pricing",
-  "Test24 Basic: R5,000 per idea (50% off)",
-  "Test24 Pro: R45,000 per study (10% off)",
   "Private Dashboard Access",
   "Priority Email Support",
   "Monthly Industry Insights",
@@ -19,6 +18,7 @@ export default function CheckoutMembershipEntry() {
   const [, setLocation] = useLocation();
   const [paymentType, setPaymentType] = useState<"monthly" | "annual">("annual");
   const [showOrderForm, setShowOrderForm] = useState(false);
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -28,14 +28,17 @@ export default function CheckoutMembershipEntry() {
     setShowOrderForm(true);
   };
 
-  const formatPrice = (price: number) => {
-    return `R${price.toLocaleString()}`;
-  };
-
-  const monthlyPrice = 5000;
-  const annualPrice = 60000;
-  const monthlyEquivalent = 5000;
-  const totalDueToday = paymentType === "monthly" ? monthlyPrice : annualPrice;
+  const monthlyPriceZAR = 5000;
+  const annualPriceZAR = 60000;
+  const basicPriceZAR = 5000;
+  const proPriceZAR = 45000;
+  const totalDueTodayZAR = paymentType === "monthly" ? monthlyPriceZAR : annualPriceZAR;
+  
+  const starterFeatures = [
+    ...starterFeaturesBase,
+    `Test24 Basic: ${formatPrice(basicPriceZAR)} per idea (50% off)`,
+    `Test24 Pro: ${formatPrice(proPriceZAR)} per study (10% off)`,
+  ];
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -96,7 +99,7 @@ export default function CheckoutMembershipEntry() {
                     </div>
                     <div className="mb-2">
                       <span className="text-3xl font-bold text-primary">
-                        {formatPrice(monthlyPrice)}
+                        {formatPrice(monthlyPriceZAR)}
                       </span>
                       <span className="text-muted-foreground ml-1">/month</span>
                     </div>
@@ -126,7 +129,7 @@ export default function CheckoutMembershipEntry() {
                     </div>
                     <div className="mb-2">
                       <span className="text-3xl font-bold text-primary">
-                        {formatPrice(annualPrice)}
+                        {formatPrice(annualPriceZAR)}
                       </span>
                       <span className="text-muted-foreground ml-1">/year</span>
                     </div>
@@ -139,7 +142,7 @@ export default function CheckoutMembershipEntry() {
                 {paymentType === "annual" && (
                   <div className="mt-4 bg-accent/10 border border-accent/20 rounded-lg p-4">
                     <p className="text-sm font-medium text-accent">
-                      Save with annual billing - just {formatPrice(monthlyEquivalent)}/month equivalent
+                      Save with annual billing - just {formatPrice(monthlyPriceZAR)}/month equivalent
                     </p>
                   </div>
                 )}
@@ -162,12 +165,12 @@ export default function CheckoutMembershipEntry() {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="border rounded-lg p-4">
                       <h4 className="font-semibold mb-1">Test24 Basic</h4>
-                      <p className="text-2xl font-bold text-primary">R5,000</p>
+                      <p className="text-2xl font-bold text-primary">{formatPrice(basicPriceZAR)}</p>
                       <p className="text-sm text-muted-foreground">per idea (50% off PAYG)</p>
                     </div>
                     <div className="border rounded-lg p-4">
                       <h4 className="font-semibold mb-1">Test24 Pro</h4>
-                      <p className="text-2xl font-bold text-primary">R45,000</p>
+                      <p className="text-2xl font-bold text-primary">{formatPrice(proPriceZAR)}</p>
                       <p className="text-sm text-muted-foreground">per study (10% off PAYG)</p>
                     </div>
                   </div>
@@ -236,19 +239,19 @@ export default function CheckoutMembershipEntry() {
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Monthly Price</span>
                         <span data-testid="text-monthly-price" className="font-semibold">
-                          {formatPrice(monthlyPrice)}
+                          {formatPrice(monthlyPriceZAR)}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Total for 12 months</span>
                         <span className="text-accent" data-testid="text-12-month-total">
-                          {formatPrice(monthlyPrice * 12)}
+                          {formatPrice(monthlyPriceZAR * 12)}
                         </span>
                       </div>
                       <div className="flex justify-between text-lg font-bold pt-2 border-t">
                         <span>Due Today</span>
                         <span className="text-primary" data-testid="text-total">
-                          {formatPrice(totalDueToday)}
+                          {formatPrice(totalDueTodayZAR)}
                         </span>
                       </div>
                     </>
@@ -257,17 +260,17 @@ export default function CheckoutMembershipEntry() {
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Annual Price</span>
                         <span data-testid="text-annual-price" className="font-semibold">
-                          {formatPrice(annualPrice)}
+                          {formatPrice(annualPriceZAR)}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Monthly Equivalent</span>
-                        <span className="text-accent">{formatPrice(monthlyPrice)}/month</span>
+                        <span className="text-accent">{formatPrice(monthlyPriceZAR)}/month</span>
                       </div>
                       <div className="flex justify-between text-lg font-bold pt-2 border-t">
                         <span>Total Due Today</span>
                         <span className="text-primary" data-testid="text-total">
-                          {formatPrice(totalDueToday)}
+                          {formatPrice(totalDueTodayZAR)}
                         </span>
                       </div>
                     </>
@@ -307,17 +310,17 @@ export default function CheckoutMembershipEntry() {
             type: "membership",
             description: `Starter Membership (${paymentType === "monthly" ? "Monthly" : "Annual"})`,
             quantity: 1,
-            unitAmount: String(totalDueToday),
+            unitAmount: String(totalDueTodayZAR),
           },
         ]}
-        totalAmount={totalDueToday}
+        totalAmount={totalDueTodayZAR}
         purchaseType={`Starter Membership (${paymentType === "monthly" ? "Monthly" : "Annual"})`}
         subscriptionOptions={paymentType === "monthly" ? {
           enabled: true,
           subscriptionType: 1, // Fixed subscription
           frequency: 3, // Monthly
           cycles: 12, // 12 months
-          recurringAmount: monthlyPrice, // R5,000 per month
+          recurringAmount: monthlyPriceZAR,
         } : undefined}
       />
     </div>

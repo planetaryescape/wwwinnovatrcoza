@@ -4,19 +4,12 @@ import { ArrowLeft, Check, Crown, ShoppingCart, Star } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import OrderFormDialog from "@/components/OrderFormDialog";
-
-const growthFeatures = [
-  "Everything in Starter membership",
-  "10x Test24 Basic ideas included (~R50k value)",
-  "2x Test24 Pro Studies included (~R90k value)",
-  "Priority support & faster response times",
-  "Advanced analytics dashboard",
-  "Quarterly strategy session",
-];
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 export default function CheckoutMembershipGold() {
   const [, setLocation] = useLocation();
   const [showOrderForm, setShowOrderForm] = useState(false);
+  const { formatPrice, formatShortPrice } = useCurrency();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -26,15 +19,22 @@ export default function CheckoutMembershipGold() {
     setShowOrderForm(true);
   };
 
-  const formatPrice = (price: number) => {
-    return `R${price.toLocaleString()}`;
-  };
+  const entryPriceZAR = 60000;
+  const growthUpgradeZAR = 120000;
+  const totalPriceZAR = 180000;
+  const totalValueZAR = 260000;
+  const basicValueZAR = 50000;
+  const proValueZAR = 90000;
+  const savingsZAR = totalValueZAR - totalPriceZAR;
 
-  const entryPrice = 60000;
-  const growthUpgrade = 120000;
-  const totalPrice = 180000;
-  const totalValue = 260000;
-  const savings = totalValue - totalPrice;
+  const growthFeatures = [
+    "Everything in Starter membership",
+    `10x Test24 Basic ideas included (~${formatShortPrice(basicValueZAR)} value)`,
+    `2x Test24 Pro Studies included (~${formatShortPrice(proValueZAR)} value)`,
+    "Priority support & faster response times",
+    "Advanced analytics dashboard",
+    "Quarterly strategy session",
+  ];
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -103,7 +103,7 @@ export default function CheckoutMembershipGold() {
                       <ul className="space-y-1 text-sm text-muted-foreground">
                         <li>• 10 Basic credits included</li>
                         <li>• 2 Pro studies included</li>
-                        <li>• ~R260k total value</li>
+                        <li>• ~{formatShortPrice(totalValueZAR)} total value</li>
                       </ul>
                     </div>
                   </div>
@@ -112,11 +112,11 @@ export default function CheckoutMembershipGold() {
                     <h3 className="font-semibold text-accent mb-1">Included Credits</h3>
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-sm">10x Test24 Basic ideas</span>
-                      <span className="font-semibold">~R50,000 value</span>
+                      <span className="font-semibold">~{formatPrice(basicValueZAR)} value</span>
                     </div>
                     <div className="flex items-center justify-between mt-1">
                       <span className="text-sm">2x Test24 Pro studies</span>
-                      <span className="font-semibold">~R90,000 value</span>
+                      <span className="font-semibold">~{formatPrice(proValueZAR)} value</span>
                     </div>
                   </div>
                 </div>
@@ -168,24 +168,24 @@ export default function CheckoutMembershipGold() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Starter Membership Base</span>
-                    <span className="font-semibold" data-testid="text-entry-price">{formatPrice(entryPrice)}</span>
+                    <span className="font-semibold" data-testid="text-entry-price">{formatPrice(entryPriceZAR)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Growth Tier Upgrade</span>
-                    <span className="font-semibold" data-testid="text-gold-upgrade">{formatPrice(growthUpgrade)}</span>
+                    <span className="font-semibold" data-testid="text-gold-upgrade">{formatPrice(growthUpgradeZAR)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-accent font-medium pt-2 border-t">
                     <span>Total Package Value</span>
-                    <span data-testid="text-total-value">{formatPrice(totalValue)}</span>
+                    <span data-testid="text-total-value">{formatPrice(totalValueZAR)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-primary">
                     <span>Your Savings</span>
-                    <span data-testid="text-savings">{formatPrice(savings)}</span>
+                    <span data-testid="text-savings">{formatPrice(savingsZAR)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t">
                     <span>Total Due Today</span>
                     <span className="text-primary" data-testid="text-total">
-                      {formatPrice(totalPrice)}
+                      {formatPrice(totalPriceZAR)}
                     </span>
                   </div>
                 </div>
@@ -221,16 +221,16 @@ export default function CheckoutMembershipGold() {
             type: "membership",
             description: "Starter Membership (Annual)",
             quantity: 1,
-            unitAmount: String(entryPrice),
+            unitAmount: String(entryPriceZAR),
           },
           {
             type: "membership_upgrade",
             description: "Growth Tier Upgrade (10x Basic + 2x Pro)",
             quantity: 1,
-            unitAmount: String(growthUpgrade),
+            unitAmount: String(growthUpgradeZAR),
           },
         ]}
-        totalAmount={totalPrice}
+        totalAmount={totalPriceZAR}
         purchaseType="Growth Membership (Annual)"
       />
     </div>
