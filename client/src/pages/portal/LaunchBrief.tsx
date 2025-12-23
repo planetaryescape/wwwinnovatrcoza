@@ -2458,7 +2458,7 @@ export default function LaunchBrief() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-blue-600 dark:text-blue-400">Amount to pay:</span>
-                    <span className="font-medium text-blue-700 dark:text-blue-300">R{amountToPayFor.toLocaleString()}</span>
+                    <span className="font-medium text-blue-700 dark:text-blue-300">{formatPrice(amountToPayFor)}</span>
                   </div>
                 </div>
               </div>
@@ -2473,12 +2473,12 @@ export default function LaunchBrief() {
                   {creditsRequired} {requiredCreditsType} Credit{creditsRequired > 1 ? "s" : ""}
                 </span>
               ) : formData.billingPreference === "credits_plus_payment" ? (
-                <span className="text-2xl font-bold text-primary">
-                  R{amountToPayFor.toLocaleString()}
+                <span className="text-2xl font-bold text-primary" data-testid="text-total-amount">
+                  {formatPrice(amountToPayFor)}
                 </span>
               ) : (
-                <span className="text-2xl font-bold text-primary">
-                  R{totalPrice.toLocaleString()}
+                <span className="text-2xl font-bold text-primary" data-testid="text-total-amount">
+                  {formatPrice(totalPrice)}
                 </span>
               )}
             </div>
