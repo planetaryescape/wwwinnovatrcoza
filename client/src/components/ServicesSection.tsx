@@ -30,7 +30,7 @@ const services: Service[] = [
     priceSuffix: " / idea",
     link: "/test24-basic",
     features: [
-      "Lite Testing (x100 consumers)",
+      "Lite Testing (x100 consumers) 5min",
       "Automated briefing & reporting",
       "24hr turnaround",
     ],
@@ -47,7 +47,7 @@ const services: Service[] = [
     priceSuffix: " / study",
     link: "/test24-pro",
     features: [
-      "Full Testing (+100)",
+      "Full Testing (+100) 15min",
       "Custom Audience",
       "Quant + AI Qual",
     ],
