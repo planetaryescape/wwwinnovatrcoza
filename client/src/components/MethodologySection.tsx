@@ -73,7 +73,7 @@ export default function MethodologySection() {
             
             <div className="relative aspect-video rounded-lg overflow-hidden bg-muted/50 border border-border -mx-2 sm:mx-0">
               <iframe
-                src="https://player.vimeo.com/video/1138122776?badge=0&autopause=0&player_id=0&app_id=58479&title=0&byline=0&portrait=0&vimeo_logo=0&dnt=1"
+                src="https://player.vimeo.com/video/1138122776?badge=0&autopause=0&player_id=0&app_id=58479&title=0&byline=0&portrait=0&vimeo_logo=0&dnt=1&pip=0&keyboard=1&quality=auto"
                 className="w-full h-full absolute top-0 left-0"
                 frameBorder="0"
                 allow="fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
