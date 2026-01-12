@@ -5,7 +5,6 @@ import { X, Menu, ArrowRight, ArrowDown, Target, Lightbulb, Trophy, TrendingUp, 
 import { SiLinkedin, SiInstagram } from "react-icons/si";
 import { Link, useLocation } from "wouter";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
 
 const pillars = [
@@ -839,7 +838,6 @@ export default function CinematicLanding() {
           </div>
         </section>
       </div>
-      <Footer />
       {/* Menu Overlay */}
       <AnimatePresence>
         {menuOpen && (
