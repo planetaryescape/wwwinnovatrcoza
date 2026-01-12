@@ -402,33 +402,18 @@ export default function CinematicLanding() {
         {/* Nav Links */}
         <div className="flex flex-col items-center gap-10">
           {navItems.map((item) => (
-            item.href ? (
-              <Link key={item.label} href={item.href}>
-                <span 
-                  className="text-xs tracking-[0.2em] text-white hover:text-white/70 transition-colors font-normal cursor-pointer lowercase"
-                  style={{ 
-                    writingMode: "vertical-rl",
-                    fontFamily: "Roboto, sans-serif"
-                  }}
-                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                >
-                  {item.label.toLowerCase()}
-                </span>
-              </Link>
-            ) : (
-              <button
-                key={item.label}
-                onClick={item.action}
-                className="text-xs tracking-[0.2em] text-white hover:text-white/70 transition-colors font-normal lowercase"
-                style={{ 
-                  writingMode: "vertical-rl",
-                  fontFamily: "Roboto, sans-serif"
-                }}
-                data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-              >
-                {item.label.toLowerCase()}
-              </button>
-            )
+            <button
+              key={item.label}
+              onClick={item.action}
+              className="text-xs tracking-[0.2em] text-white hover:text-white/70 transition-colors font-normal lowercase"
+              style={{ 
+                writingMode: "vertical-rl",
+                fontFamily: "Roboto, sans-serif"
+              }}
+              data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+            >
+              {item.label.toLowerCase()}
+            </button>
           ))}
         </div>
         
@@ -1022,30 +1007,16 @@ export default function CinematicLanding() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.1 }}
                   >
-                    {item.action ? (
-                      <button
-                        onClick={() => {
-                          setMenuOpen(false);
-                          item.action();
-                        }}
-                        className="text-2xl sm:text-3xl text-white/80 hover:text-white transition-colors font-light cursor-pointer"
-                        data-testid={`menu-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                      >
-                        {item.label}
-                      </button>
-                    ) : (
-                      <Link 
-                        href={item.href!}
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        <span 
-                          className="text-2xl sm:text-3xl text-white/80 hover:text-white transition-colors font-light cursor-pointer"
-                          data-testid={`menu-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                        >
-                          {item.label}
-                        </span>
-                      </Link>
-                    )}
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        item.action();
+                      }}
+                      className="text-2xl sm:text-3xl text-white/80 hover:text-white transition-colors font-light cursor-pointer"
+                      data-testid={`menu-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                    >
+                      {item.label}
+                    </button>
                   </motion.div>
                 ))}
                 
