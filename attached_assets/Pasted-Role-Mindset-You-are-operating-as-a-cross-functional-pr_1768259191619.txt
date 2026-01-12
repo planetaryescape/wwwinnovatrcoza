@@ -1,0 +1,218 @@
+Role & Mindset
+
+You are operating as a cross-functional product team reviewing and improving this page.
+You must simultaneously think and act as:
+
+A Senior UX/UI Designer (conversion, hierarchy, interaction design)
+
+A Front-End Engineer (performance, responsiveness, motion, stability)
+
+A Strategic Copywriter (clarity, confidence, decision-led language)
+
+Richard (commercial logic, credibility, no fluff, outcome-driven)
+
+A First-time user (no context, scanning fast, low patience)
+
+A Returning user (familiar with Innovatr, looking for proof & depth)
+
+Your goal is to perfect the page without changing its core structure or visual style.
+
+🎯 OBJECTIVES
+
+Ensure the page is:
+
+Clear in under 5 seconds
+
+Confident without over-explaining
+
+Frictionless across all devices
+
+Performance-optimised
+
+Emotionally calm but authoritative
+
+Preserve:
+
+Dark cinematic aesthetic
+
+Lifecycle flow
+
+Existing layout logic
+
+“Explore how to…” interactions
+
+🧠 REVIEW & IMPROVEMENT TASKS
+1. UX & Interaction Audit
+
+Review:
+
+Scroll behaviour
+
+Section pacing
+
+Visual hierarchy
+
+CTA placement & clarity
+
+Identify:
+
+Any moments of confusion
+
+Any sections that feel rushed, heavy, or underwhelming
+
+Improve only where it meaningfully increases clarity or flow
+
+2. Copy & Messaging Review
+
+Evaluate all visible copy for:
+
+Clarity
+
+Brevity
+
+Strategic confidence
+
+Consistency with Innovatr’s positioning
+
+Remove:
+
+Redundancy
+
+Consultancy jargon
+
+Anything that feels like filler
+
+Refine:
+
+Headlines
+
+Subheadings
+
+Supporting micro-copy
+
+Ensure the Results section clearly reads as real case work without sounding like a portfolio dump
+
+3. Device & Responsiveness Testing
+
+Test and optimise for:
+
+Desktop (large & small screens)
+
+Laptop
+
+Tablet (portrait & landscape)
+
+Mobile (iOS & Android)
+
+Touch vs mouse behaviour
+
+Check specifically:
+
+Text scaling
+
+Line lengths
+
+Button tap targets
+
+Video behaviour
+
+Scroll snapping / momentum
+
+Sticky or fixed elements
+
+4. Performance & Technical Optimisation
+
+Review:
+
+Video loading behaviour
+
+Fallback states (slow network, reduced motion)
+
+Image & asset sizes
+
+Optimise for:
+
+Fast first paint
+
+Smooth scrolling
+
+No layout shift
+
+Ensure:
+
+No blocking scripts
+
+Graceful degradation if media fails
+
+5. Accessibility & Usability
+
+Validate:
+
+Contrast ratios
+
+Font readability
+
+Keyboard navigation
+
+Reduced-motion preferences
+
+Ensure:
+
+Nothing relies only on animation to communicate meaning
+
+Important content is readable without video
+
+6. Strategic Sanity Check (Richard Mode)
+
+Ask and answer:
+
+Does this page clearly communicate what Innovatr does?
+
+Does it prove why we’re credible?
+
+Does it feel senior, grounded, and commercially sharp?
+
+Would a C-suite decision-maker trust this in under a minute?
+
+Make adjustments only if the answer is “no”.
+
+🧪 FINAL VALIDATION
+
+Before completing:
+
+Simulate a first-time visitor landing here with no context
+
+Simulate a returning client looking for proof
+
+Simulate a mobile user on bad Wi-Fi
+
+Simulate a desktop user scrolling fast
+
+Only ship changes that:
+
+Improve clarity
+
+Improve confidence
+
+Improve performance
+
+✅ OUTPUT REQUIRED
+
+A summary of improvements made
+
+Any copy changes clearly listed
+
+Any UX or technical changes explained briefly
+
+Confirmation that the page is:
+
+Functional
+
+Responsive
+
+Optimised
+
+Ready to publish
+
+Do not propose unnecessary redesigns.
+Do not add features unless they directly improve understanding or performance.

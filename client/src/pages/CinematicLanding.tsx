@@ -479,29 +479,34 @@ export default function CinematicLanding() {
         {/* Sticky Video Container */}
         <div className="sticky top-0 h-screen w-full overflow-hidden">
           {/* Video Background */}
-          {!reducedMotion ? (
+          {!reducedMotion && !videoError ? (
             <motion.div 
               className="absolute inset-0"
               style={{ opacity: heroOpacity }}
             >
               <video
                 ref={videoRef}
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover pointer-events-none"
                 muted
+                autoPlay
+                loop
                 playsInline
                 preload="auto"
-                autoPlay={useAutoplay}
-                loop={useAutoplay}
                 onLoadedMetadata={() => {
+                  console.log("[Video] Metadata loaded, duration:", videoRef.current?.duration);
                   setVideoLoaded(true);
-                  if (videoRef.current && !useAutoplay) {
+                  if (videoRef.current) {
                     videoRef.current.currentTime = 0;
+                    tryPlayVideo();
                   }
                 }}
                 onCanPlay={() => {
-                  if (useAutoplay && videoRef.current) {
-                    videoRef.current.play().catch(() => {});
-                  }
+                  console.log("[Video] Can play");
+                  tryPlayVideo();
+                }}
+                onError={() => {
+                  console.log("[Video] Error loading video, activating fallback");
+                  setVideoError(true);
                 }}
                 poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Crect fill='%230a0a0f' width='1920' height='1080'/%3E%3C/svg%3E"
                 data-testid="video-background"
