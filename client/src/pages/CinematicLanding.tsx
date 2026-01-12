@@ -166,7 +166,7 @@ function HumorSection() {
           <div className="flex flex-col items-center justify-center gap-6 sm:gap-8 md:gap-10 text-[#fafafa]">
             <motion.p
               style={{ opacity: line1Opacity }}
-              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white/60 font-light tracking-wide"
+              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light tracking-wide text-[#fafafa]"
               data-testid="humor-line-1"
             >
               {humorLines[0].text}
