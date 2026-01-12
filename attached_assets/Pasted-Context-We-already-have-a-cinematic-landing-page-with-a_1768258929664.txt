@@ -1,0 +1,216 @@
+Context
+We already have a cinematic landing page with a hero background video. The video file exists, is MP4 (~7.5MB), and is intended to act as a hero background with optional scroll-scrubbing. However, autoplay restrictions, metadata timing, and browser quirks are preventing reliable playback.
+
+Your task is to make the video reliably visible and functional across all modern browsers, with graceful fallbacks.
+
+This is a stability + compatibility task, not a redesign.
+
+PRIMARY GOAL (DO NOT MISS THIS)
+
+The hero video must:
+
+Always render visually (never disappear / stay black)
+
+Autoplay & loop where allowed
+
+Scroll-scrub when possible
+
+Fall back to looping autoplay if scroll-scrub fails
+
+Fall back to a static background if video playback is blocked
+
+Never block page interaction or scrolling
+
+STEP 1 — FILE & PATH (CRITICAL)
+
+Rename the video file to remove spaces & capitals:
+
+consult-landing.mp4
+
+
+Move it into a true public/static directory so it is served directly:
+
+/public/video/consult-landing.mp4
+
+
+Confirm it is accessible at:
+
+https://<site-url>/video/consult-landing.mp4
+
+
+(Must return 200 OK, not 404.)
+
+STEP 2 — VIDEO ELEMENT (NON-NEGOTIABLE ATTRIBUTES)
+
+Update the hero <video> element so it includes all of the following:
+
+muted
+
+autoplay
+
+loop
+
+playsInline
+
+preload="auto"
+
+controls={false}
+
+It must:
+
+Be positioned as a full-bleed background
+
+Use object-fit: cover
+
+Ignore pointer events
+
+Sit behind all hero text
+
+The video should be allowed to autoplay even if scroll-scrubbing is used.
+
+STEP 3 — PLAYBACK STRATEGY (OPTION B IMPLEMENTATION)
+The video must support two modes:
+Mode 1 — Scroll-scrub (preferred)
+
+Only initialise scroll-scrubbing after loadedmetadata fires
+
+Do not assume video.duration exists on load
+
+Clamp scroll progress safely between 0 and 1
+
+Use requestAnimationFrame for smooth updates
+
+Never let currentTime exceed duration
+
+Mode 2 — Autoplay fallback (mandatory)
+
+If any of the following occur:
+
+video.play() is blocked
+
+loadedmetadata does not fire in time
+
+Scroll-scrub logic fails
+
+Then:
+
+Allow the video to loop naturally using autoplay
+
+Do not hide or remove the video
+
+Do not block scrolling
+
+Scroll-scrub should enhance playback, not gate it.
+
+STEP 4 — USER INTERACTION SAFETY NET
+
+Because browsers often allow autoplay after interaction:
+
+Attempt video.play():
+
+on loadedmetadata
+
+on first click
+
+on first touchstart
+
+Catch and handle autoplay rejection silently
+
+Do not throw errors or break layout
+
+This ensures the video starts as soon as the browser permits it.
+
+STEP 5 — FALLBACK IF VIDEO CANNOT PLAY
+
+If the video:
+
+Errors
+
+Is blocked
+
+Or fails to load
+
+Then:
+
+Show the existing hero gradient/background immediately
+
+Do not leave an empty or black container
+
+Do not block hero text
+
+This fallback must feel intentional, not broken.
+
+STEP 6 — ENCODING CHECK (ONLY IF NEEDED)
+
+If playback is still unreliable, assume encoding incompatibility.
+
+Re-encode the video using web-safe H.264 with:
+
+Baseline or Main profile
+
+yuv420p pixel format
+
+Fast-start enabled
+
+Replace the file without changing the path.
+
+STEP 7 — DEBUGGING (TEMPORARY, DEV ONLY)
+
+Add console logs to confirm:
+
+Video src URL
+
+Metadata loaded (duration, dimensions)
+
+Autoplay blocked or allowed
+
+Fallback activated
+
+Remove or silence logs once confirmed working.
+
+ACCEPTANCE CRITERIA (MUST ALL PASS)
+
+Video loads with 200 OK
+
+Video is visible immediately on page load
+
+Video autoplays silently on desktop
+
+Video plays on iOS Safari after first interaction
+
+Scroll-scrub works when metadata is available
+
+If scroll-scrub fails, video still loops
+
+If video fails entirely, hero still looks premium
+
+No console errors
+
+No layout shift
+
+IMPORTANT CONSTRAINTS
+
+Do NOT redesign the hero
+
+Do NOT remove scroll-scrub logic
+
+Do NOT require user clicks to see the hero
+
+Do NOT break accessibility or reduced-motion settings
+
+DELIVERABLE
+
+After implementation:
+
+Confirm the final video path
+
+Confirm which playback mode is active by default
+
+Confirm fallback behaviour
+
+Confirm cross-browser testing (Chrome, Safari, Mobile)
+
+Final instruction
+
+Prioritise reliability over cleverness.
+A looping background video that always works is better than a perfect scroll-scrub that sometimes fails.
