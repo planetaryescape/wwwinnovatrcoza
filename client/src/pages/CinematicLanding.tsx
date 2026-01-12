@@ -5,6 +5,7 @@ import { X, Menu, ArrowRight, ArrowDown, Target, Lightbulb, Trophy, TrendingUp, 
 import { Link, useLocation } from "wouter";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Footer from "@/components/Footer";
+import CustomCursor from "@/components/CustomCursor";
 
 const pillars = [
   {
@@ -221,7 +222,9 @@ export default function CinematicLanding() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white">
+    <div className="min-h-screen bg-[#0a0a0f] text-white cursor-none">
+      <CustomCursor />
+      
       {/* Fixed Header - Always visible */}
       <header className="fixed top-0 left-0 right-0 z-50 px-6 py-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
