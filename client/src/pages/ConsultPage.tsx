@@ -80,29 +80,6 @@ const pillars = [
   }
 ];
 
-const results = [
-  {
-    pillar: "Where to focus",
-    outcome: "Driving adoption of autonomous vehicles in Germany through strategic test-market design.",
-    context: "Mapped opportunity spaces & identified the right audience segments for early market entry."
-  },
-  {
-    pillar: "How to play",
-    outcome: "Supporting the shift from hardware manufacturing to a scalable cloud services model.",
-    context: "Developed new propositions & service concepts to accelerate digital transformation."
-  },
-  {
-    pillar: "How to win",
-    outcome: "Helping a national telecoms brand lead the smart-home category.",
-    context: "Screened & optimised concepts, built the commercial case for executive sign-off."
-  },
-  {
-    pillar: "What's working",
-    outcome: "Enabling real-time visibility into competitive dynamics for a global beverage brand.",
-    context: "Established always-on tracking to inform ongoing portfolio & activation decisions."
-  }
-];
-
 const clientLogos = [
   "Nando's",
   "Revlon",
@@ -139,7 +116,7 @@ export default function ConsultPage() {
   const [, setLocation] = useLocation();
   const [activePillar, setActivePillar] = useState(0);
   const lifecycleRef = useRef<HTMLDivElement>(null);
-  const whatWeDoRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
   
   const { scrollYProgress } = useScroll({
     target: lifecycleRef,
@@ -159,8 +136,8 @@ export default function ConsultPage() {
     });
   }, [pillarProgress]);
 
-  const scrollToWhatWeDo = () => {
-    whatWeDoRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToResults = () => {
+    resultsRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -201,7 +178,7 @@ export default function ConsultPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
                 size="lg"
-                onClick={scrollToWhatWeDo}
+                onClick={scrollToResults}
                 className="bg-transparent border border-[#4D5FF1]/50 hover:bg-[#4D5FF1]/10 text-white px-8 group"
                 data-testid="button-explore-lifecycle"
               >
@@ -281,87 +258,24 @@ export default function ConsultPage() {
         </div>
       </section>
 
-      {/* RESULTS Section */}
-      <section className="py-32 bg-[#0d0d18]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal className="mb-12">
-            <h2 className="text-5xl sm:text-6xl md:text-7xl font-serif font-bold text-white uppercase tracking-tight text-center">
+      {/* RESULTS Section - Title + Subheading */}
+      <section ref={resultsRef} className="pt-32 pb-16 bg-[#0a0a0f]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <ScrollReveal>
+            <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-serif font-bold text-white uppercase tracking-tight mb-10">
               Results
             </h2>
           </ScrollReveal>
           
-          <ScrollReveal delay={0.1} className="max-w-3xl mx-auto text-center mb-16">
-            <p className="text-xl text-gray-300 mb-4">
-              Real outcomes from real decisions — across innovation, growth & transformation.
-            </p>
-            <p className="text-gray-500">
-              Each result reflects a specific business challenge, a clear learning agenda & a confident decision made.
-            </p>
-          </ScrollReveal>
-          
-          <div className="grid md:grid-cols-2 gap-8">
-            {results.map((result, index) => (
-              <ScrollReveal key={index} delay={index * 0.1}>
-                <Card className="bg-[#12121a] border-gray-800/50 hover:border-gray-700/50 transition-colors overflow-hidden h-full">
-                  <CardContent className="p-0">
-                    <div 
-                      className="h-0.5"
-                      style={{ backgroundColor: pillars.find(p => p.title === result.pillar)?.color || "#4D5FF1" }}
-                    />
-                    <div className="p-8">
-                      <span 
-                        className="text-xs uppercase tracking-wider"
-                        style={{ color: pillars.find(p => p.title === result.pillar)?.color }}
-                      >
-                        {result.pillar}
-                      </span>
-                      
-                      <p className="text-lg text-white mt-4 mb-4 leading-relaxed">
-                        {result.outcome}
-                      </p>
-                      
-                      <p className="text-gray-500 text-sm">
-                        {result.context}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* WHAT WE DO Orientation Section */}
-      <section ref={whatWeDoRef} className="py-32 bg-[#0a0a0f]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <ScrollReveal>
-            <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-serif font-bold text-white uppercase tracking-tight mb-10">
-              What We Do
-            </h2>
-          </ScrollReveal>
-          
           <ScrollReveal delay={0.15}>
-            <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto mb-8" style={{ opacity: 0.9 }}>
-              Four phases that connect, overlap & adapt. Designed to work together or independently.
+            <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto" style={{ opacity: 0.9 }}>
+              Four phases that connect, overlap, and adapt. Designed to work together or independently.
             </p>
-          </ScrollReveal>
-          
-          <ScrollReveal delay={0.25}>
-            <div className="max-w-2xl mx-auto text-gray-500 space-y-4">
-              <p>
-                Some clients start by defining the opportunity.<br />
-                Others arrive with ideas, live products, or performance questions.
-              </p>
-              <p>
-                Our work flexes to where you are — & what decision you need to make next.
-              </p>
-            </div>
           </ScrollReveal>
         </div>
       </section>
 
-      {/* The Lifecycle - Pillar Section */}
+      {/* The Lifecycle - Pillar Section (directly under RESULTS) */}
       <section 
         ref={lifecycleRef} 
         className="relative min-h-[500vh]"
