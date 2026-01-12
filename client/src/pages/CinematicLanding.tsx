@@ -263,7 +263,7 @@ export default function CinematicLanding() {
                 className="absolute inset-0 w-full h-full object-cover"
                 muted
                 playsInline
-                preload="metadata"
+                preload="auto"
                 onLoadedMetadata={() => {
                   setVideoLoaded(true);
                   if (videoRef.current) {
@@ -273,7 +273,7 @@ export default function CinematicLanding() {
                 poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Crect fill='%230a0a0f' width='1920' height='1080'/%3E%3C/svg%3E"
                 data-testid="video-background"
               >
-                <source src="/video/innovatr-landing.mp4" type="video/mp4" />
+                <source src="/video/consult-landing.mp4" type="video/mp4" />
               </video>
             </motion.div>
           ) : (
