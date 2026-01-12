@@ -1,0 +1,225 @@
+CONTEXT & INTENT
+
+You are working on the Innovatr Consult page.
+This page should feel confident, senior, cinematic, and intentional — not busy, not salesy, not startup-y.
+
+The inspiration is high-end consulting and innovation studios such as:
+
+grannyandsmith.com
+
+gladeye.com
+
+cuberto.com
+
+The goal is to:
+
+Establish credibility through track record
+
+Show proof through results (case studies)
+
+Orient users before they enter the four consult phases
+
+This page is not linear.
+It should communicate flexibility, modularity, and strategic depth.
+
+PART 1 — REPLACE “WHY CONSULT” WITH “TRACK RECORD”
+SECTION PURPOSE
+
+This section establishes credibility and trust before explaining the work.
+
+SECTION TITLE
+
+Replace the existing “WHY CONSULT” label entirely.
+
+Title (large, animated on scroll):
+TRACK RECORD
+
+Font: DM Serif Display
+
+All caps
+
+Bold
+
+White on black
+
+Appears with a subtle scroll-triggered reveal (fade + slight upward movement)
+
+No decorative elements
+
+CONTENT UNDER TITLE
+
+Below “TRACK RECORD”, include:
+
+A short credibility statement (lightweight, not verbose)
+
+Existing logos / brand proof (current content can remain, just reframed)
+
+Tone guidance:
+
+Confident
+
+Matter-of-fact
+
+No hype language
+
+Example supporting copy (can be refined but use this intent):
+
+Proven delivery across complex, high-stakes innovation challenges — from early direction setting to execution and optimisation.
+
+Logos should:
+
+Sit comfortably below the title
+
+Feel editorial, not grid-heavy
+
+Be evenly spaced and visually calm
+
+PART 2 — CHANGE “CASE STUDIES” TO “RESULTS”
+SECTION PURPOSE
+
+This section demonstrates outcomes, not storytelling for its own sake.
+
+SECTION TITLE
+
+Replace “CASE STUDIES” with:
+
+RESULTS
+
+Font: DM Serif Display
+
+Large, bold, white
+
+Scroll-triggered reveal (same animation style as “TRACK RECORD”)
+
+Appears before any cards or imagery
+
+This title should feel like a statement, not a navigation label.
+
+CASE STUDY / RESULT CARDS
+
+Keep the existing case study layout, but reframe the intent:
+
+These are results, not narratives
+
+Each card should prioritise:
+
+Outcome
+
+Impact
+
+Strategic shift
+
+Guidelines for cards:
+
+Minimal copy
+
+Clear outcome framing
+
+No unnecessary metadata
+
+Clean hover states only (no excessive animation)
+
+This section should feel earned, not promotional.
+
+PART 3 — ADD A “WHAT WE DO” ORIENTATION SECTION BEFORE THE FOUR PHASES
+SECTION PURPOSE
+
+This section prepares users for the four consult phases without implying a linear journey.
+
+It is an orientation moment, not an explanation.
+
+SECTION TITLE
+
+Insert a new full-width section before the four pillars.
+
+Title:
+WHAT WE DO
+
+Font: DM Serif Display
+
+Very large
+
+White on black
+
+Scroll-triggered reveal
+
+Calm, confident entrance
+
+SUBHEADING (IMPORTANT — USE EXACT COPY)
+
+Directly beneath the title, add this subheading:
+
+Four phases that connect, overlap, and adapt. Designed to work together or independently.
+
+Smaller than the title
+
+High readability
+
+Slightly reduced opacity (e.g. 85–90%)
+
+Still prominent enough to be read before scrolling further
+
+OPTIONAL SUPPORTING LINE (VERY SUBTLE)
+
+If needed, include a single soft line below the subheading:
+
+Clients engage at different points, for different needs — always with the same outcome in mind.
+
+This should feel almost whispered.
+Do not overpower the subheading.
+
+TRANSITION INTO THE FOUR PHASES
+
+After the “WHAT WE DO” section:
+
+The four consult phases should follow naturally
+
+No divider lines
+
+No abrupt visual change
+
+The user should feel like they are entering the system, not clicking into steps
+
+The four phases must feel:
+
+Interconnected
+
+Modular
+
+Non-linear
+
+Designed to flex around the problem
+
+DESIGN & MOTION RULES (GLOBAL)
+
+Background: predominantly black / very dark
+
+Typography carries the weight — not graphics
+
+Motion should be:
+
+Scroll-driven
+
+Subtle
+
+Consistent across all three sections
+
+No unnecessary icons
+
+No diagrams in these sections
+
+Let hierarchy and spacing do the work
+
+SUCCESS CRITERIA
+
+This update is successful if:
+
+“TRACK RECORD” immediately builds trust
+
+“RESULTS” reframes case studies as proof, not portfolio
+
+“WHAT WE DO” makes the four phases feel intentional, flexible, and senior
+
+Nothing feels linear or prescriptive
+
+The page reads like consulting for real decisions, not marketing
