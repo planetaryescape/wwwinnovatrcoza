@@ -149,78 +149,53 @@ function HumorSection() {
     offset: ["start end", "end start"]
   });
 
-  const line1Opacity = useTransform(scrollYProgress, [0.1, 0.2], [0, 1]);
-  const line1Y = useTransform(scrollYProgress, [0.1, 0.2], [30, 0]);
-  
-  const line2Opacity = useTransform(scrollYProgress, [0.2, 0.3], [0, 1]);
-  const line2Y = useTransform(scrollYProgress, [0.2, 0.3], [30, 0]);
-  
-  const line3Opacity = useTransform(scrollYProgress, [0.3, 0.4], [0, 1]);
-  const line3Y = useTransform(scrollYProgress, [0.3, 0.4], [30, 0]);
-  
-  const line4Opacity = useTransform(scrollYProgress, [0.4, 0.5], [0, 1]);
-  const line4Y = useTransform(scrollYProgress, [0.4, 0.5], [30, 0]);
-  
-  const ctaOpacity = useTransform(scrollYProgress, [0.55, 0.65], [0, 1]);
-  const ctaY = useTransform(scrollYProgress, [0.55, 0.65], [30, 0]);
-  const ctaScale = useTransform(scrollYProgress, [0.55, 0.65], [0.95, 1]);
+  const line1Opacity = useTransform(scrollYProgress, [0.08, 0.14, 0.20, 0.26], [0, 1, 1, 0]);
+  const line2Opacity = useTransform(scrollYProgress, [0.18, 0.24, 0.30, 0.36], [0, 1, 1, 0]);
+  const line3Opacity = useTransform(scrollYProgress, [0.28, 0.34, 0.40, 0.46], [0, 1, 1, 0]);
+  const line4Opacity = useTransform(scrollYProgress, [0.38, 0.44, 0.50, 0.56], [0, 1, 1, 0]);
 
   return (
     <section 
       ref={sectionRef}
-      className="relative bg-[#0d0d18]"
-      style={{ minHeight: "120vh" }}
+      className="relative bg-[#0a0a0f]"
+      style={{ minHeight: "300vh" }}
       data-testid="section-humor"
     >
       <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
-          <div className="space-y-6 sm:space-y-8 md:space-y-10 text-[#fafafa]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
+          <div className="relative h-32 flex items-center justify-center">
             <motion.p
-              style={{ opacity: line1Opacity, y: line1Y }}
-              className="text-2xl sm:text-3xl md:text-4xl text-gray-400 font-light"
+              style={{ opacity: line1Opacity }}
+              className="absolute text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white/60 font-light tracking-wide"
               data-testid="humor-line-1"
             >
               {humorLines[0].text}
             </motion.p>
             
             <motion.p
-              style={{ opacity: line2Opacity, y: line2Y }}
-              className="text-2xl sm:text-3xl md:text-4xl text-gray-300 font-light"
+              style={{ opacity: line2Opacity }}
+              className="absolute text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white/70 font-light tracking-wide"
               data-testid="humor-line-2"
             >
               {humorLines[1].text}
             </motion.p>
             
             <motion.p
-              style={{ opacity: line3Opacity, y: line3Y }}
-              className="text-2xl sm:text-3xl md:text-4xl text-gray-200 font-light"
+              style={{ opacity: line3Opacity }}
+              className="absolute text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white/80 font-light tracking-wide"
               data-testid="humor-line-3"
             >
               {humorLines[2].text}
             </motion.p>
             
             <motion.p
-              style={{ opacity: line4Opacity, y: line4Y }}
-              className="text-2xl sm:text-3xl md:text-4xl text-white font-light"
+              style={{ opacity: line4Opacity }}
+              className="absolute text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white font-light tracking-wide"
               data-testid="humor-line-4"
             >
               {humorLines[3].text}
             </motion.p>
           </div>
-          
-          <motion.div
-            style={{ opacity: ctaOpacity, y: ctaY, scale: ctaScale }}
-            className="mt-12 sm:mt-16"
-            data-testid="humor-cta"
-          >
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-              className="inline-flex items-center justify-center"
-            >
-              <ArrowDown className="w-6 h-6 text-white/40" />
-            </motion.div>
-          </motion.div>
         </div>
       </div>
     </section>
@@ -760,7 +735,7 @@ export default function CinematicLanding() {
         </section>
 
         {/* Case Studies Section */}
-        <section id="case-studies" className="py-24 bg-[#0d0d18]">
+        <section id="case-studies" className="py-24 bg-[#0a0a0e]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
             <div className="text-center mb-16">
               <h2 
