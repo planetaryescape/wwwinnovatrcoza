@@ -843,7 +843,34 @@ export default function CinematicLanding() {
         <HumorSection />
 
         {/* Final CTA Section - Interactive Ball */}
-        <section id="consult-contact" className="relative min-h-screen bg-[#0a0a0f] flex items-center overflow-hidden">
+        <section id="consult-contact" className="relative min-h-screen bg-[#0a0a0f] flex flex-col justify-center overflow-hidden">
+          {/* Section Header */}
+          <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-16 sm:mb-20">
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <p className="text-sm uppercase tracking-[0.3em] text-white/40 mb-8" data-testid="text-contact-subheading">
+                Let's talk
+              </p>
+              
+              <h2 
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white mb-8 leading-tight"
+                data-cursor-invert
+                data-testid="text-contact-heading"
+              >
+                Ready when you are.
+              </h2>
+              
+              <p className="text-lg sm:text-xl text-white/50 max-w-xl mx-auto leading-relaxed" data-testid="text-contact-intro">
+                High stakes decisions deserve a thought partner.
+              </p>
+            </motion.div>
+          </div>
+          
+          {/* Interactive Ball Section */}
           <div className="relative w-full flex items-center">
             {/* Large clickable ball on the left */}
             <motion.a
