@@ -842,56 +842,69 @@ export default function CinematicLanding() {
         {/* Humorous Scroll Reveal Section */}
         <HumorSection />
 
-        {/* Final CTA Section */}
-        <section id="consult-contact" className="relative min-h-screen bg-[#0a0a0f] flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none">
-            <div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.03]"
-              style={{ 
-                background: "radial-gradient(circle, #4D5FF1 0%, transparent 70%)"
-              }}
-            />
-          </div>
-          
-          <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
+        {/* Final CTA Section - Interactive Ball */}
+        <section id="consult-contact" className="relative min-h-screen bg-[#0a0a0f] flex items-center overflow-hidden">
+          <div className="relative w-full flex items-center">
+            {/* Large clickable ball on the left */}
+            <motion.a
+              href="mailto:richard@innovatr.co.za"
+              initial={{ x: -200, opacity: 0 }}
+              whileInView={{ x: 0, opacity: 1 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="relative flex-shrink-0 group cursor-pointer"
+              data-testid="button-email-ball"
             >
-              <p className="text-sm uppercase tracking-[0.3em] text-white/40 mb-8">
-                Let's talk
-              </p>
-              
-              <h2 
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white mb-8 leading-tight"
-                data-cursor-invert
+              <div 
+                className="w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] md:w-[380px] md:h-[380px] lg:w-[420px] lg:h-[420px] rounded-full bg-white -ml-[100px] sm:-ml-[80px] md:-ml-[60px] lg:-ml-[40px] transition-transform duration-500 group-hover:scale-105 flex items-center justify-center"
               >
-                Ready when you are.
-              </h2>
+                <span className="text-[#0a0a0f] text-lg sm:text-xl md:text-2xl font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 pl-[80px] sm:pl-[60px] md:pl-[40px] lg:pl-[20px]">
+                  Let's talk
+                </span>
+              </div>
+            </motion.a>
+            
+            {/* Click over here text with arrow */}
+            <motion.div
+              initial={{ opacity: 0, x: 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+              className="flex items-center ml-6 sm:ml-10 md:ml-16"
+            >
+              {/* Hand-drawn style curved arrow pointing left */}
+              <svg 
+                viewBox="0 0 120 80" 
+                className="w-20 h-14 sm:w-24 sm:h-16 md:w-32 md:h-20 mr-4 sm:mr-6"
+                fill="none"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <motion.path
+                  d="M110 20 C80 15, 50 10, 30 35 C15 55, 20 65, 15 60"
+                  initial={{ pathLength: 0 }}
+                  whileInView={{ pathLength: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 1, delay: 0.5 }}
+                />
+                <motion.path
+                  d="M15 60 L5 50 M15 60 L25 55"
+                  initial={{ pathLength: 0 }}
+                  whileInView={{ pathLength: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: 1.3 }}
+                />
+              </svg>
               
-              <p className="text-lg sm:text-xl text-white/50 mb-16 max-w-xl mx-auto leading-relaxed">
-                High stakes decisions deserve a thought partner.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                <Button
-                  size="lg"
-                  className="bg-white text-[#0a0a0f] hover:bg-white/90 px-10 py-6 text-base font-medium"
-                  onClick={() => setLocation("/home#contact")}
-                  data-testid="button-book-consult"
+              <div className="text-white">
+                <p 
+                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light tracking-wide"
+                  data-testid="text-click-over-here"
                 >
-                  Book a call
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-                <a 
-                  href="mailto:richard@innovatr.co.za" 
-                  className="text-white/50 hover:text-white transition-colors text-sm tracking-wide"
-                  data-testid="link-email-us"
-                >
-                  richard@innovatr.co.za
-                </a>
+                  Click over here
+                </p>
               </div>
             </motion.div>
           </div>
