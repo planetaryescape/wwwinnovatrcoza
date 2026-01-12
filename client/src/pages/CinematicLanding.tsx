@@ -394,7 +394,7 @@ export default function CinematicLanding() {
               className="text-center max-w-4xl mx-auto"
             >
               <h1 
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white leading-tight mb-10"
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white leading-tight"
                 data-testid="text-headline"
                 data-cursor-invert
               >
@@ -402,16 +402,6 @@ export default function CinematicLanding() {
                 <br />
                 <span className="text-white/90">Built for decisions.</span>
               </h1>
-
-              <Button 
-                size="lg"
-                onClick={scrollToContent}
-                className="bg-[#4D5FF1] hover:bg-[#4D5FF1]/90 text-white px-8 py-4 text-base sm:text-lg font-medium rounded-lg shadow-[0_0_30px_rgba(77,95,241,0.3)] hover:shadow-[0_0_40px_rgba(77,95,241,0.5)] transition-all duration-300"
-                data-testid="button-explore-work"
-              >
-                Explore our work
-                <ArrowDown className="ml-2 h-5 w-5" />
-              </Button>
             </motion.div>
           </motion.div>
 
