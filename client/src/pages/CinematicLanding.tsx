@@ -150,9 +150,9 @@ function HumorSection() {
   });
 
   const line1Opacity = useTransform(scrollYProgress, [0.08, 0.14, 0.20, 0.26], [0, 1, 1, 0]);
-  const line2Opacity = useTransform(scrollYProgress, [0.18, 0.24, 0.30, 0.36], [0, 1, 1, 0]);
-  const line3Opacity = useTransform(scrollYProgress, [0.28, 0.34, 0.40, 0.46], [0, 1, 1, 0]);
-  const line4Opacity = useTransform(scrollYProgress, [0.38, 0.44, 0.50, 0.56], [0, 1, 1, 0]);
+  const line2Opacity = useTransform(scrollYProgress, [0.14, 0.20, 0.26, 0.32], [0, 1, 1, 0]);
+  const line3Opacity = useTransform(scrollYProgress, [0.20, 0.26, 0.32, 0.38], [0, 1, 1, 0]);
+  const line4Opacity = useTransform(scrollYProgress, [0.26, 0.32, 0.38, 0.44], [0, 1, 1, 0]);
 
   return (
     <section 
@@ -163,10 +163,10 @@ function HumorSection() {
     >
       <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
-          <div className="relative h-32 flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center gap-6 sm:gap-8 md:gap-10">
             <motion.p
               style={{ opacity: line1Opacity }}
-              className="absolute text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white/60 font-light tracking-wide"
+              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white/60 font-light tracking-wide"
               data-testid="humor-line-1"
             >
               {humorLines[0].text}
@@ -174,7 +174,7 @@ function HumorSection() {
             
             <motion.p
               style={{ opacity: line2Opacity }}
-              className="absolute text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white/70 font-light tracking-wide"
+              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white/70 font-light tracking-wide"
               data-testid="humor-line-2"
             >
               {humorLines[1].text}
@@ -182,7 +182,7 @@ function HumorSection() {
             
             <motion.p
               style={{ opacity: line3Opacity }}
-              className="absolute text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white/80 font-light tracking-wide"
+              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white/80 font-light tracking-wide"
               data-testid="humor-line-3"
             >
               {humorLines[2].text}
@@ -190,7 +190,7 @@ function HumorSection() {
             
             <motion.p
               style={{ opacity: line4Opacity }}
-              className="absolute text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white font-light tracking-wide"
+              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white font-light tracking-wide"
               data-testid="humor-line-4"
             >
               {humorLines[3].text}
@@ -735,7 +735,7 @@ export default function CinematicLanding() {
         </section>
 
         {/* Case Studies Section */}
-        <section id="case-studies" className="py-24 bg-[#0a0a0e]">
+        <section id="case-studies" className="py-24 bg-[#0a0a0f]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
             <div className="text-center mb-16">
               <h2 
@@ -818,39 +818,57 @@ export default function CinematicLanding() {
         <HumorSection />
 
         {/* Final CTA Section */}
-        <section id="consult-contact" className="py-24 bg-[#0a0a0f]">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
-            <h2 
-              className="sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white mb-6 text-[95px]"
-              data-cursor-invert
+        <section id="consult-contact" className="relative min-h-screen bg-[#0a0a0f] flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none">
+            <div 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.03]"
+              style={{ 
+                background: "radial-gradient(circle, #4D5FF1 0%, transparent 70%)"
+              }}
+            />
+          </div>
+          
+          <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
             >
-              Contact Us
-            </h2>
-            <p className="text-xl text-gray-400 mb-10">
-              If the stakes are high and you want a thought partner, let's talk.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button
-                size="lg"
-                className="bg-[#4D5FF1] hover:bg-[#4D5FF1]/90 text-white px-8"
-                onClick={() => setLocation("/home#contact")}
-                data-testid="button-book-consult"
+              <p className="text-sm uppercase tracking-[0.3em] text-white/40 mb-8">
+                Let's talk
+              </p>
+              
+              <h2 
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white mb-8 leading-tight"
+                data-cursor-invert
               >
-                Book a consult call
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-gray-600 text-gray-300 hover:bg-white/5"
-                asChild
-              >
-                <a href="mailto:richard@innovatr.co.za" data-testid="link-email-us">
-                  Email us
+                Ready when you are.
+              </h2>
+              
+              <p className="text-lg sm:text-xl text-white/50 mb-16 max-w-xl mx-auto leading-relaxed">
+                High stakes decisions deserve a thought partner.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                <Button
+                  size="lg"
+                  className="bg-white text-[#0a0a0f] hover:bg-white/90 px-10 py-6 text-base font-medium"
+                  onClick={() => setLocation("/home#contact")}
+                  data-testid="button-book-consult"
+                >
+                  Book a call
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+                <a 
+                  href="mailto:richard@innovatr.co.za" 
+                  className="text-white/50 hover:text-white transition-colors text-sm tracking-wide"
+                  data-testid="link-email-us"
+                >
+                  richard@innovatr.co.za
                 </a>
-              </Button>
-            </div>
+              </div>
+            </motion.div>
           </div>
         </section>
       </div>
