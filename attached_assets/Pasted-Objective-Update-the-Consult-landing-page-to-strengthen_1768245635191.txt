@@ -1,0 +1,201 @@
+Objective
+Update the Consult landing page to strengthen clarity, credibility & storytelling while preserving the existing layout, scroll behaviour, animations, and “Explore how to…” CTAs.
+This update focuses on three changes only:
+
+Replace “Why Consult” with Track record
+
+Rename “Case Studies” to Results
+
+Introduce a “What we do” transition section before the 4 lifecycle phases
+
+Use DM Serif Display for all large scroll-revealed titles.
+Use Roboto for all body copy.
+Use “&” instead of “and” consistently throughout.
+
+Do not redesign layout. Improve copy, hierarchy & transitions only.
+
+1️⃣ Replace “Why Consult” → TRACK RECORD
+Section title (scroll-revealed, DM Serif Display)
+
+TRACK RECORD
+
+Supporting copy (body text)
+
+700+ projects delivered.
+50+ startups created.
+Numerous innovations built, launched & scaled.
+
+We work with global organisations, fast-growing brands & ambitious teams to solve complex decisions — across categories, markets & stages of growth.
+
+Optional filters / tags (retain existing UI)
+
+Corporate Innovation
+
+Corporate Ventures
+
+Startup Studio & Investments
+
+Logos
+
+Retain existing logo wall. Keep minimal, high-contrast presentation.
+
+2️⃣ Rename “Case Studies” → RESULTS
+Section title (scroll-revealed, DM Serif Display)
+
+RESULTS
+
+Intro copy
+
+Real outcomes from real decisions — across innovation, growth & transformation.
+
+Each result reflects a specific business challenge, a clear learning agenda & a confident decision made.
+
+Cards / tiles (retain existing structure)
+
+Keep imagery
+
+Keep hover behaviour
+
+Keep client naming where appropriate
+
+Replace “Case Study” language with results-led framing
+
+Example micro-copy tone:
+
+“Driving adoption of autonomous vehicles in Germany through strategic test-market design.”
+
+“Supporting the shift from hardware manufacturing to a scalable cloud services model.”
+
+“Helping a national telecoms brand lead the smart-home category.”
+
+No performance claims that feel salesy. Keep it factual & confident.
+
+3️⃣ Insert NEW SECTION before lifecycle → WHAT WE DO
+
+This section appears between Track record / Results and the lifecycle phases.
+
+Section title (large, scroll-revealed, DM Serif Display)
+
+WHAT WE DO
+
+Subheading (body text)
+
+Four phases that connect, overlap & adapt. Designed to work together or independently.
+
+Supporting paragraph
+
+Some clients start by defining the opportunity.
+Others arrive with ideas, live products, or performance questions.
+
+Our work flexes to where you are — & what decision you need to make next.
+
+4️⃣ Lifecycle Phases — COPY UPDATE (keep layout & CTAs)
+PHASE 01
+WHERE TO FOCUS
+
+Understand the market before you place your bets.
+
+We help you identify where growth genuinely exists — grounded in people, behaviour & category dynamics — so you’re solving the right problem before moving forward.
+
+Includes:
+
+Trends & foresight analysis
+
+Need states & jobs-to-be-done
+
+Audience segmentation & prioritisation
+
+Category & competitive audits
+
+Business & brand health diagnostics
+
+Customer & shopper journey mapping
+
+Opportunity sizing & white-space identification
+
+CTA: Explore Where to focus →
+
+PHASE 02
+HOW TO PLAY
+
+Turn opportunity spaces into ideas worth backing.
+
+Once the focus is clear, we design & develop routes to market — shaping ideas, propositions & experiences that are strategically sound & creatively strong.
+
+Includes:
+
+Ideation & innovation workshops
+
+Design sprints & rapid concept development
+
+Idea & proposition generation
+
+Early-stage concept framing & positioning
+
+Creative territories & platform development
+
+Exploration of formats, features & experiences
+
+CTA: Explore How to play →
+
+PHASE 03
+HOW TO WIN
+
+Choose the strongest route, optimise it & build the commercial case.
+
+This is where decisions get real. We help you compare options, make trade-offs visible & confidently commit to the ideas that will perform in market.
+
+Includes:
+
+Idea & concept screening
+
+Concept optimisation & refinement
+
+Portfolio management & prioritisation
+
+Volumetric forecasting & scenario modelling
+
+Cannibalisation & source-of-volume analysis
+
+Price-pack architecture
+
+Packaging, branding & end-to-end design support
+
+CTA: Explore How to win →
+
+PHASE 04
+WHAT’S WORKING
+
+Track what’s changing so you can keep winning after launch.
+
+Markets don’t stand still. We help you monitor performance, understand shifts & adapt intelligently — turning learning into ongoing advantage.
+
+Includes:
+
+Innovation tracking
+
+Promotion & activation tracking
+
+Brand & category health tracking
+
+Competitive monitoring
+
+Post-launch optimisation & learning loops
+
+Performance diagnostics over time
+
+CTA: Explore What’s working →
+
+Tone & Behaviour Rules
+
+Confident, calm, senior-ready
+
+Never salesy
+
+No buzzword stacking
+
+Clear decision-led language
+
+Maintain cinematic scroll pacing
+
+Prioritise clarity over cleverness

@@ -12,14 +12,18 @@ const pillars = [
     id: "where-to-focus",
     number: "01",
     title: "Where to focus",
-    tagline: "Understand and anticipate the market before you place your bets.",
+    tagline: "Understand the market before you place your bets.",
+    description: "We help you identify where growth genuinely exists — grounded in people, behaviour & category dynamics — so you're solving the right problem before moving forward.",
     icon: Target,
     color: "#4D5FF1",
     bullets: [
-      "Trends and foresight",
-      "Need states",
-      "Segmentation",
-      "Category audits"
+      "Trends & foresight analysis",
+      "Need states & jobs-to-be-done",
+      "Audience segmentation & prioritisation",
+      "Category & competitive audits",
+      "Business & brand health diagnostics",
+      "Customer & shopper journey mapping",
+      "Opportunity sizing & white-space identification"
     ]
   },
   {
@@ -27,26 +31,34 @@ const pillars = [
     number: "02",
     title: "How to play",
     tagline: "Turn opportunity spaces into ideas worth backing.",
+    description: "Once the focus is clear, we design & develop routes to market — shaping ideas, propositions & experiences that are strategically sound & creatively strong.",
     icon: Lightbulb,
     color: "#ED876E",
     bullets: [
-      "Ideation workshops",
-      "Design sprints",
-      "Idea generation"
+      "Ideation & innovation workshops",
+      "Design sprints & rapid concept development",
+      "Idea & proposition generation",
+      "Early-stage concept framing & positioning",
+      "Creative territories & platform development",
+      "Exploration of formats, features & experiences"
     ]
   },
   {
     id: "how-to-win",
     number: "03",
     title: "How to win",
-    tagline: "Choose the strongest route, optimise it, and build the commercial case.",
+    tagline: "Choose the strongest route, optimise it & build the commercial case.",
+    description: "This is where decisions get real. We help you compare options, make trade-offs visible & confidently commit to the ideas that will perform in market.",
     icon: Trophy,
     color: "#10B981",
     bullets: [
-      "Idea screening",
-      "Idea optimisation",
-      "Portfolio management",
-      "Volumetric forecasting"
+      "Idea & concept screening",
+      "Concept optimisation & refinement",
+      "Portfolio management & prioritisation",
+      "Volumetric forecasting & scenario modelling",
+      "Cannibalisation & source-of-volume analysis",
+      "Price-pack architecture",
+      "Packaging, branding & end-to-end design support"
     ]
   },
   {
@@ -54,12 +66,16 @@ const pillars = [
     number: "04",
     title: "What's working",
     tagline: "Track what's changing so you can keep winning after launch.",
+    description: "Markets don't stand still. We help you monitor performance, understand shifts & adapt intelligently — turning learning into ongoing advantage.",
     icon: TrendingUp,
     color: "#8B5CF6",
     bullets: [
       "Innovation tracking",
-      "Promotion tracking",
-      "Brand and category health tracking"
+      "Promotion & activation tracking",
+      "Brand & category health tracking",
+      "Competitive monitoring",
+      "Post-launch optimisation & learning loops",
+      "Performance diagnostics over time"
     ]
   }
 ];
@@ -67,27 +83,23 @@ const pillars = [
 const results = [
   {
     pillar: "Where to focus",
-    outcome: "Clear opportunity map and prioritised growth roadmap",
-    impact: "Enabled confident planning cycle decisions for a leading national retailer.",
-    shift: "From uncertainty to strategic clarity"
+    outcome: "Driving adoption of autonomous vehicles in Germany through strategic test-market design.",
+    context: "Mapped opportunity spaces & identified the right audience segments for early market entry."
   },
   {
     pillar: "How to play",
-    outcome: "Three breakthrough concepts advanced to development",
-    impact: "40+ concepts generated through facilitated workshops for a premium FMCG brand.",
-    shift: "From ambition to actionable routes"
+    outcome: "Supporting the shift from hardware manufacturing to a scalable cloud services model.",
+    context: "Developed new propositions & service concepts to accelerate digital transformation."
   },
   {
     pillar: "How to win",
-    outcome: "Executive sign-off and launch budget secured",
-    impact: "Data-backed business case built through screening and volumetric forecasting.",
-    shift: "From multiple options to confident choice"
+    outcome: "Helping a national telecoms brand lead the smart-home category.",
+    context: "Screened & optimised concepts, built the commercial case for executive sign-off."
   },
   {
     pillar: "What's working",
-    outcome: "Real-time visibility into market dynamics",
-    impact: "Always-on tracking dashboard enabling faster competitive response.",
-    shift: "From reactive to proactive"
+    outcome: "Enabling real-time visibility into competitive dynamics for a global beverage brand.",
+    context: "Established always-on tracking to inform ongoing portfolio & activation decisions."
   }
 ];
 
@@ -98,6 +110,12 @@ const clientLogos = [
   "DGB",
   "Rugani Juice",
   "Mitchum"
+];
+
+const filterTags = [
+  "Corporate Innovation",
+  "Corporate Ventures",
+  "Startup Studio & Investments"
 ];
 
 function ScrollReveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
@@ -174,10 +192,10 @@ export default function ConsultPage() {
             </h1>
             <p className="text-lg sm:text-xl text-gray-400 max-w-3xl mx-auto mb-4">
               We partner with ambitious teams to shape direction, create opportunities, 
-              optimise routes to market, and track what's changing.
+              optimise routes to market & track what's changing.
             </p>
             <p className="text-sm text-gray-500 max-w-2xl mx-auto mb-12">
-              Built for phased programmes, high-stakes choices, and senior stakeholders who need clarity, not noise.
+              Built for phased programmes, high-stakes choices & senior stakeholders who need clarity, not noise.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -220,16 +238,32 @@ export default function ConsultPage() {
       {/* TRACK RECORD Section */}
       <section className="py-32 bg-[#0a0a0f]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal className="mb-16">
+          <ScrollReveal className="mb-12">
             <h2 className="text-5xl sm:text-6xl md:text-7xl font-serif font-bold text-white uppercase tracking-tight text-center">
               Track Record
             </h2>
           </ScrollReveal>
           
-          <ScrollReveal delay={0.1} className="max-w-3xl mx-auto text-center mb-20">
-            <p className="text-lg text-gray-400">
-              Proven delivery across complex, high-stakes innovation challenges — from early direction setting to execution and optimisation.
+          <ScrollReveal delay={0.1} className="max-w-3xl mx-auto text-center mb-12">
+            <p className="text-2xl sm:text-3xl text-white font-medium mb-6">
+              700+ projects delivered.<br />
+              50+ startups created.<br />
+              Numerous innovations built, launched & scaled.
             </p>
+            <p className="text-lg text-gray-400">
+              We work with global organisations, fast-growing brands & ambitious teams to solve complex decisions — across categories, markets & stages of growth.
+            </p>
+          </ScrollReveal>
+          
+          <ScrollReveal delay={0.15} className="flex flex-wrap justify-center gap-3 mb-16">
+            {filterTags.map((tag, index) => (
+              <span
+                key={index}
+                className="px-4 py-2 text-sm text-gray-400 border border-gray-700 rounded-full"
+              >
+                {tag}
+              </span>
+            ))}
           </ScrollReveal>
           
           <ScrollReveal delay={0.2}>
@@ -250,10 +284,19 @@ export default function ConsultPage() {
       {/* RESULTS Section */}
       <section className="py-32 bg-[#0d0d18]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal className="mb-20">
+          <ScrollReveal className="mb-12">
             <h2 className="text-5xl sm:text-6xl md:text-7xl font-serif font-bold text-white uppercase tracking-tight text-center">
               Results
             </h2>
+          </ScrollReveal>
+          
+          <ScrollReveal delay={0.1} className="max-w-3xl mx-auto text-center mb-16">
+            <p className="text-xl text-gray-300 mb-4">
+              Real outcomes from real decisions — across innovation, growth & transformation.
+            </p>
+            <p className="text-gray-500">
+              Each result reflects a specific business challenge, a clear learning agenda & a confident decision made.
+            </p>
           </ScrollReveal>
           
           <div className="grid md:grid-cols-2 gap-8">
@@ -273,16 +316,12 @@ export default function ConsultPage() {
                         {result.pillar}
                       </span>
                       
-                      <h3 className="text-xl font-semibold text-white mt-3 mb-4">
+                      <p className="text-lg text-white mt-4 mb-4 leading-relaxed">
                         {result.outcome}
-                      </h3>
-                      
-                      <p className="text-gray-400 text-sm mb-6">
-                        {result.impact}
                       </p>
                       
-                      <p className="text-gray-500 text-sm italic">
-                        {result.shift}
+                      <p className="text-gray-500 text-sm">
+                        {result.context}
                       </p>
                     </div>
                   </CardContent>
@@ -297,21 +336,27 @@ export default function ConsultPage() {
       <section ref={whatWeDoRef} className="py-32 bg-[#0a0a0f]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <ScrollReveal>
-            <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-serif font-bold text-white uppercase tracking-tight mb-8">
+            <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-serif font-bold text-white uppercase tracking-tight mb-10">
               What We Do
             </h2>
           </ScrollReveal>
           
           <ScrollReveal delay={0.15}>
-            <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto mb-6" style={{ opacity: 0.9 }}>
-              Four phases that connect, overlap, and adapt. Designed to work together or independently.
+            <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto mb-8" style={{ opacity: 0.9 }}>
+              Four phases that connect, overlap & adapt. Designed to work together or independently.
             </p>
           </ScrollReveal>
           
           <ScrollReveal delay={0.25}>
-            <p className="text-base text-gray-500 max-w-2xl mx-auto">
-              Clients engage at different points, for different needs — always with the same outcome in mind.
-            </p>
+            <div className="max-w-2xl mx-auto text-gray-500 space-y-4">
+              <p>
+                Some clients start by defining the opportunity.<br />
+                Others arrive with ideas, live products, or performance questions.
+              </p>
+              <p>
+                Our work flexes to where you are — & what decision you need to make next.
+              </p>
+            </div>
           </ScrollReveal>
         </div>
       </section>
@@ -354,37 +399,39 @@ export default function ConsultPage() {
                 transition={{ duration: 0.5 }}
                 className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 lg:pl-24"
               >
-                <div className="grid lg:grid-cols-2 gap-12 items-center">
+                <div className="grid lg:grid-cols-2 gap-12 items-start">
                   <div>
                     <p className="text-sm uppercase tracking-[0.3em] text-gray-500 mb-2">
-                      The Lifecycle
-                    </p>
-                    <p 
-                      className="text-6xl font-bold mb-4 opacity-20"
-                      style={{ color: pillars[activePillar].color }}
-                    >
-                      {pillars[activePillar].number}
+                      Phase {pillars[activePillar].number}
                     </p>
                     <h2 
-                      className="text-4xl sm:text-5xl font-serif font-bold mb-6"
+                      className="text-4xl sm:text-5xl font-serif font-bold mb-4 uppercase"
                       style={{ color: pillars[activePillar].color }}
                     >
                       {pillars[activePillar].title}
                     </h2>
-                    <p className="text-xl text-gray-300 mb-8">
+                    <p className="text-xl text-gray-300 mb-4">
                       {pillars[activePillar].tagline}
                     </p>
-                    <ul className="space-y-3 mb-8">
-                      {pillars[activePillar].bullets.map((bullet, idx) => (
-                        <li key={idx} className="flex items-center gap-3 text-gray-400">
-                          <div 
-                            className="w-1.5 h-1.5 rounded-full"
-                            style={{ backgroundColor: pillars[activePillar].color }}
-                          />
-                          {bullet}
-                        </li>
-                      ))}
-                    </ul>
+                    <p className="text-gray-400 mb-8 leading-relaxed">
+                      {pillars[activePillar].description}
+                    </p>
+                    
+                    <div className="mb-8">
+                      <p className="text-xs uppercase tracking-wider text-gray-500 mb-4">Includes:</p>
+                      <ul className="space-y-2">
+                        {pillars[activePillar].bullets.map((bullet, idx) => (
+                          <li key={idx} className="flex items-start gap-3 text-gray-400 text-sm">
+                            <div 
+                              className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
+                              style={{ backgroundColor: pillars[activePillar].color }}
+                            />
+                            {bullet}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
                     <Link href={`/consult/${pillars[activePillar].id}`}>
                       <Button
                         variant="ghost"
@@ -397,7 +444,7 @@ export default function ConsultPage() {
                     </Link>
                   </div>
                   
-                  <div className="hidden lg:flex justify-center">
+                  <div className="hidden lg:flex justify-center items-center">
                     <div 
                       className="w-64 h-64 rounded-full opacity-30 blur-3xl"
                       style={{ backgroundColor: pillars[activePillar].color }}
@@ -443,32 +490,22 @@ export default function ConsultPage() {
                         <IconComponent style={{ color: pillar.color }} className="w-6 h-6" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm text-gray-500 mb-1">{pillar.number}</p>
+                        <p className="text-sm text-gray-500 mb-1">Phase {pillar.number}</p>
                         <h3 
-                          className="text-2xl font-serif font-bold mb-2"
+                          className="text-2xl font-serif font-bold mb-2 uppercase"
                           style={{ color: pillar.color }}
                         >
                           {pillar.title}
                         </h3>
-                        <p className="text-gray-400 mb-4">{pillar.tagline}</p>
-                        <ul className="space-y-2 mb-4">
-                          {pillar.bullets.map((bullet, idx) => (
-                            <li key={idx} className="flex items-center gap-2 text-sm text-gray-500">
-                              <div 
-                                className="w-1 h-1 rounded-full"
-                                style={{ backgroundColor: pillar.color }}
-                              />
-                              {bullet}
-                            </li>
-                          ))}
-                        </ul>
+                        <p className="text-gray-300 mb-2">{pillar.tagline}</p>
+                        <p className="text-gray-500 text-sm mb-4">{pillar.description}</p>
                         <Link href={`/consult/${pillar.id}`}>
                           <Button
                             variant="ghost"
                             size="sm"
                             className="text-white hover:bg-white/5 p-0"
                           >
-                            Explore
+                            Explore {pillar.title}
                             <ArrowRight className="ml-1 h-3 w-3" />
                           </Button>
                         </Link>
@@ -492,7 +529,7 @@ export default function ConsultPage() {
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <p className="text-xl text-gray-400 mb-10">
-              If the stakes are high and you want a thought partner, let's talk.
+              If the stakes are high & you want a thought partner, let's talk.
             </p>
           </ScrollReveal>
           
