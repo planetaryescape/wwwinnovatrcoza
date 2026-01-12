@@ -360,7 +360,7 @@ export default function CinematicLanding() {
         {/* The Lifecycle - Pillar Section */}
         <section 
           ref={lifecycleRef} 
-          className="relative"
+          className="relative hidden lg:block"
           style={{ minHeight: "calc(100vh * 5.5)" }}
           id="lifecycle"
         >
@@ -465,12 +465,12 @@ export default function CinematicLanding() {
         </section>
 
         {/* Mobile Pillars (stacked cards) */}
-        <section className="lg:hidden py-20 bg-[#0d0d18]">
-          <div className="max-w-4xl mx-auto px-4">
+        <section className="lg:hidden py-16 sm:py-20 bg-[#0d0d18]">
+          <div className="max-w-lg sm:max-w-xl mx-auto px-6 sm:px-8">
             <p className="text-sm uppercase tracking-[0.3em] text-gray-500 mb-8 text-center">
               The Lifecycle
             </p>
-            <div className="space-y-6">
+            <div className="space-y-5">
               {pillars.map((pillar) => {
                 const IconComponent = pillar.icon;
                 return (
@@ -478,13 +478,13 @@ export default function CinematicLanding() {
                     key={pillar.id}
                     className="bg-[#12121a] border-gray-800 overflow-hidden"
                   >
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
+                    <CardContent className="p-5 sm:p-6">
+                      <div className="text-center sm:text-left sm:flex sm:items-start sm:gap-4">
                         <div 
-                          className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
+                          className="w-14 h-14 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center flex-shrink-0 mx-auto sm:mx-0 mb-4 sm:mb-0"
                           style={{ backgroundColor: `${pillar.color}20` }}
                         >
-                          <IconComponent style={{ color: pillar.color }} className="w-6 h-6" />
+                          <IconComponent style={{ color: pillar.color }} className="w-7 h-7 sm:w-6 sm:h-6" />
                         </div>
                         <div className="flex-1">
                           <p className="text-sm text-gray-500 mb-1">{pillar.number}</p>
@@ -494,28 +494,30 @@ export default function CinematicLanding() {
                           >
                             {pillar.title}
                           </h3>
-                          <p className="text-gray-400 mb-4">{pillar.tagline}</p>
-                          <ul className="space-y-2 mb-4">
+                          <p className="text-gray-400 mb-4 text-sm sm:text-base">{pillar.tagline}</p>
+                          <ul className="space-y-2 mb-4 text-left inline-block">
                             {pillar.bullets.map((bullet, idx) => (
                               <li key={idx} className="flex items-center gap-2 text-sm text-gray-500">
                                 <div 
-                                  className="w-1 h-1 rounded-full"
+                                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
                                   style={{ backgroundColor: pillar.color }}
                                 />
                                 {bullet}
                               </li>
                             ))}
                           </ul>
-                          <Link href={`/consult/${pillar.id}`}>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-white hover:bg-white/5 p-0"
-                            >
-                              Explore
-                              <ArrowRight className="ml-1 h-3 w-3" />
-                            </Button>
-                          </Link>
+                          <div className="mt-4">
+                            <Link href={`/consult/${pillar.id}`}>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-white hover:bg-white/5 p-0"
+                              >
+                                Explore
+                                <ArrowRight className="ml-1 h-3 w-3" />
+                              </Button>
+                            </Link>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
