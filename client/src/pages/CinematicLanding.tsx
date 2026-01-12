@@ -328,7 +328,7 @@ export default function CinematicLanding() {
               <Button 
                 size="lg"
                 onClick={scrollToContent}
-                className="bg-[#4D5FF1] hover:bg-[#4D5FF1]/90 text-white px-8 py-6 text-base sm:text-lg font-medium rounded-lg shadow-[0_0_30px_rgba(77,95,241,0.3)] hover:shadow-[0_0_40px_rgba(77,95,241,0.5)] transition-all duration-300"
+                className="bg-[#4D5FF1] hover:bg-[#4D5FF1]/90 text-white px-8 py-4 text-base sm:text-lg font-medium rounded-lg shadow-[0_0_30px_rgba(77,95,241,0.3)] hover:shadow-[0_0_40px_rgba(77,95,241,0.5)] transition-all duration-300"
                 data-testid="button-explore-work"
               >
                 Explore our work
