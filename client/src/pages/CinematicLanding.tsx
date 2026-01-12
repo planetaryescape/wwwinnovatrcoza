@@ -272,10 +272,16 @@ export default function CinematicLanding() {
   useEffect(() => {
     if (reducedMotion || !videoRef.current || useAutoplay || videoError) return;
 
-    const lerp = (start: number, end: number, factor: number) => {
-      return start + (end - start) * factor;
+    // Smooth exponential interpolation for buttery video scrubbing
+    const smoothStep = (current: number, target: number, smoothing: number) => {
+      const diff = target - current;
+      // Adaptive smoothing: faster when far, slower when close
+      const adaptiveFactor = Math.min(smoothing * (1 + Math.abs(diff) * 0.5), 0.4);
+      return current + diff * adaptiveFactor;
     };
 
+    let lastTime = performance.now();
+    
     const updateVideoTime = () => {
       if (!videoRef.current || useAutoplay || videoError) return;
       
@@ -285,11 +291,20 @@ export default function CinematicLanding() {
         return;
       }
       
-      currentTimeRef.current = lerp(currentTimeRef.current, targetTimeRef.current, 0.1);
-      const clampedTime = Math.max(0, Math.min(currentTimeRef.current, duration - 0.1));
+      // Frame-rate independent smoothing
+      const now = performance.now();
+      const deltaTime = Math.min((now - lastTime) / 16.67, 2); // Normalize to 60fps, cap at 2x
+      lastTime = now;
+      
+      // Smoother interpolation with frame-rate compensation
+      const smoothingFactor = 0.15 * deltaTime;
+      currentTimeRef.current = smoothStep(currentTimeRef.current, targetTimeRef.current, smoothingFactor);
+      
+      const clampedTime = Math.max(0, Math.min(currentTimeRef.current, duration - 0.05));
       
       try {
-        if (Math.abs(videoRef.current.currentTime - clampedTime) > 0.01) {
+        // Smaller threshold for more frequent updates = smoother playback
+        if (Math.abs(videoRef.current.currentTime - clampedTime) > 0.005) {
           videoRef.current.currentTime = clampedTime;
           scrollScrubAttempted.current = true;
         }
