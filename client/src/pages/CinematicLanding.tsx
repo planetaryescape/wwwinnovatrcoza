@@ -158,7 +158,7 @@ function HumorSection() {
     <section 
       ref={sectionRef}
       className="relative bg-[#0a0a0f]"
-      style={{ minHeight: "300vh" }}
+      style={{ minHeight: "180vh" }}
       data-testid="section-humor"
     >
       <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
