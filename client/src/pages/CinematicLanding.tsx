@@ -7,6 +7,12 @@ import { Link, useLocation } from "wouter";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
+import marketTrendsImg from "@assets/generated_images/blue_abstract_trends_visualization.png";
+import brandHealthImg from "@assets/generated_images/blue_abstract_brand_health.png";
+import pricePackImg from "@assets/generated_images/coral_abstract_price_architecture.png";
+import workshopImg from "@assets/generated_images/coral_abstract_ideation_workshop.png";
+import endToEndImg from "@assets/generated_images/green_abstract_end_to_end.png";
+import categoryTrackingImg from "@assets/generated_images/purple_abstract_health_tracking.png";
 
 const pillars = [
   {
@@ -65,35 +71,43 @@ const pillars = [
   }
 ];
 
-const caseStudies = [
+const resultsItems = [
   {
-    pillar: "Where to focus",
-    client: "Leading National Retailer",
-    challenge: "Needed clarity on where growth would come from in a changing category.",
-    approach: "Category scan, need state mapping, segmentation and journey mapping.",
-    outcome: "Clear opportunity map and a prioritised growth roadmap for the next planning cycle."
+    title: "Market Trends & Foresight",
+    pillarNumber: "01",
+    color: "#4D5FF1",
+    image: marketTrendsImg,
   },
   {
-    pillar: "How to play",
-    client: "Premium FMCG Brand",
-    challenge: "Had ambition but lacked clear routes to innovation.",
-    approach: "Facilitated ideation workshops and design sprints to generate 40+ concepts.",
-    outcome: "Three breakthrough concepts advanced to development phase."
+    title: "Brand Health Audit",
+    pillarNumber: "01",
+    color: "#4D5FF1",
+    image: brandHealthImg,
   },
   {
-    pillar: "How to win",
-    client: "International Beverage Company",
-    challenge: "Multiple product routes needed to be prioritised with limited budget.",
-    approach: "Idea screening, optimisation testing, and volumetric forecasting.",
-    outcome: "Data-backed business case securing executive sign-off and launch budget."
+    title: "Price Pack Architecture",
+    pillarNumber: "02",
+    color: "#ED876E",
+    image: pricePackImg,
   },
   {
-    pillar: "What's working",
-    client: "Regional Food Manufacturer",
-    challenge: "Post-launch tracking was fragmented and reactive.",
-    approach: "Set up always-on innovation and promotion tracking dashboard.",
-    outcome: "Real-time visibility into market dynamics, enabling faster response to competitors."
-  }
+    title: "Workshopping & Ideation",
+    pillarNumber: "02",
+    color: "#ED876E",
+    image: workshopImg,
+  },
+  {
+    title: "End to End Design",
+    pillarNumber: "03",
+    color: "#10B981",
+    image: endToEndImg,
+  },
+  {
+    title: "Brand & Category Health Tracking",
+    pillarNumber: "04",
+    color: "#8B5CF6",
+    image: categoryTrackingImg,
+  },
 ];
 
 const valueCards = [
@@ -357,33 +371,18 @@ export default function CinematicLanding() {
         {/* Nav Links */}
         <div className="flex flex-col items-center gap-10">
           {navItems.map((item) => (
-            item.href ? (
-              <Link key={item.label} href={item.href}>
-                <span 
-                  className="text-xs tracking-[0.2em] text-white hover:text-white/70 transition-colors font-normal cursor-pointer lowercase"
-                  style={{ 
-                    writingMode: "vertical-rl",
-                    fontFamily: "Roboto, sans-serif"
-                  }}
-                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                >
-                  {item.label.toLowerCase()}
-                </span>
-              </Link>
-            ) : (
-              <button
-                key={item.label}
-                onClick={item.action}
-                className="text-xs tracking-[0.2em] text-white hover:text-white/70 transition-colors font-normal lowercase"
-                style={{ 
-                  writingMode: "vertical-rl",
-                  fontFamily: "Roboto, sans-serif"
-                }}
-                data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-              >
-                {item.label.toLowerCase()}
-              </button>
-            )
+            <button
+              key={item.label}
+              onClick={item.action}
+              className="text-xs tracking-[0.2em] text-white hover:text-white/70 transition-colors font-normal lowercase"
+              style={{ 
+                writingMode: "vertical-rl",
+                fontFamily: "Roboto, sans-serif"
+              }}
+              data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+            >
+              {item.label.toLowerCase()}
+            </button>
           ))}
         </div>
         
@@ -740,9 +739,9 @@ export default function CinematicLanding() {
           </div>
         </section>
 
-        {/* Case Studies Section */}
+        {/* Results Section - Cuberto-inspired Cards */}
         <section id="case-studies" className="py-24 bg-[#0d0d18]">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
             <div className="text-center mb-16">
               <h2 
                 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white leading-tight"
@@ -752,48 +751,46 @@ export default function CinematicLanding() {
               </h2>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-6">
-              {caseStudies.map((study, index) => (
-                <Card 
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {resultsItems.map((item, index) => (
+                <motion.div
                   key={index}
-                  className="bg-[#12121a] border-gray-800 hover:border-gray-700 transition-colors overflow-hidden"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="group cursor-pointer"
+                  data-testid={`result-card-${index}`}
                 >
-                  <CardContent className="p-0">
+                  <div className="relative overflow-hidden rounded-lg mb-4">
                     <div 
-                      className="h-1"
-                      style={{ backgroundColor: pillars.find(p => p.title === study.pillar)?.color || "#4D5FF1" }}
+                      className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300 z-10"
+                      style={{ backgroundColor: item.color }}
                     />
-                    <div className="p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <span 
-                          className="text-xs uppercase tracking-wider px-2 py-1 rounded"
-                          style={{ 
-                            backgroundColor: `${pillars.find(p => p.title === study.pillar)?.color}20`,
-                            color: pillars.find(p => p.title === study.pillar)?.color
-                          }}
-                        >
-                          {study.pillar}
-                        </span>
-                        <span className="text-sm text-gray-500">{study.client}</span>
-                      </div>
-                      
-                      <div className="space-y-4">
-                        <div>
-                          <p className="text-xs uppercase tracking-wider text-gray-500 mb-1">Challenge</p>
-                          <p className="text-gray-300">{study.challenge}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs uppercase tracking-wider text-gray-500 mb-1">Approach</p>
-                          <p className="text-gray-400 text-sm">{study.approach}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs uppercase tracking-wider text-gray-500 mb-1">Outcome</p>
-                          <p className="text-gray-300 font-medium">{study.outcome}</p>
-                        </div>
-                      </div>
+                    <img 
+                      src={item.image} 
+                      alt={item.title}
+                      className="w-full aspect-[4/3] object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div 
+                      className="absolute top-4 left-4 text-xs font-medium px-2 py-1 rounded"
+                      style={{ 
+                        backgroundColor: `${item.color}20`,
+                        color: item.color
+                      }}
+                    >
+                      {item.pillarNumber}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                  <h3 
+                    className="text-lg font-medium text-white group-hover:text-opacity-80 transition-colors"
+                    style={{ fontFamily: "Roboto, sans-serif" }}
+                  >
+                    <span style={{ color: item.color }}>{item.title.split(' ')[0]}</span>
+                    {' '}
+                    <span className="text-gray-300">– {item.title.split(' ').slice(1).join(' ')}</span>
+                  </h3>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -873,30 +870,16 @@ export default function CinematicLanding() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.1 }}
                   >
-                    {item.action ? (
-                      <button
-                        onClick={() => {
-                          setMenuOpen(false);
-                          item.action();
-                        }}
-                        className="text-2xl sm:text-3xl text-white/80 hover:text-white transition-colors font-light cursor-pointer"
-                        data-testid={`menu-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                      >
-                        {item.label}
-                      </button>
-                    ) : (
-                      <Link 
-                        href={item.href!}
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        <span 
-                          className="text-2xl sm:text-3xl text-white/80 hover:text-white transition-colors font-light cursor-pointer"
-                          data-testid={`menu-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                        >
-                          {item.label}
-                        </span>
-                      </Link>
-                    )}
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        item.action();
+                      }}
+                      className="text-2xl sm:text-3xl text-white/80 hover:text-white transition-colors font-light cursor-pointer"
+                      data-testid={`menu-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                    >
+                      {item.label}
+                    </button>
                   </motion.div>
                 ))}
                 
