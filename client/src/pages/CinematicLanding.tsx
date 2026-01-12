@@ -149,16 +149,16 @@ function HumorSection() {
     offset: ["start end", "end start"]
   });
 
-  const line1Opacity = useTransform(scrollYProgress, [0.08, 0.14, 0.20, 0.26], [0, 1, 1, 0]);
-  const line2Opacity = useTransform(scrollYProgress, [0.14, 0.20, 0.26, 0.32], [0, 1, 1, 0]);
-  const line3Opacity = useTransform(scrollYProgress, [0.20, 0.26, 0.32, 0.38], [0, 1, 1, 0]);
-  const line4Opacity = useTransform(scrollYProgress, [0.26, 0.32, 0.38, 0.44], [0, 1, 1, 0]);
+  const line1Opacity = useTransform(scrollYProgress, [0.10, 0.18, 0.26, 0.34], [0, 1, 1, 0]);
+  const line2Opacity = useTransform(scrollYProgress, [0.18, 0.26, 0.34, 0.42], [0, 1, 1, 0]);
+  const line3Opacity = useTransform(scrollYProgress, [0.26, 0.34, 0.42, 0.50], [0, 1, 1, 0]);
+  const line4Opacity = useTransform(scrollYProgress, [0.34, 0.42, 0.50, 0.58], [0, 1, 1, 0]);
 
   return (
     <section 
       ref={sectionRef}
       className="relative bg-[#0a0a0f]"
-      style={{ minHeight: "180vh" }}
+      style={{ minHeight: "140vh" }}
       data-testid="section-humor"
     >
       <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
