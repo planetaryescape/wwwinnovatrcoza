@@ -810,7 +810,7 @@ export default function CinematicLanding() {
         <section id="consult-contact" className="py-24 bg-[#0a0a0f]">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
             <h2 
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white leading-tight mb-6"
+              className="sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white mb-6 text-[95px]"
               data-cursor-invert
             >
               Contact Us
