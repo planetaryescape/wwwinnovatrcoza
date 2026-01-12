@@ -56,28 +56,16 @@ export default function HeroSection() {
           </div>
           
           {/* Consult Entry Card */}
-          <div className="mt-10 md:mt-12">
+          <div className="mt-4">
             <Link href="/consult">
-              <div 
-                className="group relative inline-block cursor-pointer"
+              <Button 
+                size="default"
+                variant="outline"
+                className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-[#0a0a0f]/80 backdrop-blur-xl border-white/20 text-white hover:bg-[#0a0a0f]/90 hover:border-[#4D5FF1]/50 w-[200px] sm:w-[calc(200px+200px+1rem)] md:w-[calc(220px+220px+1rem)]"
                 data-testid="card-consult-entry"
               >
-                <div className="relative px-8 py-5 bg-[#0a0a0f]/80 backdrop-blur-xl border border-white/10 rounded-lg hover:border-[#4D5FF1]/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(77,95,241,0.15)] hover:-translate-y-0.5">
-                  <p className="text-xs uppercase tracking-[0.2em] text-[#4D5FF1] mb-1 font-medium">
-                    Consult
-                  </p>
-                  <p className="text-white font-medium mb-1">
-                    Strategic consulting for complex decisions
-                  </p>
-                  <p className="text-sm text-gray-400 mb-3">
-                    For when the decision is bigger than a single study
-                  </p>
-                  <span className="inline-flex items-center text-sm text-gray-300 group-hover:text-white transition-colors">
-                    Explore
-                    <ArrowRight className="ml-1 h-3 w-3 group-hover:translate-x-1 transition-transform" />
-                  </span>
-                </div>
-              </div>
+                Consult
+              </Button>
             </Link>
           </div>
         </div>
