@@ -114,6 +114,102 @@ const valueCards = [
   }
 ];
 
+const humorLines = [
+  { text: "Look, if you've made it this far...", delay: 0 },
+  { text: "Either you're nosy (no shame)...", delay: 0.15 },
+  { text: "...you think our work is lekker...", delay: 0.3 },
+  { text: "...or you're ready to chat.", delay: 0.45 },
+];
+
+function HumorSection() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"]
+  });
+
+  const line1Opacity = useTransform(scrollYProgress, [0.1, 0.2], [0, 1]);
+  const line1Y = useTransform(scrollYProgress, [0.1, 0.2], [30, 0]);
+  
+  const line2Opacity = useTransform(scrollYProgress, [0.2, 0.3], [0, 1]);
+  const line2Y = useTransform(scrollYProgress, [0.2, 0.3], [30, 0]);
+  
+  const line3Opacity = useTransform(scrollYProgress, [0.3, 0.4], [0, 1]);
+  const line3Y = useTransform(scrollYProgress, [0.3, 0.4], [30, 0]);
+  
+  const line4Opacity = useTransform(scrollYProgress, [0.4, 0.5], [0, 1]);
+  const line4Y = useTransform(scrollYProgress, [0.4, 0.5], [30, 0]);
+  
+  const ctaOpacity = useTransform(scrollYProgress, [0.55, 0.65], [0, 1]);
+  const ctaY = useTransform(scrollYProgress, [0.55, 0.65], [30, 0]);
+  const ctaScale = useTransform(scrollYProgress, [0.55, 0.65], [0.95, 1]);
+
+  return (
+    <section 
+      ref={sectionRef}
+      className="relative bg-[#0d0d18]"
+      style={{ minHeight: "120vh" }}
+      data-testid="section-humor"
+    >
+      <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
+          <div className="space-y-4 sm:space-y-6">
+            <motion.p
+              style={{ opacity: line1Opacity, y: line1Y }}
+              className="text-2xl sm:text-3xl md:text-4xl text-gray-400 font-light"
+              data-testid="humor-line-1"
+            >
+              {humorLines[0].text}
+            </motion.p>
+            
+            <motion.p
+              style={{ opacity: line2Opacity, y: line2Y }}
+              className="text-2xl sm:text-3xl md:text-4xl text-gray-300 font-light"
+              data-testid="humor-line-2"
+            >
+              {humorLines[1].text}
+            </motion.p>
+            
+            <motion.p
+              style={{ opacity: line3Opacity, y: line3Y }}
+              className="text-2xl sm:text-3xl md:text-4xl text-gray-200 font-light"
+              data-testid="humor-line-3"
+            >
+              {humorLines[2].text}
+            </motion.p>
+            
+            <motion.p
+              style={{ opacity: line4Opacity, y: line4Y }}
+              className="text-2xl sm:text-3xl md:text-4xl text-white font-light"
+              data-testid="humor-line-4"
+            >
+              {humorLines[3].text}
+            </motion.p>
+          </div>
+          
+          <motion.div
+            style={{ opacity: ctaOpacity, y: ctaY, scale: ctaScale }}
+            className="mt-12 sm:mt-16"
+            data-testid="humor-cta"
+          >
+            <p className="text-3xl sm:text-4xl md:text-5xl font-serif font-semibold text-[#4D5FF1] mb-8">
+              Let's braai some ideas together.
+            </p>
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="inline-flex items-center justify-center"
+            >
+              <ArrowDown className="w-6 h-6 text-white/40" />
+            </motion.div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function CinematicLanding() {
   const [, setLocation] = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -700,6 +796,9 @@ export default function CinematicLanding() {
             </div>
           </div>
         </section>
+
+        {/* Humorous Scroll Reveal Section */}
+        <HumorSection />
 
         {/* Final CTA Section */}
         <section id="consult-contact" className="py-24 bg-[#0a0a0f]">
