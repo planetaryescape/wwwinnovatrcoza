@@ -1,50 +1,84 @@
+import { Link } from "wouter";
+
 export default function Footer() {
+  const currentYear = new Date().getFullYear();
+  
   return (
-    <footer className="border-t border-border py-12 bg-muted/30">
+    <footer className="border-t border-gray-800 py-16 bg-[#08080c]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
+        <div className="grid md:grid-cols-4 gap-8 mb-12">
           <div>
-            <h3 className="font-bold text-lg mb-4">Innovatr</h3>
-            <p className="text-sm text-muted-foreground">
-              Smart Research in 24 Hours. AI-powered insights for decision-makers.
+            <h3 className="font-serif font-bold text-xl mb-4 text-white">Innovatr</h3>
+            <p className="text-sm text-gray-400 mb-3">
+              Smart research in 24 hours. AI-powered insights for decision-makers.
+            </p>
+            <p className="text-xs text-gray-500">
+              South Africa • Global work
             </p>
           </div>
           
           <div>
-            <h4 className="font-semibold mb-4">Services</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#services" className="hover:text-primary transition-colors">Innovatr Intelligence</a></li>
-              <li><a href="#services" className="hover:text-primary transition-colors">Test24 Basic</a></li>
-              <li><a href="#services" className="hover:text-primary transition-colors">Test24 Pro</a></li>
-              <li><a href="#services" className="hover:text-primary transition-colors">Consulting</a></li>
+            <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-300 mb-4">Services</h4>
+            <ul className="space-y-3 text-sm text-gray-400">
+              <li>
+                <Link href="/home#services" className="hover:text-white hover:underline transition-colors">
+                  Innovatr Intelligence
+                </Link>
+              </li>
+              <li>
+                <Link href="/home#services" className="hover:text-white hover:underline transition-colors">
+                  Test24 Basic
+                </Link>
+              </li>
+              <li>
+                <Link href="/home#services" className="hover:text-white hover:underline transition-colors">
+                  Test24 Pro
+                </Link>
+              </li>
+              <li>
+                <Link href="/consult" className="hover:text-white hover:underline transition-colors">
+                  Consulting
+                </Link>
+              </li>
             </ul>
           </div>
           
           <div>
-            <h4 className="font-semibold mb-4">Pricing</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#pricing" className="hover:text-primary transition-colors">Pay-As-You-Go</a></li>
-              <li><a href="#membership" className="hover:text-primary transition-colors">Membership Plans</a></li>
-              <li><a href="#contact" className="hover:text-primary transition-colors">Contact Sales</a></li>
+            <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-300 mb-4">Pricing</h4>
+            <ul className="space-y-3 text-sm text-gray-400">
+              <li>
+                <Link href="/home#pricing" className="hover:text-white hover:underline transition-colors">
+                  Pay-as-you-go
+                </Link>
+              </li>
+              <li>
+                <Link href="/home#membership" className="hover:text-white hover:underline transition-colors">
+                  Membership plans
+                </Link>
+              </li>
+              <li>
+                <Link href="/home#contact" className="hover:text-white hover:underline transition-colors">
+                  Contact sales
+                </Link>
+              </li>
             </ul>
           </div>
           
           <div>
-            <h4 className="font-semibold mb-4">Company</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              {/* <li><a href="#about" className="hover:text-primary transition-colors">About Us</a></li> */}
-              <li><a href="#contact" className="hover:text-primary transition-colors">Contact</a></li>
-              {/* <li><a href="#privacy" className="hover:text-primary transition-colors">Privacy Policy</a></li>
-              <li><a href="#terms" className="hover:text-primary transition-colors">Terms of Service</a></li> */}
+            <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-300 mb-4">Company</h4>
+            <ul className="space-y-3 text-sm text-gray-400">
+              <li>
+                <Link href="/home#contact" className="hover:text-white hover:underline transition-colors">
+                  Contact
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
         
-        <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>© 2024 Innovatr. All rights reserved.</p>
-          {/* <p>
-            Powered by <span className="text-primary font-semibold">Just Design Group</span>
-          </p> */}
+        <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
+          <p>© {currentYear} Innovatr. All rights reserved.</p>
+          <p className="text-gray-600 italic">Built for decisions.</p>
         </div>
       </div>
     </footer>
