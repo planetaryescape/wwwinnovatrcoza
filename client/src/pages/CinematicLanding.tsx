@@ -704,7 +704,7 @@ export default function CinematicLanding() {
               >
                 Track Record
               </h2>
-              <div className="max-w-3xl mx-auto space-y-4 text-gray-400">
+              <div className="max-w-3xl mx-auto space-y-4 text-[#fafafa]">
                 <p>
                   Test24 is designed for fast, high-quality testing.
                 </p>
