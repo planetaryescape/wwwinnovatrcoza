@@ -1,0 +1,109 @@
+We need to FIX and IMPROVE the last implementation. Do NOT start a new project. Work in the existing codebase and make minimal safe changes.
+
+CURRENT PROBLEMS
+1) Landing page video is not showing. Visiting “/” jumps straight to pillars (/consult). The new landing route is being bypassed by a redirect or router config.
+2) Scroll is better but section 3 -> 4 still often skips past 4 when scrolling fast (trackpad + mouse wheel).
+3) Landing hero copy needs to change: ONLY show this text over the video:
+   “More than research. Built for decisions.”
+   No subhead. No extra text. Keep CTA button.
+
+NEW BEHAVIOUR GOAL
+A) “/” must always show the cinematic landing page first (video visible).
+B) The CTA button “Explore our work” goes to the lifecycle/pillars experience.
+C) The landing video should feel connected to scrolling, like the Gladeye “journey” vibe:
+   - When the user scrolls on the landing page, we transition into the pillars/lifecycle page (not an abrupt page jump).
+   - The feeling should be: scroll down to “enter” the experience. Smooth, cinematic.
+   - We can implement this as either:
+     Option 1 (preferred): keep everything on ONE route (/) and make it a scroll-based page:
+       - Section 0: Full-screen landing video hero
+       - Section 1+: Existing lifecycle/pillars content below (reuse existing components)
+     Option 2: keep / as landing but on scroll-down trigger navigate to /consult smoothly
+       - Use wheel/touch scroll detection to trigger a smooth route transition and scroll to top of /consult.
+       - Must prevent accidental triggers (require deliberate scroll).
+
+Choose Option 1 if feasible without big refactor. It will solve “video linked to scroll” best.
+
+ROUTING FIX (CRITICAL)
+- Identify any automatic redirect that forces “/” -> “/consult” or “/home”.
+- Common causes:
+  - Next.js redirect() in middleware, next.config, or server routing
+  - React router Navigate element in the root route
+  - A default route pointing to /consult
+- Remove or adjust the redirect so “/” renders the landing page component.
+- Keep /home (original homepage) if it exists, but / must be the cinematic landing.
+
+LANDING PAGE REQUIREMENTS (VISUAL)
+- Full-screen looping background video
+- Dark cinematic overlays: subtle vignette + gradient for readability
+- Minimal header: Innovatr logo/wordmark + Menu button (optional overlay menu)
+- Centre text: ONLY “More than research. Built for decisions.”
+  - Large serif headline
+  - “Built for decisions.” can be slightly emphasised (weight or subtle colour shift)
+- CTA button below: “Explore our work”
+- If we do Option 1 (single scroll page):
+  - CTA should smooth scroll down to the next section (the lifecycle/pillars section), not navigate.
+- Reduced motion:
+  - If prefers-reduced-motion, do not autoplay. Show poster/gradient background.
+
+VIDEO ASSET
+Use the same video file currently stored for landing (verify correct path):
+- Ensure it exists in a static path like /public/video/innovatr-landing.mp4
+- Verify the <video> src resolves (no 404). Fix file path issues.
+- Include: autoplay muted loop playsInline preload="auto"
+- Add fallback: poster + gradient background.
+
+SCROLL FIX FOR LIFECYCLE (3 -> 4 SKIP)
+Do not just increase vh height again. We need a better snapping strategy.
+Implement the following:
+1) Change scroll snap behaviour:
+   - Use scroll-snap-type: y proximity (NOT mandatory)
+   - Set scroll-snap-stop: always on each section to reduce skipping (if supported)
+2) Ensure each lifecycle section is a proper snap point:
+   - scroll-snap-align: start
+   - min-height: 110vh to 125vh is fine
+3) Add explicit “spacer” elements between sections, BUT:
+   - Spacer should NOT be snap points.
+   - Give spacers height like 15vh–25vh to slow momentum.
+4) Add a safety “snap assist” on scroll end:
+   - Listen for scroll end / debounced scroll
+   - Determine which section is closest to viewport top
+   - Smooth-scroll to that section if user is between snap points
+   - This should only run if user is within a threshold (e.g. within 20% of next section) to avoid fighting the user.
+5) Confirm section 4 cannot be skipped on fast trackpad scroll.
+
+SCROLL-LINKED VIDEO FEEL (THE “TRAVEL JOURNEY” VIBE)
+Implement one of these approaches (prefer Option 1):
+
+OPTION 1 (Preferred): One-page experience at “/”
+- Landing hero video is the first full-height section.
+- Under it, render the existing lifecycle/pillars content (reuse the current /consult page component).
+- Keep the same styling and content of the pillars page.
+- The scroll progression should feel like entering the “journey”.
+- The Menu button can remain fixed, but keep it subtle.
+- The CTA button should smoothly scroll to the lifecycle section container.
+
+OPTION 2: Route transition on scroll
+- On landing “/”, if user scrolls down past a threshold (e.g. 120px) or a deliberate wheel gesture, trigger navigate("/consult").
+- On navigation, ensure the consult page scroll container starts at top.
+- Add a fade transition so it doesn’t feel like a hard jump.
+- Prevent accidental triggers: require a second scroll within 500ms OR require reaching the bottom of the hero.
+
+Choose Option 1 if it can be done with minimal duplication: import and render the existing consult page component inside the root page rather than re-creating it.
+
+DO NOT CHANGE
+- Do not rewrite backend.
+- Do not change auth.
+- Do not change the lifecycle/pillars content itself.
+- Do not change overall branding, only improve behaviour and landing copy.
+
+DELIVERABLES
+1) “/” shows the cinematic landing page video, always.
+2) Landing headline is ONLY: “More than research. Built for decisions.”
+3) CTA “Explore our work” works (smooth scroll if Option 1; route if Option 2).
+4) Lifecycle scroll no longer skips from 3 to 4.
+5) Works on desktop + mobile, with reduced motion fallback.
+
+After implementing:
+- List the exact files changed.
+- Explain how routing now works (why / no longer redirects).
+- Confirm the video asset path and that it returns 200 in dev.
