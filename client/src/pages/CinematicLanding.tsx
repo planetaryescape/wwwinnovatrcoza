@@ -163,7 +163,7 @@ function HumorSection() {
     >
       <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
-          <div className="flex flex-col items-center justify-center gap-6 sm:gap-8 md:gap-10">
+          <div className="flex flex-col items-center justify-center gap-6 sm:gap-8 md:gap-10 text-[#fafafa]">
             <motion.p
               style={{ opacity: line1Opacity }}
               className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white/60 font-light tracking-wide"
@@ -182,7 +182,7 @@ function HumorSection() {
             
             <motion.p
               style={{ opacity: line3Opacity }}
-              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white/80 font-light tracking-wide"
+              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light tracking-wide text-[#fafafa]"
               data-testid="humor-line-3"
             >
               {humorLines[2].text}
@@ -207,6 +207,7 @@ export default function CinematicLanding() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoError, setVideoError] = useState(false);
   const [useAutoplay, setUseAutoplay] = useState(false);
   const [activePillar, setActivePillar] = useState(0);
   const [heroOpacity, setHeroOpacity] = useState(1);
@@ -218,6 +219,7 @@ export default function CinematicLanding() {
   const targetTimeRef = useRef(0);
   const animationFrameRef = useRef<number | null>(null);
   const scrollScrubAttempted = useRef(false);
+  const userInteracted = useRef(false);
 
   const { scrollYProgress: heroScrollProgress } = useScroll({
     target: heroRef,
@@ -243,25 +245,56 @@ export default function CinematicLanding() {
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
+  const tryPlayVideo = () => {
+    if (!videoRef.current || videoError) return;
+    videoRef.current.play().catch((err) => {
+      console.log("[Video] Autoplay blocked:", err.message);
+    });
+  };
+
   useEffect(() => {
-    if (reducedMotion || !videoRef.current || useAutoplay) return;
+    const handleInteraction = () => {
+      if (!userInteracted.current) {
+        userInteracted.current = true;
+        tryPlayVideo();
+      }
+    };
+
+    window.addEventListener("click", handleInteraction, { once: true });
+    window.addEventListener("touchstart", handleInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener("click", handleInteraction);
+      window.removeEventListener("touchstart", handleInteraction);
+    };
+  }, [videoError]);
+
+  useEffect(() => {
+    if (reducedMotion || !videoRef.current || useAutoplay || videoError) return;
 
     const lerp = (start: number, end: number, factor: number) => {
       return start + (end - start) * factor;
     };
 
     const updateVideoTime = () => {
-      if (!videoRef.current || useAutoplay) return;
+      if (!videoRef.current || useAutoplay || videoError) return;
+      
+      const duration = videoRef.current.duration;
+      if (!duration || !isFinite(duration)) {
+        animationFrameRef.current = requestAnimationFrame(updateVideoTime);
+        return;
+      }
       
       currentTimeRef.current = lerp(currentTimeRef.current, targetTimeRef.current, 0.1);
+      const clampedTime = Math.max(0, Math.min(currentTimeRef.current, duration - 0.1));
       
       try {
-        if (Math.abs(currentTimeRef.current - targetTimeRef.current) > 0.01) {
-          videoRef.current.currentTime = currentTimeRef.current;
+        if (Math.abs(videoRef.current.currentTime - clampedTime) > 0.01) {
+          videoRef.current.currentTime = clampedTime;
           scrollScrubAttempted.current = true;
         }
       } catch {
-        console.log("Scroll-scrub failed, falling back to autoplay");
+        console.log("[Video] Scroll-scrub failed, falling back to autoplay");
         setUseAutoplay(true);
         return;
       }
@@ -272,12 +305,12 @@ export default function CinematicLanding() {
     animationFrameRef.current = requestAnimationFrame(updateVideoTime);
 
     const fallbackTimer = setTimeout(() => {
-      if (!scrollScrubAttempted.current && videoRef.current) {
-        console.log("Scroll-scrub not working, enabling autoplay fallback");
+      if (!scrollScrubAttempted.current && videoRef.current && !videoError) {
+        console.log("[Video] Scroll-scrub not working, enabling autoplay fallback");
         setUseAutoplay(true);
-        videoRef.current.play().catch(() => {});
+        tryPlayVideo();
       }
-    }, 2000);
+    }, 2500);
 
     return () => {
       if (animationFrameRef.current) {
@@ -285,7 +318,7 @@ export default function CinematicLanding() {
       }
       clearTimeout(fallbackTimer);
     };
-  }, [reducedMotion, useAutoplay]);
+  }, [reducedMotion, useAutoplay, videoError]);
 
   useEffect(() => {
     if (reducedMotion) return;
