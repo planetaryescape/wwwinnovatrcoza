@@ -193,9 +193,7 @@ function HumorSection() {
             className="mt-12 sm:mt-16"
             data-testid="humor-cta"
           >
-            <p className="text-3xl sm:text-4xl md:text-5xl font-serif font-semibold text-[#4D5FF1] mb-8">
-              Let's braai some ideas together.
-            </p>
+            <p className="text-3xl sm:text-4xl md:text-5xl font-serif font-semibold text-[#4D5FF1] mb-8">Let's braai up some ideas together.</p>
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ repeat: Infinity, duration: 2 }}
@@ -331,7 +329,6 @@ export default function CinematicLanding() {
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white">
       <CustomCursor />
-      
       {/* Fixed Header - Always visible */}
       <header className="fixed top-0 left-0 right-0 z-50 px-6 py-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -355,7 +352,6 @@ export default function CinematicLanding() {
           </button>
         </div>
       </header>
-
       {/* Vertical Right Sidebar Navigation - Desktop Only */}
       <nav className="hidden lg:flex fixed right-6 top-[10%] bottom-[10%] z-50 flex-col items-center justify-between py-4">
         {/* Nav Links */}
@@ -429,7 +425,6 @@ export default function CinematicLanding() {
           </Link>
         </div>
       </nav>
-
       {/* Video Scroll-Scrub Zone */}
       <section 
         ref={heroRef}
@@ -525,10 +520,8 @@ export default function CinematicLanding() {
           </motion.div>
         </div>
       </section>
-
       {/* Transition Bridge */}
       <div className="h-20 bg-gradient-to-b from-[#0a0a0f] to-[#0d0d18]" />
-
       {/* Lifecycle Content Section */}
       <div ref={contentRef}>
         {/* The Lifecycle - Pillar Section */}
@@ -846,9 +839,7 @@ export default function CinematicLanding() {
           </div>
         </section>
       </div>
-
       <Footer />
-
       {/* Menu Overlay */}
       <AnimatePresence>
         {menuOpen && (
