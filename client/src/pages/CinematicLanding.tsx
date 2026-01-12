@@ -749,7 +749,7 @@ export default function CinematicLanding() {
               >
                 Results
               </h2>
-              <p className="text-lg sm:text-xl text-gray-400 mt-6 max-w-2xl mx-auto">
+              <p className="text-lg sm:text-xl mt-6 max-w-2xl mx-auto text-[#fafafa]">
                 A showcase of impact across markets, categories & stages of growth.
                 <br />
                 A curated selection of work across focus, play, win & performance tracking.
