@@ -153,7 +153,7 @@ function HumorSection() {
     >
       <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
-          <div className="space-y-4 sm:space-y-6">
+          <div className="space-y-4 sm:space-y-6 text-[#fafafa]">
             <motion.p
               style={{ opacity: line1Opacity, y: line1Y }}
               className="text-2xl sm:text-3xl md:text-4xl text-gray-400 font-light"
