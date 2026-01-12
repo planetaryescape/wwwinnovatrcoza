@@ -5,6 +5,7 @@ export default function CustomCursor() {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const [isOnLight, setIsOnLight] = useState(false);
   const cursorRef = useRef({ x: 0, y: 0 });
   const animationRef = useRef<number | null>(null);
 
@@ -14,6 +15,32 @@ export default function CustomCursor() {
 
     const lerp = (start: number, end: number, factor: number) => {
       return start + (end - start) * factor;
+    };
+
+    const isLightColor = (r: number, g: number, b: number) => {
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      return luminance > 0.7;
+    };
+
+    const checkBackgroundColor = (x: number, y: number) => {
+      const element = document.elementFromPoint(x, y);
+      if (!element) return false;
+      
+      let current: Element | null = element;
+      while (current) {
+        const style = getComputedStyle(current);
+        const bg = style.backgroundColor;
+        
+        if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') {
+          const match = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+          if (match) {
+            const [, r, g, b] = match.map(Number);
+            return isLightColor(r, g, b);
+          }
+        }
+        current = current.parentElement;
+      }
+      return false;
     };
 
     const updatePosition = () => {
@@ -27,6 +54,8 @@ export default function CustomCursor() {
     const handleMouseMove = (e: MouseEvent) => {
       cursorRef.current = { x: e.clientX, y: e.clientY };
       if (!isVisible) setIsVisible(true);
+      
+      setIsOnLight(checkBackgroundColor(e.clientX, e.clientY));
     };
 
     const handleMouseEnter = () => setIsVisible(true);
@@ -73,9 +102,13 @@ export default function CustomCursor() {
   const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
   if (isTouchDevice) return null;
 
+  const cursorColor = isOnLight ? '#4D5FF1' : '#ffffff';
+  const glowColor = isOnLight ? 'rgba(77, 95, 241, 0.4)' : 'rgba(255, 255, 255, 0.3)';
+  const glowColorHover = isOnLight ? 'rgba(77, 95, 241, 0.5)' : 'rgba(255, 255, 255, 0.4)';
+
   return (
     <motion.div
-      className="fixed pointer-events-none z-[9999] mix-blend-difference"
+      className="fixed pointer-events-none z-[9999]"
       animate={{
         x: position.x - (isHovering ? 16 : 6),
         y: position.y - (isHovering ? 16 : 6),
@@ -88,13 +121,14 @@ export default function CustomCursor() {
       }}
     >
       <div 
-        className={`rounded-full bg-white transition-all duration-200 ease-out ${
+        className={`rounded-full transition-all duration-200 ease-out ${
           isHovering ? 'w-8 h-8' : 'w-3 h-3'
         }`}
         style={{
+          backgroundColor: cursorColor,
           boxShadow: isHovering 
-            ? '0 0 20px rgba(255,255,255,0.4)' 
-            : '0 0 10px rgba(255,255,255,0.3)'
+            ? `0 0 20px ${glowColorHover}` 
+            : `0 0 10px ${glowColor}`
         }}
       />
     </motion.div>
