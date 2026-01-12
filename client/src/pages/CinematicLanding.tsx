@@ -247,59 +247,6 @@ export default function CinematicLanding() {
             Innovatr
           </button>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-8">
-            {navItems.map((item) => (
-              item.href ? (
-                <Link key={item.label} href={item.href}>
-                  <span 
-                    className="text-sm uppercase tracking-[0.15em] text-white/70 hover:text-white transition-colors font-medium cursor-pointer"
-                    data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                  >
-                    {item.label}
-                  </span>
-                </Link>
-              ) : (
-                <button
-                  key={item.label}
-                  onClick={item.action}
-                  className="text-sm uppercase tracking-[0.15em] text-white/70 hover:text-white transition-colors font-medium"
-                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-                >
-                  {item.label}
-                </button>
-              )
-            ))}
-            
-            {/* Social Icons */}
-            <div className="flex items-center gap-4 ml-4 pl-4 border-l border-white/20">
-              <a
-                href="https://www.linkedin.com/in/richard-lawrence-innovation-72a62414"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white/60 hover:text-white transition-colors"
-                data-testid="social-linkedin"
-              >
-                <SiLinkedin className="w-4 h-4" />
-              </a>
-              <a
-                href="mailto:Richard@innovatr.co.za?subject=Innovatr%20Consult%20Connect"
-                className="text-white/60 hover:text-white transition-colors"
-                data-testid="social-email"
-              >
-                <Mail className="w-4 h-4" />
-              </a>
-              <a
-                href="https://www.instagram.com/innovatr1?igsh=d2V3eGM5eDZ5anhh"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white/60 hover:text-white transition-colors"
-                data-testid="social-instagram"
-              >
-                <SiInstagram className="w-4 h-4" />
-              </a>
-            </div>
-          </nav>
 
           {/* Mobile Menu Button */}
           <button
@@ -312,6 +259,68 @@ export default function CinematicLanding() {
           </button>
         </div>
       </header>
+
+      {/* Vertical Right Sidebar Navigation - Desktop Only */}
+      <nav className="hidden lg:flex fixed right-8 top-1/2 -translate-y-1/2 z-50 flex-col items-center gap-8">
+        {navItems.map((item) => (
+          item.href ? (
+            <Link key={item.label} href={item.href}>
+              <span 
+                className="text-xs tracking-[0.15em] text-white/60 hover:text-white transition-colors font-normal cursor-pointer lowercase"
+                style={{ 
+                  writingMode: "vertical-rl",
+                  fontFamily: "Roboto, sans-serif"
+                }}
+                data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+              >
+                {item.label.toLowerCase()}
+              </span>
+            </Link>
+          ) : (
+            <button
+              key={item.label}
+              onClick={item.action}
+              className="text-xs tracking-[0.15em] text-white/60 hover:text-white transition-colors font-normal lowercase"
+              style={{ 
+                writingMode: "vertical-rl",
+                fontFamily: "Roboto, sans-serif"
+              }}
+              data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+            >
+              {item.label.toLowerCase()}
+            </button>
+          )
+        ))}
+        
+        {/* Social Icons - Vertical */}
+        <div className="flex flex-col items-center gap-5 mt-4 pt-4 border-t border-white/20">
+          <a
+            href="https://www.linkedin.com/in/richard-lawrence-innovation-72a62414"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white/50 hover:text-white transition-colors"
+            data-testid="social-linkedin"
+          >
+            <SiLinkedin className="w-4 h-4" />
+          </a>
+          <a
+            href="mailto:Richard@innovatr.co.za?subject=Innovatr%20Consult%20Connect"
+            className="text-white/50 hover:text-white transition-colors"
+            data-testid="social-email"
+          >
+            <Mail className="w-4 h-4" />
+          </a>
+          <a
+            href="https://www.instagram.com/innovatr1?igsh=d2V3eGM5eDZ5anhh"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white/50 hover:text-white transition-colors"
+            data-testid="social-instagram"
+          >
+            <SiInstagram className="w-4 h-4" />
+          </a>
+        </div>
+      </nav>
 
       {/* Video Scroll-Scrub Zone */}
       <section 
