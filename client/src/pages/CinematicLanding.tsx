@@ -7,6 +7,13 @@ import { Link, useLocation } from "wouter";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import CustomCursor from "@/components/CustomCursor";
 
+import trendsForesightImg from "@assets/generated_images/trends_and_foresight_3d_abstract.png";
+import demandSpaceImg from "@assets/generated_images/demand_space_mapping_3d_network.png";
+import categoryAuditsImg from "@assets/generated_images/category_audits_3d_cubes.png";
+import ideationWorkshopsImg from "@assets/generated_images/ideation_workshops_creative_explosion.png";
+import endToEndDesignImg from "@assets/generated_images/end_to_end_design_flow.png";
+import brandHealthImg from "@assets/generated_images/brand_health_tracking_pulse.png";
+
 const pillars = [
   {
     id: "where-to-focus",
@@ -66,32 +73,46 @@ const pillars = [
 
 const caseStudies = [
   {
+    id: "trends-foresight",
+    title: "Trends & Foresight",
     pillar: "Where to focus",
-    client: "Leading National Retailer",
-    challenge: "Needed clarity on where growth would come from in a changing category.",
-    approach: "Category scan, need state mapping, segmentation and journey mapping.",
-    outcome: "Clear opportunity map and a prioritised growth roadmap for the next planning cycle."
+    image: trendsForesightImg,
+    tagline: "See what's coming before your competitors do"
   },
   {
+    id: "demand-space",
+    title: "Demand Space Mapping",
+    pillar: "Where to focus",
+    image: demandSpaceImg,
+    tagline: "Map the white space where growth lives"
+  },
+  {
+    id: "category-audits",
+    title: "Category Audits",
+    pillar: "Where to focus",
+    image: categoryAuditsImg,
+    tagline: "Know exactly where you stand"
+  },
+  {
+    id: "ideation-workshops",
+    title: "Ideation Workshops",
     pillar: "How to play",
-    client: "Premium FMCG Brand",
-    challenge: "Had ambition but lacked clear routes to innovation.",
-    approach: "Facilitated ideation workshops and design sprints to generate 40+ concepts.",
-    outcome: "Three breakthrough concepts advanced to development phase."
+    image: ideationWorkshopsImg,
+    tagline: "Turn opportunity into breakthrough ideas"
   },
   {
+    id: "end-to-end-design",
+    title: "End to End Design",
     pillar: "How to win",
-    client: "International Beverage Company",
-    challenge: "Multiple product routes needed to be prioritised with limited budget.",
-    approach: "Idea screening, optimisation testing, and volumetric forecasting.",
-    outcome: "Data-backed business case securing executive sign-off and launch budget."
+    image: endToEndDesignImg,
+    tagline: "From concept to shelf-ready execution"
   },
   {
+    id: "brand-health",
+    title: "Brand & Category Health",
     pillar: "What's working",
-    client: "Regional Food Manufacturer",
-    challenge: "Post-launch tracking was fragmented and reactive.",
-    approach: "Set up always-on innovation and promotion tracking dashboard.",
-    outcome: "Real-time visibility into market dynamics, enabling faster response to competitors."
+    image: brandHealthImg,
+    tagline: "Track what matters, act on what works"
   }
 ];
 
@@ -740,7 +761,7 @@ export default function CinematicLanding() {
 
         {/* Case Studies Section */}
         <section id="case-studies" className="py-24 bg-[#0d0d18]">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
             <div className="text-center mb-16">
               <h2 
                 className="sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white text-[95px]"
@@ -755,49 +776,65 @@ export default function CinematicLanding() {
               </p>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-6">
-              {caseStudies.map((study, index) => (
-                <Card 
-                  key={index}
-                  className="bg-[#12121a] border-gray-800 hover:border-gray-700 transition-colors overflow-hidden"
-                >
-                  <CardContent className="p-0">
-                    <div 
-                      className="h-1"
-                      style={{ backgroundColor: pillars.find(p => p.title === study.pillar)?.color || "#4D5FF1" }}
-                    />
-                    <div className="p-6">
-                      <div className="flex items-center gap-3 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {caseStudies.map((study, index) => {
+                const pillarColor = pillars.find(p => p.title === study.pillar)?.color || "#4D5FF1";
+                return (
+                  <motion.div
+                    key={study.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    className="group relative overflow-hidden rounded-lg cursor-pointer"
+                    style={{ 
+                      background: "linear-gradient(180deg, #12121a 0%, #0a0a0f 100%)"
+                    }}
+                    data-testid={`case-study-${study.id}`}
+                  >
+                    <div className="relative aspect-[3/4] overflow-hidden">
+                      <motion.img
+                        src={study.image}
+                        alt={study.title}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        whileHover={{ scale: 1.08 }}
+                        transition={{ duration: 0.6, ease: "easeOut" }}
+                      />
+                      <div 
+                        className="absolute inset-0 opacity-40 group-hover:opacity-20 transition-opacity duration-500"
+                        style={{
+                          background: `linear-gradient(180deg, transparent 30%, ${pillarColor}40 100%)`
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/60 to-transparent opacity-80" />
+                      
+                      <div className="absolute bottom-0 left-0 right-0 p-5">
                         <span 
-                          className="text-xs uppercase tracking-wider px-2 py-1 rounded"
+                          className="inline-block text-[10px] uppercase tracking-[0.2em] px-2 py-1 rounded mb-3"
                           style={{ 
-                            backgroundColor: `${pillars.find(p => p.title === study.pillar)?.color}20`,
-                            color: pillars.find(p => p.title === study.pillar)?.color
+                            backgroundColor: `${pillarColor}30`,
+                            color: pillarColor,
+                            border: `1px solid ${pillarColor}40`
                           }}
                         >
                           {study.pillar}
                         </span>
-                        <span className="text-sm text-gray-500">{study.client}</span>
-                      </div>
-                      
-                      <div className="space-y-4">
-                        <div>
-                          <p className="text-xs uppercase tracking-wider text-gray-500 mb-1">Challenge</p>
-                          <p className="text-gray-300">{study.challenge}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs uppercase tracking-wider text-gray-500 mb-1">Approach</p>
-                          <p className="text-gray-400 text-sm">{study.approach}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs uppercase tracking-wider text-gray-500 mb-1">Outcome</p>
-                          <p className="text-gray-300 font-medium">{study.outcome}</p>
-                        </div>
+                        <h3 className="text-xl font-serif font-bold text-white mb-2 group-hover:text-[#fafafa] transition-colors">
+                          {study.title}
+                        </h3>
+                        <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors leading-relaxed">
+                          {study.tagline}
+                        </p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    
+                    <div 
+                      className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      style={{ backgroundColor: pillarColor }}
+                    />
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </section>
