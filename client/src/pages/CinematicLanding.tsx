@@ -611,12 +611,11 @@ export default function CinematicLanding() {
         <section id="why-consult" className="py-24 bg-[#0a0a0f]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
             <div className="text-center mb-16">
-              <p className="text-sm uppercase tracking-[0.3em] text-[#4D5FF1] mb-4">
-                Why Consult
-              </p>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6">
-                More than research.{" "}
-                <span className="text-gray-400">Built for decisions.</span>
+              <h2 
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white leading-tight mb-6"
+                data-cursor-invert
+              >
+                Track Record
               </h2>
               <div className="max-w-3xl mx-auto space-y-4 text-gray-400">
                 <p>
@@ -657,11 +656,11 @@ export default function CinematicLanding() {
         <section id="case-studies" className="py-24 bg-[#0d0d18]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
             <div className="text-center mb-16">
-              <p className="text-sm uppercase tracking-[0.3em] text-gray-500 mb-4">
-                Case Studies
-              </p>
-              <h2 className="text-3xl sm:text-4xl font-serif font-bold">
-                Real results, real clients
+              <h2 
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white leading-tight"
+                data-cursor-invert
+              >
+                Results
               </h2>
             </div>
             
@@ -715,8 +714,11 @@ export default function CinematicLanding() {
         {/* Final CTA Section */}
         <section id="consult-contact" className="py-24 bg-[#0a0a0f]">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6">
-              Facing a complex decision?
+            <h2 
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white leading-tight mb-6"
+              data-cursor-invert
+            >
+              Contact Us
             </h2>
             <p className="text-xl text-gray-400 mb-10">
               If the stakes are high and you want a thought partner, let's talk.
