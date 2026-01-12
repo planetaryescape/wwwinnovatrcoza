@@ -418,6 +418,15 @@ export default function CinematicLanding() {
           >
             <SiInstagram className="w-4 h-4" />
           </a>
+          <Link href="/home">
+            <span 
+              className="text-white hover:text-white/70 transition-colors text-sm font-bold"
+              style={{ fontFamily: "Roboto, sans-serif" }}
+              data-testid="nav-24"
+            >
+              24
+            </span>
+          </Link>
         </div>
       </nav>
 
