@@ -207,6 +207,7 @@ export default function CinematicLanding() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [useAutoplay, setUseAutoplay] = useState(false);
   const [activePillar, setActivePillar] = useState(0);
   const [heroOpacity, setHeroOpacity] = useState(1);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -216,6 +217,7 @@ export default function CinematicLanding() {
   const currentTimeRef = useRef(0);
   const targetTimeRef = useRef(0);
   const animationFrameRef = useRef<number | null>(null);
+  const scrollScrubAttempted = useRef(false);
 
   const { scrollYProgress: heroScrollProgress } = useScroll({
     target: heroRef,
@@ -242,19 +244,26 @@ export default function CinematicLanding() {
   }, []);
 
   useEffect(() => {
-    if (reducedMotion || !videoRef.current) return;
+    if (reducedMotion || !videoRef.current || useAutoplay) return;
 
     const lerp = (start: number, end: number, factor: number) => {
       return start + (end - start) * factor;
     };
 
     const updateVideoTime = () => {
-      if (!videoRef.current) return;
+      if (!videoRef.current || useAutoplay) return;
       
       currentTimeRef.current = lerp(currentTimeRef.current, targetTimeRef.current, 0.1);
       
-      if (Math.abs(currentTimeRef.current - targetTimeRef.current) > 0.01) {
-        videoRef.current.currentTime = currentTimeRef.current;
+      try {
+        if (Math.abs(currentTimeRef.current - targetTimeRef.current) > 0.01) {
+          videoRef.current.currentTime = currentTimeRef.current;
+          scrollScrubAttempted.current = true;
+        }
+      } catch {
+        console.log("Scroll-scrub failed, falling back to autoplay");
+        setUseAutoplay(true);
+        return;
       }
       
       animationFrameRef.current = requestAnimationFrame(updateVideoTime);
@@ -262,12 +271,21 @@ export default function CinematicLanding() {
 
     animationFrameRef.current = requestAnimationFrame(updateVideoTime);
 
+    const fallbackTimer = setTimeout(() => {
+      if (!scrollScrubAttempted.current && videoRef.current) {
+        console.log("Scroll-scrub not working, enabling autoplay fallback");
+        setUseAutoplay(true);
+        videoRef.current.play().catch(() => {});
+      }
+    }, 2000);
+
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
+      clearTimeout(fallbackTimer);
     };
-  }, [reducedMotion]);
+  }, [reducedMotion, useAutoplay]);
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -439,10 +457,17 @@ export default function CinematicLanding() {
                 muted
                 playsInline
                 preload="auto"
+                autoPlay={useAutoplay}
+                loop={useAutoplay}
                 onLoadedMetadata={() => {
                   setVideoLoaded(true);
-                  if (videoRef.current) {
+                  if (videoRef.current && !useAutoplay) {
                     videoRef.current.currentTime = 0;
+                  }
+                }}
+                onCanPlay={() => {
+                  if (useAutoplay && videoRef.current) {
+                    videoRef.current.play().catch(() => {});
                   }
                 }}
                 poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Crect fill='%230a0a0f' width='1920' height='1080'/%3E%3C/svg%3E"
