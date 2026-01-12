@@ -102,9 +102,11 @@ export default function CustomCursor() {
   const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
   if (isTouchDevice) return null;
 
-  const cursorColor = isOnLight ? '#4D5FF1' : '#ffffff';
-  const glowColor = isOnLight ? 'rgba(77, 95, 241, 0.4)' : 'rgba(255, 255, 255, 0.3)';
-  const glowColorHover = isOnLight ? 'rgba(77, 95, 241, 0.5)' : 'rgba(255, 255, 255, 0.4)';
+  const cursorColor = isOnLight ? 'rgba(77, 95, 241, 0.7)' : 'rgba(255, 255, 255, 0.8)';
+  const cursorColorHover = isOnLight ? 'rgba(77, 95, 241, 0.5)' : 'rgba(255, 255, 255, 0.6)';
+  const glowColor = isOnLight ? 'rgba(77, 95, 241, 0.3)' : 'rgba(255, 255, 255, 0.25)';
+  const glowColorHover = isOnLight ? 'rgba(77, 95, 241, 0.4)' : 'rgba(255, 255, 255, 0.35)';
+  const borderColor = isOnLight ? 'rgba(77, 95, 241, 0.9)' : 'rgba(255, 255, 255, 0.9)';
 
   return (
     <motion.div
@@ -125,10 +127,12 @@ export default function CustomCursor() {
           isHovering ? 'w-8 h-8' : 'w-3 h-3'
         }`}
         style={{
-          backgroundColor: cursorColor,
+          backgroundColor: isHovering ? cursorColorHover : cursorColor,
+          border: `1.5px solid ${borderColor}`,
           boxShadow: isHovering 
-            ? `0 0 20px ${glowColorHover}` 
-            : `0 0 10px ${glowColor}`
+            ? `0 0 20px ${glowColorHover}, inset 0 0 10px ${glowColorHover}` 
+            : `0 0 10px ${glowColor}`,
+          backdropFilter: isHovering ? 'blur(2px)' : 'none'
         }}
       />
     </motion.div>
