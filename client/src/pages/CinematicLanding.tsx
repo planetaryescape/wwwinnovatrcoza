@@ -351,7 +351,7 @@ export default function CinematicLanding() {
         </div>
       </header>
       {/* Vertical Right Sidebar Navigation - Desktop Only */}
-      <nav className="hidden lg:flex fixed right-6 top-[10%] bottom-[10%] z-50 flex-col items-center justify-between py-4">
+      <nav className="hidden lg:flex fixed right-6 top-6 bottom-6 z-50 flex-col items-center justify-between py-4">
         {/* Nav Links */}
         <div className="flex flex-col items-center gap-10">
           {navItems.map((item) => (
