@@ -5,6 +5,7 @@ export default function CustomCursor() {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const [isOverHeading, setIsOverHeading] = useState(false);
   const [isOnLight, setIsOnLight] = useState(false);
   const cursorRef = useRef({ x: 0, y: 0 });
   const animationRef = useRef<number | null>(null);
@@ -43,6 +44,30 @@ export default function CustomCursor() {
       return false;
     };
 
+    const isLargeHeading = (element: Element | null): boolean => {
+      if (!element) return false;
+      
+      const target = element as HTMLElement;
+      if (target.hasAttribute('data-cursor-invert')) return true;
+      if (target.closest('[data-cursor-invert]')) return true;
+      
+      const tagName = target.tagName;
+      if (tagName === 'H1' || tagName === 'H2') {
+        const style = getComputedStyle(target);
+        const fontSize = parseFloat(style.fontSize);
+        if (fontSize >= 28) return true;
+      }
+      
+      const parent = target.closest('h1, h2');
+      if (parent) {
+        const style = getComputedStyle(parent);
+        const fontSize = parseFloat(style.fontSize);
+        if (fontSize >= 28) return true;
+      }
+      
+      return false;
+    };
+
     const updatePosition = () => {
       setPosition(prev => ({
         x: lerp(prev.x, cursorRef.current.x, 0.15),
@@ -55,6 +80,8 @@ export default function CustomCursor() {
       cursorRef.current = { x: e.clientX, y: e.clientY };
       if (!isVisible) setIsVisible(true);
       
+      const element = document.elementFromPoint(e.clientX, e.clientY);
+      setIsOverHeading(isLargeHeading(element));
       setIsOnLight(checkBackgroundColor(e.clientX, e.clientY));
     };
 
@@ -102,6 +129,10 @@ export default function CustomCursor() {
   const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
   if (isTouchDevice) return null;
 
+  const isEnlarged = isHovering || isOverHeading;
+  const size = isOverHeading ? 48 : (isHovering ? 32 : 12);
+  const offset = size / 2;
+
   const cursorColor = isOnLight ? 'rgba(77, 95, 241, 0.7)' : 'rgba(255, 255, 255, 0.8)';
   const cursorColorHover = isOnLight ? 'rgba(77, 95, 241, 0.5)' : 'rgba(255, 255, 255, 0.6)';
   const glowColor = isOnLight ? 'rgba(77, 95, 241, 0.3)' : 'rgba(255, 255, 255, 0.25)';
@@ -110,10 +141,10 @@ export default function CustomCursor() {
 
   return (
     <motion.div
-      className="fixed pointer-events-none z-[9999]"
+      className={`fixed pointer-events-none z-[9999] ${isOverHeading ? 'mix-blend-difference' : ''}`}
       animate={{
-        x: position.x - (isHovering ? 16 : 6),
-        y: position.y - (isHovering ? 16 : 6),
+        x: position.x - offset,
+        y: position.y - offset,
         opacity: isVisible ? 1 : 0
       }}
       transition={{
@@ -123,16 +154,20 @@ export default function CustomCursor() {
       }}
     >
       <div 
-        className={`rounded-full transition-all duration-200 ease-out ${
-          isHovering ? 'w-8 h-8' : 'w-3 h-3'
-        }`}
+        className="rounded-full transition-all duration-200 ease-out"
         style={{
-          backgroundColor: isHovering ? cursorColorHover : cursorColor,
-          border: `1.5px solid ${borderColor}`,
-          boxShadow: isHovering 
-            ? `0 0 20px ${glowColorHover}, inset 0 0 10px ${glowColorHover}` 
-            : `0 0 10px ${glowColor}`,
-          backdropFilter: isHovering ? 'blur(2px)' : 'none'
+          width: size,
+          height: size,
+          backgroundColor: isOverHeading 
+            ? '#ffffff' 
+            : (isHovering ? cursorColorHover : cursorColor),
+          border: isOverHeading ? 'none' : `1.5px solid ${borderColor}`,
+          boxShadow: isOverHeading 
+            ? 'none'
+            : (isEnlarged 
+              ? `0 0 20px ${glowColorHover}, inset 0 0 10px ${glowColorHover}` 
+              : `0 0 10px ${glowColor}`),
+          backdropFilter: (isHovering && !isOverHeading) ? 'blur(2px)' : 'none'
         }}
       />
     </motion.div>

@@ -318,6 +318,7 @@ export default function CinematicLanding() {
               <h1 
                 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white leading-tight mb-10"
                 data-testid="text-headline"
+                data-cursor-invert
               >
                 More than research.
                 <br />
