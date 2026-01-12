@@ -261,12 +261,28 @@ export default function CinematicLanding() {
       </header>
 
       {/* Vertical Right Sidebar Navigation - Desktop Only */}
-      <nav className="hidden lg:flex fixed right-8 top-1/2 -translate-y-1/2 z-50 flex-col items-center gap-8">
-        {navItems.map((item) => (
-          item.href ? (
-            <Link key={item.label} href={item.href}>
-              <span 
-                className="text-xs tracking-[0.15em] text-white/60 hover:text-white transition-colors font-normal cursor-pointer lowercase"
+      <nav className="hidden lg:flex fixed right-6 top-[10%] bottom-[10%] z-50 flex-col items-center justify-between py-4">
+        {/* Nav Links */}
+        <div className="flex flex-col items-center gap-10">
+          {navItems.map((item) => (
+            item.href ? (
+              <Link key={item.label} href={item.href}>
+                <span 
+                  className="text-xs tracking-[0.2em] text-white hover:text-white/70 transition-colors font-normal cursor-pointer lowercase"
+                  style={{ 
+                    writingMode: "vertical-rl",
+                    fontFamily: "Roboto, sans-serif"
+                  }}
+                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  {item.label.toLowerCase()}
+                </span>
+              </Link>
+            ) : (
+              <button
+                key={item.label}
+                onClick={item.action}
+                className="text-xs tracking-[0.2em] text-white hover:text-white/70 transition-colors font-normal lowercase"
                 style={{ 
                   writingMode: "vertical-rl",
                   fontFamily: "Roboto, sans-serif"
@@ -274,38 +290,25 @@ export default function CinematicLanding() {
                 data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
               >
                 {item.label.toLowerCase()}
-              </span>
-            </Link>
-          ) : (
-            <button
-              key={item.label}
-              onClick={item.action}
-              className="text-xs tracking-[0.15em] text-white/60 hover:text-white transition-colors font-normal lowercase"
-              style={{ 
-                writingMode: "vertical-rl",
-                fontFamily: "Roboto, sans-serif"
-              }}
-              data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-            >
-              {item.label.toLowerCase()}
-            </button>
-          )
-        ))}
+              </button>
+            )
+          ))}
+        </div>
         
         {/* Social Icons - Vertical */}
-        <div className="flex flex-col items-center gap-5 mt-4 pt-4 border-t border-white/20">
+        <div className="flex flex-col items-center gap-5">
           <a
             href="https://www.linkedin.com/in/richard-lawrence-innovation-72a62414"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-white/50 hover:text-white transition-colors"
+            className="text-white hover:text-white/70 transition-colors"
             data-testid="social-linkedin"
           >
             <SiLinkedin className="w-4 h-4" />
           </a>
           <a
             href="mailto:Richard@innovatr.co.za?subject=Innovatr%20Consult%20Connect"
-            className="text-white/50 hover:text-white transition-colors"
+            className="text-white hover:text-white/70 transition-colors"
             data-testid="social-email"
           >
             <Mail className="w-4 h-4" />
@@ -314,7 +317,7 @@ export default function CinematicLanding() {
             href="https://www.instagram.com/innovatr1?igsh=d2V3eGM5eDZ5anhh"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-white/50 hover:text-white transition-colors"
+            className="text-white hover:text-white/70 transition-colors"
             data-testid="social-instagram"
           >
             <SiInstagram className="w-4 h-4" />
@@ -606,7 +609,7 @@ export default function CinematicLanding() {
 
         {/* Why Consult Section */}
         <section id="why-consult" className="py-24 bg-[#0a0a0f]">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
             <div className="text-center mb-16">
               <p className="text-sm uppercase tracking-[0.3em] text-[#4D5FF1] mb-4">
                 Why Consult
@@ -652,7 +655,7 @@ export default function CinematicLanding() {
 
         {/* Case Studies Section */}
         <section id="case-studies" className="py-24 bg-[#0d0d18]">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
             <div className="text-center mb-16">
               <p className="text-sm uppercase tracking-[0.3em] text-gray-500 mb-4">
                 Case Studies
@@ -711,7 +714,7 @@ export default function CinematicLanding() {
 
         {/* Final CTA Section */}
         <section id="consult-contact" className="py-24 bg-[#0a0a0f]">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6">
               Facing a complex decision?
             </h2>
