@@ -116,7 +116,7 @@ const valueCards = [
 const humorLines = [
   { text: "Look, if you've made it this far...", delay: 0 },
   { text: "Either you're nosy (no shame)...", delay: 0.15 },
-  { text: "...you think our work is lekker...", delay: 0.3 },
+  { text: "...you think our work is pretty lekker...", delay: 0.3 },
   { text: "...or you're ready to chat.", delay: 0.45 },
 ];
 
