@@ -192,7 +192,6 @@ function HumorSection() {
             className="mt-12 sm:mt-16"
             data-testid="humor-cta"
           >
-            <p className="text-3xl sm:text-4xl md:text-5xl font-serif font-semibold text-[#4D5FF1] mb-8">Let's braai up some ideas together.</p>
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ repeat: Infinity, duration: 2 }}
