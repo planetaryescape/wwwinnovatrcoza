@@ -1,0 +1,268 @@
+ou are working inside the existing Innovatr Replit codebase. Do not rebuild the whole site. Make targeted, production-ready edits only. Keep the current /consult lifecycle page as-is (no content changes), and keep the improved scroll logic as-is for now. The goal is to implement a new cinematic landing route that uses a scroll-scrubbed video hero and then naturally transitions into the existing lifecycle sections and footer.
+
+Objective
+
+Create a premium cinematic landing experience on the root route / that:
+
+Shows an 8-second video as the hero background (use the uploaded asset: Consult Landing video.mp4 in the public/static assets folder).
+
+The video “plays” as the user scrolls through the first portion of the page (scroll-scrubbed playback).
+
+The hero includes only one line of copy on top of the video:
+“More than research. Built for decisions.”
+
+After the video scrub zone finishes, the page transitions smoothly into the existing lifecycle sections (same content currently on /consult, but rendered directly below the landing hero on / so it feels like one continuous journey).
+
+Footer is present at the bottom of / and styled consistently with the cinematic theme.
+
+The “Explore our work” CTA should scroll the user into the lifecycle section on the same page (not navigate away). We still keep /consult as a standalone route too.
+
+Implementation Requirements
+A) File handling
+
+Move Consult Landing video.mp4 into a public/static location so it can be served reliably (e.g. public/videos/consult-landing.mp4).
+
+Ensure the video path is used correctly in the <video> tag and works in Replit preview + production build.
+
+B) Route behaviour
+
+/ becomes the new cinematic landing page with:
+
+video-scrub hero
+
+lifecycle sections rendered underneath (reuse the existing lifecycle component)
+
+footer at the bottom
+
+Keep /consult route working as-is (pillar/lifecycle standalone page) for direct linking.
+
+Keep /home route (legacy homepage) intact as it is.
+
+C) Hero: scroll-scrubbed video (crucial)
+
+Implement a dedicated “Video Scrub Zone” at the top:
+
+Layout
+
+Full viewport height hero (100vh).
+
+Video is full-bleed, covers entire hero (object-fit: cover).
+
+Add cinematic overlays:
+
+subtle vignette
+
+top-to-bottom gradient for readability
+
+optional film grain (very subtle, tasteful)
+
+Scroll behaviour
+
+The first section must have “scroll space” so the user scrolls to progress through the video.
+
+The hero video should be “sticky” while scrubbing.
+
+Scroll controls video playback time:
+
+When scroll progress = 0 → video time = 0.0s
+
+When scroll progress = 1 → video time = video duration
+
+The video should not autoplay normally; it should be scrubbed by scroll.
+
+Make the scrub smooth:
+
+use requestAnimationFrame loop
+
+apply light easing/lerp to avoid jitter
+
+Handle iOS/Safari:
+
+muted
+
+playsInline
+
+preload metadata
+
+set currentTime after metadata is loaded
+
+Add a fallback for reduced motion:
+
+If prefers-reduced-motion is enabled, don’t scrub; show the first frame / poster and allow a normal scroll.
+
+Recommended scroll space
+
+Give the scrub zone ~250vh–320vh of scroll space so it feels cinematic and not rushed.
+
+D) Hero copy and UI (minimal)
+
+Only show:
+
+Headline (exact copy)
+“More than research. Built for decisions.”
+
+Styling:
+
+Font: DM Serif Display
+
+Colour: white with slight softness (e.g. 92–96% opacity)
+
+Large, centred, two-line layout is fine, but it must read as one statement.
+
+No subhead. No paragraph. No extra marketing fluff.
+
+Header:
+
+Keep the minimal header:
+
+left: Innovatr wordmark
+
+right: Menu button
+
+Menu opens overlay with nav links (keep existing if already implemented).
+
+Primary CTA:
+
+Button text: “Explore our work”
+
+Behaviour: Smooth scroll to the start of lifecycle section on the same page (anchor ID).
+
+Button style: Innovatr blue primary button (same style as current).
+
+Add a small down arrow icon if it exists already.
+
+Scroll cue:
+
+Keep a small mouse/scroll indicator at bottom centre.
+
+E) Transition from video zone → lifecycle (smooth handoff)
+
+As the scrub finishes:
+
+Video ends on its last frame.
+
+The hero’s overlay and headline gently fade down as user passes the end threshold.
+
+The lifecycle section begins immediately after, with no harsh cut.
+
+Add a small “fade bridge”:
+
+A 10–20vh transition spacer with a gradient so it feels like you’re “arriving” into the lifecycle content.
+
+F) Lifecycle section on /
+
+Under the hero, render the existing lifecycle/pillars content (the same one currently on /consult) inside the same page:
+
+Add an anchor ID like id="lifecycle" at the start of this section.
+
+Ensure “Explore our work” scrolls to this anchor.
+
+Do not change lifecycle copy/content right now.
+
+Keep the section progress dots/navigation.
+
+G) Footer (must be fixed + aligned with vibe)
+
+Implement a footer at the bottom of / that matches the cinematic theme.
+
+Footer layout:
+
+Dark background (near-black) with subtle border top.
+
+4 columns on desktop, stacked on mobile.
+
+Footer content (copy inclusive):
+
+Column 1: Innovatr
+
+Short descriptor:
+“Smart research in 24 hours. AI-powered insights for decision-makers.”
+
+Small line: “South Africa • Global work”
+
+Column 2: Services
+
+Innovatr Intelligence
+
+Test24 Basic
+
+Test24 Pro
+
+Consulting
+
+Each links to the relevant routes (use existing ones; don’t invent new pages).
+
+Column 3: Pricing
+
+Pay-as-you-go
+
+Membership plans
+
+Contact sales
+
+(If some routes don’t exist yet, link them to /pricing or /contact-sales only if those exist; otherwise link to /home#pricing style anchors, or the most relevant existing page.)
+
+Column 4: Company
+
+About
+
+Contact
+
+Privacy (if exists)
+
+Terms (if exists)
+
+Footer bottom bar:
+
+“© {current year} Innovatr. All rights reserved.”
+
+Optional: “Built for decisions.”
+
+Make sure footer text contrast is readable and consistent with the site’s fonts:
+
+headings: Roboto bold / small caps
+
+links: Roboto regular
+
+hover states subtle (underline or opacity shift)
+
+H) Performance + correctness
+
+Lazy load the video (preload="metadata" is fine).
+
+Ensure no layout shift.
+
+Ensure video doesn’t download multiple times.
+
+Ensure page works on desktop + mobile.
+
+Make sure the landing is actually / (root). It must not redirect to /consult.
+
+I) Deliverables
+
+After implementation:
+
+Confirm the file path used for the video.
+
+Confirm the route map:
+
+/ new cinematic landing with scrubbed video + lifecycle + footer
+
+/consult unchanged
+
+/home unchanged
+
+Confirm the CTA scrolls to lifecycle anchor.
+
+Confirm reduced motion fallback works.
+
+Notes / Important Clarifications
+
+Do NOT add any additional copy on the hero besides:
+“More than research. Built for decisions.”
+
+Do NOT remove the menu.
+
+Do NOT change the lifecycle copy.
+
+Keep design minimal, premium, and cinematic.

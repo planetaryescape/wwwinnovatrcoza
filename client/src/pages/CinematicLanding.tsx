@@ -118,16 +118,26 @@ export default function CinematicLanding() {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [activePillar, setActivePillar] = useState(0);
+  const [heroOpacity, setHeroOpacity] = useState(1);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
   const lifecycleRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const currentTimeRef = useRef(0);
+  const targetTimeRef = useRef(0);
+  const animationFrameRef = useRef<number | null>(null);
 
-  const { scrollYProgress } = useScroll({
+  const { scrollYProgress: heroScrollProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end end"]
+  });
+
+  const { scrollYProgress: lifecycleScrollProgress } = useScroll({
     target: lifecycleRef,
     offset: ["start start", "end end"]
   });
 
-  const pillarProgress = useTransform(scrollYProgress, [0, 0.85], [0, 3.99]);
+  const pillarProgress = useTransform(lifecycleScrollProgress, [0, 0.85], [0, 3.99]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -142,12 +152,53 @@ export default function CinematicLanding() {
   }, []);
 
   useEffect(() => {
-    if (videoRef.current && !reducedMotion) {
-      videoRef.current.play().catch(() => {
-        console.log("Autoplay prevented");
-      });
-    }
-  }, [reducedMotion, videoLoaded]);
+    if (reducedMotion || !videoRef.current) return;
+
+    const lerp = (start: number, end: number, factor: number) => {
+      return start + (end - start) * factor;
+    };
+
+    const updateVideoTime = () => {
+      if (!videoRef.current) return;
+      
+      currentTimeRef.current = lerp(currentTimeRef.current, targetTimeRef.current, 0.1);
+      
+      if (Math.abs(currentTimeRef.current - targetTimeRef.current) > 0.01) {
+        videoRef.current.currentTime = currentTimeRef.current;
+      }
+      
+      animationFrameRef.current = requestAnimationFrame(updateVideoTime);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(updateVideoTime);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [reducedMotion]);
+
+  useEffect(() => {
+    if (reducedMotion) return;
+
+    const unsubscribe = heroScrollProgress.on("change", (latest) => {
+      if (videoRef.current) {
+        const duration = videoRef.current.duration || 8;
+        targetTimeRef.current = latest * duration;
+        
+        const fadeStart = 0.85;
+        if (latest > fadeStart) {
+          const fadeProgress = (latest - fadeStart) / (1 - fadeStart);
+          setHeroOpacity(1 - fadeProgress * 0.3);
+        } else {
+          setHeroOpacity(1);
+        }
+      }
+    });
+
+    return unsubscribe;
+  }, [heroScrollProgress, reducedMotion]);
 
   useEffect(() => {
     return pillarProgress.on("change", (latest) => {
@@ -171,103 +222,135 @@ export default function CinematicLanding() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white">
-      {/* Video Hero Section */}
-      <section className="relative h-screen w-full overflow-hidden">
-        {/* Video Background */}
-        {!reducedMotion ? (
-          <video
-            ref={videoRef}
-            className="absolute inset-0 w-full h-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            onLoadedData={() => setVideoLoaded(true)}
-            poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Crect fill='%230a0a0f' width='1920' height='1080'/%3E%3C/svg%3E"
-            data-testid="video-background"
+      {/* Fixed Header - Always visible */}
+      <header className="fixed top-0 left-0 right-0 z-50 px-6 py-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <button 
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="text-2xl font-serif font-bold text-white tracking-wide"
+            data-testid="link-logo-landing"
           >
-            <source src="/video/innovatr-landing.mp4" type="video/mp4" />
-          </video>
-        ) : (
-          <div 
-            className="absolute inset-0 bg-gradient-to-br from-[#0a0a0f] via-[#12121a] to-[#0a0a0f]"
-            data-testid="poster-fallback"
-          />
-        )}
+            Innovatr
+          </button>
 
-        {/* Cinematic Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: "radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.5) 100%)"
-          }}
-        />
-
-        {/* Fixed Header */}
-        <header className="fixed top-0 left-0 right-0 z-50 px-6 py-6">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <button 
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="text-2xl font-serif font-bold text-white tracking-wide"
-              data-testid="link-logo-landing"
-            >
-              Innovatr
-            </button>
-
-            <button
-              onClick={() => setMenuOpen(true)}
-              className="text-white/80 hover:text-white transition-colors text-sm uppercase tracking-[0.2em] font-medium flex items-center gap-2"
-              data-testid="button-menu-open"
-            >
-              <Menu className="w-5 h-5" />
-              Menu
-            </button>
-          </div>
-        </header>
-
-        {/* Hero Content */}
-        <div className="relative z-10 h-full flex flex-col items-center justify-center px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.3 }}
-            className="text-center max-w-4xl mx-auto"
+          <button
+            onClick={() => setMenuOpen(true)}
+            className="text-white/80 hover:text-white transition-colors text-sm uppercase tracking-[0.2em] font-medium flex items-center gap-2"
+            data-testid="button-menu-open"
           >
-            <h1 
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white leading-tight mb-10"
-              data-testid="text-headline"
-            >
-              More than research.
-              <br />
-              <span className="text-white/90">Built for decisions.</span>
-            </h1>
-
-            <Button 
-              size="lg"
-              onClick={scrollToContent}
-              className="bg-[#4D5FF1] hover:bg-[#4D5FF1]/90 text-white px-8 py-6 text-base sm:text-lg font-medium rounded-lg shadow-[0_0_30px_rgba(77,95,241,0.3)] hover:shadow-[0_0_40px_rgba(77,95,241,0.5)] transition-all duration-300"
-              data-testid="button-explore-work"
-            >
-              Explore our work
-              <ArrowDown className="ml-2 h-5 w-5" />
-            </Button>
-          </motion.div>
+            <Menu className="w-5 h-5" />
+            Menu
+          </button>
         </div>
+      </header>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-            className="w-6 h-10 border-2 border-white/40 rounded-full flex justify-center pt-2"
+      {/* Video Scroll-Scrub Zone */}
+      <section 
+        ref={heroRef}
+        className="relative"
+        style={{ height: "280vh" }}
+      >
+        {/* Sticky Video Container */}
+        <div className="sticky top-0 h-screen w-full overflow-hidden">
+          {/* Video Background */}
+          {!reducedMotion ? (
+            <motion.div 
+              className="absolute inset-0"
+              style={{ opacity: heroOpacity }}
+            >
+              <video
+                ref={videoRef}
+                className="absolute inset-0 w-full h-full object-cover"
+                muted
+                playsInline
+                preload="metadata"
+                onLoadedMetadata={() => {
+                  setVideoLoaded(true);
+                  if (videoRef.current) {
+                    videoRef.current.currentTime = 0;
+                  }
+                }}
+                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Crect fill='%230a0a0f' width='1920' height='1080'/%3E%3C/svg%3E"
+                data-testid="video-background"
+              >
+                <source src="/video/innovatr-landing.mp4" type="video/mp4" />
+              </video>
+            </motion.div>
+          ) : (
+            <div 
+              className="absolute inset-0 bg-gradient-to-br from-[#0a0a0f] via-[#12121a] to-[#0a0a0f]"
+              data-testid="poster-fallback"
+            />
+          )}
+
+          {/* Cinematic Overlays */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/70" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30" />
+          <div 
+            className="absolute inset-0"
+            style={{
+              background: "radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%)"
+            }}
+          />
+          {/* Subtle film grain overlay */}
+          <div 
+            className="absolute inset-0 opacity-[0.03] pointer-events-none"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+              backgroundRepeat: "repeat"
+            }}
+          />
+
+          {/* Hero Content */}
+          <motion.div 
+            className="relative z-10 h-full flex flex-col items-center justify-center px-6"
+            style={{ opacity: heroOpacity }}
           >
-            <motion.div className="w-1.5 h-1.5 bg-white/60 rounded-full" />
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.3 }}
+              className="text-center max-w-4xl mx-auto"
+            >
+              <h1 
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white leading-tight mb-10"
+                data-testid="text-headline"
+              >
+                More than research.
+                <br />
+                <span className="text-white/90">Built for decisions.</span>
+              </h1>
+
+              <Button 
+                size="lg"
+                onClick={scrollToContent}
+                className="bg-[#4D5FF1] hover:bg-[#4D5FF1]/90 text-white px-8 py-6 text-base sm:text-lg font-medium rounded-lg shadow-[0_0_30px_rgba(77,95,241,0.3)] hover:shadow-[0_0_40px_rgba(77,95,241,0.5)] transition-all duration-300"
+                data-testid="button-explore-work"
+              >
+                Explore our work
+                <ArrowDown className="ml-2 h-5 w-5" />
+              </Button>
+            </motion.div>
+          </motion.div>
+
+          {/* Scroll indicator */}
+          <motion.div 
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+            style={{ opacity: heroOpacity }}
+          >
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="w-6 h-10 border-2 border-white/40 rounded-full flex justify-center pt-2"
+            >
+              <motion.div className="w-1.5 h-1.5 bg-white/60 rounded-full" />
+            </motion.div>
           </motion.div>
         </div>
       </section>
+
+      {/* Transition Bridge */}
+      <div className="h-20 bg-gradient-to-b from-[#0a0a0f] to-[#0d0d18]" />
 
       {/* Lifecycle Content Section */}
       <div ref={contentRef}>
