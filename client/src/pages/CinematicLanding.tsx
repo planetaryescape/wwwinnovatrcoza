@@ -564,7 +564,7 @@ export default function CinematicLanding() {
                 >
                   <div className="grid lg:grid-cols-2 gap-12 items-center">
                     <div>
-                      <p className="text-sm uppercase tracking-[0.3em] text-gray-500 mb-2">
+                      <p className="text-sm uppercase tracking-[0.3em] mb-2 text-[#fafafa]">
                         The Lifecycle
                       </p>
                       <p 
