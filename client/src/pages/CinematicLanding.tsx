@@ -540,7 +540,7 @@ export default function CinematicLanding() {
         </div>
       </section>
       {/* Transition Bridge */}
-      <div className="h-20 bg-gradient-to-b from-[#0a0a0f] to-[#0d0d18]" />
+      <div className="h-20 from-[#0a0a0f] to-[#0d0d18] bg-[#0a0a0f]" />
       {/* Lifecycle Content Section */}
       <div ref={contentRef}>
         {/* The Lifecycle - Pillar Section */}
@@ -843,56 +843,94 @@ export default function CinematicLanding() {
         <HumorSection />
 
         {/* Final CTA Section */}
-        <section id="consult-contact" className="relative min-h-screen bg-[#0a0a0f] flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none">
-            <div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.03]"
-              style={{ 
-                background: "radial-gradient(circle, #4D5FF1 0%, transparent 70%)"
-              }}
-            />
-          </div>
-          
-          <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            >
-              <p className="text-sm uppercase tracking-[0.3em] text-white/40 mb-8">
-                Let's talk
-              </p>
-              
-              <h2 
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white mb-8 leading-tight"
-                data-cursor-invert
+        <section id="consult-contact" className="relative min-h-[200vh] bg-[#0a0a0f] overflow-hidden">
+          <div className="sticky top-0 h-screen flex items-center justify-center">
+            <div className="absolute inset-0 pointer-events-none">
+              <div 
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.03]"
+                style={{ 
+                  background: "radial-gradient(circle, #4D5FF1 0%, transparent 70%)"
+                }}
+              />
+            </div>
+            
+            <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
               >
-                Ready when you are.
-              </h2>
-              
-              <p className="text-lg sm:text-xl text-white/50 mb-16 max-w-xl mx-auto leading-relaxed">
-                High stakes decisions deserve a thought partner.
+                <p className="text-sm uppercase tracking-[0.3em] text-white/40 mb-8">
+                  Let's talk
+                </p>
+                
+                <h2 
+                  className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white mb-8 leading-tight"
+                  data-cursor-invert
+                >
+                  Ready when you are.
+                </h2>
+                
+                <p className="text-lg sm:text-xl text-white/50 max-w-xl mx-auto leading-relaxed">
+                  High stakes decisions deserve a thought partner.
+                </p>
+              </motion.div>
+            </div>
+
+            {/* Scroll-triggered ball and arrow CTA */}
+            <motion.a
+              href="mailto:richard@innovatr.co.za"
+              className="fixed bottom-12 left-12 sm:bottom-16 sm:left-16 z-50 w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white flex items-center justify-center cursor-pointer hover:scale-110 transition-transform duration-300 shadow-[0_0_60px_rgba(255,255,255,0.3)]"
+              initial={{ scale: 0, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true, margin: "-40%" }}
+              transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
+              data-testid="button-email-ball"
+            >
+              <Mail className="w-8 h-8 sm:w-10 sm:h-10 text-[#0a0a0f]" />
+            </motion.a>
+            
+            {/* Hand-drawn arrow with text */}
+            <motion.div
+              className="fixed bottom-32 left-28 sm:bottom-40 sm:left-40 z-50 pointer-events-none"
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-50%" }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+            >
+              <svg 
+                width="180" 
+                height="100" 
+                viewBox="0 0 180 100" 
+                fill="none" 
+                className="transform -rotate-12"
+              >
+                {/* Hand-drawn curved arrow */}
+                <path 
+                  d="M160 20 C140 25, 100 35, 60 55 C40 65, 25 75, 15 85" 
+                  stroke="white" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round"
+                  fill="none"
+                  strokeDasharray="4 3"
+                  className="opacity-80"
+                />
+                {/* Arrow head */}
+                <path 
+                  d="M15 85 L25 78 M15 85 L22 92" 
+                  stroke="white" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round"
+                  className="opacity-80"
+                />
+              </svg>
+              <p 
+                className="absolute -top-2 right-0 text-white text-sm sm:text-base font-light tracking-wide whitespace-nowrap opacity-80"
+                style={{ fontFamily: "'Caveat', cursive" }}
+              >
+                click here to book a call
               </p>
-              
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                <Button
-                  size="lg"
-                  className="bg-white text-[#0a0a0f] hover:bg-white/90 px-10 py-6 text-base font-medium"
-                  onClick={() => setLocation("/home#contact")}
-                  data-testid="button-book-consult"
-                >
-                  Book a call
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-                <a 
-                  href="mailto:richard@innovatr.co.za" 
-                  className="text-white/50 hover:text-white transition-colors text-sm tracking-wide"
-                  data-testid="link-email-us"
-                >
-                  richard@innovatr.co.za
-                </a>
-              </div>
             </motion.div>
           </div>
         </section>
