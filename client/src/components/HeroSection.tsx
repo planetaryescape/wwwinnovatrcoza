@@ -37,7 +37,8 @@ export default function HeroSection() {
           <div className="mt-6 md:mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button 
               size="default"
-              className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-primary hover:bg-primary/90 backdrop-blur-sm border-0 min-w-[200px] sm:min-w-[220px]"
+              variant="outline" 
+              className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20 min-w-[200px] sm:min-w-[220px]"
               onClick={handleTestNow}
               data-testid="button-test-now"
             >
@@ -60,8 +61,7 @@ export default function HeroSection() {
             <Link href="/consult">
               <Button 
                 size="default"
-                variant="outline"
-                className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-[#0a0a0f]/80 backdrop-blur-xl border-white/20 text-white hover:bg-[#0a0a0f]/90 hover:border-[#4D5FF1]/50 w-[200px] sm:w-[calc(200px+200px+1rem)] md:w-[calc(220px+220px+1rem)]"
+                className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-primary hover:bg-primary/90 backdrop-blur-sm border-0 w-[200px] sm:w-[calc(200px+200px+1rem)] md:w-[calc(220px+220px+1rem)]"
                 data-testid="card-consult-entry"
               >
                 Consult
