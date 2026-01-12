@@ -699,7 +699,7 @@ export default function CinematicLanding() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
             <div className="text-center mb-16">
               <h2 
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white leading-tight mb-6"
+                className="sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white mb-6 text-[95px]"
                 data-cursor-invert
               >
                 Track Record
@@ -749,6 +749,11 @@ export default function CinematicLanding() {
               >
                 Results
               </h2>
+              <p className="text-lg sm:text-xl text-gray-400 mt-6 max-w-2xl mx-auto">
+                A showcase of impact across markets, categories & stages of growth.
+                <br />
+                A curated selection of work across focus, play, win & performance tracking.
+              </p>
             </div>
             
             <div className="grid md:grid-cols-2 gap-6">
