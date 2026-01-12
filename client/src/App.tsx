@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
+import CinematicLanding from "@/pages/CinematicLanding";
 import Home from "@/pages/Home";
 import Test24BasicPage from "@/pages/Test24BasicPage";
 import Test24ProPage from "@/pages/Test24ProPage";
@@ -38,7 +39,8 @@ import NotFound from "@/pages/not-found";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={CinematicLanding} />
+      <Route path="/home" component={Home} />
       <Route path="/test24-basic" component={Test24BasicPage} />
       <Route path="/test24-pro" component={Test24ProPage} />
       <Route path="/innovatr-consult" component={InnovatrConsultPage} />

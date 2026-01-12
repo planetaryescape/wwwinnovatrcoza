@@ -1,0 +1,120 @@
+You are working inside our existing Innovatr codebase. Do NOT refactor unrelated areas. Keep current pages, styling system, routing, auth, and backend intact. This is an incremental, safe change.
+
+GOAL
+We want a new cinematic landing page (like https://www.gladeye.com/) that uses a full-screen looping background video. When the user clicks “Explore our work”, they should be taken to our existing page that currently shows our “pillars / lifecycle” content (the page we already have). We also need to fix the scroll behaviour inside the lifecycle sections so users don’t jump from section 2 to the end when scrolling.
+
+ASSETS (VIDEO)
+- Use the attached video file as the landing background:
+  /mnt/data/Love the journey.mp4
+- Add it to the project in a proper web-safe location:
+  - If this is a Next.js-style app: put it in /public/video/innovatr-landing.mp4
+  - If this is a Vite/React app: put it in /public/video/innovatr-landing.mp4 (or equivalent static folder)
+- Ensure it is served as a static asset and loads reliably.
+
+VIDEO TECH REQUIREMENTS (CRITICAL)
+- Video should autoplay, loop, be muted, and play inline:
+  autoplay + muted + loop + playsInline
+- Add preload="auto" and a poster image fallback if possible (generate a simple poster frame from the first frame if we can, otherwise use a dark gradient poster).
+- On mobile / low power: respect reduced motion.
+  - If prefers-reduced-motion is enabled, do NOT autoplay video; show the poster + subtle gradient instead.
+- Performance: avoid huge layout shift; ensure the hero loads quickly and doesn’t block initial render.
+- Add a dark cinematic overlay over the video for readability:
+  - A gradient overlay similar to Gladeye: subtle vignette + soft dark layer
+  - No “techy” HUD overlays; keep it premium and minimal.
+
+NEW LANDING PAGE (LIKE GLADEYE)
+Create a new root landing page route:
+- Path: “/”
+- This landing page should be minimal and cinematic:
+  - Full-screen background video
+  - A simple header with:
+    - Innovatr wordmark/logo (left)
+    - A “Menu” button (center/top like Gladeye) OR just a clean “Menu” button top centre
+    - Optional small icon on right is fine but not required
+  - Centered headline and CTA.
+  - No scrolling on this landing page (or very minimal). It should feel like a “splash / portal” into the site.
+
+COPY (USE EXACTLY)
+Headline (center, large, elegant serif):
+Strategic innovation for high-stakes decisions
+
+Subhead (optional, smaller, modern sans):
+Consulting-led strategy and research across every stage of the business lifecycle.
+
+CTA button (center, below):
+Explore our work
+
+CTA behaviour:
+- Clicking “Explore our work” routes the user to the existing page that currently contains our lifecycle/pillars sections (the page we already have today). Do NOT rebuild that page. Just route to it.
+- If the existing pillars page is currently at /consult, then CTA goes to /consult.
+- If it’s at another route in our project, use that route. Identify it in the router and link correctly.
+
+DESIGN REQUIREMENTS
+- Match our current site typography and brand styles:
+  - Use our existing DM Serif Display style for the headline if already present.
+  - Use our existing Roboto/sans for body text.
+- Keep the landing page clean:
+  - White text, subtle opacity on subhead
+  - CTA button in Innovatr blue, with soft hover glow
+  - Add a subtle blur/glass background behind the text if needed for readability, but keep it minimal and premium.
+- The overall feel should be cinematic, human, and “consulting-grade”, not sci-fi.
+
+NAVIGATION & SITE INTEGRATION
+- Landing page should not break current navigation.
+- Existing top nav (Services, Pricing, Membership, Contact, Consult, currency toggle, sign in) can stay on the internal pages exactly as is.
+- On the landing page, keep nav minimal (logo + menu is enough). If you implement the menu, it should open a small overlay with links:
+  - Explore our work (goes to pillars page)
+  - Services
+  - Pricing
+  - Membership
+  - Contact
+  - Sign in
+
+SCROLL FIX (IMPORTANT): LIFECYCLE SECTIONS 1–4
+Current issue:
+When scrolling inside the lifecycle / pillars page, the snapping is too aggressive and users can jump from section 2 straight to the end if they scroll quickly.
+
+We want:
+- More “scroll distance” / breathing room between sections 1, 2, 3, 4
+- Snap should feel guided, not forced.
+- Users must reliably land on each section when scrolling normally.
+
+Implement the following changes:
+1) Change scroll snap behaviour from mandatory to proximity (or loosen it):
+   - Use scroll-snap-type: y proximity (instead of mandatory), OR implement a safer snap strategy.
+2) Ensure each lifecycle section has:
+   - min-height: 100vh (or slightly more like 110vh) to create more travel
+   - top/bottom padding so the scroll wheel has more distance before snapping
+3) Add “spacer” padding between sections:
+   - Either a small spacer div between sections (e.g., 20–30vh) with the same background, OR increase section margins/padding so sections don’t “teleport”.
+4) Make sure the scroll container is correct:
+   - If using a scrollable container (like a div with overflow-y: scroll), ensure the snap points are applied correctly to children and that the container has stable height.
+5) Keep the existing visual design exactly the same (cards, headings, gradients). Only improve scroll feel and section spacing.
+
+Quality bar:
+- On a Mac trackpad, a fast scroll should not skip from section 2 to the end.
+- On a mouse wheel, scrolling should progress section by section.
+
+IMPLEMENTATION RULES
+- Make the smallest change needed.
+- Don’t rename routes unless necessary.
+- Don’t remove existing components.
+- Keep the code clean and consistent with the repo style.
+
+DELIVERABLES
+1) New landing page at “/” with video background using /public/video/innovatr-landing.mp4
+2) CTA routes to existing pillars page
+3) Scroll behaviour improved between lifecycle sections 1–4
+4) Works on desktop + mobile
+5) Reduced motion support (poster fallback)
+
+TEST CHECKLIST (DO THIS)
+- Confirm landing video plays (desktop Chrome/Safari)
+- Confirm it’s muted and loops
+- Confirm iOS Safari shows poster if autoplay blocked
+- Confirm prefers-reduced-motion disables autoplay
+- Confirm CTA navigates correctly to pillars page
+- Confirm scroll does not skip sections 1–4 on trackpad fast scroll
+- Confirm existing pages (Services/Pricing/Membership/Contact/Consult/Sign in) still work
+
+If anything is unclear in the repo (route names etc.), inspect routing and choose the correct existing pillars page route automatically. Do not ask me questions—make reasonable decisions and implement.

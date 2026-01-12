@@ -215,7 +215,7 @@ export default function ConsultPage() {
       {/* The Lifecycle - Pillar Section */}
       <section 
         ref={lifecycleRef} 
-        className="relative min-h-[400vh]"
+        className="relative min-h-[500vh]"
         id="lifecycle"
       >
         <div className="sticky top-0 h-screen flex items-center overflow-hidden">
@@ -305,12 +305,12 @@ export default function ConsultPage() {
           </div>
         </div>
         
-        {/* Scroll anchors for each pillar */}
+        {/* Scroll anchors for each pillar - increased height for smoother scrolling */}
         {pillars.map((pillar, index) => (
           <div 
             key={pillar.id} 
             id={`pillar-${pillar.id}`}
-            className="h-screen"
+            className="min-h-[125vh]"
             style={{ marginTop: index === 0 ? "-100vh" : 0 }}
           />
         ))}

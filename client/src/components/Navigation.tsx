@@ -77,7 +77,7 @@ export default function Navigation() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-12">
               <button 
-                onClick={() => setLocation("/")}
+                onClick={() => setLocation("/home")}
                 className="text-2xl font-serif font-bold text-primary" 
                 data-testid="link-logo"
               >
