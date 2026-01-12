@@ -315,14 +315,14 @@ export default function CinematicLanding() {
   };
 
   const navItems = [
-    { label: "Test24", href: "/home" },
+    { label: "Lifecycle", action: () => scrollToSection("lifecycle") },
     { label: "Track Record", action: () => scrollToSection("why-consult") },
     { label: "Results", action: () => scrollToSection("case-studies") },
     { label: "Contact", action: () => scrollToSection("consult-contact") },
   ];
 
   const menuItems = [
-    { label: "Test24", href: "/home" },
+    { label: "Lifecycle", action: () => scrollToSection("lifecycle") },
     { label: "Track Record", action: () => scrollToSection("why-consult") },
     { label: "Results", action: () => scrollToSection("case-studies") },
     { label: "Contact", action: () => scrollToSection("consult-contact") },
