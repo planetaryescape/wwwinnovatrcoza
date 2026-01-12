@@ -584,7 +584,7 @@ export default function CinematicLanding() {
                       </p>
                       <ul className="space-y-3 mb-8">
                         {pillars[activePillar].bullets.map((bullet, idx) => (
-                          <li key={idx} className="flex items-center gap-3 text-gray-400">
+                          <li key={idx} className="flex items-center gap-3 text-[#fafafa]">
                             <div 
                               className="w-1.5 h-1.5 rounded-full"
                               style={{ backgroundColor: pillars[activePillar].color }}
