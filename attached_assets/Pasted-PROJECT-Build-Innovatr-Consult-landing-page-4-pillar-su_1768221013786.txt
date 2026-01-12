@@ -1,0 +1,338 @@
+PROJECT: Build Innovatr Consult (landing page + 4 pillar sub-pages) with a sleek, futuristic, tech-forward feel, plus a simple admin CMS to manage pillar content and anonymised case studies.
+
+CONTEXT
+Innovatr has an existing main marketing site (with hero and CTAs like “See Test24” and “See Membership Plans”). We are adding a premium “Consult” offering that sits above Test24. Consult is strategic, phased, decision-grade work for senior stakeholders (CEOs, founders, MDs, brand leaders). This page is not salesy; it’s authoritative and confident, with minimal CTAs. It should demonstrate additional value beyond basic research: longer engagements, multi-phase programmes, and deeper partnership work (like with Rain, Discovery, DGB), but without revealing confidential details.
+
+STYLE + INSPIRATION (use as direction, not copy-paste)
+We want a blend of:
+1) Gladeye home page vibe: bold, striking landing that invites exploration, then deeper sections once you scroll.
+2) Special Offer: modern, minimal, clean, strong typography, lots of whitespace, very intentional layout.
+3) Cuberto / Instrument: premium motion, polished transitions, scroll interactions that feel high-end, not gimmicky.
+4) Granny & Smith: strategic consulting energy and premium credibility.
+5) Wodniack / Antinomy / Feelslike: micro-interactions, tasteful motion, unique, techy but professional.
+
+DESIGN PRINCIPLES
+- Consult should feel more elevated than the main Innovatr pages: darker, tech-forward, sleek, “AI-ish”, futuristic.
+- Use restrained motion and high performance. Motion should guide meaning and progression, not distract.
+- Anonymous credibility: show logos/brand names already approved on Innovatr’s main site, but do not reveal client-specific findings or confidential work.
+- Minimal CTAs: 1 primary CTA at the bottom and optional subtle CTA in the hero. No repeated loud buttons.
+- Mobile-first: the experience must work beautifully on mobile. On mobile, simplify heavy scroll-pin effects and replace with stacked sections and lighter transitions.
+
+TECH STACK (assume if not explicitly known)
+- Use Next.js (App Router) or React + Vite (choose what the repo uses). Keep changes consistent with existing structure.
+- Use Tailwind CSS for styling.
+- Use Framer Motion for animations and micro-interactions.
+- For the pinned-scroll pillar “chapter” section, optionally use GSAP ScrollTrigger if already allowed. If adding GSAP is too heavy or conflicts, recreate with Framer Motion + IntersectionObserver.
+- No heavy 3D libraries unless already present. Prioritise performance.
+
+INFORMATION ARCHITECTURE
+Create:
+A) /consult (Consult Landing Page: acts like a mini home page)
+B) /consult/where-to-focus
+C) /consult/how-to-play
+D) /consult/how-to-win
+E) /consult/whats-working
+
+Also add:
+F) A homepage entry card/button under the main hero CTA area:
+- Add a third option: “Explore Consult”
+- Make it visually distinct (premium “door”, not a loud button)
+- Copy suggestion:
+  Title: Consult
+  Subtitle: Consulting-led insight for complex decisions
+  Link label: Explore →
+
+CONSULT LANDING PAGE USER JOURNEY
+1) Hero: immediate premium signal, minimal copy, exploration cue.
+2) A scroll-based “life-cycle” pillar chapter: Where to focus → How to play → How to win → What’s working (blends as you scroll).
+3) A short “Why Consult” value section: demonstrates consult is more than a single study.
+4) Case studies: 4 anonymised case tiles (one per pillar) with Challenge → Approach → Outcome.
+5) Final CTA + contact: one understated booking option.
+
+CORE OFFER: THE 4 PILLARS
+Innovatr Consult focuses on four sections (pivots in a business lifecycle):
+1) Where to focus: understand and anticipate the market.
+2) How to play: identify growth opportunities.
+3) How to win: optimise your business and build a business case.
+4) What’s working: track market dynamics.
+
+Each pillar has a full service list for now (we can simplify later). Make each pillar clickable from the landing page and from a persistent Consult sub-nav. Clicking goes to the sub-page for that pillar, with deeper detail and a related anonymised case study.
+
+COPY (WRITE THIS INTO THE UI, BUT FEEL FREE TO IMPROVE)
+Tone: confident, crisp, modern, British English spelling. Short sentences. No fluff. Premium.
+
+CONSULT HERO (Landing page /consult)
+Headline options (pick the best, or propose improved variants):
+Option A: Decision-grade insight for complex growth challenges.
+Option B: Strategic consulting that turns insight into confident decisions.
+Option C: Smarter decision-making across every phase of your business lifecycle.
+
+Subhead (one line):
+We partner with ambitious teams to shape direction, create opportunities, optimise routes to market, and track what’s changing.
+
+Hero supporting line (small text):
+Consult is built for phased programmes, high-stakes choices, and senior stakeholders who need clarity, not noise.
+
+Hero CTA (subtle, not loud):
+Primary: Explore the lifecycle ↓
+Secondary (optional): Book a consult call (small ghost button)
+
+SECTION: “THE LIFECYCLE” (Pinned scroll chapter)
+Create a visually striking “chapter” section.
+Behaviour:
+- As the user scrolls, the active pillar updates and the design subtly morphs to the next:
+  Where to focus → How to play → How to win → What’s working
+- Use a pinned container for desktop (each pillar takes ~1 viewport of scroll).
+- On mobile, remove pinning and display as four stacked cards with swipe/scroll transitions.
+
+Visual:
+- Dark background with subtle gradients and soft glow accents.
+- Each pillar has its own accent colour and thin outline, but stay tasteful.
+- Large pillar title, one-sentence purpose, and a preview list of capabilities (3–5 items) with “Explore →” link.
+
+PILLAR PREVIEW COPY (Landing)
+Where to focus
+One-liner: Understand and anticipate the market before you place your bets.
+Preview bullets (choose 4):
+Trends and foresight
+Need states
+Segmentation
+Business health
+Category audits
+Journey mapping
+Link: Explore Where to focus →
+
+How to play
+One-liner: Turn opportunity spaces into ideas worth backing.
+Preview bullets:
+Ideation workshops
+Design sprints
+Idea generation
+Link: Explore How to play →
+
+How to win
+One-liner: Choose the strongest route, optimise it, and build the commercial case.
+Preview bullets:
+Idea screening
+Idea optimisation
+Portfolio management
+Volumetric forecasting
+Price pack architecture
+Packaging and branding
+End to end design
+Link: Explore How to win →
+
+What’s working
+One-liner: Track what’s changing so you can keep winning after launch.
+Preview bullets:
+Innovation tracking
+Promotion tracking
+Brand and category health tracking
+Link: Explore What’s working →
+
+SECTION: “WHY CONSULT”
+This is a tight, service-led section. Avoid philosophy-heavy content.
+Title: More than research. Built for decisions.
+Body (short):
+Test24 is designed for fast, high-quality testing.
+Consult is for when the decision is bigger: multiple routes, multiple stakeholders, multiple phases.
+We design the learning agenda, run the work, and translate it into clear actions.
+
+Include three “value cards”:
+1) Phased programmes: from direction to optimisation to tracking.
+2) Decision confidence: clarity on trade-offs and what to do next.
+3) Senior-ready delivery: workshops, alignment, and executive-ready outputs.
+
+CASE STUDIES (Landing page)
+Place near the bottom.
+Show 4 “anonymised” case tiles (one per pillar). Use client logos that are already shown on Innovatr’s main page, but do not name the specific project or reveal findings.
+Each card includes:
+- Client (logo only or “Leading national brand”)
+- Challenge (1–2 lines)
+- Approach (1–2 lines)
+- Outcome (1 line, keep general)
+Example format:
+Case: Where to focus
+Challenge: Needed clarity on where growth would come from in a changing category.
+Approach: Category scan, need state mapping, segmentation and journey mapping.
+Outcome: Clear opportunity map and a prioritised growth roadmap for the next planning cycle.
+
+Repeat similarly for the other pillars.
+
+FINAL CTA (Landing)
+Keep understated.
+Title: Facing a complex decision?
+Body: If the stakes are high and you want a thought partner, let’s talk.
+CTA button: Book a consult call
+Also allow a secondary: Email us / Contact form.
+
+SUB-PAGES (4 pillar pages)
+Each pillar page includes:
+1) Hero section with pillar title and purpose.
+2) “Best for when…” scenarios (3–6 bullets).
+3) Full service list, grouped into neat clusters with short descriptions.
+4) A simple “How we work” flow (3–5 steps).
+5) One anonymised case study card (Challenge → Approach → Outcome).
+6) Subtle CTA at bottom.
+
+SUB-PAGE COPY + STRUCTURE
+
+/consult/where-to-focus
+Title: Where to focus
+Purpose line: Understand and anticipate the market before you commit investment.
+Best for when:
+- You need clarity on growth opportunities and category direction
+- You are entering a new category or segment
+- You need sharper target definition
+- You need an objective view of brand or category health
+Service list (grouped):
+A) Market clarity
+- Trends and foresight
+- Category audits
+- Business health
+B) Consumer and context
+- Need states
+- Segmentation
+- Journey mapping
+Process (simple):
+Define decision → Map category context → Identify needs and segments → Build opportunity map → Prioritise focus areas
+
+/consult/how-to-play
+Title: How to play
+Purpose line: Create opportunity routes and turn them into concepts worth testing.
+Best for when:
+- You have ambition but need routes and ideas
+- You want better ideation and sharper concept direction
+- You need a repeatable innovation pipeline
+Services:
+- Ideation workshops
+- Design sprints
+- Idea generation
+Process:
+Frame opportunity → Generate options → Shape concepts → Align internally → Prepare for testing and optimisation
+
+/consult/how-to-win
+Title: How to win
+Purpose line: Optimise your offer and build the business case with confidence.
+Best for when:
+- You have multiple routes and need to choose
+- You need to optimise concepts or packaging
+- You need to model volume, cannibalisation, pricing, portfolio trade-offs
+Services (grouped):
+A) Optimisation
+- Idea screening
+- Idea optimisation
+- Packaging and branding
+- End to end design
+B) Commercial confidence
+- Portfolio management
+- Preliminary share, source of volume and cannibalisation
+- Volumetric forecasting
+- Price pack architecture
+Process:
+Screen options → Optimise winners → Model commercial impact → Build business case → Recommend route forward
+
+/consult/whats-working
+Title: What’s working
+Purpose line: Track market dynamics, learn fast, and keep improving post-launch.
+Best for when:
+- You need always-on monitoring
+- You want to track innovation and promotions
+- You need brand/category health pulses
+Services:
+- Innovation tracking
+- Promotion tracking
+- Brand and category health tracking
+Process:
+Define KPIs → Set cadence → Track signals → Interpret changes → Feed learning back into pipeline
+
+NAVIGATION + UX DETAILS
+- Add a Consult top nav item.
+- Within Consult pages, add a sticky sub-nav:
+  Overview, Where to focus, How to play, How to win, What’s working, Case studies, Contact
+- Add tasteful scroll progress indicator on the landing page for the chapter section.
+- Add micro-interactions: hover states, subtle parallax, soft blur glows, but keep performance stable.
+
+VISUAL DESIGN DETAILS
+- Default Consult theme: dark, premium.
+- Use a palette that complements Innovatr branding but feels more “tech”. Keep it understated, avoid neon overload.
+- Typography: match existing site fonts if defined. If not, use a modern editorial pairing:
+  Headlines: a high-contrast serif or modern display font
+  Body: clean sans font
+- Layout: large spacing, strong grid, no clutter.
+- Accessibility: readable contrast, focus states, reduced motion support.
+
+ADMIN BACKEND / CMS (SOUND + COMPLETE)
+We need a simple admin system to manage Consult content without editing code.
+
+Create:
+- Admin route: /admin (requires authentication)
+- Admin sections:
+  1) Pillars (edit title, purpose line, best-for bullets, service list grouped, process steps)
+  2) Case studies (create, edit, archive)
+  3) Logos (upload/manage allowed client logos used on Consult pages)
+  4) Settings (Consult CTA link, booking link, contact email, feature toggles for animations)
+
+Data model (minimal but robust):
+- Pillar:
+  id, slug, title, purpose, accentColor, previewBullets[], bestForBullets[], serviceGroups[{title, items[{name, description}]}], processSteps[], updatedAt
+- CaseStudy:
+  id, pillarSlug, clientDisplayType (logoOnly/anonymisedText), clientNameOptional, clientLogoIdOptional, challenge, approach, outcome, tags[], isPublished, createdAt, updatedAt
+- Logo:
+  id, name, imageUrl, isApproved, createdAt
+- Settings:
+  bookingUrl, contactEmail, enablePinnedScrollDesktop, enableHeavyMotion, enableDarkModeToggle
+
+Auth:
+- If the project already has admin/auth logic, integrate into that system.
+- Otherwise implement a simple email/password admin login with hashed password storage.
+- Include role: admin only.
+- Add basic audit log entries (who changed what and when) if feasible.
+
+Storage:
+- Use existing DB if present (Postgres/Prisma/etc).
+- If no DB exists, use a lightweight approach:
+  - JSON file stored server-side for dev
+  - Provide clear path to migrate to DB later
+Prefer DB if the main Innovatr portal already uses one.
+
+Content rendering:
+- Landing page and sub-pages should read from the CMS.
+- Provide sensible seeded defaults using the copy above.
+- If CMS is unavailable, fall back to static defaults.
+
+PERFORMANCE + QA REQUIREMENTS
+- Must load fast. No huge videos by default.
+- Images optimised.
+- Animations should degrade gracefully.
+- Works on mobile and desktop.
+- Provide a clean build with no console errors.
+- Ensure SEO basics:
+  - Meta title/description per page
+  - OpenGraph tags
+  - Clean headings hierarchy
+  - Good internal linking from main site
+
+DELIVERABLES
+1) /consult landing page with “chapter” scroll pillar transition.
+2) Four pillar sub-pages with deeper content and related case study.
+3) Case studies section (landing and per pillar).
+4) Main homepage entry point “Explore Consult” under hero CTAs.
+5) Admin CMS with authentication to manage pillars, case studies, logos, settings.
+6) Seed content loaded by default.
+
+CREATIVE FREEDOM NOTES
+You may propose improvements to:
+- microcopy
+- section order
+- animation details
+- layout decisions
+As long as:
+- It stays premium and clean
+- It remains service-led (not philosophical)
+- It keeps CTAs minimal
+- It preserves the 4 pillar lifecycle flow and clickable deep dives
+- It respects confidentiality (no revealing specific client work)
+
+NOW IMPLEMENT
+Review the existing repository structure first. Reuse shared components and styling conventions. Then implement the above cleanly, with maintainable components, and clear separation between marketing pages and admin logic.

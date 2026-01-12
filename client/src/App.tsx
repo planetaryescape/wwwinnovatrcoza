@@ -9,6 +9,8 @@ import Home from "@/pages/Home";
 import Test24BasicPage from "@/pages/Test24BasicPage";
 import Test24ProPage from "@/pages/Test24ProPage";
 import InnovatrConsultPage from "@/pages/InnovatrConsultPage";
+import ConsultPage from "@/pages/ConsultPage";
+import ConsultPillarPage from "@/pages/ConsultPillarPage";
 import InnovatrIntelligence from "@/pages/InnovatrIntelligence";
 import CheckoutBasicPAYG from "@/pages/CheckoutBasicPAYG";
 import CheckoutProPAYG from "@/pages/CheckoutProPAYG";
@@ -40,6 +42,8 @@ function Router() {
       <Route path="/test24-basic" component={Test24BasicPage} />
       <Route path="/test24-pro" component={Test24ProPage} />
       <Route path="/innovatr-consult" component={InnovatrConsultPage} />
+      <Route path="/consult" component={ConsultPage} />
+      <Route path="/consult/:pillarId" component={ConsultPillarPage} />
       <Route path="/innovatr-intelligence" component={InnovatrIntelligence} />
       <Route path="/checkout/basic-payg" component={CheckoutBasicPAYG} />
       <Route path="/checkout/pro-payg" component={CheckoutProPAYG} />

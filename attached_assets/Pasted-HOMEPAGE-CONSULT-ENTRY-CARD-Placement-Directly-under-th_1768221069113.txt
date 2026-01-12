@@ -1,0 +1,132 @@
+HOMEPAGE: CONSULT ENTRY CARD
+
+Placement:
+Directly under the hero CTA row (same horizontal rhythm), but visually distinct so it reads as “another door”, not “another button”.
+
+Think:
+
+Test24 = action
+
+Membership = access
+
+Consult = elevation
+
+STRUCTURE (DESKTOP)
+Layout
+
+A single wide card OR a slightly taller vertical card aligned with the existing CTA buttons
+
+Subtle hover interaction (lift + glow or border reveal)
+
+No loud button styling — this should feel considered
+
+Visual Treatment
+
+Darker / tech-forward background than the rest of the homepage
+
+Soft gradient or glassy blur effect
+
+Thin outline or accent line (Consult colourway)
+
+Minimal iconography (optional: abstract arrow, dot-grid, or signal motif)
+
+COPY (FINAL – USE THIS)
+Eyebrow (small, uppercase, optional)
+
+CONSULT
+
+Title (primary)
+
+Strategic consulting for complex decisions
+
+Alternative options if you want slightly different tone:
+
+Consulting-led insight for high-stakes decisions
+
+Decision-grade strategy beyond testing
+
+Supporting line (1–2 lines max)
+
+Built for senior teams navigating multi-phase growth, portfolio choices, and high-impact launches.
+
+OR (slightly sharper):
+For when the decision is bigger than a single study — and the stakes are higher.
+
+Link / CTA (not a button)
+
+Explore Consult →
+
+Text-only or ghost-style
+
+On hover: underline / arrow animates / subtle motion
+
+INTERACTION BEHAVIOUR
+Hover (desktop)
+
+Card lifts slightly (2–4px)
+
+Border or glow animates in
+
+Arrow nudges right
+
+Cursor changes to indicate “explore”
+
+Click
+
+Navigates to /consult
+
+No modal, no friction
+
+Mobile
+
+Card becomes full-width
+
+Stacked below hero CTAs
+
+Reduced motion, but still tappable and clear
+
+POSITIONING LOGIC (IMPORTANT FOR USER JOURNEY)
+
+This card should implicitly say:
+
+“If you already know Innovatr — and you’re dealing with something serious — this is where you go next.”
+
+It should not:
+
+Compete visually with Test24
+
+Feel transactional
+
+Feel like a product upsell
+
+This is a signal, not a sell.
+
+OPTIONAL ENHANCEMENT (VERY ON-BRAND, LOW EFFORT)
+
+On scroll (as the hero fades):
+
+The Consult card subtly comes into focus
+
+Almost like it’s being “revealed” once the user finishes scanning the hero
+
+Psychologically:
+
+“Okay, now that I get Innovatr… what else is there?”
+
+DEV NOTES FOR REPLIT (ADD THIS VERBATIM IF YOU WANT)
+Add a third CTA card under the homepage hero CTA section for “Consult”.
+This should not be styled as a primary button.
+It should feel like a premium entry point or doorway into a deeper offering.
+Use darker, tech-forward styling with subtle motion on hover.
+Minimal copy, confident tone.
+Link to /consult.
+
+TL;DR (why this works)
+
+Doesn’t clutter the hero
+
+Doesn’t scream for attention
+
+Signals seniority and depth
+
+Perfect bridge from “platform” → “partnership”
