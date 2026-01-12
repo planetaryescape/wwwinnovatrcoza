@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { X, Menu, ArrowRight, ArrowDown, Target, Lightbulb, Trophy, TrendingUp, Users, Layers } from "lucide-react";
+import { X, Menu, ArrowRight, ArrowDown, Target, Lightbulb, Trophy, TrendingUp, Users, Layers, Mail } from "lucide-react";
+import { SiLinkedin, SiInstagram } from "react-icons/si";
 import { Link, useLocation } from "wouter";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Footer from "@/components/Footer";
@@ -212,13 +213,23 @@ export default function CinematicLanding() {
     contentRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    element?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const navItems = [
+    { label: "Test24", href: "/home" },
+    { label: "Results", action: () => scrollToSection("case-studies") },
+    { label: "Track Record", action: () => scrollToSection("why-consult") },
+    { label: "Contact", action: () => scrollToSection("consult-contact") },
+  ];
+
   const menuItems = [
-    { label: "Explore our work", action: () => scrollToContent() },
-    { label: "Services", href: "/home#services" },
-    { label: "Pricing", href: "/home#pricing" },
-    { label: "Membership", href: "/home#membership" },
-    { label: "Contact", href: "/home#contact" },
-    { label: "Sign in", href: "/home?login=true" },
+    { label: "Test24", href: "/home" },
+    { label: "Results", action: () => scrollToSection("case-studies") },
+    { label: "Track Record", action: () => scrollToSection("why-consult") },
+    { label: "Contact", action: () => scrollToSection("consult-contact") },
   ];
 
   return (
@@ -236,9 +247,64 @@ export default function CinematicLanding() {
             Innovatr
           </button>
 
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-8">
+            {navItems.map((item) => (
+              item.href ? (
+                <Link key={item.label} href={item.href}>
+                  <span 
+                    className="text-sm uppercase tracking-[0.15em] text-white/70 hover:text-white transition-colors font-medium cursor-pointer"
+                    data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                  >
+                    {item.label}
+                  </span>
+                </Link>
+              ) : (
+                <button
+                  key={item.label}
+                  onClick={item.action}
+                  className="text-sm uppercase tracking-[0.15em] text-white/70 hover:text-white transition-colors font-medium"
+                  data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  {item.label}
+                </button>
+              )
+            ))}
+            
+            {/* Social Icons */}
+            <div className="flex items-center gap-4 ml-4 pl-4 border-l border-white/20">
+              <a
+                href="https://www.linkedin.com/in/richard-lawrence-innovation-72a62414"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/60 hover:text-white transition-colors"
+                data-testid="social-linkedin"
+              >
+                <SiLinkedin className="w-4 h-4" />
+              </a>
+              <a
+                href="mailto:Richard@innovatr.co.za?subject=Innovatr%20Consult%20Connect"
+                className="text-white/60 hover:text-white transition-colors"
+                data-testid="social-email"
+              >
+                <Mail className="w-4 h-4" />
+              </a>
+              <a
+                href="https://www.instagram.com/innovatr1?igsh=d2V3eGM5eDZ5anhh"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/60 hover:text-white transition-colors"
+                data-testid="social-instagram"
+              >
+                <SiInstagram className="w-4 h-4" />
+              </a>
+            </div>
+          </nav>
+
+          {/* Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(true)}
-            className="text-white/80 hover:text-white transition-colors text-sm uppercase tracking-[0.2em] font-medium flex items-center gap-2"
+            className="lg:hidden text-white/80 hover:text-white transition-colors text-sm uppercase tracking-[0.2em] font-medium flex items-center gap-2"
             data-testid="button-menu-open"
           >
             <Menu className="w-5 h-5" />
@@ -530,7 +596,7 @@ export default function CinematicLanding() {
         </section>
 
         {/* Why Consult Section */}
-        <section className="py-24 bg-[#0a0a0f]">
+        <section id="why-consult" className="py-24 bg-[#0a0a0f]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <p className="text-sm uppercase tracking-[0.3em] text-[#4D5FF1] mb-4">
@@ -576,7 +642,7 @@ export default function CinematicLanding() {
         </section>
 
         {/* Case Studies Section */}
-        <section className="py-24 bg-[#0d0d18]">
+        <section id="case-studies" className="py-24 bg-[#0d0d18]">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <p className="text-sm uppercase tracking-[0.3em] text-gray-500 mb-4">
@@ -730,6 +796,40 @@ export default function CinematicLanding() {
                     )}
                   </motion.div>
                 ))}
+                
+                {/* Mobile Social Icons */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: menuItems.length * 0.1 }}
+                  className="flex items-center gap-6 mt-8 pt-8 border-t border-white/20"
+                >
+                  <a
+                    href="https://www.linkedin.com/in/richard-lawrence-innovation-72a62414"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white/60 hover:text-white transition-colors"
+                    data-testid="menu-social-linkedin"
+                  >
+                    <SiLinkedin className="w-6 h-6" />
+                  </a>
+                  <a
+                    href="mailto:Richard@innovatr.co.za?subject=Innovatr%20Consult%20Connect"
+                    className="text-white/60 hover:text-white transition-colors"
+                    data-testid="menu-social-email"
+                  >
+                    <Mail className="w-6 h-6" />
+                  </a>
+                  <a
+                    href="https://www.instagram.com/innovatr1?igsh=d2V3eGM5eDZ5anhh"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white/60 hover:text-white transition-colors"
+                    data-testid="menu-social-instagram"
+                  >
+                    <SiInstagram className="w-6 h-6" />
+                  </a>
+                </motion.div>
               </nav>
             </div>
           </motion.div>
