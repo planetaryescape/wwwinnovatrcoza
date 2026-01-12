@@ -504,9 +504,20 @@ export default function CinematicLanding() {
                   console.log("[Video] Can play");
                   tryPlayVideo();
                 }}
-                onError={() => {
-                  console.log("[Video] Error loading video, activating fallback");
-                  setVideoError(true);
+                onError={(e) => {
+                  const video = e.currentTarget as HTMLVideoElement;
+                  if (video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+                    console.log("[Video] No valid source found, activating fallback");
+                    setVideoError(true);
+                  }
+                }}
+                onStalled={() => {
+                  setTimeout(() => {
+                    if (videoRef.current && videoRef.current.readyState < 2) {
+                      console.log("[Video] Stalled for too long, activating fallback");
+                      setVideoError(true);
+                    }
+                  }, 5000);
                 }}
                 poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Crect fill='%230a0a0f' width='1920' height='1080'/%3E%3C/svg%3E"
                 data-testid="video-background"
