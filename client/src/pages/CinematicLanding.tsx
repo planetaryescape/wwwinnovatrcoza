@@ -222,7 +222,7 @@ export default function CinematicLanding() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white cursor-none">
+    <div className="min-h-screen bg-[#0a0a0f] text-white">
       <CustomCursor />
       
       {/* Fixed Header - Always visible */}

@@ -79,7 +79,6 @@ export default function CustomCursor() {
       animate={{
         x: position.x - (isHovering ? 16 : 6),
         y: position.y - (isHovering ? 16 : 6),
-        scale: isHovering ? 1 : 1,
         opacity: isVisible ? 1 : 0
       }}
       transition={{
@@ -90,10 +89,12 @@ export default function CustomCursor() {
     >
       <div 
         className={`rounded-full bg-white transition-all duration-200 ease-out ${
-          isHovering ? 'w-8 h-8 opacity-50' : 'w-3 h-3 opacity-90'
+          isHovering ? 'w-8 h-8' : 'w-3 h-3'
         }`}
         style={{
-          boxShadow: '0 0 10px rgba(255,255,255,0.3)'
+          boxShadow: isHovering 
+            ? '0 0 20px rgba(255,255,255,0.4)' 
+            : '0 0 10px rgba(255,255,255,0.3)'
         }}
       />
     </motion.div>
