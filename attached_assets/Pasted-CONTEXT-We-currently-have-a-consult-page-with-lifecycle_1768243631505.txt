@@ -1,0 +1,97 @@
+CONTEXT
+We currently have a /consult page with lifecycle sections (01–04) and a hero. I want to upgrade this so the top hero becomes a scroll-synced video experience, using the uploaded file “Consult Landing video.mp4” (8 seconds long). The landing should NOT auto-jump straight into the lifecycle; the video hero must be the first thing users see.
+
+GOALS
+1) Fix routing so the cinematic video hero shows first (no redirect straight to pillars/lifecycle).
+2) Replace the hero background with an 8-second video that scrubs as the user scrolls (scroll controls video time).
+3) Make the transition from the video hero into the lifecycle sections smooth (feels like one continuous journey).
+4) Only text overlay on the video hero: “More than research. Built for decisions.”
+5) Fix lifecycle scroll so step 3 → 4 never skips, even with fast scrolling / trackpad.
+
+ASSETS
+- Add the uploaded video file into the project’s public assets so it can be served reliably:
+  Preferred: /public/videos/consult-landing.mp4
+  (Rename the file for URL-safety.)
+- Use that path in the code.
+
+IMPLEMENTATION DETAILS
+
+A) ROUTING (must do)
+- Ensure “/consult” renders the new video+scroll journey page.
+- Ensure “/” renders the SAME consult landing page OR a dedicated Landing route that shows the video hero first.
+- Keep the old homepage accessible at “/home” if needed, but DO NOT route “/” directly to the lifecycle section anymore.
+- Confirm in App router that “/” does not redirect to “/consult#whatever” on load.
+
+B) SCROLL-SYNC VIDEO HERO (core)
+Create a component: VideoScrollHero
+
+Layout:
+- A section that is taller than the viewport so scrolling has room to scrub the video:
+  e.g. outer section height: 220vh–300vh.
+- Inside it, a sticky container that stays fixed at 100vh while the user scrolls that section.
+- The video sits behind everything (cover, object-fit: cover).
+- Add cinematic overlay layers: subtle vignette + top/bottom gradient for text readability.
+
+Scroll-to-video behaviour:
+- Video duration is 8 seconds.
+- Map scroll progress within the hero section to video.currentTime from 0 → 8.
+- Use requestAnimationFrame to update smoothly.
+- Smooth it with easing:
+  - Compute a targetTime from scroll progress.
+  - Lerp currentTime toward targetTime (prevents jitter).
+- The video must be muted + playsInline. We are scrubbing time so we don’t depend on autoplay.
+
+Text overlay:
+- Only show centered text:
+  “More than research. Built for decisions.”
+- No subhead, no extra CTA text on the hero itself.
+- Optional: a tiny scroll indicator (mouse icon) is ok.
+
+Reduced motion:
+- Respect prefers-reduced-motion:
+  If reduce motion is on, do not scrub; instead show the first frame (poster-like) or a gentle loop without syncing.
+
+C) SMOOTH TRANSITION INTO LIFECYCLE
+Immediately after the hero section ends, the lifecycle section begins.
+Make it feel seamless:
+- As the hero scroll section approaches the end (last ~15% of progress), fade down the hero overlay and slightly fade in the lifecycle background/section.
+- Avoid harsh “cut” between hero and section 01.
+- Ensure there isn’t an empty black gap. If needed, overlap sections with z-index and a gradient bridge.
+
+D) FIX SKIPPING BETWEEN 3 → 4 (very important)
+Current scroll zones still allow skipping from 3 to past 4 when scrolling quickly.
+Fix using one of these robust approaches (choose the best for the codebase):
+
+Option 1 (preferred): IntersectionObserver + Snap Points
+- Make each lifecycle “panel” a full viewport-height snap section (or 120vh) with scroll-snap-type on the container.
+- Use IntersectionObserver thresholds to set active panel accurately.
+- This prevents skipping because the browser snaps to the nearest panel.
+
+Option 2: Progress segmentation with clamping
+- If lifecycle uses a single scroll progress value mapped across panels:
+  - Increase per-panel height (e.g. 150vh each).
+  - Use sticky container.
+  - Clamp progress per panel so fast scroll cannot jump over the activation range.
+  - Add hysteresis so it doesn’t flicker.
+
+Also:
+- Ensure Step 04 has enough scroll “space” after it so it can become active and stay active (like an extra tail height).
+
+E) KEEP STYLING CONSISTENT
+- Keep the premium dark cinematic look currently used.
+- Buttons/menus can remain, but the hero should be clean: logo, menu, centered headline only.
+
+DELIVERABLES
+- Update routing so “/” shows the video hero first (or the consult landing page with video hero at top).
+- Implement VideoScrollHero with scroll-synced scrubbing (8 seconds).
+- Lifecycle section transition is smooth.
+- No skipping from 3 to 4.
+- Test on desktop trackpad + mouse wheel.
+- Ensure video loads correctly in production (public folder path, not local filesystem).
+
+VALIDATION CHECKLIST
+- Visiting “/” shows the video hero with “More than research. Built for decisions.”
+- Scrolling down scrubs the video forward smoothly across the hero section.
+- When hero ends, the lifecycle section begins without a visible seam.
+- Lifecycle steps activate reliably: 01 → 02 → 03 → 04 (never skipping 04).
+- Works on fast scroll and slow scroll.

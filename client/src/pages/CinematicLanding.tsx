@@ -240,7 +240,8 @@ export default function CinematicLanding() {
               className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white leading-tight mb-10"
               data-testid="text-headline"
             >
-              More than research.{" "}
+              More than research.
+              <br />
               <span className="text-white/90">Built for decisions.</span>
             </h1>
 
