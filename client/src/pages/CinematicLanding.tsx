@@ -413,15 +413,29 @@ export default function CinematicLanding() {
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-            className="w-6 h-10 border-2 border-white/40 rounded-full flex justify-center pt-2"
-          >
-            <motion.div className="w-1.5 h-1.5 bg-white/60 rounded-full" />
-          </motion.div>
+        {/* Animated Bubbles Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex items-end gap-2">
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
+              className="rounded-full bg-white/30 border border-white/40"
+              style={{
+                width: i === 1 ? 12 : 8,
+                height: i === 1 ? 12 : 8,
+              }}
+              animate={{
+                y: [0, -20, -40, -20, 0],
+                opacity: [0.3, 0.6, 0.8, 0.6, 0.3],
+                scale: [1, 1.1, 1.2, 1.1, 1],
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: 2.5,
+                delay: i * 0.4,
+                ease: "easeInOut",
+              }}
+            />
+          ))}
         </div>
       </section>
       {/* Problem / Solution Cinematic Section */}
