@@ -18,6 +18,7 @@ interface Service {
   features: string[];
   color: string;
   isNew: boolean;
+  isPremium?: boolean;
 }
 
 const services: Service[] = [
@@ -77,13 +78,14 @@ const services: Service[] = [
     description: "Enterprise Level Strategic Problem Solving",
     priceZAR: null,
     customPrice: "Custom Pricing",
-    link: "/innovatr-consult",
+    link: "/consult",
     features: [
       "Idea to Market Consulting",
       "Strategy, Design, Testing & Go to Market",
     ],
     color: "#4D5FF1",
     isNew: false,
+    isPremium: true,
   },
 ];
 
@@ -114,10 +116,20 @@ export default function ServicesSection() {
           {services.map((service, index) => (
             <Card 
               key={index} 
-              className="hover-elevate transition-all duration-300 relative overflow-hidden flex flex-col"
+              className={`hover-elevate transition-all duration-300 relative overflow-hidden flex flex-col ${
+                service.isPremium 
+                  ? 'bg-gradient-to-br from-[#0a0a0f]/95 via-[#12121a]/90 to-[#0a0a0f]/95 backdrop-blur-xl border-[#4D5FF1]/30 shadow-[0_8px_32px_rgba(77,95,241,0.15)] ring-1 ring-[#4D5FF1]/20' 
+                  : ''
+              }`}
+              style={service.isPremium ? {
+                background: 'linear-gradient(135deg, rgba(10,10,15,0.95) 0%, rgba(18,18,26,0.9) 50%, rgba(10,10,15,0.95) 100%)',
+              } : undefined}
               data-testid={`service-card-${index}`}
             >
-              <div className="absolute top-0 right-0 text-[120px] font-serif font-bold leading-none p-4" style={{ color: service.color, opacity: index === 2 ? 0.15 : 0.05 }}>
+              {service.isPremium && (
+                <div className="absolute inset-0 bg-gradient-to-br from-[#4D5FF1]/5 via-transparent to-[#8B5CF6]/5 pointer-events-none" />
+              )}
+              <div className="absolute top-0 right-0 text-[120px] font-serif font-bold leading-none p-4" style={{ color: service.color, opacity: service.isPremium ? 0.12 : (index === 2 ? 0.15 : 0.05) }}>
                 {service.number}
               </div>
               {service.isNew && (
@@ -131,6 +143,21 @@ export default function ServicesSection() {
                   </Badge>
                 </div>
               )}
+              {service.isPremium && (
+                <div className="absolute top-4 right-4 z-10">
+                  <Badge 
+                    className="font-semibold text-xs px-3 py-1 border border-[#4D5FF1]/40"
+                    style={{ 
+                      background: 'linear-gradient(135deg, rgba(77,95,241,0.2) 0%, rgba(139,92,246,0.2) 100%)',
+                      color: '#ffffff',
+                      backdropFilter: 'blur(8px)'
+                    }}
+                    data-testid={`badge-premium-${index}`}
+                  >
+                    ELITE
+                  </Badge>
+                </div>
+              )}
               <CardHeader>
                 <div 
                   className="w-12 h-12 mb-4 rounded-md flex items-center justify-center"
@@ -141,13 +168,13 @@ export default function ServicesSection() {
                 <CardTitle className="text-2xl font-serif" style={{ color: service.color }}>
                   {service.title}
                 </CardTitle>
-                <CardDescription className="text-base">{service.description}</CardDescription>
+                <CardDescription className={`text-base ${service.isPremium ? 'text-gray-300' : ''}`}>{service.description}</CardDescription>
                 <div className="text-lg font-bold pt-2" style={{ color: service.color }}>{getDisplayPrice(service)}</div>
               </CardHeader>
               <CardContent className="flex flex-col flex-1 space-y-4">
                 <ul className="space-y-2 flex-1">
                   {service.features.map((feature, fIndex) => (
-                    <li key={fIndex} className="flex items-start gap-2 text-sm">
+                    <li key={fIndex} className={`flex items-start gap-2 text-sm ${service.isPremium ? 'text-gray-300' : ''}`}>
                       <span className="mt-1" style={{ color: service.color }}>•</span>
                       <span>{feature}</span>
                     </li>
@@ -156,11 +183,11 @@ export default function ServicesSection() {
                 {service.link && (
                   <Link href={service.link}>
                     <Button 
-                      variant="outline" 
-                      className="w-full group"
+                      variant={service.isPremium ? "default" : "outline"}
+                      className={`w-full group ${service.isPremium ? 'bg-[#4D5FF1] hover:bg-[#4D5FF1]/90 text-white border-0' : ''}`}
                       data-testid={`button-learn-more-${index}`}
                     >
-                      Learn More
+                      {service.isPremium ? 'Explore Consult' : 'Learn More'}
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
