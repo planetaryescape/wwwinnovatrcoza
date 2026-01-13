@@ -275,15 +275,15 @@ export default function CinematicLanding() {
   };
 
   const navItems = [
-    { label: "Lifecycle", action: () => scrollToSection("lifecycle") },
     { label: "Track Record", action: () => scrollToSection("why-consult") },
+    { label: "Lifecycle", action: () => scrollToSection("lifecycle") },
     { label: "Results", action: () => scrollToSection("case-studies") },
     { label: "Contact", action: () => scrollToSection("consult-contact") },
   ];
 
   const menuItems = [
-    { label: "Lifecycle", action: () => scrollToSection("lifecycle") },
     { label: "Track Record", action: () => scrollToSection("why-consult") },
+    { label: "Lifecycle", action: () => scrollToSection("lifecycle") },
     { label: "Results", action: () => scrollToSection("case-studies") },
     { label: "Contact", action: () => scrollToSection("consult-contact") },
   ];
@@ -486,6 +486,52 @@ export default function CinematicLanding() {
       </section>
       {/* Transition Bridge */}
       <div className="h-20 bg-gradient-to-b from-[#0a0a0f] to-[#0d0d18]" />
+      
+      {/* Track Record Section */}
+      <section id="why-consult" className="py-24 bg-[#0a0a0f]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
+          <div className="text-center mb-16">
+            <h2 
+              className="sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white mb-6 text-[95px]"
+              data-cursor-invert
+            >
+              Track Record
+            </h2>
+            <div className="max-w-3xl mx-auto space-y-4 text-[#fafafa]">
+              <p>
+                Test24 is designed for fast, high-quality testing.
+              </p>
+              <p>
+                Consult is for when the decision is bigger: multiple routes, multiple stakeholders, multiple phases.
+              </p>
+              <p>
+                We design the learning agenda, run the work, and translate it into clear actions.
+              </p>
+            </div>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            {valueCards.map((card, index) => {
+              const IconComponent = card.icon;
+              return (
+                <Card 
+                  key={index}
+                  className="bg-[#12121a] border-gray-800 hover:border-[#4D5FF1]/30 transition-colors"
+                >
+                  <CardContent className="p-8 text-center">
+                    <div className="w-14 h-14 rounded-xl bg-[#4D5FF1]/10 flex items-center justify-center mx-auto mb-6">
+                      <IconComponent className="w-7 h-7 text-[#4D5FF1]" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-3 text-white">{card.title}</h3>
+                    <p className="text-gray-400">{card.description}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* Lifecycle Content Section */}
       <div ref={contentRef}>
         {/* The Lifecycle - Pillar Section */}
@@ -651,51 +697,6 @@ export default function CinematicLanding() {
                           </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Why Consult Section */}
-        <section id="why-consult" className="py-24 bg-[#0a0a0f]">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
-            <div className="text-center mb-16">
-              <h2 
-                className="sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white mb-6 text-[95px]"
-                data-cursor-invert
-              >
-                Track Record
-              </h2>
-              <div className="max-w-3xl mx-auto space-y-4 text-[#fafafa]">
-                <p>
-                  Test24 is designed for fast, high-quality testing.
-                </p>
-                <p>
-                  Consult is for when the decision is bigger: multiple routes, multiple stakeholders, multiple phases.
-                </p>
-                <p>
-                  We design the learning agenda, run the work, and translate it into clear actions.
-                </p>
-              </div>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-6">
-              {valueCards.map((card, index) => {
-                const IconComponent = card.icon;
-                return (
-                  <Card 
-                    key={index}
-                    className="bg-[#12121a] border-gray-800 hover:border-[#4D5FF1]/30 transition-colors"
-                  >
-                    <CardContent className="p-8 text-center">
-                      <div className="w-14 h-14 rounded-xl bg-[#4D5FF1]/10 flex items-center justify-center mx-auto mb-6">
-                        <IconComponent className="w-7 h-7 text-[#4D5FF1]" />
-                      </div>
-                      <h3 className="text-xl font-semibold mb-3 text-white">{card.title}</h3>
-                      <p className="text-gray-400">{card.description}</p>
                     </CardContent>
                   </Card>
                 );
