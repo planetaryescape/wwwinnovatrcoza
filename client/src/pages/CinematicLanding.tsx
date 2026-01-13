@@ -370,7 +370,7 @@ export default function CinematicLanding() {
         <div className="absolute inset-0 bg-[#4D5FF1]" />
 
         {/* Hero Content - Two Column Layout */}
-        <div className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16">
+        <div className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16 bg-[#4444ff]">
           <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left: Large Text */}
             <motion.div
