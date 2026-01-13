@@ -462,7 +462,7 @@ export default function CinematicLanding() {
                 <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-6 leading-tight whitespace-pre-line tracking-tight">
                   {card.title}
                 </h3>
-                <p className="text-white/50 text-sm sm:text-base leading-relaxed mb-6">
+                <p className="text-sm sm:text-base leading-relaxed mb-6 text-[#ffffff]">
                   {card.description}
                 </p>
                 <a 
