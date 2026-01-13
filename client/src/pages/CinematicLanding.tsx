@@ -143,10 +143,10 @@ const whatWeDoCards = [
 ];
 
 const humorLines = [
-  { text: "Look, if you've made it this far...", delay: 0 },
-  { text: "Either you're nosy (no shame)...", delay: 0.15 },
-  { text: "...you think our work is pretty cool..", delay: 0.3 },
-  { text: "...or you're ready to chat.", delay: 0.45 },
+  { text: "If you've reached this point, you're thinking seriously about what comes next.", delay: 0 },
+  { text: "Big decisions require focus, evidence, and alignment — not more noise.", delay: 0.15 },
+  { text: "We work with teams who are ready to move from discussion to direction, and from insight to action.", delay: 0.3 },
+  { text: "Start the conversation when it suits you.", delay: 0.45 },
 ];
 
 function HumorSection() {
