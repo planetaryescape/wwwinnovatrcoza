@@ -279,7 +279,6 @@ export default function CinematicLanding() {
   };
 
   const navItems = [
-    { label: "The Problem", action: () => scrollToSection("problem-solution") },
     { label: "What We Do", action: () => scrollToSection("why-consult") },
     { label: "Lifecycle", action: () => scrollToSection("lifecycle") },
     { label: "Results", action: () => scrollToSection("case-studies") },
@@ -287,7 +286,6 @@ export default function CinematicLanding() {
   ];
 
   const menuItems = [
-    { label: "The Problem", action: () => scrollToSection("problem-solution") },
     { label: "What We Do", action: () => scrollToSection("why-consult") },
     { label: "Lifecycle", action: () => scrollToSection("lifecycle") },
     { label: "Results", action: () => scrollToSection("case-studies") },
