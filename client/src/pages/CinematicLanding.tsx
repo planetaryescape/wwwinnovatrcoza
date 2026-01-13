@@ -142,33 +142,45 @@ const whatWeDoCards = [
   }
 ];
 
-const humorLines = [
-  { text: "If you've reached this point, you're thinking seriously about what comes next.", delay: 0 },
-  { text: "Big decisions require focus, evidence, and alignment — not more noise.", delay: 0.15 },
-  { text: "We work with teams who are ready to move from discussion to direction, and from insight to action.", delay: 0.3 },
-  { text: "Start the conversation when it suits you.", delay: 0.45 },
-];
-
 function ClosingSection() {
   return (
     <section 
-      className="relative py-32 sm:py-44 bg-gradient-to-b from-[#0D1598] via-[#0A1088] to-[#080E80] overflow-hidden"
+      id="consult-contact"
+      className="relative min-h-screen flex flex-col justify-center bg-gradient-to-b from-[#0D1598] via-[#080E80] to-[#050960] overflow-hidden"
       data-testid="section-closing"
     >
-      {/* Subtle decorative elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-0 w-32 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-        <div className="absolute bottom-1/4 right-0 w-32 h-px bg-gradient-to-l from-transparent via-white/20 to-transparent" />
+      {/* Ambient floating particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(8)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-white/15 rounded-full"
+            style={{
+              left: `${15 + (i * 10)}%`,
+              top: `${25 + (i * 6) % 50}%`,
+            }}
+            animate={{
+              y: [-15, 15, -15],
+              opacity: [0.1, 0.25, 0.1],
+            }}
+            transition={{
+              duration: 5 + i * 0.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: i * 0.4,
+            }}
+          />
+        ))}
       </div>
       
-      <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 lg:pr-20">
-        {/* Opening statement - larger, serif, centered */}
+      <div className="relative z-10 max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 lg:pr-20 py-24 sm:py-32">
+        {/* Opening statement - centered */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16 sm:mb-20"
+          className="text-center mb-12 sm:mb-16"
           data-testid="closing-line-1"
         >
           <h2 
@@ -185,66 +197,137 @@ function ClosingSection() {
           </h2>
         </motion.div>
         
-        {/* Middle statements - staggered, alternating alignment */}
-        <div className="space-y-12 sm:space-y-16 mb-20 sm:mb-24">
-          <motion.p
+        {/* Two column layout: messaging left, contact right */}
+        <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-start">
+          {/* Left - Professional messaging */}
+          <motion.div
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-white/85 leading-relaxed max-w-2xl"
-            style={{ fontSize: "clamp(1.1rem, 2vw, 1.35rem)" }}
-            data-testid="closing-line-2"
+            className="space-y-8"
           >
-            Big decisions require <span className="text-white font-medium">focus</span>, <span className="text-white font-medium">evidence</span>, and <span className="text-white font-medium">alignment</span> — not more noise.
-          </motion.p>
-          
-          <motion.p
+            <p 
+              className="text-white/85 leading-relaxed"
+              style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.25rem)" }}
+              data-testid="closing-line-2"
+            >
+              Big decisions require <span className="text-white font-medium">focus</span>, <span className="text-white font-medium">evidence</span>, and <span className="text-white font-medium">alignment</span> — not more noise.
+            </p>
+            
+            <p 
+              className="text-white/85 leading-relaxed"
+              style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.25rem)" }}
+              data-testid="closing-line-3"
+            >
+              We work with teams who are ready to move from <span className="text-white font-medium">discussion to direction</span>, and from <span className="text-white font-medium">insight to action</span>.
+            </p>
+            
+            <div className="pt-4">
+              <p 
+                className="text-white font-medium tracking-wide"
+                style={{ fontSize: "clamp(1.15rem, 2vw, 1.5rem)" }}
+                data-testid="closing-line-4"
+              >
+                Start the conversation when it suits you.
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Right - Contact options */}
+          <motion.div
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="text-white/85 leading-relaxed max-w-2xl ml-auto text-right"
-            style={{ fontSize: "clamp(1.1rem, 2vw, 1.35rem)" }}
-            data-testid="closing-line-3"
+            className="flex flex-col gap-5"
           >
-            We work with teams who are ready to move from <span className="text-white font-medium">discussion to direction</span>, and from <span className="text-white font-medium">insight to action</span>.
-          </motion.p>
+            {/* Email Card */}
+            <a 
+              href="mailto:richard@innovatr.co.za?subject=Let's%20Talk%20-%20Innovatr%20Consult"
+              className="group relative overflow-hidden rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 p-6 sm:p-8 transition-all duration-500 hover:bg-white/10 hover:border-white/20"
+              data-testid="button-email-contact"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-[#5A5EFF] flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 
+                      className="text-white text-lg sm:text-xl mb-1"
+                      style={{ fontFamily: "'DM Serif Display', serif" }}
+                    >
+                      Send an email
+                    </h3>
+                    <p className="text-white/50 text-sm" style={{ fontFamily: "Roboto, sans-serif" }}>
+                      richard@innovatr.co.za
+                    </p>
+                  </div>
+                </div>
+                <ArrowRight className="w-5 h-5 text-white/30 group-hover:text-white/80 group-hover:translate-x-1 transition-all" />
+              </div>
+            </a>
+
+            {/* LinkedIn Card */}
+            <a 
+              href="https://www.linkedin.com/in/richard-lawrence-innovation-72a62414"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative overflow-hidden rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 p-6 sm:p-8 transition-all duration-500 hover:bg-white/10 hover:border-white/20"
+              data-testid="button-linkedin-contact"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-[#0A66C2] flex items-center justify-center flex-shrink-0">
+                    <SiLinkedin className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 
+                      className="text-white text-lg sm:text-xl mb-1"
+                      style={{ fontFamily: "'DM Serif Display', serif" }}
+                    >
+                      Connect on LinkedIn
+                    </h3>
+                    <p className="text-white/50 text-sm" style={{ fontFamily: "Roboto, sans-serif" }}>
+                      Let's connect and chat
+                    </p>
+                  </div>
+                </div>
+                <ArrowRight className="w-5 h-5 text-white/30 group-hover:text-white/80 group-hover:translate-x-1 transition-all" />
+              </div>
+            </a>
+
+            {/* Instagram Card */}
+            <a 
+              href="https://www.instagram.com/innovatr1?igsh=d2V3eGM5eDZ5anhh"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative overflow-hidden rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 p-6 sm:p-8 transition-all duration-500 hover:bg-white/10 hover:border-white/20"
+              data-testid="button-instagram-contact"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#FCAF45] flex items-center justify-center flex-shrink-0">
+                    <SiInstagram className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 
+                      className="text-white text-lg sm:text-xl mb-1"
+                      style={{ fontFamily: "'DM Serif Display', serif" }}
+                    >
+                      Follow on Instagram
+                    </h3>
+                    <p className="text-white/50 text-sm" style={{ fontFamily: "Roboto, sans-serif" }}>
+                      Behind the scenes
+                    </p>
+                  </div>
+                </div>
+                <ArrowRight className="w-5 h-5 text-white/30 group-hover:text-white/80 group-hover:translate-x-1 transition-all" />
+              </div>
+            </a>
+          </motion.div>
         </div>
-        
-        {/* Decorative divider */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1, delay: 0.3 }}
-          className="w-24 h-px bg-white/30 mx-auto mb-16 sm:mb-20"
-        />
-        
-        {/* Closing CTA - prominent, centered */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-center"
-          data-testid="closing-line-4"
-        >
-          <p 
-            className="text-white font-medium tracking-wide mb-10"
-            style={{ fontSize: "clamp(1.25rem, 2.5vw, 1.75rem)" }}
-          >
-            Start the conversation when it suits you.
-          </p>
-          <a
-            href="mailto:Richard@innovatr.co.za?subject=Let's%20Talk"
-            className="inline-flex items-center gap-3 px-8 py-4 border border-white/30 rounded-full text-white hover:bg-white/10 transition-all duration-300 group"
-            data-testid="button-closing-cta"
-          >
-            <span className="text-sm uppercase tracking-[0.2em]">Get in Touch</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </a>
-        </motion.div>
       </div>
     </section>
   );
@@ -765,227 +848,8 @@ export default function CinematicLanding() {
           </div>
         </section>
 
-        {/* Humorous Scroll Reveal Section */}
+        {/* Closing & Contact Section */}
         <ClosingSection />
-
-        {/* Gradient Bridge - smooth transition to contact */}
-        <div className="h-32 sm:h-48 bg-gradient-to-b from-[#080E80] via-[#060B70] to-[#050960]" aria-hidden="true" />
-
-        {/* Final CTA Section - Elevated Contact */}
-        <section id="consult-contact" className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-gradient-to-b from-[#050960] via-[#040850] to-[#030868]">
-          {/* Ambient floating particles */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(12)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-1 h-1 bg-white/20 rounded-full"
-                style={{
-                  left: `${10 + (i * 7)}%`,
-                  top: `${20 + (i * 5) % 60}%`,
-                }}
-                animate={{
-                  y: [-20, 20, -20],
-                  opacity: [0.1, 0.3, 0.1],
-                }}
-                transition={{
-                  duration: 4 + i * 0.5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: i * 0.3,
-                }}
-              />
-            ))}
-          </div>
-
-          {/* Main Content */}
-          <div className="relative z-10 max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-20">
-            <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-              {/* Left - Big Statement */}
-              <motion.div
-                initial={{ opacity: 0, x: -60 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.9, ease: "easeOut" }}
-              >
-                <p 
-                  className="text-xs uppercase tracking-[0.35em] mb-8 text-white/50"
-                  style={{ fontFamily: "Roboto, sans-serif" }}
-                  data-testid="text-contact-subheading"
-                >
-                  Start a conversation
-                </p>
-                
-                <h2 
-                  className="text-white mb-10 leading-[0.95]"
-                  style={{ 
-                    fontFamily: "'DM Serif Display', serif", 
-                    letterSpacing: "0.04em",
-                    fontSize: "clamp(2.5rem, 7vw, 5.5rem)"
-                  }}
-                  data-testid="text-contact-heading"
-                >
-                  Let's build<br />
-                  <span className="italic text-white/80">something</span><br />
-                  together.
-                </h2>
-                
-                <p 
-                  className="text-white/70 leading-relaxed max-w-md" 
-                  style={{ 
-                    fontFamily: "Roboto, sans-serif",
-                    fontSize: "clamp(1rem, 1.5vw, 1.15rem)" 
-                  }}
-                  data-testid="text-contact-intro"
-                >
-                  High-stakes decisions deserve a thought partner. Whether you're launching, pivoting, or scaling — we're ready when you are.
-                </p>
-              </motion.div>
-
-              {/* Right - Action Cards */}
-              <motion.div
-                initial={{ opacity: 0, x: 60 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.9, delay: 0.2, ease: "easeOut" }}
-                className="flex flex-col gap-6"
-              >
-                {/* Email Card */}
-                <a 
-                  href="mailto:richard@innovatr.co.za?subject=Let's%20Talk%20-%20Innovatr%20Consult"
-                  className="group relative overflow-hidden rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 p-8 transition-all duration-500 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02]"
-                  data-testid="button-email-contact"
-                >
-                  <div className="flex items-start justify-between gap-6">
-                    <div>
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-full bg-[#5A5EFF] flex items-center justify-center">
-                          <Mail className="w-5 h-5 text-white" />
-                        </div>
-                        <span 
-                          className="text-xs uppercase tracking-[0.2em] text-white/50"
-                          style={{ fontFamily: "Roboto, sans-serif" }}
-                        >
-                          Preferred
-                        </span>
-                      </div>
-                      <h3 
-                        className="text-white text-xl sm:text-2xl mb-2"
-                        style={{ fontFamily: "'DM Serif Display', serif" }}
-                      >
-                        Send an email
-                      </h3>
-                      <p className="text-white/50 text-sm" style={{ fontFamily: "Roboto, sans-serif" }}>
-                        richard@innovatr.co.za
-                      </p>
-                    </div>
-                    <motion.div 
-                      className="text-white/30 group-hover:text-white/80 transition-colors"
-                      whileHover={{ x: 4 }}
-                    >
-                      <ArrowRight className="w-6 h-6" />
-                    </motion.div>
-                  </div>
-                </a>
-
-                {/* LinkedIn Card */}
-                <a 
-                  href="https://www.linkedin.com/in/richard-lawrence-innovation-72a62414"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative overflow-hidden rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 p-8 transition-all duration-500 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02]"
-                  data-testid="button-linkedin-contact"
-                >
-                  <div className="flex items-start justify-between gap-6">
-                    <div>
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-full bg-[#0A66C2] flex items-center justify-center">
-                          <SiLinkedin className="w-5 h-5 text-white" />
-                        </div>
-                        <span 
-                          className="text-xs uppercase tracking-[0.2em] text-white/50"
-                          style={{ fontFamily: "Roboto, sans-serif" }}
-                        >
-                          Connect
-                        </span>
-                      </div>
-                      <h3 
-                        className="text-white text-xl sm:text-2xl mb-2"
-                        style={{ fontFamily: "'DM Serif Display', serif" }}
-                      >
-                        Find me on LinkedIn
-                      </h3>
-                      <p className="text-white/50 text-sm" style={{ fontFamily: "Roboto, sans-serif" }}>
-                        Let's connect and chat
-                      </p>
-                    </div>
-                    <motion.div 
-                      className="text-white/30 group-hover:text-white/80 transition-colors"
-                      whileHover={{ x: 4 }}
-                    >
-                      <ArrowRight className="w-6 h-6" />
-                    </motion.div>
-                  </div>
-                </a>
-
-                {/* Instagram Card */}
-                <a 
-                  href="https://www.instagram.com/innovatr1?igsh=d2V3eGM5eDZ5anhh"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative overflow-hidden rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 p-8 transition-all duration-500 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02]"
-                  data-testid="button-instagram-contact"
-                >
-                  <div className="flex items-start justify-between gap-6">
-                    <div>
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#FCAF45] flex items-center justify-center">
-                          <SiInstagram className="w-5 h-5 text-white" />
-                        </div>
-                        <span 
-                          className="text-xs uppercase tracking-[0.2em] text-white/50"
-                          style={{ fontFamily: "Roboto, sans-serif" }}
-                        >
-                          Follow
-                        </span>
-                      </div>
-                      <h3 
-                        className="text-white text-xl sm:text-2xl mb-2"
-                        style={{ fontFamily: "'DM Serif Display', serif" }}
-                      >
-                        See the work
-                      </h3>
-                      <p className="text-white/50 text-sm" style={{ fontFamily: "Roboto, sans-serif" }}>
-                        @innovatr1
-                      </p>
-                    </div>
-                    <motion.div 
-                      className="text-white/30 group-hover:text-white/80 transition-colors"
-                      whileHover={{ x: 4 }}
-                    >
-                      <ArrowRight className="w-6 h-6" />
-                    </motion.div>
-                  </div>
-                </a>
-              </motion.div>
-            </div>
-
-            {/* Bottom tagline */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              className="mt-24 pt-12 border-t border-white/10 text-center"
-            >
-              <p 
-                className="text-white/30 text-sm tracking-wide"
-                style={{ fontFamily: "Roboto, sans-serif" }}
-              >
-                Johannesburg, South Africa · Working globally
-              </p>
-            </motion.div>
-          </div>
-        </section>
       </div>
       {/* Menu Overlay */}
       <AnimatePresence>
