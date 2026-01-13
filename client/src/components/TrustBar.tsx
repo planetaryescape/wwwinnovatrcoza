@@ -39,7 +39,9 @@ export default function TrustBar() {
   }, []);
 
   return (
-    <div className="py-8 border-y border-border overflow-hidden">
+    <div 
+      className="py-8 border-y border-border overflow-hidden w-screen relative left-1/2 -translate-x-1/2"
+    >
       <div 
         ref={scrollRef}
         className="flex gap-12 items-center whitespace-nowrap overflow-hidden"
