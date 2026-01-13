@@ -363,10 +363,10 @@ export default function CinematicLanding() {
       {/* Hero Section */}
       <section 
         ref={heroRef}
-        className="relative min-h-screen bg-[#0a0a0f]"
+        className="relative min-h-screen bg-[#4D5FF1]"
       >
-        {/* Plain Background */}
-        <div className="absolute inset-0 bg-[#0a0a0f]" />
+        {/* Solid Blue Background */}
+        <div className="absolute inset-0 bg-[#4D5FF1]" />
 
         {/* Hero Content - Two Column Layout */}
         <div className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16">
@@ -428,7 +428,7 @@ export default function CinematicLanding() {
         </div>
       </section>
       {/* Transition Bridge */}
-      <div className="h-20 bg-gradient-to-b from-[#0a0a0f] to-[#0d0d18]" />
+      <div className="h-20 bg-gradient-to-b from-[#4D5FF1] to-[#0a0a0f]" />
       {/* Problem / Solution Cinematic Section */}
       <ProblemSolutionSection />
       {/* What We Do Section */}
