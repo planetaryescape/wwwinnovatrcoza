@@ -389,8 +389,8 @@ export default function CinematicLanding() {
                 WHAT'S<br />
                 MISSING
               </h1>
-              <p className="mt-8 text-base sm:text-lg md:text-xl font-sans text-[#fafafa] max-w-md">
-                Launch Better Innovation through<br />in-house data, design and testing.
+              <p className="mt-8 text-base sm:text-lg md:text-xl font-sans text-[#fafafa] whitespace-nowrap">
+                Launch Better Innovation through in-house data, design and testing.
               </p>
             </motion.div>
             
