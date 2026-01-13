@@ -161,11 +161,11 @@ function HumorSection() {
   return (
     <section 
       ref={sectionRef}
-      className="relative bg-gradient-to-b from-[#1D2DC8] via-[#1520B0] to-[#0D1598]"
+      className="relative bg-gradient-to-b from-[#0D1598] via-[#0A1290] to-[#080E80]"
       style={{ minHeight: "140vh", position: "relative" }}
       data-testid="section-humor"
     >
-      <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden bg-[#1520B0]">
+      <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden bg-[#0A1290]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center text-[22px]">
           <div className="flex flex-col items-center justify-center gap-10 sm:gap-14 md:gap-16 lg:gap-20 text-[#fafafa]">
             <motion.p
