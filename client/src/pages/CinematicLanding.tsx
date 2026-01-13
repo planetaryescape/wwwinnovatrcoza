@@ -370,7 +370,7 @@ export default function CinematicLanding() {
         <div className="absolute inset-0 bg-[#4D5FF1]" />
 
         {/* Hero Content - Two Column Layout */}
-        <div className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16">
+        <div className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16 bg-[#4444ff]">
           <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left: Large Text */}
             <motion.div
@@ -424,12 +424,8 @@ export default function CinematicLanding() {
           </motion.div>
         </div>
       </section>
-      {/* Section Divider */}
-      <div className="h-1 bg-white/20" />
       {/* Problem / Solution Cinematic Section */}
       <ProblemSolutionSection />
-      {/* Section Divider */}
-      <div className="h-1 bg-white/20" />
       {/* What We Do Section */}
       <section id="why-consult" className="py-24 sm:py-32 bg-[#4D5FF1]">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -483,8 +479,6 @@ export default function CinematicLanding() {
       </section>
       {/* Content Sections */}
       <div ref={contentRef}>
-        {/* Section Divider */}
-        <div className="h-1 bg-white/20" />
         {/* Case Studies Section */}
         <section id="case-studies" className="py-24 bg-[#4D5FF1]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
@@ -566,13 +560,9 @@ export default function CinematicLanding() {
           </div>
         </section>
 
-        {/* Section Divider */}
-        <div className="h-1 bg-white/20" />
         {/* Humorous Scroll Reveal Section */}
         <HumorSection />
 
-        {/* Section Divider */}
-        <div className="h-1 bg-white/20" />
         {/* Final CTA Section - Interactive Ball */}
         <section id="consult-contact" className="relative min-h-screen bg-[#4D5FF1] flex flex-col justify-center overflow-hidden">
           {/* Section Header */}
