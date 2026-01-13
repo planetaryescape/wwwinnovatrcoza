@@ -6,6 +6,7 @@ import { Link, useLocation } from "wouter";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import CustomCursor from "@/components/CustomCursor";
 import ProblemSolutionSection from "@/components/ProblemSolutionSection";
+import LiquidBlob from "@/components/LiquidBlob";
 
 import trendsForesightImg from "@assets/generated_images/trends_and_foresight_3d_abstract.png";
 import demandSpaceImg from "@assets/generated_images/demand_space_mapping_3d_network.png";
@@ -389,9 +390,6 @@ export default function CinematicLanding() {
                 WHAT'S<br />
                 MISSING
               </h1>
-              <p className="mt-8 text-base sm:text-lg md:text-xl text-white/60 font-sans whitespace-nowrap">
-                Launch Better Innovation through in-house data, design and testing.
-              </p>
             </motion.div>
             
             {/* Right: Shift Key Video Loop */}
@@ -413,15 +411,9 @@ export default function CinematicLanding() {
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-            className="w-6 h-10 border-2 border-white/40 rounded-full flex justify-center pt-2"
-          >
-            <motion.div className="w-1.5 h-1.5 bg-white/60 rounded-full" />
-          </motion.div>
+        {/* Liquid Blob with Subheading */}
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-10">
+          <LiquidBlob text="Launch Better Innovation through in-house data, design and testing." />
         </div>
       </section>
       {/* Problem / Solution Cinematic Section */}
