@@ -141,7 +141,7 @@ export default function CustomCursor() {
 
   return (
     <motion.div
-      className={`fixed pointer-events-none z-[9999] ${isOverHeading ? 'mix-blend-difference' : ''}`}
+      className="fixed pointer-events-none z-[9999]"
       animate={{
         x: position.x - offset,
         y: position.y - offset,
@@ -161,9 +161,9 @@ export default function CustomCursor() {
           backgroundColor: isOverHeading 
             ? '#ffffff' 
             : (isHovering ? cursorColorHover : cursorColor),
-          border: isOverHeading ? 'none' : `1.5px solid ${borderColor}`,
+          border: isOverHeading ? '2px solid #0a0a0f' : `1.5px solid ${borderColor}`,
           boxShadow: isOverHeading 
-            ? 'none'
+            ? '0 0 0 1px rgba(255, 255, 255, 0.3)'
             : (isEnlarged 
               ? `0 0 20px ${glowColorHover}, inset 0 0 10px ${glowColorHover}` 
               : `0 0 10px ${glowColor}`),
