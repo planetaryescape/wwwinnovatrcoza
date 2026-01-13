@@ -65,7 +65,7 @@ export default function ProblemSolutionSection() {
             className="max-w-4xl mx-auto space-y-4 sm:space-y-5 md:space-y-6 text-white/60 font-sans 
               text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed px-4"
           >
-            <p>
+            <p className="text-[#ffffff]">
               We align stakeholders, clarify options, and use real market evidence to show where to focus, how to play, and how to win, with confidence.
             </p>
             <p className="text-[#ffffff]">
