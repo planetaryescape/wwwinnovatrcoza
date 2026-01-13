@@ -1709,6 +1709,9 @@ export default function LaunchBrief() {
             {/* Country selector - full width */}
             <div className="space-y-2" data-field="country">
               <Label htmlFor="country">Country *</Label>
+              <p className="text-xs text-muted-foreground italic">
+                These countries are a guideline. Anything outside of SA or Europe may have an additional recruitment delay.
+              </p>
               <MultiSelect
                 options={countryOptions}
                 selected={formData.country}
