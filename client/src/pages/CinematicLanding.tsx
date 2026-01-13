@@ -13,6 +13,7 @@ import categoryAuditsImg from "@assets/generated_images/category_audits_3d_cubes
 import ideationWorkshopsImg from "@assets/generated_images/ideation_workshops_creative_explosion.png";
 import endToEndDesignImg from "@assets/generated_images/end_to_end_design_flow.png";
 import brandHealthImg from "@assets/generated_images/brand_health_tracking_pulse.png";
+import consultBackgroundGif from "@assets/test_1768331395403.gif";
 
 const pillars = [
   {
@@ -401,7 +402,7 @@ export default function CinematicLanding() {
               className="flex justify-center lg:justify-end"
             >
               <img
-                src="/video/consult-background.gif"
+                src={consultBackgroundGif}
                 alt="Animated fish background"
                 className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[420px] lg:h-[420px] object-contain"
                 data-testid="img-consult-background"

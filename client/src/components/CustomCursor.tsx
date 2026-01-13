@@ -78,7 +78,7 @@ export default function CustomCursor() {
 
   return (
     <motion.div
-      className="fixed pointer-events-none z-[9999] mix-blend-difference"
+      className="fixed pointer-events-none z-[9999]"
       animate={{
         x: position.x - offset,
         y: position.y - offset,
@@ -90,14 +90,25 @@ export default function CustomCursor() {
         ease: "linear"
       }}
     >
+      {/* White outer ring */}
       <div 
-        className="rounded-full transition-all duration-200 ease-out"
+        className="relative rounded-full transition-all duration-200 ease-out border-2 border-white"
         style={{
           width: size,
           height: size,
-          backgroundColor: '#ffffff',
+          backgroundColor: 'transparent',
         }}
-      />
+      >
+        {/* Blue inner dot */}
+        <div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{
+            width: size * 0.3,
+            height: size * 0.3,
+            backgroundColor: '#4D5FF1',
+          }}
+        />
+      </div>
     </motion.div>
   );
 }
