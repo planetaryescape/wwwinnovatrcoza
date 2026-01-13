@@ -151,7 +151,7 @@ const humorLines = [
 function HumorSection() {
   return (
     <section 
-      className="relative py-24 sm:py-32 bg-gradient-to-b from-[#0D1598] via-[#0A1290] to-[#080E80]"
+      className="relative py-24 sm:py-32 bg-gradient-to-b from-[#0D1598] via-[#0A1088] to-[#080E80]"
       data-testid="section-humor"
     >
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
@@ -714,8 +714,11 @@ export default function CinematicLanding() {
         {/* Humorous Scroll Reveal Section */}
         <HumorSection />
 
+        {/* Gradient Bridge - smooth transition to contact */}
+        <div className="h-32 sm:h-48 bg-gradient-to-b from-[#080E80] via-[#060B70] to-[#050960]" aria-hidden="true" />
+
         {/* Final CTA Section - Interactive Ball */}
-        <section id="consult-contact" className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-gradient-to-b from-[#0D1598] via-[#080E80] to-[#030868]">
+        <section id="consult-contact" className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-gradient-to-b from-[#050960] via-[#040850] to-[#030868]">
           {/* Section Header */}
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-16 sm:mb-20">
             <motion.div
