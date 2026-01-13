@@ -589,21 +589,21 @@ export default function CinematicLanding() {
             
             {/* Case Study 1 - Image Left, Text Right */}
             <motion.div 
-              className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center mb-24 sm:mb-32"
+              className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-center mb-24 sm:mb-32"
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.7 }}
               data-testid="case-study-1"
             >
-              <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-[#FFE8D8]">
+              <div className="relative aspect-square overflow-hidden rounded-sm bg-[#FFE8D8] lg:col-span-2">
                 <img 
                   src={cookingGif}
                   alt="Animated cooking illustration"
                   className="w-full h-full object-contain"
                 />
               </div>
-              <div className="py-4">
+              <div className="py-4 lg:col-span-3">
                 <span 
                   className="text-xs uppercase tracking-[0.25em] text-white/60 mb-6 block"
                   style={{ fontFamily: "Roboto, sans-serif" }}
@@ -635,14 +635,14 @@ export default function CinematicLanding() {
 
             {/* Case Study 2 - Image Right, Text Left */}
             <motion.div 
-              className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center mb-24 sm:mb-32"
+              className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-center mb-24 sm:mb-32"
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.7 }}
               data-testid="case-study-2"
             >
-              <div className="py-4 order-2 lg:order-1">
+              <div className="py-4 lg:col-span-3 order-2 lg:order-1">
                 <span 
                   className="text-xs uppercase tracking-[0.25em] text-white/60 mb-6 block"
                   style={{ fontFamily: "Roboto, sans-serif" }}
@@ -670,7 +670,7 @@ export default function CinematicLanding() {
                   <span className="underline underline-offset-4 hover:text-white/80 cursor-pointer transition-colors">4 minute read</span>
                 </div>
               </div>
-              <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-[#E8F0FF] order-1 lg:order-2">
+              <div className="relative aspect-square overflow-hidden rounded-sm bg-[#E8F0FF] lg:col-span-2 order-1 lg:order-2">
                 <img 
                   src={airplanesGif}
                   alt="Animated airplanes illustration"
@@ -681,21 +681,21 @@ export default function CinematicLanding() {
 
             {/* Case Study 3 - Image Left, Text Right */}
             <motion.div 
-              className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center"
+              className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-center"
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.7 }}
               data-testid="case-study-3"
             >
-              <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-[#FFE4D8]">
+              <div className="relative aspect-square overflow-hidden rounded-sm bg-[#FFE4D8] lg:col-span-2">
                 <img 
                   src={penGif}
                   alt="Animated pen illustration"
                   className="w-full h-full object-contain"
                 />
               </div>
-              <div className="py-4">
+              <div className="py-4 lg:col-span-3">
                 <span 
                   className="text-xs uppercase tracking-[0.25em] text-white/60 mb-6 block"
                   style={{ fontFamily: "Roboto, sans-serif" }}
