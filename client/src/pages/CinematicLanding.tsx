@@ -191,9 +191,9 @@ function ClosingSection() {
               fontStyle: "italic"
             }}
           >
-            If you've reached this point, you're thinking seriously
-            <br className="hidden sm:block" />
-            <span className="text-white/60"> about what comes next.</span>
+            If you've reached this point, you're thinking seriously.
+            <br />
+            <span className="text-white/60">You're ready for what comes next.</span>
           </h2>
         </motion.div>
         
