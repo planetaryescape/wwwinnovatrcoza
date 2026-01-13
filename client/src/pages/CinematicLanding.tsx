@@ -216,11 +216,28 @@ export default function CinematicLanding() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const heroSectionRef = useRef<HTMLElement>(null);
   const userInteracted = useRef(false);
 
   const handleGifLoad = useCallback(() => {
     setGifLoaded(true);
   }, []);
+
+  // Scroll-based dive animation for hero section
+  const { scrollYProgress: heroScrollProgress } = useScroll({
+    target: heroSectionRef,
+    offset: ["start start", "end start"],
+    layoutEffect: false
+  });
+
+  // Fish zoom: starts at 1x and zooms to 2.5x as you scroll
+  const fishScale = useTransform(heroScrollProgress, [0, 0.8], [1, 2.5]);
+  // Fish moves toward center as it zooms
+  const fishX = useTransform(heroScrollProgress, [0, 0.8], ["0%", "-25%"]);
+  // Text fades out quickly
+  const textOpacity = useTransform(heroScrollProgress, [0, 0.3], [1, 0]);
+  // Overall hero opacity for transition
+  const heroOpacity = useTransform(heroScrollProgress, [0.7, 1], [1, 0]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -379,88 +396,105 @@ export default function CinematicLanding() {
           </Link>
         </div>
       </nav>
-      {/* Hero Section */}
+      {/* Hero Section with Dive Animation */}
       <section 
-        ref={heroRef}
-        className="relative min-h-screen overflow-hidden"
+        ref={heroSectionRef}
+        className="relative h-[200vh]"
       >
-        {/* Fish GIF Background - positioned right */}
-        <div className="absolute inset-0 bg-[#5A5EFF]">
-          {!gifLoaded && (
-            <div className="absolute inset-0 bg-[#5A5EFF] animate-pulse" />
-          )}
-          <img
-            src={consultBackgroundGif}
-            alt="Animated underwater fish illustration"
-            className={`absolute right-0 top-1/2 -translate-y-1/2 h-[70%] w-auto max-w-[60%] object-contain transition-opacity duration-700 ${gifLoaded ? 'opacity-100' : 'opacity-0'}`}
-            onLoad={handleGifLoad}
-            loading="eager"
-            data-testid="img-consult-background"
-          />
-        </div>
-
-        {/* Hero Content - Two Column Layout: Text Left, Fish Right */}
-        <div className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16">
-          <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            {/* Left: Text */}
-            <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 1, delay: 0.3 }}
-              className="text-left"
-            >
-              <h1 
-                className="font-serif font-bold text-white leading-[0.95] uppercase drop-shadow-lg"
-                style={{ 
-                  fontFamily: "'DM Serif Display', serif", 
-                  letterSpacing: "0.06em",
-                  fontSize: "clamp(3rem, 8vw, 9rem)",
-                  textShadow: "0 4px 30px rgba(0,0,0,0.3)"
-                }}
-                data-testid="text-headline"
-                data-cursor-invert
-              >
-                WE BUILD<br />
-                WHAT'S<br />
-                MISSING
-              </h1>
-              <p 
-                className="mt-8 font-sans text-white/95 drop-shadow-md max-w-md"
-                style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
-              >
-                Launch Better Innovation through in-house data, design & testing.
-              </p>
-            </motion.div>
-            
-            {/* Right: Empty space where fish shows through background */}
-            <div className="hidden lg:block" />
-          </div>
-        </div>
-
-        {/* Animated Bubbles Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex items-end gap-2">
-          {[0, 1, 2].map((i) => (
-            <motion.div
-              key={i}
-              className="rounded-full bg-white/30 border border-white/40"
-              style={{
-                width: i === 1 ? 12 : 8,
-                height: i === 1 ? 12 : 8,
+        {/* Sticky hero container */}
+        <motion.div 
+          ref={heroRef}
+          className="sticky top-0 h-screen overflow-hidden"
+          style={{ opacity: heroOpacity }}
+        >
+          {/* Fish GIF Background - positioned right with zoom animation */}
+          <div className="absolute inset-0 bg-[#5A5EFF]">
+            {!gifLoaded && (
+              <div className="absolute inset-0 bg-[#5A5EFF] animate-pulse" />
+            )}
+            <motion.img
+              src={consultBackgroundGif}
+              alt="Animated underwater fish illustration"
+              className={`absolute -right-8 lg:-right-12 top-1/2 h-[85%] w-auto max-w-[65%] object-contain transition-opacity duration-700 origin-center ${gifLoaded ? 'opacity-100' : 'opacity-0'}`}
+              style={{ 
+                scale: fishScale, 
+                x: fishX,
+                y: "-50%"
               }}
-              animate={{
-                y: [0, -20, -40, -20, 0],
-                opacity: [0.3, 0.6, 0.8, 0.6, 0.3],
-                scale: [1, 1.1, 1.2, 1.1, 1],
-              }}
-              transition={{
-                repeat: Infinity,
-                duration: 2.5,
-                delay: i * 0.4,
-                ease: "easeInOut",
-              }}
+              onLoad={handleGifLoad}
+              data-testid="img-consult-background"
             />
-          ))}
-        </div>
+          </div>
+
+          {/* Hero Content - Two Column Layout: Text Left, Fish Right */}
+          <motion.div 
+            className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16"
+            style={{ opacity: textOpacity }}
+          >
+            <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              {/* Left: Text */}
+              <motion.div
+                initial={{ opacity: 0, x: -40 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 1, delay: 0.3 }}
+                className="text-left"
+              >
+                <h1 
+                  className="font-serif font-bold text-white leading-[0.95] uppercase drop-shadow-lg"
+                  style={{ 
+                    fontFamily: "'DM Serif Display', serif", 
+                    letterSpacing: "0.06em",
+                    fontSize: "clamp(3rem, 8vw, 9rem)",
+                    textShadow: "0 4px 30px rgba(0,0,0,0.3)"
+                  }}
+                  data-testid="text-headline"
+                  data-cursor-invert
+                >
+                  WE BUILD<br />
+                  WHAT'S<br />
+                  MISSING
+                </h1>
+                <p 
+                  className="mt-8 font-sans text-white/95 drop-shadow-md max-w-md"
+                  style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
+                >
+                  Launch Better Innovation through in-house data, design & testing.
+                </p>
+              </motion.div>
+              
+              {/* Right: Empty space where fish shows through background */}
+              <div className="hidden lg:block" />
+            </div>
+          </motion.div>
+
+          {/* Animated Bubbles Scroll Indicator */}
+          <motion.div 
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex items-end gap-2"
+            style={{ opacity: textOpacity }}
+          >
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="rounded-full bg-white/30 border border-white/40"
+                style={{
+                  width: i === 1 ? 12 : 8,
+                  height: i === 1 ? 12 : 8,
+                }}
+                animate={{
+                  y: [0, -20, -40, -20, 0],
+                  opacity: [0.3, 0.6, 0.8, 0.6, 0.3],
+                  scale: [1, 1.1, 1.2, 1.1, 1],
+                }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 2.5,
+                  delay: i * 0.4,
+                  ease: "easeInOut",
+                }}
+              />
+            ))}
+          </motion.div>
+        </motion.div>
       </section>
       {/* Problem / Solution Cinematic Section */}
       <ProblemSolutionSection />
