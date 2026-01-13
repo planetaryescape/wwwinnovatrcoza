@@ -861,10 +861,10 @@ export default function CinematicLanding() {
               transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
               className="flex items-center ml-6 sm:ml-10 md:ml-16"
             >
-              {/* Hand-drawn style curved arrow pointing left */}
+              {/* Hand-drawn style curved arrow pointing left at circle */}
               <svg 
-                viewBox="0 0 120 80" 
-                className="w-20 h-14 sm:w-24 sm:h-16 md:w-32 md:h-20 mr-4 sm:mr-6"
+                viewBox="0 0 120 60" 
+                className="w-20 h-12 sm:w-24 sm:h-14 md:w-32 md:h-16 mr-4 sm:mr-6"
                 fill="none"
                 stroke="white"
                 strokeWidth="2"
@@ -872,14 +872,14 @@ export default function CinematicLanding() {
                 strokeLinejoin="round"
               >
                 <motion.path
-                  d="M110 20 C80 15, 50 10, 30 35 C15 55, 20 65, 15 60"
+                  d="M110 30 C70 30, 40 30, 10 30"
                   initial={{ pathLength: 0 }}
                   whileInView={{ pathLength: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 1, delay: 0.5 }}
                 />
                 <motion.path
-                  d="M15 60 L5 50 M15 60 L25 55"
+                  d="M10 30 L22 22 M10 30 L22 38"
                   initial={{ pathLength: 0 }}
                   whileInView={{ pathLength: 1 }}
                   viewport={{ once: true }}
