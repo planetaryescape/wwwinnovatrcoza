@@ -71,7 +71,7 @@ export default function ProblemSolutionSection() {
             <p className="text-[#ffffff]">
               From strategy and innovation to execution and scale.
             </p>
-            <p className="text-white/80 font-medium">
+            <p className="font-medium text-[#ffffff]">
               No noise. No guesswork.
               <br />
               Just momentum.
