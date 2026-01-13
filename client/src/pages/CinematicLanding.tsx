@@ -166,7 +166,7 @@ function HumorSection() {
       data-testid="section-humor"
     >
       <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden bg-[#4444ff]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center text-[22px]">
           <div className="flex flex-col items-center justify-center gap-10 sm:gap-14 md:gap-16 lg:gap-20 text-[#fafafa]">
             <motion.p
               style={{ opacity: line1Opacity }}
