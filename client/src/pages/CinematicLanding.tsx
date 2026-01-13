@@ -286,16 +286,16 @@ export default function CinematicLanding() {
 
   const navItems = [
     { label: "The Problem", action: () => scrollToSection("problem-solution") },
-    { label: "What We Do", action: () => scrollToSection("why-consult") },
-    { label: "Results", action: () => scrollToSection("case-studies") },
-    { label: "Contact", action: () => scrollToSection("consult-contact") },
+    { label: "The Process", action: () => scrollToSection("why-consult") },
+    { label: "The Results", action: () => scrollToSection("case-studies") },
+    { label: "Contact Us", action: () => scrollToSection("consult-contact") },
   ];
 
   const menuItems = [
     { label: "The Problem", action: () => scrollToSection("problem-solution") },
-    { label: "What We Do", action: () => scrollToSection("why-consult") },
-    { label: "Results", action: () => scrollToSection("case-studies") },
-    { label: "Contact", action: () => scrollToSection("consult-contact") },
+    { label: "The Process", action: () => scrollToSection("why-consult") },
+    { label: "The Results", action: () => scrollToSection("case-studies") },
+    { label: "Contact Us", action: () => scrollToSection("consult-contact") },
   ];
 
   return (
@@ -512,7 +512,7 @@ export default function CinematicLanding() {
               data-cursor-invert
               data-testid="text-what-we-do-heading"
             >
-              WHAT WE DO
+              THE PROCESS
             </h2>
             <p 
               className="mb-4 text-white/90"
@@ -580,7 +580,7 @@ export default function CinematicLanding() {
                 }}
                 data-cursor-invert
               >
-                RESULTS
+                THE RESULTS
               </h2>
             </div>
             
