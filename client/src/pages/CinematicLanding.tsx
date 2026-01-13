@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { X, Menu, ArrowRight, Target, Lightbulb, Trophy, TrendingUp, Mail } from "lucide-react";
 import { SiLinkedin, SiInstagram } from "react-icons/si";
@@ -162,39 +162,39 @@ function HumorSection() {
     <section 
       ref={sectionRef}
       className="relative bg-gradient-to-b from-[#1D2DC7] via-[#1525C0] to-[#0D1DB9]"
-      style={{ minHeight: "140vh" }}
+      style={{ minHeight: "140vh", position: "relative" }}
       data-testid="section-humor"
     >
       <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden bg-[#1525C0]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center text-[22px]">
           <div className="flex flex-col items-center justify-center gap-10 sm:gap-14 md:gap-16 lg:gap-20 text-[#fafafa]">
             <motion.p
-              style={{ opacity: line1Opacity }}
-              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light tracking-wide text-[#fafafa]"
+              style={{ opacity: line1Opacity, fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
+              className="font-light tracking-wide text-white/90"
               data-testid="humor-line-1"
             >
               {humorLines[0].text}
             </motion.p>
             
             <motion.p
-              style={{ opacity: line2Opacity }}
-              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white/70 font-light tracking-wide"
+              style={{ opacity: line2Opacity, fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
+              className="text-white/90 font-light tracking-wide"
               data-testid="humor-line-2"
             >
               {humorLines[1].text}
             </motion.p>
             
             <motion.p
-              style={{ opacity: line3Opacity }}
-              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light tracking-wide text-[#fafafa]"
+              style={{ opacity: line3Opacity, fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
+              className="font-light tracking-wide text-white/90"
               data-testid="humor-line-3"
             >
               {humorLines[2].text}
             </motion.p>
             
             <motion.p
-              style={{ opacity: line4Opacity }}
-              className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white font-light tracking-wide"
+              style={{ opacity: line4Opacity, fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
+              className="text-white font-light tracking-wide"
               data-testid="humor-line-4"
             >
               {humorLines[3].text}
@@ -212,10 +212,15 @@ export default function CinematicLanding() {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [gifLoaded, setGifLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const userInteracted = useRef(false);
+
+  const handleGifLoad = useCallback(() => {
+    setGifLoaded(true);
+  }, []);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -279,6 +284,14 @@ export default function CinematicLanding() {
   return (
     <div className="min-h-screen bg-[#4D5FF1] text-white">
       <CustomCursor />
+      
+      {/* Skip to main content link for accessibility */}
+      <a 
+        href="#problem-solution" 
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[200] focus:px-4 focus:py-2 focus:bg-white focus:text-[#4D5FF1] focus:rounded-md focus:font-medium"
+      >
+        Skip to main content
+      </a>
       {/* Fixed Header - Always visible */}
       <header className="fixed top-0 left-0 right-0 z-50 px-6 py-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -296,15 +309,20 @@ export default function CinematicLanding() {
           <button
             onClick={() => setMenuOpen(true)}
             className="lg:hidden text-white/80 hover:text-white transition-colors text-sm uppercase tracking-[0.2em] font-medium flex items-center gap-2"
+            aria-label="Open navigation menu"
+            aria-expanded={menuOpen}
             data-testid="button-menu-open"
           >
-            <Menu className="w-5 h-5" />
-            Menu
+            <Menu className="w-5 h-5" aria-hidden="true" />
+            <span>Menu</span>
           </button>
         </div>
       </header>
       {/* Vertical Right Sidebar Navigation - Desktop Only */}
-      <nav className="hidden lg:flex fixed right-6 top-6 bottom-6 z-50 flex-col items-center justify-between py-4">
+      <nav 
+        className="hidden lg:flex fixed right-6 top-6 bottom-6 z-50 flex-col items-center justify-between py-4"
+        aria-label="Page sections"
+      >
         {/* Nav Links */}
         <div className="flex flex-col items-center gap-10">
           {navItems.map((item) => (
@@ -370,7 +388,7 @@ export default function CinematicLanding() {
         <div className="absolute inset-0 bg-[#4D5FF1]" />
 
         {/* Hero Content - Two Column Layout */}
-        <div className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16 bg-[#4444ff]">
+        <div className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16">
           <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left: Large Text */}
             <motion.div
@@ -380,8 +398,12 @@ export default function CinematicLanding() {
               className="text-left"
             >
               <h1 
-                className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-serif font-bold text-white leading-[0.95] uppercase"
-                style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.06em" }}
+                className="font-serif font-bold text-white leading-[0.95] uppercase"
+                style={{ 
+                  fontFamily: "'DM Serif Display', serif", 
+                  letterSpacing: "0.06em",
+                  fontSize: "clamp(3rem, 8vw, 9rem)"
+                }}
                 data-testid="text-headline"
                 data-cursor-invert
               >
@@ -389,8 +411,11 @@ export default function CinematicLanding() {
                 WHAT'S<br />
                 MISSING
               </h1>
-              <p className="mt-8 text-base sm:text-lg md:text-xl font-sans text-[#fafafa] whitespace-nowrap">
-                Launch Better Innovation through in-house data, design and testing.
+              <p 
+                className="mt-8 font-sans text-white/90"
+                style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
+              >
+                Launch Better Innovation through in-house data, design & testing.
               </p>
             </motion.div>
             
@@ -401,11 +426,16 @@ export default function CinematicLanding() {
               transition={{ duration: 1, delay: 0.5 }}
               className="flex justify-center lg:justify-end"
             >
-              <div className="w-72 h-56 sm:w-88 sm:h-68 md:w-[420px] md:h-[320px] lg:w-[460px] lg:h-[350px] overflow-hidden rounded-lg -mt-16 sm:-mt-20 md:-mt-24 lg:-mt-28">
+              <div className="w-72 h-56 sm:w-88 sm:h-68 md:w-[420px] md:h-[320px] lg:w-[460px] lg:h-[350px] overflow-hidden rounded-lg -mt-16 sm:-mt-20 md:-mt-24 lg:-mt-28 relative">
+                {!gifLoaded && (
+                  <div className="absolute inset-0 bg-white/10 animate-pulse rounded-lg" />
+                )}
                 <img
                   src={consultBackgroundGif}
-                  alt="Animated fish background"
-                  className="w-[115%] h-[140%] object-cover -translate-x-[5%] -translate-y-[15%]"
+                  alt="Animated underwater fish illustration"
+                  className={`w-[115%] h-[140%] object-cover -translate-x-[5%] -translate-y-[15%] transition-opacity duration-500 ${gifLoaded ? 'opacity-100' : 'opacity-0'}`}
+                  onLoad={handleGifLoad}
+                  loading="eager"
                   data-testid="img-consult-background"
                 />
               </div>
@@ -446,17 +476,27 @@ export default function CinematicLanding() {
           {/* Header */}
           <div className="mb-20 sm:mb-24">
             <h2 
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-serif font-bold text-white mb-6 italic"
-              style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.08em" }}
+              className="font-serif font-bold text-white mb-6"
+              style={{ 
+                fontFamily: "'DM Serif Display', serif", 
+                letterSpacing: "0.06em",
+                fontSize: "clamp(2.5rem, 7vw, 6rem)"
+              }}
               data-cursor-invert
               data-testid="text-what-we-do-heading"
             >
               WHAT WE DO
             </h2>
-            <p className="text-lg sm:text-xl mb-4 text-[#ffffff]">
-              Many paths. One goal: systematic innovation
+            <p 
+              className="mb-4 text-white/90"
+              style={{ fontSize: "clamp(1.125rem, 2vw, 1.25rem)" }}
+            >
+              Many paths. One goal: systematic innovation.
             </p>
-            <p className="text-base sm:text-lg max-w-2xl text-[#ffffff]">
+            <p 
+              className="max-w-2xl text-white/90 leading-relaxed"
+              style={{ fontSize: "clamp(1rem, 1.5vw, 1.125rem)" }}
+            >
               Strategy, innovation, execution — designed to work together, or independently.
             </p>
           </div>
@@ -473,10 +513,16 @@ export default function CinematicLanding() {
                 className="group"
                 data-testid={`card-what-we-do-${index}`}
               >
-                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-6 leading-tight whitespace-pre-line tracking-tight">
+                <h3 
+                  className="font-bold text-white mb-6 leading-tight whitespace-pre-line"
+                  style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)" }}
+                >
                   {card.title}
                 </h3>
-                <p className="text-sm sm:text-base leading-relaxed mb-6 text-[#ffffff]">
+                <p 
+                  className="leading-relaxed mb-6 text-white/95"
+                  style={{ fontSize: "clamp(0.875rem, 1.2vw, 1rem)" }}
+                >
                   {card.description}
                 </p>
                 <a 
@@ -498,15 +544,22 @@ export default function CinematicLanding() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
             <div className="text-center mb-16">
               <h2 
-                className="sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white text-[95px]"
-                style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.08em" }}
+                className="font-serif font-semibold text-white"
+                style={{ 
+                  fontFamily: "'DM Serif Display', serif", 
+                  letterSpacing: "0.06em",
+                  fontSize: "clamp(2.5rem, 7vw, 6rem)"
+                }}
                 data-cursor-invert
               >
                 Results
               </h2>
-              <p className="text-lg sm:text-xl mt-6 max-w-2xl mx-auto text-[#fafafa]">
+              <p 
+                className="mt-6 max-w-2xl mx-auto text-white/95 leading-relaxed"
+                style={{ fontSize: "clamp(1rem, 1.8vw, 1.25rem)" }}
+              >
                 A showcase of impact across markets, categories & stages of growth.
-                <br />
+                <br className="hidden sm:block" />
                 A curated selection of work across focus, play, win & performance tracking.
               </p>
             </div>
@@ -530,10 +583,11 @@ export default function CinematicLanding() {
                     <div className="relative aspect-[3/4] overflow-hidden">
                       <motion.img
                         src={study.image}
-                        alt={study.title}
+                        alt={`${study.title} - ${study.tagline}`}
                         className="absolute inset-0 w-full h-full object-cover"
                         whileHover={{ scale: 1.08 }}
                         transition={{ duration: 0.6, ease: "easeOut" }}
+                        loading="lazy"
                       />
                       <div 
                         className="absolute inset-0 opacity-40 group-hover:opacity-20 transition-opacity duration-500"
@@ -541,7 +595,7 @@ export default function CinematicLanding() {
                           background: `linear-gradient(180deg, transparent 30%, ${pillarColor}40 100%)`
                         }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#4D5FF1] via-[#4D5FF1]/60 to-transparent opacity-80" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#1D2DC7] via-[#2535CE]/60 to-transparent opacity-80" />
                       
                       <div className="absolute bottom-0 left-0 right-0 p-5">
                         <span 
@@ -592,15 +646,23 @@ export default function CinematicLanding() {
               </p>
               
               <h2 
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white mb-8 leading-tight"
-                style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.06em" }}
+                className="font-serif font-semibold text-white mb-8 leading-tight"
+                style={{ 
+                  fontFamily: "'DM Serif Display', serif", 
+                  letterSpacing: "0.06em",
+                  fontSize: "clamp(2rem, 6vw, 5rem)"
+                }}
                 data-cursor-invert
                 data-testid="text-contact-heading"
               >
                 Ready when you are.
               </h2>
               
-              <p className="text-lg sm:text-xl max-w-xl mx-auto leading-relaxed text-[#ffffff]" data-testid="text-contact-intro">
+              <p 
+                className="max-w-xl mx-auto leading-relaxed text-white/95" 
+                style={{ fontSize: "clamp(1.125rem, 2vw, 1.25rem)" }}
+                data-testid="text-contact-intro"
+              >
                 High stakes decisions deserve a thought partner.
               </p>
             </motion.div>
@@ -615,7 +677,8 @@ export default function CinematicLanding() {
               whileInView={{ x: 0, opacity: 1 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              className="relative flex-shrink-0 group cursor-pointer"
+              className="relative flex-shrink-0 group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-[#0D1DB9] rounded-full"
+              aria-label="Send email to discuss your project"
               data-testid="button-email-ball"
             >
               <div 
@@ -663,7 +726,8 @@ export default function CinematicLanding() {
               
               <div className="text-white">
                 <p 
-                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light tracking-wide"
+                  className="font-light tracking-wide"
+                  style={{ fontSize: "clamp(1.5rem, 4vw, 3rem)" }}
                   data-testid="text-click-over-here"
                 >
                   Click over here
@@ -691,14 +755,15 @@ export default function CinematicLanding() {
                 </span>
                 <button
                   onClick={() => setMenuOpen(false)}
-                  className="text-white/80 hover:text-white transition-colors"
+                  className="text-white/80 hover:text-white transition-colors p-2 -m-2"
+                  aria-label="Close navigation menu"
                   data-testid="button-menu-close"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="w-6 h-6" aria-hidden="true" />
                 </button>
               </div>
 
-              <nav className="flex-1 flex flex-col items-center justify-center gap-6">
+              <nav className="flex-1 flex flex-col items-center justify-center gap-6" aria-label="Main navigation">
                 {menuItems.map((item, index) => (
                   <motion.div
                     key={item.label}

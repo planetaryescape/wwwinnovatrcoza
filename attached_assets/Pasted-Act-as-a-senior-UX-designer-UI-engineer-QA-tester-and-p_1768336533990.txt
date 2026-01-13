@@ -1,0 +1,61 @@
+Act as a senior UX designer, UI engineer, QA tester, and performance/accessibility specialist.
+
+Context
+- Project: Innovatr / Consult + main site
+- Aesthetic: premium, modern, restrained, dark theme, high typographic confidence (Granny & Smith-inspired)
+- Priorities: clarity in <5 seconds, low clutter, strong hierarchy, smooth interactions (no gimmicks)
+
+Your mission
+1) VISUAL DESIGN PASS (UX/UI)
+- Audit every key section (hero, navigation, lifecycle/4 phases, results/case studies, track record, contact/footer).
+- Identify the top 10 visual/UX issues hurting clarity, trust, or conversion.
+- Improve layout, spacing, typography scale, alignment, contrast, and rhythm.
+- Make typography fluid and responsive using clamp() so it looks elite on mobile/tablet/desktop.
+- Ensure all text on dark backgrounds passes contrast and remains readable.
+- Reduce cognitive load: simplify copy blocks, tighten line lengths, increase whitespace.
+- Keep interactions subtle: hover/scroll reveals only if they add clarity.
+
+2) ERROR CHECK + RELIABILITY
+- Run through the site and fix console errors/warnings.
+- Check for broken links, missing assets, incorrect imports, and layout shift.
+- Verify the video/hero background behaviour:
+  - Works on Chrome/Safari/iOS (muted, playsInline, autoplay/loop behaviour)
+  - Has a graceful fallback (gradient/image) if it cannot play
+  - Respects prefers-reduced-motion
+  - No hot reload false positives in dev mode
+- Add lightweight error logging only if necessary, and remove/disable logs for production.
+
+3) RESPONSIVE + CROSS-DEVICE QA
+- Test at common breakpoints: 360, 390, 414, 768, 1024, 1280, 1440, 1728, 1920.
+- Check: nav usability, tap targets, spacing, overflow, alignment, typography scale, scroll behaviour.
+- Ensure no horizontal scrolling bugs.
+- Verify the right-side vertical menu (if present) doesn’t overlap content on small screens.
+
+4) PERFORMANCE + BEST PRACTICES
+- Optimise images/video loading (proper formats, sizing, preload only when needed).
+- Avoid heavy animations; prefer CSS transforms over layout-triggering animations.
+- Ensure clean semantic HTML, accessible labels, focus states, keyboard navigation.
+- Use lazy loading appropriately.
+- Prevent CLS (cumulative layout shift) by setting media dimensions.
+
+Deliverables (do not skip)
+A) A short “Audit Summary” (what was wrong + what you changed)
+B) A “Before vs After” list of the biggest improvements
+C) The actual code changes:
+   - Implement changes directly in the codebase (components + styles)
+   - Keep styling consistent (prefer existing system; if none, create a small, tidy design token section)
+D) A checklist of what you tested and the result (Pass/Fail) across breakpoints and browsers
+E) If you add new CSS utilities (clamp typography, spacing scale), document them briefly in comments.
+
+Constraints
+- Keep the site premium and minimal — no new gimmicks.
+- Don’t introduce new heavy libraries unless absolutely necessary.
+- Use “&” instead of “and” in headings where it improves scanability.
+- Favour short, confident copy and strong hierarchy.
+- Make changes in small, clean commits/steps so it’s easy to review and rollback.
+
+Start now:
+1) Scan the codebase for layout + styling patterns
+2) Run a console + build check
+3) Make the highest-impact visual fixes first (hero/nav/first scroll sections)
+4) Then handle responsiveness, then performance/accessibility cleanup
