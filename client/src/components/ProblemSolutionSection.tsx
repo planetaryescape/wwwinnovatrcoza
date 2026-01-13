@@ -139,7 +139,9 @@ export default function ProblemSolutionSection() {
                 Innovatr Consult brings structure to complexity.
               </p>
               <p className="text-[#ffffff]">
-                We design a clear learning agenda, test the right questions at the right moments, and turn evidence into decisive action — across strategy, innovation & execution.
+                We align stakeholders, clarify options, and use real market evidence to show where to focus, how to play, and how to win, with confidence.
+                <br className="hidden sm:block" />
+                From strategy and innovation to execution and scale.
               </p>
               <p className="text-white/80 font-medium">
                 No noise. No guesswork. Just momentum.
