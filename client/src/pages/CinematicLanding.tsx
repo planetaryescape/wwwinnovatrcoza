@@ -564,7 +564,7 @@ export default function CinematicLanding() {
         <HumorSection />
 
         {/* Final CTA Section - Interactive Ball */}
-        <section id="consult-contact" className="relative min-h-screen bg-[#4D5FF1] flex flex-col justify-center overflow-hidden">
+        <section id="consult-contact" className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-[#4444ff]">
           {/* Section Header */}
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-16 sm:mb-20">
             <motion.div
