@@ -1,0 +1,90 @@
+You are a senior UX designer + front-end engineer working inside this Replit project. Update the Innovatr Consult landing page by adding a new cinematic scroll section that matches the attached reference style (black background, huge headline, small centred copy, lots of negative space). You must choose the best responsive sizing for every device (mobile, tablet, desktop, ultrawide) so nothing clips, wraps awkwardly, or feels too small. Prioritise premium typography, legibility, and smooth scroll behaviour.
+
+PRIMARY GOAL
+Insert a new “Problem / Solution” narrative section BEFORE the 4 lifecycle pillars content (before “Where to focus / How to play / How to win / What’s working”). This should feel like a bold, premium pause in the page: the user scrolls into “THE PROBLEM”, then continues scrolling and it transitions into “THE SOLUTION”.
+
+CONTENT (use EXACT copy below, preserve punctuation, British English, and line breaks)
+Headline 1:
+THE PROBLEM
+
+Body:
+Big decisions don’t fail because of a lack of ideas.
+They fail because there are too many routes, too many opinions, and no clear way forward.
+
+Teams get stuck debating direction, testing in silos, or moving too slowly while the market keeps shifting.
+
+Headline 2:
+THE SOLUTION
+
+Body:
+Innovatr Consult brings structure to complexity.
+
+We design a clear learning agenda, test the right questions at the right moments, and turn evidence into decisive action — across strategy, innovation & execution.
+
+No noise. No guesswork. Just momentum.
+
+DESIGN DIRECTION (match reference, but in Innovatr’s style)
+1) Background
+- Solid black or near-black with a subtle premium vignette/gradient consistent with the site (no busy graphics, no images).
+- Keep strong negative space.
+
+2) Typography
+- Keep Innovatr typography rules:
+  - Use DM Serif Display for the big headings.
+  - Use Roboto for body copy.
+- Headline must feel “massive + bold + condensed-ish” like the reference. If DM Serif isn’t naturally condensed, achieve the feel via letter spacing (tighter tracking), weight feel (visual emphasis), and sizing choices.
+- Body copy should be smaller, centred, and slightly softer (white/grey at reduced opacity).
+
+3) Responsiveness (YOU choose best values)
+- You must choose the best headline/body sizes per breakpoint so:
+  - Headlines are dramatic but never clip offscreen.
+  - Words wrap elegantly on small devices.
+  - The section still feels cinematic on large screens.
+- Use fluid sizing where helpful (clamp) and adjust spacing/padding per device.
+- Ensure line-height and max-width make the body readable on every device.
+
+INTERACTION / SCROLL BEHAVIOUR (cinematic)
+- The section should be tall enough to create a story moment (e.g., ~200–240vh), but you decide the best height.
+- “THE PROBLEM” is centred vertically in the viewport when the section begins.
+- As the user scrolls down, “THE PROBLEM” subtly fades and/or drifts out (small Y movement), and “THE SOLUTION” fades/drifts in to replace it.
+- Keep it smooth and premium. No jarring jumps. No layout shift. No horizontal scroll.
+- Respect prefers-reduced-motion:
+  - If enabled, remove animations and show the content as a simple stacked section with generous spacing.
+
+IMPLEMENTATION REQUIREMENTS
+- Create a new React component: ProblemSolutionSection (or similar).
+- Insert it on the Consult page BEFORE the 4 lifecycle pillars.
+- Use semantic HTML:
+  - <section>, <h2>, <p>
+- Add an anchor id so it can be linked: id="problem-solution"
+
+NAV / PAGE INTEGRATION
+- Do not break the existing right-side vertical navigation.
+- If your vertical nav supports anchors/sections, add a new nav item that fits the style:
+  - Use one of these labels (choose the best fit):
+    - “problem & solution”
+    - “problem/solution”
+    - “the problem”
+- Keep existing labels, ordering, and behaviours consistent.
+
+TECHNICAL APPROACH (choose simplest that works best in this codebase)
+- Prefer a clean sticky scroll technique:
+  - Outer section: tall (your choice).
+  - Inner wrapper: sticky, 100vh, centred content.
+  - Two panels (Problem and Solution) layered and crossfaded based on scroll progress.
+- You may use IntersectionObserver, scroll progress tracking, or a lightweight motion utility. Avoid adding heavy dependencies unless already used.
+- Make sure performance is solid (no constant re-renders, use requestAnimationFrame if tracking scroll).
+
+QUALITY CHECKS (must do)
+- Test in preview and ensure:
+  - Mobile Safari and mobile Chrome show correct sizing and spacing.
+  - Desktop works at common widths and ultrawide.
+  - Headline never clips (top/bottom or sides).
+  - Body copy remains readable.
+  - Transition feels smooth.
+  - Next section (4 pillars) starts immediately after “THE SOLUTION” scroll completes.
+- Remove any debug logs.
+- Do not change any other page copy, layout, or components unless absolutely necessary to place this section cleanly.
+
+DELIVERABLE
+Implement the Problem/Solution scroll section, verify visually across device sizes, and keep the rest of the page unchanged.

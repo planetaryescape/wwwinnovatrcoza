@@ -6,6 +6,7 @@ import { SiLinkedin, SiInstagram } from "react-icons/si";
 import { Link, useLocation } from "wouter";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import CustomCursor from "@/components/CustomCursor";
+import ProblemSolutionSection from "@/components/ProblemSolutionSection";
 
 import trendsForesightImg from "@assets/generated_images/trends_and_foresight_3d_abstract.png";
 import demandSpaceImg from "@assets/generated_images/demand_space_mapping_3d_network.png";
@@ -276,6 +277,7 @@ export default function CinematicLanding() {
 
   const navItems = [
     { label: "Track Record", action: () => scrollToSection("why-consult") },
+    { label: "The Problem", action: () => scrollToSection("problem-solution") },
     { label: "Lifecycle", action: () => scrollToSection("lifecycle") },
     { label: "Results", action: () => scrollToSection("case-studies") },
     { label: "Contact", action: () => scrollToSection("consult-contact") },
@@ -283,6 +285,7 @@ export default function CinematicLanding() {
 
   const menuItems = [
     { label: "Track Record", action: () => scrollToSection("why-consult") },
+    { label: "The Problem", action: () => scrollToSection("problem-solution") },
     { label: "Lifecycle", action: () => scrollToSection("lifecycle") },
     { label: "Results", action: () => scrollToSection("case-studies") },
     { label: "Contact", action: () => scrollToSection("consult-contact") },
@@ -532,6 +535,9 @@ export default function CinematicLanding() {
           </div>
         </div>
       </section>
+
+      {/* Problem / Solution Cinematic Section */}
+      <ProblemSolutionSection />
 
       {/* Lifecycle Content Section */}
       <div ref={contentRef}>
