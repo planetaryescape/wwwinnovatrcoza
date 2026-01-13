@@ -439,7 +439,7 @@ export default function CinematicLanding() {
             >
               WHAT WE DO
             </h2>
-            <p className="text-lg sm:text-xl text-white/60 mb-4">
+            <p className="text-lg sm:text-xl mb-4 text-[#ffffff]">
               Many paths. One goal: systematic innovation
             </p>
             <p className="text-base sm:text-lg max-w-2xl text-[#ffffff]">
