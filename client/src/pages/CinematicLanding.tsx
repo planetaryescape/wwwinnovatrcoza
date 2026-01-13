@@ -217,12 +217,6 @@ export default function CinematicLanding() {
   const contentRef = useRef<HTMLDivElement>(null);
   const userInteracted = useRef(false);
 
-  // Scroll-based logo animation
-  const { scrollY } = useScroll();
-  const logoScale = useTransform(scrollY, [0, 300], [3, 1]);
-  const logoY = useTransform(scrollY, [0, 300], [120, 0]);
-  const logoX = useTransform(scrollY, [0, 300], [100, 0]);
-
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     setReducedMotion(mediaQuery.matches);
@@ -289,17 +283,12 @@ export default function CinematicLanding() {
       <header className="fixed top-0 left-0 right-0 z-50 px-6 py-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link href="/home">
-            <motion.span 
-              className="text-2xl font-serif font-bold text-white cursor-pointer hover:text-white/80 transition-colors inline-block origin-left"
-              style={{ 
-                scale: logoScale,
-                y: logoY,
-                x: logoX
-              }}
+            <span 
+              className="text-2xl font-serif font-bold text-white cursor-pointer hover:text-white/80 transition-colors"
               data-testid="link-logo-landing"
             >
               Innovatr
-            </motion.span>
+            </span>
           </Link>
 
 
