@@ -105,7 +105,7 @@ export default function CustomCursor() {
           style={{
             width: size * 0.3,
             height: size * 0.3,
-            backgroundColor: '#4D5FF1',
+            backgroundColor: '#5A5EFF',
           }}
         />
       </div>

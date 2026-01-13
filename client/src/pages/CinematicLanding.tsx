@@ -22,7 +22,7 @@ const pillars = [
     title: "Where to focus",
     tagline: "Understand and anticipate the market before you place your bets.",
     icon: Target,
-    color: "#4D5FF1",
+    color: "#5A5EFF",
     bullets: [
       "Trends and foresight",
       "Need states",
@@ -161,11 +161,11 @@ function HumorSection() {
   return (
     <section 
       ref={sectionRef}
-      className="relative bg-gradient-to-b from-[#1D2DC7] via-[#1525C0] to-[#0D1DB9]"
+      className="relative bg-gradient-to-b from-[#1D2DC8] via-[#1520B0] to-[#0D1598]"
       style={{ minHeight: "140vh", position: "relative" }}
       data-testid="section-humor"
     >
-      <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden bg-[#1525C0]">
+      <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden bg-[#1520B0]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center text-[22px]">
           <div className="flex flex-col items-center justify-center gap-10 sm:gap-14 md:gap-16 lg:gap-20 text-[#fafafa]">
             <motion.p
@@ -282,13 +282,13 @@ export default function CinematicLanding() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#4D5FF1] text-white">
+    <div className="min-h-screen bg-[#5A5EFF] text-white">
       <CustomCursor />
       
       {/* Skip to main content link for accessibility */}
       <a 
         href="#problem-solution" 
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[200] focus:px-4 focus:py-2 focus:bg-white focus:text-[#4D5FF1] focus:rounded-md focus:font-medium"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[200] focus:px-4 focus:py-2 focus:bg-white focus:text-[#5A5EFF] focus:rounded-md focus:font-medium"
       >
         Skip to main content
       </a>
@@ -382,10 +382,10 @@ export default function CinematicLanding() {
       {/* Hero Section */}
       <section 
         ref={heroRef}
-        className="relative min-h-screen bg-[#4D5FF1]"
+        className="relative min-h-screen bg-[#5A5EFF]"
       >
         {/* Solid Blue Background */}
-        <div className="absolute inset-0 bg-[#4D5FF1]" />
+        <div className="absolute inset-0 bg-[#5A5EFF]" />
 
         {/* Hero Content - Two Column Layout */}
         <div className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16">
@@ -471,7 +471,7 @@ export default function CinematicLanding() {
       {/* Problem / Solution Cinematic Section */}
       <ProblemSolutionSection />
       {/* What We Do Section */}
-      <section id="why-consult" className="py-24 sm:py-32 bg-gradient-to-b from-[#3D4DE3] via-[#3545DC] to-[#2D3DD5]">
+      <section id="why-consult" className="py-24 sm:py-32 bg-gradient-to-b from-[#3D4DE8] via-[#2D3DD8] to-[#1D2DC8]">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           {/* Header */}
           <div className="mb-20 sm:mb-24">
@@ -540,7 +540,7 @@ export default function CinematicLanding() {
       {/* Content Sections */}
       <div ref={contentRef}>
         {/* Case Studies Section */}
-        <section id="case-studies" className="py-24 bg-gradient-to-b from-[#2D3DD5] via-[#2535CE] to-[#1D2DC7]">
+        <section id="case-studies" className="py-24 bg-gradient-to-b from-[#1D2DC8] via-[#1520B0] to-[#0D1598]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
             <div className="text-center mb-16">
               <h2 
@@ -566,7 +566,7 @@ export default function CinematicLanding() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {caseStudies.map((study, index) => {
-                const pillarColor = pillars.find(p => p.title === study.pillar)?.color || "#4D5FF1";
+                const pillarColor = pillars.find(p => p.title === study.pillar)?.color || "#5A5EFF";
                 return (
                   <motion.div
                     key={study.id}
@@ -595,7 +595,7 @@ export default function CinematicLanding() {
                           background: `linear-gradient(180deg, transparent 30%, ${pillarColor}40 100%)`
                         }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#1D2DC7] via-[#2535CE]/60 to-transparent opacity-80" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0D1598] via-[#1520B0]/60 to-transparent opacity-80" />
                       
                       <div className="absolute bottom-0 left-0 right-0 p-5">
                         <span 
@@ -632,7 +632,7 @@ export default function CinematicLanding() {
         <HumorSection />
 
         {/* Final CTA Section - Interactive Ball */}
-        <section id="consult-contact" className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-gradient-to-b from-[#0D1DB9] via-[#0515B2] to-[#000DAB]">
+        <section id="consult-contact" className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-gradient-to-b from-[#0D1598] via-[#080E80] to-[#030868]">
           {/* Section Header */}
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-16 sm:mb-20">
             <motion.div
@@ -677,14 +677,14 @@ export default function CinematicLanding() {
               whileInView={{ x: 0, opacity: 1 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              className="relative flex-shrink-0 group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-[#0D1DB9] rounded-full"
+              className="relative flex-shrink-0 group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-[#080E80] rounded-full"
               aria-label="Send email to discuss your project"
               data-testid="button-email-ball"
             >
               <div 
                 className="w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] md:w-[380px] md:h-[380px] lg:w-[420px] lg:h-[420px] rounded-full bg-white -ml-[100px] sm:-ml-[80px] md:-ml-[60px] lg:-ml-[40px] transition-transform duration-500 group-hover:scale-105 flex items-center justify-center"
               >
-                <span className="text-[#4D5FF1] text-lg sm:text-xl md:text-2xl font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 pl-[80px] sm:pl-[60px] md:pl-[40px] lg:pl-[20px]">
+                <span className="text-[#5A5EFF] text-lg sm:text-xl md:text-2xl font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 pl-[80px] sm:pl-[60px] md:pl-[40px] lg:pl-[20px]">
                   Let's talk
                 </span>
               </div>
@@ -745,7 +745,7 @@ export default function CinematicLanding() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[100] bg-[#4D5FF1]/95 backdrop-blur-xl"
+            className="fixed inset-0 z-[100] bg-[#5A5EFF]/95 backdrop-blur-xl"
             data-testid="menu-overlay"
           >
             <div className="h-full flex flex-col">

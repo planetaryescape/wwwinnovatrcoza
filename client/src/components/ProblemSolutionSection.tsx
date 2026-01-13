@@ -4,7 +4,7 @@ export default function ProblemSolutionSection() {
   return (
     <section 
       id="problem-solution" 
-      className="py-24 md:py-32 lg:py-40 bg-gradient-to-b from-[#4D5FF1] via-[#4555EA] to-[#3D4DE3]"
+      className="py-24 md:py-32 lg:py-40 bg-gradient-to-b from-[#5A5EFF] via-[#4D55F5] to-[#3D4DE8]"
       aria-labelledby="problem-heading"
     >
       <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
