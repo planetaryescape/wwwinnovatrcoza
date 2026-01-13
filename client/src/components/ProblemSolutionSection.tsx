@@ -4,7 +4,7 @@ export default function ProblemSolutionSection() {
   return (
     <section 
       id="problem-solution" 
-      className="py-24 md:py-32 lg:py-40 bg-[#4444ff]"
+      className="py-24 md:py-32 lg:py-40 bg-gradient-to-b from-[#4D5FF1] to-[#4050E0]"
     >
       <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
         {/* THE PROBLEM */}

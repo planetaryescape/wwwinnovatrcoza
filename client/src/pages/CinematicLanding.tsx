@@ -161,11 +161,11 @@ function HumorSection() {
   return (
     <section 
       ref={sectionRef}
-      className="relative bg-[#4D5FF1]"
+      className="relative bg-gradient-to-b from-[#2A3AC0] to-[#2030B0]"
       style={{ minHeight: "140vh" }}
       data-testid="section-humor"
     >
-      <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden bg-[#4444ff]">
+      <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden bg-[#2535B8]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center text-[22px]">
           <div className="flex flex-col items-center justify-center gap-10 sm:gap-14 md:gap-16 lg:gap-20 text-[#fafafa]">
             <motion.p
@@ -427,7 +427,7 @@ export default function CinematicLanding() {
       {/* Problem / Solution Cinematic Section */}
       <ProblemSolutionSection />
       {/* What We Do Section */}
-      <section id="why-consult" className="py-24 sm:py-32 bg-[#4444ff]">
+      <section id="why-consult" className="py-24 sm:py-32 bg-gradient-to-b from-[#4050E0] to-[#3545D0]">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           {/* Header */}
           <div className="mb-20 sm:mb-24">
@@ -480,7 +480,7 @@ export default function CinematicLanding() {
       {/* Content Sections */}
       <div ref={contentRef}>
         {/* Case Studies Section */}
-        <section id="case-studies" className="py-24 bg-[#4444ff]">
+        <section id="case-studies" className="py-24 bg-gradient-to-b from-[#3545D0] to-[#2A3AC0]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
             <div className="text-center mb-16">
               <h2 
@@ -564,7 +564,7 @@ export default function CinematicLanding() {
         <HumorSection />
 
         {/* Final CTA Section - Interactive Ball */}
-        <section id="consult-contact" className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-[#4444ff]">
+        <section id="consult-contact" className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-gradient-to-b from-[#2030B0] to-[#1825A0]">
           {/* Section Header */}
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-16 sm:mb-20">
             <motion.div
