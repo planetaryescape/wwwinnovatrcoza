@@ -658,7 +658,7 @@ export default function CinematicLanding() {
                 <img 
                   src={airplanesGif}
                   alt="Animated airplanes illustration"
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover"
                 />
               </div>
             </motion.div>
