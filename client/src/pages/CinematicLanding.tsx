@@ -573,7 +573,7 @@ export default function CinematicLanding() {
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
             >
-              <p className="text-sm uppercase tracking-[0.3em] text-white/40 mb-8" data-testid="text-contact-subheading">
+              <p className="text-sm uppercase tracking-[0.3em] mb-8 text-[#ffffff]" data-testid="text-contact-subheading">
                 Let's talk
               </p>
               
