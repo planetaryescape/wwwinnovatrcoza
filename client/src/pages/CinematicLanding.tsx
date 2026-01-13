@@ -6,6 +6,7 @@ import { Link, useLocation } from "wouter";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import CustomCursor from "@/components/CustomCursor";
 import ProblemSolutionSection from "@/components/ProblemSolutionSection";
+import ToolsSection from "@/components/ToolsSection";
 
 import trendsForesightImg from "@assets/generated_images/trends_and_foresight_3d_abstract.png";
 import demandSpaceImg from "@assets/generated_images/demand_space_mapping_3d_network.png";
@@ -271,18 +272,11 @@ export default function CinematicLanding() {
     element?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const navItems = [
-    { label: "The Problem", action: () => scrollToSection("problem-solution") },
-    { label: "The Process", action: () => scrollToSection("why-consult") },
-    { label: "The Results", action: () => scrollToSection("case-studies") },
-    { label: "Contact Us", action: () => scrollToSection("consult-contact") },
-  ];
-
   const menuItems = [
     { label: "The Problem", action: () => scrollToSection("problem-solution") },
     { label: "The Process", action: () => scrollToSection("why-consult") },
+    { label: "The Tools", action: () => scrollToSection("consult-tools") },
     { label: "The Results", action: () => scrollToSection("case-studies") },
-    { label: "Contact Us", action: () => scrollToSection("consult-contact") },
   ];
 
   return (
@@ -328,7 +322,7 @@ export default function CinematicLanding() {
       >
         {/* Nav Links */}
         <div className="flex flex-col items-center gap-10">
-          {navItems.map((item) => (
+          {menuItems.map((item) => (
             <button
               key={item.label}
               onClick={item.action}
@@ -551,10 +545,14 @@ export default function CinematicLanding() {
           </div>
         </div>
       </section>
+      
+      {/* Tools Section */}
+      <ToolsSection />
+      
       {/* Content Sections */}
       <div ref={contentRef}>
         {/* Case Studies Section - Alternating Layout */}
-        <section id="case-studies" className="py-24 sm:py-32 bg-gradient-to-b from-[#1D2DC8] via-[#1520B0] to-[#0D1598]">
+        <section id="case-studies" className="py-24 sm:py-32 bg-gradient-to-b from-[#0D1598] via-[#1520B0] to-[#0D1598]">
           <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 lg:pr-20">
             {/* Section Header */}
             <div className="mb-20 sm:mb-28">
