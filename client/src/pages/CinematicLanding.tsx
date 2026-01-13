@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { X, Menu, ArrowRight, ArrowDown, Target, Lightbulb, Trophy, TrendingUp, Users, Layers, Mail } from "lucide-react";
+import { X, Menu, ArrowRight, Target, Lightbulb, Trophy, TrendingUp, Mail } from "lucide-react";
 import { SiLinkedin, SiInstagram } from "react-icons/si";
 import { Link, useLocation } from "wouter";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
@@ -212,19 +211,10 @@ export default function CinematicLanding() {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
-  const [activePillar, setActivePillar] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
-  const lifecycleRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const userInteracted = useRef(false);
-
-  const { scrollYProgress: lifecycleScrollProgress } = useScroll({
-    target: lifecycleRef,
-    offset: ["start start", "end end"]
-  });
-
-  const pillarProgress = useTransform(lifecycleScrollProgress, [0, 0.85], [0, 3.99]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -262,13 +252,6 @@ export default function CinematicLanding() {
     };
   }, [videoError]);
 
-  useEffect(() => {
-    return pillarProgress.on("change", (latest) => {
-      const index = Math.min(Math.floor(latest), 3);
-      setActivePillar(index);
-    });
-  }, [pillarProgress]);
-
   const scrollToContent = () => {
     contentRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -279,15 +262,15 @@ export default function CinematicLanding() {
   };
 
   const navItems = [
+    { label: "The Problem", action: () => scrollToSection("problem-solution") },
     { label: "What We Do", action: () => scrollToSection("why-consult") },
-    { label: "Lifecycle", action: () => scrollToSection("lifecycle") },
     { label: "Results", action: () => scrollToSection("case-studies") },
     { label: "Contact", action: () => scrollToSection("consult-contact") },
   ];
 
   const menuItems = [
+    { label: "The Problem", action: () => scrollToSection("problem-solution") },
     { label: "What We Do", action: () => scrollToSection("why-consult") },
-    { label: "Lifecycle", action: () => scrollToSection("lifecycle") },
     { label: "Results", action: () => scrollToSection("case-studies") },
     { label: "Contact", action: () => scrollToSection("consult-contact") },
   ];
@@ -498,179 +481,8 @@ export default function CinematicLanding() {
           </div>
         </div>
       </section>
-      {/* Lifecycle Content Section */}
+      {/* Content Sections */}
       <div ref={contentRef}>
-        {/* The Lifecycle - Pillar Section */}
-        <section 
-          ref={lifecycleRef} 
-          className="relative hidden lg:block"
-          style={{ minHeight: "calc(100vh * 5.5)" }}
-          id="lifecycle"
-        >
-          <div className="sticky top-0 h-screen flex items-center overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] to-[#0d0d18]" />
-            
-            {/* Progress indicator */}
-            <div className="absolute left-8 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-4 z-20">
-              {pillars.map((pillar, index) => (
-                <button
-                  key={pillar.id}
-                  onClick={() => {
-                    const element = document.getElementById(`pillar-${pillar.id}`);
-                    element?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    activePillar === index 
-                      ? "w-8 bg-white" 
-                      : "bg-gray-600 hover:bg-gray-400"
-                  }`}
-                  data-testid={`progress-${pillar.id}`}
-                />
-              ))}
-            </div>
-            
-            <div className="relative z-10 w-full">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activePillar}
-                  initial={{ opacity: 0, x: 50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -50 }}
-                  transition={{ duration: 0.5 }}
-                  className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 lg:pl-24"
-                >
-                  <div className="grid lg:grid-cols-2 gap-12 items-center">
-                    <div>
-                      <p className="text-sm uppercase tracking-[0.3em] mb-2 text-[#fafafa]">
-                        The Lifecycle
-                      </p>
-                      <p 
-                        className="text-6xl font-bold mb-4 opacity-20"
-                        style={{ color: pillars[activePillar].color }}
-                      >
-                        {pillars[activePillar].number}
-                      </p>
-                      <h2 
-                        className="text-4xl sm:text-5xl font-serif font-bold mb-6"
-                        style={{ color: pillars[activePillar].color }}
-                      >
-                        {pillars[activePillar].title}
-                      </h2>
-                      <p className="text-xl text-gray-300 mb-8">
-                        {pillars[activePillar].tagline}
-                      </p>
-                      <ul className="space-y-3 mb-8">
-                        {pillars[activePillar].bullets.map((bullet, idx) => (
-                          <li key={idx} className="flex items-center gap-3 text-[#fafafa]">
-                            <div 
-                              className="w-1.5 h-1.5 rounded-full"
-                              style={{ backgroundColor: pillars[activePillar].color }}
-                            />
-                            {bullet}
-                          </li>
-                        ))}
-                      </ul>
-                      <Link href={`/consult/${pillars[activePillar].id}`}>
-                        <Button
-                          variant="ghost"
-                          className="text-white hover:bg-white/5 p-0 group"
-                          data-testid={`link-explore-${pillars[activePillar].id}`}
-                        >
-                          Explore {pillars[activePillar].title}
-                          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                        </Button>
-                      </Link>
-                    </div>
-                    
-                    <div className="hidden lg:flex justify-center">
-                      <div 
-                        className="w-64 h-64 rounded-full opacity-30 blur-3xl"
-                        style={{ backgroundColor: pillars[activePillar].color }}
-                      />
-                    </div>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
-          
-          {/* Scroll anchors for each pillar - taller sections for smoother scrolling */}
-          {pillars.map((pillar, index) => (
-            <div 
-              key={pillar.id}
-              id={`pillar-${pillar.id}`}
-              style={{ 
-                height: "150vh",
-                marginTop: index === 0 ? "-100vh" : 0
-              }}
-            />
-          ))}
-        </section>
-
-        {/* Mobile Pillars (stacked cards) */}
-        <section className="lg:hidden py-16 sm:py-20 bg-[#0d0d18]">
-          <div className="max-w-lg sm:max-w-xl mx-auto px-6 sm:px-8">
-            <p className="text-sm uppercase tracking-[0.3em] text-gray-500 mb-8 text-center">
-              The Lifecycle
-            </p>
-            <div className="space-y-5">
-              {pillars.map((pillar) => {
-                const IconComponent = pillar.icon;
-                return (
-                  <Card 
-                    key={pillar.id}
-                    className="bg-[#12121a] border-gray-800 overflow-hidden"
-                  >
-                    <CardContent className="p-5 sm:p-6">
-                      <div className="text-center sm:text-left sm:flex sm:items-start sm:gap-4">
-                        <div 
-                          className="w-14 h-14 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center flex-shrink-0 mx-auto sm:mx-0 mb-4 sm:mb-0"
-                          style={{ backgroundColor: `${pillar.color}20` }}
-                        >
-                          <IconComponent style={{ color: pillar.color }} className="w-7 h-7 sm:w-6 sm:h-6" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm text-gray-500 mb-1">{pillar.number}</p>
-                          <h3 
-                            className="text-2xl font-serif font-bold mb-2"
-                            style={{ color: pillar.color }}
-                          >
-                            {pillar.title}
-                          </h3>
-                          <p className="text-gray-400 mb-4 text-sm sm:text-base">{pillar.tagline}</p>
-                          <ul className="space-y-2 mb-4 text-left inline-block">
-                            {pillar.bullets.map((bullet, idx) => (
-                              <li key={idx} className="flex items-center gap-2 text-sm text-gray-500">
-                                <div 
-                                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                                  style={{ backgroundColor: pillar.color }}
-                                />
-                                {bullet}
-                              </li>
-                            ))}
-                          </ul>
-                          <div className="mt-4">
-                            <Link href={`/consult/${pillar.id}`}>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-white hover:bg-white/5 p-0"
-                              >
-                                Explore
-                                <ArrowRight className="ml-1 h-3 w-3" />
-                              </Button>
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
         {/* Case Studies Section */}
         <section id="case-studies" className="py-24 bg-[#0a0a0f]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
