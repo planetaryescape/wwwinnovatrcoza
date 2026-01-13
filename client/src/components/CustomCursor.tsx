@@ -141,7 +141,7 @@ export default function CustomCursor() {
 
   return (
     <motion.div
-      className="fixed pointer-events-none z-[9999]"
+      className={`fixed pointer-events-none z-[9999] ${isOverHeading ? 'mix-blend-difference' : ''}`}
       animate={{
         x: position.x - offset,
         y: position.y - offset,
