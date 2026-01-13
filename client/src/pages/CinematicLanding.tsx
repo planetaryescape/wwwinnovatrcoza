@@ -300,7 +300,7 @@ export default function CinematicLanding() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link href="/home">
             <span 
-              className="text-3xl sm:text-4xl font-serif font-bold text-white tracking-wide cursor-pointer hover:text-white/80 transition-colors"
+              className="text-2xl font-serif font-bold text-white cursor-pointer hover:text-white/80 transition-colors"
               data-testid="link-logo-landing"
             >
               Innovatr
