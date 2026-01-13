@@ -427,7 +427,7 @@ export default function CinematicLanding() {
       {/* Problem / Solution Cinematic Section */}
       <ProblemSolutionSection />
       {/* What We Do Section */}
-      <section id="why-consult" className="py-24 sm:py-32 bg-[#4D5FF1]">
+      <section id="why-consult" className="py-24 sm:py-32 bg-[#4444ff]">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           {/* Header */}
           <div className="mb-20 sm:mb-24">
