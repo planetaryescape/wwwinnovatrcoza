@@ -389,7 +389,7 @@ export default function CinematicLanding() {
                 WHAT'S<br />
                 MISSING
               </h1>
-              <p className="mt-8 text-base sm:text-lg md:text-xl font-sans whitespace-nowrap bg-[#ffffff42] text-[#fafafa]">
+              <p className="mt-8 text-base sm:text-lg md:text-xl font-sans whitespace-nowrap text-[#fafafa] bg-[#ffffff00]">
                 Launch Better Innovation through in-house data, design and testing.
               </p>
             </motion.div>
