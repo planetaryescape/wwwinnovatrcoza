@@ -380,113 +380,56 @@ export default function CinematicLanding() {
       {/* Hero Section */}
       <section 
         ref={heroRef}
-        className="relative h-screen"
+        className="relative min-h-screen bg-[#0a0a0f]"
       >
-        {/* Video Container */}
-        <div className="absolute inset-0 w-full h-full overflow-hidden">
-          {/* Video Background */}
-          {!reducedMotion && !videoError ? (
-            <div className="absolute inset-0">
+        {/* Plain Background */}
+        <div className="absolute inset-0 bg-[#0a0a0f]" />
+
+        {/* Hero Content */}
+        <div className="relative z-10 h-screen flex flex-col items-center justify-center px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.3 }}
+            className="text-center max-w-4xl mx-auto"
+          >
+            <h1 
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white leading-tight"
+              data-testid="text-headline"
+              data-cursor-invert
+            >
+              We build what's next.
+            </h1>
+            <p className="mt-6 text-base sm:text-lg md:text-xl text-white/80 font-sans max-w-2xl mx-auto">
+              Launch Better Innovation through in-house data, design and testing.
+            </p>
+            
+            {/* Shift Key Video Loop */}
+            <div className="mt-12 sm:mt-16 flex justify-center">
               <video
-                ref={videoRef}
-                className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 object-contain"
                 muted
                 autoPlay
                 loop
                 playsInline
                 preload="auto"
-                onLoadedMetadata={() => {
-                  console.log("[Video] Metadata loaded, duration:", videoRef.current?.duration);
-                  setVideoLoaded(true);
-                  if (videoRef.current) {
-                    videoRef.current.currentTime = 0;
-                    tryPlayVideo();
-                  }
-                }}
-                onCanPlay={() => {
-                  console.log("[Video] Can play");
-                  tryPlayVideo();
-                }}
-                onError={() => {
-                  // Only trigger fallback after a delay to avoid race conditions
-                  setTimeout(() => {
-                    const video = videoRef.current;
-                    if (video && video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE && video.readyState === 0) {
-                      console.log("[Video] No valid source found after delay, activating fallback");
-                      setVideoError(true);
-                    }
-                  }, 2000);
-                }}
-                onStalled={() => {
-                  setTimeout(() => {
-                    if (videoRef.current && videoRef.current.readyState < 2 && !videoLoaded) {
-                      console.log("[Video] Stalled for too long, activating fallback");
-                      setVideoError(true);
-                    }
-                  }, 8000);
-                }}
-                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Crect fill='%230a0a0f' width='1920' height='1080'/%3E%3C/svg%3E"
-                data-testid="video-background"
+                data-testid="video-shift-key"
               >
-                <source src="/video/consult-landing.mp4" type="video/mp4" />
+                <source src="/video/shift-key-loop.mp4" type="video/mp4" />
               </video>
             </div>
-          ) : (
-            <div 
-              className="absolute inset-0 bg-gradient-to-br from-[#0a0a0f] via-[#12121a] to-[#0a0a0f]"
-              data-testid="poster-fallback"
-            />
-          )}
+          </motion.div>
+        </div>
 
-          {/* Cinematic Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/70" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30" />
-          <div 
-            className="absolute inset-0"
-            style={{
-              background: "radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%)"
-            }}
-          />
-          {/* Subtle film grain overlay */}
-          <div 
-            className="absolute inset-0 opacity-[0.03] pointer-events-none"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-              backgroundRepeat: "repeat"
-            }}
-          />
-
-          {/* Hero Content */}
-          <div className="relative z-10 h-full flex flex-col items-center justify-center px-6">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.3 }}
-              className="text-center max-w-4xl mx-auto"
-            >
-              <h1 
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white leading-tight"
-                data-testid="text-headline"
-                data-cursor-invert
-              >
-                We build what's next.
-              </h1>
-              <p className="mt-6 text-base sm:text-lg md:text-xl text-white/80 font-sans max-w-2xl mx-auto">
-                Launch Better Innovation through in-house data, design and testing.
-              </p>
-            </motion.div>
-          </div>
-
-          {/* Scroll indicator */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-              className="w-6 h-10 border-2 border-white/40 rounded-full flex justify-center pt-2"
-            >
-              <motion.div className="w-1.5 h-1.5 bg-white/60 rounded-full" />
-            </motion.div>
-          </div>
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className="w-6 h-10 border-2 border-white/40 rounded-full flex justify-center pt-2"
+          >
+            <motion.div className="w-1.5 h-1.5 bg-white/60 rounded-full" />
+          </motion.div>
         </div>
       </section>
       {/* Transition Bridge */}
