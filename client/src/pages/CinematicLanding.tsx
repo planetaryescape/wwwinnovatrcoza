@@ -394,7 +394,7 @@ export default function CinematicLanding() {
             className="text-center max-w-4xl mx-auto"
           >
             <h1 
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white leading-tight"
+              className="sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white text-[90px]"
               data-testid="text-headline"
               data-cursor-invert
             >
@@ -435,10 +435,8 @@ export default function CinematicLanding() {
       </section>
       {/* Transition Bridge */}
       <div className="h-20 bg-gradient-to-b from-[#0a0a0f] to-[#0d0d18]" />
-      
       {/* Problem / Solution Cinematic Section */}
       <ProblemSolutionSection />
-
       {/* What We Do Section */}
       <section id="why-consult" className="py-24 sm:py-32 bg-[#0a0a0f]">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -489,7 +487,6 @@ export default function CinematicLanding() {
           </div>
         </div>
       </section>
-
       {/* Lifecycle Content Section */}
       <div ref={contentRef}>
         {/* The Lifecycle - Pillar Section */}
