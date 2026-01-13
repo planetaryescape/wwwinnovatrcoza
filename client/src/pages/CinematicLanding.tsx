@@ -386,7 +386,7 @@ export default function CinematicLanding() {
         <div className="absolute inset-0 bg-[#0a0a0f]" />
 
         {/* Hero Content */}
-        <div className="relative z-10 h-screen flex flex-col items-center justify-center px-6">
+        <div className="relative z-10 h-screen flex flex-col items-center justify-center px-6 pt-16 sm:pt-20">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
