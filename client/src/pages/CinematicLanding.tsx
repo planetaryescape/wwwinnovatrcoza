@@ -407,10 +407,9 @@ export default function CinematicLanding() {
                 loop
                 playsInline
                 preload="auto"
-                data-testid="video-shift-key"
+                data-testid="video-consult-background"
               >
-                <source src="/video/shift-key-loop.mov" type="video/quicktime" />
-                <source src="/video/shift-key-loop.mp4" type="video/mp4" />
+                <source src="/video/consult-background.mp4" type="video/mp4" />
               </video>
             </motion.div>
           </div>
