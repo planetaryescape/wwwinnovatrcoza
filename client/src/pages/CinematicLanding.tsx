@@ -301,7 +301,6 @@ export default function CinematicLanding() {
   return (
     <div className="min-h-screen bg-[#5A5EFF] text-white" style={{ backgroundColor: 'transparent' }}>
       <CustomCursor />
-      
       {/* Skip to main content link for accessibility */}
       <a 
         href="#problem-solution" 
@@ -428,7 +427,7 @@ export default function CinematicLanding() {
 
           {/* Hero Content - Two Column Layout: Text Left, Fish Right */}
           <motion.div 
-            className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16"
+            className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16 bg-[#4444ff]"
             style={{ opacity: textOpacity }}
           >
             <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
