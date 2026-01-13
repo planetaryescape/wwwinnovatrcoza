@@ -480,7 +480,7 @@ export default function CinematicLanding() {
       {/* Content Sections */}
       <div ref={contentRef}>
         {/* Case Studies Section */}
-        <section id="case-studies" className="py-24 bg-[#4D5FF1]">
+        <section id="case-studies" className="py-24 bg-[#4444ff]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
             <div className="text-center mb-16">
               <h2 
