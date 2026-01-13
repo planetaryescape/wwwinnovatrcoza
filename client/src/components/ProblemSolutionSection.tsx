@@ -104,7 +104,7 @@ export default function ProblemSolutionSection() {
             >
               THE PROBLEM
             </h2>
-            <div className="max-w-2xl mx-auto space-y-4 sm:space-y-5 md:space-y-6 text-white/60 font-sans 
+            <div className="max-w-4xl mx-auto space-y-4 sm:space-y-5 md:space-y-6 text-white/60 font-sans 
               text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed px-4">
               <p>
                 Big decisions don't fail because of a lack of ideas.
@@ -128,7 +128,7 @@ export default function ProblemSolutionSection() {
             >
               THE SOLUTION
             </h2>
-            <div className="max-w-2xl mx-auto space-y-4 sm:space-y-5 md:space-y-6 text-white/60 font-sans 
+            <div className="max-w-4xl mx-auto space-y-4 sm:space-y-5 md:space-y-6 text-white/60 font-sans 
               text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed px-4">
               <p>
                 Innovatr Consult brings structure to complexity.
