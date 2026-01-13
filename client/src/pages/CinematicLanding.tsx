@@ -314,7 +314,7 @@ export default function CinematicLanding() {
               className="text-xs tracking-[0.2em] text-white hover:text-white/70 transition-colors font-normal lowercase"
               style={{ 
                 writingMode: "vertical-rl",
-                fontFamily: "'DM Serif Display', serif"
+                fontFamily: "Roboto, sans-serif"
               }}
               data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
             >
