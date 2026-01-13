@@ -442,7 +442,7 @@ export default function CinematicLanding() {
             <p className="text-lg sm:text-xl text-white/60 mb-4">
               Many paths. One goal: systematic innovation
             </p>
-            <p className="text-base sm:text-lg text-white/40 max-w-2xl">
+            <p className="text-base sm:text-lg max-w-2xl text-[#ffffff]">
               Strategy, innovation, execution — designed to work together, or independently.
             </p>
           </div>
