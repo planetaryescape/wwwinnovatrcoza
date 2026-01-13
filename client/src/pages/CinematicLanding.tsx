@@ -14,6 +14,9 @@ import ideationWorkshopsImg from "@assets/generated_images/ideation_workshops_cr
 import endToEndDesignImg from "@assets/generated_images/end_to_end_design_flow.png";
 import brandHealthImg from "@assets/generated_images/brand_health_tracking_pulse.png";
 import consultBackgroundGif from "@assets/test_1768331395403.gif";
+import cookingGif from "@assets/RafaelVarona_Playbook_Cooking_Animation_1768339161246.gif";
+import airplanesGif from "@assets/rafael-varona-airplanes_1768339161246.gif";
+import penGif from "@assets/RafaelVarona_Playbook_Pen_1768339161246.gif";
 
 const pillars = [
   {
@@ -593,12 +596,11 @@ export default function CinematicLanding() {
               transition={{ duration: 0.7 }}
               data-testid="case-study-1"
             >
-              <div className="relative aspect-[4/5] overflow-hidden rounded-sm">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-[#FFE8D8]">
                 <img 
-                  src="https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=800&auto=format&fit=crop&q=80" 
-                  alt="Financial growth visualization"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
+                  src={cookingGif}
+                  alt="Animated cooking illustration"
+                  className="w-full h-full object-contain"
                 />
               </div>
               <div className="py-4">
@@ -668,12 +670,11 @@ export default function CinematicLanding() {
                   <span className="underline underline-offset-4 hover:text-white/80 cursor-pointer transition-colors">4 minute read</span>
                 </div>
               </div>
-              <div className="relative aspect-[4/5] overflow-hidden rounded-sm order-1 lg:order-2">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-[#E8F0FF] order-1 lg:order-2">
                 <img 
-                  src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&auto=format&fit=crop&q=80" 
-                  alt="Innovation team collaboration"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
+                  src={airplanesGif}
+                  alt="Animated airplanes illustration"
+                  className="w-full h-full object-contain"
                 />
               </div>
             </motion.div>
@@ -687,12 +688,11 @@ export default function CinematicLanding() {
               transition={{ duration: 0.7 }}
               data-testid="case-study-3"
             >
-              <div className="relative aspect-[4/5] overflow-hidden rounded-sm">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-[#FFE4D8]">
                 <img 
-                  src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80" 
-                  alt="Data analytics dashboard"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
+                  src={penGif}
+                  alt="Animated pen illustration"
+                  className="w-full h-full object-contain"
                 />
               </div>
               <div className="py-4">
