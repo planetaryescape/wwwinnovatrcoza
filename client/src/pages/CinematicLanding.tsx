@@ -580,7 +580,7 @@ export default function CinematicLanding() {
               transition={{ duration: 0.7 }}
               data-testid="case-study-1"
             >
-              <div className="relative aspect-[3/4] overflow-hidden rounded-sm bg-[#FFE8D8] lg:col-span-2">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-[#FFE8D8] lg:col-span-2 shadow-2xl shadow-black/30 ring-1 ring-white/10">
                 <img 
                   src={cookingGif}
                   alt="Animated cooking illustration"
@@ -654,7 +654,7 @@ export default function CinematicLanding() {
                   <span className="underline underline-offset-4 hover:text-white/80 cursor-pointer transition-colors">4 minute read</span>
                 </div>
               </div>
-              <div className="relative aspect-[3/4] overflow-hidden rounded-sm bg-[#E8F0FF] lg:col-span-2 order-1 lg:order-2">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-[#E8F0FF] lg:col-span-2 order-1 lg:order-2 shadow-2xl shadow-black/30 ring-1 ring-white/10">
                 <img 
                   src={airplanesGif}
                   alt="Animated airplanes illustration"
@@ -672,7 +672,7 @@ export default function CinematicLanding() {
               transition={{ duration: 0.7 }}
               data-testid="case-study-3"
             >
-              <div className="relative aspect-[3/4] overflow-hidden rounded-sm bg-[#FFE4D8] lg:col-span-2">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-[#FFE4D8] lg:col-span-2 shadow-2xl shadow-black/30 ring-1 ring-white/10">
                 <img 
                   src={penGif}
                   alt="Animated pen illustration"
