@@ -4,7 +4,7 @@ export default function ProblemSolutionSection() {
   return (
     <section 
       id="problem-solution" 
-      className="bg-[#0a0a0f] py-24 md:py-32 lg:py-40"
+      className="bg-[#4D5FF1] py-24 md:py-32 lg:py-40"
     >
       <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
         {/* THE PROBLEM */}
@@ -14,9 +14,9 @@ export default function ProblemSolutionSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.7, ease: "easeOut" }}
-            className="font-serif font-bold text-white mb-8 md:mb-12 tracking-tight
+            className="font-serif font-bold text-white mb-8 md:mb-12
               text-[clamp(3rem,10vw,8rem)] leading-[1.05]"
-            style={{ letterSpacing: "-0.02em" }}
+            style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.08em" }}
           >
             THE PROBLEM
           </motion.h2>
@@ -51,9 +51,9 @@ export default function ProblemSolutionSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.7, ease: "easeOut" }}
-            className="font-serif font-bold text-white mb-8 md:mb-12 tracking-tight
+            className="font-serif font-bold text-white mb-8 md:mb-12
               text-[clamp(3rem,10vw,8rem)] leading-[1.05]"
-            style={{ letterSpacing: "-0.02em" }}
+            style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.08em" }}
           >
             THE SOLUTION
           </motion.h2>

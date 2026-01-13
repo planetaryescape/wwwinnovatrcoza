@@ -161,7 +161,7 @@ function HumorSection() {
   return (
     <section 
       ref={sectionRef}
-      className="relative bg-[#0a0a0f]"
+      className="relative bg-[#4D5FF1]"
       style={{ minHeight: "140vh" }}
       data-testid="section-humor"
     >
@@ -277,7 +277,7 @@ export default function CinematicLanding() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white">
+    <div className="min-h-screen bg-[#4D5FF1] text-white">
       <CustomCursor />
       {/* Fixed Header - Always visible */}
       <header className="fixed top-0 left-0 right-0 z-50 px-6 py-6">
@@ -370,7 +370,7 @@ export default function CinematicLanding() {
         <div className="absolute inset-0 bg-[#4D5FF1]" />
 
         {/* Hero Content - Two Column Layout */}
-        <div className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16 bg-[#4444ff]">
+        <div className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16">
           <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left: Large Text */}
             <motion.div
@@ -380,8 +380,8 @@ export default function CinematicLanding() {
               className="text-left"
             >
               <h1 
-                className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-serif font-bold text-white leading-[0.95] tracking-tight uppercase"
-                style={{ fontFamily: "'DM Serif Display', serif" }}
+                className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-serif font-bold text-white leading-[0.95] uppercase"
+                style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.06em" }}
                 data-testid="text-headline"
                 data-cursor-invert
               >
@@ -424,17 +424,20 @@ export default function CinematicLanding() {
           </motion.div>
         </div>
       </section>
-      {/* Transition Bridge */}
-      <div className="h-20 bg-gradient-to-b from-[#4D5FF1] to-[#0a0a0f]" />
+      {/* Section Divider */}
+      <div className="h-1 bg-white/20" />
       {/* Problem / Solution Cinematic Section */}
       <ProblemSolutionSection />
+      {/* Section Divider */}
+      <div className="h-1 bg-white/20" />
       {/* What We Do Section */}
-      <section id="why-consult" className="py-24 sm:py-32 bg-[#0a0a0f]">
+      <section id="why-consult" className="py-24 sm:py-32 bg-[#4D5FF1]">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           {/* Header */}
           <div className="mb-20 sm:mb-24">
             <h2 
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-serif font-bold text-white mb-6 italic tracking-tight"
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-serif font-bold text-white mb-6 italic"
+              style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.08em" }}
               data-cursor-invert
               data-testid="text-what-we-do-heading"
             >
@@ -480,12 +483,15 @@ export default function CinematicLanding() {
       </section>
       {/* Content Sections */}
       <div ref={contentRef}>
+        {/* Section Divider */}
+        <div className="h-1 bg-white/20" />
         {/* Case Studies Section */}
-        <section id="case-studies" className="py-24 bg-[#0a0a0f]">
+        <section id="case-studies" className="py-24 bg-[#4D5FF1]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
             <div className="text-center mb-16">
               <h2 
                 className="sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white text-[95px]"
+                style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.08em" }}
                 data-cursor-invert
               >
                 Results
@@ -509,7 +515,7 @@ export default function CinematicLanding() {
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                     className="group relative overflow-hidden rounded-lg cursor-pointer"
                     style={{ 
-                      background: "linear-gradient(180deg, #12121a 0%, #0a0a0f 100%)"
+                      background: "linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)"
                     }}
                     data-testid={`case-study-${study.id}`}
                   >
@@ -527,7 +533,7 @@ export default function CinematicLanding() {
                           background: `linear-gradient(180deg, transparent 30%, ${pillarColor}40 100%)`
                         }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/60 to-transparent opacity-80" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#4D5FF1] via-[#4D5FF1]/60 to-transparent opacity-80" />
                       
                       <div className="absolute bottom-0 left-0 right-0 p-5">
                         <span 
@@ -560,11 +566,15 @@ export default function CinematicLanding() {
           </div>
         </section>
 
+        {/* Section Divider */}
+        <div className="h-1 bg-white/20" />
         {/* Humorous Scroll Reveal Section */}
         <HumorSection />
 
+        {/* Section Divider */}
+        <div className="h-1 bg-white/20" />
         {/* Final CTA Section - Interactive Ball */}
-        <section id="consult-contact" className="relative min-h-screen bg-[#0a0a0f] flex flex-col justify-center overflow-hidden">
+        <section id="consult-contact" className="relative min-h-screen bg-[#4D5FF1] flex flex-col justify-center overflow-hidden">
           {/* Section Header */}
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-16 sm:mb-20">
             <motion.div
@@ -579,6 +589,7 @@ export default function CinematicLanding() {
               
               <h2 
                 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white mb-8 leading-tight"
+                style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.06em" }}
                 data-cursor-invert
                 data-testid="text-contact-heading"
               >
@@ -606,7 +617,7 @@ export default function CinematicLanding() {
               <div 
                 className="w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] md:w-[380px] md:h-[380px] lg:w-[420px] lg:h-[420px] rounded-full bg-white -ml-[100px] sm:-ml-[80px] md:-ml-[60px] lg:-ml-[40px] transition-transform duration-500 group-hover:scale-105 flex items-center justify-center"
               >
-                <span className="text-[#0a0a0f] text-lg sm:text-xl md:text-2xl font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 pl-[80px] sm:pl-[60px] md:pl-[40px] lg:pl-[20px]">
+                <span className="text-[#4D5FF1] text-lg sm:text-xl md:text-2xl font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 pl-[80px] sm:pl-[60px] md:pl-[40px] lg:pl-[20px]">
                   Let's talk
                 </span>
               </div>
@@ -666,7 +677,7 @@ export default function CinematicLanding() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[100] bg-[#0a0a0f]/95 backdrop-blur-xl"
+            className="fixed inset-0 z-[100] bg-[#4D5FF1]/95 backdrop-blur-xl"
             data-testid="menu-overlay"
           >
             <div className="h-full flex flex-col">
