@@ -149,60 +149,44 @@ const humorLines = [
 ];
 
 function HumorSection() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"]
-  });
-
-  const line1Opacity = useTransform(scrollYProgress, [0.10, 0.18, 0.26, 0.34], [0, 1, 1, 0]);
-  const line2Opacity = useTransform(scrollYProgress, [0.18, 0.26, 0.34, 0.42], [0, 1, 1, 0]);
-  const line3Opacity = useTransform(scrollYProgress, [0.26, 0.34, 0.42, 0.50], [0, 1, 1, 0]);
-  const line4Opacity = useTransform(scrollYProgress, [0.34, 0.42, 0.50, 0.58], [0, 1, 1, 0]);
-
   return (
     <section 
-      ref={sectionRef}
-      className="relative bg-gradient-to-b from-[#0D1598] via-[#0A1290] to-[#080E80]"
-      style={{ minHeight: "140vh", position: "relative" }}
+      className="relative py-24 sm:py-32 bg-gradient-to-b from-[#0D1598] via-[#0A1290] to-[#080E80]"
       data-testid="section-humor"
     >
-      <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden bg-[#0A1290]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center text-[22px]">
-          <div className="flex flex-col items-center justify-center gap-10 sm:gap-14 md:gap-16 lg:gap-20 text-[#fafafa]">
-            <motion.p
-              style={{ opacity: line1Opacity, fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
-              className="font-light tracking-wide text-white/90"
-              data-testid="humor-line-1"
-            >
-              {humorLines[0].text}
-            </motion.p>
-            
-            <motion.p
-              style={{ opacity: line2Opacity, fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
-              className="text-white/90 font-light tracking-wide"
-              data-testid="humor-line-2"
-            >
-              {humorLines[1].text}
-            </motion.p>
-            
-            <motion.p
-              style={{ opacity: line3Opacity, fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
-              className="font-light tracking-wide text-white/90"
-              data-testid="humor-line-3"
-            >
-              {humorLines[2].text}
-            </motion.p>
-            
-            <motion.p
-              style={{ opacity: line4Opacity, fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
-              className="text-white font-light tracking-wide"
-              data-testid="humor-line-4"
-            >
-              {humorLines[3].text}
-            </motion.p>
-          </div>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
+        <div className="flex flex-col items-center justify-center gap-6 sm:gap-8 md:gap-10 text-[#fafafa]">
+          <p
+            style={{ fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
+            className="font-light tracking-wide text-white/90"
+            data-testid="humor-line-1"
+          >
+            {humorLines[0].text}
+          </p>
+          
+          <p
+            style={{ fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
+            className="text-white/90 font-light tracking-wide"
+            data-testid="humor-line-2"
+          >
+            {humorLines[1].text}
+          </p>
+          
+          <p
+            style={{ fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
+            className="font-light tracking-wide text-white/90"
+            data-testid="humor-line-3"
+          >
+            {humorLines[2].text}
+          </p>
+          
+          <p
+            style={{ fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
+            className="text-white font-light tracking-wide"
+            data-testid="humor-line-4"
+          >
+            {humorLines[3].text}
+          </p>
         </div>
       </div>
     </section>
