@@ -149,46 +149,102 @@ const humorLines = [
   { text: "Start the conversation when it suits you.", delay: 0.45 },
 ];
 
-function HumorSection() {
+function ClosingSection() {
   return (
     <section 
-      className="relative py-24 sm:py-32 bg-gradient-to-b from-[#0D1598] via-[#0A1088] to-[#080E80]"
-      data-testid="section-humor"
+      className="relative py-32 sm:py-44 bg-gradient-to-b from-[#0D1598] via-[#0A1088] to-[#080E80] overflow-hidden"
+      data-testid="section-closing"
     >
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16 text-center">
-        <div className="flex flex-col items-center justify-center gap-6 sm:gap-8 md:gap-10 text-[#fafafa]">
-          <p
-            style={{ fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
-            className="font-light tracking-wide text-white/90"
-            data-testid="humor-line-1"
+      {/* Subtle decorative elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/4 left-0 w-32 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div className="absolute bottom-1/4 right-0 w-32 h-px bg-gradient-to-l from-transparent via-white/20 to-transparent" />
+      </div>
+      
+      <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 lg:pr-20">
+        {/* Opening statement - larger, serif, centered */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-16 sm:mb-20"
+          data-testid="closing-line-1"
+        >
+          <h2 
+            className="font-serif text-white leading-tight"
+            style={{ 
+              fontFamily: "'DM Serif Display', serif",
+              fontSize: "clamp(1.75rem, 4vw, 3rem)",
+              fontStyle: "italic"
+            }}
           >
-            {humorLines[0].text}
-          </p>
+            If you've reached this point, you're thinking seriously
+            <br className="hidden sm:block" />
+            <span className="text-white/60"> about what comes next.</span>
+          </h2>
+        </motion.div>
+        
+        {/* Middle statements - staggered, alternating alignment */}
+        <div className="space-y-12 sm:space-y-16 mb-20 sm:mb-24">
+          <motion.p
+            initial={{ opacity: 0, x: -40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="text-white/85 leading-relaxed max-w-2xl"
+            style={{ fontSize: "clamp(1.1rem, 2vw, 1.35rem)" }}
+            data-testid="closing-line-2"
+          >
+            Big decisions require <span className="text-white font-medium">focus</span>, <span className="text-white font-medium">evidence</span>, and <span className="text-white font-medium">alignment</span> — not more noise.
+          </motion.p>
           
-          <p
-            style={{ fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
-            className="text-white/90 font-light tracking-wide"
-            data-testid="humor-line-2"
+          <motion.p
+            initial={{ opacity: 0, x: 40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="text-white/85 leading-relaxed max-w-2xl ml-auto text-right"
+            style={{ fontSize: "clamp(1.1rem, 2vw, 1.35rem)" }}
+            data-testid="closing-line-3"
           >
-            {humorLines[1].text}
-          </p>
-          
-          <p
-            style={{ fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
-            className="font-light tracking-wide text-white/90"
-            data-testid="humor-line-3"
-          >
-            {humorLines[2].text}
-          </p>
-          
-          <p
-            style={{ fontSize: "clamp(1.25rem, 3vw, 2.25rem)" }}
-            className="text-white font-light tracking-wide"
-            data-testid="humor-line-4"
-          >
-            {humorLines[3].text}
-          </p>
+            We work with teams who are ready to move from <span className="text-white font-medium">discussion to direction</span>, and from <span className="text-white font-medium">insight to action</span>.
+          </motion.p>
         </div>
+        
+        {/* Decorative divider */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, delay: 0.3 }}
+          className="w-24 h-px bg-white/30 mx-auto mb-16 sm:mb-20"
+        />
+        
+        {/* Closing CTA - prominent, centered */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="text-center"
+          data-testid="closing-line-4"
+        >
+          <p 
+            className="text-white font-medium tracking-wide mb-10"
+            style={{ fontSize: "clamp(1.25rem, 2.5vw, 1.75rem)" }}
+          >
+            Start the conversation when it suits you.
+          </p>
+          <a
+            href="mailto:Richard@innovatr.co.za?subject=Let's%20Talk"
+            className="inline-flex items-center gap-3 px-8 py-4 border border-white/30 rounded-full text-white hover:bg-white/10 transition-all duration-300 group"
+            data-testid="button-closing-cta"
+          >
+            <span className="text-sm uppercase tracking-[0.2em]">Get in Touch</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </a>
+        </motion.div>
       </div>
     </section>
   );
@@ -710,7 +766,7 @@ export default function CinematicLanding() {
         </section>
 
         {/* Humorous Scroll Reveal Section */}
-        <HumorSection />
+        <ClosingSection />
 
         {/* Gradient Bridge - smooth transition to contact */}
         <div className="h-32 sm:h-48 bg-gradient-to-b from-[#080E80] via-[#060B70] to-[#050960]" aria-hidden="true" />
