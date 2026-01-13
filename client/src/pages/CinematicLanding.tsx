@@ -465,10 +465,11 @@ export default function CinematicLanding() {
                 data-testid="text-headline"
                 data-cursor-invert
               >
-                More than research.
-                <br />
-                <span className="text-white/90">Built for decisions.</span>
+                We build what's next.
               </h1>
+              <p className="mt-6 text-base sm:text-lg md:text-xl text-white/80 font-sans max-w-2xl mx-auto">
+                Launch Better Innovation through in-house data, design and testing.
+              </p>
             </motion.div>
           </div>
 
