@@ -107,12 +107,17 @@ export default function ProblemSolutionSection() {
             <div className="max-w-4xl mx-auto space-y-4 sm:space-y-5 md:space-y-6 text-white/60 font-sans 
               text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed px-4">
               <p>
+                Innovation isn't linear, but too often, decisions are forced to be.
+              </p>
+              <p>
                 Big decisions don't fail because of a lack of ideas.
                 <br className="hidden sm:block" />
                 They fail because there are too many routes, too many opinions, and no clear way forward.
               </p>
               <p>
-                Teams get stuck debating direction, testing in silos, or moving too slowly while the market keeps shifting.
+                Multiple ideas. Multiple stakeholders. Conflicting signals.
+                <br className="hidden sm:block" />
+                Progress stalls while certainty stays just out of reach.
               </p>
             </div>
           </motion.div>
