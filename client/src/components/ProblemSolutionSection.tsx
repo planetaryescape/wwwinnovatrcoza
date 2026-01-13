@@ -136,15 +136,15 @@ export default function ProblemSolutionSection() {
             <div className="max-w-4xl mx-auto space-y-4 sm:space-y-5 md:space-y-6 text-white/60 font-sans 
               text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed px-4">
               <p>
-                Innovatr Consult brings structure to complexity.
+                We align stakeholders, clarify options, and use real market evidence to show where to focus, how to play, and how to win, with confidence.
               </p>
               <p className="text-[#ffffff]">
-                We align stakeholders, clarify options, and use real market evidence to show where to focus, how to play, and how to win, with confidence.
-                <br className="hidden sm:block" />
                 From strategy and innovation to execution and scale.
               </p>
               <p className="text-white/80 font-medium">
-                No noise. No guesswork. Just momentum.
+                No noise. No guesswork.
+                <br />
+                Just momentum.
               </p>
             </div>
           </motion.div>
