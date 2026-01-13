@@ -294,13 +294,14 @@ export default function CinematicLanding() {
       {/* Fixed Header - Always visible */}
       <header className="fixed top-0 left-0 right-0 z-50 px-6 py-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <button 
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="text-3xl sm:text-4xl font-serif font-bold text-white tracking-wide"
-            data-testid="link-logo-landing"
-          >
-            Innovatr
-          </button>
+          <Link href="/home">
+            <span 
+              className="text-3xl sm:text-4xl font-serif font-bold text-white tracking-wide cursor-pointer hover:text-white/80 transition-colors"
+              data-testid="link-logo-landing"
+            >
+              Innovatr
+            </span>
+          </Link>
 
 
           {/* Mobile Menu Button */}
