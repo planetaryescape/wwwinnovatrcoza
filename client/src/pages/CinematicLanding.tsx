@@ -385,29 +385,40 @@ export default function CinematicLanding() {
         {/* Plain Background */}
         <div className="absolute inset-0 bg-[#0a0a0f]" />
 
-        {/* Hero Content */}
-        <div className="relative z-10 h-screen flex flex-col items-center justify-center px-6 pt-16 sm:pt-20">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.3 }}
-            className="text-center max-w-4xl mx-auto"
-          >
-            <h1 
-              className="sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white text-[90px]"
-              data-testid="text-headline"
-              data-cursor-invert
+        {/* Hero Content - Two Column Layout */}
+        <div className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16">
+          <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Left: Large Text */}
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, delay: 0.3 }}
+              className="text-left"
             >
-              We build what's next.
-            </h1>
-            <p className="mt-6 text-base sm:text-lg md:text-xl text-white/80 font-sans max-w-2xl mx-auto">
-              Launch Better Innovation through in-house data, design and testing.
-            </p>
+              <h1 
+                className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-sans font-bold text-white leading-[0.95] tracking-tight uppercase"
+                style={{ fontFamily: "Roboto, sans-serif" }}
+                data-testid="text-headline"
+                data-cursor-invert
+              >
+                WE BUILD<br />
+                WHAT'S<br />
+                MISSING
+              </h1>
+              <p className="mt-8 text-base sm:text-lg md:text-xl text-white/60 font-sans max-w-md">
+                Launch Better Innovation through in-house data, design and testing.
+              </p>
+            </motion.div>
             
-            {/* Shift Key Video Loop */}
-            <div className="mt-12 sm:mt-16 flex justify-center">
+            {/* Right: Shift Key Video Loop */}
+            <motion.div
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, delay: 0.5 }}
+              className="flex justify-center lg:justify-end"
+            >
               <video
-                className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 object-contain"
+                className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[420px] lg:h-[420px] object-contain"
                 muted
                 autoPlay
                 loop
@@ -418,8 +429,8 @@ export default function CinematicLanding() {
                 <source src="/video/shift-key-loop.mov" type="video/quicktime" />
                 <source src="/video/shift-key-loop.mp4" type="video/mp4" />
               </video>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
 
         {/* Scroll indicator */}
