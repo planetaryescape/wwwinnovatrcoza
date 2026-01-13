@@ -756,7 +756,7 @@ export default function CinematicLanding() {
           
           {/* Interactive Ball Section */}
           <div className="relative w-full flex items-center">
-            {/* Large clickable ball on the left with tentacles */}
+            {/* Large clickable ball on the left */}
             <motion.a
               href="mailto:richard@innovatr.co.za"
               initial={{ x: -200, opacity: 0 }}
@@ -767,106 +767,8 @@ export default function CinematicLanding() {
               aria-label="Send email to discuss your project"
               data-testid="button-email-ball"
             >
-              {/* Tentacles wrapping around the ball from below */}
-              <svg 
-                className="absolute -bottom-8 sm:-bottom-12 left-1/2 -translate-x-1/2 w-[400px] h-[300px] sm:w-[500px] sm:h-[350px] md:w-[600px] md:h-[400px] pointer-events-none z-10"
-                viewBox="0 0 600 400"
-                fill="none"
-                aria-hidden="true"
-              >
-                {/* Tentacle 1 - far left, curling up and right */}
-                <motion.path
-                  d="M50 400 Q30 350, 60 300 Q90 250, 70 200 Q50 150, 90 120 Q120 100, 140 130 Q160 160, 130 190"
-                  stroke="#4A4EE8"
-                  strokeWidth="18"
-                  strokeLinecap="round"
-                  fill="none"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  whileInView={{ pathLength: 1, opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1.5, delay: 0.2 }}
-                />
-                {/* Tentacle 1 suckers */}
-                <motion.ellipse cx="65" cy="280" rx="6" ry="4" fill="#6A6EF8" initial={{ opacity: 0 }} whileInView={{ opacity: 0.8 }} transition={{ delay: 0.5 }} viewport={{ once: true }} />
-                <motion.ellipse cx="72" cy="240" rx="5" ry="3" fill="#6A6EF8" initial={{ opacity: 0 }} whileInView={{ opacity: 0.8 }} transition={{ delay: 0.6 }} viewport={{ once: true }} />
-                <motion.ellipse cx="78" cy="200" rx="5" ry="3" fill="#6A6EF8" initial={{ opacity: 0 }} whileInView={{ opacity: 0.8 }} transition={{ delay: 0.7 }} viewport={{ once: true }} />
-                <motion.ellipse cx="95" cy="160" rx="4" ry="3" fill="#6A6EF8" initial={{ opacity: 0 }} whileInView={{ opacity: 0.8 }} transition={{ delay: 0.8 }} viewport={{ once: true }} />
-                
-                {/* Tentacle 2 - left side, reaching up over ball */}
-                <motion.path
-                  d="M120 400 Q100 320, 140 260 Q180 200, 200 150 Q220 100, 260 80 Q300 60, 320 90 Q340 120, 300 140"
-                  stroke="#5A5EFF"
-                  strokeWidth="22"
-                  strokeLinecap="round"
-                  fill="none"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  whileInView={{ pathLength: 1, opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1.8, delay: 0.1 }}
-                />
-                {/* Tentacle 2 suckers */}
-                <motion.ellipse cx="135" cy="300" rx="7" ry="5" fill="#7A7EFF" initial={{ opacity: 0 }} whileInView={{ opacity: 0.7 }} transition={{ delay: 0.4 }} viewport={{ once: true }} />
-                <motion.ellipse cx="160" cy="240" rx="7" ry="5" fill="#7A7EFF" initial={{ opacity: 0 }} whileInView={{ opacity: 0.7 }} transition={{ delay: 0.5 }} viewport={{ once: true }} />
-                <motion.ellipse cx="190" cy="190" rx="6" ry="4" fill="#7A7EFF" initial={{ opacity: 0 }} whileInView={{ opacity: 0.7 }} transition={{ delay: 0.6 }} viewport={{ once: true }} />
-                <motion.ellipse cx="220" cy="140" rx="5" ry="4" fill="#7A7EFF" initial={{ opacity: 0 }} whileInView={{ opacity: 0.7 }} transition={{ delay: 0.7 }} viewport={{ once: true }} />
-                <motion.ellipse cx="260" cy="100" rx="5" ry="3" fill="#7A7EFF" initial={{ opacity: 0 }} whileInView={{ opacity: 0.7 }} transition={{ delay: 0.8 }} viewport={{ once: true }} />
-                
-                {/* Tentacle 3 - center, thick one curling around */}
-                <motion.path
-                  d="M200 400 Q220 340, 250 290 Q280 240, 310 200 Q340 160, 350 130 Q360 100, 340 85 Q320 70, 290 90"
-                  stroke="#3A3ED8"
-                  strokeWidth="26"
-                  strokeLinecap="round"
-                  fill="none"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  whileInView={{ pathLength: 1, opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 2, delay: 0 }}
-                />
-                {/* Tentacle 3 suckers */}
-                <motion.ellipse cx="235" cy="320" rx="8" ry="6" fill="#5A5EF8" initial={{ opacity: 0 }} whileInView={{ opacity: 0.8 }} transition={{ delay: 0.3 }} viewport={{ once: true }} />
-                <motion.ellipse cx="265" cy="270" rx="8" ry="6" fill="#5A5EF8" initial={{ opacity: 0 }} whileInView={{ opacity: 0.8 }} transition={{ delay: 0.4 }} viewport={{ once: true }} />
-                <motion.ellipse cx="295" cy="220" rx="7" ry="5" fill="#5A5EF8" initial={{ opacity: 0 }} whileInView={{ opacity: 0.8 }} transition={{ delay: 0.5 }} viewport={{ once: true }} />
-                <motion.ellipse cx="325" cy="175" rx="6" ry="4" fill="#5A5EF8" initial={{ opacity: 0 }} whileInView={{ opacity: 0.8 }} transition={{ delay: 0.6 }} viewport={{ once: true }} />
-                <motion.ellipse cx="345" cy="130" rx="5" ry="4" fill="#5A5EF8" initial={{ opacity: 0 }} whileInView={{ opacity: 0.8 }} transition={{ delay: 0.7 }} viewport={{ once: true }} />
-                
-                {/* Tentacle 4 - right side, shorter curl */}
-                <motion.path
-                  d="M350 400 Q380 340, 400 290 Q420 240, 410 200 Q400 160, 380 150 Q360 140, 350 170"
-                  stroke="#4A4EE8"
-                  strokeWidth="20"
-                  strokeLinecap="round"
-                  fill="none"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  whileInView={{ pathLength: 1, opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1.6, delay: 0.3 }}
-                />
-                {/* Tentacle 4 suckers */}
-                <motion.ellipse cx="385" cy="320" rx="6" ry="5" fill="#6A6EF8" initial={{ opacity: 0 }} whileInView={{ opacity: 0.7 }} transition={{ delay: 0.5 }} viewport={{ once: true }} />
-                <motion.ellipse cx="405" cy="270" rx="6" ry="4" fill="#6A6EF8" initial={{ opacity: 0 }} whileInView={{ opacity: 0.7 }} transition={{ delay: 0.6 }} viewport={{ once: true }} />
-                <motion.ellipse cx="410" cy="220" rx="5" ry="4" fill="#6A6EF8" initial={{ opacity: 0 }} whileInView={{ opacity: 0.7 }} transition={{ delay: 0.7 }} viewport={{ once: true }} />
-                
-                {/* Tentacle 5 - far right, thin wispy one */}
-                <motion.path
-                  d="M450 400 Q480 350, 490 300 Q500 250, 480 210 Q460 170, 430 160 Q400 150, 390 180"
-                  stroke="#5A5EFF"
-                  strokeWidth="14"
-                  strokeLinecap="round"
-                  fill="none"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  whileInView={{ pathLength: 1, opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1.4, delay: 0.4 }}
-                />
-                {/* Tentacle 5 suckers */}
-                <motion.ellipse cx="488" cy="320" rx="5" ry="3" fill="#7A7EFF" initial={{ opacity: 0 }} whileInView={{ opacity: 0.6 }} transition={{ delay: 0.6 }} viewport={{ once: true }} />
-                <motion.ellipse cx="492" cy="270" rx="4" ry="3" fill="#7A7EFF" initial={{ opacity: 0 }} whileInView={{ opacity: 0.6 }} transition={{ delay: 0.7 }} viewport={{ once: true }} />
-                <motion.ellipse cx="482" cy="230" rx="4" ry="3" fill="#7A7EFF" initial={{ opacity: 0 }} whileInView={{ opacity: 0.6 }} transition={{ delay: 0.8 }} viewport={{ once: true }} />
-              </svg>
-              
               <div 
-                className="w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] md:w-[380px] md:h-[380px] lg:w-[420px] lg:h-[420px] rounded-full bg-white -ml-[100px] sm:-ml-[80px] md:-ml-[60px] lg:-ml-[40px] transition-transform duration-500 group-hover:scale-105 flex items-center justify-center relative z-20"
+                className="w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] md:w-[380px] md:h-[380px] lg:w-[420px] lg:h-[420px] rounded-full bg-white -ml-[100px] sm:-ml-[80px] md:-ml-[60px] lg:-ml-[40px] transition-transform duration-500 group-hover:scale-105 flex items-center justify-center"
               >
                 <span className="text-[#5A5EFF] text-lg sm:text-xl md:text-2xl font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 pl-[80px] sm:pl-[60px] md:pl-[40px] lg:pl-[20px]">
                   Let's talk
