@@ -91,7 +91,6 @@ export default function ProblemSolutionSection() {
           background: "radial-gradient(ellipse at center, transparent 0%, #0a0a0f 70%)"
         }}
       />
-
       <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
         <div className="relative w-full max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
           <motion.div
@@ -134,7 +133,7 @@ export default function ProblemSolutionSection() {
               <p>
                 Innovatr Consult brings structure to complexity.
               </p>
-              <p>
+              <p className="text-[#ffffff]">
                 We design a clear learning agenda, test the right questions at the right moments, and turn evidence into decisive action — across strategy, innovation & execution.
               </p>
               <p className="text-white/80 font-medium">
