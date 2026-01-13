@@ -384,15 +384,15 @@ export default function CinematicLanding() {
         ref={heroRef}
         className="relative min-h-screen overflow-hidden"
       >
-        {/* Full-screen Fish GIF Background */}
-        <div className="absolute inset-0">
+        {/* Fish GIF Background - positioned right */}
+        <div className="absolute inset-0 bg-[#5A5EFF]">
           {!gifLoaded && (
             <div className="absolute inset-0 bg-[#5A5EFF] animate-pulse" />
           )}
           <img
             src={consultBackgroundGif}
             alt="Animated underwater fish illustration"
-            className={`w-full h-full object-cover transition-opacity duration-700 ${gifLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`absolute right-0 top-1/2 -translate-y-1/2 h-[70%] w-auto max-w-[60%] object-contain transition-opacity duration-700 ${gifLoaded ? 'opacity-100' : 'opacity-0'}`}
             onLoad={handleGifLoad}
             loading="eager"
             data-testid="img-consult-background"
