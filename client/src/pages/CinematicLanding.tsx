@@ -415,6 +415,7 @@ export default function CinematicLanding() {
                 preload="auto"
                 data-testid="video-shift-key"
               >
+                <source src="/video/shift-key-loop.mov" type="video/quicktime" />
                 <source src="/video/shift-key-loop.mp4" type="video/mp4" />
               </video>
             </div>
