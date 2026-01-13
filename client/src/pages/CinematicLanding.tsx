@@ -276,16 +276,16 @@ export default function CinematicLanding() {
   };
 
   const navItems = [
-    { label: "Track Record", action: () => scrollToSection("why-consult") },
     { label: "The Problem", action: () => scrollToSection("problem-solution") },
+    { label: "Track Record", action: () => scrollToSection("why-consult") },
     { label: "Lifecycle", action: () => scrollToSection("lifecycle") },
     { label: "Results", action: () => scrollToSection("case-studies") },
     { label: "Contact", action: () => scrollToSection("consult-contact") },
   ];
 
   const menuItems = [
-    { label: "Track Record", action: () => scrollToSection("why-consult") },
     { label: "The Problem", action: () => scrollToSection("problem-solution") },
+    { label: "Track Record", action: () => scrollToSection("why-consult") },
     { label: "Lifecycle", action: () => scrollToSection("lifecycle") },
     { label: "Results", action: () => scrollToSection("case-studies") },
     { label: "Contact", action: () => scrollToSection("consult-contact") },
@@ -491,6 +491,9 @@ export default function CinematicLanding() {
       {/* Transition Bridge */}
       <div className="h-20 bg-gradient-to-b from-[#0a0a0f] to-[#0d0d18]" />
       
+      {/* Problem / Solution Cinematic Section */}
+      <ProblemSolutionSection />
+
       {/* Track Record Section */}
       <section id="why-consult" className="py-24 bg-[#0a0a0f]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
@@ -535,9 +538,6 @@ export default function CinematicLanding() {
           </div>
         </div>
       </section>
-
-      {/* Problem / Solution Cinematic Section */}
-      <ProblemSolutionSection />
 
       {/* Lifecycle Content Section */}
       <div ref={contentRef}>
