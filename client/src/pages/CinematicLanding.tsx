@@ -405,7 +405,7 @@ export default function CinematicLanding() {
                 <img
                   src={consultBackgroundGif}
                   alt="Animated fish background"
-                  className="w-[120%] h-[120%] object-cover -translate-x-[8%] -translate-y-[8%]"
+                  className="w-[115%] h-[115%] object-cover -translate-x-[5%] -translate-y-[6%]"
                   data-testid="img-consult-background"
                 />
               </div>
