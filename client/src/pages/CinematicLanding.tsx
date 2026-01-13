@@ -566,12 +566,13 @@ export default function CinematicLanding() {
       </section>
       {/* Content Sections */}
       <div ref={contentRef}>
-        {/* Case Studies Section */}
-        <section id="case-studies" className="py-24 bg-gradient-to-b from-[#1D2DC8] via-[#1520B0] to-[#0D1598]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
-            <div className="text-center mb-16">
+        {/* Case Studies Section - Alternating Layout */}
+        <section id="case-studies" className="py-24 sm:py-32 bg-gradient-to-b from-[#1D2DC8] via-[#1520B0] to-[#0D1598]">
+          <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 lg:pr-20">
+            {/* Section Header */}
+            <div className="mb-20 sm:mb-28">
               <h2 
-                className="font-serif font-semibold text-white"
+                className="font-serif font-bold text-white"
                 style={{ 
                   fontFamily: "'DM Serif Display', serif", 
                   letterSpacing: "0.06em",
@@ -579,79 +580,150 @@ export default function CinematicLanding() {
                 }}
                 data-cursor-invert
               >
-                Results
+                RESULTS
               </h2>
-              <p 
-                className="mt-6 max-w-2xl mx-auto text-white/95 leading-relaxed"
-                style={{ fontSize: "clamp(1rem, 1.8vw, 1.25rem)" }}
-              >
-                A showcase of impact across markets, categories & stages of growth.
-                <br className="hidden sm:block" />
-                A curated selection of work across focus, play, win & performance tracking.
-              </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {caseStudies.map((study, index) => {
-                const pillarColor = pillars.find(p => p.title === study.pillar)?.color || "#5A5EFF";
-                return (
-                  <motion.div
-                    key={study.id}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-50px" }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    className="group relative overflow-hidden rounded-lg cursor-pointer"
-                    style={{ 
-                      background: "linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)"
-                    }}
-                    data-testid={`case-study-${study.id}`}
-                  >
-                    <div className="relative aspect-[3/4] overflow-hidden">
-                      <motion.img
-                        src={study.image}
-                        alt={`${study.title} - ${study.tagline}`}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        whileHover={{ scale: 1.08 }}
-                        transition={{ duration: 0.6, ease: "easeOut" }}
-                        loading="lazy"
-                      />
-                      <div 
-                        className="absolute inset-0 opacity-40 group-hover:opacity-20 transition-opacity duration-500"
-                        style={{
-                          background: `linear-gradient(180deg, transparent 30%, ${pillarColor}40 100%)`
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0D1598] via-[#1520B0]/60 to-transparent opacity-80" />
-                      
-                      <div className="absolute bottom-0 left-0 right-0 p-5">
-                        <span 
-                          className="inline-block text-[10px] uppercase tracking-[0.2em] px-2 py-1 rounded mb-3"
-                          style={{ 
-                            backgroundColor: `${pillarColor}30`,
-                            color: pillarColor,
-                            border: `1px solid ${pillarColor}40`
-                          }}
-                        >
-                          {study.pillar}
-                        </span>
-                        <h3 className="text-xl font-serif font-bold text-white mb-2 group-hover:text-[#fafafa] transition-colors">
-                          {study.title}
-                        </h3>
-                        <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors leading-relaxed">
-                          {study.tagline}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div 
-                      className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                      style={{ backgroundColor: pillarColor }}
-                    />
-                  </motion.div>
-                );
-              })}
-            </div>
+            {/* Case Study 1 - Image Left, Text Right */}
+            <motion.div 
+              className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center mb-24 sm:mb-32"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.7 }}
+              data-testid="case-study-1"
+            >
+              <div className="relative aspect-[4/5] overflow-hidden rounded-sm">
+                <img 
+                  src="https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=800&auto=format&fit=crop&q=80" 
+                  alt="Financial growth visualization"
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+              <div className="py-4">
+                <span 
+                  className="text-xs uppercase tracking-[0.25em] text-white/60 mb-6 block"
+                  style={{ fontFamily: "Roboto, sans-serif" }}
+                >
+                  Consumer Insights
+                </span>
+                <h3 
+                  className="font-serif text-white mb-6 leading-[1.1]"
+                  style={{ 
+                    fontFamily: "'DM Serif Display', serif",
+                    fontStyle: "italic",
+                    fontSize: "clamp(1.75rem, 4vw, 2.75rem)"
+                  }}
+                >
+                  How a Local Beverage Brand Discovered a R40M Untapped Market
+                </h3>
+                <p 
+                  className="text-white/80 leading-relaxed mb-8"
+                  style={{ fontSize: "clamp(0.95rem, 1.5vw, 1.1rem)" }}
+                >
+                  Deep consumer research revealed hidden demand in peri-urban markets. Within 18 months, the brand expanded distribution to 200+ new outlets.
+                </p>
+                <div className="flex items-center justify-between text-sm text-white/50">
+                  <span>Featured in Business Day</span>
+                  <span className="underline underline-offset-4 hover:text-white/80 cursor-pointer transition-colors">3 minute read</span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Case Study 2 - Image Right, Text Left */}
+            <motion.div 
+              className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center mb-24 sm:mb-32"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.7 }}
+              data-testid="case-study-2"
+            >
+              <div className="py-4 order-2 lg:order-1">
+                <span 
+                  className="text-xs uppercase tracking-[0.25em] text-white/60 mb-6 block"
+                  style={{ fontFamily: "Roboto, sans-serif" }}
+                >
+                  Innovation Strategy
+                </span>
+                <h3 
+                  className="font-serif text-white mb-6 leading-[1.1]"
+                  style={{ 
+                    fontFamily: "'DM Serif Display', serif",
+                    fontStyle: "italic",
+                    fontSize: "clamp(1.75rem, 4vw, 2.75rem)"
+                  }}
+                >
+                  From Concept to Shelf in 90 Days — A Retail Innovation Sprint
+                </h3>
+                <p 
+                  className="text-white/80 leading-relaxed mb-8"
+                  style={{ fontSize: "clamp(0.95rem, 1.5vw, 1.1rem)" }}
+                >
+                  We partnered with a heritage food brand to fast-track product development. Test24 validated concepts in real-time, cutting launch risk by 60%.
+                </p>
+                <div className="flex items-center justify-between text-sm text-white/50">
+                  <span>Finalist, Retail Innovation Awards</span>
+                  <span className="underline underline-offset-4 hover:text-white/80 cursor-pointer transition-colors">4 minute read</span>
+                </div>
+              </div>
+              <div className="relative aspect-[4/5] overflow-hidden rounded-sm order-1 lg:order-2">
+                <img 
+                  src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&auto=format&fit=crop&q=80" 
+                  alt="Innovation team collaboration"
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            </motion.div>
+
+            {/* Case Study 3 - Image Left, Text Right */}
+            <motion.div 
+              className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.7 }}
+              data-testid="case-study-3"
+            >
+              <div className="relative aspect-[4/5] overflow-hidden rounded-sm">
+                <img 
+                  src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80" 
+                  alt="Data analytics dashboard"
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+              <div className="py-4">
+                <span 
+                  className="text-xs uppercase tracking-[0.25em] text-white/60 mb-6 block"
+                  style={{ fontFamily: "Roboto, sans-serif" }}
+                >
+                  Performance Tracking
+                </span>
+                <h3 
+                  className="font-serif text-white mb-6 leading-[1.1]"
+                  style={{ 
+                    fontFamily: "'DM Serif Display', serif",
+                    fontStyle: "italic",
+                    fontSize: "clamp(1.75rem, 4vw, 2.75rem)"
+                  }}
+                >
+                  The Dashboard That Saved a Brand R8M in Wasted Media Spend
+                </h3>
+                <p 
+                  className="text-white/80 leading-relaxed mb-8"
+                  style={{ fontSize: "clamp(0.95rem, 1.5vw, 1.1rem)" }}
+                >
+                  Real-time performance tracking identified underperforming channels early. The client pivoted mid-campaign, reallocating budget to high-ROI touchpoints.
+                </p>
+                <div className="flex items-center justify-between text-sm text-white/50">
+                  <span>Case Study with Permission</span>
+                  <span className="underline underline-offset-4 hover:text-white/80 cursor-pointer transition-colors">2 minute read</span>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </section>
 
