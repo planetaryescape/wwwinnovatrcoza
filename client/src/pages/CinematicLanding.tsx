@@ -400,17 +400,12 @@ export default function CinematicLanding() {
               transition={{ duration: 1, delay: 0.5 }}
               className="flex justify-center lg:justify-end"
             >
-              <video
+              <img
+                src="/video/consult-background.gif"
+                alt="Animated fish background"
                 className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[420px] lg:h-[420px] object-contain"
-                muted
-                autoPlay
-                loop
-                playsInline
-                preload="auto"
-                data-testid="video-consult-background"
-              >
-                <source src="/video/consult-background.mp4" type="video/mp4" />
-              </video>
+                data-testid="img-consult-background"
+              />
             </motion.div>
           </div>
         </div>
