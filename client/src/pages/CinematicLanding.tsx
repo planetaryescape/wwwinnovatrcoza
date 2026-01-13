@@ -586,7 +586,7 @@ export default function CinematicLanding() {
                 Ready when you are.
               </h2>
               
-              <p className="text-lg sm:text-xl text-white/50 max-w-xl mx-auto leading-relaxed" data-testid="text-contact-intro">
+              <p className="text-lg sm:text-xl max-w-xl mx-auto leading-relaxed text-[#ffffff]" data-testid="text-contact-intro">
                 High stakes decisions deserve a thought partner.
               </p>
             </motion.div>
