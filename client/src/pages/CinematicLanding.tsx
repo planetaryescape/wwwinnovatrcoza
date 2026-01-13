@@ -117,21 +117,24 @@ const caseStudies = [
   }
 ];
 
-const valueCards = [
+const whatWeDoCards = [
   {
-    icon: Layers,
-    title: "Phased programmes",
-    description: "From direction to optimisation to tracking."
+    title: "STRATEGY &\nDIRECTION",
+    description: "We help teams find focus when there are too many options. We clarify routes, align stakeholders, and build confidence in what to pursue.",
+    link: "How we set direction",
+    linkHref: "#"
   },
   {
-    icon: Target,
-    title: "Decision confidence",
-    description: "Clarity on trade-offs and what to do next."
+    title: "INNOVATION &\nTESTING",
+    description: "We design and run the tests that answer the right questions at the right time. Real evidence. Real insight. No guesswork.",
+    link: "How we test ideas",
+    linkHref: "#"
   },
   {
-    icon: Users,
-    title: "Senior-ready delivery",
-    description: "Workshops, alignment, and executive-ready outputs."
+    title: "EXECUTION &\nSCALE",
+    description: "We translate learnings into action — optimising launches, refining execution, and tracking performance as you grow.",
+    link: "How we drive momentum",
+    linkHref: "#"
   }
 ];
 
@@ -277,7 +280,7 @@ export default function CinematicLanding() {
 
   const navItems = [
     { label: "The Problem", action: () => scrollToSection("problem-solution") },
-    { label: "Track Record", action: () => scrollToSection("why-consult") },
+    { label: "What We Do", action: () => scrollToSection("why-consult") },
     { label: "Lifecycle", action: () => scrollToSection("lifecycle") },
     { label: "Results", action: () => scrollToSection("case-studies") },
     { label: "Contact", action: () => scrollToSection("consult-contact") },
@@ -285,7 +288,7 @@ export default function CinematicLanding() {
 
   const menuItems = [
     { label: "The Problem", action: () => scrollToSection("problem-solution") },
-    { label: "Track Record", action: () => scrollToSection("why-consult") },
+    { label: "What We Do", action: () => scrollToSection("why-consult") },
     { label: "Lifecycle", action: () => scrollToSection("lifecycle") },
     { label: "Results", action: () => scrollToSection("case-studies") },
     { label: "Contact", action: () => scrollToSection("consult-contact") },
@@ -494,47 +497,53 @@ export default function CinematicLanding() {
       {/* Problem / Solution Cinematic Section */}
       <ProblemSolutionSection />
 
-      {/* Track Record Section */}
-      <section id="why-consult" className="py-24 bg-[#0a0a0f]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-16">
-          <div className="text-center mb-16">
+      {/* What We Do Section */}
+      <section id="why-consult" className="py-24 sm:py-32 bg-[#0a0a0f]">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          {/* Header */}
+          <div className="mb-20 sm:mb-24">
             <h2 
-              className="sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white mb-6 text-[95px]"
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-serif font-bold text-white mb-6 italic tracking-tight"
               data-cursor-invert
+              data-testid="text-what-we-do-heading"
             >
-              Track Record
+              WHAT WE DO
             </h2>
-            <div className="max-w-3xl mx-auto space-y-4 text-[#fafafa]">
-              <p>
-                Test24 is designed for fast, high-quality testing.
-              </p>
-              <p>
-                Consult is for when the decision is bigger: multiple routes, multiple stakeholders, multiple phases.
-              </p>
-              <p>
-                We design the learning agenda, run the work, and translate it into clear actions.
-              </p>
-            </div>
+            <p className="text-lg sm:text-xl text-white/60 mb-4">
+              Many paths. One goal: systematic innovation
+            </p>
+            <p className="text-base sm:text-lg text-white/40 max-w-2xl">
+              Strategy, innovation, execution — designed to work together, or independently.
+            </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6">
-            {valueCards.map((card, index) => {
-              const IconComponent = card.icon;
-              return (
-                <Card 
-                  key={index}
-                  className="bg-[#12121a] border-gray-800 hover:border-[#4D5FF1]/30 transition-colors"
+          {/* Three Columns - Granny Smith Style */}
+          <div className="grid md:grid-cols-3 gap-12 lg:gap-16">
+            {whatWeDoCards.map((card, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6, delay: index * 0.15 }}
+                className="group"
+                data-testid={`card-what-we-do-${index}`}
+              >
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-6 leading-tight whitespace-pre-line tracking-tight">
+                  {card.title}
+                </h3>
+                <p className="text-white/50 text-sm sm:text-base leading-relaxed mb-6">
+                  {card.description}
+                </p>
+                <a 
+                  href={card.linkHref}
+                  className="inline-block text-white/70 text-sm underline underline-offset-4 hover:text-white transition-colors"
+                  data-testid={`link-what-we-do-${index}`}
                 >
-                  <CardContent className="p-8 text-center">
-                    <div className="w-14 h-14 rounded-xl bg-[#4D5FF1]/10 flex items-center justify-center mx-auto mb-6">
-                      <IconComponent className="w-7 h-7 text-[#4D5FF1]" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-3 text-white">{card.title}</h3>
-                    <p className="text-gray-400">{card.description}</p>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                  {card.link}
+                </a>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
