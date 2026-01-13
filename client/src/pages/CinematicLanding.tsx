@@ -314,7 +314,7 @@ export default function CinematicLanding() {
               className="text-xs tracking-[0.2em] text-white hover:text-white/70 transition-colors font-normal lowercase"
               style={{ 
                 writingMode: "vertical-rl",
-                fontFamily: "Roboto, sans-serif"
+                fontFamily: "'DM Serif Display', serif"
               }}
               data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
             >
@@ -380,8 +380,8 @@ export default function CinematicLanding() {
               className="text-left"
             >
               <h1 
-                className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-sans font-bold text-white leading-[0.95] tracking-tight uppercase"
-                style={{ fontFamily: "Roboto, sans-serif" }}
+                className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-serif font-bold text-white leading-[0.95] tracking-tight uppercase"
+                style={{ fontFamily: "'DM Serif Display', serif" }}
                 data-testid="text-headline"
                 data-cursor-invert
               >
@@ -697,6 +697,7 @@ export default function CinematicLanding() {
                         item.action();
                       }}
                       className="text-2xl sm:text-3xl text-white/80 hover:text-white transition-colors font-light cursor-pointer"
+                      style={{ fontFamily: "'DM Serif Display', serif" }}
                       data-testid={`menu-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                     >
                       {item.label}
