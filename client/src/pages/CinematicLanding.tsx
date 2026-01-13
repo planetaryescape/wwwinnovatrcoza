@@ -282,7 +282,7 @@ export default function CinematicLanding() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#5A5EFF] text-white">
+    <div className="min-h-screen bg-[#5A5EFF] text-white" style={{ backgroundColor: 'transparent' }}>
       <CustomCursor />
       
       {/* Skip to main content link for accessibility */}
@@ -382,65 +382,53 @@ export default function CinematicLanding() {
       {/* Hero Section */}
       <section 
         ref={heroRef}
-        className="relative min-h-screen bg-[#5A5EFF]"
+        className="relative min-h-screen overflow-hidden"
       >
-        {/* Solid Blue Background */}
-        <div className="absolute inset-0 bg-[#5A5EFF]" />
+        {/* Full-screen Fish GIF Background */}
+        <div className="absolute inset-0">
+          {!gifLoaded && (
+            <div className="absolute inset-0 bg-[#5A5EFF] animate-pulse" />
+          )}
+          <img
+            src={consultBackgroundGif}
+            alt="Animated underwater fish illustration"
+            className={`w-full h-full object-cover transition-opacity duration-700 ${gifLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoad={handleGifLoad}
+            loading="eager"
+            data-testid="img-consult-background"
+          />
+        </div>
 
-        {/* Hero Content - Two Column Layout */}
-        <div className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16">
-          <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            {/* Left: Large Text */}
-            <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 1, delay: 0.3 }}
-              className="text-left"
+        {/* Hero Content - Centered Text */}
+        <div className="relative z-10 h-screen flex items-center justify-center px-6 sm:px-10 lg:px-16">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.3 }}
+            className="text-center"
+          >
+            <h1 
+              className="font-serif font-bold text-white leading-[0.95] uppercase drop-shadow-lg"
+              style={{ 
+                fontFamily: "'DM Serif Display', serif", 
+                letterSpacing: "0.06em",
+                fontSize: "clamp(3rem, 10vw, 10rem)",
+                textShadow: "0 4px 30px rgba(0,0,0,0.3)"
+              }}
+              data-testid="text-headline"
+              data-cursor-invert
             >
-              <h1 
-                className="font-serif font-bold text-white leading-[0.95] uppercase"
-                style={{ 
-                  fontFamily: "'DM Serif Display', serif", 
-                  letterSpacing: "0.06em",
-                  fontSize: "clamp(3rem, 8vw, 9rem)"
-                }}
-                data-testid="text-headline"
-                data-cursor-invert
-              >
-                WE BUILD<br />
-                WHAT'S<br />
-                MISSING
-              </h1>
-              <p 
-                className="mt-8 font-sans text-white/90"
-                style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
-              >
-                Launch Better Innovation through in-house data, design & testing.
-              </p>
-            </motion.div>
-            
-            {/* Right: Shift Key Video Loop */}
-            <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 1, delay: 0.5 }}
-              className="flex justify-center lg:justify-end"
+              WE BUILD<br />
+              WHAT'S<br />
+              MISSING
+            </h1>
+            <p 
+              className="mt-8 font-sans text-white/95 drop-shadow-md max-w-xl mx-auto"
+              style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
             >
-              <div className="w-72 h-56 sm:w-88 sm:h-68 md:w-[420px] md:h-[320px] lg:w-[460px] lg:h-[350px] overflow-hidden rounded-lg -mt-16 sm:-mt-20 md:-mt-24 lg:-mt-28 relative">
-                {!gifLoaded && (
-                  <div className="absolute inset-0 bg-white/10 animate-pulse rounded-lg" />
-                )}
-                <img
-                  src={consultBackgroundGif}
-                  alt="Animated underwater fish illustration"
-                  className={`w-[115%] h-[140%] object-cover -translate-x-[5%] -translate-y-[15%] transition-opacity duration-500 ${gifLoaded ? 'opacity-100' : 'opacity-0'}`}
-                  onLoad={handleGifLoad}
-                  loading="eager"
-                  data-testid="img-consult-background"
-                />
-              </div>
-            </motion.div>
-          </div>
+              Launch Better Innovation through in-house data, design & testing.
+            </p>
+          </motion.div>
         </div>
 
         {/* Animated Bubbles Scroll Indicator */}
