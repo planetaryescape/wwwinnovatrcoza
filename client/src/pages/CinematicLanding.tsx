@@ -399,36 +399,42 @@ export default function CinematicLanding() {
           />
         </div>
 
-        {/* Hero Content - Centered Text */}
-        <div className="relative z-10 h-screen flex items-center justify-center px-6 sm:px-10 lg:px-16">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.3 }}
-            className="text-center"
-          >
-            <h1 
-              className="font-serif font-bold text-white leading-[0.95] uppercase drop-shadow-lg"
-              style={{ 
-                fontFamily: "'DM Serif Display', serif", 
-                letterSpacing: "0.06em",
-                fontSize: "clamp(3rem, 10vw, 10rem)",
-                textShadow: "0 4px 30px rgba(0,0,0,0.3)"
-              }}
-              data-testid="text-headline"
-              data-cursor-invert
+        {/* Hero Content - Two Column Layout: Text Left, Fish Right */}
+        <div className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16">
+          <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Left: Text */}
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, delay: 0.3 }}
+              className="text-left"
             >
-              WE BUILD<br />
-              WHAT'S<br />
-              MISSING
-            </h1>
-            <p 
-              className="mt-8 font-sans text-white/95 drop-shadow-md max-w-xl mx-auto"
-              style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
-            >
-              Launch Better Innovation through in-house data, design & testing.
-            </p>
-          </motion.div>
+              <h1 
+                className="font-serif font-bold text-white leading-[0.95] uppercase drop-shadow-lg"
+                style={{ 
+                  fontFamily: "'DM Serif Display', serif", 
+                  letterSpacing: "0.06em",
+                  fontSize: "clamp(3rem, 8vw, 9rem)",
+                  textShadow: "0 4px 30px rgba(0,0,0,0.3)"
+                }}
+                data-testid="text-headline"
+                data-cursor-invert
+              >
+                WE BUILD<br />
+                WHAT'S<br />
+                MISSING
+              </h1>
+              <p 
+                className="mt-8 font-sans text-white/95 drop-shadow-md max-w-md"
+                style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
+              >
+                Launch Better Innovation through in-house data, design & testing.
+              </p>
+            </motion.div>
+            
+            {/* Right: Empty space where fish shows through background */}
+            <div className="hidden lg:block" />
+          </div>
         </div>
 
         {/* Animated Bubbles Scroll Indicator */}
