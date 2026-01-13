@@ -401,11 +401,11 @@ export default function CinematicLanding() {
               transition={{ duration: 1, delay: 0.5 }}
               className="flex justify-center lg:justify-end"
             >
-              <div className="w-72 h-72 sm:w-88 sm:h-88 md:w-[420px] md:h-[420px] lg:w-[460px] lg:h-[460px] overflow-hidden rounded-lg">
+              <div className="w-72 h-56 sm:w-88 sm:h-68 md:w-[420px] md:h-[320px] lg:w-[460px] lg:h-[350px] overflow-hidden rounded-lg">
                 <img
                   src={consultBackgroundGif}
                   alt="Animated fish background"
-                  className="w-[115%] h-[115%] object-cover -translate-x-[5%] -translate-y-[6%]"
+                  className="w-[115%] h-[140%] object-cover -translate-x-[5%] -translate-y-[15%]"
                   data-testid="img-consult-background"
                 />
               </div>
