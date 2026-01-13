@@ -161,9 +161,9 @@ export default function CustomCursor() {
           backgroundColor: isOverHeading 
             ? '#ffffff' 
             : (isHovering ? cursorColorHover : cursorColor),
-          border: isOverHeading ? '2px solid #0a0a0f' : `1.5px solid ${borderColor}`,
+          border: isOverHeading ? 'none' : `1.5px solid ${borderColor}`,
           boxShadow: isOverHeading 
-            ? '0 0 0 1px rgba(255, 255, 255, 0.3)'
+            ? 'none'
             : (isEnlarged 
               ? `0 0 20px ${glowColorHover}, inset 0 0 10px ${glowColorHover}` 
               : `0 0 10px ${glowColor}`),
