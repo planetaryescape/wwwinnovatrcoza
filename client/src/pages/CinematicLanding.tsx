@@ -208,23 +208,12 @@ export default function CinematicLanding() {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
-  const [useAutoplay, setUseAutoplay] = useState(false);
   const [activePillar, setActivePillar] = useState(0);
-  const [heroOpacity, setHeroOpacity] = useState(1);
   const videoRef = useRef<HTMLVideoElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const lifecycleRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const currentTimeRef = useRef(0);
-  const targetTimeRef = useRef(0);
-  const animationFrameRef = useRef<number | null>(null);
-  const scrollScrubAttempted = useRef(false);
   const userInteracted = useRef(false);
-
-  const { scrollYProgress: heroScrollProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end end"]
-  });
 
   const { scrollYProgress: lifecycleScrollProgress } = useScroll({
     target: lifecycleRef,
@@ -268,93 +257,6 @@ export default function CinematicLanding() {
       window.removeEventListener("touchstart", handleInteraction);
     };
   }, [videoError]);
-
-  useEffect(() => {
-    if (reducedMotion || !videoRef.current || useAutoplay || videoError) return;
-
-    // Smooth exponential interpolation for buttery video scrubbing
-    const smoothStep = (current: number, target: number, smoothing: number) => {
-      const diff = target - current;
-      // Adaptive smoothing: faster when far, slower when close
-      const adaptiveFactor = Math.min(smoothing * (1 + Math.abs(diff) * 0.5), 0.4);
-      return current + diff * adaptiveFactor;
-    };
-
-    let lastTime = performance.now();
-    
-    const updateVideoTime = () => {
-      if (!videoRef.current || useAutoplay || videoError) return;
-      
-      const duration = videoRef.current.duration;
-      if (!duration || !isFinite(duration)) {
-        animationFrameRef.current = requestAnimationFrame(updateVideoTime);
-        return;
-      }
-      
-      // Frame-rate independent smoothing
-      const now = performance.now();
-      const deltaTime = Math.min((now - lastTime) / 16.67, 2); // Normalize to 60fps, cap at 2x
-      lastTime = now;
-      
-      // Smoother interpolation with frame-rate compensation
-      const smoothingFactor = 0.15 * deltaTime;
-      currentTimeRef.current = smoothStep(currentTimeRef.current, targetTimeRef.current, smoothingFactor);
-      
-      const clampedTime = Math.max(0, Math.min(currentTimeRef.current, duration - 0.05));
-      
-      try {
-        // Smaller threshold for more frequent updates = smoother playback
-        if (Math.abs(videoRef.current.currentTime - clampedTime) > 0.005) {
-          videoRef.current.currentTime = clampedTime;
-          scrollScrubAttempted.current = true;
-        }
-      } catch {
-        console.log("[Video] Scroll-scrub failed, falling back to autoplay");
-        setUseAutoplay(true);
-        return;
-      }
-      
-      animationFrameRef.current = requestAnimationFrame(updateVideoTime);
-    };
-
-    animationFrameRef.current = requestAnimationFrame(updateVideoTime);
-
-    const fallbackTimer = setTimeout(() => {
-      if (!scrollScrubAttempted.current && videoRef.current && !videoError) {
-        console.log("[Video] Scroll-scrub not working, enabling autoplay fallback");
-        setUseAutoplay(true);
-        tryPlayVideo();
-      }
-    }, 2500);
-
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      clearTimeout(fallbackTimer);
-    };
-  }, [reducedMotion, useAutoplay, videoError]);
-
-  useEffect(() => {
-    if (reducedMotion) return;
-
-    const unsubscribe = heroScrollProgress.on("change", (latest) => {
-      if (videoRef.current) {
-        const duration = videoRef.current.duration || 8;
-        targetTimeRef.current = latest * duration;
-        
-        const fadeStart = 0.85;
-        if (latest > fadeStart) {
-          const fadeProgress = (latest - fadeStart) / (1 - fadeStart);
-          setHeroOpacity(1 - fadeProgress * 0.3);
-        } else {
-          setHeroOpacity(1);
-        }
-      }
-    });
-
-    return unsubscribe;
-  }, [heroScrollProgress, reducedMotion]);
 
   useEffect(() => {
     return pillarProgress.on("change", (latest) => {
@@ -470,20 +372,16 @@ export default function CinematicLanding() {
           </Link>
         </div>
       </nav>
-      {/* Video Scroll-Scrub Zone */}
+      {/* Hero Section */}
       <section 
         ref={heroRef}
-        className="relative"
-        style={{ height: "280vh" }}
+        className="relative h-screen"
       >
-        {/* Sticky Video Container */}
-        <div className="sticky top-0 h-screen w-full overflow-hidden">
+        {/* Video Container */}
+        <div className="absolute inset-0 w-full h-full overflow-hidden">
           {/* Video Background */}
           {!reducedMotion && !videoError ? (
-            <motion.div 
-              className="absolute inset-0"
-              style={{ opacity: heroOpacity }}
-            >
+            <div className="absolute inset-0">
               <video
                 ref={videoRef}
                 className="absolute inset-0 w-full h-full object-cover pointer-events-none"
@@ -527,7 +425,7 @@ export default function CinematicLanding() {
               >
                 <source src="/video/consult-landing.mp4" type="video/mp4" />
               </video>
-            </motion.div>
+            </div>
           ) : (
             <div 
               className="absolute inset-0 bg-gradient-to-br from-[#0a0a0f] via-[#12121a] to-[#0a0a0f]"
@@ -554,10 +452,7 @@ export default function CinematicLanding() {
           />
 
           {/* Hero Content */}
-          <motion.div 
-            className="relative z-10 h-full flex flex-col items-center justify-center px-6"
-            style={{ opacity: heroOpacity }}
-          >
+          <div className="relative z-10 h-full flex flex-col items-center justify-center px-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -574,13 +469,10 @@ export default function CinematicLanding() {
                 <span className="text-white/90">Built for decisions.</span>
               </h1>
             </motion.div>
-          </motion.div>
+          </div>
 
           {/* Scroll indicator */}
-          <motion.div 
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
-            style={{ opacity: heroOpacity }}
-          >
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ repeat: Infinity, duration: 2 }}
@@ -588,7 +480,7 @@ export default function CinematicLanding() {
             >
               <motion.div className="w-1.5 h-1.5 bg-white/60 rounded-full" />
             </motion.div>
-          </motion.div>
+          </div>
         </div>
       </section>
       {/* Transition Bridge */}
