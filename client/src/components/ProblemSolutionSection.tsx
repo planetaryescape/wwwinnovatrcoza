@@ -30,17 +30,15 @@ export default function ProblemSolutionSection() {
             style={{ fontSize: "clamp(1rem, 1.5vw, 1.125rem)" }}
           >
             <p>
-              Innovation isn't linear, but too often, decisions are forced to be.
+              Innovation is too important to fail. But, <span className="font-semibold">DAMN</span> it's tough.
             </p>
             <p>
-              Big decisions don't fail because of a lack of ideas.
+              How fast is enough? Why is the project so expensive?
               <br className="hidden sm:block" />
-              They fail because there are too many routes, too many opinions, and no clear way forward.
+              Will this launch fail like the last one?
             </p>
             <p>
-              Multiple ideas. Multiple stakeholders. Conflicting signals.
-              <br className="hidden sm:block" />
-              Progress stalls while certainty stays just out of reach.
+              We obsess over making growth easier, by turning insights into decision centricity & action.
             </p>
           </motion.div>
         </div>
