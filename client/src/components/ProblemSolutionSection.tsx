@@ -64,15 +64,15 @@ export default function ProblemSolutionSection() {
             style={{ fontSize: "clamp(1rem, 1.5vw, 1.125rem)" }}
           >
             <p>
-              We align stakeholders, clarify options, and use real market evidence to show where to focus, how to play, and how to win, with confidence.
+              Finally, a team of do-ers, not fluffy consultants — that literally make big ideas happen, fast, and have already done so for over 15 years.
             </p>
             <p>
-              From strategy & innovation to execution & scale.
+              Idea to market. Agile in-house strategy, research, design and go-to-market experts all in one team.
             </p>
             <p className="font-medium">
-              No noise. No guesswork.
+              If innovation was a drive-through, welcome to Innovatr.
               <br />
-              Just momentum.
+              How can we take your order?
             </p>
           </motion.div>
         </div>
