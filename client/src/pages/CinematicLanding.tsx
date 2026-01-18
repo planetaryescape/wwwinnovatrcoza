@@ -634,12 +634,6 @@ export default function CinematicLanding() {
               THE PROCESS
             </h2>
             <p 
-              className="mb-4 text-white/90"
-              style={{ fontSize: "clamp(1.125rem, 2vw, 1.25rem)" }}
-            >
-              Many paths. One goal: systematic innovation.
-            </p>
-            <p 
               className="max-w-2xl text-white/90 leading-relaxed"
               style={{ fontSize: "clamp(1rem, 1.5vw, 1.125rem)" }}
             >
