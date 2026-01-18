@@ -207,13 +207,6 @@ function ClosingSection() {
           >
             Your next big move starts with a <span className="text-white font-medium">conversation</span>.
           </p>
-          <p 
-            className="text-white font-medium tracking-wide"
-            style={{ fontSize: "clamp(1.15rem, 2vw, 1.5rem)" }}
-            data-testid="closing-line-4"
-          >
-            Take the first step today.
-          </p>
         </motion.div>
         
         {/* Contact options - centered */}
