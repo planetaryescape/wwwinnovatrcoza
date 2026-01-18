@@ -91,7 +91,7 @@ function ImageCarousel({ images }: { images: string[] }) {
       <div 
         className="flex h-full absolute left-0 top-0 animate-scroll-left"
         style={{ 
-          animation: `scrollLeft 30s linear infinite`,
+          animation: `scrollLeft 35s linear infinite`,
         }}
       >
         {duplicatedImages.map((img, idx) => (
