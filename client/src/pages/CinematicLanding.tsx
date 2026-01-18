@@ -645,7 +645,7 @@ export default function CinematicLanding() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6, delay: index * 0.15 }}
-                className="group"
+                className="group text-center"
                 data-testid={`card-what-we-do-${index}`}
               >
                 <h3 
