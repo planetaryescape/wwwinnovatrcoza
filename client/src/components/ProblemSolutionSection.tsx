@@ -30,11 +30,15 @@ export default function ProblemSolutionSection() {
             style={{ fontSize: "clamp(1rem, 1.5vw, 1.125rem)" }}
           >
             <p>
-              Innovation is too important to fail. But, <span className="font-semibold">DAMN</span> it's tough.
+              Innovation is too important to fail.
+              <br />
+              But, <span className="font-semibold">DAMN</span> it's tough.
             </p>
             <p>
-              How fast is enough? Why is the project so expensive?
-              <br className="hidden sm:block" />
+              How fast is enough?
+              <br />
+              Why is the project so expensive?
+              <br />
               Will this launch fail like the last one?
             </p>
             <p>
