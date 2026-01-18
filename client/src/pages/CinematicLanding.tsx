@@ -129,7 +129,7 @@ const whatWeDoCards = [
   },
   {
     title: "INNOVATION &\nTESTING",
-    description: "We design and run the tests that answer the right questions at the right time. Real evidence. Real insight. No guesswork.",
+    description: "Identify growth opportunities and build a business case via:\n- Idea screening & optimization\n- Portfolio management\n- Preliminary share, source of volume and cannibalization\n- Price pack architecture",
     link: "How we test ideas",
     linkHref: "#"
   },
