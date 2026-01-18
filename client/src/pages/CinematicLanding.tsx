@@ -196,9 +196,7 @@ function ClosingSection() {
               fontStyle: "italic"
             }}
           >
-            Ready to unblock Real Growth?
-            <br />
-            <span className="text-white/60">Let's make it happen.</span>
+            Ready to Unlock Real Growth? <span className="text-white/60">Let's make it happen.</span>
           </h2>
           <p 
             className="text-white/85 leading-relaxed mb-4"
