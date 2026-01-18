@@ -186,7 +186,7 @@ export default function ToolsSection() {
               fontSize: "clamp(2rem, 5vw, 3.5rem)"
             }}
           >
-            Turn Insights into evidence based decisions.
+            Turn Insights into <span className="font-bold">evidence based</span> decisions.
           </h2>
           <p 
             className="text-white/60 max-w-2xl mx-auto leading-relaxed"
