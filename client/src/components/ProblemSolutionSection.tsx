@@ -42,7 +42,7 @@ export default function ProblemSolutionSection() {
               Will this launch fail like the last one?
             </p>
             <p>
-              We obsess over making growth easier, by turning insights into decision centricity & action.
+              We turn insights into action, fast.
             </p>
           </motion.div>
         </div>
