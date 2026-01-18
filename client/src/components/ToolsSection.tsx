@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useMemo } from "react";
+import { motion } from "framer-motion";
 import { Plus, X, Wrench } from "lucide-react";
 
 import gamifiedRespondentImg from "@assets/IMG_8480_1768743786622.jpeg";
@@ -84,29 +84,36 @@ const tools = [
 
 function ImageCarousel({ images }: { images: string[] }) {
   const shuffledImages = useMemo(() => shuffleArray(images), []);
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % shuffledImages.length);
-    }, 3500);
-    return () => clearInterval(interval);
-  }, [shuffledImages.length]);
+  const duplicatedImages = [...shuffledImages, ...shuffledImages];
 
   return (
     <div className="relative w-full h-full overflow-hidden">
-      <AnimatePresence mode="wait">
-        <motion.img
-          key={currentIndex}
-          src={shuffledImages[currentIndex]}
-          alt="Design portfolio"
-          className="absolute inset-0 w-full h-full object-cover"
-          initial={{ x: "100%", opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: "-100%", opacity: 0 }}
-          transition={{ duration: 0.8, ease: "easeInOut" }}
-        />
-      </AnimatePresence>
+      <motion.div
+        className="flex h-full"
+        animate={{ x: [0, -50 * shuffledImages.length + "%"] }}
+        transition={{
+          x: {
+            duration: shuffledImages.length * 4,
+            repeat: Infinity,
+            ease: "linear",
+          },
+        }}
+        style={{ width: `${duplicatedImages.length * 100}%` }}
+      >
+        {duplicatedImages.map((img, idx) => (
+          <div
+            key={idx}
+            className="h-full flex-shrink-0"
+            style={{ width: `${100 / duplicatedImages.length}%` }}
+          >
+            <img
+              src={img}
+              alt="Design portfolio"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ))}
+      </motion.div>
     </div>
   );
 }
