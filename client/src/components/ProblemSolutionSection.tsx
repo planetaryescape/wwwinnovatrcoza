@@ -63,7 +63,7 @@ export default function ProblemSolutionSection() {
             className="text-[#5A5EFF] mb-8 md:mb-12"
             style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.04em", fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
           >
-            A team of do-ers, not powerpoint consultants.
+            A team of do-ers,<br />not powerpoint consultants.
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0 }}
