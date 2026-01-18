@@ -68,7 +68,7 @@ export default function ProblemSolutionSection() {
             style={{ fontSize: "clamp(1rem, 1.5vw, 1.125rem)" }}
           >
             <p>
-              Finally, a team of do-ers, not fluffy consultants — that literally make big ideas happen, fast, and have already done so for over 15 years.
+              Finally, a team of do-ers, not powerpoint consultants — that have actually built & launched real products for 15 years.
             </p>
             <p>
               Idea to market. Agile in-house strategy, research, design and go-to-market experts all in one team.
