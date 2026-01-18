@@ -123,7 +123,7 @@ const caseStudies = [
 const whatWeDoCards = [
   {
     title: "STRATEGY &\nDIRECTION",
-    description: "We help teams find focus when there are too many options. We clarify routes, align stakeholders, and build confidence in what to pursue.",
+    description: "Understand and anticipate the market through:\n- Trends and foresight\n- Segmentation\n- Brand & Category Health\n- Demand Mapping",
     link: "How we set direction",
     linkHref: "#"
   },
@@ -594,7 +594,7 @@ export default function CinematicLanding() {
                   {card.title}
                 </h3>
                 <p 
-                  className="leading-relaxed mb-6 text-white/95"
+                  className="leading-relaxed mb-6 text-white/95 whitespace-pre-line"
                   style={{ fontSize: "clamp(0.875rem, 1.2vw, 1rem)" }}
                 >
                   {card.description}
