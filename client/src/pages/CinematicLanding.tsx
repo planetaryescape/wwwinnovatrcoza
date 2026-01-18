@@ -530,7 +530,7 @@ export default function CinematicLanding() {
                   className="mt-6 font-sans text-slate-600 max-w-md"
                   style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
                 >
-                  Launch Better Innovation<br />through in-house data, design & testing.
+                  Launch Better Innovation<br />through expert strategy, design & testing.
                 </p>
                 
                 {/* Animated pen GIF below subtitle */}
