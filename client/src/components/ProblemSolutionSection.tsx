@@ -92,7 +92,7 @@ export default function ProblemSolutionSection() {
             className="max-w-2xl mx-auto text-slate-700 leading-relaxed"
             style={{ fontFamily: "Roboto, sans-serif", fontSize: "clamp(1rem, 1.5vw, 1.15rem)" }}
           >
-            Idea to market. Agile in-house strategy, research, design and go-to-market experts all in one team.
+            Idea to market.<br />Agile in-house strategy, research, design and go-to-market experts all in one team.
           </motion.p>
         </div>
       </div>
