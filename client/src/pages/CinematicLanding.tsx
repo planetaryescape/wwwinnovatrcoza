@@ -535,16 +535,22 @@ export default function CinematicLanding() {
                 >
                   Launch Better Innovation<br />through in-house data, design & testing.
                 </p>
-                {/* Animated pen GIF below headline */}
-                <div className="mt-8 w-32 h-32 sm:w-40 sm:h-40">
-                  <img 
-                    src={penGif}
-                    alt="Animated pen illustration"
-                    className="w-full h-full object-contain"
-                  />
-                </div>
               </motion.div>
               
+              {/* Right: Animated pen GIF - fills the right section */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1, delay: 0.5 }}
+                className="hidden lg:flex items-center justify-center"
+              >
+                <img 
+                  src={penGif}
+                  alt="Animated pen illustration"
+                  className="w-full h-[70vh] max-h-[600px] object-contain"
+                  data-testid="img-hero-pen"
+                />
+              </motion.div>
             </div>
           </motion.div>
 
