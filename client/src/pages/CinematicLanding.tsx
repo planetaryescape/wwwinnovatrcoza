@@ -637,7 +637,7 @@ export default function CinematicLanding() {
               data-cursor-invert
               data-testid="text-what-we-do-heading"
             >
-              Strategy, innovation, execution — designed to work together, or independently.
+              Designed to connect where to play & how to win phases seamlessly.
             </h2>
           </div>
           
