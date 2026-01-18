@@ -69,7 +69,7 @@ const tools = [
   },
   {
     id: "upsiide",
-    title: "Analyse live results on your private dashboard",
+    title: "Analyse results live on your private dashboard",
     description: "Inspiring Data Visualizations and Modeling. Brilliant innovation marries rigor with playfulness and exploration. Your private dashboards make data inspiring.",
     image: dashboardImg,
   },
