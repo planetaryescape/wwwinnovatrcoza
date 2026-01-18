@@ -517,7 +517,7 @@ export default function CinematicLanding() {
                 >
                   WE BUILD<br />
                   WHAT'S<br />
-                  MISSING
+                  MISSING.
                 </h1>
                 <p 
                   className="mt-6 font-sans text-slate-600 max-w-md"
