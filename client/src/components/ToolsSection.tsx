@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Wrench } from "lucide-react";
 
 import marketShareImg from "@assets/generated_images/market_share_simulator_3d.png";
 import aiQualImg from "@assets/generated_images/ai_qual_neural_brain.png";
@@ -172,6 +172,9 @@ export default function ToolsSection() {
           transition={{ duration: 0.8 }}
           className="text-center mb-16 sm:mb-20"
         >
+          <div className="mb-4" style={{ transform: "rotate(-2deg)" }}>
+            <Wrench className="w-10 h-10 mx-auto text-white/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(255,255,255,0.1))" }} />
+          </div>
           <p 
             className="text-xs uppercase tracking-[0.35em] mb-6 text-white/50"
             style={{ fontFamily: "Roboto, sans-serif" }}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { X, Menu, ArrowRight, Target, Lightbulb, Trophy, TrendingUp, Mail } from "lucide-react";
+import { X, Menu, ArrowRight, Target, Lightbulb, Trophy, TrendingUp, Mail, GitBranch } from "lucide-react";
 import { SiLinkedin, SiInstagram } from "react-icons/si";
 import { Link, useLocation } from "wouter";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
@@ -613,6 +613,9 @@ export default function CinematicLanding() {
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           {/* Header */}
           <div className="text-left mb-16 sm:mb-20">
+            <div className="mb-4" style={{ transform: "rotate(2deg)" }}>
+              <GitBranch className="w-10 h-10 text-white/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(255,255,255,0.1))" }} />
+            </div>
             <p 
               className="text-xs uppercase tracking-[0.35em] mb-6 text-white/50"
               style={{ fontFamily: "Roboto, sans-serif" }}
@@ -680,6 +683,9 @@ export default function CinematicLanding() {
           <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 lg:pr-20">
             {/* Section Header */}
             <div className="text-left mb-16 sm:mb-20">
+              <div className="mb-4" style={{ transform: "rotate(-3deg)" }}>
+                <TrendingUp className="w-10 h-10 text-white/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(255,255,255,0.1))" }} />
+              </div>
               <p 
                 className="text-xs uppercase tracking-[0.35em] mb-6 text-white/50"
                 style={{ fontFamily: "Roboto, sans-serif" }}

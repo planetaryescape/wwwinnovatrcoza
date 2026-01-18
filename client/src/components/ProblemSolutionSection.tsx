@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { HelpCircle, Lightbulb } from "lucide-react";
 
 export default function ProblemSolutionSection() {
   return (
@@ -10,6 +11,15 @@ export default function ProblemSolutionSection() {
       <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
         {/* THE PROBLEM */}
         <div className="text-center mb-32 md:mb-40 lg:mb-48">
+          <motion.div
+            initial={{ opacity: 0, rotate: -5 }}
+            whileInView={{ opacity: 1, rotate: -3 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="mb-4"
+          >
+            <HelpCircle className="w-10 h-10 mx-auto text-white/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(255,255,255,0.1))" }} />
+          </motion.div>
           <motion.p 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -45,6 +55,15 @@ export default function ProblemSolutionSection() {
 
         {/* THE SOLUTION */}
         <div className="text-center">
+          <motion.div
+            initial={{ opacity: 0, rotate: 5 }}
+            whileInView={{ opacity: 1, rotate: 3 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="mb-4"
+          >
+            <Lightbulb className="w-10 h-10 mx-auto text-white/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(255,255,255,0.1))" }} />
+          </motion.div>
           <motion.p 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
