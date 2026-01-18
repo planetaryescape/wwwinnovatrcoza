@@ -5,7 +5,7 @@ export default function ProblemSolutionSection() {
   return (
     <section 
       id="problem-solution" 
-      className="py-24 md:py-32 lg:py-40 bg-[#FFF5EE]"
+      className="py-24 md:py-32 lg:py-40 bg-[#B5E0F0]"
       aria-labelledby="problem-heading"
     >
       <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
