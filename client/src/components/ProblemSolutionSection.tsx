@@ -16,7 +16,7 @@ export default function ProblemSolutionSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.7, ease: "easeOut" }}
-            className="font-serif font-bold text-white mb-8 md:mb-12 leading-[1.05]"
+            className="font-serif font-bold text-[#5A5EFF] mb-8 md:mb-12 leading-[1.05]"
             style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.06em", fontSize: "clamp(2.5rem, 8vw, 6rem)" }}
           >
             THE PROBLEM
@@ -54,7 +54,7 @@ export default function ProblemSolutionSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.7, ease: "easeOut" }}
-            className="font-serif font-bold text-white mb-8 md:mb-12 leading-[1.05]"
+            className="font-serif font-bold text-[#5A5EFF] mb-8 md:mb-12 leading-[1.05]"
             style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.06em", fontSize: "clamp(2.5rem, 8vw, 6rem)" }}
           >
             THE SOLUTION
