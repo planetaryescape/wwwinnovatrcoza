@@ -487,24 +487,22 @@ export default function CinematicLanding() {
           </Link>
         </div>
       </nav>
-      {/* Hero Section with Dive Animation */}
+      {/* Hero Section */}
       <section 
         ref={heroSectionRef}
-        className="relative h-[120vh]"
+        className="relative"
       >
-        {/* Sticky hero container */}
-        <motion.div 
+        {/* Hero container */}
+        <div 
           ref={heroRef}
-          className="sticky top-0 h-screen overflow-hidden"
-          style={{ opacity: heroOpacity }}
+          className="min-h-screen overflow-visible"
         >
           {/* Solid background */}
           <div className="absolute inset-0 bg-[#FFF5EE]" />
 
           {/* Hero Content */}
-          <motion.div 
-            className="relative z-10 h-screen flex flex-col justify-start px-6 sm:px-10 lg:px-16 pt-32 sm:pt-40 lg:pt-48 bg-[#FFF5EE]"
-            style={{ opacity: textOpacity }}
+          <div 
+            className="relative z-10 min-h-screen flex flex-col justify-start px-6 sm:px-10 lg:px-16 pt-32 sm:pt-40 lg:pt-48 pb-16 bg-[#FFF5EE]"
           >
             {/* Text content */}
             <div className="w-full max-w-7xl mx-auto">
@@ -551,8 +549,8 @@ export default function CinematicLanding() {
                 </motion.div>
               </motion.div>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </section>
 
       {/* Problem / Solution Cinematic Section */}
