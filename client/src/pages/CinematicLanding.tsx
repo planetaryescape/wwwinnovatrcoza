@@ -503,7 +503,7 @@ export default function CinematicLanding() {
 
           {/* Hero Content */}
           <motion.div 
-            className="relative z-10 h-screen flex flex-col justify-center px-6 sm:px-10 lg:px-16 bg-[#4444ff]"
+            className="relative z-10 h-screen flex flex-col justify-center px-6 sm:px-10 lg:px-16 pt-24 sm:pt-28 lg:pt-32 bg-[#4444ff]"
             style={{ opacity: textOpacity }}
           >
             {/* Text content */}
@@ -541,12 +541,12 @@ export default function CinematicLanding() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 1, delay: 0.6 }}
-                  className="mt-8"
+                  className="mt-8 -mx-6 sm:mx-0"
                 >
                   <img 
                     src={penGif}
                     alt="Animated pen illustration"
-                    className="w-full max-w-xs sm:max-w-sm h-auto object-contain"
+                    className="w-screen sm:w-full sm:max-w-md lg:max-w-lg h-auto object-contain"
                     data-testid="img-hero-pen"
                   />
                 </motion.div>
