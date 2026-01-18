@@ -495,7 +495,7 @@ export default function CinematicLanding() {
 
           {/* Hero Content */}
           <div 
-            className="relative z-10 min-h-screen flex flex-col justify-start px-6 sm:px-10 lg:px-16 pt-32 sm:pt-40 lg:pt-48 pb-16 bg-[#FFF5EE]"
+            className="relative z-10 min-h-screen flex flex-col justify-start px-6 sm:px-10 lg:px-16 pt-32 sm:pt-40 lg:pt-48 pb-16 bg-[#ffe7de]"
           >
             {/* Text content */}
             <div className="w-full max-w-7xl mx-auto">
@@ -545,7 +545,6 @@ export default function CinematicLanding() {
           </div>
         </div>
       </section>
-
       {/* Problem / Solution Cinematic Section */}
       <ProblemSolutionSection />
       {/* What We Do Section */}
@@ -612,10 +611,8 @@ export default function CinematicLanding() {
           </div>
         </div>
       </section>
-      
       {/* Tools Section */}
       <ToolsSection />
-      
       {/* Content Sections */}
       <div ref={contentRef}>
         {/* Case Studies Section - Alternating Layout */}
