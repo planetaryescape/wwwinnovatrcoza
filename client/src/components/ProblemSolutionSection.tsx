@@ -29,7 +29,7 @@ export default function ProblemSolutionSection() {
             className="text-[#5A5EFF] mb-8 md:mb-12"
             style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.04em", fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
           >
-            Innovation is too important to fail. But, DAMN it's tough.
+            Innovation is too important to fail.
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0 }}
