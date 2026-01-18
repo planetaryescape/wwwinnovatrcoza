@@ -84,19 +84,14 @@ const tools = [
 
 function ImageCarousel({ images }: { images: string[] }) {
   const shuffledImages = useMemo(() => shuffleArray(images), []);
-  const duplicatedImages = [...shuffledImages, ...shuffledImages];
+  const duplicatedImages = [...shuffledImages, ...shuffledImages, ...shuffledImages];
 
   return (
     <div className="relative w-full h-full overflow-hidden">
-      <motion.div
-        className="flex h-full absolute left-0 top-0"
-        animate={{ x: ["0%", "-50%"] }}
-        transition={{
-          x: {
-            duration: 6,
-            repeat: Infinity,
-            ease: "linear",
-          },
+      <div 
+        className="flex h-full absolute left-0 top-0 animate-scroll-left"
+        style={{ 
+          animation: `scrollLeft 30s linear infinite`,
         }}
       >
         {duplicatedImages.map((img, idx) => (
@@ -105,9 +100,16 @@ function ImageCarousel({ images }: { images: string[] }) {
             src={img}
             alt="Design portfolio"
             className="h-full w-auto flex-shrink-0 object-cover"
+            style={{ minWidth: '300px' }}
           />
         ))}
-      </motion.div>
+      </div>
+      <style>{`
+        @keyframes scrollLeft {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-33.333%); }
+        }
+      `}</style>
     </div>
   );
 }
