@@ -11,6 +11,7 @@ import speedImg from "@assets/generated_images/24hr_speed_clock_bolt.png";
 import agileDesignImg from "@assets/IMG_8478_1768743527121.jpeg";
 import gamifiedRespondentImg from "@assets/IMG_8480_1768743786622.jpeg";
 import emotionalAppealImg from "@assets/IMG_8482_1768743819583.jpeg";
+import marketShareImg2 from "@assets/IMG_8483_1768743852255.jpeg";
 
 const tools = [
   {
@@ -35,7 +36,7 @@ const tools = [
     id: "market-share",
     title: "Predict Market Share",
     description: "Proprietary Market Simulator. Market Simulator is a proprietary, patented data modeling that converts respondent data into forecasts of share of choice, source of volume, incrementality and cannibalization. This is the data you need to make compelling business decisions.",
-    image: marketShareImg,
+    image: marketShareImg2,
   },
   {
     id: "upsiide",
