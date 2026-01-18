@@ -9,13 +9,14 @@ import gamificationImg from "@assets/generated_images/gamification_controller_ab
 import upsiideImg from "@assets/generated_images/upsiide_dashboard_floating.png";
 import speedImg from "@assets/generated_images/24hr_speed_clock_bolt.png";
 import agileDesignImg from "@assets/IMG_8478_1768743527121.jpeg";
+import gamifiedRespondentImg from "@assets/IMG_8480_1768743786622.jpeg";
 
 const tools = [
   {
     id: "storyteller",
     title: "Gamified Respondent Experience",
     description: "Will consumers engage with my innovation? Will months of development be discarded in a moment as consumers ignore your idea? Upsiide identifies innovations that will break through with an intuitive swiping interface that places your ideas in a competitive context.",
-    image: storytellerImg,
+    image: gamifiedRespondentImg,
   },
   {
     id: "ai-qual",
