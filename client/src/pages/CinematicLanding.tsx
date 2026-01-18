@@ -191,9 +191,9 @@ function ClosingSection() {
               fontStyle: "italic"
             }}
           >
-            If you've reached this point, you're thinking seriously.
+            Ready to build something real?
             <br />
-            <span className="text-white/60">You're ready for what comes next.</span>
+            <span className="text-white/60">Let's make it happen.</span>
           </h2>
         </motion.div>
         
@@ -212,15 +212,7 @@ function ClosingSection() {
               style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.25rem)" }}
               data-testid="closing-line-2"
             >
-              Big decisions require <span className="text-white font-medium">focus</span>, <span className="text-white font-medium">evidence</span>, and <span className="text-white font-medium">alignment</span> — not more noise.
-            </p>
-            
-            <p 
-              className="text-white/85 leading-relaxed"
-              style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.25rem)" }}
-              data-testid="closing-line-3"
-            >
-              We work with teams who are ready to move from <span className="text-white font-medium">discussion to direction</span>, and from <span className="text-white font-medium">insight to action</span>.
+              Your next big move starts with a <span className="text-white font-medium">conversation</span>.
             </p>
             
             <div className="pt-4">
@@ -229,7 +221,7 @@ function ClosingSection() {
                 style={{ fontSize: "clamp(1.15rem, 2vw, 1.5rem)" }}
                 data-testid="closing-line-4"
               >
-                Start the conversation when it suits you.
+                Take the first step today.
               </p>
             </div>
           </motion.div>
