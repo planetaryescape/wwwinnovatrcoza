@@ -535,6 +535,14 @@ export default function CinematicLanding() {
                 >
                   Launch Better Innovation<br />through in-house data, design & testing.
                 </p>
+                {/* Animated pen GIF below headline */}
+                <div className="mt-8 w-32 h-32 sm:w-40 sm:h-40">
+                  <img 
+                    src={penGif}
+                    alt="Animated pen illustration"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
               </motion.div>
               
             </div>
@@ -777,6 +785,14 @@ export default function CinematicLanding() {
                 />
               </div>
               <div className="py-4 lg:col-span-3">
+                {/* Animated pen GIF above Performance Tracking */}
+                <div className="mb-6 w-24 h-24 sm:w-32 sm:h-32">
+                  <img 
+                    src={penGif}
+                    alt="Animated pen illustration"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
                 <span 
                   className="text-xs uppercase tracking-[0.25em] text-slate-600/80 mb-6 block"
                   style={{ fontFamily: "Roboto, sans-serif" }}
