@@ -537,21 +537,6 @@ export default function CinematicLanding() {
                 </p>
               </motion.div>
             </div>
-            
-            {/* Full-width animated pen GIF below headline */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, delay: 0.5 }}
-              className="w-full mt-8 flex justify-center"
-            >
-              <img 
-                src={penGif}
-                alt="Animated pen illustration"
-                className="w-full max-w-5xl h-auto max-h-[35vh] object-contain"
-                data-testid="img-hero-pen"
-              />
-            </motion.div>
           </motion.div>
 
           {/* Animated Bubbles Scroll Indicator */}
@@ -583,6 +568,25 @@ export default function CinematicLanding() {
           </motion.div>
         </motion.div>
       </section>
+      
+      {/* Full-screen Animated Pen Section */}
+      <section className="h-screen w-full bg-[#4444ff] flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8 }}
+          className="w-full h-full flex items-center justify-center p-4 sm:p-8"
+        >
+          <img 
+            src={penGif}
+            alt="Animated pen illustration"
+            className="w-full h-full max-w-4xl object-contain"
+            data-testid="img-fullscreen-pen"
+          />
+        </motion.div>
+      </section>
+
       {/* Problem / Solution Cinematic Section */}
       <ProblemSolutionSection />
       {/* What We Do Section */}
