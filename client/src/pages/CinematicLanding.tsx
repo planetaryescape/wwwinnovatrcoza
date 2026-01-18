@@ -577,7 +577,7 @@ export default function CinematicLanding() {
                   className="mt-8 font-sans text-white/95 drop-shadow-md max-w-md"
                   style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
                 >
-                  Launch Better Innovation through in-house data, design & testing.
+                  Launch Better Innovation<br />through in-house data, design & testing.
                 </p>
               </motion.div>
               
