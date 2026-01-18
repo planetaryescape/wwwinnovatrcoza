@@ -620,7 +620,7 @@ export default function CinematicLanding() {
               The Process
             </p>
             <h2 
-              className="text-white mb-6"
+              className="text-black mb-6"
               style={{ 
                 fontFamily: "'DM Serif Display', serif", 
                 letterSpacing: "0.04em",
