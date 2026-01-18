@@ -12,6 +12,7 @@ import agileDesignImg from "@assets/IMG_8478_1768743527121.jpeg";
 import gamifiedRespondentImg from "@assets/IMG_8480_1768743786622.jpeg";
 import emotionalAppealImg from "@assets/IMG_8482_1768743819583.jpeg";
 import marketShareImg2 from "@assets/IMG_8483_1768743852255.jpeg";
+import aiQualImg2 from "@assets/IMG_8492_1768744027913.jpeg";
 
 const tools = [
   {
@@ -24,7 +25,7 @@ const tools = [
     id: "ai-qual",
     title: "Empathy at Scale via AI Qual",
     description: "AI Video Interview. What: An AI qualitative moderator that understands your information objectives and conducts a naturalistic interview and summarizes the learnings, complete with a show reel. Why it matters: Makes agile qualitative research accessible. Bring the voice of the consumer to your stakeholders on demand.",
-    image: aiQualImg,
+    image: aiQualImg2,
   },
   {
     id: "gamification",
