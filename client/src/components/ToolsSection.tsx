@@ -157,7 +157,7 @@ export default function ToolsSection() {
   return (
     <section 
       id="consult-tools"
-      className="relative py-24 sm:py-32 bg-gradient-to-b from-[#1D2DC8] via-[#151FB0] to-[#0D1598]"
+      className="relative py-24 sm:py-32 bg-[#DDA0DD]"
       data-testid="section-tools"
     >
       {/* Light gradient overlay at top for depth */}
