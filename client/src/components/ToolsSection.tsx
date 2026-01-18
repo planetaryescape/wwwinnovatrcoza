@@ -12,14 +12,14 @@ import speedImg from "@assets/generated_images/24hr_speed_clock_bolt.png";
 const tools = [
   {
     id: "market-share",
-    title: "Market Share Simulator",
+    title: "Predict Market Share",
     description: "What's the size of the prize? The Upsiide idea Score has been proven across multiple categories to predict in-market success. This makes prioritizing opportunities incredibly simple. Patented data modeling converts Upsiide data into forecasts of share of choice, source of volume, incrementality, and cannibalization. There's nothing else like it in-market.",
     image: marketShareImg,
   },
   {
     id: "ai-qual",
-    title: "AI Qual",
-    description: "Deep qualitative insights at quantitative scale. Our AI-powered platform conducts nuanced conversations with thousands of consumers simultaneously.",
+    title: "Empathy at Scale via AI Qual",
+    description: "AI Video Interview. What: An AI qualitative moderator that understands your information objectives and conducts a naturalistic interview and summarizes the learnings, complete with a show reel. Why it matters: Makes agile qualitative research accessible. Bring the voice of the consumer to your stakeholders on demand.",
     image: aiQualImg,
   },
   {
