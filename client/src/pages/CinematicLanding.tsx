@@ -609,12 +609,12 @@ export default function CinematicLanding() {
       {/* Problem / Solution Cinematic Section */}
       <ProblemSolutionSection />
       {/* What We Do Section */}
-      <section id="why-consult" className="py-24 sm:py-32 bg-gradient-to-b from-[#3D4DE8] via-[#2D3DD8] to-[#1D2DC8]">
+      <section id="why-consult" className="py-24 sm:py-32 bg-[#FF7F6E]">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           {/* Header */}
-          <div className="text-left mb-16 sm:mb-20">
+          <div className="text-center mb-16 sm:mb-20">
             <div className="mb-4" style={{ transform: "rotate(2deg)" }}>
-              <GitBranch className="w-10 h-10 text-white/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(255,255,255,0.1))" }} />
+              <GitBranch className="w-10 h-10 mx-auto text-white/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(255,255,255,0.1))" }} />
             </div>
             <p 
               className="text-xs uppercase tracking-[0.35em] mb-6 text-white/50"
