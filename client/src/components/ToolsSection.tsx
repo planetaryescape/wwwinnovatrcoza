@@ -30,8 +30,8 @@ const tools = [
   },
   {
     id: "gamification",
-    title: "Gamification",
-    description: "Engage respondents with interactive survey experiences. Higher completion rates, richer data, happier participants.",
+    title: "Track Emotional Appeal",
+    description: "Emojis. To understand how people feel about your innovations, we created a set of 24 emojis based on Robert Plutchik's wheel of emotions. This allows us to dig deeper into drivers of strong or weak performance of your ideas while maintaining an experience that feels like social media, not a survey.",
     image: gamificationImg,
   },
   {
