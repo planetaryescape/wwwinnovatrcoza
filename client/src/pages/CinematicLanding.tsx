@@ -406,7 +406,7 @@ export default function CinematicLanding() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link href="/home">
             <span 
-              className="text-2xl font-serif font-bold text-white cursor-pointer hover:text-white/80 transition-colors"
+              className="text-2xl font-serif font-bold text-slate-800 cursor-pointer hover:text-slate-600 transition-colors"
               data-testid="link-logo-landing"
             >
               Innovatr
@@ -417,7 +417,7 @@ export default function CinematicLanding() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(true)}
-            className="lg:hidden text-white/80 hover:text-white transition-colors text-sm uppercase tracking-[0.2em] font-medium flex items-center gap-2"
+            className="lg:hidden text-slate-700 hover:text-slate-900 transition-colors text-sm uppercase tracking-[0.2em] font-medium flex items-center gap-2"
             aria-label="Open navigation menu"
             aria-expanded={menuOpen}
             data-testid="button-menu-open"
@@ -437,7 +437,7 @@ export default function CinematicLanding() {
             <button
               key={item.label}
               onClick={item.action}
-              className="text-xs tracking-[0.2em] text-white hover:text-white/70 transition-colors font-normal lowercase"
+              className="text-xs tracking-[0.2em] text-slate-600 hover:text-slate-800 transition-colors font-normal lowercase"
               style={{ 
                 writingMode: "vertical-rl",
                 fontFamily: "Roboto, sans-serif"
@@ -455,14 +455,14 @@ export default function CinematicLanding() {
             href="https://www.linkedin.com/in/richard-lawrence-innovation-72a62414"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-white hover:text-white/70 transition-colors"
+            className="text-slate-600 hover:text-slate-800 transition-colors"
             data-testid="social-linkedin"
           >
             <SiLinkedin className="w-4 h-4" />
           </a>
           <a
             href="mailto:Richard@innovatr.co.za?subject=Innovatr%20Consult%20Connect"
-            className="text-white hover:text-white/70 transition-colors"
+            className="text-slate-600 hover:text-slate-800 transition-colors"
             data-testid="social-email"
           >
             <Mail className="w-4 h-4" />
@@ -471,14 +471,14 @@ export default function CinematicLanding() {
             href="https://www.instagram.com/innovatr1?igsh=d2V3eGM5eDZ5anhh"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-white hover:text-white/70 transition-colors"
+            className="text-slate-600 hover:text-slate-800 transition-colors"
             data-testid="social-instagram"
           >
             <SiInstagram className="w-4 h-4" />
           </a>
           <Link href="/home">
             <span 
-              className="text-white hover:text-white/70 transition-colors text-sm font-bold"
+              className="text-slate-600 hover:text-slate-800 transition-colors text-sm font-bold"
               style={{ fontFamily: "Roboto, sans-serif" }}
               data-testid="nav-24"
             >
@@ -499,11 +499,11 @@ export default function CinematicLanding() {
           style={{ opacity: heroOpacity }}
         >
           {/* Solid background */}
-          <div className="absolute inset-0 bg-[#5A5EFF]" />
+          <div className="absolute inset-0 bg-[#FFF5EE]" />
 
           {/* Hero Content */}
           <motion.div 
-            className="relative z-10 h-screen flex flex-col justify-center px-6 sm:px-10 lg:px-16 pt-24 sm:pt-28 lg:pt-32 bg-[#4444ff]"
+            className="relative z-10 h-screen flex flex-col justify-start px-6 sm:px-10 lg:px-16 pt-32 sm:pt-40 lg:pt-48 bg-[#FFF5EE]"
             style={{ opacity: textOpacity }}
           >
             {/* Text content */}
@@ -515,12 +515,11 @@ export default function CinematicLanding() {
                 className="text-left"
               >
                 <h1 
-                  className="font-serif font-bold text-white leading-[0.95] uppercase drop-shadow-lg"
+                  className="font-serif font-bold text-slate-800 leading-[0.95] uppercase"
                   style={{ 
                     fontFamily: "'DM Serif Display', serif", 
                     letterSpacing: "0.06em",
-                    fontSize: "clamp(3rem, 8vw, 9rem)",
-                    textShadow: "0 4px 30px rgba(0,0,0,0.3)"
+                    fontSize: "clamp(3rem, 8vw, 9rem)"
                   }}
                   data-testid="text-headline"
                   data-cursor-invert
@@ -530,7 +529,7 @@ export default function CinematicLanding() {
                   MISSING
                 </h1>
                 <p 
-                  className="mt-6 font-sans text-white/95 drop-shadow-md max-w-md"
+                  className="mt-6 font-sans text-slate-600 max-w-md"
                   style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
                 >
                   Launch Better Innovation<br />through in-house data, design & testing.
