@@ -620,7 +620,7 @@ export default function CinematicLanding() {
       <section id="why-consult" className="py-24 sm:py-32 bg-gradient-to-b from-[#3D4DE8] via-[#2D3DD8] to-[#1D2DC8]">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           {/* Header */}
-          <div className="text-center mb-16 sm:mb-20">
+          <div className="text-left mb-16 sm:mb-20">
             <p 
               className="text-xs uppercase tracking-[0.35em] mb-6 text-white/50"
               style={{ fontFamily: "Roboto, sans-serif" }}
