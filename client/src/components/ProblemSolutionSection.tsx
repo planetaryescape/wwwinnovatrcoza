@@ -82,7 +82,7 @@ export default function ProblemSolutionSection() {
             className="text-slate-800 mb-8 md:mb-12"
             style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.04em", fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
           >
-            A team of do-ers,<br />not powerpoint consultants.
+            Trust Expert Do-ers, rather than fluffy consultants.
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0 }}
