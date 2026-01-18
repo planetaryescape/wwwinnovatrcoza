@@ -93,7 +93,7 @@ function ImageCarousel({ images }: { images: string[] }) {
         animate={{ x: ["0%", "-50%"] }}
         transition={{
           x: {
-            duration: 18,
+            duration: 6,
             repeat: Infinity,
             ease: "linear",
           },
