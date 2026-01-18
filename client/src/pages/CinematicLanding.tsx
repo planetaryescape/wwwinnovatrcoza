@@ -503,16 +503,16 @@ export default function CinematicLanding() {
 
           {/* Hero Content */}
           <motion.div 
-            className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16 bg-[#4444ff]"
+            className="relative z-10 h-screen flex flex-col justify-center px-6 sm:px-10 lg:px-16 bg-[#4444ff]"
             style={{ opacity: textOpacity }}
           >
-            <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-              {/* Left: Text */}
+            {/* Text content */}
+            <div className="w-full max-w-7xl mx-auto">
               <motion.div
-                initial={{ opacity: 0, x: -40 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: -40 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, delay: 0.3 }}
-                className="text-left"
+                className="text-center lg:text-left"
               >
                 <h1 
                   className="font-serif font-bold text-white leading-[0.95] uppercase drop-shadow-lg"
@@ -530,28 +530,28 @@ export default function CinematicLanding() {
                   MISSING
                 </h1>
                 <p 
-                  className="mt-8 font-sans text-white/95 drop-shadow-md max-w-md"
+                  className="mt-6 font-sans text-white/95 drop-shadow-md max-w-md mx-auto lg:mx-0"
                   style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
                 >
                   Launch Better Innovation<br />through in-house data, design & testing.
                 </p>
               </motion.div>
-              
-              {/* Right: Animated pen GIF - fills the right section */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 1, delay: 0.5 }}
-                className="hidden lg:flex items-center justify-center"
-              >
-                <img 
-                  src={penGif}
-                  alt="Animated pen illustration"
-                  className="w-full h-[70vh] max-h-[600px] object-contain"
-                  data-testid="img-hero-pen"
-                />
-              </motion.div>
             </div>
+            
+            {/* Full-width animated pen GIF below headline */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.5 }}
+              className="w-full mt-8 flex justify-center"
+            >
+              <img 
+                src={penGif}
+                alt="Animated pen illustration"
+                className="w-full max-w-5xl h-auto max-h-[35vh] object-contain"
+                data-testid="img-hero-pen"
+              />
+            </motion.div>
           </motion.div>
 
           {/* Animated Bubbles Scroll Indicator */}
@@ -791,14 +791,6 @@ export default function CinematicLanding() {
                 />
               </div>
               <div className="py-4 lg:col-span-3">
-                {/* Animated pen GIF above Performance Tracking */}
-                <div className="mb-6 w-24 h-24 sm:w-32 sm:h-32">
-                  <img 
-                    src={penGif}
-                    alt="Animated pen illustration"
-                    className="w-full h-full object-contain"
-                  />
-                </div>
                 <span 
                   className="text-xs uppercase tracking-[0.25em] text-slate-600/80 mb-6 block"
                   style={{ fontFamily: "Roboto, sans-serif" }}
