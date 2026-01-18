@@ -40,6 +40,12 @@ const tools = [
     description: "Inspiring Data Visualizations and Modeling. Brilliant innovation marries rigor with playfulness and exploration. Your private dashboards make data inspiring.",
     image: upsiideImg,
   },
+  {
+    id: "agile-design",
+    title: "Bring your concept to life with Agile Design",
+    description: "Just Design: Creatively Led. Results Driven. With 3 offices and clients across Africa, the Middle East, and Europe. Whether it's a small-scale artisanal brand or a retail powerhouse with a vast product line, our designs are not just Instagram-worthy, but also highly effective.",
+    image: speedImg,
+  },
 ];
 
 function ToolCard({ tool, index }: { tool: typeof tools[0]; index: number }) {
