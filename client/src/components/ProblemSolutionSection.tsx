@@ -73,11 +73,6 @@ export default function ProblemSolutionSection() {
             <p>
               Idea to market. Agile in-house strategy, research, design and go-to-market experts all in one team.
             </p>
-            <p className="font-medium">
-              If innovation was a drive-through, welcome to Innovatr.
-              <br />
-              How can we take your order?
-            </p>
           </motion.div>
         </div>
       </div>
