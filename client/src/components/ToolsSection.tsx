@@ -89,29 +89,23 @@ function ImageCarousel({ images }: { images: string[] }) {
   return (
     <div className="relative w-full h-full overflow-hidden">
       <motion.div
-        className="flex h-full"
-        animate={{ x: [0, -50 * shuffledImages.length + "%"] }}
+        className="flex h-full absolute left-0 top-0"
+        animate={{ x: ["0%", "-50%"] }}
         transition={{
           x: {
-            duration: shuffledImages.length * 4,
+            duration: 60,
             repeat: Infinity,
             ease: "linear",
           },
         }}
-        style={{ width: `${duplicatedImages.length * 100}%` }}
       >
         {duplicatedImages.map((img, idx) => (
-          <div
+          <img
             key={idx}
-            className="h-full flex-shrink-0"
-            style={{ width: `${100 / duplicatedImages.length}%` }}
-          >
-            <img
-              src={img}
-              alt="Design portfolio"
-              className="w-full h-full object-cover"
-            />
-          </div>
+            src={img}
+            alt="Design portfolio"
+            className="h-full w-auto flex-shrink-0 object-cover"
+          />
         ))}
       </motion.div>
     </div>
