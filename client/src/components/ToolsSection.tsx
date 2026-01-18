@@ -264,6 +264,17 @@ export default function ToolsSection() {
           >
             Our proprietary toolkit accelerates every phase of research — from hypothesis to action.
           </p>
+          <a 
+            href="/test24-basic"
+            className="inline-block mt-6 text-white underline underline-offset-4 hover:text-white/80 transition-colors"
+            style={{ 
+              fontFamily: "Roboto, sans-serif",
+              fontSize: "clamp(0.9rem, 1.3vw, 1rem)" 
+            }}
+            data-testid="link-test24-basic"
+          >
+            See how we Test Ideas in 24hrs
+          </a>
         </motion.div>
 
         {/* Tools Grid */}
