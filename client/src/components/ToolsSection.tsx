@@ -186,8 +186,7 @@ export default function ToolsSection() {
               fontSize: "clamp(2rem, 5vw, 3.5rem)"
             }}
           >
-            Built for speed.<br />
-            <span className="italic text-white/80">Designed for insight.</span>
+            Turn Insights into evidence based decisions.
           </h2>
           <p 
             className="text-white/60 max-w-2xl mx-auto leading-relaxed"
