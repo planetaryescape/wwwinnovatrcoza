@@ -629,9 +629,9 @@ export default function CinematicLanding() {
         <section id="case-studies" className="py-24 sm:py-32 bg-[#C5E1A5]">
           <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 lg:pr-20">
             {/* Section Header */}
-            <div className="text-left mb-16 sm:mb-20">
+            <div className="text-center mb-16 sm:mb-20">
               <div className="mb-4" style={{ transform: "rotate(-3deg)" }}>
-                <TrendingUp className="w-10 h-10 text-slate-700/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} />
+                <TrendingUp className="w-10 h-10 mx-auto text-slate-700/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} />
               </div>
               <p 
                 className="text-xs uppercase tracking-[0.35em] mb-6 text-slate-600/70"
