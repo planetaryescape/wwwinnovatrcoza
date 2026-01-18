@@ -5,7 +5,7 @@ export default function ProblemSolutionSection() {
   return (
     <section 
       id="problem-solution" 
-      className="py-24 md:py-32 lg:py-40 bg-black"
+      className="py-24 md:py-32 lg:py-40 bg-[#FFF5EE]"
       aria-labelledby="problem-heading"
     >
       <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -18,14 +18,14 @@ export default function ProblemSolutionSection() {
             transition={{ duration: 0.6 }}
             className="mb-4"
           >
-            <HelpCircle className="w-10 h-10 mx-auto text-white/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(255,255,255,0.1))" }} />
+            <HelpCircle className="w-10 h-10 mx-auto text-slate-500 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} />
           </motion.div>
           <motion.p 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.5 }}
-            className="text-xs uppercase tracking-[0.35em] mb-6 text-white/50"
+            className="text-xs uppercase tracking-[0.35em] mb-6 text-slate-500"
             style={{ fontFamily: "Roboto, sans-serif" }}
           >
             The Problem
@@ -46,7 +46,7 @@ export default function ProblemSolutionSection() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="max-w-2xl mx-auto text-white/60 leading-relaxed"
+            className="max-w-2xl mx-auto text-slate-600 leading-relaxed"
             style={{ fontFamily: "Roboto, sans-serif", fontSize: "clamp(1rem, 1.5vw, 1.15rem)" }}
           >
             How fast is enough? Why is the project so expensive? Will this launch fail like the last one?
@@ -62,14 +62,14 @@ export default function ProblemSolutionSection() {
             transition={{ duration: 0.6 }}
             className="mb-4"
           >
-            <Lightbulb className="w-10 h-10 mx-auto text-white/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(255,255,255,0.1))" }} />
+            <Lightbulb className="w-10 h-10 mx-auto text-slate-500 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} />
           </motion.div>
           <motion.p 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.5 }}
-            className="text-xs uppercase tracking-[0.35em] mb-6 text-white/50"
+            className="text-xs uppercase tracking-[0.35em] mb-6 text-slate-500"
             style={{ fontFamily: "Roboto, sans-serif" }}
           >
             The Solution
@@ -89,7 +89,7 @@ export default function ProblemSolutionSection() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="max-w-2xl mx-auto text-white/60 leading-relaxed"
+            className="max-w-2xl mx-auto text-slate-600 leading-relaxed"
             style={{ fontFamily: "Roboto, sans-serif", fontSize: "clamp(1rem, 1.5vw, 1.15rem)" }}
           >
             Idea to market. Agile in-house strategy, research, design and go-to-market experts all in one team.
