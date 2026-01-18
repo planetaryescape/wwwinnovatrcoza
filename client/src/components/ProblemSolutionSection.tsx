@@ -18,14 +18,14 @@ export default function ProblemSolutionSection() {
             transition={{ duration: 0.6 }}
             className="mb-4"
           >
-            <HelpCircle className="w-10 h-10 mx-auto text-slate-800 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} />
+            <HelpCircle className="w-10 h-10 mx-auto text-white/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(255,255,255,0.1))" }} />
           </motion.div>
           <motion.p 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.5 }}
-            className="text-xs uppercase tracking-[0.35em] mb-6 text-slate-800"
+            className="text-xs uppercase tracking-[0.35em] mb-6 text-white/60"
             style={{ fontFamily: "Roboto, sans-serif" }}
           >
             The Problem
@@ -36,7 +36,7 @@ export default function ProblemSolutionSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.7, ease: "easeOut" }}
-            className="text-slate-800 mb-8 md:mb-12"
+            className="text-white mb-8 md:mb-12"
             style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.04em", fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
           >
             Innovation is too important to fail.
@@ -46,7 +46,7 @@ export default function ProblemSolutionSection() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="max-w-2xl mx-auto text-slate-700 leading-relaxed"
+            className="max-w-2xl mx-auto text-white/90 leading-relaxed"
             style={{ fontFamily: "Roboto, sans-serif", fontSize: "clamp(1rem, 1.5vw, 1.15rem)" }}
           >
             Why are projects so slow? Why is it so expensive? Will this launch fail like the last one?
@@ -62,14 +62,14 @@ export default function ProblemSolutionSection() {
             transition={{ duration: 0.6 }}
             className="mb-4"
           >
-            <Lightbulb className="w-10 h-10 mx-auto text-slate-800 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} />
+            <Lightbulb className="w-10 h-10 mx-auto text-white/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(255,255,255,0.1))" }} />
           </motion.div>
           <motion.p 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.5 }}
-            className="text-xs uppercase tracking-[0.35em] mb-6 text-slate-800"
+            className="text-xs uppercase tracking-[0.35em] mb-6 text-white/60"
             style={{ fontFamily: "Roboto, sans-serif" }}
           >
             The Solution
@@ -79,7 +79,7 @@ export default function ProblemSolutionSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.7, ease: "easeOut" }}
-            className="text-slate-800 mb-8 md:mb-12"
+            className="text-white mb-8 md:mb-12"
             style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.04em", fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
           >
             Trust Expert Do-ers, rather than fluffy consultants.
@@ -89,7 +89,7 @@ export default function ProblemSolutionSection() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="max-w-2xl mx-auto text-slate-700 leading-relaxed"
+            className="max-w-2xl mx-auto text-white/90 leading-relaxed"
             style={{ fontFamily: "Roboto, sans-serif", fontSize: "clamp(1rem, 1.5vw, 1.15rem)" }}
           >
             Idea to market.<br />Agile in-house strategy, research, design and go-to-market experts all in one team.
