@@ -49,7 +49,7 @@ export default function ProblemSolutionSection() {
             className="max-w-2xl mx-auto text-slate-700 leading-relaxed"
             style={{ fontFamily: "Roboto, sans-serif", fontSize: "clamp(1rem, 1.5vw, 1.15rem)" }}
           >
-            How fast is enough? Why is the project so expensive? Will this launch fail like the last one?
+            Why are projects so slow? Why is it so expensive? Will this launch fail like the last one?
           </motion.p>
         </div>
 
