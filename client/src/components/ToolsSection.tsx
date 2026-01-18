@@ -128,14 +128,7 @@ function ToolCard({ tool, index }: { tool: typeof tools[0]; index: number }) {
               {tool.description}
             </p>
             
-            <div className="mt-4 flex items-center justify-between">
-              <span 
-                className="text-[#5A5EFF]/60 text-sm"
-                style={{ fontFamily: "Roboto, sans-serif" }}
-              >
-                Coming soon
-              </span>
-              
+            <div className="mt-4 flex items-center justify-end">
               {/* Close button */}
               <button
                 onClick={() => setIsFlipped(false)}
