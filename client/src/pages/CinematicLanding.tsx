@@ -14,7 +14,6 @@ import categoryAuditsImg from "@assets/generated_images/category_audits_3d_cubes
 import ideationWorkshopsImg from "@assets/generated_images/ideation_workshops_creative_explosion.png";
 import endToEndDesignImg from "@assets/generated_images/end_to_end_design_flow.png";
 import brandHealthImg from "@assets/generated_images/brand_health_tracking_pulse.png";
-import consultBackgroundGif from "@assets/test_1768331395403.gif";
 import cookingGif from "@assets/RafaelVarona_Playbook_Cooking_Animation_1768339161246.gif";
 import airplanesGif from "@assets/rafael-varona-airplanes_1768339161246.gif";
 import penGif from "@assets/RafaelVarona_Playbook_Pen_1768339161246.gif";
@@ -321,16 +320,12 @@ export default function CinematicLanding() {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
-  const [gifLoaded, setGifLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const heroSectionRef = useRef<HTMLElement>(null);
   const userInteracted = useRef(false);
 
-  const handleGifLoad = useCallback(() => {
-    setGifLoaded(true);
-  }, []);
 
   // Scroll-based dive animation for hero section
   const { scrollYProgress: heroScrollProgress } = useScroll({
@@ -339,10 +334,6 @@ export default function CinematicLanding() {
     layoutEffect: false
   });
 
-  // Fish zoom: starts at 1x and zooms to 2.5x as you scroll
-  const fishScale = useTransform(heroScrollProgress, [0, 0.8], [1, 2.5]);
-  // Fish moves toward center as it zooms
-  const fishX = useTransform(heroScrollProgress, [0, 0.8], ["0%", "-25%"]);
   // Text fades out quickly
   const textOpacity = useTransform(heroScrollProgress, [0, 0.3], [1, 0]);
   // Overall hero opacity for transition
@@ -507,26 +498,10 @@ export default function CinematicLanding() {
           className="sticky top-0 h-screen overflow-hidden"
           style={{ opacity: heroOpacity }}
         >
-          {/* Fish GIF Background - positioned right with zoom animation */}
-          <div className="absolute inset-0 bg-[#5A5EFF]">
-            {!gifLoaded && (
-              <div className="absolute inset-0 bg-[#5A5EFF] animate-pulse" />
-            )}
-            <motion.img
-              src={consultBackgroundGif}
-              alt="Animated underwater fish illustration"
-              className={`absolute -right-8 lg:-right-12 top-1/2 h-[85%] w-auto max-w-[65%] object-contain transition-opacity duration-700 origin-center ${gifLoaded ? 'opacity-100' : 'opacity-0'}`}
-              style={{ 
-                scale: fishScale, 
-                x: fishX,
-                y: "-50%"
-              }}
-              onLoad={handleGifLoad}
-              data-testid="img-consult-background"
-            />
-          </div>
+          {/* Solid background */}
+          <div className="absolute inset-0 bg-[#5A5EFF]" />
 
-          {/* Hero Content - Two Column Layout: Text Left, Fish Right */}
+          {/* Hero Content */}
           <motion.div 
             className="relative z-10 h-screen flex items-center px-6 sm:px-10 lg:px-16 bg-[#4444ff]"
             style={{ opacity: textOpacity }}
@@ -562,8 +537,6 @@ export default function CinematicLanding() {
                 </p>
               </motion.div>
               
-              {/* Right: Empty space where fish shows through background */}
-              <div className="hidden lg:block" />
             </div>
           </motion.div>
 
