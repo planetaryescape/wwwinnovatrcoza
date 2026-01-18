@@ -1,19 +1,46 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Wrench } from "lucide-react";
 
-import marketShareImg from "@assets/generated_images/market_share_simulator_3d.png";
-import aiQualImg from "@assets/generated_images/ai_qual_neural_brain.png";
-import storytellerImg from "@assets/generated_images/storyteller_flowing_book.png";
-import gamificationImg from "@assets/generated_images/gamification_controller_abstract.png";
-import upsiideImg from "@assets/generated_images/upsiide_dashboard_floating.png";
-import speedImg from "@assets/generated_images/24hr_speed_clock_bolt.png";
-import agileDesignImg from "@assets/IMG_8478_1768743527121.jpeg";
 import gamifiedRespondentImg from "@assets/IMG_8480_1768743786622.jpeg";
 import emotionalAppealImg from "@assets/IMG_8482_1768743819583.jpeg";
 import marketShareImg2 from "@assets/IMG_8483_1768743852255.jpeg";
 import aiQualImg2 from "@assets/IMG_8492_1768744027913.jpeg";
 import dashboardImg from "@assets/IMG_8494_1768744362356.jpeg";
+
+import agileImg1 from "@assets/IMG_8495_1768760848107.jpeg";
+import agileImg2 from "@assets/IMG_8498_1768760848107.jpeg";
+import agileImg3 from "@assets/IMG_8500_1768760848107.jpeg";
+import agileImg4 from "@assets/IMG_8497_1768760848107.jpeg";
+import agileImg5 from "@assets/IMG_8496_1768760848107.jpeg";
+import agileImg6 from "@assets/IMG_8501_1768760848107.jpeg";
+import agileImg7 from "@assets/IMG_8503_1768760848107.jpeg";
+import agileImg8 from "@assets/IMG_8502_1768760848107.jpeg";
+import agileImg9 from "@assets/IMG_8504_1768760848107.jpeg";
+import agileImg10 from "@assets/IMG_8508_1768760848107.jpeg";
+import agileImg11 from "@assets/IMG_8507_1768760848107.jpeg";
+import agileImg12 from "@assets/IMG_8510_1768760848107.jpeg";
+import agileImg13 from "@assets/IMG_8512_1768760848107.jpeg";
+import agileImg14 from "@assets/IMG_8509_1768760848107.jpeg";
+import agileImg15 from "@assets/IMG_8511_1768760848107.jpeg";
+import agileImg16 from "@assets/IMG_8505_1768760848107.jpeg";
+import agileImg17 from "@assets/IMG_8506_1768760848107.jpeg";
+import agileImg18 from "@assets/IMG_8499_1768760848107.jpeg";
+
+const agileDesignImages = [
+  agileImg1, agileImg2, agileImg3, agileImg4, agileImg5, agileImg6,
+  agileImg7, agileImg8, agileImg9, agileImg10, agileImg11, agileImg12,
+  agileImg13, agileImg14, agileImg15, agileImg16, agileImg17, agileImg18
+];
+
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
 
 const tools = [
   {
@@ -50,12 +77,43 @@ const tools = [
     id: "agile-design",
     title: "Bring your concept to life with Agile Design",
     description: "Just Design: Creatively Led. Results Driven. With 3 offices and clients across Africa, the Middle East, and Europe. Whether it's a small-scale artisanal brand or a retail powerhouse with a vast product line, our designs are not just Instagram-worthy, but also highly effective.",
-    image: agileDesignImg,
+    image: null,
+    isCarousel: true,
   },
 ];
 
+function ImageCarousel({ images }: { images: string[] }) {
+  const shuffledImages = useMemo(() => shuffleArray(images), []);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % shuffledImages.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [shuffledImages.length]);
+
+  return (
+    <div className="relative w-full h-full overflow-hidden">
+      <AnimatePresence mode="wait">
+        <motion.img
+          key={currentIndex}
+          src={shuffledImages[currentIndex]}
+          alt="Design portfolio"
+          className="absolute inset-0 w-full h-full object-cover"
+          initial={{ x: "100%", opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: "-100%", opacity: 0 }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
+        />
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function ToolCard({ tool, index }: { tool: typeof tools[0]; index: number }) {
   const [isFlipped, setIsFlipped] = useState(false);
+  const isCarousel = 'isCarousel' in tool && tool.isCarousel;
 
   return (
     <motion.div
@@ -79,12 +137,16 @@ function ToolCard({ tool, index }: { tool: typeof tools[0]; index: number }) {
         >
           {/* Image area */}
           <div className="h-[65%] relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
-            <img 
-              src={tool.image}
-              alt={tool.title}
-              className="w-full h-full object-cover"
-              data-testid={`img-tool-${tool.id}`}
-            />
+            {isCarousel ? (
+              <ImageCarousel images={agileDesignImages} />
+            ) : (
+              <img 
+                src={tool.image || ""}
+                alt={tool.title}
+                className="w-full h-full object-cover"
+                data-testid={`img-tool-${tool.id}`}
+              />
+            )}
           </div>
           
           {/* Title area */}
