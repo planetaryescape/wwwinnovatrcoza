@@ -13,7 +13,7 @@ const tools = [
   {
     id: "market-share",
     title: "Market Share Simulator",
-    description: "Model competitive scenarios and predict market dynamics before you make your move. Run 'what-if' analyses to pressure-test your strategy.",
+    description: "What's the size of the prize? The Upsiide idea Score has been proven across multiple categories to predict in-market success. This makes prioritizing opportunities incredibly simple. Patented data modeling converts Upsiide data into forecasts of share of choice, source of volume, incrementality, and cannibalization. There's nothing else like it in-market.",
     image: marketShareImg,
   },
   {
