@@ -11,10 +11,10 @@ import speedImg from "@assets/generated_images/24hr_speed_clock_bolt.png";
 
 const tools = [
   {
-    id: "market-share",
-    title: "Predict Market Share",
-    description: "Proprietary Market Simulator. Market Simulator is a proprietary, patented data modeling that converts respondent data into forecasts of share of choice, source of volume, incrementality and cannibalization. This is the data you need to make compelling business decisions.",
-    image: marketShareImg,
+    id: "storyteller",
+    title: "Gamified Respondent Experience",
+    description: "Will consumers engage with my innovation? Will months of development be discarded in a moment as consumers ignore your idea? Upsiide identifies innovations that will break through with an intuitive swiping interface that places your ideas in a competitive context.",
+    image: storytellerImg,
   },
   {
     id: "ai-qual",
@@ -23,28 +23,22 @@ const tools = [
     image: aiQualImg,
   },
   {
-    id: "storyteller",
-    title: "Gamified Respondent Experience",
-    description: "Will consumers engage with my innovation? Will months of development be discarded in a moment as consumers ignore your idea? Upsiide identifies innovations that will break through with an intuitive swiping interface that places your ideas in a competitive context.",
-    image: storytellerImg,
-  },
-  {
     id: "gamification",
     title: "Track Emotional Appeal",
     description: "Emojis. To understand how people feel about your innovations, we created a set of 24 emojis based on Robert Plutchik's wheel of emotions. This allows us to dig deeper into drivers of strong or weak performance of your ideas while maintaining an experience that feels like social media, not a survey.",
     image: gamificationImg,
   },
   {
+    id: "market-share",
+    title: "Predict Market Share",
+    description: "Proprietary Market Simulator. Market Simulator is a proprietary, patented data modeling that converts respondent data into forecasts of share of choice, source of volume, incrementality and cannibalization. This is the data you need to make compelling business decisions.",
+    image: marketShareImg,
+  },
+  {
     id: "upsiide",
     title: "Analyse live results on your private dashboard",
     description: "Inspiring Data Visualizations and Modeling. Brilliant innovation marries rigor with playfulness and exploration. Your private dashboards make data inspiring.",
     image: upsiideImg,
-  },
-  {
-    id: "speed",
-    title: "24hr Report Speed",
-    description: "From fieldwork to insights in a single day. Our streamlined process delivers actionable reports while your competition is still waiting.",
-    image: speedImg,
   },
 ];
 
