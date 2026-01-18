@@ -8,6 +8,7 @@ import storytellerImg from "@assets/generated_images/storyteller_flowing_book.pn
 import gamificationImg from "@assets/generated_images/gamification_controller_abstract.png";
 import upsiideImg from "@assets/generated_images/upsiide_dashboard_floating.png";
 import speedImg from "@assets/generated_images/24hr_speed_clock_bolt.png";
+import agileDesignImg from "@assets/IMG_8478_1768743527121.jpeg";
 
 const tools = [
   {
@@ -44,7 +45,7 @@ const tools = [
     id: "agile-design",
     title: "Bring your concept to life with Agile Design",
     description: "Just Design: Creatively Led. Results Driven. With 3 offices and clients across Africa, the Middle East, and Europe. Whether it's a small-scale artisanal brand or a retail powerhouse with a vast product line, our designs are not just Instagram-worthy, but also highly effective.",
-    image: speedImg,
+    image: agileDesignImg,
   },
 ];
 
