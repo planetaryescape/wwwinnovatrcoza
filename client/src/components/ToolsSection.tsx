@@ -36,8 +36,8 @@ const tools = [
   },
   {
     id: "upsiide",
-    title: "Upsiide Dashboard",
-    description: "Innovation testing platform that ranks and optimizes ideas in real-time. See which concepts have the highest potential before you invest.",
+    title: "Track results on your private dashboard",
+    description: "Inspiring Data Visualizations and Modeling. Brilliant innovation marries rigor with playfulness and exploration. Your private dashboards make data inspiring.",
     image: upsiideImg,
   },
   {
