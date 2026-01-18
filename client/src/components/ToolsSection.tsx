@@ -13,6 +13,7 @@ import gamifiedRespondentImg from "@assets/IMG_8480_1768743786622.jpeg";
 import emotionalAppealImg from "@assets/IMG_8482_1768743819583.jpeg";
 import marketShareImg2 from "@assets/IMG_8483_1768743852255.jpeg";
 import aiQualImg2 from "@assets/IMG_8492_1768744027913.jpeg";
+import dashboardImg from "@assets/IMG_8494_1768744362356.jpeg";
 
 const tools = [
   {
@@ -43,7 +44,7 @@ const tools = [
     id: "upsiide",
     title: "Analyse live results on your private dashboard",
     description: "Inspiring Data Visualizations and Modeling. Brilliant innovation marries rigor with playfulness and exploration. Your private dashboards make data inspiring.",
-    image: upsiideImg,
+    image: dashboardImg,
   },
   {
     id: "agile-design",
