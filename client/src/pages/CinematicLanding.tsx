@@ -620,25 +620,25 @@ export default function CinematicLanding() {
       <section id="why-consult" className="py-24 sm:py-32 bg-gradient-to-b from-[#3D4DE8] via-[#2D3DD8] to-[#1D2DC8]">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           {/* Header */}
-          <div className="mb-20 sm:mb-24">
+          <div className="text-center mb-16 sm:mb-20">
+            <p 
+              className="text-xs uppercase tracking-[0.35em] mb-6 text-white/50"
+              style={{ fontFamily: "Roboto, sans-serif" }}
+            >
+              The Process
+            </p>
             <h2 
-              className="font-serif font-bold text-white mb-6"
+              className="text-white mb-6"
               style={{ 
                 fontFamily: "'DM Serif Display', serif", 
-                letterSpacing: "0.06em",
-                fontSize: "clamp(2.5rem, 7vw, 6rem)"
+                letterSpacing: "0.04em",
+                fontSize: "clamp(2rem, 5vw, 3.5rem)"
               }}
               data-cursor-invert
               data-testid="text-what-we-do-heading"
             >
-              THE PROCESS
-            </h2>
-            <p 
-              className="max-w-2xl text-white/90 leading-relaxed"
-              style={{ fontSize: "clamp(1rem, 1.5vw, 1.125rem)" }}
-            >
               Strategy, innovation, execution — designed to work together, or independently.
-            </p>
+            </h2>
           </div>
           
           {/* Three Columns - Granny Smith Style */}
