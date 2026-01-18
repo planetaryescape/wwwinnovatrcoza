@@ -679,17 +679,23 @@ export default function CinematicLanding() {
         <section id="case-studies" className="py-24 sm:py-32 bg-gradient-to-b from-[#0D1598] via-[#1520B0] to-[#0D1598]">
           <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 lg:pr-20">
             {/* Section Header */}
-            <div className="mb-20 sm:mb-28">
+            <div className="text-left mb-16 sm:mb-20">
+              <p 
+                className="text-xs uppercase tracking-[0.35em] mb-6 text-white/50"
+                style={{ fontFamily: "Roboto, sans-serif" }}
+              >
+                The Results
+              </p>
               <h2 
-                className="font-serif font-bold text-white"
+                className="text-white mb-6"
                 style={{ 
                   fontFamily: "'DM Serif Display', serif", 
-                  letterSpacing: "0.06em",
-                  fontSize: "clamp(2.5rem, 7vw, 6rem)"
+                  letterSpacing: "0.04em",
+                  fontSize: "clamp(2rem, 5vw, 3.5rem)"
                 }}
                 data-cursor-invert
               >
-                THE RESULTS
+                Growth is our Currency.
               </h2>
             </div>
             
