@@ -24,8 +24,8 @@ const tools = [
   },
   {
     id: "storyteller",
-    title: "Storyteller",
-    description: "Transform raw data into compelling narratives. Auto-generate insight decks that leadership actually wants to read.",
+    title: "Gamified Respondent Experience",
+    description: "Will consumers engage with my innovation? Will months of development be discarded in a moment as consumers ignore your idea? Upsiide identifies innovations that will break through with an intuitive swiping interface that places your ideas in a competitive context.",
     image: storytellerImg,
   },
   {
