@@ -197,43 +197,44 @@ function ClosingSection() {
           </h2>
         </motion.div>
         
-        {/* Two column layout: messaging left, contact right */}
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-start">
-          {/* Left - Professional messaging */}
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="space-y-8"
+        {/* Centered messaging */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.7, delay: 0.1 }}
+          className="text-center mb-12 sm:mb-16"
+        >
+          <p 
+            className="text-xs uppercase tracking-[0.35em] mb-6 text-white/50"
+            style={{ fontFamily: "Roboto, sans-serif" }}
           >
-            <p 
-              className="text-white/85 leading-relaxed"
-              style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.25rem)" }}
-              data-testid="closing-line-2"
-            >
-              Your next big move starts with a <span className="text-white font-medium">conversation</span>.
-            </p>
-            
-            <div className="pt-4">
-              <p 
-                className="text-white font-medium tracking-wide"
-                style={{ fontSize: "clamp(1.15rem, 2vw, 1.5rem)" }}
-                data-testid="closing-line-4"
-              >
-                Take the first step today.
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Right - Contact options */}
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="flex flex-col gap-5"
+            Your Future
+          </p>
+          <p 
+            className="text-white/85 leading-relaxed mb-4"
+            style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.25rem)" }}
+            data-testid="closing-line-2"
           >
+            Your next big move starts with a <span className="text-white font-medium">conversation</span>.
+          </p>
+          <p 
+            className="text-white font-medium tracking-wide"
+            style={{ fontSize: "clamp(1.15rem, 2vw, 1.5rem)" }}
+            data-testid="closing-line-4"
+          >
+            Take the first step today.
+          </p>
+        </motion.div>
+        
+        {/* Contact options - centered */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.7, delay: 0.2 }}
+          className="flex flex-col items-center gap-5 max-w-md mx-auto"
+        >
             {/* Email Card */}
             <a 
               href="mailto:richard@innovatr.co.za?subject=Let's%20Talk%20-%20Innovatr%20Consult"
@@ -318,8 +319,7 @@ function ClosingSection() {
                 <ArrowRight className="w-5 h-5 text-white/30 group-hover:text-white/80 group-hover:translate-x-1 transition-all" />
               </div>
             </a>
-          </motion.div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
