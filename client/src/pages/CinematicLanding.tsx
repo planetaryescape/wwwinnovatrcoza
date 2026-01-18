@@ -571,7 +571,7 @@ export default function CinematicLanding() {
               data-cursor-invert
               data-testid="text-what-we-do-heading"
             >
-              Designed to connect where to play & how to win phases seamlessly.
+              Move from Where to Play to How to Win, seamlessly.
             </h2>
           </div>
           
