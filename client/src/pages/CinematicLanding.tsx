@@ -450,7 +450,6 @@ export default function CinematicLanding() {
             data-testid="button-menu-open"
           >
             <Menu className="w-5 h-5" aria-hidden="true" />
-            <span>Menu</span>
           </button>
         </div>
       </header>
