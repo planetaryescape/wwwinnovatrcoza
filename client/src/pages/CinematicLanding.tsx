@@ -638,7 +638,7 @@ export default function CinematicLanding() {
                 }}
                 data-cursor-invert
               >
-                Growth is our Currency.
+                Growth is our Currency. See how we transformed some of the world's most ambitious brands.
               </h2>
             </div>
             
