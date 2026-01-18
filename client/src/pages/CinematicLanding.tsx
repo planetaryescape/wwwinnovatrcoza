@@ -135,7 +135,7 @@ const whatWeDoCards = [
   },
   {
     title: "EXECUTION &\nSCALE",
-    description: "We translate learnings into action — optimising launches, refining execution, and tracking performance as you grow.",
+    description: "Track launch effectiveness & market dynamics via:\n- Innovation launch monitoring\n- Promotion tracking\n- Brand and category health tracking",
     link: "How we drive momentum",
     linkHref: "#"
   }
