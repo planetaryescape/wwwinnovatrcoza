@@ -490,7 +490,7 @@ export default function CinematicLanding() {
       {/* Hero Section with Dive Animation */}
       <section 
         ref={heroSectionRef}
-        className="relative h-[200vh]"
+        className="relative h-[120vh]"
       >
         {/* Sticky hero container */}
         <motion.div 
@@ -512,7 +512,7 @@ export default function CinematicLanding() {
                 initial={{ opacity: 0, y: -40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, delay: 0.3 }}
-                className="text-center lg:text-left"
+                className="text-left"
               >
                 <h1 
                   className="font-serif font-bold text-white leading-[0.95] uppercase drop-shadow-lg"
@@ -530,7 +530,7 @@ export default function CinematicLanding() {
                   MISSING
                 </h1>
                 <p 
-                  className="mt-6 font-sans text-white/95 drop-shadow-md max-w-md mx-auto lg:mx-0"
+                  className="mt-6 font-sans text-white/95 drop-shadow-md max-w-md"
                   style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
                 >
                   Launch Better Innovation<br />through in-house data, design & testing.
