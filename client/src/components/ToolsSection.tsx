@@ -10,6 +10,7 @@ import upsiideImg from "@assets/generated_images/upsiide_dashboard_floating.png"
 import speedImg from "@assets/generated_images/24hr_speed_clock_bolt.png";
 import agileDesignImg from "@assets/IMG_8478_1768743527121.jpeg";
 import gamifiedRespondentImg from "@assets/IMG_8480_1768743786622.jpeg";
+import emotionalAppealImg from "@assets/IMG_8482_1768743819583.jpeg";
 
 const tools = [
   {
@@ -28,7 +29,7 @@ const tools = [
     id: "gamification",
     title: "Track Emotional Appeal",
     description: "Emojis. To understand how people feel about your innovations, we created a set of 24 emojis based on Robert Plutchik's wheel of emotions. This allows us to dig deeper into drivers of strong or weak performance of your ideas while maintaining an experience that feels like social media, not a survey.",
-    image: gamificationImg,
+    image: emotionalAppealImg,
   },
   {
     id: "market-share",
