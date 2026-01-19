@@ -103,14 +103,14 @@ export default function MembershipSection() {
   };
 
   return (
-    <section id="membership" className="py-20">
+    <section id="membership" className="py-20 bg-[#1E1E2E]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
+          <div className="text-sm font-semibold text-white/50 mb-4 uppercase tracking-wider">
             05 — Memberships
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6" style={{ color: '#4D5FF1' }}>Join the Club & Save</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6 text-white">Join the Club & Save</h2>
+          <p className="text-xl text-white/70 max-w-2xl mx-auto">
             Scale your research. Save up to 50%.
           </p>
         </div>
@@ -119,60 +119,68 @@ export default function MembershipSection() {
           {membershipPlansData.map((plan, index) => (
             <Card 
               key={index}
-              className={`hover-elevate transition-all duration-300 relative flex flex-col ${
-                plan.badge ? 'border-primary shadow-lg' : ''
+              className={`hover-elevate relative flex flex-col border-0 ${
+                plan.badge 
+                  ? 'bg-white text-slate-900 shadow-2xl' 
+                  : 'bg-white/10 text-white backdrop-blur-sm'
               }`}
               data-testid={`membership-card-${index}`}
             >
               {plan.badge && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-primary text-primary-foreground px-4 py-1">
+                  <Badge className="bg-[#ED876E] text-white px-4 py-1 shadow-lg">
                     {plan.badge}
                   </Badge>
                 </div>
               )}
               <CardHeader className="pt-8">
-                <div className="w-12 h-12 mb-4 rounded-md bg-primary/10 flex items-center justify-center">
-                  <plan.icon className="w-6 h-6 text-primary" />
+                <div className={`w-12 h-12 mb-4 rounded-md flex items-center justify-center ${
+                  plan.badge ? 'bg-[#4D5FF1]/10' : 'bg-white/10'
+                }`}>
+                  <plan.icon className={`w-6 h-6 ${plan.badge ? 'text-[#4D5FF1]' : 'text-white'}`} />
                 </div>
                 <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
-                <CardDescription className="text-base">{plan.description}</CardDescription>
+                <CardDescription className={`text-base ${plan.badge ? 'text-slate-600' : 'text-white/70'}`}>{plan.description}</CardDescription>
                 <div className="mt-4">
                   {plan.starterPriceZAR && plan.additionalPriceZAR ? (
                     <div className="space-y-2">
-                      <div className="text-sm text-muted-foreground">
+                      <div className={`text-sm ${plan.badge ? 'text-slate-500' : 'text-white/50'}`}>
                         Starter ({formatShortPrice(plan.starterPriceZAR)}) + {plan.name} ({formatShortPrice(plan.additionalPriceZAR)})
                       </div>
                       <div>
-                        <span className="text-4xl font-bold text-primary">{formatShortPrice(plan.priceZAR)}</span>
-                        <span className="text-muted-foreground ml-2">per year</span>
+                        <span className={`text-4xl font-bold ${plan.badge ? 'text-[#4D5FF1]' : 'text-white'}`}>{formatShortPrice(plan.priceZAR)}</span>
+                        <span className={`ml-2 ${plan.badge ? 'text-slate-500' : 'text-white/50'}`}>per year</span>
                       </div>
                     </div>
                   ) : (
                     <div>
-                      <span className="text-4xl font-bold text-primary">{formatShortPrice(plan.priceZAR)}</span>
-                      <span className="text-muted-foreground ml-2">per year</span>
+                      <span className={`text-4xl font-bold ${plan.badge ? 'text-[#4D5FF1]' : 'text-white'}`}>{formatShortPrice(plan.priceZAR)}</span>
+                      <span className={`ml-2 ${plan.badge ? 'text-slate-500' : 'text-white/50'}`}>per year</span>
                       {plan.monthlyZAR && (
-                        <div className="text-sm text-muted-foreground mt-1">{formatShortPrice(plan.monthlyZAR)}/month</div>
+                        <div className={`text-sm mt-1 ${plan.badge ? 'text-slate-500' : 'text-white/50'}`}>{formatShortPrice(plan.monthlyZAR)}/month</div>
                       )}
                     </div>
                   )}
                 </div>
                 {plan.valueZAR && (
-                  <div className="text-sm font-semibold text-accent mt-2">~{formatShortPrice(plan.valueZAR)} value</div>
+                  <div className="text-sm font-semibold mt-2 text-[#ED876E]">~{formatShortPrice(plan.valueZAR)} value</div>
                 )}
               </CardHeader>
               <CardContent className="space-y-6 flex flex-col flex-1">
                 <ul className="space-y-3 flex-1">
                   {getFeatures(plan).map((feature, fIndex) => (
                     <li key={fIndex} className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <Check className={`h-5 w-5 mt-0.5 flex-shrink-0 ${plan.badge ? 'text-[#4D5FF1]' : 'text-[#ED876E]'}`} />
                       <span className="text-sm">{feature}</span>
                     </li>
                   ))}
                 </ul>
                 <Button 
-                  className="w-full mt-auto" 
+                  className={`w-full mt-auto ${
+                    plan.badge 
+                      ? 'bg-[#4D5FF1] text-white' 
+                      : 'bg-white/10 border-white/30 text-white'
+                  }`}
                   size="lg"
                   variant={plan.badge ? "default" : "outline"}
                   onClick={() => handleBecomeMember(plan.name)}

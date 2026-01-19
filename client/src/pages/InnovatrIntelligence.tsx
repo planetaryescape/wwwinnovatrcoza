@@ -5,6 +5,8 @@ import { TrendingUp, Users, AlertCircle, Star, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import { useEffect } from "react";
 
+const greenColor = "#10B981";
+
 export default function InnovatrIntelligence() {
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -22,11 +24,11 @@ export default function InnovatrIntelligence() {
 
         <div className="space-y-8">
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-              <TrendingUp className="w-8 h-8 text-primary-foreground" />
+            <div className="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: greenColor }}>
+              <TrendingUp className="w-8 h-8 text-white" />
             </div>
             <div className="flex-1">
-              <h1 className="text-5xl font-serif font-bold mb-4 text-primary">
+              <h1 className="text-5xl font-serif font-bold mb-4" style={{ color: greenColor }}>
                 Innovatr Intelligence
               </h1>
               <p className="text-2xl font-semibold mb-2">
@@ -41,7 +43,7 @@ export default function InnovatrIntelligence() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2 mb-2">
-                <Users className="w-5 h-5 text-primary" />
+                <Users className="w-5 h-5" style={{ color: greenColor }} />
                 <CardTitle>Ideal For</CardTitle>
               </div>
             </CardHeader>
@@ -60,10 +62,10 @@ export default function InnovatrIntelligence() {
             </CardContent>
           </Card>
 
-          <Card className="border-accent/20">
+          <Card style={{ borderColor: `${greenColor}33` }}>
             <CardHeader>
               <div className="flex items-center gap-2 mb-2">
-                <AlertCircle className="w-5 h-5 text-accent" />
+                <AlertCircle className="w-5 h-5" style={{ color: greenColor }} />
                 <CardTitle>Pain Point</CardTitle>
               </div>
             </CardHeader>
@@ -74,45 +76,45 @@ export default function InnovatrIntelligence() {
             </CardContent>
           </Card>
 
-          <Card className="bg-muted/30 border-primary/20">
+          <Card className="bg-muted/30" style={{ borderColor: `${greenColor}33` }}>
             <CardHeader>
               <div className="flex items-center gap-2 mb-2">
-                <Star className="w-5 h-5 text-primary" />
+                <Star className="w-5 h-5" style={{ color: greenColor }} />
                 <CardTitle>Key Features</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3" data-testid="feature-curated-insights">
-                  <span className="text-primary mt-1 font-bold">•</span>
+                  <span className="mt-1 font-bold" style={{ color: greenColor }}>•</span>
                   <span>Bi-weekly curated insights delivered to your inbox</span>
                 </li>
                 <li className="flex items-start gap-3" data-testid="feature-signal-detection">
-                  <span className="text-primary mt-1 font-bold">•</span>
+                  <span className="mt-1 font-bold" style={{ color: greenColor }}>•</span>
                   <span>Real-time signal detection across multiple data sources</span>
                 </li>
                 <li className="flex items-start gap-3" data-testid="feature-local-research">
-                  <span className="text-primary mt-1 font-bold">•</span>
+                  <span className="mt-1 font-bold" style={{ color: greenColor }}>•</span>
                   <span>+200 Local Research AI Powered Trends & Opportunity detection</span>
                 </li>
                 <li className="flex items-start gap-3" data-testid="feature-downloadable-reports">
-                  <span className="text-primary mt-1 font-bold">•</span>
+                  <span className="mt-1 font-bold" style={{ color: greenColor }}>•</span>
                   <span>Downloadable Reports via Membership Plans</span>
                 </li>
                 <li className="flex items-start gap-3" data-testid="feature-text-answers">
-                  <span className="text-primary mt-1 font-bold">•</span>
+                  <span className="mt-1 font-bold" style={{ color: greenColor }}>•</span>
                   <span>Text-based answers & downloadable reports on any topics – launching soon</span>
                 </li>
               </ul>
             </CardContent>
           </Card>
 
-          <div className="rounded-lg p-8 text-center" style={{ background: 'linear-gradient(to right, rgba(77, 95, 241, 0.1), rgba(77, 95, 241, 0.05))' }}>
-            <h2 className="text-3xl font-serif font-bold mb-2" style={{ color: '#4D5FF1' }}>
+          <div className="rounded-lg p-8 text-center" style={{ background: `linear-gradient(to right, ${greenColor}1A, ${greenColor}0D)` }}>
+            <h2 className="text-3xl font-serif font-bold mb-2" style={{ color: greenColor }}>
               Ready to stay ahead of trends?
             </h2>
             <p className="text-sm uppercase tracking-wide text-muted-foreground mb-2">Pricing</p>
-            <p className="text-4xl font-bold mb-4" style={{ color: '#4D5FF1' }}>R5,000 / month</p>
+            <p className="text-4xl font-bold mb-4" style={{ color: greenColor }}>R5,000 / month</p>
             <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
               Get bi-weekly curated insights and access to 200+ AI-powered trend reports
             </p>
@@ -120,6 +122,8 @@ export default function InnovatrIntelligence() {
               <Button 
                 size="lg"
                 asChild
+                className="text-white"
+                style={{ backgroundColor: greenColor }}
                 data-testid="button-get-started"
               >
                 <a href="/#membership">Get Started</a>

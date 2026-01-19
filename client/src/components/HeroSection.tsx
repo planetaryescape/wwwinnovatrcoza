@@ -21,9 +21,12 @@ export default function HeroSection() {
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{ 
-          backgroundImage: `url(${heroBackground})`
+          backgroundImage: `url(${heroBackground})`,
+          filter: 'saturate(1.3) brightness(0.85)'
         }}
       />
+      {/* Dark overlay for better text contrast and richer visual feel */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/50" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex items-center justify-center">
         <div>
           <h1 className="text-4xl md:text-6xl font-serif font-semibold text-white tracking-tight leading-tight text-center">
@@ -38,7 +41,7 @@ export default function HeroSection() {
             <Button 
               size="default"
               variant="outline" 
-              className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20 min-w-[200px] sm:min-w-[220px]"
+              className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-white/10 backdrop-blur-md border-white/30 text-white min-w-[200px] sm:min-w-[220px]"
               onClick={handleTestNow}
               data-testid="button-test-now"
             >
@@ -48,7 +51,7 @@ export default function HeroSection() {
             <Button 
               size="default"
               variant="outline" 
-              className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20 min-w-[200px] sm:min-w-[220px]"
+              className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-white/10 backdrop-blur-md border-white/30 text-white min-w-[200px] sm:min-w-[220px]"
               onClick={handleMembership}
               data-testid="button-membership"
             >
@@ -61,7 +64,7 @@ export default function HeroSection() {
             <Link href="/consult">
               <Button 
                 size="default"
-                className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-primary hover:bg-primary/90 backdrop-blur-sm border-0 w-[200px] sm:w-[calc(200px+200px+1rem)] md:w-[calc(220px+220px+1rem)]"
+                className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-primary border-primary-border backdrop-blur-sm w-[200px] sm:w-[calc(200px+200px+1rem)] md:w-[calc(220px+220px+1rem)]"
                 data-testid="card-consult-entry"
               >
                 Consult

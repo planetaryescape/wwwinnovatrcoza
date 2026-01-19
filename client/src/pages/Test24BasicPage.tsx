@@ -28,11 +28,11 @@ export default function Test24BasicPage() {
 
         <div className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-16 h-16 rounded-md bg-accent/20 flex items-center justify-center">
-              <Clock className="w-8 h-8 text-accent" />
+            <div className="w-16 h-16 rounded-md flex items-center justify-center" style={{ backgroundColor: 'rgba(237, 135, 110, 0.2)' }}>
+              <Clock className="w-8 h-8" style={{ color: '#ED876E' }} />
             </div>
             <div>
-              <h1 className="text-5xl font-serif font-bold text-accent">
+              <h1 className="text-5xl font-serif font-bold" style={{ color: '#ED876E' }}>
                 Innovatr Test24 Basic
               </h1>
             </div>
