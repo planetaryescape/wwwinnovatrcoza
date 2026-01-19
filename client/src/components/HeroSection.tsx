@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { Link } from "wouter";
 import heroBackground from "@assets/Cover Image_1763495477591.jpg";
 
 export default function HeroSection() {
@@ -44,7 +45,7 @@ export default function HeroSection() {
               onClick={handleTestNow}
               data-testid="button-test-now"
             >
-              See TEST24
+              24hr Research
               <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
             <Button 
@@ -54,8 +55,18 @@ export default function HeroSection() {
               onClick={handleMembership}
               data-testid="button-membership"
             >
-              See Membership Plans
+              Memberships
             </Button>
+            <Link href="/consult">
+              <Button 
+                size="default"
+                variant="outline" 
+                className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-white/10 backdrop-blur-md border-white/30 text-white min-w-[200px] sm:min-w-[220px]"
+                data-testid="button-consulting"
+              >
+                Consulting
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
