@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { HelpCircle, Lightbulb } from "lucide-react";
 import squarePegGif from "@assets/EFC8B961-B983-4667-B510-566895277C4B_1768849610643.gif";
+import teamworkGif from "@assets/607B88C5-C090-4E2F-A5B1-5712734645E0_1768851070548.gif";
 
 export default function ProblemSolutionSection() {
   return (
@@ -122,6 +123,21 @@ export default function ProblemSolutionSection() {
             Idea to market.<br />Agile in-house strategy, research, design and go-to-market experts all in one team.
           </motion.p>
           </div>
+        </div>
+      </section>
+
+      {/* SECOND ANIMATED GIF SECTION - After Solution, Before Process */}
+      <section className="bg-[#F5C542]">
+        <div className="w-full lg:w-1/2">
+          <motion.img
+            src={teamworkGif}
+            alt="Teamwork and collaboration - innovation solution"
+            className="w-full h-auto"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.6 }}
+          />
         </div>
       </section>
     </>
