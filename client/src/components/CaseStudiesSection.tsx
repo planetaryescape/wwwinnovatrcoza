@@ -209,7 +209,7 @@ export default function CaseStudiesSection() {
             {filteredCaseStudies.map((caseStudy, index) => (
               <motion.div 
                 key={caseStudy.id}
-                className={`grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-center ${
+                className={`grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-stretch ${
                   index % 2 === 1 ? 'lg:flex-row-reverse' : ''
                 }`}
                 initial={{ opacity: 0, y: 40 }}
@@ -233,9 +233,9 @@ export default function CaseStudiesSection() {
                 </div>
                 
                 {/* Teaser Card - Right on desktop */}
-                <div className={`py-4 lg:col-span-3 ${
+                <div className={`p-6 lg:p-8 lg:col-span-3 rounded-xl flex flex-col ${
                   index % 2 === 1 ? 'lg:order-1' : 'lg:order-2'
-                }`}>
+                }`} style={{ backgroundColor: '#FFF8F0', minHeight: '320px' }}>
                   {/* Client & Industry */}
                   <div className="flex flex-wrap items-center gap-2 mb-4">
                     <span 
@@ -270,37 +270,38 @@ export default function CaseStudiesSection() {
                   
                   {/* Short Problem Summary */}
                   <p 
-                    className="text-slate-700 leading-relaxed mb-6"
+                    className="text-slate-700 leading-relaxed mb-6 flex-grow"
                     style={{ fontSize: "clamp(0.95rem, 1.5vw, 1.1rem)" }}
                   >
                     {caseStudy.problemShort}
                   </p>
                   
-                  {/* Key Result Badge */}
-                  <div 
-                    className="inline-block px-4 py-2 rounded-lg mb-6"
-                    style={{ backgroundColor: `${activePhaseData?.color}15` }}
-                  >
-                    <span className="text-xs text-slate-500 mr-2">Key Result:</span>
-                    <span 
-                      className="font-bold"
-                      style={{ color: activePhaseData?.color }}
+                  {/* Key Result Badge & Read More - Bottom aligned */}
+                  <div className="mt-auto">
+                    <div 
+                      className="inline-block px-4 py-2 rounded-lg mb-4"
+                      style={{ backgroundColor: `${activePhaseData?.color}15` }}
                     >
-                      {caseStudy.highlight}
-                    </span>
-                  </div>
-                  
-                  {/* Read More Link */}
-                  <div className="flex items-center gap-4">
-                    <Link href={`/case-study/${caseStudy.id}`}>
+                      <span className="text-xs text-slate-500 mr-2">Key Result:</span>
                       <span 
-                        className="inline-flex items-center gap-2 text-slate-700 font-medium underline underline-offset-4 hover:text-slate-900 cursor-pointer transition-colors"
-                        data-testid={`link-read-more-${caseStudy.id}`}
+                        className="font-bold"
+                        style={{ color: activePhaseData?.color }}
                       >
-                        Read Full Case Study
-                        <ArrowRight className="w-4 h-4" />
+                        {caseStudy.highlight}
                       </span>
-                    </Link>
+                    </div>
+                  
+                      <div className="flex items-center gap-4">
+                      <Link href={`/case-study/${caseStudy.id}`}>
+                        <span 
+                          className="inline-flex items-center gap-2 text-slate-700 font-medium underline underline-offset-4 hover:text-slate-900 cursor-pointer transition-colors"
+                          data-testid={`link-read-more-${caseStudy.id}`}
+                        >
+                          Read Full Case Study
+                          <ArrowRight className="w-4 h-4" />
+                        </span>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -322,7 +323,7 @@ export default function CaseStudiesSection() {
           <Link href="/#contact">
             <Button 
               size="lg"
-              className="bg-slate-800 hover:bg-slate-900 text-white gap-2"
+              className="bg-[#7CB342] hover:bg-[#689F38] text-white gap-2 border-0 shadow-lg"
               data-testid="button-see-more-contact"
             >
               See More

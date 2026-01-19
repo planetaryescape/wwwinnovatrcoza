@@ -3,11 +3,10 @@ import { useParams, Link } from "wouter";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Download, Target, Lightbulb, Rocket, Clock, Award, TrendingUp } from "lucide-react";
+import { ArrowLeft, Target, Lightbulb, Rocket, Clock, Award, TrendingUp } from "lucide-react";
 import cookingGif from "@assets/RafaelVarona_Playbook_Cooking_Animation_1768339161246.gif";
 import airplanesGif from "@assets/rafael-varona-airplanes_1768339161246.gif";
 import penGif from "@assets/RafaelVarona_Playbook_Pen_1768339161246.gif";
-import caseStudiesPdf from "@assets/innovatr_case_studies_20260119131201_1768828402299.pdf";
 
 type Phase = "strategy" | "innovation" | "execution";
 
@@ -127,12 +126,18 @@ export default function CaseStudyDetail() {
       {/* Navigation Bar */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 bg-[#C5E1A5]/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link href="/consult#case-studies">
+          <a 
+            href="/consult#case-studies"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.href = "/consult#case-studies";
+            }}
+          >
             <Button variant="ghost" className="gap-2 text-slate-700 hover:text-slate-900" data-testid="button-back">
               <ArrowLeft className="w-4 h-4" />
               Back to Results
             </Button>
-          </Link>
+          </a>
           <Link href="/">
             <span 
               className="text-xl font-serif font-bold text-slate-800 tracking-wide cursor-pointer"
@@ -373,15 +378,9 @@ export default function CaseStudyDetail() {
                   Want results like these?
                 </h3>
                 <p className="text-white/70 mb-8 max-w-lg mx-auto">
-                  Download our complete case studies portfolio or get in touch to discuss how we can help transform your business.
+                  Get in touch to discuss how we can help transform your business.
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
-                  <a href={caseStudiesPdf} download="Innovatr_Case_Studies_Portfolio.pdf">
-                    <Button size="lg" variant="outline" className="gap-2 border-white/30 text-white hover:bg-white/10">
-                      <Download className="w-4 h-4" />
-                      Download All Case Studies
-                    </Button>
-                  </a>
                   <Link href="/consult#contact">
                     <Button size="lg" className="gap-2 bg-[#C5E1A5] text-slate-800 hover:bg-[#A8D58C]">
                       Start Your Project
