@@ -5,7 +5,7 @@ import { TrendingUp, Users, AlertCircle, Star, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import { useEffect } from "react";
 
-const tealColor = "#7EC8D3";
+const tealColor = "#8DD9E4";
 
 export default function InnovatrIntelligence() {
   useEffect(() => {
