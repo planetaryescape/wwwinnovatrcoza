@@ -497,50 +497,68 @@ export default function CinematicLanding() {
           <div 
             className="relative z-10 min-h-screen flex flex-col justify-start px-6 sm:px-10 lg:px-16 pt-32 sm:pt-40 lg:pt-48 pb-16 bg-[#ffe7de]"
           >
-            {/* Text content */}
+            {/* Two-column layout for desktop */}
             <div className="w-full max-w-7xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: -40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.3 }}
-                className="text-left"
-              >
-                <h1 
-                  className="font-serif font-bold text-slate-800 leading-[0.95] uppercase"
-                  style={{ 
-                    fontFamily: "'DM Serif Display', serif", 
-                    letterSpacing: "0.06em",
-                    fontSize: "clamp(3rem, 8vw, 9rem)"
-                  }}
-                  data-testid="text-headline"
-                  data-cursor-invert
+              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between lg:gap-12">
+                {/* Text content - Left side */}
+                <motion.div
+                  initial={{ opacity: 0, y: -40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1, delay: 0.3 }}
+                  className="text-left lg:flex-1"
                 >
-                  WE BUILD<br />
-                  WHAT'S<br />
-                  MISSING.
-                </h1>
-                <p 
-                  className="mt-6 font-sans text-slate-600 max-w-md"
-                  style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
-                >
-                  Launch Better Innovation<br />through expert strategy, design & testing.
-                </p>
+                  <h1 
+                    className="font-serif font-bold text-slate-800 leading-[0.95] uppercase"
+                    style={{ 
+                      fontFamily: "'DM Serif Display', serif", 
+                      letterSpacing: "0.06em",
+                      fontSize: "clamp(3rem, 8vw, 9rem)"
+                    }}
+                    data-testid="text-headline"
+                    data-cursor-invert
+                  >
+                    WE BUILD<br />
+                    WHAT'S<br />
+                    MISSING.
+                  </h1>
+                  <p 
+                    className="mt-6 font-sans text-slate-600 max-w-md"
+                    style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
+                  >
+                    Launch Better Innovation<br />through expert strategy, design & testing.
+                  </p>
+                  
+                  {/* Animated pen GIF - below subtitle on mobile */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 1, delay: 0.6 }}
+                    className="mt-8 -mx-6 sm:mx-0 lg:hidden"
+                  >
+                    <img 
+                      src={penGif}
+                      alt="Animated pen illustration"
+                      className="w-screen sm:w-full sm:max-w-md h-auto object-contain"
+                      data-testid="img-hero-pen-mobile"
+                    />
+                  </motion.div>
+                </motion.div>
                 
-                {/* Animated pen GIF below subtitle */}
+                {/* Animated pen GIF - Right side on desktop */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 1, delay: 0.6 }}
-                  className="mt-8 -mx-6 sm:mx-0"
+                  className="hidden lg:flex lg:flex-1 lg:items-start lg:justify-end"
                 >
                   <img 
                     src={penGif}
                     alt="Animated pen illustration"
-                    className="w-screen sm:w-full sm:max-w-md lg:max-w-lg h-auto object-contain"
+                    className="w-full max-w-lg xl:max-w-xl h-auto object-contain"
                     data-testid="img-hero-pen"
                   />
                 </motion.div>
-              </motion.div>
+              </div>
             </div>
           </div>
         </div>
