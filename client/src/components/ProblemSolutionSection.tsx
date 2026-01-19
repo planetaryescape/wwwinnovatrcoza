@@ -7,7 +7,7 @@ export default function ProblemSolutionSection() {
     <>
       <section 
         id="problem-solution" 
-        className="py-24 md:py-32 lg:py-40 bg-[#7EC8E3]"
+        className="py-24 md:py-32 lg:py-40 bg-[#F5C4B8]"
         aria-labelledby="problem-heading"
       >
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -76,7 +76,7 @@ export default function ProblemSolutionSection() {
       </section>
 
       <section 
-        className="py-24 md:py-32 lg:py-40 bg-[#7EC8E3]"
+        className="py-24 md:py-32 lg:py-40 bg-[#F5C4B8]"
         aria-labelledby="solution-heading"
       >
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
