@@ -506,7 +506,13 @@ export default function CinematicLanding() {
       <section id="why-consult" className="py-24 sm:py-32 bg-[#FF7F6E]">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           {/* Header */}
-          <div className="text-center mb-16 sm:mb-20">
+          <motion.div 
+            className="text-center mb-16 sm:mb-20"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
             <div className="mb-4" style={{ transform: "rotate(2deg)" }}>
               <GitBranch className="w-10 h-10 mx-auto text-white/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(255,255,255,0.1))" }} />
             </div>
@@ -528,7 +534,7 @@ export default function CinematicLanding() {
             >
               Move from Where to Play to How to Win, seamlessly.
             </h2>
-          </div>
+          </motion.div>
           
           {/* Three Columns - Granny Smith Style */}
           <div className="grid md:grid-cols-3 gap-12 lg:gap-16">

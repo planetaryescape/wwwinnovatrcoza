@@ -122,7 +122,13 @@ export default function CaseStudiesSection() {
     <section id="case-studies" className="py-24 sm:py-32 bg-[#C5E1A5]">
       <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
         {/* Section Header */}
-        <div className="text-center mb-12 sm:mb-16">
+        <motion.div 
+          className="text-center mb-12 sm:mb-16"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
           <div className="mb-4" style={{ transform: "rotate(-3deg)" }}>
             <TrendingUp className="w-10 h-10 mx-auto text-slate-700/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} />
           </div>
@@ -152,7 +158,7 @@ export default function CaseStudiesSection() {
           >
             See how we transformed some of the world's most ambitious brands.
           </p>
-        </div>
+        </motion.div>
         
         {/* Phase Toggle Buttons */}
         <div className="flex flex-wrap justify-center gap-3 mb-12">
@@ -220,10 +226,10 @@ export default function CaseStudiesSection() {
               >
                 {/* GIF Image - Left on desktop (alternates) */}
                 <div 
-                  className={`relative overflow-hidden rounded-lg lg:col-span-2 shadow-2xl shadow-black/30 ring-1 ring-white/10 ${
+                  className={`relative overflow-hidden rounded-lg lg:col-span-2 shadow-2xl shadow-black/30 ring-1 ring-white/10 h-full ${
                     index % 2 === 1 ? 'lg:order-2' : 'lg:order-1'
                   }`}
-                  style={{ height: "320px" }}
+                  style={{ minHeight: "320px" }}
                 >
                   <img 
                     src={caseStudy.gif}
@@ -232,10 +238,10 @@ export default function CaseStudiesSection() {
                   />
                 </div>
                 
-                {/* Teaser Card - Right on desktop */}
-                <div className={`p-6 lg:p-8 lg:col-span-3 rounded-xl flex flex-col ${
+                {/* Teaser Content - Right on desktop, directly on green bg */}
+                <div className={`py-6 lg:py-4 lg:col-span-3 flex flex-col h-full ${
                   index % 2 === 1 ? 'lg:order-1' : 'lg:order-2'
-                }`} style={{ backgroundColor: '#FFF8F0', minHeight: '320px' }}>
+                }`} style={{ minHeight: '320px' }}>
                   {/* Client & Industry */}
                   <div className="flex flex-wrap items-center gap-2 mb-4">
                     <span 

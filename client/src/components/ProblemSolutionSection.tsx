@@ -39,8 +39,8 @@ export default function ProblemSolutionSection() {
             className="text-black mb-8 md:mb-12"
             style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.04em", fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
           >
-            <span className="hidden md:inline">Innovation is too important to fail.</span>
-            <span className="md:hidden">Innovation is too<br />important to fail.</span>
+            <span className="hidden lg:inline whitespace-nowrap">Innovation is too important to fail.</span>
+            <span className="lg:hidden">Innovation is too<br />important to fail.</span>
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -50,7 +50,9 @@ export default function ProblemSolutionSection() {
             className="max-w-2xl mx-auto text-black/90 leading-relaxed"
             style={{ fontFamily: "Roboto, sans-serif", fontSize: "clamp(1rem, 1.5vw, 1.15rem)" }}
           >
-            Why are projects so slow? Why is it so expensive? Will this launch fail like the last one?
+            Why are projects so slow?<br />
+            Why is it so expensive?<br />
+            Will this launch fail like the last one?
           </motion.p>
         </div>
 
