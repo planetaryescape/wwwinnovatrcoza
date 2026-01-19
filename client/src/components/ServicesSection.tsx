@@ -35,7 +35,7 @@ const services: Service[] = [
       "Automated briefing & reporting",
       "24hr turnaround",
     ],
-    color: "#ED876E",
+    color: "#E8A598",
     isNew: true,
   },
   {
@@ -52,7 +52,7 @@ const services: Service[] = [
       "Custom Audience",
       "Quant + AI Qual",
     ],
-    color: "#4D5FF1",
+    color: "#9B8DC2",
     isNew: false,
   },
   {
@@ -68,7 +68,7 @@ const services: Service[] = [
       "Opportunity identification",
       "Bi-weekly curated insights",
     ],
-    color: "#10B981",
+    color: "#7EC8D3",
     isNew: true,
   },
   {
@@ -83,7 +83,7 @@ const services: Service[] = [
       "Idea to Market Consulting",
       "Strategy, Design, Testing & Go to Market",
     ],
-    color: "#1E1E2E",
+    color: "#3B4C6B",
     isNew: false,
     isPremium: true,
   },
@@ -116,8 +116,14 @@ export default function ServicesSection() {
           {services.map((service, index) => (
             <Card 
               key={index} 
-              className="hover-elevate relative overflow-hidden flex flex-col border-0"
-              style={{ backgroundColor: service.color }}
+              className={`hover-elevate relative overflow-hidden flex flex-col border-0 ${
+                service.isPremium ? 'shadow-2xl ring-1 ring-white/20' : ''
+              }`}
+              style={{ 
+                backgroundColor: service.isPremium ? 'rgba(59, 76, 107, 0.85)' : service.color,
+                backdropFilter: service.isPremium ? 'blur(12px)' : undefined,
+                WebkitBackdropFilter: service.isPremium ? 'blur(12px)' : undefined,
+              }}
               data-testid={`service-card-${index}`}
             >
               {/* Large background number */}

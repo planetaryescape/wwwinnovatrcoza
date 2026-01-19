@@ -26,11 +26,11 @@ export default function Test24ProPage() {
 
         <div className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-16 h-16 rounded-md flex items-center justify-center" style={{ backgroundColor: 'rgba(77, 95, 241, 0.2)' }}>
-              <Rocket className="w-8 h-8" style={{ color: '#4D5FF1' }} />
+            <div className="w-16 h-16 rounded-md flex items-center justify-center" style={{ backgroundColor: 'rgba(155, 141, 194, 0.2)' }}>
+              <Rocket className="w-8 h-8" style={{ color: '#9B8DC2' }} />
             </div>
             <div>
-              <h1 className="text-5xl font-serif font-bold" style={{ color: '#4D5FF1' }}>
+              <h1 className="text-5xl font-serif font-bold" style={{ color: '#9B8DC2' }}>
                 Innovatr Test24 Pro
               </h1>
             </div>
