@@ -7,6 +7,7 @@ import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
 import CustomCursor from "@/components/CustomCursor";
 import ProblemSolutionSection from "@/components/ProblemSolutionSection";
 import ToolsSection from "@/components/ToolsSection";
+import CaseStudiesSection from "@/components/CaseStudiesSection";
 
 import trendsForesightImg from "@assets/generated_images/trends_and_foresight_3d_abstract.png";
 import demandSpaceImg from "@assets/generated_images/demand_space_mapping_3d_network.png";
@@ -14,8 +15,6 @@ import categoryAuditsImg from "@assets/generated_images/category_audits_3d_cubes
 import ideationWorkshopsImg from "@assets/generated_images/ideation_workshops_creative_explosion.png";
 import endToEndDesignImg from "@assets/generated_images/end_to_end_design_flow.png";
 import brandHealthImg from "@assets/generated_images/brand_health_tracking_pulse.png";
-import cookingGif from "@assets/RafaelVarona_Playbook_Cooking_Animation_1768339161246.gif";
-import airplanesGif from "@assets/rafael-varona-airplanes_1768339161246.gif";
 import penGif from "@assets/RafaelVarona_Playbook_Pen_1768339161246.gif";
 
 const pillars = [
@@ -633,172 +632,8 @@ export default function CinematicLanding() {
       <ToolsSection />
       {/* Content Sections */}
       <div ref={contentRef}>
-        {/* Case Studies Section - Alternating Layout */}
-        <section id="case-studies" className="py-24 sm:py-32 bg-[#C5E1A5]">
-          <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 lg:pr-20">
-            {/* Section Header */}
-            <div className="text-center mb-16 sm:mb-20">
-              <div className="mb-4" style={{ transform: "rotate(-3deg)" }}>
-                <TrendingUp className="w-10 h-10 mx-auto text-slate-700/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} />
-              </div>
-              <p 
-                className="text-xs uppercase tracking-[0.35em] mb-6 text-slate-600/70"
-                style={{ fontFamily: "Roboto, sans-serif" }}
-              >
-                The Results
-              </p>
-              <h2 
-                className="text-slate-800 mb-6"
-                style={{ 
-                  fontFamily: "'DM Serif Display', serif", 
-                  letterSpacing: "0.04em",
-                  fontSize: "clamp(2rem, 5vw, 3.5rem)"
-                }}
-                data-cursor-invert
-              >
-                Growth is our Currency. See how we transformed some of the world's most ambitious brands.
-              </h2>
-            </div>
-            
-            {/* Case Study 1 - Image Left, Text Right */}
-            <motion.div 
-              className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-center mb-32 sm:mb-44"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.7 }}
-              data-testid="case-study-1"
-            >
-              <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-[#FFE8D8] lg:col-span-2 shadow-2xl shadow-black/30 ring-1 ring-white/10">
-                <img 
-                  src={cookingGif}
-                  alt="Animated cooking illustration"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="py-4 lg:col-span-3">
-                <span 
-                  className="text-xs uppercase tracking-[0.25em] text-slate-600/80 mb-6 block"
-                  style={{ fontFamily: "Roboto, sans-serif" }}
-                >
-                  Consumer Insights
-                </span>
-                <h3 
-                  className="font-serif text-slate-800 mb-6 leading-[1.1]"
-                  style={{ 
-                    fontFamily: "'DM Serif Display', serif",
-                    fontStyle: "italic",
-                    fontSize: "clamp(1.75rem, 4vw, 2.75rem)"
-                  }}
-                >
-                  How a Local Beverage Brand Discovered a R40M Untapped Market
-                </h3>
-                <p 
-                  className="text-slate-700 leading-relaxed mb-8"
-                  style={{ fontSize: "clamp(0.95rem, 1.5vw, 1.1rem)" }}
-                >
-                  Deep consumer research revealed hidden demand in peri-urban markets. Within 18 months, the brand expanded distribution to 200+ new outlets.
-                </p>
-                <div className="flex items-center justify-between text-sm text-slate-500">
-                  <span>Featured in Business Day</span>
-                  <span className="underline underline-offset-4 hover:text-slate-700 cursor-pointer transition-colors">3 minute read</span>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Case Study 2 - Image Right, Text Left */}
-            <motion.div 
-              className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-center mb-32 sm:mb-44"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.7 }}
-              data-testid="case-study-2"
-            >
-              <div className="py-4 lg:col-span-3 order-2 lg:order-1">
-                <span 
-                  className="text-xs uppercase tracking-[0.25em] text-slate-600/80 mb-6 block"
-                  style={{ fontFamily: "Roboto, sans-serif" }}
-                >
-                  Innovation Strategy
-                </span>
-                <h3 
-                  className="font-serif text-slate-800 mb-6 leading-[1.1]"
-                  style={{ 
-                    fontFamily: "'DM Serif Display', serif",
-                    fontStyle: "italic",
-                    fontSize: "clamp(1.75rem, 4vw, 2.75rem)"
-                  }}
-                >
-                  From Concept to Shelf in 90 Days — A Retail Innovation Sprint
-                </h3>
-                <p 
-                  className="text-slate-700 leading-relaxed mb-8"
-                  style={{ fontSize: "clamp(0.95rem, 1.5vw, 1.1rem)" }}
-                >
-                  We partnered with a heritage food brand to fast-track product development. Test24 validated concepts in real-time, cutting launch risk by 60%.
-                </p>
-                <div className="flex items-center justify-between text-sm text-slate-500">
-                  <span>Finalist, Retail Innovation Awards</span>
-                  <span className="underline underline-offset-4 hover:text-slate-700 cursor-pointer transition-colors">4 minute read</span>
-                </div>
-              </div>
-              <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-[#E8F0FF] lg:col-span-2 order-1 lg:order-2 shadow-2xl shadow-black/30 ring-1 ring-white/10">
-                <img 
-                  src={airplanesGif}
-                  alt="Animated airplanes illustration"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </motion.div>
-
-            {/* Case Study 3 - Image Left, Text Right */}
-            <motion.div 
-              className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-center"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.7 }}
-              data-testid="case-study-3"
-            >
-              <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-[#FFE4D8] lg:col-span-2 shadow-2xl shadow-black/30 ring-1 ring-white/10">
-                <img 
-                  src={penGif}
-                  alt="Animated pen illustration"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="py-4 lg:col-span-3">
-                <span 
-                  className="text-xs uppercase tracking-[0.25em] text-slate-600/80 mb-6 block"
-                  style={{ fontFamily: "Roboto, sans-serif" }}
-                >
-                  Performance Tracking
-                </span>
-                <h3 
-                  className="font-serif text-slate-800 mb-6 leading-[1.1]"
-                  style={{ 
-                    fontFamily: "'DM Serif Display', serif",
-                    fontStyle: "italic",
-                    fontSize: "clamp(1.75rem, 4vw, 2.75rem)"
-                  }}
-                >
-                  The Dashboard That Saved a Brand R8M in Wasted Media Spend
-                </h3>
-                <p 
-                  className="text-slate-700 leading-relaxed mb-8"
-                  style={{ fontSize: "clamp(0.95rem, 1.5vw, 1.1rem)" }}
-                >
-                  Real-time performance tracking identified underperforming channels early. The client pivoted mid-campaign, reallocating budget to high-ROI touchpoints.
-                </p>
-                <div className="flex items-center justify-between text-sm text-slate-500">
-                  <span>Case Study with Permission</span>
-                  <span className="underline underline-offset-4 hover:text-slate-700 cursor-pointer transition-colors">2 minute read</span>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
+        {/* Case Studies Section with Toggle System */}
+        <CaseStudiesSection />
 
         {/* Closing & Contact Section */}
         <ClosingSection />
