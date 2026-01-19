@@ -436,12 +436,12 @@ export default function CinematicLanding() {
           >
             {/* Two-column layout for desktop */}
             <div className="w-full max-w-7xl mx-auto">
-              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between lg:gap-12">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between lg:gap-12">
                 {/* Text content - Left side */}
                 <motion.div
                   initial={{ opacity: 0, y: -40 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 1, delay: 0.3 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
                   className="text-left lg:flex-1"
                 >
                   <h1 
@@ -469,7 +469,7 @@ export default function CinematicLanding() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 1, delay: 0.6 }}
+                    transition={{ duration: 0.8, delay: 0.4 }}
                     className="mt-8 -mx-6 sm:mx-0 lg:hidden"
                   >
                     <img 
@@ -481,12 +481,12 @@ export default function CinematicLanding() {
                   </motion.div>
                 </motion.div>
                 
-                {/* Animated pen GIF - Right side on desktop */}
+                {/* Animated pen GIF - Right side on desktop, aligned with headline */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 1, delay: 0.6 }}
-                  className="hidden lg:flex lg:flex-1 lg:items-start lg:justify-end"
+                  transition={{ duration: 0.8, delay: 0.4 }}
+                  className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end"
                 >
                   <img 
                     src={penGif}

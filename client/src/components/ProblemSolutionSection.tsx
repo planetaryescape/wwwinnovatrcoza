@@ -10,7 +10,7 @@ export default function ProblemSolutionSection() {
     >
       <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
         {/* THE PROBLEM */}
-        <div className="text-center mb-32 md:mb-40 lg:mb-48">
+        <div className="text-center mb-16 md:mb-20 lg:mb-24">
           <motion.div
             initial={{ opacity: 0, rotate: -5 }}
             whileInView={{ opacity: 1, rotate: -3 }}
@@ -21,10 +21,10 @@ export default function ProblemSolutionSection() {
             <HelpCircle className="w-10 h-10 mx-auto text-black/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} />
           </motion.div>
           <motion.p 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6 }}
             className="text-xs uppercase tracking-[0.35em] mb-6 text-black/60"
             style={{ fontFamily: "Roboto, sans-serif" }}
           >
@@ -32,20 +32,21 @@ export default function ProblemSolutionSection() {
           </motion.p>
           <motion.h2 
             id="problem-heading"
-            initial={{ opacity: 0, y: 60 }}
+            initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             className="text-black mb-8 md:mb-12"
             style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.04em", fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
           >
-            Innovation is too important to fail.
+            <span className="hidden md:inline">Innovation is too important to fail.</span>
+            <span className="md:hidden">Innovation is too<br />important to fail.</span>
           </motion.h2>
           <motion.p 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.15 }}
             className="max-w-2xl mx-auto text-black/90 leading-relaxed"
             style={{ fontFamily: "Roboto, sans-serif", fontSize: "clamp(1rem, 1.5vw, 1.15rem)" }}
           >
@@ -65,30 +66,30 @@ export default function ProblemSolutionSection() {
             <Lightbulb className="w-10 h-10 mx-auto text-black/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }} />
           </motion.div>
           <motion.p 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6 }}
             className="text-xs uppercase tracking-[0.35em] mb-6 text-black/60"
             style={{ fontFamily: "Roboto, sans-serif" }}
           >
             The Solution
           </motion.p>
           <motion.h2 
-            initial={{ opacity: 0, y: 60 }}
+            initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             className="text-black mb-8 md:mb-12"
             style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.04em", fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
           >
             Trust Expert Do-ers, rather than fluffy consultants.
           </motion.h2>
           <motion.p 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.15 }}
             className="max-w-2xl mx-auto text-black/90 leading-relaxed"
             style={{ fontFamily: "Roboto, sans-serif", fontSize: "clamp(1rem, 1.5vw, 1.15rem)" }}
           >
