@@ -34,6 +34,7 @@ import AdminPortal from "@/pages/portal/AdminPortal";
 import AdminCompanyDetail from "@/pages/portal/AdminCompanyDetail";
 import CouponSignup from "@/pages/CouponSignup";
 import ResetPassword from "@/pages/ResetPassword";
+import CaseStudyDetail from "@/pages/CaseStudyDetail";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -45,6 +46,7 @@ function Router() {
       <Route path="/innovatr-consult" component={InnovatrConsultPage} />
       <Route path="/consult" component={CinematicLanding} />
       <Route path="/consult/:pillarId" component={ConsultPillarPage} />
+      <Route path="/case-study/:id" component={CaseStudyDetail} />
       <Route path="/innovatr-intelligence" component={InnovatrIntelligence} />
       <Route path="/checkout/basic-payg" component={CheckoutBasicPAYG} />
       <Route path="/checkout/pro-payg" component={CheckoutProPAYG} />
