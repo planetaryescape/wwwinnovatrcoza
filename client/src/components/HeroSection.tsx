@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { Link } from "wouter";
 import heroBackground from "@assets/Cover Image_1763495477591.jpg";
 
 export default function HeroSection() {
@@ -57,19 +56,6 @@ export default function HeroSection() {
             >
               See Membership Plans
             </Button>
-          </div>
-          
-          {/* Consult Entry Card */}
-          <div className="mt-4">
-            <Link href="/consult">
-              <Button 
-                size="default"
-                className="text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 bg-primary border-primary-border backdrop-blur-sm w-[200px] sm:w-[calc(200px+200px+1rem)] md:w-[calc(220px+220px+1rem)]"
-                data-testid="card-consult-entry"
-              >
-                Consult
-              </Button>
-            </Link>
           </div>
         </div>
       </div>
