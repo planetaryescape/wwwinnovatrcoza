@@ -133,7 +133,7 @@ export default function CaseStudiesSection() {
             The Results
           </p>
           <h2 
-            className="text-slate-800 mb-6"
+            className="text-slate-800 mb-4"
             style={{ 
               fontFamily: "'DM Serif Display', serif", 
               letterSpacing: "0.04em",
@@ -141,8 +141,17 @@ export default function CaseStudiesSection() {
             }}
             data-cursor-invert
           >
-            Growth is our Currency. See how we transformed some of the world's most ambitious brands.
+            Growth is our Currency.
           </h2>
+          <p 
+            className="text-slate-700 mb-6"
+            style={{ 
+              fontFamily: "'DM Serif Display', serif", 
+              fontSize: "clamp(1.1rem, 2.5vw, 1.5rem)"
+            }}
+          >
+            See how we transformed some of the world's most ambitious brands.
+          </p>
         </div>
         
         {/* Phase Toggle Buttons */}
@@ -214,12 +223,12 @@ export default function CaseStudiesSection() {
                   className={`relative overflow-hidden rounded-lg lg:col-span-2 shadow-2xl shadow-black/30 ring-1 ring-white/10 ${
                     index % 2 === 1 ? 'lg:order-2' : 'lg:order-1'
                   }`}
-                  style={{ backgroundColor: caseStudy.bgColor, height: "320px" }}
+                  style={{ height: "320px" }}
                 >
                   <img 
                     src={caseStudy.gif}
                     alt={`${caseStudy.client} case study illustration`}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover"
                   />
                 </div>
                 

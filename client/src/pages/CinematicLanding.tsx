@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { X, Menu, ArrowRight, Target, Lightbulb, Trophy, TrendingUp, Mail, GitBranch } from "lucide-react";
-import { SiLinkedin, SiInstagram } from "react-icons/si";
+import { SiWhatsapp, SiInstagram } from "react-icons/si";
 import { Link, useLocation } from "wouter";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import CustomCursor from "@/components/CustomCursor";
@@ -216,89 +216,36 @@ function ClosingSection() {
           transition={{ duration: 0.7, delay: 0.2 }}
           className="flex flex-col items-center gap-5 max-w-md mx-auto"
         >
-            {/* Email Card */}
+            {/* WhatsApp Link */}
+            <a 
+              href="https://wa.me/27823012433"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 transition-all duration-300 hover:opacity-80"
+              data-testid="button-whatsapp-contact"
+            >
+              <SiWhatsapp className="w-6 h-6 text-[#25D366]" />
+              <span 
+                className="text-white text-base"
+                style={{ fontFamily: "Roboto, sans-serif" }}
+              >
+                WhatsApp Us at 082 301 2433
+              </span>
+            </a>
+
+            {/* Email Link */}
             <a 
               href="mailto:richard@innovatr.co.za?subject=Let's%20Talk%20-%20Innovatr%20Consult"
-              className="group relative overflow-hidden rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 p-6 sm:p-8 transition-all duration-500 hover:bg-white/10 hover:border-white/20"
-              data-testid="button-email-contact"
+              className="group flex items-center gap-3 transition-all duration-300 hover:opacity-80"
+              data-testid="button-email-simple"
             >
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[#5A5EFF] flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 
-                      className="text-white text-lg sm:text-xl mb-1"
-                      style={{ fontFamily: "'DM Serif Display', serif" }}
-                    >
-                      Send an email
-                    </h3>
-                    <p className="text-white/50 text-sm" style={{ fontFamily: "Roboto, sans-serif" }}>
-                      richard@innovatr.co.za
-                    </p>
-                  </div>
-                </div>
-                <ArrowRight className="w-5 h-5 text-white/30 group-hover:text-white/80 group-hover:translate-x-1 transition-all" />
-              </div>
-            </a>
-
-            {/* LinkedIn Card */}
-            <a 
-              href="https://www.linkedin.com/in/richard-lawrence-innovation-72a62414"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative overflow-hidden rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 p-6 sm:p-8 transition-all duration-500 hover:bg-white/10 hover:border-white/20"
-              data-testid="button-linkedin-contact"
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[#0A66C2] flex items-center justify-center flex-shrink-0">
-                    <SiLinkedin className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 
-                      className="text-white text-lg sm:text-xl mb-1"
-                      style={{ fontFamily: "'DM Serif Display', serif" }}
-                    >
-                      Connect on LinkedIn
-                    </h3>
-                    <p className="text-white/50 text-sm" style={{ fontFamily: "Roboto, sans-serif" }}>
-                      Let's connect and chat
-                    </p>
-                  </div>
-                </div>
-                <ArrowRight className="w-5 h-5 text-white/30 group-hover:text-white/80 group-hover:translate-x-1 transition-all" />
-              </div>
-            </a>
-
-            {/* Instagram Card */}
-            <a 
-              href="https://www.instagram.com/innovatr1?igsh=d2V3eGM5eDZ5anhh"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative overflow-hidden rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 p-6 sm:p-8 transition-all duration-500 hover:bg-white/10 hover:border-white/20"
-              data-testid="button-instagram-contact"
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#FCAF45] flex items-center justify-center flex-shrink-0">
-                    <SiInstagram className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 
-                      className="text-white text-lg sm:text-xl mb-1"
-                      style={{ fontFamily: "'DM Serif Display', serif" }}
-                    >
-                      Follow on Instagram
-                    </h3>
-                    <p className="text-white/50 text-sm" style={{ fontFamily: "Roboto, sans-serif" }}>
-                      Behind the scenes
-                    </p>
-                  </div>
-                </div>
-                <ArrowRight className="w-5 h-5 text-white/30 group-hover:text-white/80 group-hover:translate-x-1 transition-all" />
-              </div>
+              <Mail className="w-6 h-6 text-[#5A5EFF]" />
+              <span 
+                className="text-white text-base"
+                style={{ fontFamily: "Roboto, sans-serif" }}
+              >
+                Send us an email
+              </span>
             </a>
         </motion.div>
       </div>
@@ -444,13 +391,13 @@ export default function CinematicLanding() {
         {/* Social Icons - Vertical */}
         <div className="flex flex-col items-center gap-5">
           <a
-            href="https://www.linkedin.com/in/richard-lawrence-innovation-72a62414"
+            href="https://wa.me/27823012433"
             target="_blank"
             rel="noopener noreferrer"
             className="text-slate-600 hover:text-slate-800 transition-colors"
-            data-testid="social-linkedin"
+            data-testid="social-whatsapp"
           >
-            <SiLinkedin className="w-4 h-4" />
+            <SiWhatsapp className="w-4 h-4" />
           </a>
           <a
             href="mailto:Richard@innovatr.co.za?subject=Innovatr%20Consult%20Connect"
@@ -458,15 +405,6 @@ export default function CinematicLanding() {
             data-testid="social-email"
           >
             <Mail className="w-4 h-4" />
-          </a>
-          <a
-            href="https://www.instagram.com/innovatr1?igsh=d2V3eGM5eDZ5anhh"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-slate-600 hover:text-slate-800 transition-colors"
-            data-testid="social-instagram"
-          >
-            <SiInstagram className="w-4 h-4" />
           </a>
           <Link href="/">
             <span 
@@ -694,13 +632,13 @@ export default function CinematicLanding() {
                   className="flex items-center gap-6 mt-8 pt-8 border-t border-white/20"
                 >
                   <a
-                    href="https://www.linkedin.com/in/richard-lawrence-innovation-72a62414"
+                    href="https://wa.me/27823012433"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-white/60 hover:text-white transition-colors"
-                    data-testid="menu-social-linkedin"
+                    data-testid="menu-social-whatsapp"
                   >
-                    <SiLinkedin className="w-6 h-6" />
+                    <SiWhatsapp className="w-6 h-6" />
                   </a>
                   <a
                     href="mailto:Richard@innovatr.co.za?subject=Innovatr%20Consult%20Connect"
@@ -708,15 +646,6 @@ export default function CinematicLanding() {
                     data-testid="menu-social-email"
                   >
                     <Mail className="w-6 h-6" />
-                  </a>
-                  <a
-                    href="https://www.instagram.com/innovatr1?igsh=d2V3eGM5eDZ5anhh"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white/60 hover:text-white transition-colors"
-                    data-testid="menu-social-instagram"
-                  >
-                    <SiInstagram className="w-6 h-6" />
                   </a>
                 </motion.div>
               </nav>
