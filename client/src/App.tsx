@@ -39,8 +39,7 @@ import NotFound from "@/pages/not-found";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={CinematicLanding} />
-      <Route path="/home" component={Home} />
+      <Route path="/" component={Home} />
       <Route path="/test24-basic" component={Test24BasicPage} />
       <Route path="/test24-pro" component={Test24ProPage} />
       <Route path="/innovatr-consult" component={InnovatrConsultPage} />

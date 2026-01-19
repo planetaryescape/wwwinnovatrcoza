@@ -21,17 +21,17 @@ export default function Footer() {
             <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-300 mb-4">Services</h4>
             <ul className="space-y-3 text-sm text-gray-400">
               <li>
-                <Link href="/home#services" className="hover:text-white hover:underline transition-colors">
+                <Link href="/#services" className="hover:text-white hover:underline transition-colors">
                   Innovatr Intelligence
                 </Link>
               </li>
               <li>
-                <Link href="/home#services" className="hover:text-white hover:underline transition-colors">
+                <Link href="/#services" className="hover:text-white hover:underline transition-colors">
                   Test24 Basic
                 </Link>
               </li>
               <li>
-                <Link href="/home#services" className="hover:text-white hover:underline transition-colors">
+                <Link href="/#services" className="hover:text-white hover:underline transition-colors">
                   Test24 Pro
                 </Link>
               </li>
@@ -47,17 +47,17 @@ export default function Footer() {
             <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-300 mb-4">Pricing</h4>
             <ul className="space-y-3 text-sm text-gray-400">
               <li>
-                <Link href="/home#pricing" className="hover:text-white hover:underline transition-colors">
+                <Link href="/#pricing" className="hover:text-white hover:underline transition-colors">
                   Pay-as-you-go
                 </Link>
               </li>
               <li>
-                <Link href="/home#membership" className="hover:text-white hover:underline transition-colors">
+                <Link href="/#membership" className="hover:text-white hover:underline transition-colors">
                   Membership plans
                 </Link>
               </li>
               <li>
-                <Link href="/home#contact" className="hover:text-white hover:underline transition-colors">
+                <Link href="/#contact" className="hover:text-white hover:underline transition-colors">
                   Contact sales
                 </Link>
               </li>
@@ -68,7 +68,7 @@ export default function Footer() {
             <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-300 mb-4">Company</h4>
             <ul className="space-y-3 text-sm text-gray-400">
               <li>
-                <Link href="/home#contact" className="hover:text-white hover:underline transition-colors">
+                <Link href="/#contact" className="hover:text-white hover:underline transition-colors">
                   Contact
                 </Link>
               </li>

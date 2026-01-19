@@ -397,7 +397,7 @@ export default function CinematicLanding() {
       {/* Fixed Header - Always visible */}
       <header className="fixed top-0 left-0 right-0 z-50 px-6 py-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/home">
+          <Link href="/">
             <span 
               className="text-2xl font-serif font-bold text-slate-800 cursor-pointer hover:text-slate-600 transition-colors"
               data-testid="link-logo-landing"
@@ -469,7 +469,7 @@ export default function CinematicLanding() {
           >
             <SiInstagram className="w-4 h-4" />
           </a>
-          <Link href="/home">
+          <Link href="/">
             <span 
               className="text-slate-600 hover:text-slate-800 transition-colors text-sm font-bold"
               style={{ fontFamily: "Roboto, sans-serif" }}
