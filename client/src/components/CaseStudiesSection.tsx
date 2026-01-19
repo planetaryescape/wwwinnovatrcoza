@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TrendingUp, Target, Lightbulb, Rocket, Download, ArrowRight } from "lucide-react";
+import { TrendingUp, Target, Lightbulb, Rocket, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Link } from "wouter";
-import caseStudiesPdf from "@assets/innovatr_case_studies_20260119131201_1768828402299.pdf";
 import cookingGif from "@assets/RafaelVarona_Playbook_Cooking_Animation_1768339161246.gif";
 import airplanesGif from "@assets/rafael-varona-airplanes_1768339161246.gif";
 import penGif from "@assets/RafaelVarona_Playbook_Pen_1768339161246.gif";
@@ -150,14 +148,13 @@ export default function CaseStudiesSection() {
         {/* Phase Toggle Buttons */}
         <div className="flex flex-wrap justify-center gap-3 mb-12">
           {phases.map((phase) => {
-            const Icon = phase.icon;
             const isActive = activePhase === phase.id;
             return (
               <button
                 key={phase.id}
                 onClick={() => setActivePhase(phase.id)}
                 className={`
-                  flex items-center gap-2 px-5 py-3 rounded-full transition-all duration-300
+                  px-5 py-3 rounded-full transition-all duration-300
                   ${isActive 
                     ? 'text-white shadow-lg scale-105' 
                     : 'bg-white/60 text-slate-700 hover:bg-white/80'
@@ -169,7 +166,6 @@ export default function CaseStudiesSection() {
                 }}
                 data-testid={`toggle-phase-${phase.id}`}
               >
-                <Icon className="w-4 h-4" />
                 <span className="text-sm font-medium">{phase.label}</span>
               </button>
             );
@@ -215,10 +211,10 @@ export default function CaseStudiesSection() {
               >
                 {/* GIF Image - Left on desktop (alternates) */}
                 <div 
-                  className={`relative aspect-[3/4] overflow-hidden rounded-lg lg:col-span-2 shadow-2xl shadow-black/30 ring-1 ring-white/10 ${
+                  className={`relative overflow-hidden rounded-lg lg:col-span-2 shadow-2xl shadow-black/30 ring-1 ring-white/10 ${
                     index % 2 === 1 ? 'lg:order-2' : 'lg:order-1'
                   }`}
-                  style={{ backgroundColor: caseStudy.bgColor }}
+                  style={{ backgroundColor: caseStudy.bgColor, height: "320px" }}
                 >
                   <img 
                     src={caseStudy.gif}
@@ -303,7 +299,7 @@ export default function CaseStudiesSection() {
           </motion.div>
         </AnimatePresence>
         
-        {/* Download Full Case Studies */}
+        {/* See More CTA */}
         <motion.div 
           className="mt-16 text-center"
           initial={{ opacity: 0, y: 20 }}
@@ -312,23 +308,18 @@ export default function CaseStudiesSection() {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <p className="text-slate-600 mb-6" style={{ fontFamily: "Roboto, sans-serif" }}>
-            Want the full story? Download our complete case studies portfolio.
+            Want to see how we can help your brand grow?
           </p>
-          <a 
-            href={caseStudiesPdf}
-            download="Innovatr_Case_Studies_Portfolio.pdf"
-            className="inline-block"
-          >
+          <Link href="/#contact">
             <Button 
               size="lg"
               className="bg-slate-800 hover:bg-slate-900 text-white gap-2"
-              data-testid="button-download-case-studies"
+              data-testid="button-see-more-contact"
             >
-              <Download className="w-4 h-4" />
-              Download Case Studies PDF
+              See More
               <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
-          </a>
+          </Link>
         </motion.div>
       </div>
     </section>
