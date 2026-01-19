@@ -19,6 +19,7 @@ interface Service {
   color: string;
   isNew: boolean;
   isPremium?: boolean;
+  useDarkText?: boolean;
 }
 
 const services: Service[] = [
@@ -35,7 +36,7 @@ const services: Service[] = [
       "Automated briefing & reporting",
       "24hr turnaround",
     ],
-    color: "#F2B8A8",
+    color: "#FF7F6E",
     isNew: true,
   },
   {
@@ -52,7 +53,7 @@ const services: Service[] = [
       "Custom Audience",
       "Quant + AI Qual",
     ],
-    color: "#B5A4D4",
+    color: "#DDA0DD",
     isNew: false,
   },
   {
@@ -68,8 +69,9 @@ const services: Service[] = [
       "Opportunity identification",
       "Bi-weekly curated insights",
     ],
-    color: "#8DD9E4",
+    color: "#C5E1A5",
     isNew: true,
+    useDarkText: true,
   },
   {
     icon: Rocket,
@@ -83,7 +85,7 @@ const services: Service[] = [
       "Idea to Market Consulting",
       "Strategy, Design, Testing & Go to Market",
     ],
-    color: "#4A6082",
+    color: "#7EC8E3",
     isNew: false,
     isPremium: true,
   },
@@ -117,19 +119,17 @@ export default function ServicesSection() {
             <Card 
               key={index} 
               className={`hover-elevate relative overflow-hidden flex flex-col border-0 ${
-                service.isPremium ? 'shadow-2xl ring-1 ring-white/20' : ''
+                service.isPremium ? 'shadow-2xl ring-1 ring-slate-300/30' : ''
               }`}
               style={{ 
-                backgroundColor: service.isPremium ? 'rgba(74, 96, 130, 0.9)' : service.color,
-                backdropFilter: service.isPremium ? 'blur(12px)' : undefined,
-                WebkitBackdropFilter: service.isPremium ? 'blur(12px)' : undefined,
+                backgroundColor: service.color,
               }}
               data-testid={`service-card-${index}`}
             >
               {/* Large background number */}
               <div 
                 className="absolute top-0 right-0 text-[140px] font-serif font-bold leading-none p-4 select-none pointer-events-none"
-                style={{ color: 'rgba(255,255,255,0.15)' }}
+                style={{ color: service.useDarkText ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.15)' }}
               >
                 {service.number}
               </div>
@@ -138,7 +138,11 @@ export default function ServicesSection() {
               {service.isNew && (
                 <div className="absolute top-4 right-4 z-10">
                   <Badge 
-                    className="font-semibold text-xs px-2 py-1 bg-white/20 text-white border-white/30"
+                    className={`font-semibold text-xs px-2 py-1 ${
+                      service.useDarkText 
+                        ? 'bg-slate-800/20 text-slate-800 border-slate-800/30' 
+                        : 'bg-white/20 text-white border-white/30'
+                    }`}
                     data-testid={`badge-new-${index}`}
                   >
                     NEW
@@ -149,29 +153,31 @@ export default function ServicesSection() {
               <CardHeader className="pb-2">
                 {/* Icon */}
                 <div 
-                  className="w-12 h-12 mb-4 rounded-md flex items-center justify-center bg-white/20"
+                  className={`w-12 h-12 mb-4 rounded-md flex items-center justify-center ${
+                    service.useDarkText ? 'bg-slate-800/15' : 'bg-white/20'
+                  }`}
                 >
-                  <service.icon className="w-6 h-6 text-white" />
+                  <service.icon className={`w-6 h-6 ${service.useDarkText ? 'text-slate-800' : 'text-white'}`} />
                 </div>
                 
                 {/* Title */}
-                <CardTitle className="text-2xl font-serif text-white mb-2">
+                <CardTitle className={`text-2xl font-serif mb-2 ${service.useDarkText ? 'text-slate-800' : 'text-white'}`}>
                   {service.title}
                 </CardTitle>
                 
                 {/* Description */}
-                <CardDescription className="text-white/80 text-base">{service.description}</CardDescription>
+                <CardDescription className={`text-base ${service.useDarkText ? 'text-slate-700' : 'text-white/80'}`}>{service.description}</CardDescription>
                 
                 {/* Price */}
-                <div className="text-xl font-bold text-white pt-2">{getDisplayPrice(service)}</div>
+                <div className={`text-xl font-bold pt-2 ${service.useDarkText ? 'text-slate-800' : 'text-white'}`}>{getDisplayPrice(service)}</div>
               </CardHeader>
               
               <CardContent className="flex flex-col flex-1">
                 {/* Features */}
                 <ul className="space-y-2 flex-1 mb-6">
                   {service.features.map((feature, fIndex) => (
-                    <li key={fIndex} className="flex items-start gap-2 text-sm text-white/90">
-                      <span className="mt-1 text-white">•</span>
+                    <li key={fIndex} className={`flex items-start gap-2 text-sm ${service.useDarkText ? 'text-slate-700' : 'text-white/90'}`}>
+                      <span className={`mt-1 ${service.useDarkText ? 'text-slate-800' : 'text-white'}`}>•</span>
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -182,7 +188,11 @@ export default function ServicesSection() {
                   <Link href={service.link}>
                     <Button 
                       variant="outline"
-                      className="w-full bg-white/10 border-white/30 text-white"
+                      className={`w-full ${
+                        service.useDarkText 
+                          ? 'bg-slate-800/10 border-slate-800/30 text-slate-800 hover:bg-slate-800/20' 
+                          : 'bg-white/10 border-white/30 text-white'
+                      }`}
                       data-testid={`button-learn-more-${index}`}
                     >
                       {service.isPremium ? 'Explore Consult' : 'Learn More'}
