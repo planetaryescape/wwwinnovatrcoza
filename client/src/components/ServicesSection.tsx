@@ -178,7 +178,7 @@ export default function ServicesSection() {
                   {service.features.map((feature, fIndex) => (
                     <li key={fIndex} className={`flex items-start gap-2 text-sm ${service.useDarkText ? 'text-slate-700' : 'text-white/90'}`}>
                       <span className={`mt-1 ${service.useDarkText ? 'text-slate-800' : 'text-white'}`}>•</span>
-                      <span>{feature}</span>
+                      <span className="text-[#f1f6ff]">{feature}</span>
                     </li>
                   ))}
                 </ul>
