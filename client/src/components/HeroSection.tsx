@@ -22,15 +22,13 @@ export default function HeroSection() {
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Warm, vibrant background with personality */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f0f1a]" />
-      
       {/* Colorful accent blocks - warm and inviting */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden bg-[#4860fa]">
         <div className="absolute -top-20 -right-20 w-[500px] h-[500px] bg-[#ED876E] rounded-full opacity-20 blur-[80px]" />
         <div className="absolute top-1/3 -left-32 w-[400px] h-[400px] bg-[#F4A261] rounded-full opacity-15 blur-[100px]" />
         <div className="absolute bottom-0 right-1/4 w-[350px] h-[350px] bg-[#E76F51] rounded-full opacity-15 blur-[90px]" />
         <div className="absolute bottom-1/4 left-1/3 w-[300px] h-[300px] bg-[#2A9D8F] rounded-full opacity-10 blur-[80px]" />
       </div>
-      
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left side - Large bold text */}
@@ -46,7 +44,7 @@ export default function HeroSection() {
             <p className="text-xl sm:text-2xl text-gray-300 max-w-xl mb-4 font-light">
               Smart, affordable research in 24hrs.
             </p>
-            <p className="text-base text-gray-400 max-w-lg mb-10">
+            <p className="text-base max-w-lg mb-10 text-[#f1f6ff]">
               Make confident decisions backed by real consumer insights. From rapid testing to strategic consulting.
             </p>
             
@@ -99,7 +97,6 @@ export default function HeroSection() {
           </div>
         </div>
       </div>
-      
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
         <button 

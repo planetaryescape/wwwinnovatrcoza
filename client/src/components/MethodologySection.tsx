@@ -20,11 +20,10 @@ export default function MethodologySection() {
         }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
-      
       <div className="relative z-10">
         <div className="relative py-20 overflow-hidden">
           <div 
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-center bg-[#7dc7e2]"
             style={{ 
               backgroundImage: `url(${differenceBackground})`
             }}

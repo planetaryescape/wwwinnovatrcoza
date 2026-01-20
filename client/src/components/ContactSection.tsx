@@ -80,8 +80,7 @@ export default function ContactSection() {
           backgroundImage: `url(${contactBackground})`
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/60" />
-      
+      <div className="absolute inset-0 from-black/40 via-black/50 to-black/60 bg-[#c6e1a5]" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-4 text-white">Let's start a conversation?</h2>
