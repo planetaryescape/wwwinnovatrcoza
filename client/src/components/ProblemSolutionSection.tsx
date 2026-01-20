@@ -1,14 +1,14 @@
 import { motion } from "framer-motion";
 import { HelpCircle, Lightbulb } from "lucide-react";
 import squarePegGif from "@assets/EFC8B961-B983-4667-B510-566895277C4B_1768849610643.gif";
-import teamworkGif from "@assets/607B88C5-C090-4E2F-A5B1-5712734645E0_1768851070548.gif";
+import transitionGif from "@assets/9C5A48FC-0116-4129-B55E-6A547D4F898F_1768887925056.gif";
 
 export default function ProblemSolutionSection() {
   return (
     <>
       <section 
         id="problem-solution" 
-        className="py-24 md:py-32 lg:py-40 bg-[#F2CFC5]"
+        className="py-16 md:py-20 lg:py-24 bg-[#F2CFC5]"
         aria-labelledby="problem-heading"
       >
         <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -130,8 +130,8 @@ export default function ProblemSolutionSection() {
       <section className="bg-[#F5C542]">
         <div className="w-full lg:w-1/2">
           <motion.img
-            src={teamworkGif}
-            alt="Teamwork and collaboration - innovation solution"
+            src={transitionGif}
+            alt="Innovation transition - from solution to process"
             className="w-full h-auto"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
