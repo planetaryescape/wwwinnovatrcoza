@@ -1,5 +1,4 @@
 import neonLightsBackground from "@assets/pexels-chris-f-8344064_1763492180742.jpeg";
-import differenceBackground from "@assets/pexels-merlin-lightpainting-10874566_1764656420841.jpeg";
 
 const features = [
   { label: "SPEED", subtitle: "24hr Turn-Around" },
@@ -22,12 +21,7 @@ export default function MethodologySection() {
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
       <div className="relative z-10">
         <div className="relative py-20 overflow-hidden">
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-[#7dc7e2]"
-            style={{ 
-              backgroundImage: `url(${differenceBackground})`
-            }}
-          />
+          <div className="absolute inset-0 bg-[#7dc7e2]" />
           
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
