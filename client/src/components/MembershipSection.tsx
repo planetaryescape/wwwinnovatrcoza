@@ -103,7 +103,7 @@ export default function MembershipSection() {
   };
 
   return (
-    <section id="membership" className="py-20 bg-[#1E1E2E]">
+    <section id="membership" className="py-20 bg-[#696fa3]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <div className="text-sm font-semibold text-white/50 mb-4 uppercase tracking-wider">
