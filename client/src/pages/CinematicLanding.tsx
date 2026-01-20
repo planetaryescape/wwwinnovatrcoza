@@ -17,6 +17,7 @@ import endToEndDesignImg from "@assets/generated_images/end_to_end_design_flow.p
 import brandHealthImg from "@assets/generated_images/brand_health_tracking_pulse.png";
 import penGif from "@assets/RafaelVarona_Playbook_Pen_1768339161246.gif";
 import processGif from "@assets/3033FB85-DA2A-414B-B13D-A981E92AF90D_1768887098863.gif";
+import toolsResultsGif from "@assets/6460C7DC-CC90-4A74-B89C-D2EB13F10796_1768888114249.gif";
 
 const pillars = [
   {
@@ -591,6 +592,22 @@ export default function CinematicLanding() {
 
       {/* Tools Section */}
       <ToolsSection />
+
+      {/* Animated GIF Section - Between Tools and Results */}
+      <section className="bg-[#DDA0DD]">
+        <div className="w-full lg:w-1/2">
+          <motion.img
+            src={toolsResultsGif}
+            alt="Transition from tools to results"
+            className="w-full h-auto"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.6 }}
+          />
+        </div>
+      </section>
+
       {/* Content Sections */}
       <div ref={contentRef}>
         {/* Case Studies Section with Toggle System */}
