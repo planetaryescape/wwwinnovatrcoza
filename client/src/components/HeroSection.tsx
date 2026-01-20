@@ -39,7 +39,7 @@ export default function HeroSection() {
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-serif font-bold text-white mb-8 leading-[1.1]">
               Launch{" "}
               <span className="text-[#ED876E]">Better</span>{" "}
-              Innovation
+              Research
             </h1>
             <p className="text-xl sm:text-2xl text-gray-300 max-w-xl mb-4 font-light">
               Smart, affordable research in 24hrs.
