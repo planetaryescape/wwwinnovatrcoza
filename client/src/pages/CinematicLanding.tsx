@@ -16,6 +16,7 @@ import ideationWorkshopsImg from "@assets/generated_images/ideation_workshops_cr
 import endToEndDesignImg from "@assets/generated_images/end_to_end_design_flow.png";
 import brandHealthImg from "@assets/generated_images/brand_health_tracking_pulse.png";
 import penGif from "@assets/RafaelVarona_Playbook_Pen_1768339161246.gif";
+import processGif from "@assets/3033FB85-DA2A-414B-B13D-A981E92AF90D_1768887098863.gif";
 
 const pillars = [
   {
@@ -572,6 +573,22 @@ export default function CinematicLanding() {
           </div>
         </div>
       </section>
+
+      {/* Animated GIF Section - Between Process and Tools */}
+      <section className="bg-[#5A5EFF]">
+        <div className="w-full lg:w-1/2">
+          <motion.img
+            src={processGif}
+            alt="Innovation process in action"
+            className="w-full h-auto"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.6 }}
+          />
+        </div>
+      </section>
+
       {/* Tools Section */}
       <ToolsSection />
       {/* Content Sections */}
