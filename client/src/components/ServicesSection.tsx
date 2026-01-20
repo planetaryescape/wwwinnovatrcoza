@@ -71,7 +71,7 @@ const services: Service[] = [
     ],
     color: "#C5E1A5",
     isNew: true,
-    useDarkText: true,
+    useDarkText: false,
   },
   {
     icon: Rocket,
