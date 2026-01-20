@@ -78,7 +78,7 @@ export default function Navigation() {
             <div className="flex items-center gap-12">
               <button 
                 onClick={() => setLocation("/")}
-                className="text-2xl font-serif font-bold text-primary" 
+                className="text-2xl font-serif font-bold text-[#5669ed]" 
                 data-testid="link-logo"
               >
                 Innovatr
@@ -293,7 +293,6 @@ export default function Navigation() {
           </div>
         )}
       </nav>
-
       <LoginDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
     </>
   );
