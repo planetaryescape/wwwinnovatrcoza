@@ -69,7 +69,7 @@ const services: Service[] = [
       "Opportunity identification",
       "Bi-weekly curated insights",
     ],
-    color: "#C5E1A5",
+    color: "#6BBF59",
     isNew: true,
     useDarkText: false,
   },
@@ -178,7 +178,7 @@ export default function ServicesSection() {
                   {service.features.map((feature, fIndex) => (
                     <li key={fIndex} className={`flex items-start gap-2 text-sm ${service.useDarkText ? 'text-slate-700' : 'text-white/90'}`}>
                       <span className={`mt-1 ${service.useDarkText ? 'text-slate-800' : 'text-white'}`}>•</span>
-                      <span className="text-[#f1f6ff]">{feature}</span>
+                      <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -190,7 +190,7 @@ export default function ServicesSection() {
                       variant="outline"
                       className={`w-full ${
                         service.useDarkText 
-                          ? 'bg-slate-800/10 border-slate-800/30 text-slate-800 hover:bg-slate-800/20' 
+                          ? 'bg-slate-800/10 border-slate-800/30 text-slate-800' 
                           : 'bg-white/10 border-white/30 text-white'
                       }`}
                       data-testid={`button-learn-more-${index}`}
