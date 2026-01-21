@@ -28,7 +28,7 @@ import agileImg15 from "@assets/IMG_8511_1768760848107.jpeg";
 import agileImg16 from "@assets/IMG_8505_1768760848107.jpeg";
 import agileImg17 from "@assets/IMG_8506_1768760848107.jpeg";
 import agileImg18 from "@assets/IMG_8499_1768760848107.jpeg";
-import privateDashboardVideo from "@assets/agile_research,_purpose-built_for_innovation._(720p)_3_1768994342505.mov";
+import privateDashboardVideo from "@assets/ScreenRecording_01-21-2026_15_1769001159351.mov";
 
 const agileDesignImages = [
   agileImg1, agileImg2, agileImg3, agileImg4, agileImg5, agileImg6,
