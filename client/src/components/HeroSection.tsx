@@ -1,11 +1,6 @@
 import heroVideo from "@assets/ScreenRecording_01-21-2026_15_1769001798127.mov";
 
 export default function HeroSection() {
-  const scrollToServices = () => {
-    const servicesSection = document.getElementById("services");
-    servicesSection?.scrollIntoView({ behavior: "smooth" });
-  };
-
   return (
     <section className="relative min-h-screen flex flex-col overflow-hidden bg-[#4c4de1]">
       {/* Desktop layout */}
@@ -84,18 +79,6 @@ export default function HeroSection() {
             data-testid="video-hero-mobile"
           />
         </div>
-      </div>
-      {/* Scroll indicator */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-        <button 
-          onClick={scrollToServices}
-          className="hover-elevate rounded-full p-2"
-          data-testid="button-scroll-down"
-        >
-          <div className="w-6 h-10 border-2 border-gray-500 rounded-full flex justify-center pt-2">
-            <div className="w-1.5 h-1.5 bg-[#ED876E] rounded-full animate-bounce" />
-          </div>
-        </button>
       </div>
     </section>
   );
