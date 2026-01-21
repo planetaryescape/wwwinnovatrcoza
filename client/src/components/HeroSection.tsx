@@ -46,7 +46,7 @@ export default function HeroSection() {
                   TRANSFORMING
                 </span>
                 <br />
-                <span className="text-white">CONSUMER INSIGHTS</span>
+                <span className="text-white">CONSUMER INSIGHTS.</span>
               </h1>
               <p 
                 className="text-gray-300 max-w-xl mb-6"
