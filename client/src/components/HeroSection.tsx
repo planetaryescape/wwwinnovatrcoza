@@ -7,11 +7,6 @@ export default function HeroSection() {
     pricingSection?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleMembership = () => {
-    const membershipSection = document.getElementById("membership");
-    membershipSection?.scrollIntoView({ behavior: "smooth" });
-  };
-
   const scrollToServices = () => {
     const servicesSection = document.getElementById("services");
     servicesSection?.scrollIntoView({ behavior: "smooth" });
@@ -56,14 +51,6 @@ export default function HeroSection() {
                 data-testid="button-test-now"
               >
                 24hr research
-              </Button>
-              <Button 
-                size="lg"
-                className="bg-[#ED876E]/20 text-white px-8 border border-[#ED876E]/40 min-w-[180px]"
-                onClick={handleMembership}
-                data-testid="button-membership"
-              >
-                Memberships
               </Button>
               <Link href="/consult">
                 <Button 

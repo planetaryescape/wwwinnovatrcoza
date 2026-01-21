@@ -67,9 +67,8 @@ export default function ProblemSolutionSection() {
                 className="max-w-2xl mx-auto lg:mx-0 text-white/90 leading-relaxed"
                 style={{ fontFamily: "Roboto, sans-serif", fontSize: "clamp(1rem, 1.5vw, 1.15rem)" }}
               >
-                Why are projects so slow?<br />
-                Why is it so expensive?<br />
-                Will this launch fail like the last one?
+                So why does it feel so risky every time?<br />
+                Projects drag on, spend escalates, and past failures make every new idea feel like a gamble.
               </motion.p>
             </div>
           </div>
