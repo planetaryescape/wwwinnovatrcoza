@@ -156,12 +156,8 @@ export default function ServicesSection() {
               
               <CardHeader className="pb-2">
                 {/* Icon */}
-                <div 
-                  className={`w-12 h-12 mb-4 rounded-md flex items-center justify-center ${
-                    service.useDarkText ? 'bg-slate-800/15' : 'bg-white/20'
-                  }`}
-                >
-                  <service.icon className={`w-6 h-6 ${service.useDarkText ? 'text-slate-800' : 'text-white'}`} />
+                <div className="mb-4">
+                  <service.icon className={`w-8 h-8 ${service.useDarkText ? 'text-slate-800' : 'text-white'}`} />
                 </div>
                 
                 {/* Title */}
@@ -192,10 +188,10 @@ export default function ServicesSection() {
                   <Link href={service.link}>
                     <Button 
                       variant="outline"
-                      className={`w-full ${
+                      className={`w-full border-0 ${
                         service.useDarkText 
-                          ? 'bg-slate-800/10 border-slate-800/30 text-slate-800' 
-                          : 'bg-white/10 border-white/30 text-white'
+                          ? 'bg-slate-800/10 text-slate-800' 
+                          : 'bg-white/10 text-white'
                       }`}
                       data-testid={`button-learn-more-${index}`}
                     >
