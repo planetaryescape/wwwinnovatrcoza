@@ -117,6 +117,19 @@ export default function ConsultPage() {
   const [activePillar, setActivePillar] = useState(0);
   const lifecycleRef = useRef<HTMLDivElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+
+  // Handle hash navigation for direct links to sections
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      setTimeout(() => {
+        const element = document.querySelector(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, []);
   
   const { scrollYProgress } = useScroll({
     target: lifecycleRef,
