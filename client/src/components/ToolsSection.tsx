@@ -124,6 +124,7 @@ const tools: Tool[] = [
     whatText: "Build and engage with dedicated consumer panels at the click of a button. Fast, flexible, and always-on access to your target audience.",
     whyText: "Skip the recruitment delays. Get answers from real consumers within hours, not weeks.",
     image: dashboardImg,
+    video: "https://downloads.intercomcdn.com/i/o/gbd7mpwj/1767906628/08c72a09b954ca3db0280c8dc201/Upsiide+Dashboard+%2816%29.gif?expires=1768908600&signature=ae8d62c71bb845da19da5e66cf65cffbb3bf9e19390fd505fda342a61000aa78&req=dSchEcB%2Bm4ddUfMW1HO4zdGgnhW5czxhdQkFH3PWHqZc0rM4jnGqQ0Ix2Plz%0AEyldw4Cg9rAznRfbV04%3D%0A",
     comingSoon: true,
   },
 ];
@@ -192,20 +193,30 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
             {isCarousel ? (
               <ImageCarousel images={agileDesignImages} isHovered={isHovered} />
             ) : tool.video ? (
-              tool.video.endsWith('.gif') || tool.video.includes('.gif?') ? (
-                <img 
-                  src={tool.video}
-                  alt={tool.name}
-                  className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? 'scale-110' : 'scale-100'}`}
-                  data-testid={`gif-tool-${tool.id}`}
-                />
+              tool.video.includes('.gif') ? (
+                isHovered ? (
+                  <img 
+                    src={tool.video}
+                    alt={tool.name}
+                    className="w-full h-full object-contain bg-slate-100 transition-transform duration-700 scale-105"
+                    data-testid={`gif-tool-${tool.id}`}
+                  />
+                ) : (
+                  <img 
+                    src={tool.image || ""}
+                    alt={tool.name}
+                    className="w-full h-full object-cover transition-transform duration-700"
+                    data-testid={`img-tool-${tool.id}`}
+                  />
+                )
               ) : (
                 <video 
-                  src={tool.video}
-                  autoPlay
+                  src={isHovered ? tool.video : undefined}
+                  autoPlay={isHovered}
                   loop
                   muted
                   playsInline
+                  poster={tool.image || ""}
                   className={`w-full h-full object-cover object-left transition-transform duration-700 ${isHovered ? 'scale-110' : 'scale-100'}`}
                   data-testid={`video-tool-${tool.id}`}
                 />
