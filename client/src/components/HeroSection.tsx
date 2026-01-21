@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
+import heroGif from "@assets/1C123D7B-4B5C-461A-98D9-E0A683A2D801_1768998251716.gif";
 
 export default function HeroSection() {
   const handleTestNow = () => {
@@ -38,7 +39,7 @@ export default function HeroSection() {
                 style={{ 
                   fontFamily: "'DM Serif Display', serif", 
                   letterSpacing: "0.06em",
-                  fontSize: "clamp(2rem, 4.8vw, 4.4rem)"
+                  fontSize: "clamp(2rem, 4vw, 3.74rem)"
                 }}
               >
                 <span className="text-white">WE ARE </span>
@@ -56,24 +57,28 @@ export default function HeroSection() {
               </p>
             </div>
             
-            {/* Right side - Bold color block with "24" */}
+            {/* Right side - Hero GIF (desktop) */}
             <div className="hidden lg:flex justify-center items-center relative">
-              <div className="relative">
-                {/* Main color block */}
-                <div className="w-72 h-72 rounded-3xl bg-gradient-to-br from-[#ED876E] to-[#E76F51] flex items-center justify-center shadow-2xl shadow-[#ED876E]/20">
-                  <div className="text-center">
-                    <div className="text-8xl font-serif font-bold text-white">24</div>
-                    <div className="text-lg uppercase tracking-[0.3em] text-white/80 mt-2">Hours</div>
-                  </div>
-                </div>
-                {/* Accent floating elements */}
-                <div className="absolute -top-6 -right-6 w-16 h-16 rounded-xl bg-[#2A9D8F] opacity-80" />
-                <div className="absolute -bottom-4 -left-4 w-12 h-12 rounded-lg bg-[#F4A261] opacity-70" />
-              </div>
+              <img 
+                src={heroGif}
+                alt="Innovation animation"
+                className="w-full max-w-md xl:max-w-lg h-auto object-contain"
+                data-testid="img-hero-gif-desktop"
+              />
             </div>
           </div>
           
-          {/* Buttons row - below both headline and coral box */}
+          {/* Hero GIF - Mobile (full width below content) */}
+          <div className="lg:hidden w-screen -mx-4 sm:-mx-6 mt-8">
+            <img 
+              src={heroGif}
+              alt="Innovation animation"
+              className="w-full h-auto object-contain"
+              data-testid="img-hero-gif-mobile"
+            />
+          </div>
+          
+          {/* Buttons row - below both headline and gif */}
           <div className="flex flex-row flex-wrap items-center gap-4 mt-10 lg:mt-16">
             <Button 
               size="lg"
