@@ -269,6 +269,18 @@ export default function CinematicLanding() {
   const heroSectionRef = useRef<HTMLElement>(null);
   const userInteracted = useRef(false);
 
+  // Handle hash navigation for direct links to sections
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      setTimeout(() => {
+        const element = document.querySelector(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, []);
 
   // Scroll-based dive animation for hero section
   const { scrollYProgress: heroScrollProgress } = useScroll({
