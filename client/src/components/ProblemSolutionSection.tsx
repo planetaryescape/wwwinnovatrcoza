@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { HelpCircle, Lightbulb } from "lucide-react";
-import squarePegGif from "@assets/EFC8B961-B983-4667-B510-566895277C4B_1768849610643.gif";
+import clockGif from "@assets/36B39759-4D52-492D-81FE-C70D9A558743_1768973583589.gif";
 
 export default function ProblemSolutionSection() {
   return (
@@ -16,8 +16,8 @@ export default function ProblemSolutionSection() {
             {/* GIF on left - Desktop only */}
             <div className="hidden lg:block lg:w-1/2">
               <motion.img
-                src={squarePegGif}
-                alt="Square peg trying to fit in round hole - innovation challenge"
+                src={clockGif}
+                alt="Clock animation - time pressure in innovation"
                 className="w-full h-auto"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}

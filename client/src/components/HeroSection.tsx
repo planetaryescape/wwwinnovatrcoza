@@ -43,14 +43,14 @@ export default function HeroSection() {
               Launch Better Innovation<br />through smart 24hr research
             </p>
             
-            <div className="flex flex-col sm:flex-row flex-wrap items-start gap-4">
+            <div className="flex flex-row flex-wrap items-center gap-4">
               <Button 
                 size="lg"
                 className="bg-[#ED876E]/20 text-white px-8 border border-[#ED876E]/40 min-w-[180px]"
                 onClick={handleTestNow}
                 data-testid="button-test-now"
               >
-                24hr research
+                24hr Testing
               </Button>
               <Link href="/consult">
                 <Button 

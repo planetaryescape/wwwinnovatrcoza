@@ -471,7 +471,7 @@ export default function CinematicLanding() {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.8, delay: 0.4 }}
-                    className="mt-8 -mx-6 sm:mx-0 lg:hidden"
+                    className="mt-4 -mx-6 sm:mx-0 lg:hidden"
                   >
                     <img 
                       src={penGif}
