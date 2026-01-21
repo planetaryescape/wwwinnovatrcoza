@@ -8,26 +8,26 @@ export default function ProblemSolutionSection() {
       {/* THE PROBLEM - Two column layout on desktop with GIF on left */}
       <section 
         id="problem-solution" 
-        className="py-16 md:py-20 lg:py-24 bg-[#2B5597]"
+        className="bg-[#F5EDE4]"
         aria-labelledby="problem-heading"
       >
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:gap-12">
-            {/* GIF on left - Desktop only */}
-            <div className="hidden lg:block lg:w-1/2">
-              <motion.img
-                src={clockGif}
-                alt="Clock animation - time pressure in innovation"
-                className="w-full h-auto"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.6 }}
-              />
-            </div>
-            
-            {/* Text content on right */}
-            <div className="lg:w-1/2 text-center lg:text-left">
+        <div className="flex flex-col lg:flex-row lg:items-stretch">
+          {/* GIF on left - Desktop only, edge to edge */}
+          <div className="hidden lg:block lg:w-1/2">
+            <motion.img
+              src={clockGif}
+              alt="Clock animation - time pressure in innovation"
+              className="w-full h-full object-cover"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6 }}
+            />
+          </div>
+          
+          {/* Text content on right - compact for desktop */}
+          <div className="lg:w-1/2 flex items-center py-16 md:py-20 lg:py-24 px-6 sm:px-8 lg:px-12">
+            <div className="text-center lg:text-left">
               <motion.div
                 initial={{ opacity: 0, rotate: -5 }}
                 whileInView={{ opacity: 1, rotate: -3 }}
@@ -35,14 +35,14 @@ export default function ProblemSolutionSection() {
                 transition={{ duration: 0.6 }}
                 className="mb-4"
               >
-                <HelpCircle className="w-10 h-10 mx-auto lg:mx-0 text-white/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(255,255,255,0.1))" }} />
+                <HelpCircle className="w-10 h-10 mx-auto lg:mx-0 text-slate-600/70 stroke-[1.5]" />
               </motion.div>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
-                className="text-xs uppercase tracking-[0.35em] mb-6 text-white/60"
+                className="text-xs uppercase tracking-[0.35em] mb-6 text-slate-600/60"
                 style={{ fontFamily: "Roboto, sans-serif" }}
               >
                 The Problem
@@ -53,22 +53,20 @@ export default function ProblemSolutionSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
-                className="text-white mb-8 md:mb-12"
-                style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.04em", fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
+                className="text-slate-800 mb-6 lg:mb-8"
+                style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.02em", fontSize: "clamp(1.75rem, 3vw, 2.5rem)" }}
               >
-                <span className="hidden lg:inline whitespace-nowrap">Innovation is too important to fail.</span>
-                <span className="lg:hidden">Innovation is too<br />important to fail.</span>
+                Innovation is too important to fail.
               </motion.h2>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6, delay: 0.15 }}
-                className="max-w-2xl mx-auto lg:mx-0 text-white/90 leading-relaxed"
-                style={{ fontFamily: "Roboto, sans-serif", fontSize: "clamp(1rem, 1.5vw, 1.15rem)" }}
+                className="max-w-xl mx-auto lg:mx-0 text-slate-700 leading-relaxed"
+                style={{ fontFamily: "Roboto, sans-serif", fontSize: "clamp(0.95rem, 1.2vw, 1.1rem)" }}
               >
-                So why does it feel so risky every time?<br />
-                Projects drag on, spend escalates, and past failures make every new idea feel like a gamble.
+                So why does it feel so risky every time? Projects drag on, spend escalates, and past failures make every new idea feel like a gamble.
               </motion.p>
             </div>
           </div>
