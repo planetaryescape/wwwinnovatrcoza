@@ -124,7 +124,7 @@ export default function PricingSection() {
                   data-testid={`payg-card-${index}`}
                 >
                   <CardHeader>
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-end gap-4">
                       <div className="flex-1">
                         <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
                         <CardDescription className="text-base">{plan.description}</CardDescription>
@@ -188,7 +188,7 @@ export default function PricingSection() {
                     </div>
                   )}
                   <CardHeader>
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-end gap-4">
                       <div className="flex-1">
                         <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
                         <CardDescription className="text-base">{plan.description}</CardDescription>
