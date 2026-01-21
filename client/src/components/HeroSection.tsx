@@ -7,52 +7,76 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#4c4de1]">
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-start justify-center">
-          {/* Main content row - headline and gif side by side */}
-          <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
-            {/* Left side - Large bold text */}
-            <div className="text-left">
-              <h1 
-                className="font-serif font-bold mb-8 leading-[0.95] uppercase"
-                style={{ 
-                  fontFamily: "'DM Serif Display', serif", 
-                  letterSpacing: "0.06em",
-                  fontSize: "clamp(2rem, 4vw, 3.74rem)"
-                }}
-              >
-                <span className="text-[#ED876E]">TRANSFORMING</span><br />
-                <span className="text-white">CONSUMER INSIGHTS.</span>
-              </h1>
-              <p 
-                className="text-gray-300 max-w-xl mb-6"
-                style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
-              >
-                Launch Better Innovation<br />through smart 24hr research
-              </p>
-            </div>
-            
-            {/* Right side - Hero GIF (desktop) */}
-            <div className="hidden lg:flex justify-center items-center relative">
-              <img 
-                src={heroGif}
-                alt="Innovation animation"
-                className="w-full max-w-md xl:max-w-lg h-auto object-contain"
-                data-testid="img-hero-gif-desktop"
-              />
-            </div>
+    <section className="relative min-h-screen flex flex-col overflow-hidden bg-[#4c4de1]">
+      {/* Desktop layout */}
+      <div className="hidden lg:flex items-center justify-center flex-1 relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
+          {/* Left side - Large bold text */}
+          <div className="text-left">
+            <h1 
+              className="font-serif font-bold mb-8 leading-[0.95] uppercase"
+              style={{ 
+                fontFamily: "'DM Serif Display', serif", 
+                letterSpacing: "0.06em",
+                fontSize: "clamp(2rem, 4vw, 3.74rem)"
+              }}
+            >
+              <span className="text-[#ED876E]">TRANSFORMING</span><br />
+              <span className="text-white">CONSUMER INSIGHTS.</span>
+            </h1>
+            <p 
+              className="text-gray-300 max-w-xl mb-6"
+              style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
+            >
+              Launch Better Innovation<br />through smart 24hr research
+            </p>
           </div>
           
-          {/* Hero GIF - Mobile (full width below content) */}
-          <div className="lg:hidden w-screen -mx-4 sm:-mx-6 mt-8">
+          {/* Right side - Hero GIF (desktop) */}
+          <div className="flex justify-center items-center relative">
             <img 
               src={heroGif}
               alt="Innovation animation"
-              className="w-full h-auto object-contain"
-              data-testid="img-hero-gif-mobile"
+              className="w-full max-w-md xl:max-w-lg h-auto object-contain"
+              data-testid="img-hero-gif-desktop"
             />
           </div>
+        </div>
+      </div>
+      
+      {/* Mobile layout - centered text with GIF at bottom edge */}
+      <div className="lg:hidden flex flex-col min-h-screen">
+        {/* Centered text content */}
+        <div className="flex-1 flex items-center justify-center px-4 sm:px-6">
+          <div className="text-center">
+            <h1 
+              className="font-serif font-bold mb-6 leading-[0.95] uppercase"
+              style={{ 
+                fontFamily: "'DM Serif Display', serif", 
+                letterSpacing: "0.06em",
+                fontSize: "clamp(2rem, 6vw, 3rem)"
+              }}
+            >
+              <span className="text-[#ED876E]">TRANSFORMING</span><br />
+              <span className="text-white">CONSUMER INSIGHTS.</span>
+            </h1>
+            <p 
+              className="text-gray-300 max-w-xl mx-auto"
+              style={{ fontSize: "clamp(1rem, 3vw, 1.25rem)" }}
+            >
+              Launch Better Innovation<br />through smart 24hr research
+            </p>
+          </div>
+        </div>
+        
+        {/* GIF at bottom edge - full width */}
+        <div className="w-full">
+          <img 
+            src={heroGif}
+            alt="Innovation animation"
+            className="w-full h-auto object-cover"
+            data-testid="img-hero-gif-mobile"
+          />
         </div>
       </div>
       {/* Scroll indicator */}
