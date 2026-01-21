@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Wrench } from "lucide-react";
+import { Wrench, ArrowRight } from "lucide-react";
 import { useLocation } from "wouter";
 import promoBackground from "@assets/pexels-raphael-brasileiro-6047129_1764658374911.jpeg";
 
@@ -33,11 +33,12 @@ export default function PromoBanner() {
           <Button 
             size="lg" 
             variant="outline"
-            className="bg-white/10 hover:bg-white/20 text-white border-0 ml-16 md:ml-0"
+            className="w-full md:w-auto bg-white/10 hover:bg-white/20 text-white border-0"
             onClick={handleExploreTools}
             data-testid="button-explore-tools"
           >
             Explore Tools
+            <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
       </div>
