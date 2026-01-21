@@ -165,8 +165,8 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
         />
       </div>
       
-      <CardHeader className="pt-4 pb-2">
-        <CardTitle className="text-2xl font-serif mb-1" style={{ color: plan.accentColor }}>{plan.name}</CardTitle>
+      <CardHeader className="pt-4 pb-2 text-center">
+        <CardTitle className="text-3xl font-serif mb-2" style={{ color: plan.accentColor }}>{plan.name}</CardTitle>
         <CardDescription className="text-slate-600 text-sm">{plan.description}</CardDescription>
         <div className="mt-3">
           {plan.starterPriceZAR && plan.additionalPriceZAR ? (
@@ -189,6 +189,9 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
             </div>
           )}
         </div>
+        {plan.valueZAR && (
+          <div className="text-sm font-semibold mt-2 text-[#ED876E]">~{formatShortPrice(plan.valueZAR)} value</div>
+        )}
       </CardHeader>
       <CardContent className="space-y-4 flex flex-col flex-1 pt-0">
         <ul className="space-y-2 flex-1">
@@ -199,9 +202,6 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
             </li>
           ))}
         </ul>
-        {plan.valueZAR && (
-          <div className="text-sm font-semibold text-[#ED876E] text-center">~{formatShortPrice(plan.valueZAR)} value</div>
-        )}
         <Button 
           className={`w-full ${isStarter ? 'bg-[#ED876E] border-[#ED876E]' : 'bg-[#4D5FF1] border-[#4D5FF1]'}`}
           size="lg"
