@@ -59,7 +59,7 @@ export default function StatsCounter() {
     <section className="py-16 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <p className="text-center text-sm mb-8 uppercase tracking-wider font-bold" style={{ color: '#4D5FF1' }}>
-          Brands who trust Innovatr
+          Ambitious Brands who trust Innovatr
         </p>
         <div className="mb-12">
           <TrustBar />

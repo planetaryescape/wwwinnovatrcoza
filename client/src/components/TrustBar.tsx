@@ -50,7 +50,7 @@ export default function TrustBar() {
         {[...clients, ...clients, ...clients].map((client, index) => (
           <div
             key={index}
-            className="text-2xl font-semibold text-muted-foreground/60 px-4"
+            className="text-2xl font-semibold text-[#ED876E] px-4"
             data-testid={`client-${index}`}
           >
             {client}

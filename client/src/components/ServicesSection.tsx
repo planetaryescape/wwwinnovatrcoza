@@ -129,7 +129,11 @@ export default function ServicesSection() {
               {/* Large background number */}
               <div 
                 className="absolute top-0 right-0 text-[140px] font-serif font-bold leading-none p-4 select-none pointer-events-none"
-                style={{ color: service.useDarkText ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.15)' }}
+                style={{ 
+                  color: service.useDarkText ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.15)',
+                  WebkitTextStroke: '0',
+                  textShadow: 'none'
+                }}
               >
                 {service.number}
               </div>
