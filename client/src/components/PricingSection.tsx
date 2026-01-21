@@ -109,7 +109,7 @@ export default function PricingSection() {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-5xl mx-auto">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-7xl mx-auto">
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-12">
             <TabsTrigger value="payg" data-testid="tab-payg">Pay-As-You-Go</TabsTrigger>
             <TabsTrigger value="members" data-testid="tab-members">Members</TabsTrigger>
