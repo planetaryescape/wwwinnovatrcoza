@@ -71,6 +71,7 @@ const tools: Tool[] = [
     whatText: "An intuitive swiping interface that places your ideas in a competitive context. Upsiide identifies innovations that will break through the noise.",
     whyText: "Consumers engage naturally, revealing true preferences without survey fatigue. Get authentic reactions, not forced answers.",
     image: gamifiedRespondentImg,
+    video: "https://diginsights.com/wp-content/uploads/2024/07/Upsiide-home-filters.gif?_t=1720575215",
   },
   {
     id: "social-media",
@@ -88,6 +89,7 @@ const tools: Tool[] = [
     whatText: "Proprietary, patented data modeling that converts respondent data into forecasts of share of choice, source of volume, incrementality and cannibalization.",
     whyText: "This is the data you need to make compelling business decisions. Know your potential before you invest.",
     image: marketShareImg2,
+    video: "https://diginsights.com/wp-content/uploads/2024/07/Upsiide-home-marketsimSpindrift.gif?_t=1720574730",
   },
   {
     id: "heatmapping",
@@ -190,15 +192,24 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
             {isCarousel ? (
               <ImageCarousel images={agileDesignImages} isHovered={isHovered} />
             ) : tool.video ? (
-              <video 
-                src={tool.video}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className={`w-full h-full object-cover object-right transition-transform duration-700 ${isHovered ? 'scale-110' : 'scale-100'}`}
-                data-testid={`video-tool-${tool.id}`}
-              />
+              tool.video.endsWith('.gif') || tool.video.includes('.gif?') ? (
+                <img 
+                  src={tool.video}
+                  alt={tool.name}
+                  className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? 'scale-110' : 'scale-100'}`}
+                  data-testid={`gif-tool-${tool.id}`}
+                />
+              ) : (
+                <video 
+                  src={tool.video}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className={`w-full h-full object-cover object-left transition-transform duration-700 ${isHovered ? 'scale-110' : 'scale-100'}`}
+                  data-testid={`video-tool-${tool.id}`}
+                />
+              )
             ) : (
               <img 
                 src={tool.image || ""}
