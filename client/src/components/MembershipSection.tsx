@@ -5,6 +5,10 @@ import { Check, Crown, Star, Gem } from "lucide-react";
 import { useLocation } from "wouter";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
+import starterCharacter from "@assets/generated_images/starter_tier_3d_character.png";
+import growthCharacter from "@assets/generated_images/growth_tier_3d_character.png";
+import scaleCharacter from "@assets/generated_images/scale_tier_3d_character.png";
+
 interface MembershipPlan {
   name: string;
   icon: typeof Star;
@@ -19,6 +23,8 @@ interface MembershipPlan {
   valueZAR?: number;
   basicPriceZAR: number;
   proPriceZAR: number;
+  characterImage: string;
+  accentColor: string;
 }
 
 const membershipPlansData: MembershipPlan[] = [
@@ -37,6 +43,8 @@ const membershipPlansData: MembershipPlan[] = [
     ],
     basicPriceZAR: 5000,
     proPriceZAR: 45000,
+    characterImage: starterCharacter,
+    accentColor: "#ED876E",
   },
   {
     name: "Growth",
@@ -55,6 +63,8 @@ const membershipPlansData: MembershipPlan[] = [
     valueZAR: 260000,
     basicPriceZAR: 5000,
     proPriceZAR: 45000,
+    characterImage: growthCharacter,
+    accentColor: "#4D5FF1",
   },
   {
     name: "Scale",
@@ -74,24 +84,26 @@ const membershipPlansData: MembershipPlan[] = [
     valueZAR: 360000,
     basicPriceZAR: 5000,
     proPriceZAR: 45000,
+    characterImage: scaleCharacter,
+    accentColor: "#4D5FF1",
   },
 ];
 
-export default function MembershipSection() {
+function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }) {
   const [, setLocation] = useLocation();
   const { formatPrice, formatShortPrice } = useCurrency();
 
-  const handleBecomeMember = (planName: string) => {
-    if (planName === "Starter") {
+  const handleBecomeMember = () => {
+    if (plan.name === "Starter") {
       setLocation("/checkout/membership-entry");
-    } else if (planName === "Growth") {
+    } else if (plan.name === "Growth") {
       setLocation("/checkout/membership-growth");
-    } else if (planName === "Scale") {
+    } else if (plan.name === "Scale") {
       setLocation("/checkout/membership-scale");
     }
   };
 
-  const getFeatures = (plan: MembershipPlan) => {
+  const getFeatures = () => {
     if (plan.name === "Starter") {
       return [
         ...plan.features,
@@ -102,6 +114,93 @@ export default function MembershipSection() {
     return plan.features;
   };
 
+  const isStarter = plan.name === "Starter";
+
+  return (
+    <Card 
+      className="group hover-elevate relative flex flex-col border-0 bg-white text-slate-900 shadow-xl overflow-hidden"
+      data-testid={`membership-card-${index}`}
+    >
+      {plan.badge && (
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+          <Badge className="bg-[#ED876E] text-white px-4 py-1 shadow-lg">
+            {plan.badge}
+          </Badge>
+        </div>
+      )}
+      
+      {/* Character Image Area */}
+      <div className="relative h-48 bg-gradient-to-b from-slate-50 to-white overflow-hidden flex items-end justify-center">
+        <img 
+          src={plan.characterImage}
+          alt={`${plan.name} membership character`}
+          width={176}
+          height={176}
+          loading="lazy"
+          className="h-44 w-auto object-contain transition-all duration-500 ease-out drop-shadow-md group-hover:-translate-y-2 group-hover:drop-shadow-lg group-focus-within:-translate-y-2 group-focus-within:drop-shadow-lg"
+          data-testid={`img-membership-character-${index}`}
+        />
+      </div>
+      
+      <CardHeader className="pt-4 pb-2">
+        <div className="flex items-center gap-3 mb-2">
+          <div 
+            className="w-10 h-10 rounded-md flex items-center justify-center"
+            style={{ backgroundColor: `${plan.accentColor}15` }}
+          >
+            <plan.icon className="w-5 h-5" style={{ color: plan.accentColor }} />
+          </div>
+          <CardTitle className="text-xl font-serif">{plan.name}</CardTitle>
+        </div>
+        <CardDescription className="text-slate-600 text-sm">{plan.description}</CardDescription>
+        <div className="mt-3">
+          {plan.starterPriceZAR && plan.additionalPriceZAR ? (
+            <div className="space-y-1">
+              <div className="text-xs text-slate-500">
+                Starter ({formatShortPrice(plan.starterPriceZAR)}) + {plan.name} ({formatShortPrice(plan.additionalPriceZAR)})
+              </div>
+              <div>
+                <span className="text-3xl font-bold" style={{ color: plan.accentColor }}>{formatShortPrice(plan.priceZAR)}</span>
+                <span className="ml-2 text-slate-500 text-sm">per year</span>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <span className="text-3xl font-bold" style={{ color: plan.accentColor }}>{formatShortPrice(plan.priceZAR)}</span>
+              <span className="ml-2 text-slate-500 text-sm">per year</span>
+              {plan.monthlyZAR && (
+                <div className="text-xs mt-1 text-slate-500">{formatShortPrice(plan.monthlyZAR)}/month</div>
+              )}
+            </div>
+          )}
+        </div>
+        {plan.valueZAR && (
+          <div className="text-sm font-semibold mt-2 text-[#ED876E]">~{formatShortPrice(plan.valueZAR)} value</div>
+        )}
+      </CardHeader>
+      <CardContent className="space-y-4 flex flex-col flex-1 pt-0">
+        <ul className="space-y-2 flex-1">
+          {getFeatures().map((feature, fIndex) => (
+            <li key={fIndex} className="flex items-start gap-2">
+              <Check className="h-4 w-4 mt-0.5 flex-shrink-0" style={{ color: plan.accentColor }} />
+              <span className="text-sm text-slate-700">{feature}</span>
+            </li>
+          ))}
+        </ul>
+        <Button 
+          className={`w-full mt-auto ${isStarter ? 'bg-[#ED876E] border-[#ED876E]' : 'bg-[#4D5FF1] border-[#4D5FF1]'}`}
+          size="lg"
+          onClick={handleBecomeMember}
+          data-testid={`button-membership-${index}`}
+        >
+          Become a Member
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function MembershipSection() {
   return (
     <section id="membership" className="py-20 bg-[#fd8067]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -117,79 +216,7 @@ export default function MembershipSection() {
 
         <div className="grid md:grid-cols-3 gap-8">
           {membershipPlansData.map((plan, index) => (
-            <Card 
-              key={index}
-              className={`hover-elevate relative flex flex-col border-0 ${
-                plan.badge 
-                  ? 'bg-white text-slate-900 shadow-2xl' 
-                  : 'bg-white/10 text-white backdrop-blur-sm'
-              }`}
-              data-testid={`membership-card-${index}`}
-            >
-              {plan.badge && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-[#ED876E] text-white px-4 py-1 shadow-lg">
-                    {plan.badge}
-                  </Badge>
-                </div>
-              )}
-              <CardHeader className="pt-8">
-                <div className={`w-12 h-12 mb-4 rounded-md flex items-center justify-center ${
-                  plan.badge ? 'bg-[#4D5FF1]/10' : 'bg-white/10'
-                }`}>
-                  <plan.icon className={`w-6 h-6 ${plan.badge ? 'text-[#4D5FF1]' : 'text-white'}`} />
-                </div>
-                <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
-                <CardDescription className={`text-base ${plan.badge ? 'text-slate-600' : 'text-white/70'}`}>{plan.description}</CardDescription>
-                <div className="mt-4">
-                  {plan.starterPriceZAR && plan.additionalPriceZAR ? (
-                    <div className="space-y-2">
-                      <div className={`text-sm ${plan.badge ? 'text-slate-500' : 'text-white/50'}`}>
-                        Starter ({formatShortPrice(plan.starterPriceZAR)}) + {plan.name} ({formatShortPrice(plan.additionalPriceZAR)})
-                      </div>
-                      <div>
-                        <span className={`text-4xl font-bold ${plan.badge ? 'text-[#4D5FF1]' : 'text-white'}`}>{formatShortPrice(plan.priceZAR)}</span>
-                        <span className={`ml-2 ${plan.badge ? 'text-slate-500' : 'text-white/50'}`}>per year</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <span className={`text-4xl font-bold ${plan.badge ? 'text-[#4D5FF1]' : 'text-white'}`}>{formatShortPrice(plan.priceZAR)}</span>
-                      <span className={`ml-2 ${plan.badge ? 'text-slate-500' : 'text-white/50'}`}>per year</span>
-                      {plan.monthlyZAR && (
-                        <div className={`text-sm mt-1 ${plan.badge ? 'text-slate-500' : 'text-white/50'}`}>{formatShortPrice(plan.monthlyZAR)}/month</div>
-                      )}
-                    </div>
-                  )}
-                </div>
-                {plan.valueZAR && (
-                  <div className="text-sm font-semibold mt-2 text-[#ED876E]">~{formatShortPrice(plan.valueZAR)} value</div>
-                )}
-              </CardHeader>
-              <CardContent className="space-y-6 flex flex-col flex-1">
-                <ul className="space-y-3 flex-1">
-                  {getFeatures(plan).map((feature, fIndex) => (
-                    <li key={fIndex} className="flex items-start gap-3">
-                      <Check className={`h-5 w-5 mt-0.5 flex-shrink-0 ${plan.badge ? 'text-[#4D5FF1]' : 'text-[#ED876E]'}`} />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button 
-                  className={`w-full mt-auto ${
-                    plan.badge 
-                      ? 'bg-[#4D5FF1] text-white' 
-                      : 'bg-white/10 border-white/30 text-white'
-                  }`}
-                  size="lg"
-                  variant={plan.badge ? "default" : "outline"}
-                  onClick={() => handleBecomeMember(plan.name)}
-                  data-testid={`button-membership-${index}`}
-                >
-                  Become a Member
-                </Button>
-              </CardContent>
-            </Card>
+            <MembershipCard key={index} plan={plan} index={index} />
           ))}
         </div>
       </div>
