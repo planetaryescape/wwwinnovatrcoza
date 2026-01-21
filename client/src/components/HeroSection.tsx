@@ -1,4 +1,4 @@
-import heroVideo from "@assets/ScreenRecording_01-21-2026_14-48-20_1_1769000792592.mov";
+import heroVideo from "@assets/ScreenRecording_01-21-2026_14-48-20_1_1769001055687.mov";
 
 export default function HeroSection() {
   const scrollToServices = () => {
