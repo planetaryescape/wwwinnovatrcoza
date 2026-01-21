@@ -283,6 +283,10 @@ export default function CinematicLanding() {
   const heroOpacity = useTransform(heroScrollProgress, [0.7, 1], [1, 0]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     setReducedMotion(mediaQuery.matches);
 
