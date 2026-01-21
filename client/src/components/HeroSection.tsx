@@ -55,7 +55,7 @@ export default function HeroSection() {
                 fontSize: "clamp(1.75rem, 8vw, 2.5rem)"
               }}
             >
-              <span className="text-[#ED876E]">TRANSFORMING</span><br />
+              <span className="text-[#f15d60]">TRANSFORMING</span><br />
               <span className="text-white">CONSUMER INSIGHTS.</span>
             </h1>
             <p 
