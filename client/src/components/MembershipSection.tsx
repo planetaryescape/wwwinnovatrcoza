@@ -129,15 +129,58 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
         </div>
       )}
       
-      {/* Character Image Area */}
+      {/* Character Image Area with Animated Elements */}
       <div className="relative h-48 bg-gradient-to-b from-slate-50 to-white overflow-hidden flex items-end justify-center">
+        {/* Floating decorative elements */}
+        <div 
+          className="absolute top-4 left-4 w-3 h-3 rounded-full opacity-60 transition-all duration-500 ease-out group-hover:scale-125 group-hover:-translate-y-2 group-hover:translate-x-1"
+          style={{ backgroundColor: plan.accentColor }}
+        />
+        <div 
+          className="absolute top-8 right-6 w-2 h-2 rounded-full opacity-40 transition-all duration-700 ease-out group-hover:scale-150 group-hover:-translate-y-3 group-hover:-translate-x-2"
+          style={{ backgroundColor: plan.accentColor }}
+        />
+        <div 
+          className="absolute top-12 left-8 w-4 h-4 rotate-45 opacity-30 transition-all duration-600 ease-out group-hover:rotate-90 group-hover:-translate-y-2"
+          style={{ backgroundColor: plan.accentColor }}
+        />
+        <div 
+          className="absolute top-6 right-12 w-2.5 h-2.5 rounded-full opacity-50 transition-all duration-500 ease-out group-hover:scale-110 group-hover:translate-y-1 group-hover:translate-x-2"
+          style={{ backgroundColor: plan.accentColor }}
+        />
+        <div 
+          className="absolute bottom-16 left-6 w-2 h-2 rounded-full opacity-40 transition-all duration-800 ease-out group-hover:scale-125 group-hover:-translate-y-4"
+          style={{ backgroundColor: plan.accentColor }}
+        />
+        <div 
+          className="absolute bottom-20 right-8 w-3 h-3 rotate-12 opacity-30 transition-all duration-600 ease-out group-hover:rotate-45 group-hover:-translate-y-3 group-hover:translate-x-1"
+          style={{ backgroundColor: plan.accentColor }}
+        />
+        
+        {/* Star shapes */}
+        <svg 
+          className="absolute top-10 right-4 w-4 h-4 opacity-40 transition-all duration-500 ease-out group-hover:scale-125 group-hover:-translate-y-2 group-hover:rotate-45"
+          viewBox="0 0 24 24" 
+          fill={plan.accentColor}
+        >
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        <svg 
+          className="absolute bottom-24 left-4 w-3 h-3 opacity-30 transition-all duration-700 ease-out group-hover:scale-150 group-hover:-translate-y-3 group-hover:-rotate-12"
+          viewBox="0 0 24 24" 
+          fill={plan.accentColor}
+        >
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        
+        {/* Character image */}
         <img 
           src={plan.characterImage}
           alt={`${plan.name} membership character`}
           width={176}
           height={176}
           loading="lazy"
-          className="h-44 w-auto object-contain transition-all duration-500 ease-out drop-shadow-md group-hover:-translate-y-2 group-hover:drop-shadow-lg group-focus-within:-translate-y-2 group-focus-within:drop-shadow-lg"
+          className="h-44 w-auto object-contain transition-all duration-500 ease-out drop-shadow-md group-hover:-translate-y-2 group-hover:drop-shadow-lg group-focus-within:-translate-y-2 group-focus-within:drop-shadow-lg z-10"
           data-testid={`img-membership-character-${index}`}
         />
       </div>
