@@ -100,6 +100,7 @@ const tools: Tool[] = [
     whatText: "Advanced eye-tracking simulation that reveals where consumers look first, what captures attention, and what gets missed entirely.",
     whyText: "Optimize your packaging and communications for maximum shelf impact. Know what works before you go to market.",
     image: heatmapImg,
+    video: "https://diginsights.com/wp-content/uploads/2024/07/Features-tabvideo-heatmap-1.webm",
     imagePosition: "object-left",
   },
   {
