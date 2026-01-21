@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Crown, Star, Gem } from "lucide-react";
+import { Check } from "lucide-react";
 import { useLocation } from "wouter";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
@@ -11,7 +11,6 @@ import scaleCharacter from "@assets/download_(4)_1768985238001.png";
 
 interface MembershipPlan {
   name: string;
-  icon: typeof Star;
   priceZAR: number;
   starterPriceZAR?: number;
   additionalPriceZAR?: number;
@@ -30,7 +29,6 @@ interface MembershipPlan {
 const membershipPlansData: MembershipPlan[] = [
   {
     name: "Starter",
-    icon: Star,
     priceZAR: 60000,
     monthlyZAR: 5000,
     badge: null,
@@ -48,7 +46,6 @@ const membershipPlansData: MembershipPlan[] = [
   },
   {
     name: "Growth",
-    icon: Crown,
     priceZAR: 180000,
     starterPriceZAR: 60000,
     additionalPriceZAR: 120000,
@@ -68,7 +65,6 @@ const membershipPlansData: MembershipPlan[] = [
   },
   {
     name: "Scale",
-    icon: Gem,
     priceZAR: 255000,
     starterPriceZAR: 60000,
     additionalPriceZAR: 195000,
@@ -118,60 +114,44 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
 
   return (
     <Card 
-      className="group hover-elevate relative flex flex-col border-0 bg-white text-slate-900 shadow-xl overflow-hidden"
+      className="group hover-elevate relative flex flex-col border-0 bg-white text-slate-900 shadow-xl overflow-visible pt-6"
       data-testid={`membership-card-${index}`}
     >
       {plan.badge && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-          <Badge className="bg-[#ED876E] text-white px-4 py-1 shadow-lg">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+          <Badge className="bg-[#ED876E] text-white px-4 py-1.5 shadow-lg text-sm">
             {plan.badge}
           </Badge>
         </div>
       )}
       
       {/* Character Image Area with Animated Elements */}
-      <div className="relative h-48 bg-gradient-to-b from-slate-50 to-white overflow-hidden flex items-end justify-center">
-        {/* Floating decorative elements */}
+      <div className="relative h-48 bg-gradient-to-b from-slate-50 to-white overflow-visible flex items-end justify-center">
+        {/* Floating decorative elements - bigger and closer to character */}
         <div 
-          className="absolute top-4 left-4 w-3 h-3 rounded-full opacity-60 transition-all duration-500 ease-out group-hover:scale-125 group-hover:-translate-y-2 group-hover:translate-x-1"
+          className="absolute top-8 left-12 w-5 h-5 rounded-full opacity-60 transition-all duration-500 ease-out group-hover:scale-125 group-hover:-translate-y-3 group-hover:translate-x-2"
           style={{ backgroundColor: plan.accentColor }}
         />
         <div 
-          className="absolute top-8 right-6 w-2 h-2 rounded-full opacity-40 transition-all duration-700 ease-out group-hover:scale-150 group-hover:-translate-y-3 group-hover:-translate-x-2"
+          className="absolute top-12 right-14 w-4 h-4 rounded-full opacity-50 transition-all duration-700 ease-out group-hover:scale-150 group-hover:-translate-y-4 group-hover:-translate-x-2"
           style={{ backgroundColor: plan.accentColor }}
         />
         <div 
-          className="absolute top-12 left-8 w-4 h-4 rotate-45 opacity-30 transition-all duration-600 ease-out group-hover:rotate-90 group-hover:-translate-y-2"
+          className="absolute top-20 left-16 w-6 h-6 rotate-45 opacity-35 transition-all duration-600 ease-out group-hover:rotate-90 group-hover:-translate-y-3"
           style={{ backgroundColor: plan.accentColor }}
         />
         <div 
-          className="absolute top-6 right-12 w-2.5 h-2.5 rounded-full opacity-50 transition-all duration-500 ease-out group-hover:scale-110 group-hover:translate-y-1 group-hover:translate-x-2"
+          className="absolute top-16 right-16 w-4 h-4 rounded-full opacity-45 transition-all duration-500 ease-out group-hover:scale-110 group-hover:translate-y-2 group-hover:translate-x-2"
           style={{ backgroundColor: plan.accentColor }}
         />
         <div 
-          className="absolute bottom-16 left-6 w-2 h-2 rounded-full opacity-40 transition-all duration-800 ease-out group-hover:scale-125 group-hover:-translate-y-4"
+          className="absolute bottom-12 left-14 w-4 h-4 rounded-full opacity-50 transition-all duration-800 ease-out group-hover:scale-125 group-hover:-translate-y-5"
           style={{ backgroundColor: plan.accentColor }}
         />
         <div 
-          className="absolute bottom-20 right-8 w-3 h-3 rotate-12 opacity-30 transition-all duration-600 ease-out group-hover:rotate-45 group-hover:-translate-y-3 group-hover:translate-x-1"
+          className="absolute bottom-16 right-12 w-5 h-5 rotate-12 opacity-40 transition-all duration-600 ease-out group-hover:rotate-45 group-hover:-translate-y-4 group-hover:translate-x-2"
           style={{ backgroundColor: plan.accentColor }}
         />
-        
-        {/* Star shapes */}
-        <svg 
-          className="absolute top-10 right-4 w-4 h-4 opacity-40 transition-all duration-500 ease-out group-hover:scale-125 group-hover:-translate-y-2 group-hover:rotate-45"
-          viewBox="0 0 24 24" 
-          fill={plan.accentColor}
-        >
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-        </svg>
-        <svg 
-          className="absolute bottom-24 left-4 w-3 h-3 opacity-30 transition-all duration-700 ease-out group-hover:scale-150 group-hover:-translate-y-3 group-hover:-rotate-12"
-          viewBox="0 0 24 24" 
-          fill={plan.accentColor}
-        >
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-        </svg>
         
         {/* Character image */}
         <img 
@@ -186,15 +166,7 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
       </div>
       
       <CardHeader className="pt-4 pb-2">
-        <div className="flex items-center gap-3 mb-2">
-          <div 
-            className="w-10 h-10 rounded-md flex items-center justify-center"
-            style={{ backgroundColor: `${plan.accentColor}15` }}
-          >
-            <plan.icon className="w-5 h-5" style={{ color: plan.accentColor }} />
-          </div>
-          <CardTitle className="text-xl font-serif">{plan.name}</CardTitle>
-        </div>
+        <CardTitle className="text-2xl font-serif mb-1" style={{ color: plan.accentColor }}>{plan.name}</CardTitle>
         <CardDescription className="text-slate-600 text-sm">{plan.description}</CardDescription>
         <div className="mt-3">
           {plan.starterPriceZAR && plan.additionalPriceZAR ? (
@@ -217,9 +189,6 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
             </div>
           )}
         </div>
-        {plan.valueZAR && (
-          <div className="text-sm font-semibold mt-2 text-[#ED876E]">~{formatShortPrice(plan.valueZAR)} value</div>
-        )}
       </CardHeader>
       <CardContent className="space-y-4 flex flex-col flex-1 pt-0">
         <ul className="space-y-2 flex-1">
@@ -230,8 +199,11 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
             </li>
           ))}
         </ul>
+        {plan.valueZAR && (
+          <div className="text-sm font-semibold text-[#ED876E] text-center">~{formatShortPrice(plan.valueZAR)} value</div>
+        )}
         <Button 
-          className={`w-full mt-auto ${isStarter ? 'bg-[#ED876E] border-[#ED876E]' : 'bg-[#4D5FF1] border-[#4D5FF1]'}`}
+          className={`w-full ${isStarter ? 'bg-[#ED876E] border-[#ED876E]' : 'bg-[#4D5FF1] border-[#4D5FF1]'}`}
           size="lg"
           onClick={handleBecomeMember}
           data-testid={`button-membership-${index}`}
