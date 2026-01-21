@@ -32,8 +32,8 @@ export default function PromoBanner() {
           </div>
           <Button 
             size="lg" 
-            variant="secondary"
-            className="bg-white hover:bg-white/90 text-[#141414] border-0 ml-16 md:ml-0"
+            variant="outline"
+            className="bg-white/10 hover:bg-white/20 text-white border-0 ml-16 md:ml-0"
             onClick={handleExploreTools}
             data-testid="button-explore-tools"
           >
