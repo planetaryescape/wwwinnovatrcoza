@@ -205,14 +205,14 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
                   <img 
                     src={tool.video}
                     alt={tool.name}
-                    className="w-full h-full object-contain bg-slate-100 transition-transform duration-700 scale-105"
+                    className="w-full h-full object-contain bg-slate-100 transition-transform duration-700 scale-[0.85]"
                     data-testid={`gif-tool-${tool.id}`}
                   />
                 ) : (
                   <img 
                     src={tool.image || ""}
                     alt={tool.name}
-                    className="w-full h-full object-cover transition-transform duration-700"
+                    className="w-full h-full object-cover transition-transform duration-700 scale-[0.85]"
                     data-testid={`img-tool-${tool.id}`}
                   />
                 )
@@ -224,7 +224,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
                   muted
                   playsInline
                   poster={tool.image || ""}
-                  className={`w-full h-full object-cover object-left transition-transform duration-700 ${isHovered ? 'scale-110' : 'scale-100'}`}
+                  className={`w-full h-full object-cover object-left transition-transform duration-700 ${isHovered ? 'scale-[0.95]' : 'scale-[0.85]'}`}
                   data-testid={`video-tool-${tool.id}`}
                 />
               )
@@ -232,7 +232,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
               <img 
                 src={tool.image || ""}
                 alt={tool.name}
-                className={`w-full h-full object-cover transition-transform duration-700 ${tool.imagePosition || ''} ${isHovered ? 'scale-110' : 'scale-100'}`}
+                className={`w-full h-full object-cover transition-transform duration-700 ${tool.imagePosition || ''} ${isHovered ? 'scale-[0.95]' : 'scale-[0.85]'}`}
                 data-testid={`img-tool-${tool.id}`}
               />
             )}
