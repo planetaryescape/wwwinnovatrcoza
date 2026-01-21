@@ -196,7 +196,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
                 loop
                 muted
                 playsInline
-                className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? 'scale-110' : 'scale-100'}`}
+                className={`w-full h-full object-cover object-right transition-transform duration-700 ${isHovered ? 'scale-110' : 'scale-100'}`}
                 data-testid={`video-tool-${tool.id}`}
               />
             ) : (
