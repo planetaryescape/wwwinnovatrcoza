@@ -7,6 +7,7 @@ import { useLocation } from "wouter";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { CurrencyToggle } from "@/components/CurrencyToggle";
 import basicCharacter from "@assets/Poll3_1769022875574.png";
+import proCharacter from "@assets/Poll1_1769022986706.png";
 
 // Prices in ZAR (base currency)
 const pricingPlans = {
@@ -124,13 +125,6 @@ export default function PricingSection() {
                 >
                   <CardHeader>
                     <div className="flex items-start gap-4">
-                      {plan.name === "Test24 Basic" && (
-                        <img 
-                          src={basicCharacter} 
-                          alt="Test24 Basic character" 
-                          className="w-20 h-20 object-contain flex-shrink-0"
-                        />
-                      )}
                       <div className="flex-1">
                         <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
                         <CardDescription className="text-base">{plan.description}</CardDescription>
@@ -139,6 +133,20 @@ export default function PricingSection() {
                           <span className="text-muted-foreground ml-2">{plan.unit}</span>
                         </div>
                       </div>
+                      {plan.name === "Test24 Basic" && (
+                        <img 
+                          src={basicCharacter} 
+                          alt="Test24 Basic character" 
+                          className="w-20 h-20 object-contain flex-shrink-0"
+                        />
+                      )}
+                      {plan.name === "Test24 Pro" && (
+                        <img 
+                          src={proCharacter} 
+                          alt="Test24 Pro character" 
+                          className="w-20 h-20 object-contain flex-shrink-0"
+                        />
+                      )}
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-6">
@@ -181,13 +189,6 @@ export default function PricingSection() {
                   )}
                   <CardHeader>
                     <div className="flex items-start gap-4">
-                      {plan.name === "Test24 Basic" && (
-                        <img 
-                          src={basicCharacter} 
-                          alt="Test24 Basic character" 
-                          className="w-20 h-20 object-contain flex-shrink-0"
-                        />
-                      )}
                       <div className="flex-1">
                         <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
                         <CardDescription className="text-base">{plan.description}</CardDescription>
@@ -196,6 +197,20 @@ export default function PricingSection() {
                           <span className="text-muted-foreground ml-2">{plan.unit}</span>
                         </div>
                       </div>
+                      {plan.name === "Test24 Basic" && (
+                        <img 
+                          src={basicCharacter} 
+                          alt="Test24 Basic character" 
+                          className="w-20 h-20 object-contain flex-shrink-0"
+                        />
+                      )}
+                      {plan.name === "Test24 Pro" && (
+                        <img 
+                          src={proCharacter} 
+                          alt="Test24 Pro character" 
+                          className="w-20 h-20 object-contain flex-shrink-0"
+                        />
+                      )}
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-6">
