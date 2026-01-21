@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Plus, X, Wrench } from "lucide-react";
+import { Plus, X, Wrench, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import gamifiedRespondentImg from "@assets/IMG_8480_1768743786622.jpeg";
 import emotionalAppealImg from "@assets/IMG_8482_1768743819583.jpeg";
@@ -42,56 +43,97 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
-const tools = [
+interface Tool {
+  id: string;
+  name: string;
+  headlineTitle: string;
+  whatText: string;
+  whyText: string;
+  image: string | null;
+  isCarousel?: boolean;
+  comingSoon?: boolean;
+}
+
+const tools: Tool[] = [
   {
-    id: "storyteller",
-    title: "Gamified Respondent Experience",
-    description: "Will consumers engage with my innovation? Will months of development be discarded in a moment as consumers ignore your idea? Upsiide identifies innovations that will break through with an intuitive swiping interface that places your ideas in a competitive context.",
-    image: gamifiedRespondentImg,
-  },
-  {
-    id: "ai-qual",
-    title: "Empathy at Scale via AI Qual",
-    description: "AI Video Interview. What: An AI qualitative moderator that understands your information objectives and conducts a naturalistic interview and summarizes the learnings, complete with a show reel. Why it matters: Makes agile qualitative research accessible. Bring the voice of the consumer to your stakeholders on demand.",
-    image: aiQualImg2,
-  },
-  {
-    id: "gamification",
-    title: "Track Emotional Appeal",
-    description: "Emojis. To understand how people feel about your innovations, we created a set of 24 emojis based on Robert Plutchik's wheel of emotions. This allows us to dig deeper into drivers of strong or weak performance of your ideas while maintaining an experience that feels like social media, not a survey.",
-    image: emotionalAppealImg,
-  },
-  {
-    id: "market-share",
-    title: "Predict Market Share",
-    description: "Proprietary Market Simulator. Market Simulator is a proprietary, patented data modeling that converts respondent data into forecasts of share of choice, source of volume, incrementality and cannibalization. This is the data you need to make compelling business decisions.",
-    image: marketShareImg2,
-  },
-  {
-    id: "upsiide",
-    title: "Analyse results live on your private dashboard",
-    description: "Inspiring Data Visualizations and Modeling. Brilliant innovation marries rigor with playfulness and exploration. Your private dashboards make data inspiring.",
+    id: "private-dashboard",
+    name: "Private Dashboard",
+    headlineTitle: "Analyse results live on your private dashboard",
+    whatText: "Inspiring data visualizations and modeling. Your dedicated dashboard presents results in real-time with intuitive charts and actionable insights.",
+    whyText: "Brilliant innovation marries rigor with playfulness and exploration. Make data inspiring and shareable across your team.",
     image: dashboardImg,
   },
   {
-    id: "agile-design",
-    title: "Bring your concept to life with Agile Design",
-    description: "Just Design: Creatively Led. Results Driven. With 3 offices and clients across Africa, the Middle East, and Europe. Whether it's a small-scale artisanal brand or a retail powerhouse with a vast product line, our designs are not just Instagram-worthy, but also highly effective.",
+    id: "filtering",
+    name: "Filtering",
+    headlineTitle: "Gamified Respondent Experience via Upsiide",
+    whatText: "An intuitive swiping interface that places your ideas in a competitive context. Upsiide identifies innovations that will break through the noise.",
+    whyText: "Consumers engage naturally, revealing true preferences without survey fatigue. Get authentic reactions, not forced answers.",
+    image: gamifiedRespondentImg,
+  },
+  {
+    id: "social-media",
+    name: "Social Media",
+    headlineTitle: "Track Emotional Appeal via Idea Score",
+    whatText: "A set of 24 emojis based on Robert Plutchik's wheel of emotions. Understand how people feel about your innovations at a deeper level.",
+    whyText: "Dig deeper into drivers of strong or weak performance while maintaining an experience that feels like social media, not a survey.",
+    image: emotionalAppealImg,
+  },
+  {
+    id: "market-simulator",
+    name: "Market Simulator",
+    headlineTitle: "Predict Market Share with Precision",
+    whatText: "Proprietary, patented data modeling that converts respondent data into forecasts of share of choice, source of volume, incrementality and cannibalization.",
+    whyText: "This is the data you need to make compelling business decisions. Know your potential before you invest.",
+    image: marketShareImg2,
+  },
+  {
+    id: "heatmapping",
+    name: "Heatmapping",
+    headlineTitle: "Visual Attention Analysis",
+    whatText: "Advanced eye-tracking simulation that reveals where consumers look first, what captures attention, and what gets missed entirely.",
+    whyText: "Optimize your packaging and communications for maximum shelf impact. Know what works before you go to market.",
+    image: emotionalAppealImg,
+  },
+  {
+    id: "design",
+    name: "Design",
+    headlineTitle: "Bring your concept to life with Agile Design",
+    whatText: "Creatively led, results driven. With 3 offices and clients across Africa, the Middle East, and Europe. From artisanal brands to retail powerhouses.",
+    whyText: "Our designs are not just Instagram-worthy, but also highly effective. Beautiful design that sells.",
     image: null,
     isCarousel: true,
   },
+  {
+    id: "ai-qual",
+    name: "AI Qual",
+    headlineTitle: "Empathy at Scale via AI Video Interview",
+    whatText: "An AI qualitative moderator that understands your information objectives and conducts a naturalistic interview, summarizing the learnings with a show reel.",
+    whyText: "Makes agile qualitative research accessible. Bring the voice of the consumer to your stakeholders on demand.",
+    image: aiQualImg2,
+    comingSoon: true,
+  },
+  {
+    id: "one-clique",
+    name: "One Clique",
+    headlineTitle: "Instant Consumer Communities",
+    whatText: "Build and engage with dedicated consumer panels at the click of a button. Fast, flexible, and always-on access to your target audience.",
+    whyText: "Skip the recruitment delays. Get answers from real consumers within hours, not weeks.",
+    image: dashboardImg,
+    comingSoon: true,
+  },
 ];
 
-function ImageCarousel({ images }: { images: string[] }) {
+function ImageCarousel({ images, isHovered }: { images: string[]; isHovered: boolean }) {
   const shuffledImages = useMemo(() => shuffleArray(images), []);
   const duplicatedImages = [...shuffledImages, ...shuffledImages, ...shuffledImages];
 
   return (
     <div className="relative w-full h-full overflow-hidden">
       <div 
-        className="flex h-full absolute left-0 top-0 animate-scroll-left"
+        className="flex h-full absolute left-0 top-0"
         style={{ 
-          animation: `scrollLeft 35s linear infinite`,
+          animation: isHovered ? `scrollLeft 25s linear infinite` : 'none',
         }}
       >
         {duplicatedImages.map((img, idx) => (
@@ -100,7 +142,7 @@ function ImageCarousel({ images }: { images: string[] }) {
             src={img}
             alt="Design portfolio"
             className="h-full w-auto flex-shrink-0 object-cover"
-            style={{ minWidth: '300px' }}
+            style={{ minWidth: '200px' }}
           />
         ))}
       </div>
@@ -114,17 +156,20 @@ function ImageCarousel({ images }: { images: string[] }) {
   );
 }
 
-function ToolCard({ tool, index }: { tool: typeof tools[0]; index: number }) {
+function ToolCard({ tool, index }: { tool: Tool; index: number }) {
   const [isFlipped, setIsFlipped] = useState(false);
-  const isCarousel = 'isCarousel' in tool && tool.isCarousel;
+  const [isHovered, setIsHovered] = useState(false);
+  const isCarousel = tool.isCarousel;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="relative h-[360px] sm:h-[400px] perspective-1000"
+      transition={{ duration: 0.5, delay: index * 0.08 }}
+      className="relative h-[280px] sm:h-[300px] lg:h-[320px] perspective-1000"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       data-testid={`tool-card-${tool.id}`}
     >
       <motion.div
@@ -133,82 +178,119 @@ function ToolCard({ tool, index }: { tool: typeof tools[0]; index: number }) {
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={{ duration: 0.6, ease: "easeInOut" }}
       >
-        {/* Front of card */}
+        {/* Front of card - Clean, minimal design */}
         <div 
-          className="absolute inset-0 bg-white rounded-2xl shadow-xl overflow-hidden backface-hidden"
+          className="absolute inset-0 bg-white rounded-xl shadow-lg overflow-hidden backface-hidden"
           style={{ backfaceVisibility: "hidden" }}
         >
-          {/* Image area */}
-          <div className="h-[65%] relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
+          {/* Image area - takes most of the card */}
+          <div className="h-[70%] relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
             {isCarousel ? (
-              <ImageCarousel images={agileDesignImages} />
+              <ImageCarousel images={agileDesignImages} isHovered={isHovered} />
             ) : (
               <img 
                 src={tool.image || ""}
-                alt={tool.title}
-                className="w-full h-full object-cover"
+                alt={tool.name}
+                className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? 'scale-110' : 'scale-100'}`}
                 data-testid={`img-tool-${tool.id}`}
               />
             )}
+            
+            {/* Coming Soon badge */}
+            {tool.comingSoon && (
+              <div className="absolute top-3 left-3 bg-[#5A5EFF] text-white text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1.5">
+                <Clock className="w-3 h-3" />
+                Coming Soon
+              </div>
+            )}
           </div>
           
-          {/* Title area */}
-          <div className="p-5 h-[35%] flex items-start justify-between">
+          {/* Title area - clean and minimal */}
+          <div className="p-4 h-[30%] flex items-center justify-between">
             <h3 
-              className="text-lg sm:text-xl text-slate-800 font-medium leading-tight pr-4"
-              style={{ fontFamily: "'DM Serif Display', serif" }}
+              className="text-base sm:text-lg text-slate-800 font-semibold leading-tight"
+              style={{ fontFamily: "Roboto, sans-serif" }}
               data-testid={`text-tool-title-${tool.id}`}
             >
-              {tool.title}
+              {tool.name}
             </h3>
             
             {/* Plus button */}
-            <button
+            <Button
+              size="icon"
               onClick={() => setIsFlipped(true)}
-              className="flex-shrink-0 w-10 h-10 rounded-full bg-[#5A5EFF] text-white flex items-center justify-center transition-transform duration-300 hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5A5EFF] focus-visible:ring-offset-2"
-              aria-label={`Learn more about ${tool.title}`}
+              className="flex-shrink-0 rounded-full bg-[#5A5EFF] border-[#5A5EFF]"
+              aria-label={`Learn more about ${tool.name}`}
               data-testid={`button-flip-${tool.id}`}
             >
-              <Plus className="w-5 h-5" />
-            </button>
+              <Plus className="w-4 h-4" />
+            </Button>
           </div>
         </div>
 
-        {/* Back of card */}
+        {/* Back of card - Detailed info with What/Why structure */}
         <div 
-          className="absolute inset-0 bg-white rounded-2xl shadow-xl overflow-hidden backface-hidden"
+          className="absolute inset-0 bg-white rounded-xl shadow-lg overflow-hidden backface-hidden"
           style={{ 
             backfaceVisibility: "hidden",
             transform: "rotateY(180deg)"
           }}
         >
-          <div className="p-6 h-full flex flex-col">
+          <div className="p-4 sm:p-5 h-full flex flex-col overflow-y-auto">
+            {/* Headline title */}
             <h3 
-              className="text-xl sm:text-2xl text-slate-800 mb-4"
+              className="text-lg sm:text-xl text-slate-800 mb-3 leading-tight"
               style={{ fontFamily: "'DM Serif Display', serif" }}
               data-testid={`text-tool-back-title-${tool.id}`}
             >
-              {tool.title}
+              {tool.headlineTitle}
             </h3>
             
-            <p 
-              className="text-slate-600 leading-relaxed flex-1"
-              style={{ fontFamily: "Roboto, sans-serif", fontSize: "0.95rem" }}
-              data-testid={`text-tool-description-${tool.id}`}
-            >
-              {tool.description}
-            </p>
+            {/* What section */}
+            <div className="mb-3">
+              <p 
+                className="text-xs uppercase tracking-wider text-[#5A5EFF] font-semibold mb-1"
+                style={{ fontFamily: "Roboto, sans-serif" }}
+              >
+                What
+              </p>
+              <p 
+                className="text-slate-600 leading-relaxed text-sm"
+                style={{ fontFamily: "Roboto, sans-serif" }}
+              >
+                {tool.whatText}
+              </p>
+            </div>
             
-            <div className="mt-4 flex items-center justify-end">
-              {/* Close button */}
-              <button
+            {/* Why section */}
+            <div className="flex-1">
+              <p 
+                className="text-xs uppercase tracking-wider text-[#5A5EFF] font-semibold mb-1"
+                style={{ fontFamily: "Roboto, sans-serif" }}
+              >
+                Why it matters
+              </p>
+              <p 
+                className="text-slate-600 leading-relaxed text-sm"
+                style={{ fontFamily: "Roboto, sans-serif" }}
+                data-testid={`text-tool-description-${tool.id}`}
+              >
+                {tool.whyText}
+              </p>
+            </div>
+            
+            {/* Close button */}
+            <div className="mt-3 flex items-center justify-end">
+              <Button
+                size="icon"
+                variant="secondary"
                 onClick={() => setIsFlipped(false)}
-                className="w-10 h-10 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center transition-all duration-300 hover:bg-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+                className="rounded-full"
                 aria-label="Close details"
                 data-testid={`button-close-${tool.id}`}
               >
-                <X className="w-5 h-5" />
-              </button>
+                <X className="w-4 h-4" />
+              </Button>
             </div>
           </div>
         </div>
@@ -221,7 +303,7 @@ export default function ToolsSection() {
   return (
     <section 
       id="consult-tools"
-      className="relative py-24 sm:py-32 bg-[#DDA0DD]"
+      className="relative py-20 sm:py-28 bg-[#DDA0DD]"
       data-testid="section-tools"
     >
       {/* Light gradient overlay at top for depth */}
@@ -234,7 +316,7 @@ export default function ToolsSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16 sm:mb-20"
+          className="text-center mb-12 sm:mb-16"
         >
           <div className="mb-4" style={{ transform: "rotate(-2deg)" }}>
             <Wrench className="w-10 h-10 mx-auto text-white/70 stroke-[1.5]" style={{ filter: "drop-shadow(0 2px 4px rgba(255,255,255,0.1))" }} />
@@ -277,8 +359,8 @@ export default function ToolsSection() {
           </a>
         </motion.div>
 
-        {/* Tools Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        {/* Tools Grid - 4 columns desktop, 2 columns mobile */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
           {tools.map((tool, index) => (
             <ToolCard key={tool.id} tool={tool} index={index} />
           ))}
