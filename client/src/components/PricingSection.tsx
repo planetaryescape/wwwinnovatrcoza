@@ -137,14 +137,14 @@ export default function PricingSection() {
                         <img 
                           src={basicCharacter} 
                           alt="Test24 Basic character" 
-                          className="w-20 h-20 object-contain flex-shrink-0"
+                          className="w-40 h-40 object-contain flex-shrink-0"
                         />
                       )}
                       {plan.name === "Test24 Pro" && (
                         <img 
                           src={proCharacter} 
                           alt="Test24 Pro character" 
-                          className="w-20 h-20 object-contain flex-shrink-0"
+                          className="w-40 h-40 object-contain flex-shrink-0"
                         />
                       )}
                     </div>
@@ -201,14 +201,14 @@ export default function PricingSection() {
                         <img 
                           src={basicCharacter} 
                           alt="Test24 Basic character" 
-                          className="w-20 h-20 object-contain flex-shrink-0"
+                          className="w-40 h-40 object-contain flex-shrink-0"
                         />
                       )}
                       {plan.name === "Test24 Pro" && (
                         <img 
                           src={proCharacter} 
                           alt="Test24 Pro character" 
-                          className="w-20 h-20 object-contain flex-shrink-0"
+                          className="w-40 h-40 object-contain flex-shrink-0"
                         />
                       )}
                     </div>
