@@ -15,15 +15,15 @@ export default function HeroSection() {
             {/* Left side - Large bold text */}
             <div className="text-left">
               <h1 
-                className="font-serif font-bold mb-8 leading-[0.95] uppercase text-[#ED876E]"
+                className="font-serif font-bold mb-8 leading-[0.95] uppercase"
                 style={{ 
                   fontFamily: "'DM Serif Display', serif", 
                   letterSpacing: "0.06em",
                   fontSize: "clamp(2rem, 4vw, 3.74rem)"
                 }}
               >
-                TRANSFORMING<br />
-                CONSUMER INSIGHTS.
+                <span className="text-[#ED876E]">TRANSFORMING</span><br />
+                <span className="text-white">CONSUMER INSIGHTS.</span>
               </h1>
               <p 
                 className="text-gray-300 max-w-xl mb-6"
