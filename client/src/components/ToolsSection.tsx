@@ -115,6 +115,7 @@ const tools: Tool[] = [
     whatText: "An AI qualitative moderator that understands your information objectives and conducts a naturalistic interview, summarizing the learnings with a show reel.",
     whyText: "Makes agile qualitative research accessible. Bring the voice of the consumer to your stakeholders on demand.",
     image: aiQualImg2,
+    video: "https://diginsights.com/wp-content/uploads/2024/10/Dig_AIVideo_abovefold-1.webm",
     comingSoon: true,
   },
   {
