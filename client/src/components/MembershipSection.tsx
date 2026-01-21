@@ -130,9 +130,8 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
           </Badge>
         </div>
       )}
-      
       {/* Character Image Area with Animated Elements */}
-      <div className="relative h-48 bg-[#F5F3EE] overflow-visible flex items-end justify-center">
+      <div className="relative h-48 overflow-visible flex items-end justify-center bg-[#f0f1f4]">
         {/* Character image - animate on scroll */}
         <motion.img 
           src={plan.characterImage}
@@ -146,7 +145,6 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
           data-testid={`img-membership-character-${index}`}
         />
       </div>
-      
       <CardHeader className="pt-4 pb-2 text-left">
         <CardTitle className="text-3xl font-serif mb-2" style={{ color: plan.accentColor }}>{plan.name}</CardTitle>
         <CardDescription className="text-slate-600 text-sm">{plan.description}</CardDescription>
