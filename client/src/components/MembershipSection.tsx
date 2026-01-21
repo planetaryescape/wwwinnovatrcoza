@@ -5,9 +5,9 @@ import { Check, Crown, Star, Gem } from "lucide-react";
 import { useLocation } from "wouter";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
-import starterCharacter from "@assets/generated_images/starter_tier_3d_character.png";
-import growthCharacter from "@assets/generated_images/growth_tier_3d_character.png";
-import scaleCharacter from "@assets/generated_images/scale_tier_3d_character.png";
+import starterCharacter from "@assets/download_(1)_1768985238001.png";
+import growthCharacter from "@assets/download_(3)_1768985238001.png";
+import scaleCharacter from "@assets/download_(4)_1768985238001.png";
 
 interface MembershipPlan {
   name: string;
