@@ -46,9 +46,9 @@ export default function HeroSection() {
       
       {/* Mobile layout - centered text with GIF at bottom edge */}
       <div className="lg:hidden flex flex-col min-h-screen">
-        {/* Centered text content */}
-        <div className="flex-1 flex items-center justify-center px-4 sm:px-6">
-          <div className="text-center">
+        {/* Text content - left aligned */}
+        <div className="flex-1 flex items-center px-4 sm:px-6">
+          <div className="text-left">
             <h1 
               className="font-serif font-bold mb-6 leading-[0.95] uppercase"
               style={{ 
