@@ -25,62 +25,77 @@ export default function HeroSection() {
       </div>
       
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left side - Large bold text */}
-          <div className="text-left">
-            <p className="text-sm uppercase tracking-[0.25em] text-[#ED876E] mb-6 font-semibold">
-              Research & Innovation
-            </p>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold mb-8 leading-tight">
-              <span className="text-white">WE ARE </span>
-              <span className="bg-gradient-to-r from-[#ED876E] to-[#F4A261] bg-clip-text text-transparent">
-                TRANSFORMING
-              </span>
-              <br />
-              <span className="text-white">CONSUMER INSIGHTS</span>
-            </h1>
-            <p className="text-xl sm:text-2xl text-gray-300 max-w-xl mb-10 font-light">
-              Launch Better Innovation<br />through smart 24hr research
-            </p>
-            
-            <div className="flex flex-row flex-wrap items-center gap-4">
-              <Button 
-                size="lg"
-                className="bg-[#ED876E]/20 text-white px-8 border border-[#ED876E]/40 min-w-[180px]"
-                onClick={handleTestNow}
-                data-testid="button-test-now"
+        <div className="flex flex-col items-start">
+          {/* Main content row - headline and coral box side by side */}
+          <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
+            {/* Left side - Large bold text aligned with consult page */}
+            <div className="text-left">
+              <p className="text-sm uppercase tracking-[0.25em] text-[#ED876E] mb-6 font-semibold">
+                Research & Innovation
+              </p>
+              <h1 
+                className="font-serif font-bold mb-8 leading-[0.95] uppercase"
+                style={{ 
+                  fontFamily: "'DM Serif Display', serif", 
+                  letterSpacing: "0.06em",
+                  fontSize: "clamp(2.5rem, 6vw, 5.5rem)"
+                }}
               >
-                24hr Testing
-              </Button>
-              <Link href="/consult">
-                <Button 
-                  size="lg"
-                  className="bg-[#ED876E]/20 text-white px-8 border border-[#ED876E]/40 min-w-[180px]"
-                  data-testid="button-consulting"
-                >
-                  Consulting
-                </Button>
-              </Link>
+                <span className="text-white">WE ARE </span>
+                <span className="bg-gradient-to-r from-[#ED876E] to-[#F4A261] bg-clip-text text-transparent">
+                  TRANSFORMING
+                </span>
+                <br />
+                <span className="text-white">CONSUMER INSIGHTS</span>
+              </h1>
+              <p 
+                className="text-gray-300 max-w-xl mb-6"
+                style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
+              >
+                Launch Better Innovation<br />through smart 24hr research
+              </p>
+            </div>
+            
+            {/* Right side - Bold color block with "24" */}
+            <div className="hidden lg:flex justify-center items-center relative">
+              <div className="relative">
+                {/* Main color block */}
+                <div className="w-72 h-72 rounded-3xl bg-gradient-to-br from-[#ED876E] to-[#E76F51] flex items-center justify-center shadow-2xl shadow-[#ED876E]/20">
+                  <div className="text-center">
+                    <div className="text-8xl font-serif font-bold text-white">24</div>
+                    <div className="text-lg uppercase tracking-[0.3em] text-white/80 mt-2">Hours</div>
+                  </div>
+                </div>
+                {/* Accent floating elements */}
+                <div className="absolute -top-6 -right-6 w-16 h-16 rounded-xl bg-[#2A9D8F] opacity-80" />
+                <div className="absolute -bottom-4 -left-4 w-12 h-12 rounded-lg bg-[#F4A261] opacity-70" />
+              </div>
             </div>
           </div>
           
-          {/* Right side - Bold color block with "24" */}
-          <div className="hidden lg:flex justify-center items-center relative">
-            <div className="relative">
-              {/* Main color block */}
-              <div className="w-72 h-72 rounded-3xl bg-gradient-to-br from-[#ED876E] to-[#E76F51] flex items-center justify-center shadow-2xl shadow-[#ED876E]/20">
-                <div className="text-center">
-                  <div className="text-8xl font-serif font-bold text-white">24</div>
-                  <div className="text-lg uppercase tracking-[0.3em] text-white/80 mt-2">Hours</div>
-                </div>
-              </div>
-              {/* Accent floating elements */}
-              <div className="absolute -top-6 -right-6 w-16 h-16 rounded-xl bg-[#2A9D8F] opacity-80" />
-              <div className="absolute -bottom-4 -left-4 w-12 h-12 rounded-lg bg-[#F4A261] opacity-70" />
-            </div>
+          {/* Buttons row - below both headline and coral box */}
+          <div className="flex flex-row flex-wrap items-center gap-4 mt-10 lg:mt-16">
+            <Button 
+              size="lg"
+              className="bg-[#ED876E]/20 text-white px-8 border border-[#ED876E]/40 min-w-[180px]"
+              onClick={handleTestNow}
+              data-testid="button-test-now"
+            >
+              24hr Testing
+            </Button>
+            <Link href="/consult">
+              <Button 
+                size="lg"
+                className="bg-[#ED876E]/20 text-white px-8 border border-[#ED876E]/40 min-w-[180px]"
+                data-testid="button-consulting"
+              >
+                Consulting
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
+      
       {/* Scroll indicator */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
         <button 
