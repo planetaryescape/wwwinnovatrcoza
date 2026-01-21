@@ -100,7 +100,7 @@ export default function PricingSection() {
     <section id="pricing" className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
+          <div className="text-sm font-semibold text-black mb-4 uppercase tracking-wider">
             04 — Pricing
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6" style={{ color: '#4D5FF1' }}>Flexible pricing for any business</h2>
