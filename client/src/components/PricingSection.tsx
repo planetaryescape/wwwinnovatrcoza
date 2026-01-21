@@ -128,23 +128,23 @@ export default function PricingSection() {
                       <div className="flex-1">
                         <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
                         <CardDescription className="text-base">{plan.description}</CardDescription>
-                        <div className="mt-4">
+                        <div className="mt-4 flex flex-col md:flex-row md:items-baseline">
                           <span className="text-4xl font-bold text-primary">{formatPrice(plan.priceZAR)}</span>
-                          <span className="text-muted-foreground ml-2">{plan.unit}</span>
+                          <span className="text-muted-foreground md:ml-2">{plan.unit}</span>
                         </div>
                       </div>
                       {plan.name === "Test24 Basic" && (
                         <img 
                           src={basicCharacter} 
                           alt="Test24 Basic character" 
-                          className="w-40 h-40 object-contain flex-shrink-0"
+                          className="w-32 h-32 md:w-40 md:h-40 object-contain flex-shrink-0 -mr-2 md:mr-0"
                         />
                       )}
                       {plan.name === "Test24 Pro" && (
                         <img 
                           src={proCharacter} 
                           alt="Test24 Pro character" 
-                          className="w-40 h-40 object-contain flex-shrink-0"
+                          className="w-32 h-32 md:w-40 md:h-40 object-contain flex-shrink-0 -mr-2 md:mr-0"
                         />
                       )}
                     </div>
@@ -192,23 +192,23 @@ export default function PricingSection() {
                       <div className="flex-1">
                         <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
                         <CardDescription className="text-base">{plan.description}</CardDescription>
-                        <div className="mt-4">
+                        <div className="mt-4 flex flex-col md:flex-row md:items-baseline">
                           <span className="text-4xl font-bold text-primary">{formatPrice(plan.priceZAR)}</span>
-                          <span className="text-muted-foreground ml-2">{plan.unit}</span>
+                          <span className="text-muted-foreground md:ml-2">{plan.unit}</span>
                         </div>
                       </div>
                       {plan.name === "Test24 Basic" && (
                         <img 
                           src={basicCharacter} 
                           alt="Test24 Basic character" 
-                          className="w-40 h-40 object-contain flex-shrink-0"
+                          className="w-32 h-32 md:w-40 md:h-40 object-contain flex-shrink-0 -mr-2 md:mr-0"
                         />
                       )}
                       {plan.name === "Test24 Pro" && (
                         <img 
                           src={proCharacter} 
                           alt="Test24 Pro character" 
-                          className="w-40 h-40 object-contain flex-shrink-0"
+                          className="w-32 h-32 md:w-40 md:h-40 object-contain flex-shrink-0 -mr-2 md:mr-0"
                         />
                       )}
                     </div>
