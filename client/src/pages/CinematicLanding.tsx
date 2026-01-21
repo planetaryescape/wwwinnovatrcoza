@@ -124,20 +124,23 @@ const whatWeDoCards = [
   {
     title: "STRATEGY &\nDIRECTION",
     description: "Understand and anticipate the market through:\n- Trends and foresight\n- Segmentation\n- Brand & Category Health\n- Demand Mapping",
-    link: "How we set direction",
-    linkHref: "#"
+    link: "View Case Study",
+    linkHref: "#case-studies",
+    phase: "strategy"
   },
   {
     title: "INNOVATION &\nTESTING",
     description: "Identify growth opportunities and build a business case via:\n- Idea screening & optimization\n- Portfolio management\n- Preliminary share, source of volume and cannibalization\n- Price pack architecture",
-    link: "How we test ideas",
-    linkHref: "#"
+    link: "View Case Study",
+    linkHref: "#case-studies",
+    phase: "innovation"
   },
   {
     title: "EXECUTION &\nSCALE",
     description: "Track launch effectiveness & market dynamics via:\n- Innovation launch monitoring\n- Promotion tracking\n- Brand and category health tracking",
-    link: "How we drive momentum",
-    linkHref: "#"
+    link: "View Case Study",
+    linkHref: "#case-studies",
+    phase: "execution"
   }
 ];
 
@@ -433,7 +436,7 @@ export default function CinematicLanding() {
 
           {/* Hero Content */}
           <div 
-            className="relative z-10 min-h-screen flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-16 bg-[#ffe7de]"
+            className="relative z-10 min-h-screen flex flex-col justify-center px-6 sm:px-10 lg:px-16 pt-28 sm:pt-24 lg:pt-16 pb-16 bg-[#ffe7de]"
           >
             {/* Two-column layout for desktop */}
             <div className="w-full max-w-7xl mx-auto">
@@ -561,13 +564,17 @@ export default function CinematicLanding() {
                 >
                   {card.description}
                 </p>
-                <a 
-                  href={card.linkHref}
-                  className="inline-block text-white/70 text-sm underline underline-offset-4 hover:text-white transition-colors"
+                <button 
+                  onClick={() => {
+                    const element = document.getElementById("case-studies");
+                    element?.scrollIntoView({ behavior: "smooth" });
+                    window.dispatchEvent(new CustomEvent('setPhase', { detail: card.phase }));
+                  }}
+                  className="inline-block text-white/70 text-sm underline underline-offset-4 hover:text-white transition-colors cursor-pointer"
                   data-testid={`link-what-we-do-${index}`}
                 >
                   {card.link}
-                </a>
+                </button>
               </motion.div>
             ))}
           </div>

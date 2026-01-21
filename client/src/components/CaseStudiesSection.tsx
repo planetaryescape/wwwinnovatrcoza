@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TrendingUp, Target, Lightbulb, Rocket, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,36 +26,6 @@ interface CaseStudy {
 }
 
 const caseStudies: CaseStudy[] = [
-  {
-    id: "dgb",
-    headline: "Transforming a Business for Growth with a Disruptive 3-Year Pipeline",
-    client: "DGB",
-    industry: "Alcohol",
-    problemShort: "Portfolio lacked clear direction across demand spaces, limiting growth potential against modern competitors.",
-    problem: "Portfolio lacked clear direction across demand spaces, limiting growth potential. Traditional wines significantly underperformed against modern RTD competitors with limited understanding of consumer needs.",
-    process: "Comprehensive 3-phase Demand Space Mapping methodology analyzing Connecting, Relaxing, and Socializing demand spaces. Applied Jobs-to-be-Done framework to identify Total Addressable Problems and validate consumer needs.",
-    results: "7 distinct innovation projects approved for the development pipeline. Robust 18-36 month innovation planning secured. Client requested Innovatr to lead end-to-end NPD execution.",
-    phases: ["strategy", "innovation"],
-    duration: "70 Days",
-    highlight: "7 Pipeline Projects",
-    gif: cookingGif,
-    bgColor: "#FFE8D8"
-  },
-  {
-    id: "namibian-breweries",
-    headline: "Launching & Landing the Non-Alcoholic Category in Namibia",
-    client: "Namibian Breweries",
-    industry: "Beverages",
-    problemShort: "Emerging category with undefined positioning and consumer ambiguity in a crowded market.",
-    problem: "Emerging category with undefined positioning territories and consumer ambiguity. Need for differentiated messaging and clear visual identity in a crowded market.",
-    process: "Rapid 27-day sprint developing positioning territories, category manifesto, and Visual Identity. Consumer validation with 200+ respondents followed by TTL creative rollout.",
-    results: "Full launch campaign executed with complete Through-The-Line creative toolkit. Established regional benchmark for cross-brand portfolio launches.",
-    phases: ["strategy", "execution"],
-    duration: "27 Days",
-    highlight: "Regional Benchmark",
-    gif: airplanesGif,
-    bgColor: "#E8F0FF"
-  },
   {
     id: "rain",
     headline: "Defining Winning Market Entry Strategy Through Consumer Intelligence",
@@ -85,6 +55,36 @@ const caseStudies: CaseStudy[] = [
     highlight: "Emotional Leadership",
     gif: cookingGif,
     bgColor: "#E8FFE8"
+  },
+  {
+    id: "dgb",
+    headline: "Transforming a Business for Growth with a Disruptive 3-Year Pipeline",
+    client: "DGB",
+    industry: "Alcohol",
+    problemShort: "Portfolio lacked clear direction across demand spaces, limiting growth potential against modern competitors.",
+    problem: "Portfolio lacked clear direction across demand spaces, limiting growth potential. Traditional wines significantly underperformed against modern RTD competitors with limited understanding of consumer needs.",
+    process: "Comprehensive 3-phase Demand Space Mapping methodology analyzing Connecting, Relaxing, and Socializing demand spaces. Applied Jobs-to-be-Done framework to identify Total Addressable Problems and validate consumer needs.",
+    results: "7 distinct innovation projects approved for the development pipeline. Robust 18-36 month innovation planning secured. Client requested Innovatr to lead end-to-end NPD execution.",
+    phases: ["innovation"],
+    duration: "70 Days",
+    highlight: "7 Pipeline Projects",
+    gif: cookingGif,
+    bgColor: "#FFE8D8"
+  },
+  {
+    id: "namibian-breweries",
+    headline: "Launching & Landing the Non-Alcoholic Category in Namibia",
+    client: "Namibian Breweries",
+    industry: "Beverages",
+    problemShort: "Emerging category with undefined positioning and consumer ambiguity in a crowded market.",
+    problem: "Emerging category with undefined positioning territories and consumer ambiguity. Need for differentiated messaging and clear visual identity in a crowded market.",
+    process: "Rapid 27-day sprint developing positioning territories, category manifesto, and Visual Identity. Consumer validation with 200+ respondents followed by TTL creative rollout.",
+    results: "Full launch campaign executed with complete Through-The-Line creative toolkit. Established regional benchmark for cross-brand portfolio launches.",
+    phases: ["execution"],
+    duration: "27 Days",
+    highlight: "Regional Benchmark",
+    gif: airplanesGif,
+    bgColor: "#E8F0FF"
   }
 ];
 
@@ -114,6 +114,19 @@ const phases = [
 
 export default function CaseStudiesSection() {
   const [activePhase, setActivePhase] = useState<Phase>("strategy");
+  
+  useEffect(() => {
+    const handleSetPhase = (event: CustomEvent<Phase>) => {
+      if (['strategy', 'innovation', 'execution'].includes(event.detail)) {
+        setActivePhase(event.detail);
+      }
+    };
+    
+    window.addEventListener('setPhase', handleSetPhase as EventListener);
+    return () => {
+      window.removeEventListener('setPhase', handleSetPhase as EventListener);
+    };
+  }, []);
   
   const filteredCaseStudies = caseStudies.filter(cs => cs.phases.includes(activePhase));
   const activePhaseData = phases.find(p => p.id === activePhase);

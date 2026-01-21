@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { useState, useMemo, useRef } from "react";
+import { motion, useInView } from "framer-motion";
 import { Plus, X, Wrench, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -134,7 +134,7 @@ const tools: Tool[] = [
   },
 ];
 
-function ImageCarousel({ images, isHovered }: { images: string[]; isHovered: boolean }) {
+function ImageCarousel({ images, isHovered, isInView }: { images: string[]; isHovered: boolean; isInView: boolean }) {
   const shuffledImages = useMemo(() => shuffleArray(images), []);
   const duplicatedImages = [...shuffledImages, ...shuffledImages, ...shuffledImages];
 
@@ -143,7 +143,7 @@ function ImageCarousel({ images, isHovered }: { images: string[]; isHovered: boo
       <div 
         className="flex h-full absolute left-0 top-0"
         style={{ 
-          animation: isHovered ? `scrollLeft 25s linear infinite` : 'none',
+          animation: (isHovered || isInView) ? `scrollLeft 25s linear infinite` : 'none',
         }}
       >
         {duplicatedImages.map((img, idx) => (
@@ -170,9 +170,12 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const isCarousel = tool.isCarousel;
+  const cardRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(cardRef, { once: false, amount: 0.5 });
 
   return (
     <motion.div
+      ref={cardRef}
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
@@ -196,10 +199,10 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
           {/* Image/Video area - takes most of the card */}
           <div className="h-[70%] relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
             {isCarousel ? (
-              <ImageCarousel images={agileDesignImages} isHovered={isHovered} />
+              <ImageCarousel images={agileDesignImages} isHovered={isHovered} isInView={isInView} />
             ) : tool.video ? (
               tool.video.includes('.gif') ? (
-                isHovered ? (
+                (isHovered || isInView) ? (
                   <img 
                     src={tool.video}
                     alt={tool.name}
@@ -216,13 +219,13 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
                 )
               ) : (
                 <video 
-                  src={isHovered ? tool.video : undefined}
-                  autoPlay={isHovered}
+                  src={(isHovered || isInView) ? tool.video : undefined}
+                  autoPlay={isHovered || isInView}
                   loop
                   muted
                   playsInline
                   poster={tool.image || ""}
-                  className={`w-full h-full object-cover object-left transition-transform duration-700 ${isHovered ? 'scale-[0.95]' : 'scale-[0.85]'}`}
+                  className={`w-full h-full object-cover object-left transition-transform duration-700 ${(isHovered || isInView) ? 'scale-[0.95]' : 'scale-[0.85]'}`}
                   data-testid={`video-tool-${tool.id}`}
                 />
               )
@@ -230,7 +233,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
               <img 
                 src={tool.image || ""}
                 alt={tool.name}
-                className={`w-full h-full object-cover transition-transform duration-700 ${tool.imagePosition || ''} ${isHovered ? 'scale-[0.95]' : 'scale-[0.85]'}`}
+                className={`w-full h-full object-cover transition-transform duration-700 ${tool.imagePosition || ''} ${(isHovered || isInView) ? 'scale-[0.95]' : 'scale-[0.85]'}`}
                 data-testid={`img-tool-${tool.id}`}
               />
             )}

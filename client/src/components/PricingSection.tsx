@@ -122,8 +122,8 @@ export default function PricingSection() {
                   data-testid={`payg-card-${index}`}
                 >
                   <CardHeader>
-                    <div className="w-12 h-12 mb-4 rounded-md bg-primary/10 flex items-center justify-center">
-                      <plan.icon className="w-6 h-6 text-primary" />
+                    <div className="w-12 h-12 mb-4 flex items-center justify-center">
+                      <plan.icon className="w-8 h-8 text-primary" />
                     </div>
                     <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
                     <CardDescription className="text-base">{plan.description}</CardDescription>
@@ -171,8 +171,8 @@ export default function PricingSection() {
                     </div>
                   )}
                   <CardHeader>
-                    <div className="w-12 h-12 mb-4 rounded-md bg-primary/10 flex items-center justify-center">
-                      <plan.icon className="w-6 h-6 text-primary" />
+                    <div className="w-12 h-12 mb-4 flex items-center justify-center">
+                      <plan.icon className="w-8 h-8 text-primary" />
                     </div>
                     <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
                     <CardDescription className="text-base">{plan.description}</CardDescription>

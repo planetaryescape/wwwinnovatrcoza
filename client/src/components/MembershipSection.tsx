@@ -1,3 +1,5 @@
+import { useRef } from "react";
+import { motion, useInView } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -88,6 +90,8 @@ const membershipPlansData: MembershipPlan[] = [
 function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }) {
   const [, setLocation] = useLocation();
   const { formatPrice, formatShortPrice } = useCurrency();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(cardRef, { once: false, amount: 0.5 });
 
   const handleBecomeMember = () => {
     if (plan.name === "Starter") {
@@ -111,9 +115,11 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
   };
 
   const isStarter = plan.name === "Starter";
+  const isActive = isInView;
 
   return (
     <Card 
+      ref={cardRef}
       className="group hover-elevate relative flex flex-col border-0 bg-white text-slate-900 shadow-xl overflow-visible pt-6"
       data-testid={`membership-card-${index}`}
     >
@@ -127,40 +133,54 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
       
       {/* Character Image Area with Animated Elements */}
       <div className="relative h-48 bg-gradient-to-b from-slate-50 to-white overflow-visible flex items-end justify-center">
-        {/* Floating decorative elements - bigger and closer to character */}
-        <div 
-          className="absolute top-8 left-12 w-5 h-5 rounded-full opacity-60 transition-all duration-500 ease-out group-hover:scale-125 group-hover:-translate-y-3 group-hover:translate-x-2"
+        {/* Floating decorative elements - animate on scroll or hover */}
+        <motion.div 
+          className="absolute top-8 left-12 w-5 h-5 rounded-full opacity-60"
           style={{ backgroundColor: plan.accentColor }}
+          animate={isActive ? { scale: 1.25, y: -12, x: 8 } : { scale: 1, y: 0, x: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
         />
-        <div 
-          className="absolute top-12 right-14 w-4 h-4 rounded-full opacity-50 transition-all duration-700 ease-out group-hover:scale-150 group-hover:-translate-y-4 group-hover:-translate-x-2"
+        <motion.div 
+          className="absolute top-12 right-14 w-4 h-4 rounded-full opacity-50"
           style={{ backgroundColor: plan.accentColor }}
+          animate={isActive ? { scale: 1.5, y: -16, x: -8 } : { scale: 1, y: 0, x: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
         />
-        <div 
-          className="absolute top-20 left-16 w-6 h-6 rotate-45 opacity-35 transition-all duration-600 ease-out group-hover:rotate-90 group-hover:-translate-y-3"
+        <motion.div 
+          className="absolute top-20 left-16 w-6 h-6 opacity-35"
           style={{ backgroundColor: plan.accentColor }}
+          animate={isActive ? { rotate: 90, y: -12 } : { rotate: 45, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
         />
-        <div 
-          className="absolute top-16 right-16 w-4 h-4 rounded-full opacity-45 transition-all duration-500 ease-out group-hover:scale-110 group-hover:translate-y-2 group-hover:translate-x-2"
+        <motion.div 
+          className="absolute top-16 right-16 w-4 h-4 rounded-full opacity-45"
           style={{ backgroundColor: plan.accentColor }}
+          animate={isActive ? { scale: 1.1, y: 8, x: 8 } : { scale: 1, y: 0, x: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
         />
-        <div 
-          className="absolute bottom-12 left-14 w-4 h-4 rounded-full opacity-50 transition-all duration-800 ease-out group-hover:scale-125 group-hover:-translate-y-5"
+        <motion.div 
+          className="absolute bottom-12 left-14 w-4 h-4 rounded-full opacity-50"
           style={{ backgroundColor: plan.accentColor }}
+          animate={isActive ? { scale: 1.25, y: -20 } : { scale: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         />
-        <div 
-          className="absolute bottom-16 right-12 w-5 h-5 rotate-12 opacity-40 transition-all duration-600 ease-out group-hover:rotate-45 group-hover:-translate-y-4 group-hover:translate-x-2"
+        <motion.div 
+          className="absolute bottom-16 right-12 w-5 h-5 opacity-40"
           style={{ backgroundColor: plan.accentColor }}
+          animate={isActive ? { rotate: 45, y: -16, x: 8 } : { rotate: 12, y: 0, x: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
         />
         
-        {/* Character image */}
-        <img 
+        {/* Character image - animate on scroll */}
+        <motion.img 
           src={plan.characterImage}
           alt={`${plan.name} membership character`}
           width={176}
           height={176}
           loading="lazy"
-          className="h-44 w-auto object-contain transition-all duration-500 ease-out drop-shadow-md group-hover:-translate-y-2 group-hover:drop-shadow-lg group-focus-within:-translate-y-2 group-focus-within:drop-shadow-lg z-10"
+          className="h-44 w-auto object-contain drop-shadow-md z-10"
+          animate={isActive ? { y: -8, filter: "drop-shadow(0 10px 8px rgb(0 0 0 / 0.1))" } : { y: 0, filter: "drop-shadow(0 4px 3px rgb(0 0 0 / 0.07))" }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
           data-testid={`img-membership-character-${index}`}
         />
       </div>
