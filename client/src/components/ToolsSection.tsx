@@ -8,6 +8,7 @@ import emotionalAppealImg from "@assets/IMG_8482_1768743819583.jpeg";
 import marketShareImg2 from "@assets/IMG_8483_1768743852255.jpeg";
 import aiQualImg2 from "@assets/IMG_8492_1768744027913.jpeg";
 import dashboardImg from "@assets/IMG_8494_1768744362356.jpeg";
+import heatmapImg from "@assets/image_1768991760693.png";
 
 import agileImg1 from "@assets/IMG_8495_1768760848107.jpeg";
 import agileImg2 from "@assets/IMG_8498_1768760848107.jpeg";
@@ -51,6 +52,7 @@ interface Tool {
   whyText: string;
   image: string | null;
   video?: string;
+  imagePosition?: string;
   isCarousel?: boolean;
   comingSoon?: boolean;
 }
@@ -97,7 +99,8 @@ const tools: Tool[] = [
     headlineTitle: "Visual Attention Analysis",
     whatText: "Advanced eye-tracking simulation that reveals where consumers look first, what captures attention, and what gets missed entirely.",
     whyText: "Optimize your packaging and communications for maximum shelf impact. Know what works before you go to market.",
-    image: emotionalAppealImg,
+    image: heatmapImg,
+    imagePosition: "object-left",
   },
   {
     id: "design",
@@ -226,7 +229,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
               <img 
                 src={tool.image || ""}
                 alt={tool.name}
-                className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? 'scale-110' : 'scale-100'}`}
+                className={`w-full h-full object-cover transition-transform duration-700 ${tool.imagePosition || ''} ${isHovered ? 'scale-110' : 'scale-100'}`}
                 data-testid={`img-tool-${tool.id}`}
               />
             )}
