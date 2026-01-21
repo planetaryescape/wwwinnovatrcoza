@@ -30,12 +30,12 @@ export default function Home() {
       <HeroSection />
       <StatsCounter />
       <MethodologySection />
+      <PromoBanner />
       <div id="services">
         <ServicesSection />
       </div>
       <PricingSection />
       <MembershipSection />
-      <PromoBanner />
       <MailerSection />
       <div id="contact">
         <ContactSection />

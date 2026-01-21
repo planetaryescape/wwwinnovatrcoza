@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/button";
-import { Gift } from "lucide-react";
+import { Wrench } from "lucide-react";
 import { useLocation } from "wouter";
 import promoBackground from "@assets/pexels-raphael-brasileiro-6047129_1764658374911.jpeg";
 
 export default function PromoBanner() {
   const [, setLocation] = useLocation();
 
-  const handleClaimOffer = () => {
-    setLocation("/claim-coupon");
+  const handleExploreTools = () => {
+    setLocation("/consult#consult-tools");
   };
 
   return (
@@ -22,11 +22,11 @@ export default function PromoBanner() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <Gift className="w-12 h-12 flex-shrink-0" />
+            <Wrench className="w-12 h-12 flex-shrink-0" />
             <div>
-              <h3 className="text-2xl font-serif font-bold mb-1">Limited Time Offer</h3>
+              <h3 className="text-2xl font-serif font-bold mb-1">The Tools</h3>
               <p className="text-accent-foreground/90 text-lg">
-                First Test24 basic idea on us.
+                Explore our Proprietary Research Toolkit
               </p>
             </div>
           </div>
@@ -34,10 +34,10 @@ export default function PromoBanner() {
             size="lg" 
             variant="secondary"
             className="bg-white hover:bg-white/90 text-[#141414]"
-            onClick={handleClaimOffer}
-            data-testid="button-view-deals"
+            onClick={handleExploreTools}
+            data-testid="button-explore-tools"
           >
-            Claim Offer
+            Explore Tools
           </Button>
         </div>
       </div>
