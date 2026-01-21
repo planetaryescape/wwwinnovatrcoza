@@ -123,13 +123,6 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
       className="group hover-elevate relative flex flex-col border-0 bg-white text-slate-900 shadow-xl overflow-visible pt-6"
       data-testid={`membership-card-${index}`}
     >
-      {plan.badge && (
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-          <Badge className="bg-[#ED876E] text-white px-4 py-1.5 shadow-lg text-sm">
-            {plan.badge}
-          </Badge>
-        </div>
-      )}
       {/* Character Image Area with Animated Elements */}
       <div className="relative h-48 overflow-visible flex items-end justify-center bg-white">
         {/* Character image - animate on scroll */}
