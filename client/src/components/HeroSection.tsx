@@ -1,4 +1,4 @@
-import heroGif from "@assets/1C123D7B-4B5C-461A-98D9-E0A683A2D801_1768998251716.gif";
+import heroVideo from "@assets/ScreenRecording_01-21-2026_14-48-20_1_1769000792592.mov";
 
 export default function HeroSection() {
   const scrollToServices = () => {
@@ -32,13 +32,16 @@ export default function HeroSection() {
             </p>
           </div>
           
-          {/* Right side - Hero GIF (desktop) */}
+          {/* Right side - Hero Video (desktop) */}
           <div className="flex justify-center items-center relative">
-            <img 
-              src={heroGif}
-              alt="Innovation animation"
+            <video 
+              src={heroVideo}
+              autoPlay
+              loop
+              muted
+              playsInline
               className="w-full max-w-md xl:max-w-lg h-auto object-contain"
-              data-testid="img-hero-gif-desktop"
+              data-testid="video-hero-desktop"
             />
           </div>
         </div>
@@ -69,13 +72,16 @@ export default function HeroSection() {
           </div>
         </div>
         
-        {/* GIF at bottom edge - full width */}
+        {/* Video at bottom edge - full width */}
         <div className="w-full">
-          <img 
-            src={heroGif}
-            alt="Innovation animation"
+          <video 
+            src={heroVideo}
+            autoPlay
+            loop
+            muted
+            playsInline
             className="w-full h-auto object-cover"
-            data-testid="img-hero-gif-mobile"
+            data-testid="video-hero-mobile"
           />
         </div>
       </div>
