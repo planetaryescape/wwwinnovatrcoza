@@ -132,7 +132,7 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
       )}
       
       {/* Character Image Area with Animated Elements */}
-      <div className="relative h-48 bg-gradient-to-b from-slate-50 to-white overflow-visible flex items-end justify-center">
+      <div className="relative h-48 bg-[#F5F3EE] overflow-visible flex items-end justify-center">
         {/* Character image - animate on scroll */}
         <motion.img 
           src={plan.characterImage}
@@ -140,14 +140,14 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
           width={176}
           height={176}
           loading="lazy"
-          className="h-44 w-auto object-contain drop-shadow-md z-10"
-          animate={isActive ? { y: -8, filter: "drop-shadow(0 10px 8px rgb(0 0 0 / 0.1))" } : { y: 0, filter: "drop-shadow(0 4px 3px rgb(0 0 0 / 0.07))" }}
+          className="h-44 w-auto object-contain z-10"
+          animate={isActive ? { y: -8 } : { y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
           data-testid={`img-membership-character-${index}`}
         />
       </div>
       
-      <CardHeader className="pt-4 pb-2 text-center">
+      <CardHeader className="pt-4 pb-2 text-left">
         <CardTitle className="text-3xl font-serif mb-2" style={{ color: plan.accentColor }}>{plan.name}</CardTitle>
         <CardDescription className="text-slate-600 text-sm">{plan.description}</CardDescription>
         <div className="mt-3">
@@ -175,12 +175,12 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
           <div className="text-sm font-semibold mt-2 text-[#ED876E]">~{formatShortPrice(plan.valueZAR)} value</div>
         )}
       </CardHeader>
-      <CardContent className="space-y-4 flex flex-col flex-1 pt-0">
+      <CardContent className="space-y-4 flex flex-col flex-1 pt-0 text-left">
         <ul className="space-y-2 flex-1">
           {getFeatures().map((feature, fIndex) => (
             <li key={fIndex} className="flex items-start gap-2">
               <Check className="h-4 w-4 mt-0.5 flex-shrink-0" style={{ color: plan.accentColor }} />
-              <span className="text-sm text-slate-700">{feature}</span>
+              <span className="text-sm text-slate-700 text-left">{feature}</span>
             </li>
           ))}
         </ul>
