@@ -9,7 +9,7 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 
 import starterCharacter from "@assets/IMG_8566_1769018545430.jpeg";
 import growthCharacter from "@assets/IMG_8567_1769018823712.jpeg";
-import scaleCharacter from "@assets/download_(4)_1768985238001.png";
+import scaleCharacter from "@assets/IMG_8569_1769018870308.jpeg";
 
 interface MembershipPlan {
   name: string;
@@ -133,44 +133,6 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
       
       {/* Character Image Area with Animated Elements */}
       <div className="relative h-48 bg-gradient-to-b from-slate-50 to-white overflow-visible flex items-end justify-center">
-        {/* Floating decorative elements - animate on scroll or hover */}
-        <motion.div 
-          className="absolute top-8 left-12 w-5 h-5 rounded-full opacity-60"
-          style={{ backgroundColor: plan.accentColor }}
-          animate={isActive ? { scale: 1.25, y: -12, x: 8 } : { scale: 1, y: 0, x: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-        />
-        <motion.div 
-          className="absolute top-12 right-14 w-4 h-4 rounded-full opacity-50"
-          style={{ backgroundColor: plan.accentColor }}
-          animate={isActive ? { scale: 1.5, y: -16, x: -8 } : { scale: 1, y: 0, x: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-        />
-        <motion.div 
-          className="absolute top-20 left-16 w-6 h-6 opacity-35"
-          style={{ backgroundColor: plan.accentColor }}
-          animate={isActive ? { rotate: 90, y: -12 } : { rotate: 45, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        />
-        <motion.div 
-          className="absolute top-16 right-16 w-4 h-4 rounded-full opacity-45"
-          style={{ backgroundColor: plan.accentColor }}
-          animate={isActive ? { scale: 1.1, y: 8, x: 8 } : { scale: 1, y: 0, x: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-        />
-        <motion.div 
-          className="absolute bottom-12 left-14 w-4 h-4 rounded-full opacity-50"
-          style={{ backgroundColor: plan.accentColor }}
-          animate={isActive ? { scale: 1.25, y: -20 } : { scale: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        />
-        <motion.div 
-          className="absolute bottom-16 right-12 w-5 h-5 opacity-40"
-          style={{ backgroundColor: plan.accentColor }}
-          animate={isActive ? { rotate: 45, y: -16, x: 8 } : { rotate: 12, y: 0, x: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        />
-        
         {/* Character image - animate on scroll */}
         <motion.img 
           src={plan.characterImage}
