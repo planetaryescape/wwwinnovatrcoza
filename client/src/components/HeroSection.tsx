@@ -13,7 +13,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Warm, vibrant background with personality */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f0f1a]" />
       {/* Colorful accent blocks - warm and inviting */}
@@ -25,7 +25,7 @@ export default function HeroSection() {
       </div>
       
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-start">
+        <div className="flex flex-col items-start justify-center">
           {/* Main content row - headline and coral box side by side */}
           <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
             {/* Left side - Large bold text aligned with consult page */}
@@ -38,7 +38,7 @@ export default function HeroSection() {
                 style={{ 
                   fontFamily: "'DM Serif Display', serif", 
                   letterSpacing: "0.06em",
-                  fontSize: "clamp(2.5rem, 6vw, 5.5rem)"
+                  fontSize: "clamp(2rem, 4.8vw, 4.4rem)"
                 }}
               >
                 <span className="text-white">WE ARE </span>

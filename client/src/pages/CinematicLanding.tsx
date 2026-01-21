@@ -433,7 +433,7 @@ export default function CinematicLanding() {
 
           {/* Hero Content */}
           <div 
-            className="relative z-10 min-h-screen flex flex-col justify-start px-6 sm:px-10 lg:px-16 pt-32 sm:pt-40 lg:pt-48 pb-16 bg-[#ffe7de]"
+            className="relative z-10 min-h-screen flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-16 bg-[#ffe7de]"
           >
             {/* Two-column layout for desktop */}
             <div className="w-full max-w-7xl mx-auto">
@@ -450,7 +450,7 @@ export default function CinematicLanding() {
                     style={{ 
                       fontFamily: "'DM Serif Display', serif", 
                       letterSpacing: "0.06em",
-                      fontSize: "clamp(3rem, 8vw, 9rem)"
+                      fontSize: "clamp(2rem, 4.8vw, 4.4rem)"
                     }}
                     data-testid="text-headline"
                     data-cursor-invert
