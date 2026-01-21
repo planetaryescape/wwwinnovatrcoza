@@ -78,7 +78,7 @@ export default function Navigation() {
             <div className="flex items-center gap-12">
               <button 
                 onClick={() => setLocation("/")}
-                className="text-2xl font-serif font-bold text-[#5669ed]" 
+                className={`text-2xl font-serif font-bold transition-colors ${isScrolled ? 'text-[#5669ed]' : 'text-white drop-shadow-lg'}`} 
                 data-testid="link-logo"
               >
                 Innovatr

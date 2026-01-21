@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 
 export default function HeroSection() {
@@ -29,6 +28,7 @@ export default function HeroSection() {
         <div className="absolute bottom-0 right-1/4 w-[350px] h-[350px] bg-[#E76F51] rounded-full opacity-15 blur-[90px]" />
         <div className="absolute bottom-1/4 left-1/3 w-[300px] h-[300px] bg-[#2A9D8F] rounded-full opacity-10 blur-[80px]" />
       </div>
+      
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left side - Large bold text */}
@@ -36,32 +36,30 @@ export default function HeroSection() {
             <p className="text-sm uppercase tracking-[0.25em] text-[#ED876E] mb-6 font-semibold">
               Research & Innovation
             </p>
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-serif font-bold text-white mb-8 leading-[1.1]">
-              Launch{" "}
-              <span className="text-[#ED876E]">Better</span>{" "}
-              Research
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-bold mb-8 leading-tight">
+              <span className="text-white">WE ARE </span>
+              <span className="bg-gradient-to-r from-[#ED876E] to-[#F4A261] bg-clip-text text-transparent">
+                TRANSFORMING
+              </span>
+              <br />
+              <span className="text-white">CONSUMER INSIGHTS</span>
             </h1>
-            <p className="text-xl sm:text-2xl text-gray-300 max-w-xl mb-4 font-light">
-              Smart, affordable research in 24hrs.
-            </p>
-            <p className="text-base max-w-lg mb-10 text-[#f1f6ff]">
-              Make confident decisions backed by real consumer insights. From rapid testing to strategic consulting.
+            <p className="text-xl sm:text-2xl text-gray-300 max-w-xl mb-10 font-light">
+              Launch Better Innovation<br />through smart 24hr research
             </p>
             
-            <div className="flex flex-col sm:flex-row items-start gap-4">
+            <div className="flex flex-col sm:flex-row flex-wrap items-start gap-4">
               <Button 
                 size="lg"
-                className="bg-[#ED876E] text-white px-8 border-[#ED876E]"
+                className="bg-[#ED876E]/20 text-white px-8 border border-[#ED876E]/40 min-w-[180px]"
                 onClick={handleTestNow}
                 data-testid="button-test-now"
               >
-                24hr Research
-                <ArrowRight className="ml-2 h-4 w-4" />
+                24hr research
               </Button>
               <Button 
                 size="lg"
-                variant="outline"
-                className="border-white/30 text-white bg-white/5"
+                className="bg-[#ED876E]/20 text-white px-8 border border-[#ED876E]/40 min-w-[180px]"
                 onClick={handleMembership}
                 data-testid="button-membership"
               >
@@ -70,8 +68,7 @@ export default function HeroSection() {
               <Link href="/consult">
                 <Button 
                   size="lg"
-                  variant="outline"
-                  className="border-[#2A9D8F]/50 text-[#2A9D8F] bg-[#2A9D8F]/5"
+                  className="bg-[#ED876E]/20 text-white px-8 border border-[#ED876E]/40 min-w-[180px]"
                   data-testid="button-consulting"
                 >
                   Consulting
