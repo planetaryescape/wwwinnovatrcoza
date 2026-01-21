@@ -28,6 +28,7 @@ import agileImg15 from "@assets/IMG_8511_1768760848107.jpeg";
 import agileImg16 from "@assets/IMG_8505_1768760848107.jpeg";
 import agileImg17 from "@assets/IMG_8506_1768760848107.jpeg";
 import agileImg18 from "@assets/IMG_8499_1768760848107.jpeg";
+import privateDashboardVideo from "@assets/agile_research,_purpose-built_for_innovation._(720p)_3_1768994342505.mov";
 
 const agileDesignImages = [
   agileImg1, agileImg2, agileImg3, agileImg4, agileImg5, agileImg6,
@@ -65,6 +66,7 @@ const tools: Tool[] = [
     whatText: "Inspiring data visualizations and modeling. Your dedicated dashboard presents results in real-time with intuitive charts and actionable insights.",
     whyText: "Brilliant innovation marries rigor with playfulness and exploration. Make data inspiring and shareable across your team.",
     image: dashboardImg,
+    video: privateDashboardVideo,
   },
   {
     id: "filtering",
