@@ -299,16 +299,17 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
             
             {/* Expand button */}
             {hasExpandableContent && !isCarousel && (
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => setIsExpanded(true)}
-                className="absolute top-3 right-3 bg-white/80 hover:bg-white text-slate-700 rounded-full w-8 h-8"
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsExpanded(true);
+                }}
+                className="absolute top-2 right-2 z-20 bg-white shadow-md hover:bg-slate-100 text-slate-700 rounded-full w-8 h-8 flex items-center justify-center transition-all"
                 aria-label={`Expand ${tool.name}`}
                 data-testid={`button-expand-${tool.id}`}
               >
                 <Maximize2 className="w-4 h-4" />
-              </Button>
+              </button>
             )}
           </div>
           
