@@ -7,7 +7,7 @@ import { Check } from "lucide-react";
 import { useLocation } from "wouter";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
-import starterCharacter from "@assets/IMG_8566_1769018545430.jpeg";
+import starterCharacter from "@assets/appie-race-start_1769022021150.png";
 import growthCharacter from "@assets/IMG_8567_1769018823712.jpeg";
 import scaleCharacter from "@assets/IMG_8569_1769018870308.jpeg";
 
