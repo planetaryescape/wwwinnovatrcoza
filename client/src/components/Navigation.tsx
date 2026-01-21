@@ -107,11 +107,11 @@ export default function Navigation() {
                   Membership
                 </button>
                 <button 
-                  onClick={() => scrollToSection('contact')}
+                  onClick={() => setLocation('/consult#consult-tools')}
                   className={`transition-colors ${isScrolled ? 'text-foreground hover:text-primary' : 'text-white hover:text-primary'}`}
-                  data-testid="nav-contact"
+                  data-testid="nav-tools"
                 >
-                  Contact
+                  Tools
                 </button>
                 <button 
                   onClick={() => setLocation('/consult')}
@@ -119,6 +119,13 @@ export default function Navigation() {
                   data-testid="nav-consult"
                 >
                   Consult
+                </button>
+                <button 
+                  onClick={() => scrollToSection('contact')}
+                  className={`transition-colors ${isScrolled ? 'text-foreground hover:text-primary' : 'text-white hover:text-primary'}`}
+                  data-testid="nav-contact"
+                >
+                  Contact
                 </button>
               </div>
             </div>
@@ -222,11 +229,14 @@ export default function Navigation() {
                 Membership
               </button>
               <button 
-                onClick={() => scrollToSection('contact')}
+                onClick={() => {
+                  setLocation('/consult#consult-tools');
+                  setIsMobileMenuOpen(false);
+                }}
                 className="block w-full text-left py-2 text-foreground hover:text-primary transition-colors"
-                data-testid="mobile-nav-contact"
+                data-testid="mobile-nav-tools"
               >
-                Contact
+                Tools
               </button>
               <button 
                 onClick={() => {
@@ -237,6 +247,13 @@ export default function Navigation() {
                 data-testid="mobile-nav-consult"
               >
                 Consult
+              </button>
+              <button 
+                onClick={() => scrollToSection('contact')}
+                className="block w-full text-left py-2 text-foreground hover:text-primary transition-colors"
+                data-testid="mobile-nav-contact"
+              >
+                Contact
               </button>
               
               <div className="pt-3 border-t flex items-center justify-between">
