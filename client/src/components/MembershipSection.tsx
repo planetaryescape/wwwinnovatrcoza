@@ -131,7 +131,7 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
         </div>
       )}
       {/* Character Image Area with Animated Elements */}
-      <div className="relative h-48 overflow-visible flex items-end justify-center bg-[#f0f1f4]">
+      <div className="relative h-48 overflow-visible flex items-end justify-center bg-white">
         {/* Character image - animate on scroll */}
         <motion.img 
           src={plan.characterImage}
