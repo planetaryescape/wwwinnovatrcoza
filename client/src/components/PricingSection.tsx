@@ -6,6 +6,7 @@ import { Check, Zap, Target } from "lucide-react";
 import { useLocation } from "wouter";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { CurrencyToggle } from "@/components/CurrencyToggle";
+import basicCharacter from "@assets/Poll3_1769022875574.png";
 
 // Prices in ZAR (base currency)
 const pricingPlans = {
@@ -118,18 +119,26 @@ export default function PricingSection() {
               {pricingPlans.payg.map((plan, index) => (
                 <Card 
                   key={index}
-                  className="hover-elevate transition-all duration-300"
+                  className="hover-elevate transition-all duration-300 bg-white"
                   data-testid={`payg-card-${index}`}
                 >
                   <CardHeader>
-                    <div className="w-12 h-12 mb-4 flex items-center justify-center">
-                      <plan.icon className="w-8 h-8 text-primary" />
-                    </div>
-                    <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
-                    <CardDescription className="text-base">{plan.description}</CardDescription>
-                    <div className="mt-4">
-                      <span className="text-4xl font-bold text-primary">{formatPrice(plan.priceZAR)}</span>
-                      <span className="text-muted-foreground ml-2">{plan.unit}</span>
+                    <div className="flex items-start gap-4">
+                      {plan.name === "Test24 Basic" && (
+                        <img 
+                          src={basicCharacter} 
+                          alt="Test24 Basic character" 
+                          className="w-20 h-20 object-contain flex-shrink-0"
+                        />
+                      )}
+                      <div className="flex-1">
+                        <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
+                        <CardDescription className="text-base">{plan.description}</CardDescription>
+                        <div className="mt-4">
+                          <span className="text-4xl font-bold text-primary">{formatPrice(plan.priceZAR)}</span>
+                          <span className="text-muted-foreground ml-2">{plan.unit}</span>
+                        </div>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-6">
@@ -160,7 +169,7 @@ export default function PricingSection() {
               {pricingPlans.members.map((plan, index) => (
                 <Card 
                   key={index}
-                  className="hover-elevate transition-all duration-300 relative border-primary"
+                  className="hover-elevate transition-all duration-300 relative border-primary bg-white"
                   data-testid={`member-card-${index}`}
                 >
                   {plan.badge && (
@@ -171,14 +180,22 @@ export default function PricingSection() {
                     </div>
                   )}
                   <CardHeader>
-                    <div className="w-12 h-12 mb-4 flex items-center justify-center">
-                      <plan.icon className="w-8 h-8 text-primary" />
-                    </div>
-                    <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
-                    <CardDescription className="text-base">{plan.description}</CardDescription>
-                    <div className="mt-4">
-                      <span className="text-4xl font-bold text-primary">{formatPrice(plan.priceZAR)}</span>
-                      <span className="text-muted-foreground ml-2">{plan.unit}</span>
+                    <div className="flex items-start gap-4">
+                      {plan.name === "Test24 Basic" && (
+                        <img 
+                          src={basicCharacter} 
+                          alt="Test24 Basic character" 
+                          className="w-20 h-20 object-contain flex-shrink-0"
+                        />
+                      )}
+                      <div className="flex-1">
+                        <CardTitle className="text-2xl font-serif">{plan.name}</CardTitle>
+                        <CardDescription className="text-base">{plan.description}</CardDescription>
+                        <div className="mt-4">
+                          <span className="text-4xl font-bold text-primary">{formatPrice(plan.priceZAR)}</span>
+                          <span className="text-muted-foreground ml-2">{plan.unit}</span>
+                        </div>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-6">
