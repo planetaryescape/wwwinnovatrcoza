@@ -1,13 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
 import heroGif from "@assets/1C123D7B-4B5C-461A-98D9-E0A683A2D801_1768998251716.gif";
 
 export default function HeroSection() {
-  const handleTestNow = () => {
-    const pricingSection = document.getElementById("pricing");
-    pricingSection?.scrollIntoView({ behavior: "smooth" });
-  };
-
   const scrollToServices = () => {
     const servicesSection = document.getElementById("services");
     servicesSection?.scrollIntoView({ behavior: "smooth" });
@@ -26,27 +19,20 @@ export default function HeroSection() {
       </div>
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-[#4f4be0]">
         <div className="flex flex-col items-start justify-center">
-          {/* Main content row - headline and coral box side by side */}
+          {/* Main content row - headline and gif side by side */}
           <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
-            {/* Left side - Large bold text aligned with consult page */}
+            {/* Left side - Large bold text */}
             <div className="text-left">
-              <p className="text-sm uppercase tracking-[0.25em] text-[#ED876E] mb-6 font-semibold">
-                Research & Innovation
-              </p>
               <h1 
-                className="font-serif font-bold mb-8 leading-[0.95] uppercase"
+                className="font-serif font-bold mb-8 leading-[0.95] uppercase text-[#ED876E]"
                 style={{ 
                   fontFamily: "'DM Serif Display', serif", 
                   letterSpacing: "0.06em",
                   fontSize: "clamp(2rem, 4vw, 3.74rem)"
                 }}
               >
-                <span className="text-white">WE ARE </span>
-                <span className="bg-gradient-to-r from-[#ED876E] to-[#F4A261] bg-clip-text text-transparent">
-                  TRANSFORMING
-                </span>
-                <br />
-                <span className="text-white">CONSUMER INSIGHTS.</span>
+                TRANSFORMING<br />
+                CONSUMER INSIGHTS.
               </h1>
               <p 
                 className="text-gray-300 max-w-xl mb-6"
@@ -75,27 +61,6 @@ export default function HeroSection() {
               className="w-full h-auto object-contain"
               data-testid="img-hero-gif-mobile"
             />
-          </div>
-          
-          {/* Buttons row - below both headline and gif */}
-          <div className="flex flex-row flex-wrap items-center gap-4 mt-10 lg:mt-16">
-            <Button 
-              size="lg"
-              className="bg-[#ED876E]/20 text-white px-8 border border-[#ED876E]/40 min-w-[180px]"
-              onClick={handleTestNow}
-              data-testid="button-test-now"
-            >
-              24hr Testing
-            </Button>
-            <Link href="/consult">
-              <Button 
-                size="lg"
-                className="bg-[#ED876E]/20 text-white px-8 border border-[#ED876E]/40 min-w-[180px]"
-                data-testid="button-consulting"
-              >
-                Consulting
-              </Button>
-            </Link>
           </div>
         </div>
       </div>
