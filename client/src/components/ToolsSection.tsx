@@ -50,6 +50,7 @@ interface Tool {
   whatText: string;
   whyText: string;
   image: string | null;
+  video?: string;
   isCarousel?: boolean;
   comingSoon?: boolean;
 }
@@ -73,11 +74,12 @@ const tools: Tool[] = [
   },
   {
     id: "social-media",
-    name: "Social Media",
+    name: "Social Media Feel",
     headlineTitle: "Track Emotional Appeal via Idea Score",
     whatText: "A set of 24 emojis based on Robert Plutchik's wheel of emotions. Understand how people feel about your innovations at a deeper level.",
     whyText: "Dig deeper into drivers of strong or weak performance while maintaining an experience that feels like social media, not a survey.",
     image: emotionalAppealImg,
+    video: "https://diginsights.com/wp-content/uploads/2024/07/Upsiide-home-swiping.webm",
   },
   {
     id: "market-simulator",
@@ -183,10 +185,20 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
           className="absolute inset-0 bg-white rounded-xl shadow-lg overflow-hidden backface-hidden"
           style={{ backfaceVisibility: "hidden" }}
         >
-          {/* Image area - takes most of the card */}
+          {/* Image/Video area - takes most of the card */}
           <div className="h-[70%] relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
             {isCarousel ? (
               <ImageCarousel images={agileDesignImages} isHovered={isHovered} />
+            ) : tool.video ? (
+              <video 
+                src={tool.video}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? 'scale-110' : 'scale-100'}`}
+                data-testid={`video-tool-${tool.id}`}
+              />
             ) : (
               <img 
                 src={tool.image || ""}
