@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Plus, X, Wrench, Clock } from "lucide-react";
+import { Plus, X, Wrench, Clock, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import gamifiedRespondentImg from "@assets/IMG_8480_1768743786622.jpeg";
@@ -169,11 +169,62 @@ function ImageCarousel({ images, isHovered, isInView }: { images: string[]; isHo
 function ToolCard({ tool, index }: { tool: Tool; index: number }) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const isCarousel = tool.isCarousel;
   const cardRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(cardRef, { once: false, amount: 0.5 });
 
+  const hasExpandableContent = tool.video || tool.image;
+
   return (
+    <>
+      {/* Expanded Modal */}
+      {isExpanded && hasExpandableContent && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setIsExpanded(false)}
+        >
+          <div className="relative max-w-4xl w-full max-h-[90vh]">
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => setIsExpanded(false)}
+              className="absolute -top-12 right-0 text-white hover:bg-white/20"
+              data-testid={`button-close-expand-${tool.id}`}
+            >
+              <X className="w-6 h-6" />
+            </Button>
+            {tool.video ? (
+              tool.video.includes('.gif') ? (
+                <img 
+                  src={tool.video}
+                  alt={tool.name}
+                  className="w-full h-auto max-h-[85vh] object-contain bg-white rounded-lg"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              ) : (
+                <video 
+                  src={tool.video}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-auto max-h-[85vh] object-contain bg-white rounded-lg"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              )
+            ) : (
+              <img 
+                src={tool.image || ""}
+                alt={tool.name}
+                className="w-full h-auto max-h-[85vh] object-contain bg-white rounded-lg"
+                onClick={(e) => e.stopPropagation()}
+              />
+            )}
+            <p className="text-white text-center mt-4 text-lg font-medium">{tool.name}</p>
+          </div>
+        </div>
+      )}
     <motion.div
       ref={cardRef}
       initial={{ opacity: 0, y: 40 }}
@@ -244,6 +295,20 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
                 <Clock className="w-3 h-3" />
                 Coming Soon
               </div>
+            )}
+            
+            {/* Expand button */}
+            {hasExpandableContent && !isCarousel && (
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => setIsExpanded(true)}
+                className="absolute top-3 right-3 bg-white/80 hover:bg-white text-slate-700 rounded-full w-8 h-8"
+                aria-label={`Expand ${tool.name}`}
+                data-testid={`button-expand-${tool.id}`}
+              >
+                <Maximize2 className="w-4 h-4" />
+              </Button>
             )}
           </div>
           
@@ -338,6 +403,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
         </div>
       </motion.div>
     </motion.div>
+    </>
   );
 }
 
