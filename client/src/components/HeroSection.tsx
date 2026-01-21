@@ -47,25 +47,25 @@ export default function HeroSection() {
         </div>
       </div>
       
-      {/* Mobile layout - centered text with GIF at bottom edge */}
-      <div className="lg:hidden flex flex-col min-h-screen">
-        {/* Text content - left aligned */}
-        <div className="flex-1 flex items-center px-4 sm:px-6">
-          <div className="text-left">
+      {/* Mobile layout - centered text with video at bottom edge */}
+      <div className="lg:hidden flex flex-col min-h-screen pt-20">
+        {/* Text content - left aligned with proper spacing from nav */}
+        <div className="flex-1 flex items-center px-6 py-8">
+          <div className="text-left w-full">
             <h1 
-              className="font-serif font-bold mb-6 leading-[0.95] uppercase"
+              className="font-serif font-bold mb-4 leading-[1.05] uppercase"
               style={{ 
                 fontFamily: "'DM Serif Display', serif", 
-                letterSpacing: "0.06em",
-                fontSize: "clamp(2rem, 6vw, 3rem)"
+                letterSpacing: "0.04em",
+                fontSize: "clamp(1.75rem, 8vw, 2.5rem)"
               }}
             >
               <span className="text-[#ED876E]">TRANSFORMING</span><br />
               <span className="text-white">CONSUMER INSIGHTS.</span>
             </h1>
             <p 
-              className="text-gray-300 max-w-xl mx-auto"
-              style={{ fontSize: "clamp(1rem, 3vw, 1.25rem)" }}
+              className="text-gray-300 max-w-sm leading-relaxed"
+              style={{ fontSize: "clamp(0.9rem, 4vw, 1.1rem)" }}
             >
               Launch Better Innovation<br />through smart 24hr research
             </p>
@@ -73,14 +73,14 @@ export default function HeroSection() {
         </div>
         
         {/* Video at bottom edge - full width */}
-        <div className="w-full">
+        <div className="w-full flex-shrink-0">
           <video 
             src={heroVideo}
             autoPlay
             loop
             muted
             playsInline
-            className="w-full h-auto object-cover"
+            className="w-full h-auto max-h-[50vh] object-cover object-center"
             data-testid="video-hero-mobile"
           />
         </div>
