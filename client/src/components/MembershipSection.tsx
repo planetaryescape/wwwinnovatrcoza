@@ -8,7 +8,7 @@ import { useLocation } from "wouter";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
 import starterCharacter from "@assets/IMG_8566_1769018545430.jpeg";
-import growthCharacter from "@assets/download_(3)_1768985238001.png";
+import growthCharacter from "@assets/IMG_8567_1769018823712.jpeg";
 import scaleCharacter from "@assets/download_(4)_1768985238001.png";
 
 interface MembershipPlan {
