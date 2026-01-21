@@ -482,12 +482,12 @@ export default function CinematicLanding() {
                   </motion.div>
                 </motion.div>
                 
-                {/* Animated pen GIF - Right side on desktop, aligned with headline */}
+                {/* Animated pen GIF - Right side on desktop, centered between text and screen edge */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.8, delay: 0.4 }}
-                  className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end"
+                  className="hidden lg:flex lg:flex-1 lg:items-start lg:justify-center"
                 >
                   <img 
                     src={penGif}
