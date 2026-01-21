@@ -24,8 +24,7 @@ export default function HeroSection() {
         <div className="absolute bottom-0 right-1/4 w-[350px] h-[350px] bg-[#E76F51] rounded-full opacity-15 blur-[90px]" />
         <div className="absolute bottom-1/4 left-1/3 w-[300px] h-[300px] bg-[#2A9D8F] rounded-full opacity-10 blur-[80px]" />
       </div>
-      
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-[#4f4be0]">
         <div className="flex flex-col items-start justify-center">
           {/* Main content row - headline and coral box side by side */}
           <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
@@ -100,7 +99,6 @@ export default function HeroSection() {
           </div>
         </div>
       </div>
-      
       {/* Scroll indicator */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
         <button 
