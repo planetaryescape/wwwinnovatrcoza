@@ -9,7 +9,7 @@ export default function ProblemSolutionSection() {
       {/* THE PROBLEM - Two column layout on desktop with GIF on left */}
       <section 
         id="problem-solution" 
-        className="bg-[#FFF0E6]"
+        className="bg-[#E0F4FF]"
         aria-labelledby="problem-heading"
       >
         <div className="flex flex-col lg:flex-row lg:items-stretch">
@@ -76,7 +76,7 @@ export default function ProblemSolutionSection() {
 
       {/* THE SOLUTION - Two column layout on desktop with GIF on right */}
       <section 
-        className="bg-[#2B5597]"
+        className="bg-[#B8E4FF]"
         aria-labelledby="solution-heading"
       >
         <div className="flex flex-col lg:flex-row lg:items-stretch">
@@ -90,14 +90,14 @@ export default function ProblemSolutionSection() {
                 transition={{ duration: 0.6 }}
                 className="mb-4"
               >
-                <Lightbulb className="w-10 h-10 mx-auto text-white/70 stroke-[1.5]" />
+                <Lightbulb className="w-10 h-10 mx-auto text-slate-600/70 stroke-[1.5]" />
               </motion.div>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
-                className="text-xs uppercase tracking-[0.35em] mb-6 text-white/60"
+                className="text-xs uppercase tracking-[0.35em] mb-6 text-slate-600/60"
                 style={{ fontFamily: "Roboto, sans-serif" }}
               >
                 The Solution
@@ -108,7 +108,7 @@ export default function ProblemSolutionSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
-                className="text-white mb-6 lg:mb-8"
+                className="text-slate-800 mb-6 lg:mb-8"
                 style={{ fontFamily: "'DM Serif Display', serif", letterSpacing: "0.02em", fontSize: "clamp(1.75rem, 3vw, 2.5rem)" }}
               >
                 Trust Expert Do-ers, rather than fluffy consultants.
@@ -118,7 +118,7 @@ export default function ProblemSolutionSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.6, delay: 0.15 }}
-                className="text-white/90 leading-relaxed"
+                className="text-slate-700 leading-relaxed"
                 style={{ fontFamily: "Roboto, sans-serif", fontSize: "clamp(0.95rem, 1.2vw, 1.1rem)" }}
               >
                 Idea to market. Agile in-house strategy, research, design and go-to-market experts all in one team.
