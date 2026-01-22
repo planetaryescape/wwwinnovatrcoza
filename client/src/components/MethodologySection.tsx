@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Play, Pause } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX } from "lucide-react";
 import neonLightsBackground from "@assets/pexels-chris-f-8344064_1763492180742.jpeg";
 
 const features = [
@@ -13,6 +13,8 @@ export default function MethodologySection() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [showStopButton, setShowStopButton] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [videoKey, setVideoKey] = useState(0);
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -38,7 +40,9 @@ export default function MethodologySection() {
 
   const handlePlayClick = () => {
     setIsPlaying(true);
+    setIsMuted(false);
     setHasInteracted(true);
+    setVideoKey(prev => prev + 1);
   };
 
   const handleVideoClick = () => {
@@ -61,6 +65,13 @@ export default function MethodologySection() {
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
     }
+  };
+
+  const handleUnmuteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMuted(false);
+    setHasInteracted(true);
+    setVideoKey(prev => prev + 1);
   };
 
   return (
@@ -149,7 +160,8 @@ export default function MethodologySection() {
                   data-testid="video-playing-container"
                 >
                   <iframe
-                    src="https://player.vimeo.com/video/1138122776?badge=0&autopause=0&player_id=0&app_id=58479&title=0&byline=0&portrait=0&vimeo_logo=0&dnt=1&pip=0&keyboard=1&quality=auto&autoplay=1&controls=0"
+                    key={videoKey}
+                    src={`https://player.vimeo.com/video/1138122776?badge=0&autopause=0&player_id=0&app_id=58479&title=0&byline=0&portrait=0&vimeo_logo=0&dnt=1&pip=0&keyboard=1&quality=auto&autoplay=1&controls=0${isMuted ? '&muted=1' : ''}`}
                     className="w-full h-full absolute top-0 left-0 pointer-events-none"
                     frameBorder="0"
                     allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
@@ -158,6 +170,17 @@ export default function MethodologySection() {
                     data-testid="video-upsiide-vimeo"
                     title="Upsiide Demo Video"
                   />
+                  {/* Unmute button - shows when video is muted */}
+                  {isMuted && (
+                    <button
+                      onClick={handleUnmuteClick}
+                      className="absolute bottom-4 right-4 z-20 flex items-center gap-2 px-4 py-2 bg-white/90 hover:bg-white rounded-full shadow-lg transition-all duration-300 hover:scale-105"
+                      data-testid="video-unmute-button"
+                    >
+                      <VolumeX className="w-5 h-5 text-[#4D5FF1]" />
+                      <span className="text-sm font-medium text-[#4D5FF1]">Tap for sound</span>
+                    </button>
+                  )}
                   {/* Stop button overlay */}
                   {showStopButton && (
                     <div 
