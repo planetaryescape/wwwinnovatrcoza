@@ -1,3 +1,5 @@
+import { useState, useRef, useEffect } from "react";
+import { Play } from "lucide-react";
 import neonLightsBackground from "@assets/pexels-chris-f-8344064_1763492180742.jpeg";
 
 const features = [
@@ -8,6 +10,34 @@ const features = [
 ];
 
 export default function MethodologySection() {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-play when scrolled into view
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasInteracted) {
+            setIsPlaying(true);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    if (videoContainerRef.current) {
+      observer.observe(videoContainerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasInteracted]);
+
+  const handlePlayClick = () => {
+    setIsPlaying(true);
+    setHasInteracted(true);
+  };
 
   return (
     <section className="pb-20 pt-0 relative overflow-hidden">
@@ -50,31 +80,56 @@ export default function MethodologySection() {
           </div>
         </div>
 
-        <div className="relative p-4 sm:p-8 md:p-12 overflow-hidden mt-20">
+        <div className="relative overflow-hidden mt-20">
           <div className="relative z-10">
-            <div className="text-center mb-6 sm:mb-8">
+            <div className="text-center mb-6 sm:mb-8 px-4">
               <div className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
                 02 — The Proof
               </div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-6" style={{ color: '#4D5FF1' }}>
                 Don't Guess. Test.
               </h2>
+              <p className="text-lg text-muted-foreground text-center max-w-2xl mx-auto mb-6 sm:mb-8">
+                Partnering with Upsiide we have made rapid testing truly AGILE
+              </p>
             </div>
-            <p className="text-lg text-muted-foreground text-center max-w-2xl mx-auto mb-6 sm:mb-8 px-2">
-              Partnering with Upsiide we have made rapid testing truly AGILE
-            </p>
             
-            <div className="relative aspect-video rounded-lg overflow-hidden bg-muted/50 border border-border -mx-2 sm:mx-0">
-              <iframe
-                src="https://player.vimeo.com/video/1138122776?badge=0&autopause=0&player_id=0&app_id=58479&title=0&byline=0&portrait=0&vimeo_logo=0&dnt=1&pip=0&keyboard=1&quality=auto"
-                className="w-full h-full absolute top-0 left-0"
-                frameBorder="0"
-                allow="fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-                referrerPolicy="strict-origin-when-cross-origin"
-                allowFullScreen
-                data-testid="video-upsiide-vimeo"
-                title="Upsiide Demo Video"
-              />
+            <div 
+              ref={videoContainerRef}
+              className="relative aspect-video w-full overflow-hidden bg-black"
+            >
+              {!isPlaying ? (
+                <div 
+                  className="absolute inset-0 flex items-center justify-center cursor-pointer group"
+                  onClick={handlePlayClick}
+                  data-testid="video-play-overlay"
+                >
+                  {/* Video thumbnail/placeholder */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/40" />
+                  <iframe
+                    src="https://player.vimeo.com/video/1138122776?badge=0&autopause=0&player_id=0&app_id=58479&title=0&byline=0&portrait=0&vimeo_logo=0&dnt=1&pip=0&keyboard=0&quality=auto&controls=0&muted=1"
+                    className="w-full h-full absolute top-0 left-0 pointer-events-none"
+                    frameBorder="0"
+                    allow="autoplay"
+                    title="Upsiide Demo Video Thumbnail"
+                  />
+                  {/* Play button */}
+                  <div className="relative z-10 w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/90 flex items-center justify-center group-hover:bg-white group-hover:scale-110 transition-all duration-300 shadow-2xl">
+                    <Play className="w-8 h-8 md:w-10 md:h-10 text-[#4D5FF1] ml-1" fill="#4D5FF1" />
+                  </div>
+                </div>
+              ) : (
+                <iframe
+                  src="https://player.vimeo.com/video/1138122776?badge=0&autopause=0&player_id=0&app_id=58479&title=0&byline=0&portrait=0&vimeo_logo=0&dnt=1&pip=0&keyboard=1&quality=auto&autoplay=1&controls=0"
+                  className="w-full h-full absolute top-0 left-0"
+                  frameBorder="0"
+                  allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                  data-testid="video-upsiide-vimeo"
+                  title="Upsiide Demo Video"
+                />
+              )}
             </div>
           </div>
         </div>
