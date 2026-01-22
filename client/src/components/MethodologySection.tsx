@@ -64,7 +64,7 @@ export default function MethodologySection() {
   };
 
   return (
-    <section className="pb-20 pt-0 relative overflow-hidden">
+    <section className="pb-0 pt-0 relative overflow-hidden">
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{ 

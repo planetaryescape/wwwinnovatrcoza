@@ -10,7 +10,7 @@ export default function PromoBanner() {
   };
 
   return (
-    <section className="py-6 md:py-12 bg-accent text-accent-foreground relative overflow-hidden">
+    <section className="pb-6 md:pb-12 pt-6 md:pt-12 bg-accent text-accent-foreground relative overflow-hidden -mt-1">
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{ 
