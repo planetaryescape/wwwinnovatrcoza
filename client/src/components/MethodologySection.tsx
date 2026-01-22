@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Play } from "lucide-react";
+import { Play, Pause } from "lucide-react";
 import neonLightsBackground from "@assets/pexels-chris-f-8344064_1763492180742.jpeg";
 
 const features = [
@@ -12,7 +12,9 @@ const features = [
 export default function MethodologySection() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [showStopButton, setShowStopButton] = useState(false);
   const videoContainerRef = useRef<HTMLDivElement>(null);
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-play when scrolled into view
   useEffect(() => {
@@ -37,6 +39,28 @@ export default function MethodologySection() {
   const handlePlayClick = () => {
     setIsPlaying(true);
     setHasInteracted(true);
+  };
+
+  const handleVideoClick = () => {
+    setShowStopButton(true);
+    // Clear any existing timeout
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+    }
+    // Hide after 3 seconds
+    hideTimeoutRef.current = setTimeout(() => {
+      setShowStopButton(false);
+    }, 3000);
+  };
+
+  const handleStopClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsPlaying(false);
+    setShowStopButton(false);
+    setHasInteracted(true);
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+    }
   };
 
   return (
@@ -119,16 +143,34 @@ export default function MethodologySection() {
                   </div>
                 </div>
               ) : (
-                <iframe
-                  src="https://player.vimeo.com/video/1138122776?badge=0&autopause=0&player_id=0&app_id=58479&title=0&byline=0&portrait=0&vimeo_logo=0&dnt=1&pip=0&keyboard=1&quality=auto&autoplay=1&controls=0"
-                  className="w-full h-full absolute top-0 left-0"
-                  frameBorder="0"
-                  allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  allowFullScreen
-                  data-testid="video-upsiide-vimeo"
-                  title="Upsiide Demo Video"
-                />
+                <div 
+                  className="absolute inset-0 cursor-pointer"
+                  onClick={handleVideoClick}
+                  data-testid="video-playing-container"
+                >
+                  <iframe
+                    src="https://player.vimeo.com/video/1138122776?badge=0&autopause=0&player_id=0&app_id=58479&title=0&byline=0&portrait=0&vimeo_logo=0&dnt=1&pip=0&keyboard=1&quality=auto&autoplay=1&controls=0"
+                    className="w-full h-full absolute top-0 left-0 pointer-events-none"
+                    frameBorder="0"
+                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                    data-testid="video-upsiide-vimeo"
+                    title="Upsiide Demo Video"
+                  />
+                  {/* Stop button overlay */}
+                  {showStopButton && (
+                    <div 
+                      className="absolute inset-0 flex items-center justify-center z-10"
+                      onClick={handleStopClick}
+                      data-testid="video-stop-overlay"
+                    >
+                      <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/90 flex items-center justify-center hover:bg-white hover:scale-110 transition-all duration-300 shadow-2xl">
+                        <Pause className="w-8 h-8 md:w-10 md:h-10 text-[#4D5FF1]" fill="#4D5FF1" />
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>
