@@ -77,13 +77,13 @@ export default function MethodologySection() {
 
   const handleUnmuteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    sendVimeoCommand('setVolume', 1);
+    // Show native controls so user can tap volume directly on the player
     setIsMuted(false);
     setHasInteracted(true);
   };
 
   // Build the video URL based on state
-  const getVideoUrl = () => {
+  const getVideoUrl = (showControls: boolean = false) => {
     const baseUrl = "https://player.vimeo.com/video/1138122776";
     const params = new URLSearchParams({
       badge: '0',
@@ -98,14 +98,10 @@ export default function MethodologySection() {
       pip: '0',
       keyboard: '1',
       quality: 'auto',
-      controls: '0',
+      controls: showControls ? '1' : '0',
       autoplay: '1',
+      muted: '1',
     });
-    
-    // Start muted for autoplay to work on mobile
-    if (isMuted) {
-      params.set('muted', '1');
-    }
     
     return `${baseUrl}?${params.toString()}`;
   };
@@ -189,15 +185,16 @@ export default function MethodologySection() {
                 </div>
               ) : (
                 <div 
-                  className="absolute inset-0 cursor-pointer"
-                  onClick={handleVideoClick}
+                  className="absolute inset-0"
+                  onClick={isMuted ? undefined : handleVideoClick}
                   data-testid="video-playing-container"
                 >
                   <iframe
                     ref={iframeRef}
                     id="vimeo-player"
-                    src={getVideoUrl()}
-                    className="w-full h-full absolute top-0 left-0 pointer-events-none"
+                    key={isMuted ? 'muted' : 'unmuted'}
+                    src={getVideoUrl(!isMuted)}
+                    className={`w-full h-full absolute top-0 left-0 ${isMuted ? 'pointer-events-none' : ''}`}
                     frameBorder="0"
                     allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
                     referrerPolicy="strict-origin-when-cross-origin"
@@ -215,7 +212,7 @@ export default function MethodologySection() {
                       <span className="text-sm font-medium text-[#4D5FF1]">Tap for sound</span>
                     </button>
                   )}
-                  {showStopButton && (
+                  {showStopButton && !isMuted && (
                     <div 
                       className="absolute inset-0 flex items-center justify-center z-10"
                       onClick={handleStopClick}
