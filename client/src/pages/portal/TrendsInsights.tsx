@@ -418,6 +418,9 @@ export default function TrendsInsights() {
       const matchesCategory = filters.category === "all" || 
         report.category.toLowerCase() === filters.category.toLowerCase();
       
+      const matchesIndustry = filters.industry === "all" || 
+        (report.industry && report.industry.toLowerCase() === filters.industry.toLowerCase());
+      
       const isReportFree = isFreeContent({
         slug: report.slug,
         title: report.title,
@@ -432,7 +435,7 @@ export default function TrendsInsights() {
         matchesAccess = !isReportFree;
       }
       
-      return matchesSearch && matchesCategory && matchesAccess;
+      return matchesSearch && matchesCategory && matchesIndustry && matchesAccess;
     });
 
     return filtered.sort((a, b) => {
@@ -447,7 +450,7 @@ export default function TrendsInsights() {
           return 0;
       }
     });
-  }, [filters.search, filters.category, filters.sort, filters.access, reports]);
+  }, [filters.search, filters.category, filters.industry, filters.sort, filters.access, reports]);
 
   const displayedReports = filters.showAll ? filteredAndSortedReports : filteredAndSortedReports.slice(0, 6);
   const hasMoreReports = filteredAndSortedReports.length > 6;
@@ -521,6 +524,24 @@ export default function TrendsInsights() {
                   <SelectItem value="Launch">Launch</SelectItem>
                   <SelectItem value="Inside">Inside</SelectItem>
                   <SelectItem value="IRL">IRL</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={filters.industry} onValueChange={(value) => setFilters({ industry: value })}>
+                <SelectTrigger 
+                  className="w-32 h-10 rounded-full border-border"
+                  data-testid="select-industry"
+                >
+                  <SelectValue placeholder="Industry" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="Food">Food</SelectItem>
+                  <SelectItem value="Beverages">Beverages</SelectItem>
+                  <SelectItem value="Alcohol">Alcohol</SelectItem>
+                  <SelectItem value="Financial">Financial</SelectItem>
+                  <SelectItem value="FMCGs">FMCGs</SelectItem>
+                  <SelectItem value="Beauty">Beauty</SelectItem>
                 </SelectContent>
               </Select>
 

@@ -4,6 +4,7 @@ import { useLocation, useSearch } from "wouter";
 export interface FilterState {
   search: string;
   category: string;
+  industry: string;
   sort: string;
   access: string;
   showAll: boolean;
@@ -12,6 +13,7 @@ export interface FilterState {
 const DEFAULT_FILTERS: FilterState = {
   search: "",
   category: "all",
+  industry: "all",
   sort: "newest",
   access: "all",
   showAll: false,
@@ -30,6 +32,7 @@ export function useUrlFilters() {
     return {
       search: params.get("q") || DEFAULT_FILTERS.search,
       category: params.get("category") || DEFAULT_FILTERS.category,
+      industry: params.get("industry") || DEFAULT_FILTERS.industry,
       sort: params.get("sort") || DEFAULT_FILTERS.sort,
       access: params.get("access") || DEFAULT_FILTERS.access,
       showAll: parseBoolean(params.get("all")),
@@ -52,6 +55,12 @@ export function useUrlFilters() {
         params.set("category", updatedFilters.category);
       } else {
         params.delete("category");
+      }
+
+      if (updatedFilters.industry && updatedFilters.industry !== DEFAULT_FILTERS.industry) {
+        params.set("industry", updatedFilters.industry);
+      } else {
+        params.delete("industry");
       }
 
       if (updatedFilters.sort && updatedFilters.sort !== DEFAULT_FILTERS.sort) {
