@@ -31,6 +31,12 @@ import insightsCover from "@assets/Innovatr_Insights_1765389850447.png";
 import launchCover from "@assets/Innovatr_Launch_1765389741317.png";
 import insideCover from "@assets/Innovatr_Inside_1765389935893.png";
 import irlCover from "@assets/Innovatr_IRL_1765389884914.png";
+import foodCover from "@assets/industry-food.png";
+import beveragesCover from "@assets/industry-beverages.png";
+import alcoholCover from "@assets/industry-alcohol.png";
+import financialCover from "@assets/industry-financial.png";
+import fmcgCover from "@assets/industry-fmcg.png";
+import beautyCover from "@assets/industry-beauty.png";
 
 const categoryCoverImages: Record<string, string> = {
   insights: insightsCover,
@@ -39,12 +45,27 @@ const categoryCoverImages: Record<string, string> = {
   launch: launchCover,
 };
 
+const industryCoverImages: Record<string, string> = {
+  food: foodCover,
+  beverages: beveragesCover,
+  alcohol: alcoholCover,
+  financial: financialCover,
+  fmcgs: fmcgCover,
+  beauty: beautyCover,
+};
+
 function normalizeCategoryKey(category: string): string {
   const normalized = category.toLowerCase().trim().replace("innovatr ", "");
   return normalized;
 }
 
-function getCoverImage(category: string): string {
+function getCoverImage(category: string, industry?: string): string {
+  if (industry) {
+    const industryKey = industry.toLowerCase().trim();
+    if (industryCoverImages[industryKey]) {
+      return industryCoverImages[industryKey];
+    }
+  }
   const key = normalizeCategoryKey(category);
   return categoryCoverImages[key] || categoryCoverImages.insights;
 }
@@ -146,7 +167,7 @@ function TeaseModal({ open, onOpenChange, report, isLoggedIn }: TeaseModalProps)
   if (!report) return null;
   
   const categoryStyle = getCategoryStyle(report.category);
-  const coverImage = getCoverImage(report.category);
+  const coverImage = getCoverImage(report.category, report.industry);
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -229,7 +250,7 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId, onLockedClick
   });
 
   const categoryStyle = getCategoryStyle(report.category);
-  const coverImage = getCoverImage(report.category);
+  const coverImage = getCoverImage(report.category, report.industry);
   const accessIndicator = getAccessIndicator(report, userTier, isLoggedIn, userCompanyId);
   
   const isPublicContent = isFreeContent({
@@ -380,7 +401,7 @@ export default function TrendsInsights() {
         const data = await res.json();
         const formattedReports = data.map((r: any) => ({
           ...r,
-          coverImage: r.thumbnailUrl || getCoverImage(r.category),
+          coverImage: r.thumbnailUrl || getCoverImage(r.category, r.industry),
           pdfPath: r.pdfUrl,
           tags: r.topics || [],
           isNew: false,
@@ -615,7 +636,7 @@ export default function TrendsInsights() {
                   >
                     <div 
                       className="w-20 h-14 rounded-md bg-cover bg-center flex-shrink-0"
-                      style={{ backgroundImage: `url(${getCoverImage(report.category)})` }}
+                      style={{ backgroundImage: `url(${getCoverImage(report.category, report.industry)})` }}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
