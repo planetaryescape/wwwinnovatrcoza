@@ -27,10 +27,10 @@ import {
   getEffectiveAccessLevel,
   isPaidMember as checkIsPaidMember
 } from "@shared/access";
-import insightsCover from "@assets/Innovatr_Insights_1765389850447.png";
-import launchCover from "@assets/Innovatr_Launch_1765389741317.png";
-import insideCover from "@assets/Innovatr_Inside_1765389935893.png";
-import irlCover from "@assets/Innovatr_IRL_1765389884914.png";
+import insightsCover from "@assets/category-insights.png";
+import launchCover from "@assets/category-launch.png";
+import insideCover from "@assets/category-inside.png";
+import irlCover from "@assets/category-irl.png";
 import foodCover from "@assets/industry-food.png";
 import beveragesCover from "@assets/industry-beverages.png";
 import alcoholCover from "@assets/industry-alcohol.png";
