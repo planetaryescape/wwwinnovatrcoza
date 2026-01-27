@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { storage } from "./storage";
 
 const app = express();
 
@@ -88,4 +89,27 @@ app.use((req, res, next) => {
   }, () => {
     log(`serving on port ${port}`);
   });
+
+  // Run scheduled report publishing on startup
+  storage.processScheduledReports().then((result) => {
+    if (result.published > 0 || result.unpublished > 0) {
+      log(`Scheduled reports processed: ${result.published} published, ${result.unpublished} archived`);
+    }
+  }).catch((err) => {
+    console.error("Failed to process scheduled reports on startup:", err);
+  });
+
+  // Schedule automatic publishing check every minute
+  const SCHEDULER_INTERVAL = 60 * 1000; // 1 minute
+  setInterval(async () => {
+    try {
+      const result = await storage.processScheduledReports();
+      if (result.published > 0 || result.unpublished > 0) {
+        log(`Scheduled reports processed: ${result.published} published, ${result.unpublished} archived`);
+      }
+    } catch (err) {
+      console.error("Scheduler error processing scheduled reports:", err);
+    }
+  }, SCHEDULER_INTERVAL);
+  log("Report scheduler started (runs every minute)");
 })();
