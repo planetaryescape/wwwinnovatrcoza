@@ -27,10 +27,18 @@ import {
   getEffectiveAccessLevel,
   isPaidMember as checkIsPaidMember
 } from "@shared/access";
-import insightsCover from "@assets/category-insights.png";
-import launchCover from "@assets/category-launch.png";
-import insideCover from "@assets/category-inside.png";
-import irlCover from "@assets/category-irl.png";
+import insightsCover1 from "@assets/category-insights.png";
+import insightsCover2 from "@assets/category-insights-2.png";
+import insightsCover3 from "@assets/category-insights-3.png";
+import launchCover1 from "@assets/category-launch.png";
+import launchCover2 from "@assets/category-launch-2.png";
+import launchCover3 from "@assets/category-launch-3.png";
+import insideCover1 from "@assets/category-inside.png";
+import insideCover2 from "@assets/category-inside-2.png";
+import insideCover3 from "@assets/category-inside-3.png";
+import irlCover1 from "@assets/category-irl.png";
+import irlCover2 from "@assets/category-irl-2.png";
+import irlCover3 from "@assets/category-irl-3.png";
 import foodCover from "@assets/industry-food.png";
 import beveragesCover from "@assets/industry-beverages.png";
 import alcoholCover from "@assets/industry-alcohol.png";
@@ -38,11 +46,11 @@ import financialCover from "@assets/industry-financial.png";
 import fmcgCover from "@assets/industry-fmcg.png";
 import beautyCover from "@assets/industry-beauty.png";
 
-const categoryCoverImages: Record<string, string> = {
-  insights: insightsCover,
-  irl: irlCover,
-  inside: insideCover,
-  launch: launchCover,
+const categoryCoverVariations: Record<string, string[]> = {
+  insights: [insightsCover1, insightsCover2, insightsCover3],
+  irl: [irlCover1, irlCover2, irlCover3],
+  inside: [insideCover1, insideCover2, insideCover3],
+  launch: [launchCover1, launchCover2, launchCover3],
 };
 
 const industryCoverImages: Record<string, string> = {
@@ -59,7 +67,7 @@ function normalizeCategoryKey(category: string): string {
   return normalized;
 }
 
-function getCoverImage(category: string, industry?: string): string {
+function getCoverImage(category: string, industry?: string, reportId?: number): string {
   if (industry) {
     const industryKey = industry.toLowerCase().trim();
     if (industryCoverImages[industryKey]) {
@@ -67,7 +75,9 @@ function getCoverImage(category: string, industry?: string): string {
     }
   }
   const key = normalizeCategoryKey(category);
-  return categoryCoverImages[key] || categoryCoverImages.insights;
+  const variations = categoryCoverVariations[key] || categoryCoverVariations.insights;
+  const variationIndex = (reportId || 0) % variations.length;
+  return variations[variationIndex];
 }
 
 const categoryColors: Record<string, { bg: string; text: string }> = {
@@ -167,7 +177,7 @@ function TeaseModal({ open, onOpenChange, report, isLoggedIn }: TeaseModalProps)
   if (!report) return null;
   
   const categoryStyle = getCategoryStyle(report.category);
-  const coverImage = getCoverImage(report.category, report.industry);
+  const coverImage = getCoverImage(report.category, report.industry, typeof report.id === 'number' ? report.id : parseInt(String(report.id)) || 0);
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -250,7 +260,7 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId, onLockedClick
   });
 
   const categoryStyle = getCategoryStyle(report.category);
-  const coverImage = getCoverImage(report.category, report.industry);
+  const coverImage = getCoverImage(report.category, report.industry, typeof report.id === 'number' ? report.id : parseInt(String(report.id)) || 0);
   const accessIndicator = getAccessIndicator(report, userTier, isLoggedIn, userCompanyId);
   
   const isPublicContent = isFreeContent({
@@ -401,7 +411,7 @@ export default function TrendsInsights() {
         const data = await res.json();
         const formattedReports = data.map((r: any) => ({
           ...r,
-          coverImage: r.thumbnailUrl || getCoverImage(r.category, r.industry),
+          coverImage: r.thumbnailUrl || getCoverImage(r.category, r.industry, r.id),
           pdfPath: r.pdfUrl,
           tags: r.topics || [],
           isNew: false,
@@ -636,7 +646,7 @@ export default function TrendsInsights() {
                   >
                     <div 
                       className="w-20 h-14 rounded-md bg-cover bg-center flex-shrink-0"
-                      style={{ backgroundImage: `url(${getCoverImage(report.category, report.industry)})` }}
+                      style={{ backgroundImage: `url(${getCoverImage(report.category, report.industry, typeof report.id === 'number' ? report.id : parseInt(String(report.id)) || 0)})` }}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
