@@ -137,6 +137,7 @@ const tierColors: Record<string, string> = {
   STARTER: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
   GROWTH: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
   SCALE: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+  ADMIN: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
 };
 
 export default function AdminMembers() {
@@ -649,6 +650,7 @@ export default function AdminMembers() {
                   <SelectItem value="STARTER">Starter</SelectItem>
                   <SelectItem value="GROWTH">Growth</SelectItem>
                   <SelectItem value="SCALE">Scale</SelectItem>
+                  <SelectItem value="ADMIN">Admin</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={companyFilter} onValueChange={setCompanyFilter}>
@@ -990,6 +992,7 @@ export default function AdminMembers() {
                       <SelectItem value="STARTER">Starter</SelectItem>
                       <SelectItem value="GROWTH">Growth</SelectItem>
                       <SelectItem value="SCALE">Scale</SelectItem>
+                      <SelectItem value="ADMIN">Admin</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1062,6 +1065,7 @@ export default function AdminMembers() {
                   <SelectItem value="STARTER">Starter</SelectItem>
                   <SelectItem value="GROWTH">Growth</SelectItem>
                   <SelectItem value="SCALE">Scale</SelectItem>
+                  <SelectItem value="ADMIN">Admin</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1206,6 +1210,7 @@ export default function AdminMembers() {
                     <SelectItem value="STARTER">Starter</SelectItem>
                     <SelectItem value="GROWTH">Growth</SelectItem>
                     <SelectItem value="SCALE">Scale</SelectItem>
+                    <SelectItem value="ADMIN">Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
