@@ -99,9 +99,26 @@ app.use((req, res, next) => {
     console.error("Failed to process scheduled reports on startup:", err);
   });
 
-  // Schedule automatic publishing check every minute
-  const SCHEDULER_INTERVAL = 60 * 1000; // 1 minute
-  setInterval(async () => {
+  // Calculate milliseconds until next 5am or 5pm
+  function getMillisecondsUntilNext5() {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const target = new Date(now);
+    
+    if (currentHour < 5) {
+      target.setHours(5, 0, 0, 0);
+    } else if (currentHour < 17) {
+      target.setHours(17, 0, 0, 0);
+    } else {
+      target.setDate(target.getDate() + 1);
+      target.setHours(5, 0, 0, 0);
+    }
+    
+    return target.getTime() - now.getTime();
+  }
+
+  // Schedule automatic publishing at 5am and 5pm
+  async function runScheduledPublishing() {
     try {
       const result = await storage.processScheduledReports();
       if (result.published > 0 || result.unpublished > 0) {
@@ -110,6 +127,17 @@ app.use((req, res, next) => {
     } catch (err) {
       console.error("Scheduler error processing scheduled reports:", err);
     }
-  }, SCHEDULER_INTERVAL);
-  log("Report scheduler started (runs every minute)");
+    
+    // Schedule next run
+    const msUntilNext = getMillisecondsUntilNext5();
+    setTimeout(runScheduledPublishing, msUntilNext);
+    const nextRun = new Date(Date.now() + msUntilNext);
+    log(`Next scheduled publish check at ${nextRun.toLocaleString()}`);
+  }
+
+  // Start the scheduler
+  const msUntilFirst = getMillisecondsUntilNext5();
+  setTimeout(runScheduledPublishing, msUntilFirst);
+  const firstRun = new Date(Date.now() + msUntilFirst);
+  log(`Report scheduler started (runs at 5am and 5pm, next: ${firstRun.toLocaleString()})`);
 })();
