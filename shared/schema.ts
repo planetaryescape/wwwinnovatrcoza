@@ -30,6 +30,7 @@ export const users = pgTable("users", {
   status: varchar("status", { length: 20 }).notNull().default("ACTIVE"),
   role: varchar("role", { length: 20 }).notNull().default("MEMBER"),
   memberType: varchar("member_type", { length: 20 }).notNull().default("companyUser"), // 'companyUser' or 'independent'
+  isPaidSeat: boolean("is_paid_seat").notNull().default(false), // Whether this user is a paid seat vs free team member
   creditsBasic: integer("credits_basic").notNull().default(0),
   creditsPro: integer("credits_pro").notNull().default(0),
   creditsInheritedFromCompany: boolean("credits_inherited_from_company").notNull().default(true),
@@ -61,7 +62,7 @@ export const insertUserSchema = createInsertSchema(users)
       .min(6, "Password must be at least 6 characters")
       .optional(),
     name: z.string().optional(),
-    membershipTier: z.enum(["FREE", "STARTER", "GROWTH", "SCALE"]).default("FREE"),
+    membershipTier: z.enum(["FREE", "STARTER", "GROWTH", "SCALE", "ADMIN"]).default("FREE"),
     memberType: z.enum(["companyUser", "independent"]).default("companyUser"),
     role: z.enum(["ADMIN", "DEAL_ADMIN", "MEMBER"]).default("MEMBER"),
   });
@@ -352,7 +353,7 @@ export const insertCompanySchema = createInsertSchema(companies)
   })
   .extend({
     name: z.string().min(1, "Company name is required"),
-    tier: z.enum(["FREE", "STARTER", "GROWTH", "SCALE"]).default("FREE"),
+    tier: z.enum(["FREE", "STARTER", "GROWTH", "SCALE", "ADMIN"]).default("FREE"),
   });
 
 export type InsertCompany = z.infer<typeof insertCompanySchema>;

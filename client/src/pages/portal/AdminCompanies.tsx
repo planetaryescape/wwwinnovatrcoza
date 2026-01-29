@@ -108,6 +108,7 @@ interface CompanyUser {
   membershipTier: string;
   status: string;
   lastLoginAt: string | null;
+  isPaidSeat: boolean;
 }
 
 const tierConfig: Record<string, { label: string; color: string; icon: any }> = {
@@ -115,6 +116,7 @@ const tierConfig: Record<string, { label: string; color: string; icon: any }> = 
   STARTER: { label: "Starter", color: "bg-muted text-muted-foreground", icon: UserIcon },
   GROWTH: { label: "Growth", color: "bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300", icon: TrendingUp },
   SCALE: { label: "Scale", color: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300", icon: Crown },
+  ADMIN: { label: "Admin", color: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300", icon: Crown },
 };
 
 export default function AdminCompanies() {
@@ -334,6 +336,36 @@ export default function AdminCompanies() {
   const handleSaveNotes = async () => {
     if (!selectedCompany) return;
     await handleUpdateCompany(selectedCompany.id, { notes: editNotes });
+  };
+
+  const handleTogglePaidSeat = async (userId: string, currentStatus: boolean) => {
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPaidSeat: !currentStatus }),
+      });
+      
+      if (!res.ok) {
+        throw new Error("Failed to update user");
+      }
+      
+      // Refetch users to ensure sync with server
+      if (selectedCompany) {
+        await fetchCompanyUsers(selectedCompany.id);
+      }
+      
+      toast({
+        title: !currentStatus ? "Upgraded to Paid Seat" : "Changed to Team Member",
+        description: `User access level has been updated`,
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to update user status",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleAddReport = async () => {
@@ -863,6 +895,7 @@ export default function AdminCompanies() {
                           <SelectItem value="STARTER">Starter</SelectItem>
                           <SelectItem value="GROWTH">Growth</SelectItem>
                           <SelectItem value="SCALE">Scale</SelectItem>
+                          <SelectItem value="ADMIN">Admin</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -1071,8 +1104,26 @@ export default function AdminCompanies() {
                 <div>
                   <h4 className="font-medium flex items-center gap-2 mb-3">
                     <Users className="w-4 h-4" />
-                    Company Users
+                    Team Members
                   </h4>
+                  
+                  {companyUsers.length > 0 && (
+                    <div className="flex gap-4 mb-4 p-3 rounded-lg bg-muted/30">
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-amber-600">{companyUsers.filter(u => u.isPaidSeat).length}</p>
+                        <p className="text-xs text-muted-foreground">Paid Seats</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-2xl font-bold">{companyUsers.filter(u => !u.isPaidSeat).length}</p>
+                        <p className="text-xs text-muted-foreground">Team Members</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-2xl font-bold">{companyUsers.length}</p>
+                        <p className="text-xs text-muted-foreground">Total Users</p>
+                      </div>
+                    </div>
+                  )}
+                  
                   {companyUsers.length === 0 ? (
                     <p className="text-sm text-muted-foreground">No users assigned to this company</p>
                   ) : (
@@ -1083,13 +1134,33 @@ export default function AdminCompanies() {
                           className="flex items-center justify-between p-3 rounded-lg bg-muted/30"
                           data-testid={`row-company-user-${user.id}`}
                         >
-                          <div>
-                            <p className="font-medium">{user.name || user.email}</p>
-                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                          <div className="flex items-center gap-3">
+                            <div>
+                              <p className="font-medium">{user.name || user.email}</p>
+                              <p className="text-sm text-muted-foreground">{user.email}</p>
+                            </div>
                           </div>
-                          <Badge variant={user.status === "ACTIVE" ? "default" : "secondary"}>
-                            {user.status}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant={user.isPaidSeat ? "default" : "outline"}
+                              onClick={() => handleTogglePaidSeat(user.id, user.isPaidSeat)}
+                              className={user.isPaidSeat ? "bg-amber-500 hover:bg-amber-600 text-white" : ""}
+                              data-testid={`button-toggle-paid-${user.id}`}
+                            >
+                              {user.isPaidSeat ? (
+                                <>
+                                  <Crown className="w-3 h-3 mr-1" />
+                                  Paid Seat
+                                </>
+                              ) : (
+                                "Team Member"
+                              )}
+                            </Button>
+                            <Badge variant={user.status === "ACTIVE" ? "default" : "secondary"}>
+                              {user.status}
+                            </Badge>
+                          </div>
                         </div>
                       ))}
                     </div>

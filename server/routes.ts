@@ -1411,7 +1411,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/users/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
-      const { membershipTier, status, role, creditsBasic, creditsPro, companyId, company, name, memberType, email, phone } = req.body;
+      const { membershipTier, status, role, creditsBasic, creditsPro, companyId, company, name, memberType, email, phone, isPaidSeat } = req.body;
       
       const user = await storage.getUser(id);
       if (!user) {
@@ -1450,6 +1450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email: email || user.email,
         phone: phone !== undefined ? phone : user.phone,
         memberType: memberType || user.memberType || "companyUser",
+        isPaidSeat: isPaidSeat !== undefined ? isPaidSeat : user.isPaidSeat,
       });
 
       res.json({ success: true });

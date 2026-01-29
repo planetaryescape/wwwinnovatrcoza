@@ -5,6 +5,7 @@ import {
   canAccessTier, 
   isFreeUser as checkIsFreeUser,
   isPaidMember as checkIsPaidMember,
+  hasPaidSeatAccess as checkHasPaidSeatAccess,
   isAdminUser as checkIsAdminUser,
   type TierName,
   type TierLevel,
@@ -12,7 +13,7 @@ import {
 } from "@shared/access";
 
 export type UserTier = "free" | "starter" | "growth" | "scale";
-export type MembershipTier = "STARTER" | "GROWTH" | "SCALE";
+export type MembershipTier = "STARTER" | "GROWTH" | "SCALE" | "ADMIN";
 
 export interface User {
   id: string;
@@ -23,6 +24,7 @@ export interface User {
   tier: UserTier;
   membershipTier?: MembershipTier;
   isAdmin?: boolean;
+  isPaidSeat?: boolean;
 }
 
 export interface ImpersonationState {
@@ -63,6 +65,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isFreeUser: boolean;
   isPaidMember: boolean;
+  hasPaidSeatAccess: boolean;
   membershipTier?: MembershipTier;
   tierLevel: TierLevel;
   canAccess: (requiredTier: string) => boolean;
@@ -120,7 +123,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             STARTER: "starter",
             GROWTH: "growth",
             SCALE: "scale",
+            FREE: "free",
           };
+          
+          // Determine tier: admins get scale, others get their tier or free for missing/unknown
+          const effectiveTier = isAdmin 
+            ? "scale" 
+            : (tierMap[dbUser.membershipTier] || "free");
           
           const sessionUser: User = {
             id: dbUser.id,
@@ -128,9 +137,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             name: dbUser.name || dbUser.email.split("@")[0],
             company: dbUser.company,
             companyId: dbUser.companyId,
-            tier: isAdmin ? "scale" : (tierMap[dbUser.membershipTier] || "starter"),
+            tier: effectiveTier,
             membershipTier: isAdmin ? "SCALE" : dbUser.membershipTier,
             isAdmin,
+            isPaidSeat: dbUser.isPaidSeat ?? false,
           };
           
           // If impersonation is active, don't overwrite the impersonated user
@@ -214,6 +224,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       STARTER: "starter",
       GROWTH: "growth",
       SCALE: "scale",
+      FREE: "free",
     };
     
     const loggedInUser: User = {
@@ -223,9 +234,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       company: dbUser.company,
       companyId: dbUser.companyId,
       // Admins always get Scale tier access
-      tier: isAdmin ? "scale" : (tierMap[dbUser.membershipTier] || "starter"),
+      tier: isAdmin ? "scale" : (tierMap[dbUser.membershipTier] || "free"),
       membershipTier: isAdmin ? "SCALE" : dbUser.membershipTier,
       isAdmin,
+      isPaidSeat: dbUser.isPaidSeat ?? false,
     };
     
     setUser(loggedInUser);
@@ -287,6 +299,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         STARTER: "starter",
         GROWTH: "growth",
         SCALE: "scale",
+        FREE: "free",
       };
       
       const impersonatedUser: User = {
@@ -298,6 +311,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         tier: tierMap[targetUser.membershipTier] || "free",
         membershipTier: targetUser.membershipTier,
         isAdmin: false,
+        isPaidSeat: targetUser.isPaidSeat ?? false,
       };
       
       const newImpersonation: ImpersonationState = {
@@ -329,6 +343,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         STARTER: "starter",
         GROWTH: "growth",
         SCALE: "scale",
+        FREE: "free",
       };
       
       const companyViewUser: User = {
@@ -340,6 +355,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         tier: tierMap[company.tier] || "free",
         membershipTier: company.tier,
         isAdmin: false,
+        isPaidSeat: true, // When viewing as company, treat as paid seat for full access
       };
       
       const newImpersonation: ImpersonationState = {
@@ -376,6 +392,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Use centralized access helpers
   const isFreeUser = user ? checkIsFreeUser(user.membershipTier, user.isAdmin ? "ADMIN" : "MEMBER") : true;
   const isPaidMember = user ? checkIsPaidMember(user.membershipTier) : false;
+  const hasPaidSeatAccess = user ? checkHasPaidSeatAccess(user.isPaidSeat, user.isAdmin) : false;
   const tierLevel = getTierLevel(user?.membershipTier);
   const canAccess = (requiredTier: string) => canAccessTier(user?.membershipTier, requiredTier);
   
@@ -396,6 +413,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAdmin,
       isFreeUser,
       isPaidMember,
+      hasPaidSeatAccess,
       membershipTier,
       tierLevel,
       canAccess,

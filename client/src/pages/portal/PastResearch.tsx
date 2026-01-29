@@ -108,7 +108,7 @@ interface Study {
 }
 
 export default function PastResearch() {
-  const { user, company, isAdmin } = useAuth();
+  const { user, company, isAdmin, hasPaidSeatAccess } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const searchString = useSearch();
@@ -514,10 +514,8 @@ export default function PastResearch() {
     );
   };
 
-  // Paid members (STARTER, GROWTH, SCALE) have full access
-  const userTier = (user?.membershipTier || "").toUpperCase();
-  const paidTiers = ["STARTER", "GROWTH", "SCALE"];
-  const isPaidMember = paidTiers.includes(userTier);
+  // Use centralized paid seat access check for premium content
+  const isPaidMember = hasPaidSeatAccess;
   
   // Active = in-progress studies + reports with active statuses (Brief Submitted, Audience Live, Building Report)
   const activeCount = inProgressStudies.length + activeReports.length;
@@ -970,15 +968,28 @@ export default function PastResearch() {
                               </div>
                             </div>
                             <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t">
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={() => window.open('https://app.upsiide.com/', '_blank')}
-                                data-testid={`button-view-study-${study.id}`}
-                              >
-                                <Eye className="w-4 h-4 mr-1" />
-                                View
-                              </Button>
+                              {hasPaidSeatAccess ? (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => window.open('https://app.upsiide.com/', '_blank')}
+                                  data-testid={`button-view-study-${study.id}`}
+                                >
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  View Dashboard
+                                </Button>
+                              ) : (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  disabled
+                                  className="opacity-50"
+                                  data-testid={`button-view-study-${study.id}`}
+                                >
+                                  <Lock className="w-4 h-4 mr-1" />
+                                  Paid Seats Only
+                                </Button>
+                              )}
                               <Button 
                                 variant="outline" 
                                 size="sm"
@@ -1137,15 +1148,28 @@ export default function PastResearch() {
                               )}
                             </div>
                             <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t">
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={() => window.open(report.upsiideUrl || 'https://app.upsiide.com/', '_blank')}
-                                data-testid={`button-view-${report.id}`}
-                              >
-                                <Eye className="w-4 h-4 mr-1" />
-                                View
-                              </Button>
+                              {hasPaidSeatAccess ? (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => window.open(report.upsiideUrl || 'https://app.upsiide.com/', '_blank')}
+                                  data-testid={`button-view-${report.id}`}
+                                >
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  View Dashboard
+                                </Button>
+                              ) : (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  disabled
+                                  className="opacity-50"
+                                  data-testid={`button-view-${report.id}`}
+                                >
+                                  <Lock className="w-4 h-4 mr-1" />
+                                  Paid Seats Only
+                                </Button>
+                              )}
                               <Button 
                                 variant="outline" 
                                 size="sm"
@@ -1195,15 +1219,28 @@ export default function PastResearch() {
                                 </div>
                               </div>
                               <div className="flex gap-2 flex-shrink-0">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => window.open('https://app.upsiide.com/', '_blank')}
-                                  data-testid={`button-view-study-${study.id}`}
-                                >
-                                  <Eye className="w-4 h-4 mr-1" />
-                                  View
-                                </Button>
+                                {hasPaidSeatAccess ? (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => window.open('https://app.upsiide.com/', '_blank')}
+                                    data-testid={`button-view-study-${study.id}`}
+                                  >
+                                    <Eye className="w-4 h-4 mr-1" />
+                                    View
+                                  </Button>
+                                ) : (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    disabled
+                                    className="opacity-50"
+                                    data-testid={`button-view-study-${study.id}`}
+                                  >
+                                    <Lock className="w-4 h-4 mr-1" />
+                                    Paid Only
+                                  </Button>
+                                )}
                                 <Button 
                                   variant="outline" 
                                   size="sm"
@@ -1270,15 +1307,28 @@ export default function PastResearch() {
                                     <Edit className="w-4 h-4" />
                                   </Button>
                                 )}
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => window.open(report.upsiideUrl || 'https://app.upsiide.com/', '_blank')}
-                                  data-testid={`button-view-${report.id}`}
-                                >
-                                  <Eye className="w-4 h-4 mr-1" />
-                                  View
-                                </Button>
+                                {hasPaidSeatAccess ? (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => window.open(report.upsiideUrl || 'https://app.upsiide.com/', '_blank')}
+                                    data-testid={`button-view-${report.id}`}
+                                  >
+                                    <Eye className="w-4 h-4 mr-1" />
+                                    View
+                                  </Button>
+                                ) : (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    disabled
+                                    className="opacity-50"
+                                    data-testid={`button-view-${report.id}`}
+                                  >
+                                    <Lock className="w-4 h-4 mr-1" />
+                                    Paid Only
+                                  </Button>
+                                )}
                                 <Button 
                                   variant="outline" 
                                   size="sm"

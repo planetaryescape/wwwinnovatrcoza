@@ -141,6 +141,20 @@ export function isPaidMember(membershipTier?: string | null): boolean {
   return tier !== "FREE";
 }
 
+/**
+ * Check if user has paid seat access for premium content.
+ * This should be used for content gating (dashboards, premium reports, etc.)
+ * as opposed to isPaidMember which is for pricing/membership tier checks.
+ * 
+ * @param isPaidSeat - Whether the user has a paid seat
+ * @param isAdmin - Whether the user is an admin (admins always have access)
+ * @returns True if user can access premium content
+ */
+export function hasPaidSeatAccess(isPaidSeat?: boolean | null, isAdmin?: boolean | null): boolean {
+  if (isAdmin) return true;
+  return isPaidSeat === true;
+}
+
 export function isAdminUser(email?: string | null, role?: string | null): boolean {
   if (role?.toUpperCase() === "ADMIN") return true;
   if (!email) return false;

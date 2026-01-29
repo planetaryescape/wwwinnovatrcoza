@@ -24,8 +24,7 @@ import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { useUrlFilters } from "@/hooks/use-url-filters";
 import { 
   isFreeContent, 
-  getEffectiveAccessLevel,
-  isPaidMember as checkIsPaidMember
+  getEffectiveAccessLevel
 } from "@shared/access";
 import insightsCover1 from "@assets/category-insights.png";
 import insightsCover2 from "@assets/category-insights-2.png";
@@ -124,7 +123,7 @@ interface Report {
   };
 }
 
-function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: boolean, userCompanyId?: string) {
+function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: boolean, userCompanyId?: string, hasPaidSeatAccess?: boolean) {
   // Company-only reports show a building icon
   if (report.isClientReport) {
     return (
@@ -134,13 +133,9 @@ function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: bool
     );
   }
   
-  // Paid members (STARTER, GROWTH, SCALE) have full access - no lock indicators
-  const normalizedTier = (userTier || "").toUpperCase();
-  const paidTiers = ["STARTER", "GROWTH", "SCALE"];
-  const isPaidMember = isLoggedIn && paidTiers.includes(normalizedTier);
-  
-  if (isPaidMember) {
-    return null; // No locks for paid members
+  // Users with paid seat access (paid seats + admins) have full access - no lock indicators
+  if (hasPaidSeatAccess) {
+    return null; // No locks for paid seat holders
   }
   
   // Use shared access helpers for consistent tier gating
@@ -251,7 +246,7 @@ function TeaseModal({ open, onOpenChange, report, isLoggedIn }: TeaseModalProps)
   );
 }
 
-function ReportCard({ report, userTier, isLoggedIn, userCompanyId, onLockedClick }: { report: Report; userTier?: string; isLoggedIn?: boolean; userCompanyId?: string; onLockedClick?: (report: Report) => void }) {
+function ReportCard({ report, userTier, isLoggedIn, userCompanyId, isPaidSeat, onLockedClick }: { report: Report; userTier?: string; isLoggedIn?: boolean; userCompanyId?: string; isPaidSeat?: boolean; onLockedClick?: (report: Report) => void }) {
   const [, setLocation] = useLocation();
   const formattedDate = new Date(report.date).toLocaleDateString('en-GB', {
     day: '2-digit',
@@ -261,7 +256,7 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId, onLockedClick
 
   const categoryStyle = getCategoryStyle(report.category);
   const coverImage = getCoverImage(report.category, report.industry, typeof report.id === 'number' ? report.id : parseInt(String(report.id)) || 0);
-  const accessIndicator = getAccessIndicator(report, userTier, isLoggedIn, userCompanyId);
+  const accessIndicator = getAccessIndicator(report, userTier, isLoggedIn, userCompanyId, isPaidSeat);
   
   const isPublicContent = isFreeContent({
     slug: report.slug,
@@ -270,10 +265,8 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId, onLockedClick
     accessLevel: report.accessLevel
   });
   
-  const normalizedTier = (userTier || "").toUpperCase();
-  const paidTiers = ["STARTER", "GROWTH", "SCALE"];
-  const userIsPaidMember = isLoggedIn && paidTiers.includes(normalizedTier);
-  const isLocked = !isPublicContent && !userIsPaidMember;
+  // Use hasPaidSeatAccess (passed as isPaidSeat) for consistent gating
+  const isLocked = !isPublicContent && !isPaidSeat;
   
   const isPublicWithPdf = isPublicContent && report.pdfPath;
   const ctaText = isLocked ? "Members only" : (isPublicWithPdf ? "Download full report" : "Read full issue");
@@ -388,9 +381,10 @@ export default function TrendsInsights() {
   const [teaseModalOpen, setTeaseModalOpen] = useState(false);
   const [teaseReport, setTeaseReport] = useState<Report | null>(null);
   const [, navigate] = useLocation();
-  const { user } = useAuth();
+  const { user, isAdmin, hasPaidSeatAccess } = useAuth();
   const userTier = user?.membershipTier;
   const userCompanyId = user?.companyId;
+  const userIsPaidSeat = hasPaidSeatAccess;
   
   const handleLockedClick = (report: Report) => {
     setTeaseReport(report);
@@ -619,6 +613,7 @@ export default function TrendsInsights() {
                   userTier={userTier} 
                   isLoggedIn={!!user} 
                   userCompanyId={userCompanyId ?? undefined}
+                  isPaidSeat={userIsPaidSeat}
                   onLockedClick={handleLockedClick}
                 />
               ))}
@@ -632,10 +627,8 @@ export default function TrendsInsights() {
                   category: report.category,
                   accessLevel: report.accessLevel
                 });
-                const normalizedTier = (userTier || "").toUpperCase();
-                const paidTiers = ["STARTER", "GROWTH", "SCALE"];
-                const userIsPaidMember = !!user && paidTiers.includes(normalizedTier);
-                const isLocked = !isPublicContent && !userIsPaidMember;
+                // Use hasPaidSeatAccess for consistent gating
+                const isLocked = !isPublicContent && !userIsPaidSeat;
                 
                 return (
                   <div 

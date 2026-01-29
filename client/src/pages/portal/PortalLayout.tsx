@@ -156,12 +156,22 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                   <p className="text-xs text-muted-foreground mb-2" data-testid="text-member-company">
                     {user?.company || user?.email}
                   </p>
-                  <Badge 
-                    className={`${isAdmin ? 'bg-primary text-primary-foreground' : isPaidMember ? getTierColor(user?.membershipTier || 'STARTER') : 'bg-muted text-muted-foreground'} text-xs`}
-                    data-testid={`badge-member-tier-${isAdmin ? 'admin' : user?.membershipTier?.toLowerCase() || 'free'}`}
-                  >
-                    {isAdmin ? 'ADMIN' : isPaidMember ? `${user?.membershipTier?.toUpperCase() || 'STARTER'} MEMBER` : 'FREE TIER'}
-                  </Badge>
+                  <div className="flex flex-wrap gap-1">
+                    <Badge 
+                      className={`${isAdmin ? 'bg-primary text-primary-foreground' : isPaidMember ? getTierColor(user?.membershipTier || 'STARTER') : 'bg-muted text-muted-foreground'} text-xs`}
+                      data-testid={`badge-member-tier-${isAdmin ? 'admin' : user?.membershipTier?.toLowerCase() || 'free'}`}
+                    >
+                      {isAdmin ? 'ADMIN' : isPaidMember ? `${user?.membershipTier?.toUpperCase() || 'STARTER'}` : 'FREE TIER'}
+                    </Badge>
+                    {!isAdmin && user?.companyId && (
+                      <Badge 
+                        className={`${user?.isPaidSeat ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' : 'bg-muted text-muted-foreground'} text-xs`}
+                        data-testid={`badge-seat-type-${user?.isPaidSeat ? 'paid' : 'team'}`}
+                      >
+                        {user?.isPaidSeat ? 'Paid Seat' : 'Team Member'}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
               <SidebarGroupLabel data-testid="label-portal-menu">Portal Menu</SidebarGroupLabel>
