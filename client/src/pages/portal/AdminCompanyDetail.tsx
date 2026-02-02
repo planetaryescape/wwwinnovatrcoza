@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Switch } from "@/components/ui/switch";
 import { 
   ArrowLeft,
   Building2,
@@ -131,6 +132,7 @@ interface CompanyUser {
   status: string;
   lastLoginAt: string | null;
   companyId?: string | null;
+  isPaidSeat?: boolean;
 }
 
 interface BriefSubmission {
@@ -428,6 +430,53 @@ export default function AdminCompanyDetail() {
       toast({ title: "Credits Updated" });
     } catch (err) {
       toast({ title: "Error", description: "Failed to update credits", variant: "destructive" });
+    }
+  };
+
+  const handleUpdateCompany = async (updates: Partial<Company>) => {
+    if (!company) return;
+    try {
+      const res = await fetch(`/api/admin/companies/${company.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to update company");
+      }
+      const updated = await res.json();
+      setCompany(updated);
+      toast({ title: "Company Updated", description: "Changes saved successfully" });
+    } catch (err) {
+      toast({ title: "Error", description: err instanceof Error ? err.message : "Failed to update company", variant: "destructive" });
+    }
+  };
+
+  const handleTogglePaidSeat = async (userId: string, currentStatus: boolean) => {
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPaidSeat: !currentStatus }),
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to update user");
+      }
+      
+      await fetchUsers();
+      toast({ 
+        title: "Access Updated", 
+        description: !currentStatus ? "User now has paid seat access" : "User is now a team member" 
+      });
+    } catch (err) {
+      toast({ 
+        title: "Error", 
+        description: err instanceof Error ? err.message : "Failed to update user access", 
+        variant: "destructive" 
+      });
     }
   };
 
@@ -845,6 +894,70 @@ export default function AdminCompanyDetail() {
           </CardContent>
         </Card>
 
+        {/* Company Settings Card */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5" />
+              Membership Settings
+            </CardTitle>
+            <CardDescription>Manage company membership tier and access levels</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Membership Tier</Label>
+                <Select 
+                  value={company.tier} 
+                  onValueChange={(v) => handleUpdateCompany({ tier: v })}
+                >
+                  <SelectTrigger className="w-full" data-testid="select-company-tier">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FREE">Free</SelectItem>
+                    <SelectItem value="STARTER">Starter</SelectItem>
+                    <SelectItem value="GROWTH">Growth</SelectItem>
+                    <SelectItem value="SCALE">Scale</SelectItem>
+                    <SelectItem value="ADMIN">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {company.tier === "FREE" 
+                    ? "Limited access - no premium content" 
+                    : company.tier === "STARTER"
+                    ? "Basic membership features"
+                    : company.tier === "GROWTH"
+                    ? "Full trends library access"
+                    : company.tier === "SCALE"
+                    ? "Premium access with priority support"
+                    : "Full administrative access"}
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Paid Seats</Label>
+                <div className="text-2xl font-bold text-primary">
+                  {users.filter(u => u.isPaidSeat).length}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Users with full dashboard and report access
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Team Members</Label>
+                <div className="text-2xl font-bold text-muted-foreground">
+                  {users.filter(u => !u.isPaidSeat).length}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Users with limited access (past research, public content)
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Live Briefs Section */}
         {briefs.length > 0 && (
           <Card className="mb-6">
@@ -1094,7 +1207,7 @@ export default function AdminCompanyDetail() {
                       <TableRow>
                         <TableHead>Name</TableHead>
                         <TableHead>Email</TableHead>
-                        <TableHead>Type</TableHead>
+                        <TableHead>Paid Seat</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="w-[80px]"></TableHead>
                       </TableRow>
@@ -1105,9 +1218,22 @@ export default function AdminCompanyDetail() {
                           <TableCell className="font-medium">{user.name || "—"}</TableCell>
                           <TableCell>{user.email}</TableCell>
                           <TableCell>
-                            <Badge variant="outline" className="text-xs">
-                              {user.memberType || "Member"}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={user.isPaidSeat || false}
+                                onCheckedChange={() => handleTogglePaidSeat(user.id, user.isPaidSeat || false)}
+                                data-testid={`switch-paid-seat-${user.id}`}
+                              />
+                              <Badge 
+                                variant="outline" 
+                                className={user.isPaidSeat 
+                                  ? "bg-amber-100 text-amber-700 border-amber-200 text-xs" 
+                                  : "bg-muted text-muted-foreground text-xs"
+                                }
+                              >
+                                {user.isPaidSeat ? "Paid Seat" : "Team Member"}
+                              </Badge>
+                            </div>
                           </TableCell>
                           <TableCell>
                             <Badge 
