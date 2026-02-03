@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -9,10 +9,7 @@ import CinematicLanding from "@/pages/CinematicLanding";
 import Home from "@/pages/Home";
 import Test24BasicPage from "@/pages/Test24BasicPage";
 import Test24ProPage from "@/pages/Test24ProPage";
-import InnovatrConsultPage from "@/pages/InnovatrConsultPage";
-import ConsultPage from "@/pages/ConsultPage";
 import ConsultPillarPage from "@/pages/ConsultPillarPage";
-import InnovatrIntelligence from "@/pages/InnovatrIntelligence";
 import CheckoutBasicPAYG from "@/pages/CheckoutBasicPAYG";
 import CheckoutProPAYG from "@/pages/CheckoutProPAYG";
 import CheckoutBasicMembers from "@/pages/CheckoutBasicMembers";
@@ -43,11 +40,11 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/test24-basic" component={Test24BasicPage} />
       <Route path="/test24-pro" component={Test24ProPage} />
-      <Route path="/innovatr-consult" component={InnovatrConsultPage} />
+      <Route path="/innovatr-consult">{() => <Redirect to="/consult" />}</Route>
       <Route path="/consult" component={CinematicLanding} />
       <Route path="/consult/:pillarId" component={ConsultPillarPage} />
       <Route path="/case-study/:id" component={CaseStudyDetail} />
-      <Route path="/innovatr-intelligence" component={InnovatrIntelligence} />
+      <Route path="/innovatr-intelligence">{() => <Redirect to="/#membership" />}</Route>
       <Route path="/checkout/basic-payg" component={CheckoutBasicPAYG} />
       <Route path="/checkout/pro-payg" component={CheckoutProPAYG} />
       <Route path="/checkout/basic-members" component={CheckoutBasicMembers} />

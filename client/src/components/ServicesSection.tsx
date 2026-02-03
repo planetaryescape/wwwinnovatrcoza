@@ -63,7 +63,7 @@ const services: Service[] = [
     description: "Bi-weekly insights, trends and reports",
     priceZAR: 5000,
     priceSuffix: " / month",
-    link: "/innovatr-intelligence",
+    link: "/#membership",
     features: [
       "Monitor trends & competitor launch alerts",
       "Opportunity identification",
