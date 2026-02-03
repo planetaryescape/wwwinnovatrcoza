@@ -1475,7 +1475,7 @@ export default function LaunchBrief() {
                         R{PRO_STANDARD_PRICE.toLocaleString()} standard rate
                       </Badge>
                       <p className="text-xs text-muted-foreground">
-                        Members save R{(PRO_STANDARD_PRICE - PRO_MEMBER_PRICE).toLocaleString()} per study (10% off)
+                        Members save R{(PRO_STANDARD_PRICE - PRO_MEMBER_PRICE).toLocaleString()} per survey (10% off)
                       </p>
                     </>
                   ) : (

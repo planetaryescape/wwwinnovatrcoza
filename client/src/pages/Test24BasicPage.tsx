@@ -39,7 +39,7 @@ export default function Test24BasicPage() {
           </div>
           
           <p className="text-2xl font-medium mb-2">
-            24hr Pay Per Idea Testing – {formatPrice(5000)} per idea (members)
+            24hr Pay Per Concept Testing – {formatPrice(5000)} per concept (members)
           </p>
           <p className="text-xl text-muted-foreground">
             Idea, Design, Creative rapid testing in any format
@@ -74,7 +74,7 @@ export default function Test24BasicPage() {
                 Pain Point
               </h3>
               <p className="text-muted-foreground">
-                Teams wanting faster concept testing with flexibility to only pay per idea you want to test - flexibility & affordability unlocked
+                Teams wanting faster concept testing with flexibility to only pay per concept you want to test - flexibility & affordability unlocked
               </p>
             </CardContent>
           </Card>

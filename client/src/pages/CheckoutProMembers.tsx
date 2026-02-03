@@ -29,7 +29,7 @@ const ENTRY_PLAN_COST = 60000;
 const features = [
   "24hr Turnaround",
   "Custom audience, reach & question flexibility",
-  "Custom Consumer Reach per Study",
+  "Custom Consumer Reach per Survey",
   "AI Qual Voice of the Consumer Videos",
   "Private Results Dashboard Access (members)",
   "Robust Report with unlimited Filtering",
@@ -360,7 +360,7 @@ export default function CheckoutProMembers() {
                   </div>
 
                   <div>
-                    <Label>Reach per Study</Label>
+                    <Label>Reach per Survey</Label>
                     <RadioGroup
                       value={selectedReach.toString()}
                       onValueChange={(value) => setSelectedReach(parseInt(value))}
@@ -418,7 +418,7 @@ export default function CheckoutProMembers() {
                                     <div className="text-xl font-bold text-primary">
                                       {formatPrice(tier.regularPrice)}
                                     </div>
-                                    <div className="text-xs text-muted-foreground">per study</div>
+                                    <div className="text-xs text-muted-foreground">per survey</div>
                                     <div className="text-xs text-accent font-medium">
                                       {formatPrice(tier.memberPrice)} for members
                                     </div>
@@ -533,11 +533,11 @@ export default function CheckoutProMembers() {
                         <span className="font-medium" data-testid="text-studies-count">{quantity}</span>
                       </div>
                       <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>Reach per Study</span>
+                        <span>Reach per Survey</span>
                         <span className="font-medium" data-testid="text-reach-per-study">{selectedReach}</span>
                       </div>
                       <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>Price per Study</span>
+                        <span>Price per Survey</span>
                         <span className="font-medium">{formatPrice(pricePerStudy)}</span>
                       </div>
                       <div className="flex justify-between text-sm border-t pt-2">
@@ -567,11 +567,11 @@ export default function CheckoutProMembers() {
                       <div className="text-sm p-3 bg-muted/30 rounded-lg">
                         <div className="flex justify-between text-muted-foreground">
                           <span>Standard rate</span>
-                          <span className="line-through">{formatPrice(regularPricePerStudy)} per study</span>
+                          <span className="line-through">{formatPrice(regularPricePerStudy)} per survey</span>
                         </div>
                         <div className="flex justify-between font-medium text-accent">
                           <span>Member rate</span>
-                          <span>{formatPrice(memberPricePerStudy)} per study</span>
+                          <span>{formatPrice(memberPricePerStudy)} per survey</span>
                         </div>
                       </div>
                     )}

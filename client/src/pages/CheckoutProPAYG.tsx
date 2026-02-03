@@ -17,7 +17,7 @@ const reachPricing = [
 const features = [
   "24hr Turnaround",
   "Custom audience, reach & question flexibility",
-  "Custom Consumer Reach per Study",
+  "Custom Consumer Reach per Survey",
   "AI Qual Voice of the Consumer Videos",
   "Robust Report with unlimited Filtering",
   "Strategic Recommendations from AI + Human Experts",
@@ -141,7 +141,7 @@ export default function CheckoutProPAYG() {
                   </div>
 
                   <div>
-                    <Label>Reach per Study</Label>
+                    <Label>Reach per Survey</Label>
                     <RadioGroup
                       value={selectedReach.toString()}
                       onValueChange={(value) => setSelectedReach(parseInt(value))}
@@ -180,7 +180,7 @@ export default function CheckoutProPAYG() {
                               <div className="text-xl font-bold text-primary">
                                 {formatPrice(tier.price)}
                               </div>
-                              <div className="text-xs text-muted-foreground">per study</div>
+                              <div className="text-xs text-muted-foreground">per survey</div>
                             </div>
                           </div>
                         </div>
@@ -249,7 +249,7 @@ export default function CheckoutProPAYG() {
                       <span className="font-medium" data-testid="text-studies-count">{quantity}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Reach per Study</span>
+                      <span className="text-muted-foreground">Reach per Survey</span>
                       <span className="font-medium" data-testid="text-reach-per-study">{selectedReach}</span>
                     </div>
                     <div className="flex justify-between text-sm border-t pt-2">

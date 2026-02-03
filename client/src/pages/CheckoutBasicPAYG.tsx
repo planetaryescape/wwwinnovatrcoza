@@ -268,9 +268,9 @@ export default function CheckoutBasicPAYG() {
                         <span className="text-sm text-muted-foreground">credits</span>
                       </div>
                       <div className="ml-8 mt-3 text-xs text-muted-foreground space-y-0.5">
-                        <p>1-9 credits: 0% off ({formatPrice(10000)}/ idea)</p>
-                        <p>10-19 credits: 10% off ({formatPrice(9000)}/ idea)</p>
-                        <p>20+ credits: 15% off ({formatPrice(8500)}/ idea)</p>
+                        <p>1-9 credits: 0% off ({formatPrice(10000)}/ concept)</p>
+                        <p>10-19 credits: 10% off ({formatPrice(9000)}/ concept)</p>
+                        <p>20+ credits: 15% off ({formatPrice(8500)}/ concept)</p>
                       </div>
                     </div>
                     

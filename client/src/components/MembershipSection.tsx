@@ -107,8 +107,8 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
     if (plan.name === "Starter") {
       return [
         ...plan.features,
-        `Test24 Basic: ${formatPrice(plan.basicPriceZAR)} per idea`,
-        `Test24 Pro: ${formatPrice(plan.proPriceZAR)} per study`,
+        `Test24 Basic: ${formatPrice(plan.basicPriceZAR)} per concept`,
+        `Test24 Pro: ${formatPrice(plan.proPriceZAR)} per survey`,
       ];
     }
     return plan.features;

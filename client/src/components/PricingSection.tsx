@@ -16,8 +16,8 @@ const pricingPlans = {
       name: "Test24 Basic",
       icon: Zap,
       priceZAR: 10000,
-      unit: "per idea",
-      description: "24hr Pay Per Idea Testing",
+      unit: "per concept",
+      description: "24hr Pay Per Concept Testing",
       features: [
         "100 consumer sample",
         "5 min lite survey",
@@ -30,7 +30,7 @@ const pricingPlans = {
       name: "Test24 Pro",
       icon: Target,
       priceZAR: 50000,
-      unit: "per study",
+      unit: "per survey",
       description: "Custom Quant & AI Qual",
       features: [
         "100+ custom audience",
@@ -46,8 +46,8 @@ const pricingPlans = {
       name: "Test24 Basic",
       icon: Zap,
       priceZAR: 5000,
-      unit: "per idea",
-      description: "24hr Pay Per Idea Testing",
+      unit: "per concept",
+      description: "24hr Pay Per Concept Testing",
       badge: "50% OFF",
       features: [
         "100 consumer sample",
@@ -61,7 +61,7 @@ const pricingPlans = {
       name: "Test24 Pro",
       icon: Target,
       priceZAR: 45000,
-      unit: "per study",
+      unit: "per survey",
       description: "Custom Quant & AI Qual",
       badge: "10% OFF",
       features: [

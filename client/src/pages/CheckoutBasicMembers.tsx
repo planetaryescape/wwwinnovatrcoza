@@ -52,7 +52,7 @@ const featuresBase = [
   "X100 Consumer Reach, 5min Survey",
   "Automated brief upload portal saving you time",
   "Final Reports emailed 24hrs later",
-  "{memberRate} per idea member rate",
+  "{memberRate} per concept member rate",
   "Priority support",
 ];
 

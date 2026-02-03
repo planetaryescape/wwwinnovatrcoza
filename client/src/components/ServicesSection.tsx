@@ -27,7 +27,7 @@ const services: Service[] = [
     icon: Zap,
     number: "1",
     title: "Innovatr Test24 Basic",
-    description: "24hr Pay Per Idea Quant Testing",
+    description: "24hr Pay Per Concept Quant Testing",
     priceZAR: 5000,
     priceSuffix: " / concept",
     link: "/test24-basic",

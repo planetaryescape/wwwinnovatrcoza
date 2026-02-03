@@ -36,8 +36,8 @@ export default function CheckoutMembershipEntry() {
   
   const starterFeatures = [
     ...starterFeaturesBase,
-    `Test24 Basic: ${formatPrice(basicPriceZAR)} per idea (50% off)`,
-    `Test24 Pro: ${formatPrice(proPriceZAR)} per study (10% off)`,
+    `Test24 Basic: ${formatPrice(basicPriceZAR)} per concept (50% off)`,
+    `Test24 Pro: ${formatPrice(proPriceZAR)} per survey (10% off)`,
   ];
 
   return (
@@ -166,12 +166,12 @@ export default function CheckoutMembershipEntry() {
                     <div className="border rounded-lg p-4">
                       <h4 className="font-semibold mb-1">Test24 Basic</h4>
                       <p className="text-2xl font-bold text-primary">{formatPrice(basicPriceZAR)}</p>
-                      <p className="text-sm text-muted-foreground">per idea (50% off PAYG)</p>
+                      <p className="text-sm text-muted-foreground">per concept (50% off PAYG)</p>
                     </div>
                     <div className="border rounded-lg p-4">
                       <h4 className="font-semibold mb-1">Test24 Pro</h4>
                       <p className="text-2xl font-bold text-primary">{formatPrice(proPriceZAR)}</p>
-                      <p className="text-sm text-muted-foreground">per study (10% off PAYG)</p>
+                      <p className="text-sm text-muted-foreground">per survey (10% off PAYG)</p>
                     </div>
                   </div>
                 </div>
