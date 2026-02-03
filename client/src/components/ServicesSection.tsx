@@ -29,7 +29,7 @@ const services: Service[] = [
     title: "Innovatr Test24 Basic",
     description: "24hr Pay Per Idea Quant Testing",
     priceZAR: 5000,
-    priceSuffix: " / idea",
+    priceSuffix: " / concept",
     link: "/test24-basic",
     features: [
       "Lite Testing (x100 consumers) 5min",
@@ -46,10 +46,10 @@ const services: Service[] = [
     description: "24hr Custom Quant & AI Qual",
     priceZAR: 45000,
     pricePrefix: "From ",
-    priceSuffix: " / study",
+    priceSuffix: " / survey",
     link: "/test24-pro",
     features: [
-      "Full Testing (+100) 15min",
+      "Full Testing (+100 consumers) 15min",
       "Custom Audience",
       "Quant + AI Qual",
     ],
