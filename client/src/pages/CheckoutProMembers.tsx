@@ -631,6 +631,9 @@ export default function CheckoutProMembers() {
                   <p className="text-xs text-muted-foreground">
                     Secure payment processing
                   </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    All prices include VAT where applicable
+                  </p>
                   {quantity < 3 && (
                     <p className="text-xs text-primary mt-1 font-medium">
                       Add {3 - quantity} more {3 - quantity === 1 ? "study" : "studies"} for 10% volume discount

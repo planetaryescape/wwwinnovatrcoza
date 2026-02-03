@@ -370,6 +370,9 @@ export default function CheckoutBasicPAYG() {
                   <p className="text-xs text-muted-foreground mt-1">
                     Credits never expire
                   </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    All prices include VAT where applicable
+                  </p>
                 </div>
               </CardContent>
             </Card>

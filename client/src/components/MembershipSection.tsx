@@ -190,9 +190,9 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
 
 export default function MembershipSection() {
   return (
-    <section id="membership" className="py-20 bg-[#fd8067]">
+    <section id="membership" className="py-12 sm:py-20 bg-[#fd8067]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center mb-8 sm:mb-16">
           <div className="text-sm font-semibold text-white/50 mb-4 uppercase tracking-wider">
             05 — Memberships
           </div>

@@ -292,6 +292,9 @@ export default function CheckoutMembershipEntry() {
                       ? "Billed monthly • Cancel anytime"
                       : "Billed annually • Renews automatically"}
                   </p>
+                  <p className="text-xs text-muted-foreground">
+                    All prices include VAT where applicable
+                  </p>
                   <p className="text-xs text-primary font-medium">
                     Start saving on research today
                   </p>

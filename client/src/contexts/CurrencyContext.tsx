@@ -8,6 +8,7 @@ interface CurrencyContextType {
   formatPrice: (zarAmount: number) => string;
   formatShortPrice: (zarAmount: number) => string;
   convertToDisplay: (zarAmount: number) => number;
+  isAutoDetected: boolean;
 }
 
 const ZAR_TO_USD_RATE = 0.055; // 1 ZAR = 0.055 USD (approximate)
@@ -22,6 +23,41 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     }
     return "ZAR";
   });
+  const [isAutoDetected, setIsAutoDetected] = useState(false);
+  const [hasCheckedLocation, setHasCheckedLocation] = useState(false);
+
+  useEffect(() => {
+    const detectLocationCurrency = async () => {
+      if (hasCheckedLocation) return;
+      
+      const saved = localStorage.getItem("preferredCurrency");
+      if (saved) {
+        setHasCheckedLocation(true);
+        return;
+      }
+      
+      try {
+        const response = await fetch("https://ipapi.co/json/", { 
+          signal: AbortSignal.timeout(3000) 
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const countryCode = data.country_code;
+          
+          const southernAfricanCountries = ["ZA", "NA", "BW", "ZW", "MZ", "SZ", "LS"];
+          if (!southernAfricanCountries.includes(countryCode)) {
+            setCurrency("USD");
+            setIsAutoDetected(true);
+          }
+        }
+      } catch (error) {
+        console.log("Could not detect location, defaulting to ZAR");
+      }
+      setHasCheckedLocation(true);
+    };
+
+    detectLocationCurrency();
+  }, [hasCheckedLocation]);
 
   useEffect(() => {
     localStorage.setItem("preferredCurrency", currency);
@@ -53,7 +89,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency, formatPrice, formatShortPrice, convertToDisplay }}>
+    <CurrencyContext.Provider value={{ currency, setCurrency, formatPrice, formatShortPrice, convertToDisplay, isAutoDetected }}>
       {children}
     </CurrencyContext.Provider>
   );

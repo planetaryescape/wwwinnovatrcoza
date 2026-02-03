@@ -43,16 +43,16 @@ export default function HeroSection() {
       </div>
       
       {/* Mobile layout - centered text with video at bottom edge */}
-      <div className="lg:hidden flex flex-col min-h-screen pt-20">
-        {/* Text content - left aligned with proper spacing from nav */}
-        <div className="flex-1 flex items-center px-6 py-8">
+      <div className="lg:hidden flex flex-col min-h-screen pt-16">
+        {/* Text content - left aligned with reduced spacing */}
+        <div className="flex-1 flex items-center px-4 py-4">
           <div className="text-left w-full">
             <h1 
-              className="font-serif font-bold mb-4 leading-[1.05] uppercase"
+              className="font-serif font-bold mb-3 leading-[1.05] uppercase"
               style={{ 
                 fontFamily: "'DM Serif Display', serif", 
                 letterSpacing: "0.04em",
-                fontSize: "clamp(1.75rem, 8vw, 2.5rem)"
+                fontSize: "clamp(2rem, 9vw, 2.75rem)"
               }}
             >
               <span className="text-[#f15d60]">TRANSFORMING</span><br />
@@ -60,7 +60,7 @@ export default function HeroSection() {
             </h1>
             <p 
               className="text-gray-300 max-w-sm leading-relaxed"
-              style={{ fontSize: "clamp(0.9rem, 4vw, 1.1rem)" }}
+              style={{ fontSize: "clamp(1rem, 4.5vw, 1.2rem)" }}
             >
               Launch Better Innovation<br />through smart 24hr research
             </p>

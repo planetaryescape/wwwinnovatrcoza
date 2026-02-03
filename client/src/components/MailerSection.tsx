@@ -60,7 +60,7 @@ export default function MailerSection() {
   const isFormValid = formData.name && formData.email && formData.company && formData.industry;
 
   return (
-    <section id="mailer" className="py-20 bg-muted/30">
+    <section id="mailer" className="py-12 sm:py-20 bg-muted/30">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">

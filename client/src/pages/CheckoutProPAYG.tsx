@@ -283,6 +283,9 @@ export default function CheckoutProPAYG() {
                   <p className="text-xs text-muted-foreground text-center pt-2">
                     {formatPrice(Math.round(finalTotal / totalConsumers))} per consumer
                   </p>
+                  <p className="text-xs text-muted-foreground text-center">
+                    All prices include VAT where applicable
+                  </p>
                 </div>
 
                 <Button

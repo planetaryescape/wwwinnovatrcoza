@@ -73,7 +73,7 @@ export default function ContactSection() {
   };
 
   return (
-    <section id="contact" className="py-20 relative overflow-hidden">
+    <section id="contact" className="py-12 sm:py-20 relative overflow-hidden">
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{ 
@@ -82,7 +82,7 @@ export default function ContactSection() {
       />
       <div className="absolute inset-0 from-black/40 via-black/50 to-black/60 bg-[#c6e1a5]" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center mb-8 sm:mb-16">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-4 text-white">Let's start a conversation?</h2>
           <p className="text-xl text-white max-w-2xl mx-auto">
             Ready to launch better innovation? Get in touch.
