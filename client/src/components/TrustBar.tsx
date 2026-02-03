@@ -1,17 +1,22 @@
 import { useEffect, useRef } from "react";
 
 const clients = [
-  "Heineken",
   "Discovery Bank",
+  "Heineken",
   "Rain",
+  "Mondelez",
+  "Revlon",
+  "Tiger Brands",
   "DGB",
+  "Netflorist",
+  "ooba",
+  "Nando's",
+  "BATA Shoes",
+  "SUNPAC",
+  "Clover",
   "Rugani Juice",
   "Namibian Breweries",
-  "Mondelez",
-  "ooba",
-  "Revlon",
   "Dairy Maid",
-  "Netflorist",
   "KWV",
 ];
 
