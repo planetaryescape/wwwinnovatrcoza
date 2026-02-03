@@ -168,6 +168,16 @@ export default function Dashboard() {
     retry: false,
   });
 
+  // Fetch user activity stats (personal to the logged-in user)
+  const { data: userActivity, isLoading: isLoadingActivity } = useQuery<{
+    studiesCompleted: number;
+    reportsDownloaded: number;
+    valueUnlocked: number;
+  }>({
+    queryKey: ["/api/member/activity", user?.id],
+    enabled: !!user,
+  });
+
   const userIndustry = useMemo(() => {
     return company?.industry || undefined;
   }, [company]);
@@ -558,15 +568,21 @@ export default function Dashboard() {
                 <CardContent className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Studies completed</span>
-                    <span className="text-lg font-bold">12</span>
+                    <span className="text-lg font-bold" data-testid="text-studies-completed">
+                      {isLoadingActivity ? "..." : (userActivity?.studiesCompleted ?? 0)}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Reports downloaded</span>
-                    <span className="text-lg font-bold">28</span>
+                    <span className="text-lg font-bold" data-testid="text-reports-downloaded">
+                      {isLoadingActivity ? "..." : (userActivity?.reportsDownloaded ?? 0)}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Value unlocked</span>
-                    <span className="text-lg font-bold text-primary">{formatShortPrice(240000)}</span>
+                    <span className="text-lg font-bold text-primary" data-testid="text-value-unlocked">
+                      {isLoadingActivity ? "..." : formatShortPrice(userActivity?.valueUnlocked ?? 0)}
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -579,15 +595,21 @@ export default function Dashboard() {
                 <div className="space-y-3 mt-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Studies completed</span>
-                    <span className="text-lg font-bold">12</span>
+                    <span className="text-lg font-bold">
+                      {isLoadingActivity ? "..." : (userActivity?.studiesCompleted ?? 0)}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Reports downloaded</span>
-                    <span className="text-lg font-bold">28</span>
+                    <span className="text-lg font-bold">
+                      {isLoadingActivity ? "..." : (userActivity?.reportsDownloaded ?? 0)}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Value unlocked</span>
-                    <span className="text-lg font-bold text-primary">{formatShortPrice(240000)}</span>
+                    <span className="text-lg font-bold text-primary">
+                      {isLoadingActivity ? "..." : formatShortPrice(userActivity?.valueUnlocked ?? 0)}
+                    </span>
                   </div>
                 </div>
               </LockedFeature>

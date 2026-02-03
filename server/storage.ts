@@ -189,6 +189,9 @@ export interface IStorage {
     downloadsThisMonth: number;
     mostPopularReport: { id: string; title: string; views: number } | null;
   }>;
+  
+  // User Activity Stats
+  getUserReportDownloadCount(userId: string): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1728,6 +1731,17 @@ export class DatabaseStorage implements IStorage {
       downloadsThisMonth,
       mostPopularReport,
     };
+  }
+  
+  async getUserReportDownloadCount(userId: string): Promise<number> {
+    const downloads = await db
+      .select()
+      .from(reportEvents)
+      .where(and(
+        eq(reportEvents.userId, userId),
+        eq(reportEvents.eventType, 'download')
+      ));
+    return downloads.length;
   }
 }
 

@@ -3796,6 +3796,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user activity stats (personal stats for the logged-in user)
+  app.get("/api/member/activity", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const sessionUser = req.user!;
+      
+      // Get studies completed by this user (by their email)
+      const userStudies = await storage.getStudiesByEmail(sessionUser.email);
+      const completedStudies = userStudies.filter(s => s.status === "COMPLETED");
+      
+      // Get report downloads by this user
+      const reportsDownloaded = await storage.getUserReportDownloadCount(sessionUser.id);
+      
+      // Calculate value unlocked based on completed study types
+      // Basic = R5,000, Pro = R45,000
+      let valueUnlocked = 0;
+      for (const study of completedStudies) {
+        if (study.studyType === "basic") {
+          valueUnlocked += 5000;
+        } else if (study.studyType === "pro") {
+          valueUnlocked += 45000;
+        }
+      }
+      
+      res.json({
+        studiesCompleted: completedStudies.length,
+        reportsDownloaded,
+        valueUnlocked,
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Get all studies (admin only)
   app.get("/api/admin/studies", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
