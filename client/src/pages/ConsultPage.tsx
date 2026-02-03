@@ -214,15 +214,6 @@ export default function ConsultPage() {
           </motion.div>
         </div>
         
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-            className="w-6 h-10 border-2 border-gray-600 rounded-full flex justify-center pt-2"
-          >
-            <motion.div className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
-          </motion.div>
-        </div>
       </section>
 
       {/* TRACK RECORD Section */}
@@ -297,8 +288,8 @@ export default function ConsultPage() {
         <div className="sticky top-0 h-screen flex items-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] to-[#0d0d18]" />
           
-          {/* Progress indicator */}
-          <div className="absolute left-8 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-4 z-20">
+          {/* Progress indicator - right side with titles */}
+          <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-3 z-20 bg-black/60 backdrop-blur-sm rounded-lg p-4">
             {pillars.map((pillar, index) => (
               <button
                 key={pillar.id}
@@ -306,13 +297,27 @@ export default function ConsultPage() {
                   const element = document.getElementById(`pillar-${pillar.id}`);
                   element?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                className={`flex items-center gap-3 transition-all duration-300 text-right ${
                   activePillar === index 
-                    ? "w-8 bg-white" 
-                    : "bg-gray-600 hover:bg-gray-400"
+                    ? "opacity-100" 
+                    : "opacity-50 hover:opacity-80"
                 }`}
                 data-testid={`progress-${pillar.id}`}
-              />
+              >
+                <span className={`text-sm font-medium transition-colors ${
+                  activePillar === index ? "text-white" : "text-gray-400"
+                }`}>
+                  {pillar.title}
+                </span>
+                <div 
+                  className={`w-2 h-2 rounded-full transition-all duration-300 flex-shrink-0 ${
+                    activePillar === index 
+                      ? "w-3 h-3" 
+                      : ""
+                  }`}
+                  style={{ backgroundColor: activePillar === index ? pillar.color : '#6b7280' }}
+                />
+              </button>
             ))}
           </div>
           
@@ -324,7 +329,7 @@ export default function ConsultPage() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -50 }}
                 transition={{ duration: 0.5 }}
-                className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 lg:pl-24"
+                className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 lg:pr-48"
               >
                 <div className="grid lg:grid-cols-2 gap-12 items-start">
                   <div>
