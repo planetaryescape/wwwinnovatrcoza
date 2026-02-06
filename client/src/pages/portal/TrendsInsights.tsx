@@ -405,7 +405,7 @@ export default function TrendsInsights() {
         const data = await res.json();
         const formattedReports = data.map((r: any) => ({
           ...r,
-          coverImage: r.coverImageUrl || r.thumbnailUrl || getCoverImage(r.category, r.industry, r.id),
+          coverImage: r.coverImageUrl || getCoverImage(r.category, r.industry, r.id),
           pdfPath: r.pdfUrl,
           tags: r.topics || [],
           isNew: false,
