@@ -172,7 +172,7 @@ function TeaseModal({ open, onOpenChange, report, isLoggedIn }: TeaseModalProps)
   if (!report) return null;
   
   const categoryStyle = getCategoryStyle(report.category);
-  const coverImage = getCoverImage(report.category, report.industry, typeof report.id === 'number' ? report.id : parseInt(String(report.id)) || 0);
+  const coverImage = report.coverImage || getCoverImage(report.category, report.industry, typeof report.id === 'number' ? report.id : parseInt(String(report.id)) || 0);
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -181,7 +181,7 @@ function TeaseModal({ open, onOpenChange, report, isLoggedIn }: TeaseModalProps)
           <div className="relative h-32 -mx-6 -mt-6 mb-4 overflow-hidden rounded-t-lg">
             <img
               src={coverImage}
-              alt={report.category}
+              alt={report.title}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
@@ -255,7 +255,7 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId, isPaidSeat, o
   });
 
   const categoryStyle = getCategoryStyle(report.category);
-  const coverImage = getCoverImage(report.category, report.industry, typeof report.id === 'number' ? report.id : parseInt(String(report.id)) || 0);
+  const coverImage = report.coverImage || getCoverImage(report.category, report.industry, typeof report.id === 'number' ? report.id : parseInt(String(report.id)) || 0);
   const accessIndicator = getAccessIndicator(report, userTier, isLoggedIn, userCompanyId, isPaidSeat);
   
   const isPublicContent = isFreeContent({
@@ -405,7 +405,7 @@ export default function TrendsInsights() {
         const data = await res.json();
         const formattedReports = data.map((r: any) => ({
           ...r,
-          coverImage: r.thumbnailUrl || getCoverImage(r.category, r.industry, r.id),
+          coverImage: r.coverImageUrl || r.thumbnailUrl || getCoverImage(r.category, r.industry, r.id),
           pdfPath: r.pdfUrl,
           tags: r.topics || [],
           isNew: false,
@@ -639,7 +639,7 @@ export default function TrendsInsights() {
                   >
                     <div 
                       className="w-20 h-14 rounded-md bg-cover bg-center flex-shrink-0"
-                      style={{ backgroundImage: `url(${getCoverImage(report.category, report.industry, typeof report.id === 'number' ? report.id : parseInt(String(report.id)) || 0)})` }}
+                      style={{ backgroundImage: `url(${report.coverImage || getCoverImage(report.category, report.industry, typeof report.id === 'number' ? report.id : parseInt(String(report.id)) || 0)})` }}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">

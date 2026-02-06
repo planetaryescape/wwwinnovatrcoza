@@ -3,8 +3,10 @@ import { useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Download, ArrowLeft, Calendar, Briefcase, Lock, Crown, CreditCard, LogIn, Play, ChevronUp, FileText, ExternalLink, Loader2 } from "lucide-react";
+import { Download, ArrowLeft, Calendar, Briefcase, Lock, Crown, CreditCard, LogIn, Play, ChevronUp, FileText, ExternalLink, Loader2, Mail, CheckCircle2, TrendingUp } from "lucide-react";
 import PortalLayout from "./PortalLayout";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +15,19 @@ import launchCover from "@assets/launch-cover_1764321848244.png";
 import insideCover from "@assets/inside-cover_1764321472939.png";
 import irlCover from "@assets/irl-cover_1764322310189.png";
 import { getRelatedArticles } from "@/lib/getRelatedArticles";
+
+function InsightPageWrapper({ children, isAuthenticated }: { children: React.ReactNode; isAuthenticated: boolean }) {
+  if (isAuthenticated) {
+    return <PortalLayout>{children}</PortalLayout>;
+  }
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navigation />
+      <main className="flex-1">{children}</main>
+      <Footer />
+    </div>
+  );
+}
 
 const categoryCoverImages: Record<string, string> = {
   insights: insightsHeader,
@@ -83,6 +98,12 @@ interface Report {
   content?: {
     intro: string;
     sections: ReportSection[];
+    subtitle?: string;
+    closingLine?: string;
+    retailerHook?: string;
+    ctaLabel?: string;
+    ctaHelper?: string;
+    ctaEmail?: string;
   };
   industryTag?: string | null;
   themeTags?: string[];
@@ -98,28 +119,29 @@ interface AccessCheckResult {
 
 function checkReportAccess(
   report: Report,
-  user: { membershipTier?: string; creditsBasic?: number; creditsPro?: number } | null
+  user: { membershipTier?: string; creditsBasic?: number; creditsPro?: number } | null,
+  hasPaidSeatAccess?: boolean
 ): AccessCheckResult {
   const accessLevel = report.accessLevel || "PUBLIC";
   
-  // Public content is always accessible
   if (accessLevel === "PUBLIC" || accessLevel === "public") {
     return { hasAccess: true, reason: "public" };
   }
   
-  // Not logged in - require login
   if (!user) {
     return { hasAccess: false, reason: "not_logged_in", message: "Sign in to access this members-only content" };
   }
   
-  // Paid members (STARTER, GROWTH, SCALE) have full access to all content - no locks
+  if (hasPaidSeatAccess) {
+    return { hasAccess: true, reason: "member" };
+  }
+  
   const userTier = (user.membershipTier || "").toUpperCase();
   const paidTiers = ["STARTER", "GROWTH", "SCALE"];
   if (paidTiers.includes(userTier)) {
     return { hasAccess: true, reason: "member" };
   }
   
-  // Free users need to upgrade to access member content
   return { 
     hasAccess: false, 
     reason: "membership_required", 
@@ -129,7 +151,7 @@ function checkReportAccess(
 
 function RelatedReportCard({ report }: { report: Report }) {
   const categoryStyle = getCategoryStyle(report.category);
-  const coverImage = getCoverImage(report.category);
+  const coverImage = report.coverImage || report.coverImageUrl || getCoverImage(report.category);
 
   return (
     <Link href={`/portal/insights/${report.slug}`}>
@@ -137,7 +159,7 @@ function RelatedReportCard({ report }: { report: Report }) {
         <div className="relative h-28 overflow-hidden">
           <img
             src={coverImage}
-            alt={report.category}
+            alt={report.title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </div>
@@ -269,7 +291,7 @@ export default function InsightDetail() {
   const [, params] = useRoute("/portal/insights/:slug");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, hasPaidSeatAccess } = useAuth();
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [report, setReport] = useState<Report | null>(null);
   const [relatedReports, setRelatedReports] = useState<Report[]>([]);
@@ -374,7 +396,7 @@ export default function InsightDetail() {
   }, [report?.id, report?.category, report?.industryTag, report?.themeTags, isAuthenticated]);
 
   const accessResult = report 
-    ? checkReportAccess(report, user as { membershipTier?: string; creditsBasic?: number; creditsPro?: number } | null)
+    ? checkReportAccess(report, user as { membershipTier?: string; creditsBasic?: number; creditsPro?: number } | null, hasPaidSeatAccess)
     : { hasAccess: true, reason: "public" as const };
 
   // Show back to top button after scrolling down one viewport height
@@ -412,20 +434,20 @@ export default function InsightDetail() {
 
   if (loading) {
     return (
-      <PortalLayout>
+      <InsightPageWrapper isAuthenticated={isAuthenticated}>
         <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="flex items-center gap-3">
             <Loader2 className="w-6 h-6 animate-spin text-[#5B6EF7]" />
             <span className="text-muted-foreground">Loading report...</span>
           </div>
         </div>
-      </PortalLayout>
+      </InsightPageWrapper>
     );
   }
 
   if (!report) {
     return (
-      <PortalLayout>
+      <InsightPageWrapper isAuthenticated={isAuthenticated}>
         <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center p-12">
             <h2 
@@ -448,7 +470,7 @@ export default function InsightDetail() {
             </Button>
           </div>
         </div>
-      </PortalLayout>
+      </InsightPageWrapper>
     );
   }
 
@@ -472,18 +494,20 @@ export default function InsightDetail() {
   });
 
   const categoryStyle = getCategoryStyle(report.category);
-  const coverImage = getCoverImage(report.category);
+  const heroImage = report.coverImage || getCoverImage(report.category);
+  const hasOwnCover = !!(report.coverImageUrl || report.coverImage?.startsWith('/api/files'));
+  const subtitle = report.content?.subtitle;
 
   return (
-    <PortalLayout>
+    <InsightPageWrapper isAuthenticated={isAuthenticated}>
       <div className="min-h-screen bg-white">
-        <div className="relative w-full h-72 md:h-96 overflow-hidden">
+        <div className={`relative w-full ${hasOwnCover ? 'h-80 md:h-[28rem]' : 'h-72 md:h-96'} overflow-hidden`}>
           <img
-            src={coverImage}
-            alt={report.category}
-            className="w-full h-full object-cover"
+            src={heroImage}
+            alt={report.title}
+            className={`w-full h-full ${hasOwnCover ? 'object-contain bg-white' : 'object-cover'}`}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+          <div className={`absolute inset-0 ${hasOwnCover ? 'bg-gradient-to-t from-black/80 via-black/30 to-transparent' : 'bg-gradient-to-t from-black/70 via-black/40 to-transparent'}`} />
           
           <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
             <div className="max-w-3xl mx-auto">
@@ -509,6 +533,14 @@ export default function InsightDetail() {
                 >
                   {report.industry}
                 </Badge>
+                {report.content?.retailerHook && (
+                  <Badge 
+                    variant="secondary"
+                    className="text-xs px-2.5 py-1 bg-orange-50 text-orange-700"
+                  >
+                    {report.content.retailerHook}
+                  </Badge>
+                )}
                 {report.isNew && (
                   <Badge 
                     className="text-white text-xs font-medium px-2 py-1"
@@ -520,12 +552,18 @@ export default function InsightDetail() {
               </div>
 
               <h1 
-                className="text-2xl md:text-4xl font-bold mb-3 text-white leading-tight"
+                className="text-2xl md:text-4xl font-bold mb-1 text-white leading-tight"
                 style={{ fontFamily: 'DM Serif Display, serif' }}
                 data-testid="text-report-title"
               >
                 {report.title}
               </h1>
+              
+              {subtitle && (
+                <p className="text-lg md:text-xl text-white/90 mb-3 italic" data-testid="text-report-subtitle">
+                  {subtitle}
+                </p>
+              )}
 
               <div className="flex items-center gap-4 text-sm text-white/80">
                 <div className="flex items-center gap-1.5">
@@ -574,42 +612,169 @@ export default function InsightDetail() {
 
           {!accessResult.hasAccess ? (
             <div className="my-8">
-              <AccessPaywall 
-                accessResult={accessResult}
-                report={report}
-                onLogin={handleLogin}
-                onUpgrade={handleUpgrade}
-                onPurchaseCredits={handlePurchaseCredits}
-              />
-              
-              <div className="mt-8 pt-8 border-t border-gray-100">
-                <p className="text-sm text-gray-500 text-center">
-                  The full content is available to members with appropriate access level.
-                </p>
-              </div>
+              {report.content && (
+                <article className="prose prose-lg max-w-none mb-8">
+                  <p className="text-lg text-gray-700 leading-relaxed font-medium mb-6">
+                    {report.content.intro}
+                  </p>
+
+                  {report.content.sections.map((section, index) => (
+                    <div key={index} className="mb-8">
+                      <h2 
+                        className="text-xl font-bold mb-3 text-gray-900"
+                        style={{ fontFamily: 'DM Serif Display, serif' }}
+                      >
+                        {section.heading}
+                      </h2>
+                      {section.heading.toLowerCase().includes("what you") ? (
+                        <ul className="space-y-2">
+                          {section.body.split('\n').filter(l => l.trim()).map((line, i) => (
+                            <li key={i} className="flex items-start gap-2.5 text-gray-700">
+                              <CheckCircle2 className="w-5 h-5 text-[#5B6EF7] flex-shrink-0 mt-0.5" />
+                              <span>{line.trim()}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : section.heading.toLowerCase().includes("featured") || section.heading.toLowerCase().includes("signal") ? (
+                        <div className="space-y-3">
+                          {section.body.split('\n').filter(l => l.trim()).map((line, i) => (
+                            <div key={i} className="flex items-start gap-2.5 p-3 bg-gray-50 rounded-lg">
+                              <TrendingUp className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                              <span className="text-gray-700 font-medium">{line.trim()}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                          {section.body}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {report.content.closingLine && (
+                    <p className="text-lg text-gray-900 font-medium italic border-l-4 border-[#5B6EF7] pl-4 mt-8">
+                      {report.content.closingLine}
+                    </p>
+                  )}
+                </article>
+              )}
+
+              <Card className="border-2 border-[#5B6EF7]/20 bg-gradient-to-br from-blue-50 to-white" id="report-download">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 rounded-full bg-[#5B6EF7]/10 flex items-center justify-center mx-auto mb-4">
+                    <Lock className="w-8 h-8 text-[#5B6EF7]" />
+                  </div>
+                  <h3 
+                    className="text-xl font-bold mb-2 text-gray-900"
+                    style={{ fontFamily: 'DM Serif Display, serif' }}
+                  >
+                    {report.content?.ctaLabel || "Members-Only Content"}
+                  </h3>
+                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                    {report.content?.ctaHelper || accessResult.message || "Become a member to access this content."}
+                  </p>
+                  
+                  {accessResult.reason === "not_logged_in" ? (
+                    <div className="flex flex-col items-center gap-3">
+                      <Button 
+                        onClick={handleLogin}
+                        className="rounded-full"
+                        style={{ backgroundColor: '#5B6EF7' }}
+                        data-testid="button-login-access"
+                      >
+                        <LogIn className="w-4 h-4 mr-2" />
+                        Sign In to Continue
+                      </Button>
+                      {report.content?.ctaEmail && (
+                        <p className="text-sm text-gray-500">
+                          Or email{' '}
+                          <a 
+                            href={`mailto:${report.content.ctaEmail}`} 
+                            className="text-[#5B6EF7] hover:underline"
+                            data-testid="link-cta-email"
+                          >
+                            {report.content.ctaEmail}
+                          </a>
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-3">
+                      <Button 
+                        onClick={handleUpgrade}
+                        className="rounded-full"
+                        style={{ backgroundColor: '#5B6EF7' }}
+                        data-testid="button-upgrade-tier"
+                      >
+                        <Crown className="w-4 h-4 mr-2" />
+                        Become a Member
+                      </Button>
+                      {report.content?.ctaEmail && (
+                        <p className="text-sm text-gray-500">
+                          Or email{' '}
+                          <a 
+                            href={`mailto:${report.content.ctaEmail}`} 
+                            className="text-[#5B6EF7] hover:underline"
+                            data-testid="link-cta-email"
+                          >
+                            {report.content.ctaEmail}
+                          </a>
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           ) : (
             <>
               {report.content && (
                 <article className="prose prose-lg max-w-none">
-                  <div className="text-gray-700 leading-relaxed whitespace-pre-line mb-10">
+                  <p className="text-lg text-gray-700 leading-relaxed font-medium mb-8">
                     {report.content.intro}
-                  </div>
+                  </p>
 
                   {report.content.sections.map((section, index) => (
-                    <div key={index} className="mb-10">
-                      {index > 0 && <hr className="border-gray-100 my-10" />}
+                    <div key={index} className="mb-8">
+                      {index > 0 && <hr className="border-gray-100 my-8" />}
                       <h2 
-                        className="text-2xl font-bold mb-4 text-gray-900"
+                        className="text-xl font-bold mb-3 text-gray-900"
                         style={{ fontFamily: 'DM Serif Display, serif' }}
                       >
                         {section.heading}
                       </h2>
-                      <div className="text-gray-700 leading-relaxed whitespace-pre-line">
-                        {section.body}
-                      </div>
+                      {section.heading.toLowerCase().includes("what you") ? (
+                        <ul className="space-y-2">
+                          {section.body.split('\n').filter(l => l.trim()).map((line, i) => (
+                            <li key={i} className="flex items-start gap-2.5 text-gray-700">
+                              <CheckCircle2 className="w-5 h-5 text-[#5B6EF7] flex-shrink-0 mt-0.5" />
+                              <span>{line.trim()}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : section.heading.toLowerCase().includes("featured") || section.heading.toLowerCase().includes("signal") ? (
+                        <div className="space-y-3">
+                          {section.body.split('\n').filter(l => l.trim()).map((line, i) => (
+                            <div key={i} className="flex items-start gap-2.5 p-3 bg-gray-50 rounded-lg">
+                              <TrendingUp className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                              <span className="text-gray-700 font-medium">{line.trim()}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                          {section.body}
+                        </div>
+                      )}
                     </div>
                   ))}
+
+                  {report.content.closingLine && (
+                    <p className="text-lg text-gray-900 font-medium italic border-l-4 border-[#5B6EF7] pl-4 mt-8 mb-8">
+                      {report.content.closingLine}
+                    </p>
+                  )}
                 </article>
               )}
 
@@ -622,7 +787,7 @@ export default function InsightDetail() {
                     Go deeper with the full report
                   </h3>
                   <p className="text-gray-600 mb-6">
-                    This article gives you the full story. If you need all diagnostics, numbers, and charts, access the full research report.
+                    {report.content?.ctaHelper || "This article gives you the full story. If you need all diagnostics, numbers, and charts, access the full research report."}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     {report.pdfPath && (
@@ -650,6 +815,17 @@ export default function InsightDetail() {
                       </Button>
                     )}
                   </div>
+                  {report.content?.ctaEmail && (
+                    <p className="text-sm text-gray-500 mt-4">
+                      Or email{' '}
+                      <a 
+                        href={`mailto:${report.content.ctaEmail}`} 
+                        className="text-[#5B6EF7] hover:underline"
+                      >
+                        {report.content.ctaEmail}
+                      </a>
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -741,6 +917,6 @@ export default function InsightDetail() {
           </button>
         )}
       </div>
-    </PortalLayout>
+    </InsightPageWrapper>
   );
 }

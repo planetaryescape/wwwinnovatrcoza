@@ -3227,6 +3227,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public endpoint for report cover images (no auth required for library display)
+  app.get("/api/files/reports/images/*", async (req, res) => {
+    try {
+      const imageName = (req.params as Record<string, string>)[0];
+      if (!imageName) {
+        return res.status(400).json({ error: "Image path required" });
+      }
+      
+      const filePath = `reports/images/${imageName}`;
+      
+      if (filePath.includes("..") || !imageName.match(/\.(png|jpg|jpeg|gif|webp)$/i)) {
+        return res.status(400).json({ error: "Invalid image path" });
+      }
+
+      const exists = await fileExists(filePath);
+      if (!exists) {
+        return res.status(404).json({ error: "Image not found" });
+      }
+
+      const fileBuffer = await downloadFile(filePath);
+      if (!fileBuffer) {
+        return res.status(500).json({ error: "Failed to download image" });
+      }
+
+      const ext = filePath.split(".").pop()?.toLowerCase();
+      const contentTypes: Record<string, string> = {
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        png: "image/png",
+        gif: "image/gif",
+        webp: "image/webp",
+      };
+
+      res.setHeader("Content-Type", contentTypes[ext || ""] || "image/png");
+      res.setHeader("Cache-Control", "public, max-age=31536000");
+      res.send(fileBuffer);
+    } catch (error: any) {
+      console.error("Public report image serve error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Serve files from App Storage - require authentication with access control
   app.get("/api/files/*", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
