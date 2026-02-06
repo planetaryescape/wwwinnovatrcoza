@@ -320,7 +320,7 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId, isPaidSeat, o
         </div>
       </div>
 
-      <div className="relative h-44 mx-4 rounded-lg overflow-hidden">
+      <div className="relative h-56 mx-4 rounded-lg overflow-hidden">
         <img
           src={coverImage}
           alt={report.category}
