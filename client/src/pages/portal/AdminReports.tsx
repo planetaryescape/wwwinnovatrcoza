@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,9 @@ import {
   RefreshCw,
   Loader2,
   Trash2,
+  Image,
+  Check,
+  X,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ReportEditorModal from "./ReportEditorModal";
@@ -148,6 +151,62 @@ export default function AdminReports() {
   });
   const [reportToDelete, setReportToDelete] = useState<ReportData | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [inlineEditId, setInlineEditId] = useState<string | null>(null);
+  const [inlineEditTitle, setInlineEditTitle] = useState("");
+  const [inlineSaving, setInlineSaving] = useState(false);
+  const quickImageInputRef = useRef<HTMLInputElement>(null);
+  const [quickImageReportId, setQuickImageReportId] = useState<string | null>(null);
+
+  const handleInlineTitleSave = async (reportId: string) => {
+    if (!inlineEditTitle.trim()) return;
+    setInlineSaving(true);
+    try {
+      const res = await fetch(`/api/admin/reports/${reportId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: inlineEditTitle.trim() }),
+      });
+      if (!res.ok) throw new Error("Failed to update");
+      setReports(prev => prev.map(r => r.id === reportId ? { ...r, title: inlineEditTitle.trim() } : r));
+      toast({ title: "Title updated" });
+    } catch (err) {
+      toast({ title: "Error", description: "Could not update title", variant: "destructive" });
+    } finally {
+      setInlineSaving(false);
+      setInlineEditId(null);
+    }
+  };
+
+  const handleQuickImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !quickImageReportId) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please select an image file", variant: "destructive" });
+      return;
+    }
+    try {
+      const formDataPayload = new FormData();
+      formDataPayload.append("file", file);
+      formDataPayload.append("fileType", "cover");
+      const uploadRes = await fetch("/api/admin/reports/upload", { method: "POST", body: formDataPayload });
+      if (!uploadRes.ok) throw new Error("Upload failed");
+      const { url } = await uploadRes.json();
+      
+      const patchRes = await fetch(`/api/admin/reports/${quickImageReportId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ coverImageUrl: url }),
+      });
+      if (!patchRes.ok) throw new Error("Save failed");
+      setReports(prev => prev.map(r => r.id === quickImageReportId ? { ...r, coverImage: url } : r));
+      toast({ title: "Cover image updated" });
+    } catch (err) {
+      toast({ title: "Error", description: "Could not update image", variant: "destructive" });
+    } finally {
+      setQuickImageReportId(null);
+      if (quickImageInputRef.current) quickImageInputRef.current.value = "";
+    }
+  };
 
   const fetchReports = useCallback(async () => {
     try {
@@ -615,14 +674,49 @@ export default function AdminReports() {
                     <TableRow 
                       key={report.id} 
                       className="hover:bg-gray-50 cursor-pointer"
-                      onClick={() => handleEdit(report)}
+                      onClick={() => inlineEditId !== report.id && handleEdit(report)}
                       data-testid={`row-report-${report.id}`}
                     >
-                      <TableCell>
-                        <div className="max-w-[300px]">
-                          <p className="font-medium text-sm text-gray-900 truncate">{report.title}</p>
-                          <p className="text-xs text-muted-foreground truncate">{report.teaser}</p>
-                        </div>
+                      <TableCell onClick={(e) => e.stopPropagation()}>
+                        {inlineEditId === report.id ? (
+                          <div className="flex items-center gap-1 max-w-[300px]">
+                            <Input
+                              value={inlineEditTitle}
+                              onChange={(e) => setInlineEditTitle(e.target.value)}
+                              className="h-7 text-sm"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") handleInlineTitleSave(report.id);
+                                if (e.key === "Escape") setInlineEditId(null);
+                              }}
+                              data-testid={`input-inline-title-${report.id}`}
+                            />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 flex-shrink-0"
+                              onClick={() => handleInlineTitleSave(report.id)}
+                              disabled={inlineSaving}
+                              data-testid={`button-inline-save-${report.id}`}
+                            >
+                              {inlineSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 text-green-600" />}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 flex-shrink-0"
+                              onClick={() => setInlineEditId(null)}
+                              data-testid={`button-inline-cancel-${report.id}`}
+                            >
+                              <X className="w-3.5 h-3.5 text-muted-foreground" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="max-w-[300px] group/title">
+                            <p className="font-medium text-sm text-gray-900 truncate">{report.title}</p>
+                            <p className="text-xs text-muted-foreground truncate">{report.teaser}</p>
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge className={`text-xs border-0 ${isClient ? 'bg-indigo-50 text-indigo-700' : 'bg-teal-50 text-teal-700'}`}>
@@ -664,6 +758,20 @@ export default function AdminReports() {
                             <DropdownMenuItem onClick={() => handleEdit(report)}>
                               <Pencil className="w-4 h-4 mr-2" />
                               Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              setInlineEditId(report.id);
+                              setInlineEditTitle(report.title);
+                            }}>
+                              <FileText className="w-4 h-4 mr-2" />
+                              Rename
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              setQuickImageReportId(report.id);
+                              setTimeout(() => quickImageInputRef.current?.click(), 50);
+                            }}>
+                              <Image className="w-4 h-4 mr-2" />
+                              Change Image
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => window.open(`/portal/insights/${report.slug}`, '_blank')}>
                               <Eye className="w-4 h-4 mr-2" />
@@ -708,6 +816,15 @@ export default function AdminReports() {
         onOpenChange={setModalOpen} 
         report={selectedReport}
         onSuccess={handleRefresh} 
+      />
+
+      <input
+        ref={quickImageInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleQuickImageUpload}
+        className="hidden"
+        data-testid="input-quick-image"
       />
 
       <AlertDialog open={!!reportToDelete} onOpenChange={(open) => !open && setReportToDelete(null)}>

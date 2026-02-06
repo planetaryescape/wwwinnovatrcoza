@@ -1,0 +1,248 @@
+Context:
+We have 3 Innovatr Launch Intelligence reports on the site. They were previously added as PPTX-based items and now have incorrect titles, wrong copy, and an inconsistent vibe. We need to replace their metadata and visuals so they match the rest of the Innovatr Intelligence library.
+
+Assets available (use these exact files):
+
+Header images (must be used as the report thumbnails/hero images):
+
+Functional Beverages image: /mnt/data/9.png
+
+Beauty image: /mnt/data/10.png
+
+Health image: /mnt/data/11.png
+
+PDFs (must be the downloadable “Full report” files):
+
+Functional Beverages PDF: /mnt/data/Innovatr Launch Functional Beverages.pdf
+
+Beauty PDF: /mnt/data/Innovatr Launch Beuaty.pdf
+
+Health PDF: /mnt/data/Innovatr Launch Helath.pdf
+
+Goal:
+
+Replace the 3 incorrect report entries (title/content/preview text) with the correct titles and accurate, brand-safe copy.
+
+Use the provided images for each report (not screenshots or placeholders).
+
+Ensure the report cards match the site’s existing design system (clean, modern, consistent spacing, no mismatched typography).
+
+Make the CTA membership-gated: users can view the teaser, but must be a member to download the full PDF (or be prompted to email).
+
+Fix any naming/slug typos (“Beuaty”, “Helath”) in file naming and links.
+
+Step A — Add assets into the project in the correct place
+
+Create directories if they don’t exist:
+
+public/intelligence/images/
+
+public/intelligence/reports/
+
+Copy assets into public so the site can serve them:
+
+Copy /mnt/data/9.png → public/intelligence/images/launch-functional-beverages.png
+
+Copy /mnt/data/10.png → public/intelligence/images/launch-beauty.png
+
+Copy /mnt/data/11.png → public/intelligence/images/launch-health.png
+
+Copy /mnt/data/Innovatr Launch Functional Beverages.pdf → public/intelligence/reports/innovatr-launch-functional-beverages.pdf
+
+Copy /mnt/data/Innovatr Launch Beuaty.pdf → public/intelligence/reports/innovatr-launch-beauty.pdf (fix filename typo)
+
+Copy /mnt/data/Innovatr Launch Helath.pdf → public/intelligence/reports/innovatr-launch-health.pdf (fix filename typo)
+
+Step B — Find where reports are defined
+
+Search the codebase for the reports listing source, for example:
+
+reports.json
+
+insights.json
+
+library.json
+
+src/data/reports.*
+
+src/content/reports.*
+
+intelligenceReports
+
+any array/object that contains existing report cards (title, teaser, category, url).
+
+Once found, update ONLY the three report entries below.
+
+Step C — Replace the 3 report entries with this exact metadata + copy
+1) Functional Beverages (Launch Intelligence)
+
+id/slug: launch-functional-beverages-q1-2026
+category: Launch Intelligence
+industry: Functional Beverages
+retailer_hook: Checkers
+title (must match PDF): ‘Better for You’ Is Background Noise
+subtitle (must match PDF): It’s not a category crisis. It’s a vibe shift.
+teaser (card preview, 1–2 lines):
+South Africans still want function — they just don’t want to be sold a lifestyle. Quiet credibility is outperforming loud claims.
+coverImage: /intelligence/images/launch-functional-beverages.png
+pdfUrl: /intelligence/reports/innovatr-launch-functional-beverages.pdf
+tags: Trust, Believability, Everyday Fit, Shelf Strategy
+
+page content (short description on report page):
+Key idea: Functional benefits have become expected, not exceptional. The winning move is to make function feel normal.
+What you’ll learn (bullets):
+
+Why “loud” health claims are being filtered out as noise
+
+The trust gap between Interest and real Commitment in value-conscious SA
+
+How placement and context are now doing more work than copy
+
+The new rules: calm cues, everyday use, earned belief, transparency
+Featured signals (pull from the report):
+
+74% say brand trust is non-negotiable
+
+67% expect function but resist being sold to
+
+36% conversion loss between initial interest and commitment
+Closing line:
+The detail sits behind the data.
+
+CTA block (membership-gated):
+
+Button label (logged out / non-member): Request member access to download
+
+Helper text: This deck is a directional extract. Innovatr members can download the full report and access deeper data cuts.
+
+Secondary CTA: Or email hannah@innovatr.co.za
+
+2) Beauty (Launch Intelligence)
+
+id/slug: launch-beauty-q1-2026
+category: Launch Intelligence
+industry: Beauty
+retailer_hook: Clicks
+title (must match PDF): Clicks didn’t upgrade beauty.
+subtitle (must match PDF): It softened it.
+teaser (card preview, 1–2 lines):
+Beauty hasn’t become basic — it’s become supportive. Calm, safety and routine now outperform intensity and “fixing” language.
+coverImage: /intelligence/images/launch-beauty.png
+pdfUrl: /intelligence/reports/innovatr-launch-beauty.pdf
+tags: Barrier Care, Gentle Efficacy, Proof Culture, Routine
+
+page content (short description on report page):
+Key idea: Beauty performance has been redefined: stability, tolerance and reassurance beat aggressive transformation.
+What you’ll learn (bullets):
+
+Why “before/after” and miracle timelines are collapsing as credibility signals
+
+How barrier health and sensitive-skin framing is moving from niche to mainstream
+
+Why private label + pharmacy cues are winning trust and repeat
+
+The new mandate: stop selling fixing; start selling support
+Featured signals (pull from the report):
+
+74% reject exaggerated hype (e.g., “before/after” style proof cues)
+
+3x faster growth for “Sensitive” SKUs
+
++20.5% private label growth outpacing branded goods
+Closing line:
+The detail sits behind the data.
+
+CTA block (membership-gated):
+
+Button label (non-member): Unlock full Beauty intelligence
+
+Helper text: Innovatr members can download the complete report and access deeper category tracking.
+
+Secondary CTA: Or email hannah@innovatr.co.za
+
+3) Health (Launch Intelligence)
+
+id/slug: launch-health-q1-2026
+category: Launch Intelligence
+industry: Health
+retailer_hook: Dis-Chem
+title (must match PDF): Dis-Chem didn’t make health better.
+subtitle (must match PDF): It made it usable.
+teaser (card preview, 1–2 lines):
+In SA, health decisions are driven by survival, not optimisation. Usability is now the premium feature.
+coverImage: /intelligence/images/launch-health.png
+pdfUrl: /intelligence/reports/innovatr-launch-health.pdf
+tags: Usability, Fatigue, Integration, Immediate Needs
+
+page content (short description on report page):
+Key idea: Consumers aren’t rejecting health — they’re editing it for feasibility. Brands win by reducing effort and lowering risk.
+What you’ll learn (bullets):
+
+Why “coping beats optimising” is the new health logic
+
+The two filters health products must pass: immediacy + reality
+
+Where health innovation loses people: lifestyle promises, over-education, guilt, admin
+
+How practical launches drive adoption, retention, and trust
+Featured signals (pull from the report):
+
+49% report having income only for absolute basics
+
+Health is evaluated through “Will this help today?” and “Can I keep this up?” logic
+
+Complexity increases drop-off when routines require more than ~2 steps
+Closing line:
+The detail sits behind the data.
+
+CTA block (membership-gated):
+
+Button label (non-member): Download full report (Members)
+
+Helper text: This is a directional extract. Members access deeper cuts, formatting and ongoing behavioural tracking.
+
+Secondary CTA: Or email hannah@innovatr.co.za
+
+Step D — Enforce consistent “vibe” on the UI
+
+Update the report card + detail page styling so these match the rest of the library:
+
+Use the image as a clean 16:9 hero/thumbnail (no weird cropping, keep rounded corners consistent with other cards)
+
+Avoid heavy shadows / random font styles
+
+Ensure title + subtitle hierarchy is consistent
+
+Ensure all 3 cards have the same metadata layout: Category → Industry → Title → Teaser → CTA
+
+Step E — Membership gating behaviour (do not break anything)
+
+If the user is NOT a member:
+
+They can see the report page, teaser copy, and “What you’ll learn”
+
+The download button should be disabled OR open a “Request access” modal
+
+The modal must show:
+
+Visit innovatr.co.za
+
+Email hannah@innovatr.co.za
+
+If the user IS a member:
+
+Show an active Download full report button linking directly to the pdfUrl
+
+Step F — Final QA checklist
+
+The three titles/subtitles match the PDFs exactly
+
+The three images used are exactly the provided ones
+
+The PDF links download successfully
+
+No spelling errors (especially “Beauty” and “Health”)
+
+The vibe matches the rest of the site (no mismatched fonts/spacing)
+
+Now implement.
