@@ -554,25 +554,19 @@ export default function TrendsInsights() {
     <PortalLayout>
       <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="mb-8 flex items-start justify-between gap-4">
-            <div>
-              <h1 
-                className="text-4xl md:text-5xl font-bold mb-3 text-foreground"
-                style={{ fontFamily: 'DM Serif Display, serif' }}
-              >
-                Trends & Insights Library
-              </h1>
-              <p className="text-lg text-muted-foreground" style={{ fontFamily: 'Roboto, sans-serif' }}>Your inside track on SA's shifting market.</p>
+          <div className="mb-8">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h1 
+                  className="text-4xl md:text-5xl font-bold mb-3 text-foreground"
+                  style={{ fontFamily: 'DM Serif Display, serif' }}
+                >
+                  Trends & Insights Library
+                </h1>
+                <p className="text-lg text-muted-foreground" style={{ fontFamily: 'Roboto, sans-serif' }}>Your inside track on SA's shifting market.</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <Button
-                onClick={openRequestModal}
-                className="gap-1.5"
-                data-testid="button-request-report"
-              >
-                <MessageSquarePlus className="w-4 h-4" />
-                Request a Report
-              </Button>
+            <div className="flex items-center gap-2 flex-wrap">
               <Button
                 variant="outline"
                 size="icon"
@@ -597,6 +591,14 @@ export default function TrendsInsights() {
                 data-testid="button-view-list"
               >
                 <List className="w-4 h-4" />
+              </Button>
+              <Button
+                onClick={openRequestModal}
+                className="gap-1.5"
+                data-testid="button-request-report"
+              >
+                <MessageSquarePlus className="w-4 h-4" />
+                Request a Report
               </Button>
             </div>
           </div>
