@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -399,6 +399,18 @@ export default function InsightDetail() {
     ? checkReportAccess(report, user as { membershipTier?: string; creditsBasic?: number; creditsPro?: number } | null, hasPaidSeatAccess)
     : { hasAccess: true, reason: "public" as const };
 
+  const viewTracked = useRef(false);
+  useEffect(() => {
+    if (report?.id && !viewTracked.current) {
+      viewTracked.current = true;
+      fetch(`/api/reports/${report.id}/events`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventType: "view" }),
+      }).catch(() => {});
+    }
+  }, [report?.id]);
+
   // Show back to top button after scrolling down one viewport height
   useEffect(() => {
     const handleScroll = () => {
@@ -480,7 +492,13 @@ export default function InsightDetail() {
       title: "Download Started",
       description: "Your report is being downloaded.",
     });
-    // Add download query param with report title for proper filename
+
+    fetch(`/api/reports/${report.id}/events`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eventType: "download" }),
+    }).catch(() => {});
+
     const ext = report.pdfPath.split('.').pop() || 'pdf';
     const downloadName = encodeURIComponent(`${report.title}.${ext}`);
     const downloadUrl = `${report.pdfPath}${report.pdfPath.includes('?') ? '&' : '?'}download=${downloadName}`;

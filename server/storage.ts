@@ -43,6 +43,8 @@ import {
   type InsertReportEvent,
   type ReportLastViewed,
   type InsertReportLastViewed,
+  type ReportRequest,
+  type InsertReportRequest,
   users,
   passwordResets,
   creditLedger,
@@ -64,6 +66,7 @@ import {
   studies,
   reportEvents,
   reportLastViewed,
+  reportRequests,
 } from "@shared/schema";
 import { eq, and, lte, gte, desc, sql } from "drizzle-orm";
 import { db } from "./db";
@@ -192,6 +195,12 @@ export interface IStorage {
   
   // User Activity Stats
   getUserReportDownloadCount(userId: string): Promise<number>;
+
+  // Report Requests
+  createReportRequest(request: InsertReportRequest): Promise<ReportRequest>;
+  getReportRequest(id: string): Promise<ReportRequest | undefined>;
+  getAllReportRequests(): Promise<ReportRequest[]>;
+  updateReportRequest(id: string, updates: Partial<ReportRequest>): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1742,6 +1751,24 @@ export class DatabaseStorage implements IStorage {
         eq(reportEvents.eventType, 'download')
       ));
     return downloads.length;
+  }
+
+  async createReportRequest(request: InsertReportRequest): Promise<ReportRequest> {
+    const [created] = await db.insert(reportRequests).values(request).returning();
+    return created;
+  }
+
+  async getReportRequest(id: string): Promise<ReportRequest | undefined> {
+    const [request] = await db.select().from(reportRequests).where(eq(reportRequests.id, id));
+    return request;
+  }
+
+  async getAllReportRequests(): Promise<ReportRequest[]> {
+    return db.select().from(reportRequests).orderBy(desc(reportRequests.createdAt));
+  }
+
+  async updateReportRequest(id: string, updates: Partial<ReportRequest>): Promise<void> {
+    await db.update(reportRequests).set({ ...updates, updatedAt: new Date() }).where(eq(reportRequests.id, id));
   }
 }
 

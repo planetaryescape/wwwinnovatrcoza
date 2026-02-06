@@ -2101,6 +2101,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         metadata: metadata || null,
       });
       
+      // Increment view/download count on the report
+      if (eventType === 'view') {
+        await storage.updateReport(id, { viewCount: (report.viewCount || 0) + 1 });
+      } else if (eventType === 'download') {
+        await storage.updateReport(id, { downloadCount: (report.downloadCount || 0) + 1 });
+      }
+
       // If member viewed, also update the last viewed record
       if (userId && eventType === 'view') {
         await storage.upsertReportLastViewed({
@@ -2116,6 +2123,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, eventId: event.id });
     } catch (error: any) {
       console.error("Report event tracking error:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Report Requests endpoints
+  app.post("/api/report-requests", async (req, res) => {
+    try {
+      const { name, email, industry, topic, reason, companyName } = req.body;
+      
+      if (!name || !email || !industry || !topic || !reason) {
+        return res.status(400).json({ error: "Name, email, industry, topic, and reason are required" });
+      }
+
+      let userId: string | undefined;
+      let companyId: string | undefined;
+      let resolvedCompanyName = companyName;
+
+      const sessionToken = req.cookies?.session;
+      if (sessionToken) {
+        const { hashSessionToken } = await import("./auth/password");
+        const tokenHash = hashSessionToken(sessionToken);
+        const session = await storage.getSessionByTokenHash(tokenHash);
+        if (session) {
+          const user = await storage.getUser(session.userId);
+          if (user) {
+            userId = user.id;
+            companyId = user.companyId || undefined;
+            if (user.companyId) {
+              const company = await storage.getCompany(user.companyId);
+              resolvedCompanyName = company?.name || companyName;
+            }
+          }
+        }
+      }
+
+      const request = await storage.createReportRequest({
+        name,
+        email,
+        companyName: resolvedCompanyName || null,
+        industry,
+        topic,
+        reason,
+        status: "pending",
+        userId: userId || null,
+        companyId: companyId || null,
+        adminNotes: null,
+      });
+
+      try {
+        await emailService.sendReportRequestNotification({ name, email, companyName: resolvedCompanyName, industry, topic, reason });
+      } catch (emailErr) {
+        console.error("Failed to send report request notification email:", emailErr);
+      }
+
+      res.status(201).json({ success: true, id: request.id });
+    } catch (error: any) {
+      console.error("Report request error:", error);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/admin/report-requests", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const requests = await storage.getAllReportRequests();
+      res.json(requests);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/admin/report-requests/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const request = await storage.getReportRequest(id);
+      if (!request) {
+        return res.status(404).json({ error: "Report request not found" });
+      }
+
+      const { status, adminNotes } = req.body;
+      await storage.updateReportRequest(id, { ...(status && { status }), ...(adminNotes !== undefined && { adminNotes }) });
+
+      if (status === "received") {
+        try {
+          await emailService.sendReportRequestConfirmation(request.email, request.name, request.topic);
+        } catch (emailErr) {
+          console.error("Failed to send report request confirmation:", emailErr);
+        }
+      }
+
+      res.json({ success: true });
+    } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
   });

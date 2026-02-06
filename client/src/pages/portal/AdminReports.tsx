@@ -58,6 +58,10 @@ import {
   Image,
   Check,
   X,
+  Sparkles,
+  MessageSquarePlus,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ReportEditorModal from "./ReportEditorModal";
@@ -156,6 +160,72 @@ export default function AdminReports() {
   const [inlineSaving, setInlineSaving] = useState(false);
   const quickImageInputRef = useRef<HTMLInputElement>(null);
   const [quickImageReportId, setQuickImageReportId] = useState<string | null>(null);
+
+  interface ReportRequest {
+    id: string;
+    name: string;
+    email: string;
+    companyName: string;
+    industry: string;
+    topic: string;
+    reason: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+  }
+
+  const [reportRequests, setReportRequests] = useState<ReportRequest[]>([]);
+  const [requestsExpanded, setRequestsExpanded] = useState(true);
+  const [requestActionLoading, setRequestActionLoading] = useState<string | null>(null);
+
+  const pendingRequestsCount = useMemo(
+    () => reportRequests.filter(r => r.status === "pending").length,
+    [reportRequests]
+  );
+
+  const fetchReportRequests = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/report-requests");
+      if (!res.ok) return;
+      const data = await res.json();
+      setReportRequests(data);
+    } catch (err) {
+      console.error("Failed to fetch report requests:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchReportRequests();
+  }, [fetchReportRequests]);
+
+  const handleUpdateRequestStatus = async (id: string, status: string) => {
+    setRequestActionLoading(id);
+    try {
+      const res = await fetch(`/api/admin/report-requests/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error("Failed to update status");
+      setReportRequests(prev =>
+        prev.map(r => r.id === id ? { ...r, status } : r)
+      );
+      toast({
+        title: status === "received" ? "Marked as received" : "Marked as complete",
+        description: status === "received"
+          ? "Confirmation email sent to requester."
+          : "Request marked as completed.",
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Could not update request status.",
+        variant: "destructive",
+      });
+    } finally {
+      setRequestActionLoading(null);
+    }
+  };
 
   const handleInlineTitleSave = async (reportId: string) => {
     if (!inlineEditTitle.trim()) return;
@@ -324,6 +394,26 @@ export default function AdminReports() {
     setModalOpen(true);
   };
 
+  const handleToggleFeatured = async (report: ReportData) => {
+    try {
+      const newValue = !report.isFeatured;
+      await fetch(`/api/admin/reports/${report.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isFeatured: newValue }),
+      });
+      setReports(reports.map(r => 
+        r.id === report.id ? { ...r, isFeatured: newValue } : r
+      ));
+      toast({
+        title: newValue ? "Report featured" : "Report unfeatured",
+        description: newValue ? "This report will now appear in the Featured spotlight." : "This report has been removed from Featured.",
+      });
+    } catch (err) {
+      console.error("Failed to toggle featured:", err);
+    }
+  };
+
   const handleArchive = async (reportId: string) => {
     try {
       await fetch(`/api/admin/reports/${reportId}`, {
@@ -386,6 +476,104 @@ export default function AdminReports() {
 
   return (
     <div className="space-y-6">
+      <Card className="bg-white border" data-testid="report-requests-section">
+        <div
+          className="flex items-center justify-between gap-2 p-4 cursor-pointer select-none"
+          onClick={() => setRequestsExpanded(prev => !prev)}
+        >
+          <div className="flex items-center gap-2">
+            <MessageSquarePlus className="w-5 h-5 text-[#0033A0]" />
+            <h3 className="text-lg font-semibold text-gray-900">Report Requests</h3>
+            {pendingRequestsCount > 0 && (
+              <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">
+                {pendingRequestsCount} pending
+              </Badge>
+            )}
+          </div>
+          <Button variant="ghost" size="icon">
+            {requestsExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </Button>
+        </div>
+        {requestsExpanded && (
+          <CardContent className="p-4 pt-0">
+            {reportRequests.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">No report requests yet</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gray-50">
+                      <TableHead className="font-medium">Date</TableHead>
+                      <TableHead className="font-medium">Name</TableHead>
+                      <TableHead className="font-medium">Email</TableHead>
+                      <TableHead className="font-medium">Company</TableHead>
+                      <TableHead className="font-medium">Industry</TableHead>
+                      <TableHead className="font-medium">Topic</TableHead>
+                      <TableHead className="font-medium">Status</TableHead>
+                      <TableHead className="font-medium">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {reportRequests.map((req) => {
+                      const statusColors: Record<string, string> = {
+                        pending: "bg-amber-100 text-amber-700",
+                        received: "bg-blue-100 text-blue-700",
+                        completed: "bg-green-100 text-green-700",
+                      };
+                      return (
+                        <TableRow key={req.id} data-testid={`row-request-${req.id}`}>
+                          <TableCell className="text-sm text-gray-600 whitespace-nowrap">
+                            {new Date(req.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                          </TableCell>
+                          <TableCell className="text-sm font-medium text-gray-900">{req.name}</TableCell>
+                          <TableCell className="text-sm text-gray-600">{req.email}</TableCell>
+                          <TableCell className="text-sm text-gray-600">{req.companyName}</TableCell>
+                          <TableCell className="text-sm text-gray-600">{req.industry}</TableCell>
+                          <TableCell className="text-sm text-gray-600 max-w-[200px] truncate">{req.topic}</TableCell>
+                          <TableCell>
+                            <Badge className={`text-xs border-0 ${statusColors[req.status] || "bg-gray-100 text-gray-700"}`}>
+                              {req.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-1 flex-wrap">
+                              {req.status === "pending" && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  disabled={requestActionLoading === req.id}
+                                  onClick={() => handleUpdateRequestStatus(req.id, "received")}
+                                  data-testid={`button-mark-received-${req.id}`}
+                                >
+                                  {requestActionLoading === req.id ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                                  Mark as Received
+                                </Button>
+                              )}
+                              {(req.status === "pending" || req.status === "received") && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  disabled={requestActionLoading === req.id}
+                                  onClick={() => handleUpdateRequestStatus(req.id, "completed")}
+                                  data-testid={`button-mark-complete-${req.id}`}
+                                >
+                                  {requestActionLoading === req.id ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                                  Mark as Complete
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        )}
+      </Card>
+
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h2 
@@ -713,7 +901,10 @@ export default function AdminReports() {
                           </div>
                         ) : (
                           <div className="max-w-[300px] group/title">
-                            <p className="font-medium text-sm text-gray-900 truncate">{report.title}</p>
+                            <p className="font-medium text-sm text-gray-900 truncate flex items-center gap-1.5">
+                              {report.isFeatured && <Sparkles className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />}
+                              {report.title}
+                            </p>
                             <p className="text-xs text-muted-foreground truncate">{report.teaser}</p>
                           </div>
                         )}
@@ -776,6 +967,13 @@ export default function AdminReports() {
                             <DropdownMenuItem onClick={() => window.open(`/portal/insights/${report.slug}`, '_blank')}>
                               <Eye className="w-4 h-4 mr-2" />
                               View
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleToggleFeatured(report)}
+                              data-testid={`button-toggle-featured-${report.id}`}
+                            >
+                              <Sparkles className={`w-4 h-4 mr-2 ${report.isFeatured ? 'text-amber-500' : ''}`} />
+                              {report.isFeatured ? 'Remove from Featured' : 'Feature Report'}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 

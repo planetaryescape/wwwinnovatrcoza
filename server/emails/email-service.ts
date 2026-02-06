@@ -1372,4 +1372,84 @@ export async function sendInvoiceIssuedEmail(
   }
 }
 
+export async function sendReportRequestNotification(request: {
+  name: string;
+  email: string;
+  companyName?: string | null;
+  industry: string;
+  topic: string;
+  reason: string;
+}) {
+  try {
+    const resend = await getResendClient();
+    const { fromEmail } = await getCredentials();
+
+    const response = await resend.emails.send({
+      from: fromEmail,
+      to: "hannah@innovatr.co.za",
+      subject: `New Report Request: ${request.topic}`,
+      html: `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+          <div style="background: linear-gradient(135deg, ${BRAND_COLOR}, #7c3aed); padding: 30px; border-radius: 12px 12px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 24px;">New Report Request</h1>
+            <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0;">A member has requested a new report</p>
+          </div>
+          <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr><td style="padding: 8px 0; color: ${MUTED_COLOR}; font-size: 14px;">Name</td><td style="padding: 8px 0; color: ${TEXT_COLOR}; font-size: 14px; font-weight: 600;">${request.name}</td></tr>
+              <tr><td style="padding: 8px 0; color: ${MUTED_COLOR}; font-size: 14px;">Email</td><td style="padding: 8px 0; color: ${TEXT_COLOR}; font-size: 14px;">${request.email}</td></tr>
+              ${request.companyName ? `<tr><td style="padding: 8px 0; color: ${MUTED_COLOR}; font-size: 14px;">Company</td><td style="padding: 8px 0; color: ${TEXT_COLOR}; font-size: 14px;">${request.companyName}</td></tr>` : ''}
+              <tr><td style="padding: 8px 0; color: ${MUTED_COLOR}; font-size: 14px;">Industry</td><td style="padding: 8px 0; color: ${TEXT_COLOR}; font-size: 14px;">${request.industry}</td></tr>
+              <tr><td style="padding: 8px 0; color: ${MUTED_COLOR}; font-size: 14px;">Topic</td><td style="padding: 8px 0; color: ${TEXT_COLOR}; font-size: 14px; font-weight: 600;">${request.topic}</td></tr>
+            </table>
+            <div style="margin-top: 20px; padding: 16px; background: #f8fafc; border-radius: 8px; border-left: 4px solid ${BRAND_COLOR};">
+              <p style="margin: 0 0 4px; color: ${MUTED_COLOR}; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Reason / Question</p>
+              <p style="margin: 0; color: ${TEXT_COLOR}; font-size: 14px; line-height: 1.6;">${request.reason}</p>
+            </div>
+          </div>
+          <p style="text-align: center; color: ${FOOTER_COLOR}; font-size: 12px; margin-top: 20px;">This request was submitted via the Trends & Insights Library</p>
+        </div>
+      `,
+    });
+
+    console.log("Report request notification sent:", response);
+    return response;
+  } catch (error) {
+    console.error("Failed to send report request notification:", error);
+    throw error;
+  }
+}
+
+export async function sendReportRequestConfirmation(userEmail: string, userName: string, topic: string) {
+  try {
+    const resend = await getResendClient();
+    const { fromEmail } = await getCredentials();
+
+    const response = await resend.emails.send({
+      from: fromEmail,
+      to: userEmail,
+      subject: `We've received your report request: ${topic}`,
+      html: `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+          <div style="background: linear-gradient(135deg, ${BRAND_COLOR}, #7c3aed); padding: 30px; border-radius: 12px 12px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 24px;">Request Received</h1>
+          </div>
+          <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
+            <p style="color: ${TEXT_COLOR}; font-size: 16px; line-height: 1.6;">Hi ${userName},</p>
+            <p style="color: ${TEXT_COLOR}; font-size: 14px; line-height: 1.6;">We've received your request for a report on <strong>"${topic}"</strong>. Our research team will review this and get back to you shortly.</p>
+            <p style="color: ${MUTED_COLOR}; font-size: 14px; line-height: 1.6;">Thank you for helping us shape our research agenda.</p>
+            <p style="color: ${TEXT_COLOR}; font-size: 14px; margin-top: 24px;">The Innovatr Team</p>
+          </div>
+        </div>
+      `,
+    });
+
+    console.log("Report request confirmation sent:", response);
+    return response;
+  } catch (error) {
+    console.error("Failed to send report request confirmation:", error);
+    throw error;
+  }
+}
+
 export { FRONTEND_URL };

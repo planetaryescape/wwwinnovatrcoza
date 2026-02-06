@@ -1,6 +1,9 @@
 import { useMemo, useEffect, useState, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -16,7 +19,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Building2, Grid3x3, List, RefreshCw, Loader2, Crown } from "lucide-react";
+import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Building2, Grid3x3, List, RefreshCw, Loader2, Crown, Clock, Sparkles, MessageSquarePlus, TrendingUp } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import PortalLayout from "./PortalLayout";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -110,6 +114,7 @@ interface Report {
   videoPaths?: string[];
   tags: string[];
   isNew: boolean;
+  isFeatured?: boolean;
   access?: "free" | "members";
   accessLevel?: string;
   allowedTiers?: string[];
@@ -337,12 +342,12 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId, isPaidSeat, o
           {report.title}
         </h3>
         
-        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 mb-4 flex-1">
+        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mb-4 flex-1">
           {report.teaser}
         </p>
         
         <div className="flex flex-wrap gap-1.5 mb-4">
-          {report.tags.slice(0, 3).map((tag, index) => (
+          {report.tags.slice(0, 2).map((tag, index) => (
             <Badge 
               key={index} 
               variant="secondary" 
@@ -353,10 +358,15 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId, isPaidSeat, o
           ))}
         </div>
         
-        <div className="flex items-center justify-between pt-3 border-t border-border">
-          <span className="text-sm text-muted-foreground">{formattedDate}</span>
+        <div className="flex items-center justify-between pt-3 border-t border-border gap-2">
+          <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+            {formattedDate}
+            <span className="text-muted-foreground/60">·</span>
+            <Clock className="w-3.5 h-3.5 text-muted-foreground/60" />
+            <span className="text-muted-foreground/60">{Math.max(2, Math.ceil((report.teaser?.length || 0) / 500))} min read</span>
+          </span>
           <div 
-            className="flex items-center gap-1 text-sm font-medium transition-colors"
+            className="flex items-center gap-1 text-sm font-medium transition-colors flex-shrink-0"
             style={{ color: isLocked ? 'var(--muted-foreground)' : '#5B6EF7' }}
           >
             <span>{ctaText}</span>
@@ -380,8 +390,12 @@ export default function TrendsInsights() {
   const [refreshing, setRefreshing] = useState(false);
   const [teaseModalOpen, setTeaseModalOpen] = useState(false);
   const [teaseReport, setTeaseReport] = useState<Report | null>(null);
+  const [requestModalOpen, setRequestModalOpen] = useState(false);
+  const [requestForm, setRequestForm] = useState({ name: "", email: "", industry: "", topic: "", reason: "" });
+  const [requestSubmitting, setRequestSubmitting] = useState(false);
   const [, navigate] = useLocation();
   const { user, isAdmin, hasPaidSeatAccess } = useAuth();
+  const { toast } = useToast();
   const userTier = user?.membershipTier;
   const userCompanyId = user?.companyId;
   const userIsPaidSeat = hasPaidSeatAccess;
@@ -393,6 +407,36 @@ export default function TrendsInsights() {
   
   const handleUnlockedClick = (report: Report) => {
     navigate(`/portal/insights/${report.slug}`);
+  };
+
+  const handleRequestSubmit = async () => {
+    if (!requestForm.name || !requestForm.email || !requestForm.industry || !requestForm.topic || !requestForm.reason) {
+      toast({ title: "Please fill in all fields", variant: "destructive" });
+      return;
+    }
+    try {
+      setRequestSubmitting(true);
+      const res = await fetch("/api/report-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestForm),
+      });
+      if (!res.ok) throw new Error("Failed to submit request");
+      toast({ title: "Request submitted", description: "We'll review your request and get back to you." });
+      setRequestModalOpen(false);
+      setRequestForm({ name: "", email: "", industry: "", topic: "", reason: "" });
+    } catch (err) {
+      toast({ title: "Something went wrong", description: "Please try again later.", variant: "destructive" });
+    } finally {
+      setRequestSubmitting(false);
+    }
+  };
+
+  const openRequestModal = () => {
+    if (user) {
+      setRequestForm(prev => ({ ...prev, name: user.name || "", email: user.email || "" }));
+    }
+    setRequestModalOpen(true);
   };
   
   useScrollRestoration("trends-insights");
@@ -480,10 +524,36 @@ export default function TrendsInsights() {
   const displayedReports = filters.showAll ? filteredAndSortedReports : filteredAndSortedReports.slice(0, 6);
   const hasMoreReports = filteredAndSortedReports.length > 6;
 
+  const featuredReports = useMemo(() => {
+    return reports.filter(r => r.isFeatured).slice(0, 3);
+  }, [reports]);
+
+  const { data: companyData } = useQuery<{ industry?: string }>({
+    queryKey: ['/api/companies', user?.companyId],
+    enabled: !!user?.companyId,
+  });
+  const companyIndustry = companyData?.industry || null;
+
+  const recommendedReports = useMemo(() => {
+    if (!reports.length || !user) return [];
+    const newest = [...reports].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    if (!companyIndustry) return newest.slice(0, 3);
+    const industryLower = companyIndustry.toLowerCase().trim();
+    if (!industryLower) return newest.slice(0, 3);
+    const matched = reports.filter(r => {
+      const ri = r.industry?.toLowerCase().trim();
+      if (!ri) return false;
+      return ri.includes(industryLower) || industryLower.includes(ri);
+    });
+    if (matched.length >= 3) return matched.slice(0, 3);
+    const remaining = newest.filter(r => !matched.includes(r));
+    return [...matched, ...remaining].slice(0, 3);
+  }, [reports, companyIndustry, user]);
+
   return (
     <PortalLayout>
       <div className="min-h-screen bg-background">
-        <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="mb-8 flex items-start justify-between gap-4">
             <div>
               <h1 
@@ -492,9 +562,17 @@ export default function TrendsInsights() {
               >
                 Trends & Insights Library
               </h1>
-              <p className="text-lg text-muted-foreground" style={{ fontFamily: 'Roboto, sans-serif' }}>Not trend fluff. Your inside track on South Africa’s shifting market.</p>
+              <p className="text-lg text-muted-foreground" style={{ fontFamily: 'Roboto, sans-serif' }}>Your inside track on SA's shifting market.</p>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
+              <Button
+                onClick={openRequestModal}
+                className="gap-1.5"
+                data-testid="button-request-report"
+              >
+                <MessageSquarePlus className="w-4 h-4" />
+                Request a Report
+              </Button>
               <Button
                 variant="outline"
                 size="icon"
@@ -523,6 +601,39 @@ export default function TrendsInsights() {
             </div>
           </div>
 
+          <div className="flex items-center gap-2 mb-6 flex-wrap">
+            {[
+              { value: "all", label: "All" },
+              { value: "Insights", label: "Insights" },
+              { value: "Launch", label: "Launch" },
+              { value: "Inside", label: "Inside" },
+              { value: "IRL", label: "IRL" },
+            ].map((cat) => {
+              const isActive = filters.category === cat.value;
+              const catKey = cat.value.toLowerCase();
+              const colors = categoryColors[catKey];
+              return (
+                <button
+                  key={cat.value}
+                  onClick={() => setFilters({ category: cat.value })}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                    isActive
+                      ? cat.value === "all"
+                        ? "text-white border-[#5B6EF7]"
+                        : colors
+                          ? `${colors.bg} ${colors.text} border-current`
+                          : "bg-[#5B6EF7] text-white border-[#5B6EF7]"
+                      : "bg-transparent text-muted-foreground border-border hover:border-foreground/30"
+                  }`}
+                  style={isActive && cat.value === "all" ? { backgroundColor: '#5B6EF7' } : undefined}
+                  data-testid={`pill-category-${cat.value.toLowerCase()}`}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-3 mb-8">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -536,22 +647,6 @@ export default function TrendsInsights() {
             </div>
             
             <div className="flex gap-2">
-              <Select value={filters.category} onValueChange={(value) => setFilters({ category: value })}>
-                <SelectTrigger 
-                  className="w-32 h-10 rounded-full border-border"
-                  data-testid="select-category"
-                >
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="Insights">Insights</SelectItem>
-                  <SelectItem value="Launch">Launch</SelectItem>
-                  <SelectItem value="Inside">Inside</SelectItem>
-                  <SelectItem value="IRL">IRL</SelectItem>
-                </SelectContent>
-              </Select>
-
               <Select value={filters.industry} onValueChange={(value) => setFilters({ industry: value })}>
                 <SelectTrigger 
                   className="w-32 h-10 rounded-full border-border"
@@ -600,12 +695,111 @@ export default function TrendsInsights() {
             </div>
           </div>
 
+          {featuredReports.length > 0 && (
+            <div className="mb-10" data-testid="featured-reports-section">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-5 h-5 text-amber-500" />
+                <h2 className="text-xl font-semibold text-foreground" style={{ fontFamily: 'DM Serif Display, serif' }}>
+                  Featured Reports
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {featuredReports.map((report) => {
+                  const { icon: AccessIcon, label: accessLabel, colorClass: accessColor } = getAccessIndicator(report, user?.membershipTier, !!user, user?.companyId, hasPaidSeatAccess);
+                  const colors = getCategoryColor(report.category);
+                  const readingTime = Math.max(2, Math.ceil((report.teaser?.length || 0) / 500));
+                  const isLocked = !hasPaidSeatAccess && report.accessLevel !== "PUBLIC";
+
+                  return (
+                    <div
+                      key={`featured-${report.id}`}
+                      className="group relative rounded-md overflow-hidden cursor-pointer ring-2 ring-amber-500/30 hover-elevate"
+                      onClick={() => isLocked ? handleLockedClick(report) : handleUnlockedClick(report)}
+                      data-testid={`featured-card-${report.id}`}
+                    >
+                      <div className="relative h-48 overflow-hidden">
+                        <img
+                          src={report.coverImage}
+                          alt={report.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                        <Badge
+                          className="absolute top-3 left-3 text-xs no-default-hover-elevate no-default-active-elevate"
+                          style={{ backgroundColor: colors.bg, color: colors.text, border: `1px solid ${colors.border}` }}
+                        >
+                          {report.category}
+                        </Badge>
+                        <Badge
+                          className="absolute top-3 right-3 text-xs bg-amber-500 text-white border-amber-600 no-default-hover-elevate no-default-active-elevate"
+                        >
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          Featured
+                        </Badge>
+                        {isLocked && (
+                          <div className="absolute bottom-3 right-3 bg-black/60 rounded-full p-1.5">
+                            <Lock className="w-3.5 h-3.5 text-white" />
+                          </div>
+                        )}
+                        <div className="absolute bottom-3 left-3 right-12">
+                          <h3 className="text-white font-semibold text-base leading-tight line-clamp-2" style={{ fontFamily: 'DM Serif Display, serif' }}>
+                            {report.title}
+                          </h3>
+                        </div>
+                      </div>
+                      <div className="p-4 bg-card border border-t-0 border-border rounded-b-md">
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{report.teaser}</p>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>{report.date} · <Clock className="w-3 h-3 inline-block" /> {readingTime} min</span>
+                          <span className={`flex items-center gap-1 ${accessColor}`}>
+                            <AccessIcon className="w-3.5 h-3.5" />
+                            {accessLabel}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {recommendedReports.length > 0 && user && (
+            <div className="mb-10" data-testid="recommended-reports-section">
+              <div className="flex items-center gap-2 mb-4">
+                <TrendingUp className="w-5 h-5 text-[#5B6EF7]" />
+                <h2 className="text-xl font-semibold text-foreground" style={{ fontFamily: 'DM Serif Display, serif' }}>
+                  Recommended for You
+                </h2>
+                {companyIndustry && (
+                  <Badge data-testid="badge-recommended-industry" className="text-xs no-default-hover-elevate no-default-active-elevate" variant="outline">
+                    {companyIndustry}
+                  </Badge>
+                )}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {recommendedReports.map((report) => (
+                  <ReportCard
+                    key={`rec-${report.id}`}
+                    report={report}
+                    userTier={userTier}
+                    isLoggedIn={!!user}
+                    userCompanyId={userCompanyId}
+                    hasPaidSeatAccess={userIsPaidSeat}
+                    onLockedClick={handleLockedClick}
+                    onUnlockedClick={handleUnlockedClick}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           <p className="text-sm text-muted-foreground mb-6">
             Showing {displayedReports.length} of {filteredAndSortedReports.length} reports
           </p>
 
           {viewMode === "grid" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {displayedReports.map((report) => (
                 <ReportCard 
                   key={report.id} 
@@ -722,6 +916,102 @@ export default function TrendsInsights() {
         report={teaseReport}
         isLoggedIn={!!user}
       />
+
+      <Dialog open={requestModalOpen} onOpenChange={setRequestModalOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquarePlus className="w-5 h-5 text-[#5B6EF7]" />
+              Request a Report
+            </DialogTitle>
+            <DialogDescription>
+              Tell us what you'd like to see researched. We'll review your request and get back to you.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="req-name">Your name</Label>
+                <Input
+                  id="req-name"
+                  placeholder="Full name"
+                  value={requestForm.name}
+                  onChange={(e) => setRequestForm(prev => ({ ...prev, name: e.target.value }))}
+                  data-testid="input-request-name"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="req-email">Email</Label>
+                <Input
+                  id="req-email"
+                  type="email"
+                  placeholder="you@company.com"
+                  value={requestForm.email}
+                  onChange={(e) => setRequestForm(prev => ({ ...prev, email: e.target.value }))}
+                  data-testid="input-request-email"
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="req-industry">Industry</Label>
+              <Select
+                value={requestForm.industry}
+                onValueChange={(value) => setRequestForm(prev => ({ ...prev, industry: value }))}
+              >
+                <SelectTrigger id="req-industry" data-testid="select-request-industry">
+                  <SelectValue placeholder="Select an industry" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Food">Food</SelectItem>
+                  <SelectItem value="Beverages">Beverages</SelectItem>
+                  <SelectItem value="Alcohol">Alcohol</SelectItem>
+                  <SelectItem value="Financial">Financial</SelectItem>
+                  <SelectItem value="FMCGs">FMCGs</SelectItem>
+                  <SelectItem value="Beauty">Beauty</SelectItem>
+                  <SelectItem value="Retail">Retail</SelectItem>
+                  <SelectItem value="Technology">Technology</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="req-topic">Trend or topic</Label>
+              <Input
+                id="req-topic"
+                placeholder="e.g. Gen Z spending habits in SA"
+                value={requestForm.topic}
+                onChange={(e) => setRequestForm(prev => ({ ...prev, topic: e.target.value }))}
+                data-testid="input-request-topic"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="req-reason">Why do you need this?</Label>
+              <Textarea
+                id="req-reason"
+                placeholder="What question are you trying to answer? What decision will this inform?"
+                value={requestForm.reason}
+                onChange={(e) => setRequestForm(prev => ({ ...prev, reason: e.target.value }))}
+                className="resize-none"
+                rows={3}
+                data-testid="input-request-reason"
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setRequestModalOpen(false)} data-testid="button-request-cancel">
+                Cancel
+              </Button>
+              <Button
+                onClick={handleRequestSubmit}
+                disabled={requestSubmitting}
+                data-testid="button-request-submit"
+              >
+                {requestSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : null}
+                Submit Request
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </PortalLayout>
   );
 }

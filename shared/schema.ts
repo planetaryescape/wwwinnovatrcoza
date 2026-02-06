@@ -784,3 +784,30 @@ export const insertReportLastViewedSchema = createInsertSchema(reportLastViewed)
 
 export type InsertReportLastViewed = z.infer<typeof insertReportLastViewedSchema>;
 export type ReportLastViewed = typeof reportLastViewed.$inferSelect;
+
+export const reportRequests = pgTable("report_requests", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  companyName: text("company_name"),
+  industry: text("industry").notNull(),
+  topic: text("topic").notNull(),
+  reason: text("reason").notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("pending"),
+  userId: varchar("user_id"),
+  companyId: varchar("company_id"),
+  adminNotes: text("admin_notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertReportRequestSchema = createInsertSchema(reportRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertReportRequest = z.infer<typeof insertReportRequestSchema>;
+export type ReportRequest = typeof reportRequests.$inferSelect;
