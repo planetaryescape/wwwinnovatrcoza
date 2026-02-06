@@ -505,7 +505,7 @@ export default function InsightDetail() {
           <img
             src={heroImage}
             alt={report.title}
-            className={`w-full h-full ${hasOwnCover ? 'object-contain bg-white' : 'object-cover'}`}
+            className="w-full h-full object-cover"
           />
           <div className={`absolute inset-0 ${hasOwnCover ? 'bg-gradient-to-t from-black/80 via-black/30 to-transparent' : 'bg-gradient-to-t from-black/70 via-black/40 to-transparent'}`} />
           
