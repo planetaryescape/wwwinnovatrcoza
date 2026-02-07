@@ -565,6 +565,14 @@ export default function TrendsInsights() {
               <p className="text-lg text-muted-foreground" style={{ fontFamily: 'Roboto, sans-serif' }}>Your inside track on SA's shifting market.</p>
             </div>
             <div className="flex flex-col items-end gap-2 flex-shrink-0">
+              <Button
+                onClick={openRequestModal}
+                className="gap-1.5"
+                data-testid="button-request-report"
+              >
+                <MessageSquarePlus className="w-4 h-4" />
+                Request a Report
+              </Button>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
@@ -592,14 +600,6 @@ export default function TrendsInsights() {
                   <List className="w-4 h-4" />
                 </Button>
               </div>
-              <Button
-                onClick={openRequestModal}
-                className="gap-1.5"
-                data-testid="button-request-report"
-              >
-                <MessageSquarePlus className="w-4 h-4" />
-                Request a Report
-              </Button>
             </div>
           </div>
 
