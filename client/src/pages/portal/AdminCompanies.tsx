@@ -265,6 +265,7 @@ export default function AdminCompanies() {
       filtered = filtered.filter(c => c.tier === tierFilter);
     }
     
+    filtered.sort((a, b) => a.name.localeCompare(b.name));
     setFilteredCompanies(filtered);
   }, [companies, search, tierFilter]);
 
