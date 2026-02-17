@@ -59,7 +59,10 @@ import {
   Minus,
   Image as ImageIcon,
   ExternalLink,
-  Eye
+  Eye,
+  Check,
+  X,
+  Pencil
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -71,6 +74,8 @@ interface Company {
   name: string;
   domain: string | null;
   tier: string;
+  industry: string | null;
+  companySize: string | null;
   contractStart: string | null;
   contractEnd: string | null;
   monthlyFee: string | null;
@@ -135,6 +140,13 @@ export default function AdminCompanies() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editNotes, setEditNotes] = useState("");
+  const [editingName, setEditingName] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editingDomain, setEditingDomain] = useState(false);
+  const [editDomain, setEditDomain] = useState("");
+  const [availableUsers, setAvailableUsers] = useState<{id: string; name: string | null; email: string}[]>([]);
+  const [assignUserOpen, setAssignUserOpen] = useState(false);
+  const [removingUserId, setRemovingUserId] = useState<string | null>(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   
@@ -153,12 +165,13 @@ export default function AdminCompanies() {
     name: "",
     domain: "",
     tier: "STARTER" as string,
+    industry: "" as string,
+    companySize: "" as string,
     contractStart: "",
     contractEnd: "",
     basicCreditsTotal: 0,
     proCreditsTotal: 0,
     notes: "",
-    // Initial user details
     userName: "",
     userEmail: "",
     userPhone: "",
@@ -285,6 +298,10 @@ export default function AdminCompanies() {
   const handleOpenProfile = async (company: Company) => {
     setSelectedCompany(company);
     setEditNotes(company.notes || "");
+    setEditingName(false);
+    setEditingDomain(false);
+    setAssignUserOpen(false);
+    setRemovingUserId(null);
     setDrawerOpen(true);
     await Promise.all([
       fetchCompanyUsers(company.id),
@@ -337,6 +354,64 @@ export default function AdminCompanies() {
   const handleSaveNotes = async () => {
     if (!selectedCompany) return;
     await handleUpdateCompany(selectedCompany.id, { notes: editNotes });
+  };
+
+  const handleSaveName = async () => {
+    if (!selectedCompany || !editName.trim()) return;
+    await handleUpdateCompany(selectedCompany.id, { name: editName.trim() });
+    setEditingName(false);
+  };
+
+  const handleSaveDomain = async () => {
+    if (!selectedCompany) return;
+    await handleUpdateCompany(selectedCompany.id, { domain: editDomain.trim() || null });
+    setEditingDomain(false);
+  };
+
+  const fetchAvailableUsers = async (companyId: string) => {
+    try {
+      const res = await fetch(`/api/admin/users/available-for-company/${companyId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setAvailableUsers(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch available users:", err);
+    }
+  };
+
+  const handleAssignUser = async (userId: string) => {
+    if (!selectedCompany) return;
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ companyId: selectedCompany.id }),
+      });
+      if (!res.ok) throw new Error("Failed to assign user");
+      await fetchCompanyUsers(selectedCompany.id);
+      await fetchAvailableUsers(selectedCompany.id);
+      toast({ title: "User Assigned", description: "User has been added to the company" });
+    } catch (err) {
+      toast({ title: "Error", description: "Failed to assign user", variant: "destructive" });
+    }
+  };
+
+  const handleRemoveUser = async (userId: string) => {
+    if (!selectedCompany) return;
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ companyId: null }),
+      });
+      if (!res.ok) throw new Error("Failed to remove user");
+      setRemovingUserId(null);
+      await fetchCompanyUsers(selectedCompany.id);
+      toast({ title: "User Removed", description: "User has been removed from the company" });
+    } catch (err) {
+      toast({ title: "Error", description: "Failed to remove user", variant: "destructive" });
+    }
   };
 
   const handleTogglePaidSeat = async (userId: string, currentStatus: boolean) => {
@@ -522,6 +597,8 @@ export default function AdminCompanies() {
             name: newCompany.name,
             domain: newCompany.domain || null,
             tier: newCompany.tier,
+            industry: newCompany.industry || null,
+            companySize: newCompany.companySize || null,
             contractStart: newCompany.contractStart || null,
             contractEnd: newCompany.contractEnd || null,
             basicCreditsTotal: newCompany.basicCreditsTotal || 0,
@@ -779,6 +856,9 @@ export default function AdminCompanies() {
                       <TableCell>
                         <div className="font-medium">{company.name}</div>
                         <div className="text-sm text-muted-foreground">{company.domain || "—"}</div>
+                        {company.industry && (
+                          <span className="text-xs text-muted-foreground">{company.industry}</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge className={tierInfo.color}>
@@ -857,9 +937,54 @@ export default function AdminCompanies() {
                       onChange={handleLogoUpload}
                       disabled={uploadingLogo}
                     />
-                    <div>
-                      <SheetTitle className="text-lg">{selectedCompany.name}</SheetTitle>
-                      <SheetDescription>{selectedCompany.domain || "No domain set"}</SheetDescription>
+                    <div className="flex-1 min-w-0">
+                      {editingName ? (
+                        <div className="flex items-center gap-1">
+                          <Input
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            className="h-7 text-lg font-semibold"
+                            autoFocus
+                            onKeyDown={(e) => { if (e.key === "Enter") handleSaveName(); if (e.key === "Escape") setEditingName(false); }}
+                            data-testid="input-edit-company-name"
+                          />
+                          <Button size="icon" variant="ghost" onClick={handleSaveName} data-testid="button-save-name">
+                            <Check className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <SheetTitle
+                          className="text-lg cursor-pointer"
+                          onClick={() => { setEditName(selectedCompany.name); setEditingName(true); }}
+                          data-testid="text-company-name"
+                        >
+                          {selectedCompany.name}
+                        </SheetTitle>
+                      )}
+                      {editingDomain ? (
+                        <div className="flex items-center gap-1 mt-1">
+                          <Input
+                            value={editDomain}
+                            onChange={(e) => setEditDomain(e.target.value)}
+                            className="h-6 text-sm"
+                            placeholder="e.g. company.co.za"
+                            autoFocus
+                            onKeyDown={(e) => { if (e.key === "Enter") handleSaveDomain(); if (e.key === "Escape") setEditingDomain(false); }}
+                            data-testid="input-edit-domain"
+                          />
+                          <Button size="icon" variant="ghost" onClick={handleSaveDomain} data-testid="button-save-domain">
+                            <Check className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <SheetDescription
+                          className="cursor-pointer"
+                          onClick={() => { setEditDomain(selectedCompany.domain || ""); setEditingDomain(true); }}
+                          data-testid="text-company-domain"
+                        >
+                          {selectedCompany.domain || "Click to add domain"}
+                        </SheetDescription>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -877,10 +1002,6 @@ export default function AdminCompanies() {
 
               <div className="mt-6 space-y-6">
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-xs text-muted-foreground">Domain</Label>
-                    <p className="font-medium">{selectedCompany.domain || "—"}</p>
-                  </div>
                   <div>
                     <Label className="text-xs text-muted-foreground">Tier</Label>
                     <div className="mt-1">
@@ -900,6 +1021,56 @@ export default function AdminCompanies() {
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Industry</Label>
+                    <div className="mt-1">
+                      <Select 
+                        value={selectedCompany.industry || "none"} 
+                        onValueChange={(v) => handleUpdateCompany(selectedCompany.id, { industry: v === "none" ? null : v })}
+                      >
+                        <SelectTrigger className="w-full" data-testid="select-company-industry">
+                          <SelectValue placeholder="Select industry" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Not set</SelectItem>
+                          <SelectItem value="Beverages">Beverages</SelectItem>
+                          <SelectItem value="Food & Snacks">Food & Snacks</SelectItem>
+                          <SelectItem value="Personal Care">Personal Care</SelectItem>
+                          <SelectItem value="Beauty & Cosmetics">Beauty & Cosmetics</SelectItem>
+                          <SelectItem value="Health & Wellness">Health & Wellness</SelectItem>
+                          <SelectItem value="Alcohol">Alcohol</SelectItem>
+                          <SelectItem value="Agriculture">Agriculture</SelectItem>
+                          <SelectItem value="Retail">Retail</SelectItem>
+                          <SelectItem value="Technology">Technology</SelectItem>
+                          <SelectItem value="FMCG">FMCG</SelectItem>
+                          <SelectItem value="Hospitality">Hospitality</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Company Size</Label>
+                  <div className="mt-1">
+                    <Select 
+                      value={selectedCompany.companySize || "none"} 
+                      onValueChange={(v) => handleUpdateCompany(selectedCompany.id, { companySize: v === "none" ? null : v })}
+                    >
+                      <SelectTrigger className="w-full" data-testid="select-company-size">
+                        <SelectValue placeholder="Select size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Not set</SelectItem>
+                        <SelectItem value="1-10">1-10 employees</SelectItem>
+                        <SelectItem value="11-50">11-50 employees</SelectItem>
+                        <SelectItem value="51-200">51-200 employees</SelectItem>
+                        <SelectItem value="201-500">201-500 employees</SelectItem>
+                        <SelectItem value="501-1000">501-1000 employees</SelectItem>
+                        <SelectItem value="1000+">1000+ employees</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
@@ -1103,10 +1274,24 @@ export default function AdminCompanies() {
                 <Separator />
 
                 <div>
-                  <h4 className="font-medium flex items-center gap-2 mb-3">
-                    <Users className="w-4 h-4" />
-                    Team Members
-                  </h4>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <Users className="w-4 h-4" />
+                      Team Members
+                    </h4>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        fetchAvailableUsers(selectedCompany.id);
+                        setAssignUserOpen(true);
+                      }}
+                      data-testid="button-assign-user"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add User
+                    </Button>
+                  </div>
                   
                   {companyUsers.length > 0 && (
                     <div className="flex gap-4 mb-4 p-3 rounded-lg bg-muted/30">
@@ -1135,13 +1320,13 @@ export default function AdminCompanies() {
                           className="flex items-center justify-between p-3 rounded-lg bg-muted/30"
                           data-testid={`row-company-user-${user.id}`}
                         >
-                          <div className="flex items-center gap-3">
-                            <div>
-                              <p className="font-medium">{user.name || user.email}</p>
-                              <p className="text-sm text-muted-foreground">{user.email}</p>
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="min-w-0">
+                              <p className="font-medium truncate">{user.name || user.email}</p>
+                              <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1 flex-shrink-0">
                             <Button
                               size="sm"
                               variant={user.isPaidSeat ? "default" : "outline"}
@@ -1152,18 +1337,63 @@ export default function AdminCompanies() {
                               {user.isPaidSeat ? (
                                 <>
                                   <Crown className="w-3 h-3 mr-1" />
-                                  Paid Seat
+                                  Paid
                                 </>
                               ) : (
-                                "Team Member"
+                                "Team"
                               )}
                             </Button>
-                            <Badge variant={user.status === "ACTIVE" ? "default" : "secondary"}>
-                              {user.status}
-                            </Badge>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => setRemovingUserId(user.id)}
+                              data-testid={`button-remove-user-${user.id}`}
+                            >
+                              <X className="w-4 h-4 text-destructive" />
+                            </Button>
                           </div>
                         </div>
                       ))}
+                    </div>
+                  )}
+
+                  {assignUserOpen && (
+                    <div className="mt-3 p-3 rounded-lg border border-dashed space-y-2">
+                      <Label className="text-xs text-muted-foreground">Assign existing user to this company</Label>
+                      {availableUsers.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">No unassigned users available</p>
+                      ) : (
+                        <div className="space-y-1 max-h-40 overflow-y-auto">
+                          {availableUsers.map((u) => (
+                            <div key={u.id} className="flex items-center justify-between gap-2 p-2 rounded bg-muted/30">
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium truncate">{u.name || u.email}</p>
+                                <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                              </div>
+                              <Button size="sm" variant="outline" onClick={() => handleAssignUser(u.id)} data-testid={`button-assign-${u.id}`}>
+                                Add
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <Button size="sm" variant="ghost" onClick={() => setAssignUserOpen(false)} className="w-full">
+                        Close
+                      </Button>
+                    </div>
+                  )}
+
+                  {removingUserId && (
+                    <div className="mt-2 p-3 rounded-lg border border-destructive/30 bg-destructive/5">
+                      <p className="text-sm mb-2">Remove this user from the company?</p>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="destructive" onClick={() => handleRemoveUser(removingUserId)} data-testid="button-confirm-remove-user">
+                          Remove
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => setRemovingUserId(null)}>
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1552,6 +1782,54 @@ export default function AdminCompanies() {
                       Ends: {formatDate(getContractEndDate(newCompany.contractStart))}
                     </p>
                   )}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Industry</Label>
+                  <Select
+                    value={newCompany.industry || "none"}
+                    onValueChange={(v) => setNewCompany({ ...newCompany, industry: v === "none" ? "" : v })}
+                  >
+                    <SelectTrigger data-testid="select-new-company-industry">
+                      <SelectValue placeholder="Select industry" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Not set</SelectItem>
+                      <SelectItem value="Beverages">Beverages</SelectItem>
+                      <SelectItem value="Food & Snacks">Food & Snacks</SelectItem>
+                      <SelectItem value="Personal Care">Personal Care</SelectItem>
+                      <SelectItem value="Beauty & Cosmetics">Beauty & Cosmetics</SelectItem>
+                      <SelectItem value="Health & Wellness">Health & Wellness</SelectItem>
+                      <SelectItem value="Alcohol">Alcohol</SelectItem>
+                      <SelectItem value="Agriculture">Agriculture</SelectItem>
+                      <SelectItem value="Retail">Retail</SelectItem>
+                      <SelectItem value="Technology">Technology</SelectItem>
+                      <SelectItem value="FMCG">FMCG</SelectItem>
+                      <SelectItem value="Hospitality">Hospitality</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Company Size</Label>
+                  <Select
+                    value={newCompany.companySize || "none"}
+                    onValueChange={(v) => setNewCompany({ ...newCompany, companySize: v === "none" ? "" : v })}
+                  >
+                    <SelectTrigger data-testid="select-new-company-size">
+                      <SelectValue placeholder="Select size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Not set</SelectItem>
+                      <SelectItem value="1-10">1-10 employees</SelectItem>
+                      <SelectItem value="11-50">11-50 employees</SelectItem>
+                      <SelectItem value="51-200">51-200 employees</SelectItem>
+                      <SelectItem value="201-500">201-500 employees</SelectItem>
+                      <SelectItem value="501-1000">501-1000 employees</SelectItem>
+                      <SelectItem value="1000+">1000+ employees</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">

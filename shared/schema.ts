@@ -339,6 +339,7 @@ export const companies = pgTable("companies", {
   basicCreditsUsed: integer("basic_credits_used").notNull().default(0),
   proCreditsTotal: integer("pro_credits_total").notNull().default(0),
   proCreditsUsed: integer("pro_credits_used").notNull().default(0),
+  companySize: text("company_size"),
   dealDetails: jsonb("deal_details"),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
