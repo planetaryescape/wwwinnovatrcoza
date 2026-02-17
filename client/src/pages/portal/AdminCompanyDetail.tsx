@@ -958,19 +958,21 @@ export default function AdminCompanyDetail() {
           </CardContent>
         </Card>
 
-        {/* Live Briefs Section */}
-        {briefs.length > 0 && (
+        {/* Live Briefs Section - only active briefs */}
+        {briefs.filter(b => ["new", "in_progress", "under_review"].includes(b.status)).length > 0 && (
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Zap className="w-5 h-5 text-primary" />
                 Live Briefs
               </CardTitle>
-              <CardDescription>{briefs.length} active brief(s) from this company</CardDescription>
+              <CardDescription>
+                {briefs.filter(b => ["new", "in_progress", "under_review"].includes(b.status)).length} active brief(s) from this company
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {briefs.map((brief) => {
+                {briefs.filter(b => ["new", "in_progress", "under_review"].includes(b.status)).map((brief) => {
                   const studyImage = getStudyTypeImage(brief.studyType);
                   const totalCredits = brief.basicCreditsUsed + brief.proCreditsUsed;
                   const allFiles = [...(brief.files || []), ...(brief.projectFileUrls || []).map((url, idx) => ({ 
@@ -1357,6 +1359,77 @@ export default function AdminCompanyDetail() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Research Log - Past/Completed Briefs */}
+            {briefs.filter(b => ["completed", "on_hold", "cancelled"].includes(b.status)).length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <Clock className="w-4 h-4" />
+                    Research Log
+                  </CardTitle>
+                  <CardDescription>
+                    {briefs.filter(b => ["completed", "on_hold", "cancelled"].includes(b.status)).length} past brief(s)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {briefs
+                      .filter(b => ["completed", "on_hold", "cancelled"].includes(b.status))
+                      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                      .map((brief) => (
+                        <div
+                          key={brief.id}
+                          className="flex items-center justify-between p-3 rounded-lg border"
+                          data-testid={`row-past-brief-${brief.id}`}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <Badge variant="secondary" className="text-xs">
+                                {formatStudyType(brief.studyType)}
+                              </Badge>
+                              <Badge className={`text-xs ${getBriefStatusColor(brief.status)}`}>
+                                {formatBriefStatus(brief.status)}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {formatDate(brief.createdAt)}
+                              </span>
+                            </div>
+                            <p className="text-sm truncate" title={brief.researchObjective}>
+                              {brief.researchObjective}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {brief.submittedByName}
+                            </p>
+                          </div>
+                          <div className="flex gap-1 flex-shrink-0 ml-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditBrief(brief)}
+                              data-testid={`button-edit-past-brief-${brief.id}`}
+                            >
+                              <Edit className="w-3 h-3 mr-1" />
+                              Edit
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setBriefToDelete(brief);
+                                setDeleteBriefOpen(true);
+                              }}
+                              data-testid={`button-delete-past-brief-${brief.id}`}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Right Column - Quick Stats & Notes */}
