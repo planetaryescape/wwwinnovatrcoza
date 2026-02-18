@@ -1803,6 +1803,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check if there are new trends/reports since user's last visit
+  app.get("/api/trends/has-new", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const sessionUser = req.user!;
+      const reports = await storage.getAllReports();
+      const publishedReports = reports.filter(r => r.status === "published" && !r.isArchived);
+      
+      if (publishedReports.length === 0) {
+        return res.json({ hasNew: false });
+      }
+      
+      const latestReportDate = publishedReports.reduce((latest, r) => {
+        const d = new Date(r.date);
+        return d > latest ? d : latest;
+      }, new Date(0));
+
+      const userLastSeen = sessionUser.trendsLastSeenAt ? new Date(sessionUser.trendsLastSeenAt) : null;
+      const hasNew = !userLastSeen || latestReportDate > userLastSeen;
+      
+      res.json({ hasNew });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Mark trends as seen (update user's last seen timestamp)
+  app.post("/api/trends/mark-seen", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const sessionUser = req.user!;
+      await storage.updateUser(sessionUser.id, { trendsLastSeenAt: new Date() });
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Member single report by slug (authenticated, includes client-specific reports for user's company)
   app.get("/api/member/reports/:slug", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {

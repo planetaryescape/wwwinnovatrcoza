@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Sidebar,
   SidebarContent,
@@ -97,6 +98,12 @@ interface PortalLayoutProps {
 export default function PortalLayout({ children }: PortalLayoutProps) {
   const [location, setLocation] = useLocation();
   const { user, logout, isAuthenticated, isPaidMember, isAdmin, impersonation, exitImpersonation, isViewingAsCompany, viewingCompanyName } = useAuth();
+
+  const { data: trendsStatus } = useQuery<{ hasNew: boolean }>({
+    queryKey: ["/api/trends/has-new"],
+    enabled: isAuthenticated,
+    refetchInterval: 60000,
+  });
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -197,6 +204,14 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
                           >
                             <item.icon className="h-4 w-4" />
                             <span className="flex-1 text-left">{item.title}</span>
+                            {item.title === "Trends & Insights" && trendsStatus?.hasNew && (
+                              <Badge 
+                                className="bg-blue-500 text-white text-[10px] px-1.5 py-0 leading-4 ml-auto"
+                                data-testid="badge-trends-new"
+                              >
+                                New
+                              </Badge>
+                            )}
                             {isLocked && <Lock className="h-3 w-3 ml-auto text-muted-foreground" />}
                           </button>
                         </SidebarMenuButton>

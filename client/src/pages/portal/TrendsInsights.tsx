@@ -1,5 +1,5 @@
 import { useMemo, useEffect, useState, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -396,9 +396,18 @@ export default function TrendsInsights() {
   const [, navigate] = useLocation();
   const { user, isAdmin, hasPaidSeatAccess } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const userTier = user?.membershipTier;
   const userCompanyId = user?.companyId;
   const userIsPaidSeat = hasPaidSeatAccess;
+
+  useEffect(() => {
+    if (!loading && reports.length > 0) {
+      fetch("/api/trends/mark-seen", { method: "POST", credentials: "include" })
+        .then(() => queryClient.invalidateQueries({ queryKey: ["/api/trends/has-new"] }))
+        .catch(() => {});
+    }
+  }, [loading, reports.length, queryClient]);
   
   const handleLockedClick = (report: Report) => {
     setTeaseReport(report);
