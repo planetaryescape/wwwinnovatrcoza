@@ -42,6 +42,7 @@ export const users = pgTable("users", {
   isActive: boolean("is_active").notNull().default(true),
   emailVerified: boolean("email_verified").notNull().default(false),
   pulseSubscribed: boolean("pulse_subscribed").notNull().default(true),
+  trendsLastSeenAt: timestamp("trends_last_seen_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at"),
