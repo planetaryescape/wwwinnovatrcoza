@@ -10,7 +10,7 @@ import AdminCompanies from "./AdminCompanies";
 import AdminMembers from "./AdminMembers";
 import AdminBriefs from "./AdminBriefs";
 
-const VALID_TABS = ["companies", "orders", "briefs", "members", "reports", "deals"];
+const VALID_TABS = ["companies", "orders", "briefs", "members", "reports", "offers"];
 
 export default function AdminPortal() {
   const [location, setLocation] = useLocation();
@@ -68,7 +68,7 @@ export default function AdminPortal() {
             <TabsTrigger value="briefs" data-testid="tab-admin-briefs">Briefs</TabsTrigger>
             <TabsTrigger value="members" data-testid="tab-admin-members">Members</TabsTrigger>
             <TabsTrigger value="reports" data-testid="tab-admin-reports">Reports</TabsTrigger>
-            <TabsTrigger value="deals" data-testid="tab-admin-deals">Deals</TabsTrigger>
+            <TabsTrigger value="offers" data-testid="tab-admin-offers">Offers</TabsTrigger>
           </TabsList>
 
           <TabsContent value="companies">
@@ -91,7 +91,7 @@ export default function AdminPortal() {
             <AdminReports />
           </TabsContent>
 
-          <TabsContent value="deals">
+          <TabsContent value="offers">
             <AdminDeals />
           </TabsContent>
         </Tabs>

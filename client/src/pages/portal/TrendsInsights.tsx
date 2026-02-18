@@ -612,38 +612,40 @@ export default function TrendsInsights() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 mb-6 flex-wrap">
-            {[
-              { value: "all", label: "All" },
-              { value: "Insights", label: "Insights" },
-              { value: "Launch", label: "Launch" },
-              { value: "Inside", label: "Inside" },
-              { value: "IRL", label: "IRL" },
-            ].map((cat) => {
-              const isActive = filters.category === cat.value;
-              const catKey = cat.value.toLowerCase();
-              const colors = categoryColors[catKey];
-              return (
-                <button
-                  key={cat.value}
-                  onClick={() => setFilters({ category: cat.value })}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                    isActive
-                      ? cat.value === "all"
-                        ? "text-white border-[#5B6EF7]"
-                        : colors
-                          ? `${colors.bg} ${colors.text} border-current`
-                          : "bg-[#5B6EF7] text-white border-[#5B6EF7]"
-                      : "bg-transparent text-muted-foreground border-border hover:border-foreground/30"
-                  }`}
-                  style={isActive && cat.value === "all" ? { backgroundColor: '#5B6EF7' } : undefined}
-                  data-testid={`pill-category-${cat.value.toLowerCase()}`}
-                >
-                  {cat.label}
-                </button>
-              );
-            })}
-          </div>
+          {isAdmin && (
+            <div className="flex items-center gap-2 mb-6 flex-wrap">
+              {[
+                { value: "all", label: "All" },
+                { value: "Insights", label: "Insights" },
+                { value: "Launch", label: "Launch" },
+                { value: "Inside", label: "Inside" },
+                { value: "IRL", label: "IRL" },
+              ].map((cat) => {
+                const isActive = filters.category === cat.value;
+                const catKey = cat.value.toLowerCase();
+                const colors = categoryColors[catKey];
+                return (
+                  <button
+                    key={cat.value}
+                    onClick={() => setFilters({ category: cat.value })}
+                    className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                      isActive
+                        ? cat.value === "all"
+                          ? "text-white border-[#5B6EF7]"
+                          : colors
+                            ? `${colors.bg} ${colors.text} border-current`
+                            : "bg-[#5B6EF7] text-white border-[#5B6EF7]"
+                        : "bg-transparent text-muted-foreground border-border hover:border-foreground/30"
+                    }`}
+                    style={isActive && cat.value === "all" ? { backgroundColor: '#5B6EF7' } : undefined}
+                    data-testid={`pill-category-${cat.value.toLowerCase()}`}
+                  >
+                    {cat.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           <div className="flex flex-col sm:flex-row gap-3 mb-8">
             <div className="relative flex-1">

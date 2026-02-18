@@ -173,7 +173,7 @@ export default function MemberDeals() {
             
             <div className="space-y-4">
               <h1 className="text-4xl font-serif font-bold text-foreground">
-                Member Deals
+                Member Offers
               </h1>
               <p className="text-xl text-muted-foreground">
                 Exclusive offers reserved for Innovatr Members
@@ -188,7 +188,7 @@ export default function MemberDeals() {
                       <Gift className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
                       <div>
                         <h4 className="font-semibold">Limited Drops</h4>
-                        <p className="text-sm text-muted-foreground">Only 3 slots per deal each month</p>
+                        <p className="text-sm text-muted-foreground">Only 3 slots per offer each month</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
@@ -202,14 +202,14 @@ export default function MemberDeals() {
                       <Crown className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
                       <div>
                         <h4 className="font-semibold">Early Access</h4>
-                        <p className="text-sm text-muted-foreground">See next month's deals before anyone else</p>
+                        <p className="text-sm text-muted-foreground">See next month's offers before anyone else</p>
                       </div>
                     </div>
                   </div>
                   
                   <div className="pt-4 border-t">
                     <p className="text-sm text-muted-foreground mb-4">
-                      Become an Innovatr member to unlock exclusive deals, limited drops, and member-only perks.
+                      Become an Innovatr member to unlock exclusive offers, limited drops, and member-only perks.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
                       <Button 
@@ -248,19 +248,19 @@ export default function MemberDeals() {
           </div>
           <h1 className="text-4xl font-serif font-bold mb-2 flex items-center gap-3">
             <Gift className="w-10 h-10 text-primary" />
-            Member Deals
+            Member Offers
           </h1>
           <p className="text-lg text-muted-foreground">
             Limited monthly drops reserved exclusively for Innovatr members
           </p>
         </div>
 
-        {/* Exclusive Deals with Scarcity */}
+        {/* Exclusive Offers with Scarcity */}
         <div>
           <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
             <h2 className="text-2xl font-serif font-bold">February Exclusives</h2>
             <Badge variant="secondary" className="text-xs">
-              Only 3 spots per deal
+              Only 3 spots per offer
             </Badge>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -374,7 +374,7 @@ export default function MemberDeals() {
         {/* March Preview - Teaser Cards */}
         <div>
           <div className="flex items-center gap-3 mb-4 flex-wrap">
-            <h2 className="text-2xl font-serif font-bold">March Deal Drop</h2>
+            <h2 className="text-2xl font-serif font-bold">March Offer Drop</h2>
             <Badge variant="outline" className="text-xs font-normal">
               Preview
             </Badge>
@@ -418,7 +418,7 @@ export default function MemberDeals() {
               Don't Miss Out
             </h2>
             <p className="text-lg opacity-90">
-              Deals are limited to 3 spots each. Upgrade to Scale for priority access and maximum savings.
+              Offers are limited to 3 spots each. Upgrade to Scale for priority access and maximum savings.
             </p>
             <div className="flex gap-4 justify-center flex-wrap">
               <Button

@@ -69,7 +69,7 @@ const menuItems = [
     adminOnly: false,
   },
   {
-    title: "Member Deals",
+    title: "Member Offers",
     url: "/portal/deals",
     icon: Gift,
     lockedForFree: true,

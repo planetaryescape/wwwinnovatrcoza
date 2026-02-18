@@ -79,12 +79,12 @@ export default function AdminDeals() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-serif font-bold mb-2">Deals Management</h2>
+          <h2 className="text-2xl font-serif font-bold mb-2">Offers Management</h2>
           <p className="text-muted-foreground">Create and manage member promotions</p>
         </div>
         <Button onClick={() => setModalOpen(true)} data-testid="button-new-deal">
           <Plus className="w-4 h-4 mr-2" />
-          New Deal
+          New Offer
         </Button>
       </div>
 
@@ -99,10 +99,10 @@ export default function AdminDeals() {
       <Card>
         <CardContent className="pt-6">
           {loading ? (
-            <p className="text-muted-foreground">Loading deals...</p>
+            <p className="text-muted-foreground">Loading offers...</p>
           ) : deals.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">No deals yet</p>
+              <p className="text-muted-foreground mb-4">No offers yet</p>
             </div>
           ) : (
             <div className="overflow-x-auto">

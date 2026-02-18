@@ -493,15 +493,15 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Right Column - Deals & Notifications */}
+          {/* Right Column - Offers & Notifications */}
           <div className="space-y-6">
-            {/* Member Deals Box */}
+            {/* Member Offers Box */}
             {isPaidMember ? (
               <Card className="border-primary">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-primary" />
-                    Member Deals
+                    Member Offers
                   </CardTitle>
                   <CardDescription>Exclusive offers for you</CardDescription>
                 </CardHeader>
@@ -529,13 +529,13 @@ export default function Dashboard() {
                     onClick={() => setLocation("/portal/deals")}
                     data-testid="button-explore-deals"
                   >
-                    Explore All Deals
+                    Explore All Offers
                   </Button>
                 </CardContent>
               </Card>
             ) : (
               <LockedFeature
-                title="Member Deals"
+                title="Member Offers"
                 description="Exclusive discounts and offers"
                 showButton={true}
               >

@@ -367,7 +367,7 @@ export default function Settings() {
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="deals">Member Deals & Offers</Label>
+                <Label htmlFor="deals">Member Offers & Promotions</Label>
                 <p className="text-sm text-muted-foreground">
                   Exclusive discounts and limited-time promotions
                 </p>

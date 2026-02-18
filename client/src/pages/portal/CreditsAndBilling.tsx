@@ -230,7 +230,7 @@ export default function CreditsAndBilling() {
                 <div className="flex-1">
                   <h3 className="text-2xl font-semibold mb-3">Become an Innovatr Member</h3>
                   <p className="text-muted-foreground mb-4">
-                    Unlock discounted Test24 credits, access the full trends library, member deals, and priority support. Choose from Entry, Growth, or Scale tiers.
+                    Unlock discounted Test24 credits, access the full trends library, member offers, and priority support. Choose from Entry, Growth, or Scale tiers.
                   </p>
                   <div className="flex gap-3">
                     <Button size="lg" onClick={() => setLocation("/#membership")} data-testid="button-explore-plans">
@@ -267,7 +267,7 @@ export default function CreditsAndBilling() {
               </Card>
               <Card>
                 <CardContent className="p-6">
-                  <h4 className="font-semibold mb-2">Member Deals</h4>
+                  <h4 className="font-semibold mb-2">Member Offers</h4>
                   <p className="text-sm text-muted-foreground">
                     Access exclusive offers and bundle packages
                   </p>
