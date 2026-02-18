@@ -1,0 +1,62 @@
+[
+  {
+    "title": "Valentines Went Home",
+    "slug": "valentines-went-home",
+    "category": "IRL",
+    "industry": "Multi-Category",
+    "type": "Launch",
+    "date": "16/02/2026",
+    "readTime": "2 min read",
+    "membersOnly": true,
+    "tags": ["Valentines", "Behaviour Shift", "SA Consumers", "Occasions"],
+    "teaser": "South Africans didn’t cancel Valentine’s. They recalibrated it. The night got smaller. Smarter. Closer to home."
+  },
+  {
+    "title": "Valentine’s Food Didn’t Try to Impress",
+    "slug": "valentines-food-didnt-try-to-impress",
+    "category": "Food",
+    "industry": "FMCG",
+    "type": "Launch",
+    "date": "16/02/2026",
+    "readTime": "2 min read",
+    "membersOnly": true,
+    "tags": ["Food", "Occasion Design", "Effort Reduction", "Real Life"],
+    "teaser": "Real romance didn’t require a reservation. Familiar food beat performance cooking."
+  },
+  {
+    "title": "Valentine’s Drinking Didn’t Try to Steal the Night",
+    "slug": "valentines-drinking-didnt-try-to-steal-the-night",
+    "category": "Beverages",
+    "industry": "Alcohol",
+    "type": "Launch",
+    "date": "16/02/2026",
+    "readTime": "2 min read",
+    "membersOnly": true,
+    "tags": ["Alcohol", "Moderation", "Mindful Drinking", "Occasion"],
+    "teaser": "The ritual stayed. The excess didn’t. Moderation is becoming mainstream behaviour."
+  },
+  {
+    "title": "Valentine’s Beauty Didn’t Try So Hard",
+    "slug": "valentines-beauty-didnt-try-so-hard",
+    "category": "Beauty",
+    "industry": "Personal Care",
+    "type": "Launch",
+    "date": "16/02/2026",
+    "readTime": "2 min read",
+    "membersOnly": true,
+    "tags": ["Beauty", "Calm Skin", "Routine", "Low Effort"],
+    "teaser": "Looking good stopped meaning doing the most. Calm routines outperformed glam experiments."
+  },
+  {
+    "title": "The Real Valentine’s Gift Was Not Causing Stress",
+    "slug": "real-valentines-gift-not-causing-stress",
+    "category": "Behaviour",
+    "industry": "Financial Behaviour",
+    "type": "Launch",
+    "date": "16/02/2026",
+    "readTime": "2 min read",
+    "membersOnly": true,
+    "tags": ["Money", "Gifting", "Budgeting", "Emotional Value"],
+    "teaser": "Romance didn’t need a recovery plan. Financial calm became part of emotional appeal."
+  }
+]

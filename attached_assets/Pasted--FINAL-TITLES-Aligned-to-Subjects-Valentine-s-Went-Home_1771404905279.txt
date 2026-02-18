@@ -1,0 +1,174 @@
+✅ FINAL TITLES (Aligned to Subjects)
+
+Valentine’s Went Home
+
+Valentine’s Food Didn’t Try to Impress
+
+Valentine’s Woke Up Fine
+
+Valentine’s Beauty Didn’t Try So Hard
+
+Valentine’s Didn’t Stress
+
+🔵 CARD VIEW JSON (Drop Into reports.json)
+[
+  {
+    "title": "Valentine’s Went Home",
+    "slug": "valentines-went-home",
+    "category": "IRL",
+    "industry": "Multi-Category",
+    "type": "Launch",
+    "date": "16/02/2026",
+    "readTime": "3 min read",
+    "membersOnly": true,
+    "tags": ["Valentine’s", "Behaviour Shift", "South Africa", "Real Life"],
+    "teaser": "Valentine’s didn’t flop. It just went very South African. Less pressure, less pretending, more real life."
+  },
+  {
+    "title": "Valentine’s Food Didn’t Try to Impress",
+    "slug": "valentines-food-didnt-try-to-impress",
+    "category": "Food",
+    "industry": "FMCG",
+    "type": "Launch",
+    "date": "16/02/2026",
+    "readTime": "3 min read",
+    "membersOnly": true,
+    "tags": ["Food", "Occasion", "Effort Management", "Connection"],
+    "teaser": "Real romance didn’t require a reservation. Reliability beat novelty."
+  },
+  {
+    "title": "Valentine’s Woke Up Fine",
+    "slug": "valentines-woke-up-fine",
+    "category": "Beverages",
+    "industry": "Alcohol",
+    "type": "Launch",
+    "date": "16/02/2026",
+    "readTime": "3 min read",
+    "membersOnly": true,
+    "tags": ["Alcohol", "Moderation", "Mindful Drinking", "Balance"],
+    "teaser": "The real flex was waking up fine. Moderation isn’t restriction — it’s intention."
+  },
+  {
+    "title": "Valentine’s Beauty Didn’t Try So Hard",
+    "slug": "valentines-beauty-didnt-try-so-hard",
+    "category": "Beauty",
+    "industry": "Personal Care",
+    "type": "Launch",
+    "date": "16/02/2026",
+    "readTime": "3 min read",
+    "membersOnly": true,
+    "tags": ["Beauty", "Calm Skin", "Routine", "Low Effort"],
+    "teaser": "Looking good stopped meaning doing the most. Calm beat contour."
+  },
+  {
+    "title": "Valentine’s Didn’t Stress",
+    "slug": "valentines-didnt-stress",
+    "category": "Behaviour",
+    "industry": "Financial Behaviour",
+    "type": "Launch",
+    "date": "16/02/2026",
+    "readTime": "3 min read",
+    "membersOnly": true,
+    "tags": ["Money", "Gifting", "Budgeting", "Consideration"],
+    "teaser": "Romance didn’t need a recovery plan. The real gift was financial calm."
+  }
+]
+
+🔵 LIGHT CONTENT POLISH (Subtle Tightening Only)
+
+I’m not rewriting your pieces. Just tightening repetition and strengthening endings slightly so they feel portal-ready.
+
+1️⃣ Valentine’s Went Home — Slightly Sharpened Close
+
+Replace this line:
+
+Across food, drink, money and beauty, the same thing showed up.
+
+With:
+
+Across food, drink, money and beauty, the same pattern emerged.
+
+And tighten ending:
+
+If your product helps people enjoy the moment without consequences, without guilt and without recovery time, you’re already part of the plan.
+
+To:
+
+If your product helps people enjoy the moment without consequences, guilt or recovery time, you’re already part of the plan.
+
+Cleaner rhythm.
+
+2️⃣ Valentine’s Stayed Simple
+
+(Keep headline aligned to “Food Didn’t Try to Impress” in portal)
+
+One micro polish:
+
+This isn’t a downgrade. It’s a recalibration.
+
+Change to:
+
+This isn’t a downgrade. It’s a recalibration of effort.
+
+Adds strategy signal.
+
+3️⃣ Valentine’s Woke Up Fine
+
+This line is strong but tighten slightly:
+
+The most attractive thing wasn’t excess. It was a restraint.
+
+Change to:
+
+The most attractive thing wasn’t excess. It was restraint.
+
+Sharper. Cleaner.
+
+4️⃣ Beauty
+
+This line is excellent:
+
+The most attractive thing wasn’t looking flawless. It was looking like yourself on a good day.
+
+No change needed. That’s LinkedIn-quote worthy.
+
+5️⃣ Valentine’s Didn’t Stress
+
+This is your strongest close. Just tighten this line:
+
+Not smaller. Smarter.
+
+Make it:
+
+Not smaller. Smarter. More sustainable.
+
+Adds strategic layer.
+
+🔵 Structural Suggestion (Optional But Powerful)
+
+Inside Replit, consider:
+
+Add a “Valentine’s IRL Collection” parent tag
+
+Cross-link each article at the bottom:
+
+Part of the Valentine’s IRL series:
+• Valentine’s Went Home
+• Valentine’s Food Didn’t Try to Impress
+• Valentine’s Woke Up Fine
+• Valentine’s Beauty Didn’t Try So Hard
+• Valentine’s Didn’t Stress
+
+
+This increases dwell time and makes it feel like a designed editorial moment — not five random uploads.
+
+🔥 Strategic Read
+
+What you’ve actually done here is strong:
+
+You didn’t write about Valentine’s.
+You wrote about effort compression in South Africa.
+
+That’s bigger.
+
+And very on-brand for Innovatr.
