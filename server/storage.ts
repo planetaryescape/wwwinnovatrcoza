@@ -2079,4 +2079,20 @@ The packaging conversations that matter most happen when you have real data on w
 
 seedInsightMailers().catch(console.error);
 
+async function repairAdminPasswords() {
+  try {
+    const adminEmails = ["hannah@innovatr.co.za", "richard@innovatr.co.za"];
+    for (const email of adminEmails) {
+      const user = await databaseStorage.getUserByEmail(email);
+      if (user) {
+        const adminHash = await hashPassword("Innovatr@Admin!");
+        await db.update(users).set({ passwordHash: adminHash, password: "" }).where(eq(users.id, user.id));
+      }
+    }
+  } catch (err) {
+    console.error("Failed to repair admin passwords:", err);
+  }
+}
+repairAdminPasswords().catch(console.error);
+
 export const storage = databaseStorage;
