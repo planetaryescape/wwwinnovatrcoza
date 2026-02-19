@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Check, X } from "lucide-react";
@@ -27,6 +28,18 @@ const INDUSTRY_OPTIONS = [
   "Other",
 ];
 
+const REFERRAL_OPTIONS = [
+  "Recommendation",
+  "LinkedIn",
+  "Word of Mouth",
+  "Instagram",
+  "Facebook",
+  "Email",
+  "Google Search",
+  "Event / Conference",
+  "Other",
+];
+
 interface LoginDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -37,9 +50,13 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [surname, setSurname] = useState("");
   const [company, setCompany] = useState("");
   const [industry, setIndustry] = useState("");
   const [customIndustry, setCustomIndustry] = useState("");
+  const [referralSource, setReferralSource] = useState("");
+  const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
+  const [wantsContact, setWantsContact] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -50,15 +67,12 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
 
-  // Email validation
   const isValidEmail = useMemo(() => {
     if (!email) return false;
-    // RFC 5322 compliant email regex
     const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
     return emailRegex.test(email);
   }, [email]);
 
-  // Password requirements validation
   const passwordRequirements = useMemo(() => {
     return {
       minLength: password.length >= 8,
@@ -69,7 +83,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   }, [password]);
 
   const resolvedIndustry = industry === "Other" ? customIndustry : industry;
-  const allRequirementsMet = Object.values(passwordRequirements).every(Boolean) && isValidEmail && company.trim().length > 0 && resolvedIndustry.trim().length > 0;
+  const allRequirementsMet = Object.values(passwordRequirements).every(Boolean) && isValidEmail && company.trim().length > 0 && resolvedIndustry.trim().length > 0 && name.trim().length > 0 && surname.trim().length > 0;
 
   const handlePasswordResetRequest = async () => {
     if (!email) {
@@ -116,10 +130,15 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
 
     try {
       if (isSignup) {
-        await signup(email, password, name, company, resolvedIndustry);
+        await signup(email, password, name, company, resolvedIndustry, {
+          surname,
+          referralSource: referralSource || undefined,
+          wantsContact,
+          subscribeNewsletter,
+        });
         toast({
           title: "Welcome to Innovatr!",
-          description: "Your free account has been created. Access trend reports now!",
+          description: "Your free account has been created. Explore your portal now.",
         });
         setLoginAttempts(0);
       } else {
@@ -131,7 +150,6 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
         setLoginAttempts(0);
       }
       
-      // Close dialog and redirect to portal
       onOpenChange(false);
       setTimeout(() => {
         setLocation("/portal");
@@ -140,12 +158,10 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       const newAttempts = loginAttempts + 1;
       setLoginAttempts(newAttempts);
       
-      // Progressive error messages
       if (!isSignup) {
         setLoginError("Incorrect email or password. Please try again.");
         setShowResetLink(true);
       } else {
-        // Signup error
         const message = error?.message || "Could not create account. Please try again.";
         setLoginError(message);
       }
@@ -162,51 +178,122 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" data-testid="dialog-login">
+      <DialogContent className={isSignup ? "sm:max-w-lg max-h-[90vh] overflow-y-auto" : "sm:max-w-md"} data-testid="dialog-login">
         <DialogHeader>
-          <DialogTitle data-testid="text-login-title">
-            {isSignup ? "Create Free Account" : "Sign In"}
+          <DialogTitle data-testid="text-login-title" className="text-xl font-serif">
+            {isSignup ? "Create a Free Account" : "Sign In"}
           </DialogTitle>
           <DialogDescription data-testid="text-login-description">
             {isSignup
-              ? "Get instant access to premium trend reports and industry insights."
+              ? "Join leading brands using Innovatr to make smarter decisions, faster."
               : "Access your portal and continue your research journey."}
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
           {isSignup && (
             <>
-              <div className="space-y-2">
-                <Label htmlFor="name" data-testid="label-name">
-                  Full Name
-                </Label>
-                <Input
-                  id="name"
-                  data-testid="input-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter your name"
-                  required
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="name" data-testid="label-name">First Name</Label>
+                  <Input
+                    id="name"
+                    data-testid="input-name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="First name"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="surname" data-testid="label-surname">Surname</Label>
+                  <Input
+                    id="surname"
+                    data-testid="input-surname"
+                    value={surname}
+                    onChange={(e) => setSurname(e.target.value)}
+                    placeholder="Surname"
+                    required
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="company" data-testid="label-company">
-                  Company Name
-                </Label>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="company" data-testid="label-company">Company Name</Label>
                 <Input
                   id="company"
                   data-testid="input-company"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  placeholder="Your company or organization"
+                  placeholder="Your company"
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="industry" data-testid="label-industry">
-                  Industry
-                </Label>
+            </>
+          )}
+
+          <div className="space-y-1.5">
+            <Label htmlFor="email" data-testid="label-email">
+              {isSignup ? "Company Email" : "Email Address"}
+            </Label>
+            <Input
+              id="email"
+              data-testid="input-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@company.com"
+              required
+            />
+            {isSignup && email.length > 0 && !isValidEmail && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="email-validation">
+                <X className="w-3.5 h-3.5" />
+                <span>Please enter a valid email address</span>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="password" data-testid="label-password">
+              {isSignup ? "Create Password" : "Password"}
+            </Label>
+            <Input
+              id="password"
+              data-testid="input-password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={isSignup ? "Create a secure password" : "Enter password"}
+              required
+            />
+            {isSignup && password.length > 0 && (
+              <div className="mt-1.5 space-y-1 text-xs" data-testid="password-requirements">
+                <div className="grid grid-cols-2 gap-1">
+                  <div className={`flex items-center gap-1 ${passwordRequirements.minLength ? 'text-green-600' : 'text-muted-foreground'}`}>
+                    {passwordRequirements.minLength ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                    <span>8+ characters</span>
+                  </div>
+                  <div className={`flex items-center gap-1 ${passwordRequirements.hasUppercase ? 'text-green-600' : 'text-muted-foreground'}`}>
+                    {passwordRequirements.hasUppercase ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                    <span>Uppercase</span>
+                  </div>
+                  <div className={`flex items-center gap-1 ${passwordRequirements.hasLowercase ? 'text-green-600' : 'text-muted-foreground'}`}>
+                    {passwordRequirements.hasLowercase ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                    <span>Lowercase</span>
+                  </div>
+                  <div className={`flex items-center gap-1 ${passwordRequirements.hasNumber ? 'text-green-600' : 'text-muted-foreground'}`}>
+                    {passwordRequirements.hasNumber ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                    <span>Number</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {isSignup && (
+            <>
+              <div className="space-y-1.5">
+                <Label htmlFor="industry" data-testid="label-industry">Industry</Label>
                 <Select value={industry} onValueChange={(v) => { setIndustry(v); if (v !== "Other") setCustomIndustry(""); }}>
                   <SelectTrigger data-testid="select-industry">
                     <SelectValue placeholder="Select your industry" />
@@ -227,89 +314,47 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                   />
                 )}
               </div>
-            </>
-          )}
 
-          <div className="space-y-2">
-            <Label htmlFor="email" data-testid="label-email">
-              Email Address
-            </Label>
-            <Input
-              id="email"
-              data-testid="input-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@company.com"
-              required
-            />
-            {isSignup && email.length > 0 && !isValidEmail && (
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="email-validation">
-                <X className="w-3.5 h-3.5" />
-                <span>Please enter a valid email address</span>
+              <div className="space-y-1.5">
+                <Label htmlFor="referral" data-testid="label-referral">How did you hear about us?</Label>
+                <Select value={referralSource} onValueChange={setReferralSource}>
+                  <SelectTrigger data-testid="select-referral">
+                    <SelectValue placeholder="Select an option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {REFERRAL_OPTIONS.map((opt) => (
+                      <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            )}
-            {isSignup && email.length > 0 && isValidEmail && (
-              <div className="flex items-center gap-1.5 text-xs text-green-600" data-testid="email-validation-success">
-                <Check className="w-3.5 h-3.5" />
-                <span>Valid email address</span>
-              </div>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password" data-testid="label-password">
-              Password
-            </Label>
-            <Input
-              id="password"
-              data-testid="input-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password"
-              required
-            />
-            {isSignup && password.length > 0 && (
-              <div className="mt-2 space-y-1.5 text-xs" data-testid="password-requirements">
-                <p className="text-muted-foreground font-medium mb-2">Password must have:</p>
-                <div className="grid grid-cols-2 gap-1.5">
-                  <div className={`flex items-center gap-1.5 ${passwordRequirements.minLength ? 'text-green-600' : 'text-muted-foreground'}`}>
-                    {passwordRequirements.minLength ? (
-                      <Check className="w-3.5 h-3.5" />
-                    ) : (
-                      <X className="w-3.5 h-3.5" />
-                    )}
-                    <span>8+ characters</span>
-                  </div>
-                  <div className={`flex items-center gap-1.5 ${passwordRequirements.hasUppercase ? 'text-green-600' : 'text-muted-foreground'}`}>
-                    {passwordRequirements.hasUppercase ? (
-                      <Check className="w-3.5 h-3.5" />
-                    ) : (
-                      <X className="w-3.5 h-3.5" />
-                    )}
-                    <span>Uppercase letter</span>
-                  </div>
-                  <div className={`flex items-center gap-1.5 ${passwordRequirements.hasLowercase ? 'text-green-600' : 'text-muted-foreground'}`}>
-                    {passwordRequirements.hasLowercase ? (
-                      <Check className="w-3.5 h-3.5" />
-                    ) : (
-                      <X className="w-3.5 h-3.5" />
-                    )}
-                    <span>Lowercase letter</span>
-                  </div>
-                  <div className={`flex items-center gap-1.5 ${passwordRequirements.hasNumber ? 'text-green-600' : 'text-muted-foreground'}`}>
-                    {passwordRequirements.hasNumber ? (
-                      <Check className="w-3.5 h-3.5" />
-                    ) : (
-                      <X className="w-3.5 h-3.5" />
-                    )}
-                    <span>Number</span>
-                  </div>
+              <div className="space-y-3 pt-1">
+                <div className="flex items-start gap-2">
+                  <Checkbox
+                    id="newsletter"
+                    data-testid="checkbox-newsletter"
+                    checked={subscribeNewsletter}
+                    onCheckedChange={(checked) => setSubscribeNewsletter(checked === true)}
+                  />
+                  <label htmlFor="newsletter" className="text-sm leading-tight cursor-pointer">
+                    Sign me up for Pulse Insights (free bi-weekly trends & research)
+                  </label>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Checkbox
+                    id="wantsContact"
+                    data-testid="checkbox-contact"
+                    checked={wantsContact}
+                    onCheckedChange={(checked) => setWantsContact(checked === true)}
+                  />
+                  <label htmlFor="wantsContact" className="text-sm leading-tight cursor-pointer">
+                    I'd like to be contacted to learn more about Innovatr
+                  </label>
                 </div>
               </div>
-            )}
-          </div>
+            </>
+          )}
 
           {loginError && (
             <div className="rounded-md bg-destructive/10 p-3 text-sm" data-testid="error-login">
@@ -330,17 +375,6 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                   Password reset email sent. Check your inbox.
                 </p>
               )}
-            </div>
-          )}
-
-          {isSignup && (
-            <div className="rounded-md bg-accent/10 p-3 text-sm" data-testid="banner-free-benefits">
-              <p className="font-medium text-foreground">Free Account Includes:</p>
-              <ul className="mt-1 space-y-1 text-muted-foreground">
-                <li>• Access to premium trend reports</li>
-                <li>• Industry insights library</li>
-                <li>• Email updates on new research</li>
-              </ul>
             </div>
           )}
 

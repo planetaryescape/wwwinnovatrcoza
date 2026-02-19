@@ -154,7 +154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User registration endpoint - creates new users with FREE tier
   app.post("/api/auth/signup", async (req, res) => {
     try {
-      const { email, password, name, company, industry } = req.body;
+      const { email, password, name, surname, company, industry, referralSource, wantsContact, subscribeNewsletter } = req.body;
       
       if (!email || !password) {
         return res.status(400).json({ message: "Email and password are required" });
@@ -224,8 +224,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email,
         password: "", // Security: never store plaintext passwords
         name: name || email.split("@")[0],
+        surname: surname || null,
         company: companyName || null,
         industry: userIndustry || null,
+        referralSource: referralSource || null,
+        wantsContact: wantsContact || false,
         companyId: companyId,
         membershipTier: "FREE",
         memberType: companyId ? "companyUser" : "independent",
@@ -233,6 +236,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: "MEMBER",
         creditsBasic: 0,
         creditsPro: 0,
+        pulseSubscribed: subscribeNewsletter !== false,
       });
       
       // Atomically set passwordHash (required for all new accounts)
@@ -674,7 +678,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const contactSchema = z.object({
         name: z.string().min(1, "Name is required").max(100, "Name is too long"),
         email: z.string().email("Please provide a valid email address"),
-        company: z.string().min(1, "Company is required").max(100, "Company name is too long"),
+        company: z.string().max(100, "Company name is too long").optional(),
         message: z.string().min(10, "Message must be at least 10 characters").max(5000, "Message is too long"),
       });
 
@@ -683,7 +687,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await sendContactFormMessage({
         name: validated.name,
         email: validated.email,
-        company: validated.company,
+        company: validated.company || "",
         message: validated.message,
       });
       

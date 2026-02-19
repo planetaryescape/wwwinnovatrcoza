@@ -15,15 +15,13 @@ export default function ContactSection() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    company: "",
-    industry: "",
     message: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.email || !formData.company || !formData.industry || !formData.message) {
+    if (!formData.name || !formData.email || !formData.message) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",
@@ -50,7 +48,7 @@ export default function ContactSection() {
       }
 
       setIsSubmitted(true);
-      setFormData({ name: "", email: "", company: "", industry: "", message: "" });
+      setFormData({ name: "", email: "", message: "" });
       toast({
         title: "Message Sent",
         description: "Thank you! We'll get back to you soon.",
@@ -119,28 +117,6 @@ export default function ContactSection() {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="your@email.com"
                     data-testid="input-email"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="company">Company <span className="text-destructive">*</span></Label>
-                  <Input
-                    id="company"
-                    value={formData.company}
-                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                    placeholder="Your company"
-                    data-testid="input-company"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="industry">Industry <span className="text-destructive">*</span></Label>
-                  <Input
-                    id="industry"
-                    value={formData.industry}
-                    onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
-                    placeholder="e.g. FMCG, Retail, Finance"
-                    data-testid="input-industry"
                     required
                   />
                 </div>

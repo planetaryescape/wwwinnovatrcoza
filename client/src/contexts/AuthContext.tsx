@@ -57,7 +57,7 @@ interface AuthContextType {
   user: User | null;
   company: Company | null;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string, company: string, industry: string) => Promise<void>;
+  signup: (email: string, password: string, name: string, company: string, industry: string, extras?: { surname?: string; referralSource?: string; wantsContact?: boolean; subscribeNewsletter?: boolean }) => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -244,13 +244,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("innovatr_user", JSON.stringify(loggedInUser));
   };
 
-  const signup = async (email: string, password: string, name: string, company: string, industry: string) => {
-    // Call the API to create the user in the database with hashed password
+  const signup = async (email: string, password: string, name: string, company: string, industry: string, extras?: { surname?: string; referralSource?: string; wantsContact?: boolean; subscribeNewsletter?: boolean }) => {
     const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "include", // Include cookies for session management
-      body: JSON.stringify({ email, password, name, company, industry }),
+      credentials: "include",
+      body: JSON.stringify({ email, password, name, company, industry, ...extras }),
     });
     
     if (!res.ok) {
