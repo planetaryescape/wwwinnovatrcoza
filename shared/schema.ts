@@ -23,6 +23,7 @@ export const users = pgTable("users", {
   passwordHash: text("password_hash"), // New bcrypt hashed password
   name: text("name"),
   company: text("company"),
+  industry: text("industry"),
   companyId: varchar("company_id"),
   membershipTier: varchar("membership_tier", { length: 20 })
     .notNull()
