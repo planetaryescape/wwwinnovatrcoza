@@ -20,9 +20,10 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Building2, Grid3x3, List, RefreshCw, Loader2, Crown, Clock, Sparkles, MessageSquarePlus, TrendingUp } from "lucide-react";
+import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Building2, Grid3x3, List, RefreshCw, Loader2, Crown, Clock, Sparkles, MessageSquarePlus, TrendingUp, LogIn, UserPlus, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PortalLayout from "./PortalLayout";
+import { LoginDialog } from "@/components/LoginDialog";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
@@ -395,7 +396,8 @@ export default function TrendsInsights() {
   const [requestForm, setRequestForm] = useState({ name: "", email: "", industry: "", topic: "", reason: "" });
   const [requestSubmitting, setRequestSubmitting] = useState(false);
   const [, navigate] = useLocation();
-  const { user, isAdmin, hasPaidSeatAccess } = useAuth();
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const { user, isAdmin, hasPaidSeatAccess, isAuthenticated, isPaidMember } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const userTier = user?.membershipTier;
@@ -564,10 +566,90 @@ export default function TrendsInsights() {
     return [...matched, ...remaining].slice(0, 3);
   }, [reports, companyIndustry, user]);
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="max-w-3xl mx-auto px-6 py-16 text-center">
+          <div className="mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6">
+              <TrendingUp className="w-8 h-8 text-primary" />
+            </div>
+            <h1
+              className="text-4xl md:text-5xl font-bold mb-4 text-foreground"
+              style={{ fontFamily: 'DM Serif Display, serif' }}
+              data-testid="text-trends-gate-title"
+            >
+              Trends & Insights Library
+            </h1>
+            <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto" style={{ fontFamily: 'Roboto, sans-serif' }}>
+              Get exclusive access to bi-weekly curated insights, trend reports, and competitor intelligence across South Africa's key industries.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4 max-w-lg mx-auto mb-10 text-left">
+            {[
+              "Bi-weekly curated industry insights",
+              "Trend reports & competitor alerts",
+              "Downloadable research reports",
+              "Personalised recommendations",
+            ].map((feature) => (
+              <div key={feature} className="flex items-start gap-2">
+                <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <span className="text-sm text-muted-foreground">{feature}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button
+              size="lg"
+              onClick={() => setLoginDialogOpen(true)}
+              data-testid="button-signup-trends"
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              Sign Up Free
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => setLoginDialogOpen(true)}
+              data-testid="button-login-trends"
+            >
+              <LogIn className="w-4 h-4 mr-2" />
+              Log In
+            </Button>
+          </div>
+
+          <p className="text-xs text-muted-foreground mt-6">
+            Create a free account to browse insights. Upgrade to Starter for full access to all reports.
+          </p>
+        </div>
+
+        <LoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
+      </div>
+    );
+  }
+
   return (
     <PortalLayout>
       <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto px-6 py-8">
+          {!isPaidMember && !isAdmin && (
+            <div className="mb-6 rounded-md border border-primary/20 bg-primary/5 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" data-testid="banner-upgrade-starter">
+              <div className="flex items-center gap-3">
+                <Crown className="w-5 h-5 text-primary flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Upgrade to Starter for full access</p>
+                  <p className="text-xs text-muted-foreground">Unlock all reports, downloads, and premium insights.</p>
+                </div>
+              </div>
+              <Link href="/#membership">
+                <Button size="sm" data-testid="button-upgrade-starter">
+                  View Plans
+                </Button>
+              </Link>
+            </div>
+          )}
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
               <h1 

@@ -63,7 +63,7 @@ const services: Service[] = [
     description: "Bi-weekly insights, trends and reports",
     priceZAR: 5000,
     priceSuffix: " / month",
-    link: "/#membership",
+    link: "/portal/trends",
     features: [
       "Monitor trends & competitor launch alerts",
       "Opportunity identification",
