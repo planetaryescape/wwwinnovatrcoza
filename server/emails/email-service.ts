@@ -1460,6 +1460,8 @@ export async function sendDailyAdminDigest(data: {
   uniqueLoginUsers: number;
   reportViews: number;
   reportDownloads: number;
+  reportViewDetails: { userName: string; reportName: string }[];
+  reportDownloadDetails: { userName: string; reportName: string }[];
   briefLaunches: number;
   totalEvents: number;
   companyActivity: { companyName: string; totalActions: number; uniqueUsers: number }[];
@@ -1542,6 +1544,38 @@ export async function sendDailyAdminDigest(data: {
               </tr>
             </table>
           </div>
+
+          ${data.reportViewDetails.length > 0 ? `
+          <h2 style="font-size: 16px; color: ${TEXT_COLOR}; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid ${BRAND_COLOR};">Report Views (${data.reportViewDetails.length})</h2>
+          <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #eee; border-radius: 6px; overflow: hidden;">
+            <thead>
+              <tr style="background-color: #f8f9fa;">
+                <th style="padding: 10px 12px; text-align: left; font-size: 12px; color: ${MUTED_COLOR}; text-transform: uppercase;">Report</th>
+                <th style="padding: 10px 12px; text-align: left; font-size: 12px; color: ${MUTED_COLOR}; text-transform: uppercase;">Viewed By</th>
+              </tr>
+            </thead>
+            <tbody>${data.reportViewDetails.map(r => `<tr>
+              <td style="padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 14px;">${escapeHtml(r.reportName)}</td>
+              <td style="padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 14px;">${escapeHtml(r.userName)}</td>
+            </tr>`).join("")}</tbody>
+          </table>
+          ` : ""}
+
+          ${data.reportDownloadDetails.length > 0 ? `
+          <h2 style="font-size: 16px; color: ${TEXT_COLOR}; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid ${BRAND_COLOR};">Report Downloads (${data.reportDownloadDetails.length})</h2>
+          <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #eee; border-radius: 6px; overflow: hidden;">
+            <thead>
+              <tr style="background-color: #f8f9fa;">
+                <th style="padding: 10px 12px; text-align: left; font-size: 12px; color: ${MUTED_COLOR}; text-transform: uppercase;">Report</th>
+                <th style="padding: 10px 12px; text-align: left; font-size: 12px; color: ${MUTED_COLOR}; text-transform: uppercase;">Downloaded By</th>
+              </tr>
+            </thead>
+            <tbody>${data.reportDownloadDetails.map(r => `<tr>
+              <td style="padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 14px;">${escapeHtml(r.reportName)}</td>
+              <td style="padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 14px;">${escapeHtml(r.userName)}</td>
+            </tr>`).join("")}</tbody>
+          </table>
+          ` : ""}
 
           ${data.newUsers.length > 0 ? `
           <h2 style="font-size: 16px; color: ${TEXT_COLOR}; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid ${BRAND_COLOR};">New Users (${data.newUsers.length})</h2>

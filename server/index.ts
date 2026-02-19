@@ -175,13 +175,16 @@ app.use((req, res, next) => {
         ? `Weekend + Monday (${since.toLocaleDateString("en-ZA", { weekday: "short", day: "numeric", month: "short" })} – ${now.toLocaleDateString("en-ZA", { weekday: "short", day: "numeric", month: "short" })})`
         : `${now.toLocaleDateString("en-ZA", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}`;
       
-      const events = await storage.getActivityEventsSince(since);
+      const allEvents = await storage.getActivityEventsSince(since);
       const allUsers = await storage.getAllUsers();
       const allCompanies = await storage.getAllCompanies();
       const userMap = new Map(allUsers.map(u => [u.id, u]));
       const companyMap = new Map(allCompanies.map(c => [c.id, c.name]));
       
-      const newUsers = allUsers.filter(u => u.createdAt && new Date(u.createdAt) >= since);
+      const adminUserIds = new Set(allUsers.filter(u => u.role === "ADMIN").map(u => u.id));
+      const events = allEvents.filter(e => !adminUserIds.has(e.userId));
+      
+      const newUsers = allUsers.filter(u => u.createdAt && new Date(u.createdAt) >= since && u.role !== "ADMIN");
       
       const loginEvents = events.filter(e => e.actionType === "login");
       const uniqueLoginUserIds = new Set(loginEvents.map(e => e.userId));
@@ -202,6 +205,19 @@ app.use((req, res, next) => {
         entityName: e.entityName,
         createdAt: e.createdAt instanceof Date ? e.createdAt.toISOString() : String(e.createdAt),
       }));
+
+      const reportViewDetails = events
+        .filter(e => e.actionType === "view_report")
+        .map(e => ({
+          userName: userMap.get(e.userId)?.name ?? "Unknown",
+          reportName: e.entityName ?? "Unknown report",
+        }));
+      const reportDownloadDetails = events
+        .filter(e => e.actionType === "download_report" || e.actionType === "download_client_report")
+        .map(e => ({
+          userName: userMap.get(e.userId)?.name ?? "Unknown",
+          reportName: e.entityName ?? "Unknown report",
+        }));
       
       await sendDailyAdminDigest({
         isMonday,
@@ -214,8 +230,10 @@ app.use((req, res, next) => {
         })),
         totalLogins: loginEvents.length,
         uniqueLoginUsers: uniqueLoginUserIds.size,
-        reportViews: events.filter(e => e.actionType === "view_report").length,
-        reportDownloads: events.filter(e => e.actionType === "download_report" || e.actionType === "download_client_report").length,
+        reportViews: reportViewDetails.length,
+        reportDownloads: reportDownloadDetails.length,
+        reportViewDetails,
+        reportDownloadDetails,
         briefLaunches: events.filter(e => e.actionType === "launch_brief").length,
         totalEvents: events.length,
         companyActivity,
