@@ -2330,6 +2330,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Insight Mailers endpoints
+  app.get("/api/admin/insight-mailers", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const mailers = await storage.getAllInsightMailers();
+      res.json(mailers);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/admin/insight-mailers/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const mailer = await storage.getInsightMailer(req.params.id);
+      if (!mailer) return res.status(404).json({ error: "Mailer not found" });
+      res.json(mailer);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/admin/insight-mailers/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const mailer = await storage.getInsightMailer(req.params.id);
+      if (!mailer) return res.status(404).json({ error: "Mailer not found" });
+      const updateSchema = z.object({
+        status: z.enum(["scheduled", "sent", "draft"]).optional(),
+        subjectLine: z.string().optional(),
+        previewText: z.string().optional(),
+        bodyContent: z.string().optional(),
+        topic: z.string().optional(),
+      });
+      const validated = updateSchema.parse(req.body);
+      await storage.updateInsightMailer(req.params.id, validated);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   // Deals endpoints
   app.get("/api/admin/deals", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {

@@ -178,10 +178,50 @@ export default function AdminReports() {
   const [requestsExpanded, setRequestsExpanded] = useState(true);
   const [requestActionLoading, setRequestActionLoading] = useState<string | null>(null);
 
+  interface InsightMailer {
+    id: string;
+    mailerNumber: number;
+    month: string;
+    scheduledDate: string;
+    day: string;
+    sendTime: string;
+    topic: string;
+    subjectLine: string;
+    previewText: string;
+    bodyContent: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+  }
+
+  const [insightMailers, setInsightMailers] = useState<InsightMailer[]>([]);
+  const [mailersLoading, setMailersLoading] = useState(true);
+  const [mailersExpanded, setMailersExpanded] = useState(true);
+  const [expandedMailerId, setExpandedMailerId] = useState<string | null>(null);
+  const [mailerStatusLoading, setMailerStatusLoading] = useState<string | null>(null);
+
   const pendingRequestsCount = useMemo(
     () => reportRequests.filter(r => r.status === "pending").length,
     [reportRequests]
   );
+
+  const getMailerAutoStatus = useCallback((mailer: InsightMailer) => {
+    const now = new Date();
+    const scheduled = new Date(mailer.scheduledDate);
+    if (mailer.status === "sent") return "sent";
+    if (mailer.status === "draft") return "draft";
+    if (scheduled < now) return "overdue";
+    const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    if (scheduled <= sevenDaysFromNow) return "upcoming";
+    return "scheduled";
+  }, []);
+
+  const upcomingMailersCount = useMemo(() => {
+    return insightMailers.filter(m => {
+      const status = getMailerAutoStatus(m);
+      return status === "upcoming" || status === "overdue";
+    }).length;
+  }, [insightMailers, getMailerAutoStatus]);
 
   const fetchReportRequests = useCallback(async () => {
     try {
@@ -194,9 +234,23 @@ export default function AdminReports() {
     }
   }, []);
 
+  const fetchInsightMailers = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/insight-mailers");
+      if (!res.ok) return;
+      const data = await res.json();
+      setInsightMailers(data);
+    } catch (err) {
+      console.error("Failed to fetch insight mailers:", err);
+    } finally {
+      setMailersLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchReportRequests();
-  }, [fetchReportRequests]);
+    fetchInsightMailers();
+  }, [fetchReportRequests, fetchInsightMailers]);
 
   const handleUpdateRequestStatus = async (id: string, status: string) => {
     setRequestActionLoading(id);
@@ -224,6 +278,33 @@ export default function AdminReports() {
       });
     } finally {
       setRequestActionLoading(null);
+    }
+  };
+
+  const handleUpdateMailerStatus = async (id: string, status: string) => {
+    setMailerStatusLoading(id);
+    try {
+      const res = await fetch(`/api/admin/insight-mailers/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error("Failed to update mailer status");
+      setInsightMailers(prev =>
+        prev.map(m => m.id === id ? { ...m, status } : m)
+      );
+      toast({
+        title: "Status updated",
+        description: `Mailer marked as ${status}.`,
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Could not update mailer status.",
+        variant: "destructive",
+      });
+    } finally {
+      setMailerStatusLoading(null);
     }
   };
 
@@ -568,6 +649,120 @@ export default function AdminReports() {
                     })}
                   </TableBody>
                 </Table>
+              </div>
+            )}
+          </CardContent>
+        )}
+      </Card>
+
+      <Card className="bg-white border" data-testid="insight-mailers-section">
+        <div
+          className="flex items-center justify-between gap-2 p-4 cursor-pointer select-none"
+          onClick={() => setMailersExpanded(prev => !prev)}
+        >
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-[#0033A0]" />
+            <h3 className="text-lg font-semibold text-gray-900">INNOVATR INSIDE Mailer Schedule</h3>
+            {upcomingMailersCount > 0 && (
+              <Badge className="bg-blue-100 text-[#0033A0] border-0 text-xs">
+                {upcomingMailersCount} upcoming
+              </Badge>
+            )}
+          </div>
+          <Button variant="ghost" size="icon">
+            {mailersExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </Button>
+        </div>
+        {mailersExpanded && (
+          <CardContent className="p-4 pt-0">
+            {mailersLoading ? (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : insightMailers.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">No insight mailers scheduled</p>
+            ) : (
+              <div className="space-y-2">
+                {insightMailers.map((mailer) => {
+                  const autoStatus = getMailerAutoStatus(mailer);
+                  const statusColors: Record<string, string> = {
+                    sent: "bg-green-100 text-green-700",
+                    scheduled: "bg-gray-100 text-gray-600",
+                    upcoming: "bg-blue-100 text-[#0033A0]",
+                    overdue: "bg-red-100 text-red-700",
+                    draft: "bg-amber-100 text-amber-700",
+                  };
+                  const isExpanded = expandedMailerId === mailer.id;
+                  return (
+                    <div key={mailer.id} className="border rounded-md" data-testid={`mailer-row-${mailer.id}`}>
+                      <div
+                        className="flex items-center gap-3 p-3 cursor-pointer select-none hover-elevate"
+                        onClick={() => setExpandedMailerId(isExpanded ? null : mailer.id)}
+                      >
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#0033A0]/10 text-[#0033A0] text-sm font-bold flex-shrink-0">
+                          {mailer.mailerNumber}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-semibold text-gray-900 truncate">{mailer.topic}</span>
+                            <Badge className={`text-xs border-0 ${statusColors[autoStatus] || "bg-gray-100 text-gray-700"}`}>
+                              {autoStatus}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                            <span>{mailer.month}</span>
+                            <span>{new Date(mailer.scheduledDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span>
+                            <span>{mailer.day} at {mailer.sendTime}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          {mailer.status !== "sent" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={mailerStatusLoading === mailer.id}
+                              onClick={(e) => { e.stopPropagation(); handleUpdateMailerStatus(mailer.id, "sent"); }}
+                              data-testid={`button-mark-sent-${mailer.id}`}
+                            >
+                              {mailerStatusLoading === mailer.id ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Check className="w-3 h-3 mr-1" />}
+                              Mark Sent
+                            </Button>
+                          )}
+                          {mailer.status === "sent" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={mailerStatusLoading === mailer.id}
+                              onClick={(e) => { e.stopPropagation(); handleUpdateMailerStatus(mailer.id, "scheduled"); }}
+                              data-testid={`button-revert-sent-${mailer.id}`}
+                            >
+                              Revert
+                            </Button>
+                          )}
+                          {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+                        </div>
+                      </div>
+                      {isExpanded && (
+                        <div className="border-t p-4 bg-gray-50/50 space-y-3">
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-1">Subject Line</p>
+                            <p className="text-sm text-gray-900">{mailer.subjectLine}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-1">Preview Text</p>
+                            <p className="text-sm text-gray-700">{mailer.previewText}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-1">Body Content</p>
+                            <div className="text-sm text-gray-700 whitespace-pre-wrap bg-white rounded-md p-3 border max-h-[300px] overflow-y-auto">
+                              {mailer.bodyContent}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </CardContent>

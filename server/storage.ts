@@ -47,6 +47,8 @@ import {
   type InsertReportRequest,
   type ActivityEvent,
   type InsertActivityEvent,
+  type InsightMailer,
+  type InsertInsightMailer,
   users,
   passwordResets,
   creditLedger,
@@ -70,6 +72,7 @@ import {
   reportLastViewed,
   reportRequests,
   activityEvents,
+  insightMailers,
 } from "@shared/schema";
 import { eq, and, lte, gte, desc, sql } from "drizzle-orm";
 import { db } from "./db";
@@ -210,6 +213,13 @@ export interface IStorage {
   getActivityEventsByCompany(companyId: string, from: Date, to: Date): Promise<ActivityEvent[]>;
   getActivityEventsByUser(userId: string, from: Date, to: Date): Promise<ActivityEvent[]>;
   getActivityEventsSince(since: Date): Promise<ActivityEvent[]>;
+
+  // Insight Mailers
+  getAllInsightMailers(): Promise<InsightMailer[]>;
+  getInsightMailer(id: string): Promise<InsightMailer | undefined>;
+  createInsightMailer(mailer: InsertInsightMailer): Promise<InsightMailer>;
+  updateInsightMailer(id: string, updates: Partial<InsightMailer>): Promise<void>;
+  deleteInsightMailer(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1826,9 +1836,247 @@ export class DatabaseStorage implements IStorage {
       .where(gte(activityEvents.createdAt, since))
       .orderBy(desc(activityEvents.createdAt));
   }
+
+  async getAllInsightMailers(): Promise<InsightMailer[]> {
+    return db.select().from(insightMailers).orderBy(insightMailers.scheduledDate);
+  }
+
+  async getInsightMailer(id: string): Promise<InsightMailer | undefined> {
+    const results = await db.select().from(insightMailers).where(eq(insightMailers.id, id));
+    return results[0];
+  }
+
+  async createInsightMailer(mailer: InsertInsightMailer): Promise<InsightMailer> {
+    const [result] = await db.insert(insightMailers).values(mailer).returning();
+    return result;
+  }
+
+  async updateInsightMailer(id: string, updates: Partial<InsightMailer>): Promise<void> {
+    await db.update(insightMailers).set({ ...updates, updatedAt: new Date() }).where(eq(insightMailers.id, id));
+  }
+
+  async deleteInsightMailer(id: string): Promise<void> {
+    await db.delete(insightMailers).where(eq(insightMailers.id, id));
+  }
 }
 
 const databaseStorage = new DatabaseStorage();
 databaseStorage.seedDatabase().catch(console.error);
+
+async function seedInsightMailers() {
+  const existing = await databaseStorage.getAllInsightMailers();
+  if (existing.length > 0) return;
+
+  console.log("Seeding insight mailers...");
+
+  const mailerData: InsertInsightMailer[] = [
+    {
+      mailerNumber: 1,
+      month: "March",
+      scheduledDate: new Date("2026-03-26T10:00:00"),
+      day: "Wednesday",
+      sendTime: "10:00 AM",
+      topic: "Predictive Modelling",
+      subjectLine: 'Why "I Like It" Is a Dangerous Metric',
+      previewText: "The difference between appeal and actual demand.",
+      bodyContent: `Most ideas fail for one reason: They were liked but they weren't chosen. There's a massive difference. Traditional concept testing often asks people to rate ideas in isolation. On a scale. In theory. Without trade-offs. But markets are not rating exercises. They are competitive environments. People don't ask: "Do I like this?" They ask: "Which one do I choose instead of the others?" That is where predictive modelling changes the game.
+
+When ideas compete head-to-head, you see: Substitution patterns. Demand shift. Who steals share. Who collapses under pressure. An idea can score well on appeal and still lose when real choice is introduced. That's why Innovatr focuses on behavioural competition, not opinion.
+
+Learning takeaway: If your research doesn't simulate choice, it overestimates success. Before your next launch, ask one question: Have we tested preference or just politeness?
+
+If you're running launches this year and want to know which concepts will actually convert in market, there's a reason ambitious brands run their ideas through predictive testing first. It's not about being thorough. It's about being right.`,
+      status: "scheduled",
+    },
+    {
+      mailerNumber: 2,
+      month: "July",
+      scheduledDate: new Date("2026-07-30T10:00:00"),
+      day: "Wednesday",
+      sendTime: "10:00 AM",
+      topic: "Data Storytelling",
+      subjectLine: "Insights Don't Win Meetings. Stories Do.",
+      previewText: "How Innovatr turns data into decisions.",
+      bodyContent: `Data doesn't persuade. Clarity does. Modern research shouldn't end in a spreadsheet or a 70 slide download nobody reads. It should move people. At Innovatr, we translate behavioural data into structured narratives: what changed, why it matters, what to do next. Our reporting engine transforms patterns into strategic direction. Not just results. Direction. Because insight without action is noise. The best decisions happen when everyone in the room understands where the opportunity is, what the risk is, and what move makes sense.
+
+Learning takeaway: Faster alignment. Stronger confidence. Less debate theatre. If your last study didn't move thinking in the room, the storytelling probably needs work.
+
+The brands we work with often tell us the same thing: They didn't realise how much time they were losing translating research into strategy. When insight and narrative work together, that conversation changes. If you'd like to see how your next study could land differently in the room, we're here for that conversation.`,
+      status: "scheduled",
+    },
+    {
+      mailerNumber: 3,
+      month: "May",
+      scheduledDate: new Date("2026-05-29T10:00:00"),
+      day: "Wednesday",
+      sendTime: "10:00 AM",
+      topic: "Concept Testing Mistakes",
+      subjectLine: "Not All Concept Tests Are Equal",
+      previewText: "Why most concept tests overestimate success.",
+      bodyContent: `Concept testing has a reputation problem. Too often it becomes validation theatre. Run a survey. Get decent scores. Move on. But great concept testing should do more than confirm what you hope is true.
+
+Here are five common mistakes that distort results: Testing in isolation (consumers don't buy in a vacuum). Overloading the concept (people can't process what matters). Measuring "liking" instead of strength (liking is emotional warmth, strength is purchase intent under pressure). Ignoring clarity (an unclear idea can test badly even if the core proposition is strong). Treating scores as absolute (scores only make sense in comparison).
+
+At Innovatr, we design tests to measure appeal, clarity, differentiation, competitive performance, and emotional response. Because good testing reduces commercial uncertainty.
+
+Learning takeaway: A concept test should tell you what to fix, not just whether to proceed. If your last test didn't change your thinking, it wasn't designed properly.
+
+The teams that get the most value from testing are the ones asking the hardest questions upfront. When you know what you actually need to learn, the test design changes. If you're planning a launch and want to start with the right test questions, let's talk about what you're really trying to figure out.`,
+      status: "scheduled",
+    },
+    {
+      mailerNumber: 4,
+      month: "September",
+      scheduledDate: new Date("2026-09-24T10:00:00"),
+      day: "Wednesday",
+      sendTime: "10:00 AM",
+      topic: "AI in Innovation",
+      subjectLine: "AI Is Powerful. But It's Not Strategy.",
+      previewText: "How to use AI without outsourcing your thinking.",
+      bodyContent: `AI is extraordinary at pattern detection, theme clustering, speed, and draft generation. It is not extraordinary at context, cultural nuance, commercial judgement, and portfolio strategy. That's where teams get confused. AI can surface thousands of open-ended themes in minutes. But deciding which tension matters commercially? That's human work. At Innovatr, AI accelerates analysis but strategic framing still happens at the expert level. The danger is not using AI. The danger is mistaking automation for insight.
+
+Learning takeaway: Use AI to expand visibility. Use expertise to decide direction. The future is not human versus AI. It is human plus AI.
+
+The most interesting question isn't whether to use AI in research. It's how to use it in a way that actually makes your team smarter, not just faster. If you're curious about what good AI integration looks like in practice, we've got case studies that show the difference between speed and strategy.`,
+      status: "scheduled",
+    },
+    {
+      mailerNumber: 5,
+      month: "April",
+      scheduledDate: new Date("2026-04-30T10:00:00"),
+      day: "Wednesday",
+      sendTime: "10:00 AM",
+      topic: "Agile Research Advantage",
+      subjectLine: "Why Waiting Six Weeks Is No Longer Acceptable",
+      previewText: "Research built for modern decision speed.",
+      bodyContent: `Traditional research was built for a slower world. Today, decisions move at the speed of WhatsApp. Research should too. Agile research means shorter cycles, iterative learning, live optimisation, and clear outputs. At Innovatr, our studies are structured to give you answers quickly without compromising rigour. You test. You learn. You refine. You move. No bottlenecks. No endless email threads.
+
+Learning takeaway: Momentum. The brands winning aren't necessarily smarter. They're faster at learning.
+
+If you've ever felt stuck waiting for research when decisions needed to happen last week, you know the cost of slow insights. The shift to agile research isn't about rushing. It's about learning in rhythm with how your business actually operates. If your current research cadence feels out of step with your decision making, that's a solvable problem.`,
+      status: "scheduled",
+    },
+    {
+      mailerNumber: 6,
+      month: "June",
+      scheduledDate: new Date("2026-06-25T10:00:00"),
+      day: "Wednesday",
+      sendTime: "10:00 AM",
+      topic: "Respondent Experience",
+      subjectLine: "If People Hate Your Survey, Your Insights Suffer",
+      previewText: "Why boring research creates boring data.",
+      bodyContent: `Most surveys are still built like it's 2008. Long grids. Repetitive scales. Essay questions that feel like homework. The result? People disengage. And when people disengage, your data quality collapses. Here's a truth that most research programs ignore: The experience you create determines the honesty you receive.
+
+When a respondent sees a traditional matrix with forty rating scales, their brain switches off. They're no longer thinking critically. They're clicking. They're doing the minimum. The data you collect from that fatigue looks clean on the surface but it's not honest.
+
+At Innovatr, we think about this differently. The respondent experience is not a design nicety. It's a data quality imperative. Our behavioural testing model removes friction. Instead of rating scales, people make quick, intuitive trade-offs that mirror real choice. Mobile-first design. Frictionless flow. No distractions. The result? Respondents actually think. They reveal preference instead of politeness.
+
+Learning takeaway: You cannot separate insight quality from respondent experience. The best research platforms make the experience so natural that honesty becomes effortless.
+
+Every research team knows the difference between data that feels clean and data that actually means something. The gap usually comes down to how engaged people were when they were answering. If you're curious about what that looks like in practice, we can walk you through how a better respondent experience actually changes the insights you get.`,
+      status: "scheduled",
+    },
+    {
+      mailerNumber: 7,
+      month: "August",
+      scheduledDate: new Date("2026-08-27T10:00:00"),
+      day: "Wednesday",
+      sendTime: "10:00 AM",
+      topic: "Innovation Systems",
+      subjectLine: "Why One-Off Launches Don't Build Futures. Systems Do.",
+      previewText: "How the best companies turned innovation into a repeatable engine.",
+      bodyContent: `Every team launches something new. Most hope it works. The best companies know it will because they've built a system. Apple didn't dream up the iPhone and hope. Steve Jobs built a culture where experts make fast decisions grounded in craft and vision. Starbucks didn't stumble onto the Pumpkin Spice Latte. They systematically listen to customer ideas and test them. Google didn't get lucky with Gmail. They built a structure that turned side projects into billion-dollar products.
+
+Each system shares three things: Clear decision criteria (you know what winning means before you start). Regular testing gates (innovation moves through defined stages with consumer data at each one). Portfolio discipline (you're not innovating one SKU, you're building a portfolio).
+
+Traditional research approaches innovation as an event. Modern innovation works differently. It's continuous learning. Small tests. Rapid iteration. Scaled wins.
+
+Learning takeaway: If your innovation process isn't documented and repeatable, you're innovating by accident. That's expensive. The brands winning aren't smarter. They're more systematic.
+
+The interesting shift we see happening right now is teams moving from asking "Will this work?" to asking "How do we build a system where winning ideas are obvious?" That's a different kind of question, and it requires a different kind of research partner. If you're thinking about how to structure your innovation work differently, that's worth exploring.`,
+      status: "scheduled",
+    },
+    {
+      mailerNumber: 8,
+      month: "October",
+      scheduledDate: new Date("2026-10-29T10:00:00"),
+      day: "Wednesday",
+      sendTime: "10:00 AM",
+      topic: "Market Mapping",
+      subjectLine: "Not All Empty Space Is Opportunity. Here's How to Tell the Difference.",
+      previewText: "Why positioning based on competitor absence is a bet, not a strategy.",
+      bodyContent: `Every brand wants to find white space. It sounds smart. It sounds like freedom. It sounds like a blue ocean. But here's the uncomfortable truth: Some white space is empty because nobody wants it.
+
+Market mapping isn't just about spotting gaps. It's about identifying viable demand clusters. When done right, it reveals where consumers genuinely need something but supply is falling short. When done wrong, it shows you a category gap that was empty for a reason.
+
+Real market mapping asks three questions: Where do consumer aspirations cluster? Where are functional benefits underserved? Where is supply weak relative to stated demand? That's your sweet spot.
+
+When you skip mapping and just chase white space, you're guessing. When you do it properly, you're reading the category.
+
+Learning takeaway: Opportunity lives at the intersection of unmet need and commercial viability. If your positioning is based solely on competitor absence, you haven't done the work.
+
+The teams that nail positioning are the ones who do the unglamorous work of actually understanding how the category is structured in peoples minds. If you've got a positioning challenge where you need to see the real opportunity, not just the obvious gaps, that's a conversation worth having.`,
+      status: "scheduled",
+    },
+    {
+      mailerNumber: 9,
+      month: "November",
+      scheduledDate: new Date("2026-11-26T10:00:00"),
+      day: "Wednesday",
+      sendTime: "10:00 AM",
+      topic: "Emotional Drivers",
+      subjectLine: "Consumers Justify With Logic. They Stick With Emotion.",
+      previewText: "Why strong products perform. Why strong brands resonate. Why you need both.",
+      bodyContent: `Here's a testing trap that catches smart brands all the time: A product launches. It scores well on functional performance. Taste, texture, performance, usability all solid. Consumers rate it as good. The team launches confident. Six months later, it underperforms. Shelf life is short. Repeat purchase is weak.
+
+The team is confused. The product tested well.
+
+The problem: They measured how people perform. They didn't measure how people feel.
+
+Functional benefits answer: Does this do what I need it to do?
+Emotional drivers answer: Does this say something about who I am?
+
+In competitive categories, functional parity is almost universal. The differentiator isn't function. It's feeling. It's belonging. It's a version of self. That emotional resonance is what drives stickiness. It's what builds loyalty. It's what justifies premium pricing.
+
+At Innovatr, we layer behavioural testing with AI-assisted emotional theme analysis. We measure both how something performs and how it makes people feel.
+
+Learning takeaway: A product can test well functionally and still fail emotionally. If your last study didn't make you think about emotion, about identity and belonging, you've only measured half the decision.
+
+The cleanest way to know if you're missing something is simple: If your research told you what performs but didn't tell you what resonates, there's a gap. When you add emotional truth to performance data, the whole conversation shifts. If you want to see what that looks like for your category, we can show you.`,
+      status: "scheduled",
+    },
+    {
+      mailerNumber: 10,
+      month: "December",
+      scheduledDate: new Date("2026-12-30T10:00:00"),
+      day: "Wednesday",
+      sendTime: "10:00 AM",
+      topic: "Packaging Performance",
+      subjectLine: "Your Pack Doesn't Just Sit on Shelf. It Competes.",
+      previewText: "How smart packaging design converts choice into purchase.",
+      bodyContent: `Here's a question that separates good packaging teams from great ones: Is this design beautiful or is it effective?
+
+The answer should be both. But when they conflict, effective wins every time.
+
+Packaging design isn't decoration. It's communication under pressure. It's a consumer walking down a shelf with thirty options competing for three seconds of attention. It's a moment where your design either signals clarity, trust, quality, or belonging, or signals confusion.
+
+Smart packaging signals quality (material and finish say something). Signals clarity (people understand what this is in two seconds). Signals value (is this worth what I'm paying?). Signals belonging (does choosing this say something good about me?). Signals differentiation (in a sea of similar products, your pack is the deciding factor).
+
+Most brands test packaging by asking: Do you like it? That's useless. Liking and buying are different. At Innovatr, we test packaging the way consumers encounter it. In context. In competition. Under time pressure. We measure: Does it grab attention? Does it signal what you think it signals? Would you choose it over the alternative?
+
+Learning takeaway: Design decisions are commercial decisions. If your packaging test focused on aesthetics rather than commercial performance, you tested the wrong thing.
+
+The packaging conversations that matter most happen when you have real data on what actually drives choice, not just preference. If you're planning a pack refresh and want to know which direction actually wins in market, that's where good testing changes everything.`,
+      status: "scheduled",
+    },
+  ];
+
+  for (const mailer of mailerData) {
+    await databaseStorage.createInsightMailer(mailer);
+  }
+  console.log("Seeded 10 insight mailers");
+}
+
+seedInsightMailers().catch(console.error);
 
 export const storage = databaseStorage;

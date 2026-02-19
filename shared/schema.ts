@@ -839,3 +839,30 @@ export const insertActivityEventSchema = createInsertSchema(activityEvents).omit
 
 export type InsertActivityEvent = z.infer<typeof insertActivityEventSchema>;
 export type ActivityEvent = typeof activityEvents.$inferSelect;
+
+export const insightMailers = pgTable("insight_mailers", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  mailerNumber: integer("mailer_number").notNull(),
+  month: varchar("month", { length: 20 }).notNull(),
+  scheduledDate: timestamp("scheduled_date").notNull(),
+  day: varchar("day", { length: 15 }).notNull(),
+  sendTime: varchar("send_time", { length: 10 }).notNull(),
+  topic: varchar("topic", { length: 200 }).notNull(),
+  subjectLine: text("subject_line").notNull(),
+  previewText: text("preview_text").notNull(),
+  bodyContent: text("body_content").notNull(),
+  status: varchar("status", { length: 20 }).default("scheduled").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertInsightMailerSchema = createInsertSchema(insightMailers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertInsightMailer = z.infer<typeof insertInsightMailerSchema>;
+export type InsightMailer = typeof insightMailers.$inferSelect;
