@@ -19,6 +19,11 @@ import {
   Eye,
   Download,
   TrendingUp,
+  Shield,
+  KeyRound,
+  AlertTriangle,
+  UserX,
+  LogIn,
 } from "lucide-react";
 
 interface Study {
@@ -62,6 +67,16 @@ interface Test24Stats {
   briefsInPipeline: number;
 }
 
+interface AuthActivity {
+  loginsThisMonth: number;
+  loginFailuresThisMonth: number;
+  passwordResetRequestsThisMonth: number;
+  passwordResetCompletionsThisMonth: number;
+  activeUsersThisMonth: number;
+  usersNeverLoggedIn: number;
+  usersInactive30Days: number;
+}
+
 interface AnalyticsData {
   metrics: {
     totalUsers: number;
@@ -76,6 +91,7 @@ interface AnalyticsData {
     newUsersThisMonth: number;
     newCompaniesThisMonth: number;
   };
+  authActivity?: AuthActivity;
   test24Stats: Test24Stats;
   pipeline: {
     totalBriefs: number;
@@ -354,6 +370,102 @@ export default function AdminOverview() {
           </CardContent>
         </Card>
       </div>
+
+      <Card data-testid="card-auth-activity">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Shield className="w-5 h-5 text-indigo-500" />
+            User Engagement (This Month)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
+            <div className="space-y-1" data-testid="stat-logins">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                  <LogIn className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Logins</p>
+                  {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.authActivity?.loginsThisMonth || 0}</p>}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1" data-testid="stat-active-users">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+                  <Users className="w-4 h-4 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Active Users</p>
+                  {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.authActivity?.activeUsersThisMonth || 0}</p>}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1" data-testid="stat-login-failures">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+                  <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Failed Logins</p>
+                  {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.authActivity?.loginFailuresThisMonth || 0}</p>}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1" data-testid="stat-reset-requests">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
+                  <KeyRound className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Reset Requests</p>
+                  {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.authActivity?.passwordResetRequestsThisMonth || 0}</p>}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1" data-testid="stat-reset-completions">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
+                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Resets Done</p>
+                  {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.authActivity?.passwordResetCompletionsThisMonth || 0}</p>}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1" data-testid="stat-never-logged-in">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-900/20 flex items-center justify-center">
+                  <UserX className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Never Logged In</p>
+                  {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.authActivity?.usersNeverLoggedIn || 0}</p>}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1" data-testid="stat-inactive-30d">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Inactive 30d</p>
+                  {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.authActivity?.usersInactive30Days || 0}</p>}
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>

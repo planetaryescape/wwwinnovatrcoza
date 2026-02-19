@@ -5,16 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Check, X, Lock, ArrowLeft } from "lucide-react";
+import { Check, X, Lock, ArrowLeft, Loader2 } from "lucide-react";
 import { Link } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ResetPassword() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { login } = useAuth();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isAutoLogging, setIsAutoLogging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
@@ -75,8 +78,25 @@ export default function ResetPassword() {
         setIsSuccess(true);
         toast({
           title: "Password reset successful",
-          description: "You can now sign in with your new password.",
+          description: "Signing you in now...",
         });
+        
+        setIsAutoLogging(true);
+        try {
+          await login(email, password);
+          toast({
+            title: "Welcome back!",
+            description: "You're now signed in with your new password.",
+          });
+          setLocation("/portal");
+          return;
+        } catch (autoLoginErr) {
+          setIsAutoLogging(false);
+          toast({
+            title: "Password reset successful",
+            description: "Your password has been updated. Please sign in with your new password.",
+          });
+        }
       } else {
         setError(data.error || "Failed to reset password. Please try again.");
       }
@@ -118,22 +138,32 @@ export default function ResetPassword() {
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <Check className="w-6 h-6 text-green-600" />
+            <div className="mx-auto w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
+              {isAutoLogging ? (
+                <Loader2 className="w-6 h-6 text-green-600 dark:text-green-400 animate-spin" />
+              ) : (
+                <Check className="w-6 h-6 text-green-600 dark:text-green-400" />
+              )}
             </div>
-            <CardTitle data-testid="text-reset-success-title">Password Reset Complete</CardTitle>
+            <CardTitle data-testid="text-reset-success-title">
+              {isAutoLogging ? "Signing You In..." : "Password Reset Complete"}
+            </CardTitle>
             <CardDescription data-testid="text-reset-success-description">
-              Your password has been successfully reset. You can now sign in with your new password.
+              {isAutoLogging 
+                ? "Your password has been updated. Taking you to your portal now..."
+                : "Your password has been successfully reset. Click below to sign in."}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Link href="/">
-              <Button className="w-full" data-testid="button-go-signin">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Go to Sign In
-              </Button>
-            </Link>
-          </CardContent>
+          {!isAutoLogging && (
+            <CardContent className="space-y-3">
+              <Link href="/">
+                <Button className="w-full" data-testid="button-go-signin">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Go to Sign In
+                </Button>
+              </Link>
+            </CardContent>
+          )}
         </Card>
       </div>
     );

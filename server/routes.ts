@@ -278,6 +278,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check if account is active
       if (!user.isActive) {
+        storage.createActivityEvent({
+          userId: user.id,
+          companyId: user.companyId ?? null,
+          actionType: "login_failed",
+          metadata: { reason: "account_disabled" },
+        }).catch(err => console.error("Failed to log disabled account login:", err));
+        
         return res.status(403).json({ message: "Account is disabled. Please contact support." });
       }
       
@@ -303,6 +310,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Note: if both passwordHash and password are empty/null, login fails
       
       if (!passwordValid) {
+        storage.createActivityEvent({
+          userId: user.id,
+          companyId: user.companyId ?? null,
+          actionType: "login_failed",
+          metadata: { reason: "invalid_password", ip: req.ip || req.socket.remoteAddress },
+        }).catch(err => console.error("Failed to log failed login:", err));
+        
         return res.status(401).json({ message: "Invalid email or password" });
       }
       
@@ -465,8 +479,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await emailService.sendPasswordResetEmail(user.email, user.name || 'User', resetUrl);
       } catch (emailError) {
         console.error("Failed to send password reset email:", emailError);
-        // Continue anyway - don't reveal if email was sent
       }
+      
+      storage.createActivityEvent({
+        userId: user.id,
+        companyId: user.companyId ?? null,
+        actionType: "password_reset_requested",
+      }).catch(err => console.error("Failed to log password reset request:", err));
       
       res.json({ message: "If an account exists with this email, you will receive a password reset link." });
     } catch (error: any) {
@@ -531,6 +550,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Mark token as used
       await storage.markPasswordResetUsed(resetRecord.id);
+      
+      storage.createActivityEvent({
+        userId: user.id,
+        companyId: user.companyId ?? null,
+        actionType: "password_reset_completed",
+      }).catch(err => console.error("Failed to log password reset completion:", err));
       
       // Send password reset success email
       try {
@@ -1679,6 +1704,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const test24CompletedPro = studies.filter((s) => s.isTest24 && s.studyType === "pro" && s.status === "COMPLETED").length;
       const test24Completed = test24CompletedBasic + test24CompletedPro;
 
+      const recentActivity = await storage.getActivityEventsSince(thisMonthStart);
+      const loginFailures = recentActivity.filter(a => a.actionType === "login_failed").length;
+      const passwordResetRequests = recentActivity.filter(a => a.actionType === "password_reset_requested").length;
+      const passwordResetCompletions = recentActivity.filter(a => a.actionType === "password_reset_completed").length;
+      const totalLogins = recentActivity.filter(a => a.actionType === "login").length;
+      
+      const activeUsersThisMonth = new Set(
+        recentActivity.filter(a => a.actionType === "login").map(a => a.userId)
+      ).size;
+      
+      const usersNeverLoggedIn = users.filter(u => !u.lastLoginAt).length;
+      const usersInactive30Days = users.filter(u => {
+        if (!u.lastLoginAt) return true;
+        const lastLogin = new Date(u.lastLoginAt);
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        return lastLogin < thirtyDaysAgo;
+      }).length;
+
       res.json({
         metrics: {
           totalUsers: users.length,
@@ -1694,6 +1737,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
           newUsersThisMonth: usersThisMonth,
           newCompaniesThisMonth: companiesThisMonth,
+        },
+        authActivity: {
+          loginsThisMonth: totalLogins,
+          loginFailuresThisMonth: loginFailures,
+          passwordResetRequestsThisMonth: passwordResetRequests,
+          passwordResetCompletionsThisMonth: passwordResetCompletions,
+          activeUsersThisMonth,
+          usersNeverLoggedIn,
+          usersInactive30Days,
         },
         test24Stats: {
           totalBasic: test24BasicTotal,

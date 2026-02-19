@@ -61,8 +61,6 @@ export function LoginDialog({ open, onOpenChange, defaultSignup = false }: Login
   const [isLoading, setIsLoading] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [loginError, setLoginError] = useState<string | null>(null);
-  const [showResetLink, setShowResetLink] = useState(false);
-  const [showResetForm, setShowResetForm] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const { login, signup } = useAuth();
   const { toast } = useToast();
@@ -166,8 +164,11 @@ export function LoginDialog({ open, onOpenChange, defaultSignup = false }: Login
       setLoginAttempts(newAttempts);
       
       if (!isSignup) {
-        setLoginError("Incorrect email or password. Please try again.");
-        setShowResetLink(true);
+        if (newAttempts >= 3) {
+          setLoginError("Still having trouble? Try resetting your password using the link below.");
+        } else {
+          setLoginError("Incorrect email or password. Please check your details and try again.");
+        }
       } else {
         const message = error?.message || "Could not create account. Please try again.";
         setLoginError(message);
@@ -366,20 +367,9 @@ export function LoginDialog({ open, onOpenChange, defaultSignup = false }: Login
           {loginError && (
             <div className="rounded-md bg-destructive/10 p-3 text-sm" data-testid="error-login">
               <p className="text-destructive">{loginError}</p>
-              {showResetLink && !isSignup && !resetEmailSent && (
-                <button
-                  type="button"
-                  onClick={handlePasswordResetRequest}
-                  className="mt-2 text-primary hover:underline text-xs"
-                  data-testid="button-forgot-password"
-                  disabled={isLoading}
-                >
-                  Forgot your password? Click here to reset it.
-                </button>
-              )}
               {resetEmailSent && (
-                <p className="mt-2 text-green-600 text-xs">
-                  Password reset email sent. Check your inbox.
+                <p className="mt-2 text-green-600 text-xs" data-testid="text-reset-sent">
+                  Password reset email sent. Check your inbox for a link to create a new password.
                 </p>
               )}
             </div>
@@ -393,6 +383,26 @@ export function LoginDialog({ open, onOpenChange, defaultSignup = false }: Login
           >
             {isLoading ? "Please wait..." : isSignup ? "Create Free Account" : "Sign In"}
           </Button>
+
+          {!isSignup && (
+            <div className="text-center" data-testid="forgot-password-section">
+              {!resetEmailSent ? (
+                <button
+                  type="button"
+                  onClick={handlePasswordResetRequest}
+                  className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors"
+                  data-testid="button-forgot-password"
+                  disabled={isLoading}
+                >
+                  Forgot your password?
+                </button>
+              ) : (
+                <p className="text-sm text-green-600" data-testid="text-reset-confirmation">
+                  Reset link sent. Check your inbox.
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="text-center text-sm">
             <button
