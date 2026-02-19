@@ -397,6 +397,7 @@ export default function TrendsInsights() {
   const [requestSubmitting, setRequestSubmitting] = useState(false);
   const [, navigate] = useLocation();
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [loginDialogSignup, setLoginDialogSignup] = useState(false);
   const { user, isAdmin, hasPaidSeatAccess, isAuthenticated, isPaidMember } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -603,7 +604,7 @@ export default function TrendsInsights() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
               size="lg"
-              onClick={() => setLoginDialogOpen(true)}
+              onClick={() => { setLoginDialogSignup(true); setLoginDialogOpen(true); }}
               data-testid="button-signup-trends"
             >
               <UserPlus className="w-4 h-4 mr-2" />
@@ -612,7 +613,7 @@ export default function TrendsInsights() {
             <Button
               variant="outline"
               size="lg"
-              onClick={() => setLoginDialogOpen(true)}
+              onClick={() => { setLoginDialogSignup(false); setLoginDialogOpen(true); }}
               data-testid="button-login-trends"
             >
               <LogIn className="w-4 h-4 mr-2" />
@@ -625,7 +626,7 @@ export default function TrendsInsights() {
           </p>
         </div>
 
-        <LoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
+        <LoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} defaultSignup={loginDialogSignup} />
       </div>
     );
   }

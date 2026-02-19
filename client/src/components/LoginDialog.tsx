@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -43,10 +43,11 @@ const REFERRAL_OPTIONS = [
 interface LoginDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  defaultSignup?: boolean;
 }
 
-export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
-  const [isSignup, setIsSignup] = useState(false);
+export function LoginDialog({ open, onOpenChange, defaultSignup = false }: LoginDialogProps) {
+  const [isSignup, setIsSignup] = useState(defaultSignup);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -66,6 +67,12 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const { login, signup } = useAuth();
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (open) {
+      setIsSignup(defaultSignup);
+    }
+  }, [open, defaultSignup]);
 
   const isValidEmail = useMemo(() => {
     if (!email) return false;

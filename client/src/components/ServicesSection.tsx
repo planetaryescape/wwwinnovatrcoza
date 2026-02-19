@@ -61,8 +61,8 @@ const services: Service[] = [
     number: "3",
     title: "Innovatr Intelligence",
     description: "Bi-weekly insights, trends and reports",
-    priceZAR: 5000,
-    priceSuffix: " / month",
+    priceZAR: null,
+    customPrice: "Free / limited access",
     link: "/portal/trends",
     features: [
       "Monitor trends & competitor launch alerts",
