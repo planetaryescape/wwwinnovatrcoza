@@ -854,6 +854,8 @@ export const insightMailers = pgTable("insight_mailers", {
   previewText: text("preview_text").notNull(),
   bodyContent: text("body_content").notNull(),
   status: varchar("status", { length: 20 }).default("scheduled").notNull(),
+  channel: varchar("channel", { length: 20 }).default("inside").notNull(),
+  attachmentType: varchar("attachment_type", { length: 20 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

@@ -1887,6 +1887,7 @@ Learning takeaway: If your research doesn't simulate choice, it overestimates su
 
 If you're running launches this year and want to know which concepts will actually convert in market, there's a reason ambitious brands run their ideas through predictive testing first. It's not about being thorough. It's about being right.`,
       status: "scheduled",
+      channel: "inside",
     },
     {
       mailerNumber: 2,
@@ -1903,6 +1904,7 @@ Learning takeaway: Faster alignment. Stronger confidence. Less debate theatre. I
 
 The brands we work with often tell us the same thing: They didn't realise how much time they were losing translating research into strategy. When insight and narrative work together, that conversation changes. If you'd like to see how your next study could land differently in the room, we're here for that conversation.`,
       status: "scheduled",
+      channel: "inside",
     },
     {
       mailerNumber: 3,
@@ -1923,6 +1925,7 @@ Learning takeaway: A concept test should tell you what to fix, not just whether 
 
 The teams that get the most value from testing are the ones asking the hardest questions upfront. When you know what you actually need to learn, the test design changes. If you're planning a launch and want to start with the right test questions, let's talk about what you're really trying to figure out.`,
       status: "scheduled",
+      channel: "inside",
     },
     {
       mailerNumber: 4,
@@ -1939,6 +1942,7 @@ Learning takeaway: Use AI to expand visibility. Use expertise to decide directio
 
 The most interesting question isn't whether to use AI in research. It's how to use it in a way that actually makes your team smarter, not just faster. If you're curious about what good AI integration looks like in practice, we've got case studies that show the difference between speed and strategy.`,
       status: "scheduled",
+      channel: "inside",
     },
     {
       mailerNumber: 5,
@@ -1955,6 +1959,7 @@ Learning takeaway: Momentum. The brands winning aren't necessarily smarter. They
 
 If you've ever felt stuck waiting for research when decisions needed to happen last week, you know the cost of slow insights. The shift to agile research isn't about rushing. It's about learning in rhythm with how your business actually operates. If your current research cadence feels out of step with your decision making, that's a solvable problem.`,
       status: "scheduled",
+      channel: "inside",
     },
     {
       mailerNumber: 6,
@@ -1975,6 +1980,7 @@ Learning takeaway: You cannot separate insight quality from respondent experienc
 
 Every research team knows the difference between data that feels clean and data that actually means something. The gap usually comes down to how engaged people were when they were answering. If you're curious about what that looks like in practice, we can walk you through how a better respondent experience actually changes the insights you get.`,
       status: "scheduled",
+      channel: "inside",
     },
     {
       mailerNumber: 7,
@@ -1995,6 +2001,7 @@ Learning takeaway: If your innovation process isn't documented and repeatable, y
 
 The interesting shift we see happening right now is teams moving from asking "Will this work?" to asking "How do we build a system where winning ideas are obvious?" That's a different kind of question, and it requires a different kind of research partner. If you're thinking about how to structure your innovation work differently, that's worth exploring.`,
       status: "scheduled",
+      channel: "inside",
     },
     {
       mailerNumber: 8,
@@ -2017,6 +2024,7 @@ Learning takeaway: Opportunity lives at the intersection of unmet need and comme
 
 The teams that nail positioning are the ones who do the unglamorous work of actually understanding how the category is structured in peoples minds. If you've got a positioning challenge where you need to see the real opportunity, not just the obvious gaps, that's a conversation worth having.`,
       status: "scheduled",
+      channel: "inside",
     },
     {
       mailerNumber: 9,
@@ -2044,6 +2052,7 @@ Learning takeaway: A product can test well functionally and still fail emotional
 
 The cleanest way to know if you're missing something is simple: If your research told you what performs but didn't tell you what resonates, there's a gap. When you add emotional truth to performance data, the whole conversation shifts. If you want to see what that looks like for your category, we can show you.`,
       status: "scheduled",
+      channel: "inside",
     },
     {
       mailerNumber: 10,
@@ -2068,6 +2077,7 @@ Learning takeaway: Design decisions are commercial decisions. If your packaging 
 
 The packaging conversations that matter most happen when you have real data on what actually drives choice, not just preference. If you're planning a pack refresh and want to know which direction actually wins in market, that's where good testing changes everything.`,
       status: "scheduled",
+      channel: "inside",
     },
   ];
 

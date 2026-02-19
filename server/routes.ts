@@ -2360,6 +2360,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         previewText: z.string().optional(),
         bodyContent: z.string().optional(),
         topic: z.string().optional(),
+        channel: z.enum(["inside", "insights", "launch", "irl"]).optional(),
+        attachmentType: z.enum(["video", "gif", "infographic", "report"]).nullable().optional(),
       });
       const validated = updateSchema.parse(req.body);
       await storage.updateInsightMailer(req.params.id, validated);

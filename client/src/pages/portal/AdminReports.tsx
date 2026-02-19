@@ -62,6 +62,13 @@ import {
   MessageSquarePlus,
   ChevronDown,
   ChevronUp,
+  Video,
+  FileImage,
+  BarChart3,
+  Mail,
+  Megaphone,
+  Rocket,
+  Users,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ReportEditorModal from "./ReportEditorModal";
@@ -190,6 +197,8 @@ export default function AdminReports() {
     previewText: string;
     bodyContent: string;
     status: string;
+    channel: string;
+    attachmentType: string | null;
     createdAt: string;
     updatedAt: string;
   }
@@ -655,120 +664,6 @@ export default function AdminReports() {
         )}
       </Card>
 
-      <Card className="bg-white border" data-testid="insight-mailers-section">
-        <div
-          className="flex items-center justify-between gap-2 p-4 cursor-pointer select-none"
-          onClick={() => setMailersExpanded(prev => !prev)}
-        >
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-[#0033A0]" />
-            <h3 className="text-lg font-semibold text-gray-900">INNOVATR INSIDE Mailer Schedule</h3>
-            {upcomingMailersCount > 0 && (
-              <Badge className="bg-blue-100 text-[#0033A0] border-0 text-xs">
-                {upcomingMailersCount} upcoming
-              </Badge>
-            )}
-          </div>
-          <Button variant="ghost" size="icon">
-            {mailersExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </Button>
-        </div>
-        {mailersExpanded && (
-          <CardContent className="p-4 pt-0">
-            {mailersLoading ? (
-              <div className="flex items-center justify-center py-6">
-                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-              </div>
-            ) : insightMailers.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">No insight mailers scheduled</p>
-            ) : (
-              <div className="space-y-2">
-                {insightMailers.map((mailer) => {
-                  const autoStatus = getMailerAutoStatus(mailer);
-                  const statusColors: Record<string, string> = {
-                    sent: "bg-green-100 text-green-700",
-                    scheduled: "bg-gray-100 text-gray-600",
-                    upcoming: "bg-blue-100 text-[#0033A0]",
-                    overdue: "bg-red-100 text-red-700",
-                    draft: "bg-amber-100 text-amber-700",
-                  };
-                  const isExpanded = expandedMailerId === mailer.id;
-                  return (
-                    <div key={mailer.id} className="border rounded-md" data-testid={`mailer-row-${mailer.id}`}>
-                      <div
-                        className="flex items-center gap-3 p-3 cursor-pointer select-none hover-elevate"
-                        onClick={() => setExpandedMailerId(isExpanded ? null : mailer.id)}
-                      >
-                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#0033A0]/10 text-[#0033A0] text-sm font-bold flex-shrink-0">
-                          {mailer.mailerNumber}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-semibold text-gray-900 truncate">{mailer.topic}</span>
-                            <Badge className={`text-xs border-0 ${statusColors[autoStatus] || "bg-gray-100 text-gray-700"}`}>
-                              {autoStatus}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                            <span>{mailer.month}</span>
-                            <span>{new Date(mailer.scheduledDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span>
-                            <span>{mailer.day} at {mailer.sendTime}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          {mailer.status !== "sent" && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              disabled={mailerStatusLoading === mailer.id}
-                              onClick={(e) => { e.stopPropagation(); handleUpdateMailerStatus(mailer.id, "sent"); }}
-                              data-testid={`button-mark-sent-${mailer.id}`}
-                            >
-                              {mailerStatusLoading === mailer.id ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Check className="w-3 h-3 mr-1" />}
-                              Mark Sent
-                            </Button>
-                          )}
-                          {mailer.status === "sent" && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              disabled={mailerStatusLoading === mailer.id}
-                              onClick={(e) => { e.stopPropagation(); handleUpdateMailerStatus(mailer.id, "scheduled"); }}
-                              data-testid={`button-revert-sent-${mailer.id}`}
-                            >
-                              Revert
-                            </Button>
-                          )}
-                          {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
-                        </div>
-                      </div>
-                      {isExpanded && (
-                        <div className="border-t p-4 bg-gray-50/50 space-y-3">
-                          <div>
-                            <p className="text-xs font-medium text-muted-foreground mb-1">Subject Line</p>
-                            <p className="text-sm text-gray-900">{mailer.subjectLine}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium text-muted-foreground mb-1">Preview Text</p>
-                            <p className="text-sm text-gray-700">{mailer.previewText}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium text-muted-foreground mb-1">Body Content</p>
-                            <div className="text-sm text-gray-700 whitespace-pre-wrap bg-white rounded-md p-3 border max-h-[300px] overflow-y-auto">
-                              {mailer.bodyContent}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        )}
-      </Card>
-
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h2 
@@ -1219,6 +1114,164 @@ export default function AdminReports() {
         className="hidden"
         data-testid="input-quick-image"
       />
+
+      {(() => {
+        const channelConfig = [
+          { key: "inside", label: "Inside", icon: Mail, color: "text-[#0033A0]", bgColor: "bg-[#0033A0]/10" },
+          { key: "insights", label: "Insights", icon: BarChart3, color: "text-violet-600", bgColor: "bg-violet-100" },
+          { key: "launch", label: "Launch", icon: Rocket, color: "text-orange-600", bgColor: "bg-orange-100" },
+          { key: "irl", label: "IRL", icon: Users, color: "text-emerald-600", bgColor: "bg-emerald-100" },
+        ];
+        const attachmentIcons: Record<string, { icon: typeof Video; label: string }> = {
+          video: { icon: Video, label: "Video" },
+          gif: { icon: FileImage, label: "GIF" },
+          infographic: { icon: BarChart3, label: "Infographic" },
+          report: { icon: FileText, label: "Report" },
+        };
+        const statusColors: Record<string, string> = {
+          sent: "bg-green-100 text-green-700",
+          scheduled: "bg-gray-100 text-gray-600",
+          upcoming: "bg-blue-100 text-[#0033A0]",
+          overdue: "bg-red-100 text-red-700",
+          draft: "bg-amber-100 text-amber-700",
+        };
+        return (
+          <div data-testid="insight-mailers-section" className="space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-[#0033A0]" />
+                <h2
+                  className="text-2xl font-bold text-gray-900"
+                  style={{ fontFamily: 'DM Serif Display, serif' }}
+                >
+                  Content Schedule
+                </h2>
+                {upcomingMailersCount > 0 && (
+                  <Badge className="bg-blue-100 text-[#0033A0] border-0 text-xs">
+                    {upcomingMailersCount} upcoming
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            {mailersLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                {channelConfig.map((channel) => {
+                  const channelMailers = insightMailers.filter(m => m.channel === channel.key);
+                  const ChannelIcon = channel.icon;
+                  return (
+                    <Card key={channel.key} className="bg-white border" data-testid={`channel-column-${channel.key}`}>
+                      <div className="p-4 border-b">
+                        <div className="flex items-center gap-2">
+                          <div className={`flex items-center justify-center w-7 h-7 rounded-md ${channel.bgColor}`}>
+                            <ChannelIcon className={`w-4 h-4 ${channel.color}`} />
+                          </div>
+                          <h3 className="text-sm font-semibold text-gray-900">{channel.label}</h3>
+                          <Badge className="bg-gray-100 text-gray-600 border-0 text-xs ml-auto">
+                            {channelMailers.length}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="p-2 space-y-1 max-h-[500px] overflow-y-auto">
+                        {channelMailers.length === 0 ? (
+                          <p className="text-xs text-muted-foreground py-4 text-center">No posts scheduled</p>
+                        ) : (
+                          channelMailers.map((mailer) => {
+                            const autoStatus = getMailerAutoStatus(mailer);
+                            const isExpanded = expandedMailerId === mailer.id;
+                            const AttachmentIcon = mailer.attachmentType ? attachmentIcons[mailer.attachmentType]?.icon : null;
+                            const attachmentLabel = mailer.attachmentType ? attachmentIcons[mailer.attachmentType]?.label : null;
+                            return (
+                              <div key={mailer.id} className="rounded-md border" data-testid={`mailer-row-${mailer.id}`}>
+                                <div
+                                  className="p-2.5 cursor-pointer select-none hover-elevate"
+                                  onClick={() => setExpandedMailerId(isExpanded ? null : mailer.id)}
+                                >
+                                  <div className="flex items-start gap-2">
+                                    <div className={`flex items-center justify-center w-6 h-6 rounded-full ${channel.bgColor} ${channel.color} text-xs font-bold flex-shrink-0 mt-0.5`}>
+                                      {mailer.mailerNumber}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-xs font-semibold text-gray-900 leading-tight truncate">{mailer.topic}</p>
+                                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                                        <Badge className={`text-[10px] border-0 px-1.5 py-0 ${statusColors[autoStatus] || "bg-gray-100 text-gray-700"}`}>
+                                          {autoStatus}
+                                        </Badge>
+                                        {AttachmentIcon && (
+                                          <Badge className="text-[10px] border-0 px-1.5 py-0 bg-purple-50 text-purple-700">
+                                            <AttachmentIcon className="w-2.5 h-2.5 mr-0.5" />
+                                            {attachmentLabel}
+                                          </Badge>
+                                        )}
+                                      </div>
+                                      <p className="text-[10px] text-muted-foreground mt-1">
+                                        {new Date(mailer.scheduledDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })} · {mailer.day}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                                {isExpanded && (
+                                  <div className="border-t p-2.5 bg-gray-50/50 space-y-2">
+                                    <div>
+                                      <p className="text-[10px] font-medium text-muted-foreground mb-0.5">Subject</p>
+                                      <p className="text-xs text-gray-900">{mailer.subjectLine}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-[10px] font-medium text-muted-foreground mb-0.5">Preview</p>
+                                      <p className="text-xs text-gray-700">{mailer.previewText}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-[10px] font-medium text-muted-foreground mb-0.5">Body</p>
+                                      <div className="text-xs text-gray-700 whitespace-pre-wrap bg-white rounded-md p-2 border max-h-[150px] overflow-y-auto">
+                                        {mailer.bodyContent}
+                                      </div>
+                                    </div>
+                                    <div className="flex gap-1 pt-1">
+                                      {mailer.status !== "sent" && (
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="h-7 text-xs"
+                                          disabled={mailerStatusLoading === mailer.id}
+                                          onClick={(e) => { e.stopPropagation(); handleUpdateMailerStatus(mailer.id, "sent"); }}
+                                          data-testid={`button-mark-sent-${mailer.id}`}
+                                        >
+                                          {mailerStatusLoading === mailer.id ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Check className="w-3 h-3 mr-1" />}
+                                          Mark Sent
+                                        </Button>
+                                      )}
+                                      {mailer.status === "sent" && (
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="h-7 text-xs"
+                                          disabled={mailerStatusLoading === mailer.id}
+                                          onClick={(e) => { e.stopPropagation(); handleUpdateMailerStatus(mailer.id, "scheduled"); }}
+                                          data-testid={`button-revert-sent-${mailer.id}`}
+                                        >
+                                          Revert
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       <AlertDialog open={!!reportToDelete} onOpenChange={(open) => !open && setReportToDelete(null)}>
         <AlertDialogContent>
