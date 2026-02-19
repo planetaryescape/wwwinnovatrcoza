@@ -817,3 +817,25 @@ export const insertReportRequestSchema = createInsertSchema(reportRequests).omit
 
 export type InsertReportRequest = z.infer<typeof insertReportRequestSchema>;
 export type ReportRequest = typeof reportRequests.$inferSelect;
+
+export const activityEvents = pgTable("activity_events", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  companyId: varchar("company_id"),
+  actionType: varchar("action_type", { length: 50 }).notNull(),
+  entityType: varchar("entity_type", { length: 50 }),
+  entityId: varchar("entity_id"),
+  entityName: text("entity_name"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertActivityEventSchema = createInsertSchema(activityEvents).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertActivityEvent = z.infer<typeof insertActivityEventSchema>;
+export type ActivityEvent = typeof activityEvents.$inferSelect;

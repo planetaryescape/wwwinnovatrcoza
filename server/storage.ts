@@ -45,6 +45,8 @@ import {
   type InsertReportLastViewed,
   type ReportRequest,
   type InsertReportRequest,
+  type ActivityEvent,
+  type InsertActivityEvent,
   users,
   passwordResets,
   creditLedger,
@@ -67,6 +69,7 @@ import {
   reportEvents,
   reportLastViewed,
   reportRequests,
+  activityEvents,
 } from "@shared/schema";
 import { eq, and, lte, gte, desc, sql } from "drizzle-orm";
 import { db } from "./db";
@@ -201,6 +204,12 @@ export interface IStorage {
   getReportRequest(id: string): Promise<ReportRequest | undefined>;
   getAllReportRequests(): Promise<ReportRequest[]>;
   updateReportRequest(id: string, updates: Partial<ReportRequest>): Promise<void>;
+
+  // Activity Events
+  createActivityEvent(event: InsertActivityEvent): Promise<ActivityEvent>;
+  getActivityEventsByCompany(companyId: string, from: Date, to: Date): Promise<ActivityEvent[]>;
+  getActivityEventsByUser(userId: string, from: Date, to: Date): Promise<ActivityEvent[]>;
+  getActivityEventsSince(since: Date): Promise<ActivityEvent[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1774,6 +1783,48 @@ export class DatabaseStorage implements IStorage {
 
   async updateReportRequest(id: string, updates: Partial<ReportRequest>): Promise<void> {
     await db.update(reportRequests).set({ ...updates, updatedAt: new Date() }).where(eq(reportRequests.id, id));
+  }
+
+  async createActivityEvent(event: InsertActivityEvent): Promise<ActivityEvent> {
+    const id = randomUUID();
+    const result = await db.insert(activityEvents).values({
+      id,
+      userId: event.userId,
+      companyId: event.companyId ?? null,
+      actionType: event.actionType,
+      entityType: event.entityType ?? null,
+      entityId: event.entityId ?? null,
+      entityName: event.entityName ?? null,
+      metadata: event.metadata ?? null,
+      createdAt: new Date(),
+    }).returning();
+    return result[0];
+  }
+
+  async getActivityEventsByCompany(companyId: string, from: Date, to: Date): Promise<ActivityEvent[]> {
+    return db.select().from(activityEvents)
+      .where(and(
+        eq(activityEvents.companyId, companyId),
+        gte(activityEvents.createdAt, from),
+        lte(activityEvents.createdAt, to),
+      ))
+      .orderBy(desc(activityEvents.createdAt));
+  }
+
+  async getActivityEventsByUser(userId: string, from: Date, to: Date): Promise<ActivityEvent[]> {
+    return db.select().from(activityEvents)
+      .where(and(
+        eq(activityEvents.userId, userId),
+        gte(activityEvents.createdAt, from),
+        lte(activityEvents.createdAt, to),
+      ))
+      .orderBy(desc(activityEvents.createdAt));
+  }
+
+  async getActivityEventsSince(since: Date): Promise<ActivityEvent[]> {
+    return db.select().from(activityEvents)
+      .where(gte(activityEvents.createdAt, since))
+      .orderBy(desc(activityEvents.createdAt));
   }
 }
 
