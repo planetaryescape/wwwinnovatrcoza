@@ -22,8 +22,11 @@ export const users = pgTable("users", {
   password: text("password").notNull(), // Legacy field - will be deprecated
   passwordHash: text("password_hash"), // New bcrypt hashed password
   name: text("name"),
+  surname: text("surname"),
   company: text("company"),
   industry: text("industry"),
+  referralSource: text("referral_source"),
+  wantsContact: boolean("wants_contact").default(false),
   companyId: varchar("company_id"),
   membershipTier: varchar("membership_tier", { length: 20 })
     .notNull()
