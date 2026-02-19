@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { logActivity } from "@/lib/activityLogger";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -299,6 +300,7 @@ export default function PastResearch() {
 
   const handleDownload = async (report: ClientReport) => {
     if (!report.pdfUrl) return;
+    logActivity("download_client_report", { entityType: "client_report", entityId: report.id, entityName: report.title });
     
     try {
       // Normalize the pdfUrl - strip /api/files/ prefix if present to avoid double-prefixing
@@ -529,6 +531,10 @@ export default function PastResearch() {
   
   // Check if user has any research at all
   const hasAnyResearch = totalItems > 0 || reports.length > 0 || studies.length > 0;
+
+  useEffect(() => {
+    logActivity("view_past_research");
+  }, []);
 
   return (
     <PortalLayout>

@@ -1452,4 +1452,161 @@ export async function sendReportRequestConfirmation(userEmail: string, userName:
   }
 }
 
+export async function sendDailyAdminDigest(data: {
+  isMonday: boolean;
+  periodLabel: string;
+  newUsers: { name: string; surname: string; email: string; company: string }[];
+  totalLogins: number;
+  uniqueLoginUsers: number;
+  reportViews: number;
+  reportDownloads: number;
+  briefLaunches: number;
+  totalEvents: number;
+  companyActivity: { companyName: string; totalActions: number; uniqueUsers: number }[];
+  recentEvents: { userName: string; userEmail: string; companyName: string; actionType: string; entityName: string | null; createdAt: string }[];
+}) {
+  try {
+    const resend = await getResendClient();
+    const fromEmail = await getFromEmail();
+
+    const newUsersHtml = data.newUsers.length > 0
+      ? data.newUsers.map(u =>
+        `<tr>
+          <td style="padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 14px;">${escapeHtml(u.name)} ${escapeHtml(u.surname)}</td>
+          <td style="padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 14px;">${escapeHtml(u.email)}</td>
+          <td style="padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 14px;">${escapeHtml(u.company)}</td>
+        </tr>`
+      ).join("")
+      : `<tr><td colspan="3" style="padding: 12px; text-align: center; color: ${MUTED_COLOR}; font-size: 14px;">No new users</td></tr>`;
+
+    const companyHtml = data.companyActivity.length > 0
+      ? data.companyActivity.map(c =>
+        `<tr>
+          <td style="padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 14px;">${escapeHtml(c.companyName)}</td>
+          <td style="padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 14px; text-align: center;">${c.uniqueUsers}</td>
+          <td style="padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 14px; text-align: center;">${c.totalActions}</td>
+        </tr>`
+      ).join("")
+      : `<tr><td colspan="3" style="padding: 12px; text-align: center; color: ${MUTED_COLOR}; font-size: 14px;">No company activity</td></tr>`;
+
+    const actionLabels: Record<string, string> = {
+      login: "Logged in",
+      view_report: "Viewed report",
+      download_report: "Downloaded report",
+      download_client_report: "Downloaded client report",
+      view_trends: "Viewed Trends & Insights",
+      view_past_research: "Viewed Past Research",
+      launch_brief: "Launched brief",
+      view_deals: "Viewed Member Offers",
+      view_dashboard: "Visited Dashboard",
+      view_settings: "Visited Settings",
+      view_credits: "Viewed Credits & Billing",
+    };
+
+    const recentHtml = data.recentEvents.slice(0, 20).map(ev =>
+      `<tr>
+        <td style="padding: 6px 12px; border-bottom: 1px solid #eee; font-size: 13px;">${escapeHtml(ev.userName)}</td>
+        <td style="padding: 6px 12px; border-bottom: 1px solid #eee; font-size: 13px;">${escapeHtml(ev.companyName)}</td>
+        <td style="padding: 6px 12px; border-bottom: 1px solid #eee; font-size: 13px;">${actionLabels[ev.actionType] || ev.actionType}${ev.entityName ? `: ${escapeHtml(ev.entityName)}` : ""}</td>
+        <td style="padding: 6px 12px; border-bottom: 1px solid #eee; font-size: 13px; color: ${MUTED_COLOR};">${new Date(ev.createdAt).toLocaleString("en-ZA", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" })}</td>
+      </tr>`
+    ).join("");
+
+    const bodyHtml = `
+      <div style="font-family: 'Roboto', Arial, sans-serif; max-width: 640px; margin: 0 auto; background-color: #ffffff;">
+        <div style="background-color: ${BRAND_COLOR}; padding: 24px 32px; border-radius: 8px 8px 0 0;">
+          <h1 style="color: #ffffff; font-size: 22px; margin: 0;">Innovatr Daily Digest</h1>
+          <p style="color: rgba(255,255,255,0.85); font-size: 14px; margin: 8px 0 0 0;">${escapeHtml(data.periodLabel)}</p>
+        </div>
+        
+        <div style="padding: 24px 32px;">
+          <div style="display: flex; gap: 16px; margin-bottom: 28px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td width="25%" style="padding: 12px; text-align: center; background-color: #f8f9fa; border-radius: 8px;">
+                  <div style="font-size: 28px; font-weight: 700; color: ${TEXT_COLOR};">${data.totalLogins}</div>
+                  <div style="font-size: 12px; color: ${MUTED_COLOR}; margin-top: 4px;">Logins (${data.uniqueLoginUsers} users)</div>
+                </td>
+                <td width="25%" style="padding: 12px; text-align: center; background-color: #f8f9fa; border-radius: 8px;">
+                  <div style="font-size: 28px; font-weight: 700; color: ${TEXT_COLOR};">${data.reportViews}</div>
+                  <div style="font-size: 12px; color: ${MUTED_COLOR}; margin-top: 4px;">Report Views</div>
+                </td>
+                <td width="25%" style="padding: 12px; text-align: center; background-color: #f8f9fa; border-radius: 8px;">
+                  <div style="font-size: 28px; font-weight: 700; color: ${TEXT_COLOR};">${data.reportDownloads}</div>
+                  <div style="font-size: 12px; color: ${MUTED_COLOR}; margin-top: 4px;">Downloads</div>
+                </td>
+                <td width="25%" style="padding: 12px; text-align: center; background-color: #f8f9fa; border-radius: 8px;">
+                  <div style="font-size: 28px; font-weight: 700; color: ${TEXT_COLOR};">${data.briefLaunches}</div>
+                  <div style="font-size: 12px; color: ${MUTED_COLOR}; margin-top: 4px;">Briefs</div>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          ${data.newUsers.length > 0 ? `
+          <h2 style="font-size: 16px; color: ${TEXT_COLOR}; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid ${BRAND_COLOR};">New Users (${data.newUsers.length})</h2>
+          <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #eee; border-radius: 6px; overflow: hidden;">
+            <thead>
+              <tr style="background-color: #f8f9fa;">
+                <th style="padding: 10px 12px; text-align: left; font-size: 12px; color: ${MUTED_COLOR}; text-transform: uppercase;">Name</th>
+                <th style="padding: 10px 12px; text-align: left; font-size: 12px; color: ${MUTED_COLOR}; text-transform: uppercase;">Email</th>
+                <th style="padding: 10px 12px; text-align: left; font-size: 12px; color: ${MUTED_COLOR}; text-transform: uppercase;">Company</th>
+              </tr>
+            </thead>
+            <tbody>${newUsersHtml}</tbody>
+          </table>
+          ` : ""}
+
+          <h2 style="font-size: 16px; color: ${TEXT_COLOR}; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid ${BRAND_COLOR};">Company Activity</h2>
+          <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #eee; border-radius: 6px; overflow: hidden;">
+            <thead>
+              <tr style="background-color: #f8f9fa;">
+                <th style="padding: 10px 12px; text-align: left; font-size: 12px; color: ${MUTED_COLOR}; text-transform: uppercase;">Company</th>
+                <th style="padding: 10px 12px; text-align: center; font-size: 12px; color: ${MUTED_COLOR}; text-transform: uppercase;">Active Users</th>
+                <th style="padding: 10px 12px; text-align: center; font-size: 12px; color: ${MUTED_COLOR}; text-transform: uppercase;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>${companyHtml}</tbody>
+          </table>
+
+          ${recentHtml ? `
+          <h2 style="font-size: 16px; color: ${TEXT_COLOR}; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid ${BRAND_COLOR};">Recent Activity</h2>
+          <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #eee; border-radius: 6px; overflow: hidden;">
+            <thead>
+              <tr style="background-color: #f8f9fa;">
+                <th style="padding: 8px 12px; text-align: left; font-size: 12px; color: ${MUTED_COLOR}; text-transform: uppercase;">User</th>
+                <th style="padding: 8px 12px; text-align: left; font-size: 12px; color: ${MUTED_COLOR}; text-transform: uppercase;">Company</th>
+                <th style="padding: 8px 12px; text-align: left; font-size: 12px; color: ${MUTED_COLOR}; text-transform: uppercase;">Action</th>
+                <th style="padding: 8px 12px; text-align: left; font-size: 12px; color: ${MUTED_COLOR}; text-transform: uppercase;">Time</th>
+              </tr>
+            </thead>
+            <tbody>${recentHtml}</tbody>
+          </table>
+          ` : ""}
+
+          <p style="margin-top: 28px; font-size: 13px; color: ${FOOTER_COLOR}; text-align: center;">
+            Total actions recorded: ${data.totalEvents}
+          </p>
+        </div>
+      </div>
+    `;
+
+    const subject = `Innovatr Daily Digest - ${data.periodLabel}`;
+
+    const response = await resend.emails.send({
+      from: fromEmail,
+      to: "hannah@innovatr.co.za",
+      subject,
+      html: bodyHtml,
+      text: stripHtml(bodyHtml),
+    });
+
+    console.log("Daily admin digest sent:", response);
+    return response;
+  } catch (error) {
+    console.error("Failed to send daily admin digest:", error);
+    throw error;
+  }
+}
+
 export { FRONTEND_URL };

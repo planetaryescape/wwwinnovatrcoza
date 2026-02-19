@@ -1,4 +1,5 @@
 import { useMemo, useEffect, useState, useCallback } from "react";
+import { logActivity } from "@/lib/activityLogger";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -448,6 +449,10 @@ export default function TrendsInsights() {
     setRequestModalOpen(true);
   };
   
+  useEffect(() => {
+    logActivity("view_trends");
+  }, []);
+
   useScrollRestoration("trends-insights");
   
   const fetchReports = useCallback(async () => {

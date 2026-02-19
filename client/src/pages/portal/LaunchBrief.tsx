@@ -24,6 +24,7 @@
  */
 
 import { useState, useCallback, useRef, useEffect, MutableRefObject } from "react";
+import { logActivity } from "@/lib/activityLogger";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1000,6 +1001,7 @@ export default function LaunchBrief() {
       return response.json();
     },
     onSuccess: async (data) => {
+      logActivity("launch_brief", { entityType: "brief", entityName: formData.researchObjective || "New Brief" });
       // Check if this requires payment redirect
       if (data.requiresPayment && data.brief?.id) {
         setIsRedirectingToPayment(true);

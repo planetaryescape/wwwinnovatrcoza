@@ -72,7 +72,9 @@ Preferred communication style: Simple, everyday language.
 - **Coupon Claim System**: Allows users to claim a unique coupon via a dedicated page.
 - **Launch Brief Payment Options**: Offers "Pay Online", "Invoice Me", or "Use My Credits" with credit balance display and deduction functionality. Online payments use PayFast with dynamic pricing based on login status.
 - **Member Pricing**: Logged-in users receive discounted rates: Basic R5,000 (vs R5,500), Pro R45,000 (vs R50,000). Pricing is calculated server-side by checking session validity.
-- **Admin Portal**: Comprehensive dashboard for managing users, reports, deals, and system metrics.
+- **Admin Portal**: Comprehensive dashboard for managing users, reports, deals, and system metrics. Includes per-company Activity Log with weekly summaries, user breakdowns, and event timeline.
+- **User Activity Tracking**: Server-side activity logging via `activity_events` table. Tracks logins, report views, downloads, trends page views, brief launches, and portal navigation. Client-side `logActivity()` utility in `client/src/lib/activityLogger.ts` instruments key portal actions.
+- **Daily Admin Digest Email**: Automated email sent to hannah@innovatr.co.za at 4pm weekdays (Monday includes weekend stats). Contains new user signups, login counts, report views/downloads, company activity breakdown, and recent event timeline. Scheduler in `server/index.ts`.
 - **Mailer Subscription System**: Manages subscriptions for "Pulse Insights Newsletter" with admin view.
 - **Email Notifications**: Admin notifications for new orders via Resend.
 - **API Security**: Strict access control with `requireAuth` and `requireAdmin` middleware, data redaction, and ownership verification.

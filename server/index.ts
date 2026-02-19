@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
+import { sendDailyAdminDigest } from "./emails/email-service";
 
 const app = express();
 
@@ -140,4 +141,102 @@ app.use((req, res, next) => {
   setTimeout(runScheduledPublishing, msUntilFirst);
   const firstRun = new Date(Date.now() + msUntilFirst);
   log(`Report scheduler started (runs at 5am and 5pm, next: ${firstRun.toLocaleString()})`);
+
+  // Daily admin digest email scheduler - runs at 4pm weekdays (SAST / server time)
+  function getMillisecondsUntilNext4pm(): number {
+    const now = new Date();
+    const target = new Date(now);
+    target.setHours(16, 0, 0, 0);
+    
+    if (now >= target) {
+      target.setDate(target.getDate() + 1);
+    }
+    
+    // Skip Saturday (6) and Sunday (0) - advance to Monday
+    while (target.getDay() === 0 || target.getDay() === 6) {
+      target.setDate(target.getDate() + 1);
+    }
+    
+    return target.getTime() - now.getTime();
+  }
+
+  async function runDailyDigest() {
+    try {
+      const now = new Date();
+      const dayOfWeek = now.getDay();
+      const isMonday = dayOfWeek === 1;
+      
+      // Monday: look back to Friday 4pm (covers weekend)
+      // Other weekdays: look back 24 hours
+      const hoursBack = isMonday ? 72 : 24;
+      const since = new Date(now.getTime() - hoursBack * 60 * 60 * 1000);
+      
+      const periodLabel = isMonday
+        ? `Weekend + Monday (${since.toLocaleDateString("en-ZA", { weekday: "short", day: "numeric", month: "short" })} – ${now.toLocaleDateString("en-ZA", { weekday: "short", day: "numeric", month: "short" })})`
+        : `${now.toLocaleDateString("en-ZA", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}`;
+      
+      const events = await storage.getActivityEventsSince(since);
+      const allUsers = await storage.getAllUsers();
+      const allCompanies = await storage.getAllCompanies();
+      const userMap = new Map(allUsers.map(u => [u.id, u]));
+      const companyMap = new Map(allCompanies.map(c => [c.id, c.name]));
+      
+      const newUsers = allUsers.filter(u => u.createdAt && new Date(u.createdAt) >= since);
+      
+      const loginEvents = events.filter(e => e.actionType === "login");
+      const uniqueLoginUserIds = new Set(loginEvents.map(e => e.userId));
+      
+      const companyActivity = Array.from(new Set(events.filter(e => e.companyId).map(e => e.companyId!)))
+        .map(cId => ({
+          companyName: companyMap.get(cId) ?? "Unknown",
+          totalActions: events.filter(e => e.companyId === cId).length,
+          uniqueUsers: new Set(events.filter(e => e.companyId === cId).map(e => e.userId)).size,
+        }))
+        .sort((a, b) => b.totalActions - a.totalActions);
+      
+      const recentEvents = events.slice(0, 30).map(e => ({
+        userName: userMap.get(e.userId)?.name ?? "Unknown",
+        userEmail: userMap.get(e.userId)?.email ?? "",
+        companyName: e.companyId ? companyMap.get(e.companyId) ?? "" : "",
+        actionType: e.actionType,
+        entityName: e.entityName,
+        createdAt: e.createdAt instanceof Date ? e.createdAt.toISOString() : String(e.createdAt),
+      }));
+      
+      await sendDailyAdminDigest({
+        isMonday,
+        periodLabel,
+        newUsers: newUsers.map(u => ({
+          name: u.name || "",
+          surname: u.surname || "",
+          email: u.email,
+          company: u.companyId ? companyMap.get(u.companyId) ?? "No company" : "No company",
+        })),
+        totalLogins: loginEvents.length,
+        uniqueLoginUsers: uniqueLoginUserIds.size,
+        reportViews: events.filter(e => e.actionType === "view_report").length,
+        reportDownloads: events.filter(e => e.actionType === "download_report" || e.actionType === "download_client_report").length,
+        briefLaunches: events.filter(e => e.actionType === "launch_brief").length,
+        totalEvents: events.length,
+        companyActivity,
+        recentEvents,
+      });
+      
+      log(`Daily admin digest sent for period: ${periodLabel}`);
+    } catch (err) {
+      console.error("Failed to send daily admin digest:", err);
+    }
+    
+    // Schedule next run
+    const msUntilNext4pm = getMillisecondsUntilNext4pm();
+    setTimeout(runDailyDigest, msUntilNext4pm);
+    const nextDigest = new Date(Date.now() + msUntilNext4pm);
+    log(`Next daily digest at ${nextDigest.toLocaleString()}`);
+  }
+
+  // Start the daily digest scheduler
+  const msUntilFirst4pm = getMillisecondsUntilNext4pm();
+  setTimeout(runDailyDigest, msUntilFirst4pm);
+  const firstDigest = new Date(Date.now() + msUntilFirst4pm);
+  log(`Daily digest scheduler started (4pm weekdays, next: ${firstDigest.toLocaleString()})`);
 })();

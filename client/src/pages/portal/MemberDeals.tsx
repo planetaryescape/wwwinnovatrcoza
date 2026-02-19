@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { logActivity } from "@/lib/activityLogger";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -161,6 +163,10 @@ export default function MemberDeals() {
   const [, setLocation] = useLocation();
   const { isFreeUser } = useAuth();
   const { formatPrice } = useCurrency();
+
+  useEffect(() => {
+    logActivity("view_deals");
+  }, []);
 
   if (isFreeUser) {
     return (

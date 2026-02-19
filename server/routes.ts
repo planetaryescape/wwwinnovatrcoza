@@ -325,6 +325,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastLoginAt: new Date(),
         lastActivityDate: new Date()
       });
+
+      // Log login activity
+      storage.createActivityEvent({
+        userId: user.id,
+        companyId: user.companyId ?? null,
+        actionType: "login",
+      }).catch(err => console.error("Failed to log login activity:", err));
       
       // Set HTTP-only secure cookie
       res.cookie("session", token, {
@@ -4421,6 +4428,152 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(auditResult);
     } catch (error: any) {
       console.error("Reports audit error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Activity Events - log user actions
+  const activityBodySchema = z.object({
+    actionType: z.string().min(1).max(50),
+    entityType: z.string().max(50).optional().nullable(),
+    entityId: z.string().optional().nullable(),
+    entityName: z.string().optional().nullable(),
+    metadata: z.record(z.unknown()).optional().nullable(),
+  });
+
+  app.post("/api/activity", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const user = req.user!;
+      const parsed = activityBodySchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid activity data", details: parsed.error.flatten() });
+      }
+      const { actionType, entityType, entityId, entityName, metadata } = parsed.data;
+      const event = await storage.createActivityEvent({
+        userId: user.id,
+        companyId: user.companyId ?? null,
+        actionType,
+        entityType: entityType ?? null,
+        entityId: entityId ?? null,
+        entityName: entityName ?? null,
+        metadata: metadata ?? null,
+      });
+      res.json(event);
+    } catch (error: any) {
+      console.error("Activity event error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Admin: Get company activity events
+  app.get("/api/admin/companies/:id/activity", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const from = req.query.from ? new Date(req.query.from as string) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const to = req.query.to ? new Date(req.query.to as string) : new Date();
+      const events = await storage.getActivityEventsByCompany(id, from, to);
+      const users = await storage.getUsersByCompanyId(id);
+      const userMap = new Map(users.map(u => [u.id, { name: u.name, email: u.email, surname: u.surname }]));
+      const enriched = events.map(e => ({
+        ...e,
+        userName: userMap.get(e.userId)?.name ?? "Unknown",
+        userSurname: userMap.get(e.userId)?.surname ?? "",
+        userEmail: userMap.get(e.userId)?.email ?? "",
+      }));
+      res.json(enriched);
+    } catch (error: any) {
+      console.error("Company activity error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Admin: Get company activity summary
+  app.get("/api/admin/companies/:id/activity-summary", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const from = req.query.from ? new Date(req.query.from as string) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const to = req.query.to ? new Date(req.query.to as string) : new Date();
+      const events = await storage.getActivityEventsByCompany(id, from, to);
+      const users = await storage.getUsersByCompanyId(id);
+      const userMap = new Map(users.map(u => [u.id, { name: u.name, email: u.email, surname: u.surname }]));
+
+      const summary = {
+        totalEvents: events.length,
+        uniqueUsers: new Set(events.map(e => e.userId)).size,
+        logins: events.filter(e => e.actionType === "login").length,
+        reportViews: events.filter(e => e.actionType === "view_report").length,
+        reportDownloads: events.filter(e => e.actionType === "download_report").length,
+        trendsViews: events.filter(e => e.actionType === "view_trends").length,
+        pastResearchViews: events.filter(e => e.actionType === "view_past_research").length,
+        briefLaunches: events.filter(e => e.actionType === "launch_brief").length,
+        dealsViews: events.filter(e => e.actionType === "view_deals").length,
+        byUser: Array.from(new Set(events.map(e => e.userId))).map(userId => {
+          const userEvents = events.filter(e => e.userId === userId);
+          const u = userMap.get(userId);
+          return {
+            userId,
+            userName: u?.name ?? "Unknown",
+            userSurname: u?.surname ?? "",
+            userEmail: u?.email ?? "",
+            totalActions: userEvents.length,
+            logins: userEvents.filter(e => e.actionType === "login").length,
+            reportViews: userEvents.filter(e => e.actionType === "view_report").length,
+            reportDownloads: userEvents.filter(e => e.actionType === "download_report").length,
+            lastActive: userEvents[0]?.createdAt ?? null,
+          };
+        }),
+        from: from.toISOString(),
+        to: to.toISOString(),
+      };
+      res.json(summary);
+    } catch (error: any) {
+      console.error("Activity summary error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Admin: Get global activity summary (for daily email / dashboard)
+  app.get("/api/admin/activity-summary", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const since = req.query.since ? new Date(req.query.since as string) : new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const events = await storage.getActivityEventsSince(since);
+      const allUsers = await storage.getAllUsers();
+      const allCompanies = await storage.getAllCompanies();
+      const userMap = new Map(allUsers.map(u => [u.id, u]));
+      const companyMap = new Map(allCompanies.map(c => [c.id, c.name]));
+
+      const newUsers = allUsers.filter(u => u.createdAt && new Date(u.createdAt) >= since);
+
+      const summary = {
+        totalEvents: events.length,
+        uniqueUsers: new Set(events.map(e => e.userId)).size,
+        logins: events.filter(e => e.actionType === "login").length,
+        reportViews: events.filter(e => e.actionType === "view_report").length,
+        reportDownloads: events.filter(e => e.actionType === "download_report").length,
+        briefLaunches: events.filter(e => e.actionType === "launch_brief").length,
+        newUsers: newUsers.map(u => ({
+          name: u.name,
+          surname: u.surname ?? "",
+          email: u.email,
+          company: u.companyId ? companyMap.get(u.companyId) ?? "Unknown" : "No company",
+        })),
+        byCompany: Array.from(new Set(events.filter(e => e.companyId).map(e => e.companyId!))).map(cId => ({
+          companyId: cId,
+          companyName: companyMap.get(cId) ?? "Unknown",
+          totalActions: events.filter(e => e.companyId === cId).length,
+          uniqueUsers: new Set(events.filter(e => e.companyId === cId).map(e => e.userId)).size,
+        })),
+        recentEvents: events.slice(0, 50).map(e => ({
+          ...e,
+          userName: userMap.get(e.userId)?.name ?? "Unknown",
+          userEmail: userMap.get(e.userId)?.email ?? "",
+          companyName: e.companyId ? companyMap.get(e.companyId) ?? "" : "",
+        })),
+        since: since.toISOString(),
+      };
+      res.json(summary);
+    } catch (error: any) {
+      console.error("Global activity summary error:", error);
       res.status(500).json({ error: error.message });
     }
   });

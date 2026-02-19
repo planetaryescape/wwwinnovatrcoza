@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { logActivity } from "@/lib/activityLogger";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -80,6 +81,10 @@ export default function CreditsAndBilling() {
   const { isPaidMember, user, company: authCompany } = useAuth();
   const { formatPrice } = useCurrency();
   const [showOrderForm, setShowOrderForm] = useState(false);
+
+  useEffect(() => {
+    logActivity("view_credits");
+  }, []);
   const [selectedPack, setSelectedPack] = useState<typeof mockCreditPackages[0] | null>(null);
 
   // Fetch fresh company data to ensure credits are up-to-date

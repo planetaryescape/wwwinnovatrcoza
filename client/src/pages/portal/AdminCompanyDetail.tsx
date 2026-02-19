@@ -58,6 +58,9 @@ import {
   User as UserIcon,
   Clock,
   FileText,
+  Activity,
+  LogIn,
+  BarChart3,
   Upload,
   Download,
   Trash2,
@@ -292,6 +295,12 @@ export default function AdminCompanyDetail() {
   const [deleteCompanyOpen, setDeleteCompanyOpen] = useState(false);
   const [deletingCompany, setDeletingCompany] = useState(false);
 
+  // Activity tracking
+  const [activitySummary, setActivitySummary] = useState<any>(null);
+  const [activityEvents, setActivityEvents] = useState<any[]>([]);
+  const [activityLoading, setActivityLoading] = useState(false);
+  const [activityRange, setActivityRange] = useState<"7d" | "14d" | "30d">("7d");
+
   const companyId = params?.companyId;
 
   const fetchCompany = async () => {
@@ -344,6 +353,25 @@ export default function AdminCompanyDetail() {
     }
   };
 
+  const fetchActivity = async () => {
+    if (!companyId) return;
+    setActivityLoading(true);
+    try {
+      const days = activityRange === "7d" ? 7 : activityRange === "14d" ? 14 : 30;
+      const from = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+      const to = new Date().toISOString();
+      const [summaryRes, eventsRes] = await Promise.all([
+        fetch(`/api/admin/companies/${companyId}/activity-summary?from=${from}&to=${to}`),
+        fetch(`/api/admin/companies/${companyId}/activity?from=${from}&to=${to}`),
+      ]);
+      if (summaryRes.ok) setActivitySummary(await summaryRes.json());
+      if (eventsRes.ok) setActivityEvents(await eventsRes.json());
+    } catch (err) {
+      console.error("Failed to fetch activity:", err);
+    }
+    setActivityLoading(false);
+  };
+
   const fetchAllData = async () => {
     setLoading(true);
     setError(null);
@@ -356,6 +384,12 @@ export default function AdminCompanyDetail() {
       fetchAllData();
     }
   }, [companyId]);
+
+  useEffect(() => {
+    if (companyId) {
+      fetchActivity();
+    }
+  }, [companyId, activityRange]);
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1430,6 +1464,160 @@ export default function AdminCompanyDetail() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Activity Section */}
+            <Card data-testid="card-company-activity">
+              <CardHeader className="flex flex-row items-center justify-between gap-2">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="w-5 h-5" />
+                    Activity Log
+                  </CardTitle>
+                  <CardDescription>User activity for this company</CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Select value={activityRange} onValueChange={(v: "7d" | "14d" | "30d") => setActivityRange(v)}>
+                    <SelectTrigger className="w-[120px]" data-testid="select-activity-range">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="7d">Last 7 days</SelectItem>
+                      <SelectItem value="14d">Last 14 days</SelectItem>
+                      <SelectItem value="30d">Last 30 days</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button variant="ghost" size="icon" onClick={fetchActivity} data-testid="button-refresh-activity">
+                    <RefreshCw className={`w-4 h-4 ${activityLoading ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {activityLoading && !activitySummary ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : activitySummary ? (
+                  <div className="space-y-6">
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div className="p-3 rounded-lg border text-center">
+                        <LogIn className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                        <p className="text-2xl font-bold" data-testid="text-activity-logins">{activitySummary.logins}</p>
+                        <p className="text-xs text-muted-foreground">Logins</p>
+                      </div>
+                      <div className="p-3 rounded-lg border text-center">
+                        <Eye className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                        <p className="text-2xl font-bold" data-testid="text-activity-views">{activitySummary.reportViews}</p>
+                        <p className="text-xs text-muted-foreground">Report Views</p>
+                      </div>
+                      <div className="p-3 rounded-lg border text-center">
+                        <Download className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                        <p className="text-2xl font-bold" data-testid="text-activity-downloads">{activitySummary.reportDownloads}</p>
+                        <p className="text-xs text-muted-foreground">Downloads</p>
+                      </div>
+                      <div className="p-3 rounded-lg border text-center">
+                        <BarChart3 className="w-4 h-4 mx-auto mb-1 text-muted-foreground" />
+                        <p className="text-2xl font-bold" data-testid="text-activity-total">{activitySummary.totalEvents}</p>
+                        <p className="text-xs text-muted-foreground">Total Actions</p>
+                      </div>
+                    </div>
+
+                    {/* User Breakdown */}
+                    {activitySummary.byUser && activitySummary.byUser.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium mb-2 text-muted-foreground">User Breakdown</h4>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>User</TableHead>
+                              <TableHead className="text-center">Logins</TableHead>
+                              <TableHead className="text-center">Views</TableHead>
+                              <TableHead className="text-center">Downloads</TableHead>
+                              <TableHead className="text-center">Total</TableHead>
+                              <TableHead>Last Active</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {activitySummary.byUser.map((u: any) => (
+                              <TableRow key={u.userId} data-testid={`row-user-activity-${u.userId}`}>
+                                <TableCell>
+                                  <div>
+                                    <p className="font-medium text-sm">{u.userName} {u.userSurname}</p>
+                                    <p className="text-xs text-muted-foreground">{u.userEmail}</p>
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-center">{u.logins}</TableCell>
+                                <TableCell className="text-center">{u.reportViews}</TableCell>
+                                <TableCell className="text-center">{u.reportDownloads}</TableCell>
+                                <TableCell className="text-center font-medium">{u.totalActions}</TableCell>
+                                <TableCell className="text-xs text-muted-foreground">
+                                  {u.lastActive ? new Date(u.lastActive).toLocaleDateString("en-ZA", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+
+                    {/* Recent Events */}
+                    {activityEvents.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium mb-2 text-muted-foreground">Recent Events</h4>
+                        <ScrollArea className="h-[300px]">
+                          <div className="space-y-2">
+                            {activityEvents.slice(0, 100).map((ev: any) => (
+                              <div key={ev.id} className="flex items-start gap-3 p-2 rounded-lg border text-sm" data-testid={`row-activity-event-${ev.id}`}>
+                                <div className="flex-shrink-0 mt-0.5">
+                                  {ev.actionType === "login" && <LogIn className="w-3.5 h-3.5 text-blue-500" />}
+                                  {ev.actionType === "view_report" && <Eye className="w-3.5 h-3.5 text-green-500" />}
+                                  {ev.actionType === "download_report" && <Download className="w-3.5 h-3.5 text-purple-500" />}
+                                  {ev.actionType === "view_trends" && <TrendingUp className="w-3.5 h-3.5 text-amber-500" />}
+                                  {ev.actionType === "launch_brief" && <Target className="w-3.5 h-3.5 text-red-500" />}
+                                  {ev.actionType === "view_past_research" && <Clock className="w-3.5 h-3.5 text-cyan-500" />}
+                                  {!["login", "view_report", "download_report", "view_trends", "launch_brief", "view_past_research"].includes(ev.actionType) && <Activity className="w-3.5 h-3.5 text-muted-foreground" />}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium">
+                                    {ev.userName} {ev.userSurname}
+                                    <span className="font-normal text-muted-foreground ml-1">
+                                      {ev.actionType === "login" && "logged in"}
+                                      {ev.actionType === "view_report" && `viewed "${ev.entityName || "a report"}"`}
+                                      {ev.actionType === "download_report" && `downloaded "${ev.entityName || "a report"}"`}
+                                      {ev.actionType === "download_client_report" && `downloaded client report "${ev.entityName || ""}"`}
+                                      {ev.actionType === "view_trends" && "viewed Trends & Insights"}
+                                      {ev.actionType === "view_past_research" && "viewed Past Research"}
+                                      {ev.actionType === "launch_brief" && `launched a brief${ev.entityName ? `: "${ev.entityName}"` : ""}`}
+                                      {ev.actionType === "view_deals" && "viewed Member Offers"}
+                                      {ev.actionType === "view_dashboard" && "visited Dashboard"}
+                                      {ev.actionType === "view_settings" && "visited Settings"}
+                                      {ev.actionType === "view_credits" && "viewed Credits & Billing"}
+                                    </span>
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {new Date(ev.createdAt).toLocaleDateString("en-ZA", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </div>
+                    )}
+
+                    {activitySummary.totalEvents === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        No activity recorded for this period
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No activity data available
+                  </p>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           {/* Right Column - Quick Stats & Notes */}

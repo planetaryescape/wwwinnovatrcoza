@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { logActivity } from "@/lib/activityLogger";
 import { useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -411,6 +412,12 @@ export default function InsightDetail() {
     }
   }, [report?.id]);
 
+  useEffect(() => {
+    if (report) {
+      logActivity("view_report", { entityType: "report", entityId: String(report.id), entityName: report.title });
+    }
+  }, [report?.id]);
+
   // Show back to top button after scrolling down one viewport height
   useEffect(() => {
     const handleScroll = () => {
@@ -492,6 +499,7 @@ export default function InsightDetail() {
       title: "Download Started",
       description: "Your report is being downloaded.",
     });
+    logActivity("download_report", { entityType: "report", entityId: String(report.id), entityName: report.title });
 
     fetch(`/api/reports/${report.id}/events`, {
       method: "POST",
