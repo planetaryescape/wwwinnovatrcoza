@@ -806,8 +806,8 @@ export default function TrendsInsights() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {featuredReports.map((report) => {
-                  const { icon: AccessIcon, label: accessLabel, colorClass: accessColor } = getAccessIndicator(report, user?.membershipTier, !!user, user?.companyId, hasPaidSeatAccess);
-                  const colors = getCategoryColor(report.category);
+                  const accessIndicator = getAccessIndicator(report, user?.membershipTier, !!user, user?.companyId ?? undefined, hasPaidSeatAccess);
+                  const colors = getCategoryStyle(report.category);
                   const readingTime = Math.max(2, Math.ceil((report.teaser?.length || 0) / 500));
                   const isLocked = !hasPaidSeatAccess && report.accessLevel !== "PUBLIC";
 
@@ -826,8 +826,7 @@ export default function TrendsInsights() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
                         <Badge
-                          className="absolute top-3 left-3 text-xs no-default-hover-elevate no-default-active-elevate"
-                          style={{ backgroundColor: colors.bg, color: colors.text, border: `1px solid ${colors.border}` }}
+                          className={`absolute top-3 left-3 text-xs no-default-hover-elevate no-default-active-elevate ${colors.bg} ${colors.text}`}
                         >
                           {report.category}
                         </Badge>
@@ -837,7 +836,8 @@ export default function TrendsInsights() {
                           <Sparkles className="w-3 h-3 mr-1" />
                           Featured
                         </Badge>
-                        {isLocked && (
+                        {accessIndicator}
+                        {isLocked && !accessIndicator && (
                           <div className="absolute bottom-3 right-3 bg-black/60 rounded-full p-1.5">
                             <Lock className="w-3.5 h-3.5 text-white" />
                           </div>
@@ -852,10 +852,6 @@ export default function TrendsInsights() {
                         <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{report.teaser}</p>
                         <div className="flex items-center justify-between text-xs text-muted-foreground">
                           <span>{report.date} · <Clock className="w-3 h-3 inline-block" /> {readingTime} min</span>
-                          <span className={`flex items-center gap-1 ${accessColor}`}>
-                            <AccessIcon className="w-3.5 h-3.5" />
-                            {accessLabel}
-                          </span>
                         </div>
                       </div>
                     </div>
@@ -885,10 +881,9 @@ export default function TrendsInsights() {
                     report={report}
                     userTier={userTier}
                     isLoggedIn={!!user}
-                    userCompanyId={userCompanyId}
-                    hasPaidSeatAccess={userIsPaidSeat}
+                    userCompanyId={userCompanyId ?? undefined}
+                    isPaidSeat={userIsPaidSeat}
                     onLockedClick={handleLockedClick}
-                    onUnlockedClick={handleUnlockedClick}
                   />
                 ))}
               </div>

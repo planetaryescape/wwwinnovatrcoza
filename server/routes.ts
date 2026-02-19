@@ -548,7 +548,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Change password (while logged in)
-  app.post("/api/auth/change-password", requireAuth, async (req, res) => {
+  app.post("/api/auth/change-password", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const { currentPassword, newPassword } = req.body;
       
