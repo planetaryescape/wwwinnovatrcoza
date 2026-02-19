@@ -4,9 +4,28 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { Check, X } from "lucide-react";
+
+const INDUSTRY_OPTIONS = [
+  "Beverages",
+  "Food & Snacks",
+  "Personal Care",
+  "Beauty & Cosmetics",
+  "Health & Wellness",
+  "Alcohol",
+  "Agriculture",
+  "Retail",
+  "Technology",
+  "FMCG",
+  "Hospitality",
+  "Financial Services",
+  "Media & Entertainment",
+  "Education",
+  "Other",
+];
 
 interface LoginDialogProps {
   open: boolean;
@@ -19,6 +38,8 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [customIndustry, setCustomIndustry] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -47,7 +68,8 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     };
   }, [password]);
 
-  const allRequirementsMet = Object.values(passwordRequirements).every(Boolean) && isValidEmail;
+  const resolvedIndustry = industry === "Other" ? customIndustry : industry;
+  const allRequirementsMet = Object.values(passwordRequirements).every(Boolean) && isValidEmail && company.trim().length > 0 && resolvedIndustry.trim().length > 0;
 
   const handlePasswordResetRequest = async () => {
     if (!email) {
@@ -94,7 +116,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
 
     try {
       if (isSignup) {
-        await signup(email, password, name, company);
+        await signup(email, password, name, company, resolvedIndustry);
         toast({
           title: "Welcome to Innovatr!",
           description: "Your free account has been created. Access trend reports now!",
@@ -170,7 +192,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="company" data-testid="label-company">
-                  Company Name <span className="text-muted-foreground text-xs">(optional)</span>
+                  Company Name
                 </Label>
                 <Input
                   id="company"
@@ -178,7 +200,32 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
                   placeholder="Your company or organization"
+                  required
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="industry" data-testid="label-industry">
+                  Industry
+                </Label>
+                <Select value={industry} onValueChange={(v) => { setIndustry(v); if (v !== "Other") setCustomIndustry(""); }}>
+                  <SelectTrigger data-testid="select-industry">
+                    <SelectValue placeholder="Select your industry" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {INDUSTRY_OPTIONS.map((opt) => (
+                      <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {industry === "Other" && (
+                  <Input
+                    data-testid="input-custom-industry"
+                    value={customIndustry}
+                    onChange={(e) => setCustomIndustry(e.target.value)}
+                    placeholder="Enter your industry"
+                    required
+                  />
+                )}
               </div>
             </>
           )}

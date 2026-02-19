@@ -154,10 +154,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User registration endpoint - creates new users with FREE tier
   app.post("/api/auth/signup", async (req, res) => {
     try {
-      const { email, password, name, company } = req.body;
+      const { email, password, name, company, industry } = req.body;
       
       if (!email || !password) {
         return res.status(400).json({ message: "Email and password are required" });
+      }
+      
+      if (!company || !company.trim()) {
+        return res.status(400).json({ message: "Company name is required" });
+      }
+      
+      if (!industry || !industry.trim()) {
+        return res.status(400).json({ message: "Industry is required" });
       }
       
       // Validate password strength
@@ -180,29 +188,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Handle company creation/linking
       let companyId: string | null = null;
-      if (company && company.trim()) {
-        const companyName = company.trim();
-        // Check if company already exists
-        const allCompanies = await storage.getAllCompanies();
-        const existingCompany = allCompanies.find(c => 
-          c.name.toLowerCase() === companyName.toLowerCase()
-        );
-        
-        if (existingCompany) {
-          // Link to existing company
-          companyId = existingCompany.id;
-        } else {
-          // Create a new FREE tier company
-          const newCompany = await storage.createCompany({
-            name: companyName,
-            tier: "FREE",
-            basicCreditsTotal: 0,
-            basicCreditsUsed: 0,
-            proCreditsTotal: 0,
-            proCreditsUsed: 0,
-          });
-          companyId = newCompany.id;
+      const companyName = company.trim();
+      const userIndustry = industry.trim();
+      
+      // Check if company already exists
+      const allCompanies = await storage.getAllCompanies();
+      const existingCompany = allCompanies.find(c => 
+        c.name.toLowerCase() === companyName.toLowerCase()
+      );
+      
+      if (existingCompany) {
+        // Link to existing company, update industry if not set
+        companyId = existingCompany.id;
+        if (!existingCompany.industry && userIndustry) {
+          await storage.updateCompany(existingCompany.id, { industry: userIndustry });
         }
+      } else {
+        // Create a new FREE tier company with industry
+        const newCompany = await storage.createCompany({
+          name: companyName,
+          tier: "FREE",
+          industry: userIndustry || null,
+          basicCreditsTotal: 0,
+          basicCreditsUsed: 0,
+          proCreditsTotal: 0,
+          proCreditsUsed: 0,
+        });
+        companyId = newCompany.id;
       }
       
       // Create user with FREE tier (never STARTER for new signups)
@@ -212,7 +224,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email,
         password: "", // Security: never store plaintext passwords
         name: name || email.split("@")[0],
-        company: company || null,
+        company: companyName || null,
+        industry: userIndustry || null,
         companyId: companyId,
         membershipTier: "FREE",
         memberType: companyId ? "companyUser" : "independent",

@@ -848,6 +848,7 @@ export class DatabaseStorage implements IStorage {
         passwordHash: null,
         name: insertUser.name ?? null,
         company: insertUser.company ?? null,
+        industry: (insertUser as any).industry ?? null,
         companyId: (insertUser as any).companyId ?? null,
         membershipTier: insertUser.membershipTier ?? "STARTER",
         status: insertUser.status ?? "ACTIVE",

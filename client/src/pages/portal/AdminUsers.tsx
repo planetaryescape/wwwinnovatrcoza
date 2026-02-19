@@ -611,6 +611,13 @@ export default function AdminUsers() {
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-muted-foreground" />
+                      <Label className="text-sm">Industry</Label>
+                    </div>
+                    <p className="text-sm font-medium">{(selectedUser as any).industry || "—"}</p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
                       <DollarSign className="w-4 h-4 text-muted-foreground" />
                       <Label className="text-sm">Total Spend</Label>
                     </div>

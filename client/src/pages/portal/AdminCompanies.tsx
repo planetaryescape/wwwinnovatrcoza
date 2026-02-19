@@ -630,6 +630,8 @@ export default function AdminCompanies() {
         name: "",
         domain: "",
         tier: "STARTER",
+        industry: "",
+        companySize: "",
         contractStart: "",
         contractEnd: "",
         basicCreditsTotal: 0,
