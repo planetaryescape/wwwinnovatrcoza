@@ -553,18 +553,72 @@ export default function TrendsInsights() {
 
   const recommendedReports = useMemo(() => {
     if (!reports.length || !user) return [];
+    const count = 3;
     const newest = [...reports].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    if (!companyIndustry) return newest.slice(0, 3);
-    const industryLower = companyIndustry.toLowerCase().trim();
-    if (!industryLower) return newest.slice(0, 3);
-    const matched = reports.filter(r => {
-      const ri = r.industry?.toLowerCase().trim();
+    if (newest.length <= count) return newest;
+
+    const matchesIndustry = (r: Report) => {
+      if (!companyIndustry) return false;
+      const matchLower = companyIndustry.toLowerCase().trim();
+      if (!matchLower) return false;
+      const ri = r.industry?.toLowerCase().trim() || "";
       if (!ri) return false;
-      return ri.includes(industryLower) || industryLower.includes(ri);
-    });
-    if (matched.length >= 3) return matched.slice(0, 3);
-    const remaining = newest.filter(r => !matched.includes(r));
-    return [...matched, ...remaining].slice(0, 3);
+      if (ri === matchLower || ri.includes(matchLower) || matchLower.includes(ri)) return true;
+      const displayCats = r.displayCategories || [];
+      return displayCats.some(cat => cat.toLowerCase().trim() === matchLower);
+    };
+
+    const getIndustryKey = (r: Report) => (r.industry?.toLowerCase().trim() || "general");
+    const getCategoryKey = (r: Report) => (r.category?.toLowerCase().trim() || "insights");
+
+    const industryRelevant = newest.filter(matchesIndustry);
+    const crossIndustry = newest.filter(r => !matchesIndustry(r));
+
+    const selected: Report[] = [];
+    const usedIndustries = new Set<string>();
+    const usedCategories = new Set<string>();
+
+    if (industryRelevant.length > 0) {
+      selected.push(industryRelevant[0]);
+      usedIndustries.add(getIndustryKey(industryRelevant[0]));
+      usedCategories.add(getCategoryKey(industryRelevant[0]));
+    }
+
+    for (const report of crossIndustry) {
+      if (selected.length >= count) break;
+      if (selected.some(s => s.id === report.id)) continue;
+      const indKey = getIndustryKey(report);
+      const catKey = getCategoryKey(report);
+      if (!usedIndustries.has(indKey) && !usedCategories.has(catKey)) {
+        selected.push(report);
+        usedIndustries.add(indKey);
+        usedCategories.add(catKey);
+      }
+    }
+
+    if (selected.length < count) {
+      for (const report of crossIndustry) {
+        if (selected.length >= count) break;
+        if (selected.some(s => s.id === report.id)) continue;
+        const indKey = getIndustryKey(report);
+        if (!usedIndustries.has(indKey)) {
+          selected.push(report);
+          usedIndustries.add(indKey);
+          usedCategories.add(getCategoryKey(report));
+        }
+      }
+    }
+
+    if (selected.length < count) {
+      for (const report of newest) {
+        if (selected.length >= count) break;
+        if (!selected.some(s => s.id === report.id)) {
+          selected.push(report);
+        }
+      }
+    }
+
+    return selected;
   }, [reports, companyIndustry, user]);
 
   if (!isAuthenticated) {

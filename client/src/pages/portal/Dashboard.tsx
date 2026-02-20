@@ -90,42 +90,80 @@ function getRecommendedReports(
   reports: Report[],
   userTier: string | undefined,
   isPaidMember: boolean,
-  userIndustry: string | undefined
+  userIndustry: string | undefined,
+  count: number = 3
 ): Report[] {
   const accessibleReports = reports.filter(report => 
     report.status === "live" && canAccessReport(report, userTier, isPaidMember)
   );
-  
+
   const sortedByDate = [...accessibleReports].sort(
-    (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
+    (a, b) => new Date(b.publishDate || b.date || 0).getTime() - new Date(a.publishDate || a.date || 0).getTime()
   );
-  
-  if (!userIndustry) {
-    return sortedByDate.slice(0, 3);
+
+  if (sortedByDate.length <= count) return sortedByDate;
+
+  const matchesIndustry = (report: Report) => {
+    if (!userIndustry) return false;
+    const matchLower = userIndustry.toLowerCase().trim();
+    const reportIndustry = report.industry?.toLowerCase().trim() || "";
+    if (!reportIndustry) return false;
+    if (reportIndustry === matchLower || reportIndustry.includes(matchLower) || matchLower.includes(reportIndustry)) return true;
+    const displayCategories = report.displayCategories || [];
+    return displayCategories.some(cat => cat.toLowerCase().trim() === matchLower);
+  };
+
+  const getIndustryKey = (report: Report) => (report.industry?.toLowerCase().trim() || "general");
+  const getCategoryKey = (report: Report) => (report.category?.toLowerCase().trim() || "insights");
+
+  const industryRelevant = sortedByDate.filter(matchesIndustry);
+  const crossIndustry = sortedByDate.filter(r => !matchesIndustry(r));
+
+  const selected: Report[] = [];
+  const usedIndustries = new Set<string>();
+  const usedCategories = new Set<string>();
+
+  if (industryRelevant.length > 0) {
+    selected.push(industryRelevant[0]);
+    usedIndustries.add(getIndustryKey(industryRelevant[0]));
+    usedCategories.add(getCategoryKey(industryRelevant[0]));
   }
-  
-  const industryMatches = sortedByDate.filter(report => {
-    const reportIndustry = report.industry?.toLowerCase() || "";
-    const matchIndustry = userIndustry.toLowerCase();
-    
-    if (reportIndustry === matchIndustry) return true;
-    
-    const displayCategories = report.displayCategories || [];
-    return displayCategories.some(cat => cat.toLowerCase() === matchIndustry);
-  });
-  
-  const nonIndustryMatches = sortedByDate.filter(report => {
-    const reportIndustry = report.industry?.toLowerCase() || "";
-    const matchIndustry = userIndustry.toLowerCase();
-    
-    if (reportIndustry === matchIndustry) return false;
-    
-    const displayCategories = report.displayCategories || [];
-    return !displayCategories.some(cat => cat.toLowerCase() === matchIndustry);
-  });
-  
-  const recommended = [...industryMatches, ...nonIndustryMatches];
-  return recommended.slice(0, 3);
+
+  for (const report of crossIndustry) {
+    if (selected.length >= count) break;
+    if (selected.some(s => s.id === report.id)) continue;
+    const indKey = getIndustryKey(report);
+    const catKey = getCategoryKey(report);
+    if (!usedIndustries.has(indKey) && !usedCategories.has(catKey)) {
+      selected.push(report);
+      usedIndustries.add(indKey);
+      usedCategories.add(catKey);
+    }
+  }
+
+  if (selected.length < count) {
+    for (const report of crossIndustry) {
+      if (selected.length >= count) break;
+      if (selected.some(s => s.id === report.id)) continue;
+      const indKey = getIndustryKey(report);
+      if (!usedIndustries.has(indKey)) {
+        selected.push(report);
+        usedIndustries.add(indKey);
+        usedCategories.add(getCategoryKey(report));
+      }
+    }
+  }
+
+  if (selected.length < count) {
+    for (const report of sortedByDate) {
+      if (selected.length >= count) break;
+      if (!selected.some(s => s.id === report.id)) {
+        selected.push(report);
+      }
+    }
+  }
+
+  return selected;
 }
 
 
