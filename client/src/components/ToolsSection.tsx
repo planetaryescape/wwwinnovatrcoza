@@ -73,7 +73,6 @@ const tools: Tool[] = [
     whatText: "A mobile-first, intuitive respondent experience designed to feel more like social media than a traditional survey. Simple, familiar interactions keep people engaged and moving naturally through the task.",
     whyText: "When it doesn't feel like a survey, people respond more instinctively and honestly — leading to higher engagement, faster completion, and better-quality data you can trust.",
     image: emotionalAppealImg,
-    video: "https://diginsights.com/wp-content/uploads/2024/07/Upsiide-home-swiping.webm",
   },
   {
     id: "filtering",
@@ -82,7 +81,6 @@ const tools: Tool[] = [
     whatText: "Powerful, interlocking filters that make it easy to identify and explore your target consumer. Apply multiple filters across demographics, behaviours, and attitudes to slice results exactly the way you need.",
     whyText: "Multi-layered filtering lets you uncover sharper insights, spot meaningful differences between audiences, and make confident decisions based on the consumers that matter most.",
     image: gamifiedRespondentImg,
-    video: "https://diginsights.com/wp-content/uploads/2024/07/Upsiide-home-filters.gif?_t=1720575215",
   },
   {
     id: "heatmapping",
@@ -91,7 +89,6 @@ const tools: Tool[] = [
     whatText: "An interactive heatmap that lets consumers engage directly with your ideas. People highlight specific elements they like and dislike, with in-the-moment feedback tied to each interaction.",
     whyText: "The visual heatmap instantly reveals what's working and what's not, while verbatim feedback explains why — giving clear, actionable direction on what to refine, fix, or amplify.",
     image: heatmapImg,
-    video: "https://diginsights.com/wp-content/uploads/2024/07/Features-tabvideo-heatmap-1.webm",
     imagePosition: "object-left",
   },
   {
@@ -101,7 +98,6 @@ const tools: Tool[] = [
     whatText: "Proprietary, patented data modeling that converts respondent data into forecasts of share of choice, source of volume, incrementality and cannibalization.",
     whyText: "This is the data you need to make compelling business decisions. Know your potential before you invest.",
     image: marketShareImg2,
-    video: "https://diginsights.com/wp-content/uploads/2024/07/Upsiide-home-marketsimSpindrift.gif?_t=1720574730",
   },
   {
     id: "ai-qual",
@@ -110,7 +106,6 @@ const tools: Tool[] = [
     whatText: "An AI qualitative moderator that understands your information objectives and conducts a naturalistic interview, summarizing the learnings with a show reel.",
     whyText: "Makes agile qualitative research accessible. Bring the voice of the consumer to your stakeholders on demand.",
     image: aiQualImg2,
-    video: "https://diginsights.com/wp-content/uploads/2024/10/Dig_AIVideo_abovefold-1.webm",
     comingSoon: true,
   },
   {
@@ -120,7 +115,7 @@ const tools: Tool[] = [
     whatText: "OneCliq's AI-powered engine decodes tone, sentiment, and emotional context from online conversations and social media. It synthesizes real consumer perspectives to give brands a clear, culturally-aware view of how ideas are perceived.",
     whyText: "By adding real-time cultural context, OneCliq helps brands make faster, smarter decisions — understanding not just what consumers think, but how they feel and why.",
     image: dashboardImg,
-    video: "https://downloads.intercomcdn.com/i/o/gbd7mpwj/1767906628/08c72a09b954ca3db0280c8dc201/Upsiide+Dashboard+%2816%29.gif?expires=1768908600&signature=ae8d62c71bb845da19da5e66cf65cffbb3bf9e19390fd505fda342a61000aa78&req=dSchEcB%2Bm4ddUfMW1HO4zdGgnhW5czxhdQkFH3PWHqZc0rM4jnGqQ0Ix2Plz%0AEyldw4Cg9rAznRfbV04%3D%0A",
+    video: "/assets/tools/cultural-context-dashboard.gif",
     comingSoon: true,
   },
   {
