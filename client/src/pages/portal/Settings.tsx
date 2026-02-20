@@ -21,10 +21,11 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { User, Building2, Bell, Shield, Users, Check, X, AlertTriangle, Loader2 } from "lucide-react";
+import { User, Building2, Bell, Shield, Users, Check, X, AlertTriangle, Loader2, BarChart3, Mail, TrendingUp, Activity } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
 import { INDUSTRY_OPTIONS } from "@shared/access";
 
 interface UserProfile {
@@ -39,6 +40,7 @@ interface UserProfile {
 export default function Settings() {
   const { toast } = useToast();
   const { user, isViewingAsCompany } = useAuth();
+  const isAdmin = user?.isAdmin === true;
 
   useEffect(() => {
     logActivity("view_settings");
@@ -72,6 +74,18 @@ export default function Settings() {
     };
     fetchProfile();
   }, []);
+  const { data: adminStats } = useQuery<{
+    totalUsers: number;
+    activeUsers30d: number;
+    totalCompanies: number;
+    totalBriefs: number;
+    neverLoggedIn: number;
+    totalReportViews: number;
+  }>({
+    queryKey: ["/api/admin/engagement-stats"],
+    enabled: isAdmin,
+  });
+
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -444,6 +458,136 @@ export default function Settings() {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Admin Insights - Only visible to admins */}
+        {isAdmin && (
+          <>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  Platform Insights
+                </CardTitle>
+                <CardDescription>
+                  Quick overview of platform engagement and usage
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-lg border" data-testid="stat-total-users">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Users className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Total Users</span>
+                    </div>
+                    <p className="text-2xl font-bold">{adminStats?.totalUsers ?? "..."}</p>
+                  </div>
+                  <div className="p-4 rounded-lg border" data-testid="stat-active-users">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Activity className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Active (30d)</span>
+                    </div>
+                    <p className="text-2xl font-bold">{adminStats?.activeUsers30d ?? "..."}</p>
+                  </div>
+                  <div className="p-4 rounded-lg border" data-testid="stat-companies">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Building2 className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Companies</span>
+                    </div>
+                    <p className="text-2xl font-bold">{adminStats?.totalCompanies ?? "..."}</p>
+                  </div>
+                  <div className="p-4 rounded-lg border" data-testid="stat-briefs">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Mail className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Total Briefs</span>
+                    </div>
+                    <p className="text-2xl font-bold">{adminStats?.totalBriefs ?? "..."}</p>
+                  </div>
+                  <div className="p-4 rounded-lg border" data-testid="stat-never-logged-in">
+                    <div className="flex items-center gap-2 mb-1">
+                      <AlertTriangle className="w-4 h-4 text-amber-500" />
+                      <span className="text-xs text-muted-foreground">Never Logged In</span>
+                    </div>
+                    <p className="text-2xl font-bold text-amber-600">{adminStats?.neverLoggedIn ?? "..."}</p>
+                  </div>
+                  <div className="p-4 rounded-lg border" data-testid="stat-report-views">
+                    <div className="flex items-center gap-2 mb-1">
+                      <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Report Views</span>
+                    </div>
+                    <p className="text-2xl font-bold">{adminStats?.totalReportViews ?? "..."}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Mail className="w-5 h-5" />
+                  Admin Email Preferences
+                </CardTitle>
+                <CardDescription>
+                  Configure digest emails and notification triggers
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="dailyDigest">Daily Admin Digest</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Receive a summary of platform activity at 4pm on weekdays
+                    </p>
+                  </div>
+                  <Switch id="dailyDigest" defaultChecked data-testid="switch-daily-digest" />
+                </div>
+
+                <Separator />
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="newOrderAlerts">New Order Alerts</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Instant email when a new order or brief is submitted
+                    </p>
+                  </div>
+                  <Switch id="newOrderAlerts" defaultChecked data-testid="switch-new-order-alerts" />
+                </div>
+
+                <Separator />
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="newUserAlerts">New User Signups</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Get notified when new users register on the platform
+                    </p>
+                  </div>
+                  <Switch id="newUserAlerts" defaultChecked data-testid="switch-new-user-alerts" />
+                </div>
+
+                <Separator />
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="lowCreditAlerts">Low Credit Warnings</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Alert when any company drops below 2 remaining credits
+                    </p>
+                  </div>
+                  <Switch id="lowCreditAlerts" defaultChecked data-testid="switch-low-credit-alerts" />
+                </div>
+
+                <Button 
+                  onClick={handleSavePreferences}
+                  disabled={isViewingAsCompany}
+                  data-testid="button-save-admin-preferences"
+                >
+                  Save Admin Preferences
+                </Button>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
 
       {/* Change Password Dialog */}

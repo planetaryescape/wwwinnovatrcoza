@@ -415,14 +415,21 @@ export default function AdminReports() {
     });
   }, [reports, searchQuery, statusFilter, accessFilter, categoryFilter, typeFilter]);
 
+  const totalScheduledContent = useMemo(() => {
+    return insightMailers.filter(m => {
+      const status = getMailerAutoStatus(m);
+      return status === "scheduled" || status === "upcoming";
+    }).length;
+  }, [insightMailers, getMailerAutoStatus]);
+
   const stats = useMemo(() => ({
     total: reports.length,
     published: reports.filter(r => (r.status || "published") === "published").length,
     draft: reports.filter(r => r.status === "draft").length,
-    scheduled: reports.filter(r => r.status === "scheduled").length,
+    scheduled: totalScheduledContent,
     library: reports.filter(r => !r.isClientReport).length,
     client: reports.filter(r => r.isClientReport === true).length,
-  }), [reports]);
+  }), [reports, totalScheduledContent]);
 
   const calendarData = useMemo(() => {
     const { year, month } = calendarMonth;
@@ -707,7 +714,7 @@ export default function AdminReports() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <Card className="bg-white border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -734,20 +741,13 @@ export default function AdminReports() {
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white border">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gray-50">
-                <Pencil className="w-5 h-5 text-gray-700" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.draft}</p>
-                <p className="text-xs text-muted-foreground">Drafts</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-white border">
+        <Card 
+          className="bg-white border hover-elevate active-elevate-2 cursor-pointer"
+          onClick={() => {
+            const el = document.querySelector('[data-testid="insight-mailers-section"]');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+        >
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-amber-50">
@@ -755,7 +755,7 @@ export default function AdminReports() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{stats.scheduled}</p>
-                <p className="text-xs text-muted-foreground">Scheduled</p>
+                <p className="text-xs text-muted-foreground">Scheduled Content</p>
               </div>
             </div>
           </CardContent>
@@ -912,10 +912,9 @@ export default function AdminReports() {
             <TableHeader>
               <TableRow className="bg-gray-50">
                 <TableHead className="font-medium">Report</TableHead>
-                <TableHead className="font-medium w-20">Type</TableHead>
                 <TableHead className="font-medium w-24">Category</TableHead>
-                <TableHead className="font-medium w-24">Status</TableHead>
                 <TableHead className="font-medium w-24">Access</TableHead>
+                <TableHead className="font-medium w-20">Attachment</TableHead>
                 <TableHead className="font-medium w-24 text-center">
                   <div className="flex items-center justify-center gap-1">
                     <Eye className="w-3.5 h-3.5" />
@@ -935,7 +934,7 @@ export default function AdminReports() {
             <TableBody>
               {filteredReports.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     No reports found matching your filters
                   </TableCell>
                 </TableRow>
@@ -1000,24 +999,33 @@ export default function AdminReports() {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge className={`text-xs border-0 ${isClient ? 'bg-indigo-50 text-indigo-700' : 'bg-teal-50 text-teal-700'}`}>
-                          {isClient ? 'Client' : 'Library'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
                         <Badge className={`text-xs ${categoryStyle} border-0`}>
                           {report.category}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={`text-xs ${statusStyle.color} border-0`}>
-                          {statusStyle.label}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <Badge className={`text-xs ${accessStyle.color} border-0`}>
                           {accessStyle.label}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          {(report.pdfUrl || report.pdfPath || report.hasDownload) && (
+                            <div className="flex items-center gap-0.5 text-xs text-blue-700" title="Downloadable Report">
+                              <FileText className="w-3.5 h-3.5" />
+                            </div>
+                          )}
+                          {report.videoPaths && report.videoPaths.length > 0 && (
+                            <div className="flex items-center gap-0.5 text-xs text-purple-700" title="Video">
+                              <Video className="w-3.5 h-3.5" />
+                            </div>
+                          )}
+                          {report.coverImage && !report.pdfUrl && !report.pdfPath && !report.hasDownload && !(report.videoPaths && report.videoPaths.length > 0) && (
+                            <div className="flex items-center gap-0.5 text-xs text-emerald-700" title="Image">
+                              <FileImage className="w-3.5 h-3.5" />
+                            </div>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-center">
                         <span className="text-sm text-gray-600">{report.viewCount || 0}</span>

@@ -15,6 +15,11 @@ import {
   Clock,
   AlertCircle,
   ExternalLink,
+  Activity,
+  CreditCard,
+  CheckCircle2,
+  PlayCircle,
+  BadgePercent,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -52,13 +57,6 @@ interface Report {
   };
 }
 
-const mockCredits = {
-  basicRemaining: 7,
-  basicTotal: 10,
-  proRemaining: 1,
-  proTotal: 2,
-  expiryDate: "30 Dec 2025",
-};
 
 function canAccessReport(
   report: Report,
@@ -130,19 +128,6 @@ function getRecommendedReports(
   return recommended.slice(0, 3);
 }
 
-const mockDealsData = [
-  {
-    title: "Buy 3 Test24 Basic, Get 1 Free",
-    description: "Limited time offer for Growth members",
-    expires: "5 days",
-  },
-  {
-    titleTemplate: "Upgrade to Scale - Save {amount}",
-    savingsZAR: 40000,
-    description: "Unlock 15 Basic + 3 Pro studies annually",
-    expires: "This month only",
-  },
-];
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -153,14 +138,10 @@ export default function Dashboard() {
     logActivity("view_dashboard");
   }, []);
 
-  // Format mock deals with currency context
-  const mockDeals = mockDealsData.map(deal => ({
-    title: (deal as any).titleTemplate 
-      ? (deal as any).titleTemplate.replace("{amount}", formatShortPrice((deal as any).savingsZAR))
-      : deal.title,
-    description: deal.description,
-    expires: deal.expires,
-  }));
+  const { data: realDeals, isLoading: isLoadingDeals } = useQuery<any[]>({
+    queryKey: ["/api/member/deals"],
+    enabled: !!user,
+  });
 
   const { data: company, isLoading: isLoadingCompany } = useQuery<Company>({
     queryKey: ["/api/member/company", user?.companyId],
@@ -173,11 +154,13 @@ export default function Dashboard() {
     retry: false,
   });
 
-  // Fetch user activity stats (personal to the logged-in user)
   const { data: userActivity, isLoading: isLoadingActivity } = useQuery<{
     studiesCompleted: number;
+    liveStudies: number;
     reportsDownloaded: number;
-    valueUnlocked: number;
+    discountSaved: number;
+    basicCreditsRemaining: number;
+    proCreditsRemaining: number;
   }>({
     queryKey: ["/api/member/activity", user?.id],
     enabled: !!user,
@@ -187,16 +170,46 @@ export default function Dashboard() {
     return company?.industry || undefined;
   }, [company]);
 
+  const { data: dbReports } = useQuery<any[]>({
+    queryKey: ["/api/reports"],
+    enabled: !!user,
+  });
+
   const isLoadingRecommendations = isLoadingCompany && !!user?.companyId;
 
   const recommendedReports = useMemo(() => {
+    const staticReports = reportsData as Report[];
+    const dbReportsMapped: Report[] = (dbReports || [])
+      .filter((r: any) => r.status === "published" || r.status === "live")
+      .filter((r: any) => !staticReports.some(sr => sr.slug === r.slug))
+      .map((r: any) => ({
+        id: typeof r.id === 'string' ? parseInt(r.id, 10) || 0 : r.id,
+        title: r.title,
+        teaser: r.teaser || '',
+        slug: r.slug,
+        series: r.series || r.category || '',
+        category: r.category || '',
+        industry: r.industry || '',
+        publishDate: r.date || r.publishDate || '',
+        date: r.date || '',
+        status: 'live',
+        coverImage: r.coverImage || '',
+        pdfPath: r.pdfUrl || r.pdfPath || null,
+        hasDownload: !!(r.pdfUrl || r.pdfPath || r.hasDownload),
+        videoPaths: r.videoPaths || [],
+        tags: r.tags || [],
+        isNew: false,
+        access: r.accessLevel === 'PUBLIC' ? 'free' : 'members',
+        accessLevel: r.accessLevel || 'PUBLIC',
+      }));
+    const allReports = [...staticReports, ...dbReportsMapped];
     return getRecommendedReports(
-      reportsData as Report[],
+      allReports,
       user?.membershipTier,
       isPaidMember,
       userIndustry
     );
-  }, [user?.membershipTier, isPaidMember, userIndustry]);
+  }, [user?.membershipTier, isPaidMember, userIndustry, dbReports]);
 
   const handleReportClick = (report: Report, event: React.MouseEvent) => {
     event.stopPropagation();
@@ -216,9 +229,6 @@ export default function Dashboard() {
       year: "numeric",
     });
   };
-
-  const basicPercentage = (mockCredits.basicRemaining / mockCredits.basicTotal) * 100;
-  const proPercentage = (mockCredits.proRemaining / mockCredits.proTotal) * 100;
 
   return (
     <PortalLayout>
@@ -306,90 +316,83 @@ export default function Dashboard() {
             {/* Company Credits Widget - shown for company users */}
             {user?.companyId && <CompanyCreditsCard companyId={user.companyId} />}
 
-            {/* Credit Summary Widget */}
-            {isPaidMember && !user?.companyId ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2" data-testid="text-credits-title">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                    Your Research Credits
-                  </CardTitle>
-                  <CardDescription data-testid="text-credits-description">
-                    Remaining balance as a {user?.tier?.toUpperCase()} Member
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Test24 Basic</span>
-                      <span className="text-sm text-muted-foreground">
-                        {mockCredits.basicRemaining} of {mockCredits.basicTotal} remaining
-                      </span>
+            {/* Credit Summary Widget - only for non-company users */}
+            {!user?.companyId && (
+              isPaidMember ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2" data-testid="text-credits-title">
+                      <Sparkles className="w-5 h-5 text-primary" />
+                      Your Research Credits
+                    </CardTitle>
+                    <CardDescription data-testid="text-credits-description">
+                      Remaining balance as a {user?.membershipTier?.toUpperCase()} Member
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Test24 Basic</span>
+                        <span className="text-sm text-muted-foreground">
+                          {isLoadingActivity ? "..." : (userActivity?.basicCreditsRemaining ?? 0)} remaining
+                        </span>
+                      </div>
+                      <Progress value={isLoadingActivity ? 0 : Math.min(100, (userActivity?.basicCreditsRemaining ?? 0) * 10)} className="h-2" />
                     </div>
-                    <Progress value={basicPercentage} className="h-2" />
-                  </div>
 
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Test24 Pro</span>
-                      <span className="text-sm text-muted-foreground">
-                        {mockCredits.proRemaining} of {mockCredits.proTotal} remaining
-                      </span>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Test24 Pro</span>
+                        <span className="text-sm text-muted-foreground">
+                          {isLoadingActivity ? "..." : (userActivity?.proCreditsRemaining ?? 0)} remaining
+                        </span>
+                      </div>
+                      <Progress value={isLoadingActivity ? 0 : Math.min(100, (userActivity?.proCreditsRemaining ?? 0) * 20)} className="h-2" />
                     </div>
-                    <Progress value={proPercentage} className="h-2" />
-                  </div>
 
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="w-4 h-4" />
-                    <span>Credits expire: {mockCredits.expiryDate}</span>
-                  </div>
-
-                  <div className="flex gap-3 pt-2">
-                    <Button
-                      className="flex-1"
-                      onClick={() => setLocation("/portal/credits")}
-                      data-testid="button-top-up"
-                    >
-                      Top Up Credits
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setLocation("/portal/launch")}
-                      data-testid="button-use-credit"
-                    >
-                      Use Credit
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : !user?.companyId ? (
-              <LockedFeature
-                title="Research Credits"
-                description="Track and manage your Test24 credits. Members get exclusive discounts and credit packages."
-                showButton={true}
-              >
-                <div className="space-y-4 mt-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Test24 Basic</span>
-                      <span className="text-muted-foreground">7 of 10 remaining</span>
+                    <div className="flex gap-3 pt-2">
+                      <Button
+                        className="flex-1"
+                        onClick={() => setLocation("/portal/credits")}
+                        data-testid="button-top-up"
+                      >
+                        Top Up Credits
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setLocation("/portal/launch")}
+                        data-testid="button-use-credit"
+                      >
+                        Use Credit
+                      </Button>
                     </div>
-                    <Progress value={70} className="h-2" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Test24 Pro</span>
-                      <span className="text-muted-foreground">1 of 2 remaining</span>
+                  </CardContent>
+                </Card>
+              ) : (
+                <LockedFeature
+                  title="Research Credits"
+                  description="Track and manage your Test24 credits. Members get exclusive discounts and credit packages."
+                  showButton={true}
+                >
+                  <div className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span>Test24 Basic</span>
+                        <span className="text-muted-foreground">Upgrade to access</span>
+                      </div>
+                      <Progress value={0} className="h-2" />
                     </div>
-                    <Progress value={50} className="h-2" />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span>Test24 Pro</span>
+                        <span className="text-muted-foreground">Upgrade to access</span>
+                      </div>
+                      <Progress value={0} className="h-2" />
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground flex items-center gap-2">
-                    <Clock className="w-3 h-3" />
-                    Credits expire: 30 Dec 2025
-                  </p>
-                </div>
-              </LockedFeature>
-            ) : null}
+                </LockedFeature>
+              )
+            )}
 
             {/* Personalized Recommendations Feed */}
             {isPaidMember ? (
@@ -511,22 +514,44 @@ export default function Dashboard() {
                   <CardDescription>Exclusive offers for you</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {mockDeals.map((deal, index) => (
-                    <div
-                      key={index}
-                      className="p-4 rounded-lg bg-accent/10 border border-accent/20"
-                      data-testid={`deal-${index}`}
-                    >
-                      <h4 className="font-semibold text-sm mb-1">{deal.title}</h4>
-                      <p className="text-xs text-muted-foreground mb-2">
-                        {deal.description}
-                      </p>
-                      <div className="flex items-center gap-2 text-xs text-accent">
-                        <AlertCircle className="w-3 h-3" />
-                        <span>Expires: {deal.expires}</span>
-                      </div>
+                  {isLoadingDeals ? (
+                    <div className="space-y-3">
+                      {[1, 2].map((i) => (
+                        <div key={i} className="p-4 rounded-lg border">
+                          <Skeleton className="h-4 w-3/4 mb-2" />
+                          <Skeleton className="h-3 w-1/2" />
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  ) : realDeals && realDeals.length > 0 ? (
+                    realDeals.slice(0, 3).map((deal: any, index: number) => (
+                      <div
+                        key={deal.id || index}
+                        className="p-4 rounded-lg bg-accent/10 border border-accent/20"
+                        data-testid={`deal-${deal.id || index}`}
+                      >
+                        <h4 className="font-semibold text-sm mb-1">{deal.title}</h4>
+                        <p className="text-xs text-muted-foreground mb-2">
+                          {deal.description}
+                        </p>
+                        {deal.discountPercentage && (
+                          <Badge variant="secondary" className="text-xs mb-2">
+                            {deal.discountPercentage}% off
+                          </Badge>
+                        )}
+                        {deal.expiresAt && (
+                          <div className="flex items-center gap-2 text-xs text-accent">
+                            <AlertCircle className="w-3 h-3" />
+                            <span>Expires: {new Date(deal.expiresAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}</span>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No active offers right now. Check back soon!
+                    </p>
+                  )}
 
                   <Button
                     variant="outline"
@@ -541,80 +566,97 @@ export default function Dashboard() {
             ) : (
               <LockedFeature
                 title="Member Offers"
-                description="Exclusive discounts and offers"
+                description="Exclusive discounts and offers available to members"
                 showButton={true}
               >
                 <div className="space-y-4 mt-4">
-                  {mockDeals.map((deal, index) => (
-                    <div
-                      key={index}
-                      className="p-4 rounded-lg bg-accent/10 border border-accent/20"
-                    >
-                      <h4 className="font-semibold text-sm mb-1">{deal.title}</h4>
-                      <p className="text-xs text-muted-foreground mb-2">
-                        {deal.description}
-                      </p>
-                      <div className="flex items-center gap-2 text-xs text-accent">
-                        <AlertCircle className="w-3 h-3" />
-                        <span>Expires: {deal.expires}</span>
-                      </div>
-                    </div>
-                  ))}
+                  <div className="p-4 rounded-lg bg-accent/10 border border-accent/20">
+                    <h4 className="font-semibold text-sm mb-1">Exclusive member pricing</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Members save up to 50% on research credits and studies
+                    </p>
+                  </div>
                 </div>
               </LockedFeature>
             )}
 
-            {/* Quick Stats */}
+            {/* Your Activity */}
             {isPaidMember ? (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm">Your Activity</CardTitle>
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <Activity className="w-4 h-4" />
+                    Your Activity
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Studies completed</span>
+                    <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
+                      Completed studies
+                    </span>
                     <span className="text-lg font-bold" data-testid="text-studies-completed">
                       {isLoadingActivity ? "..." : (userActivity?.studiesCompleted ?? 0)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Reports downloaded</span>
-                    <span className="text-lg font-bold" data-testid="text-reports-downloaded">
-                      {isLoadingActivity ? "..." : (userActivity?.reportsDownloaded ?? 0)}
+                    <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+                      <PlayCircle className="w-3.5 h-3.5 text-blue-600" />
+                      Live studies
+                    </span>
+                    <span className="text-lg font-bold" data-testid="text-live-studies">
+                      {isLoadingActivity ? "..." : (userActivity?.liveStudies ?? 0)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Value unlocked</span>
-                    <span className="text-lg font-bold text-primary" data-testid="text-value-unlocked">
-                      {isLoadingActivity ? "..." : formatShortPrice(userActivity?.valueUnlocked ?? 0)}
+                    <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+                      <CreditCard className="w-3.5 h-3.5 text-primary" />
+                      Credits available
+                    </span>
+                    <div className="text-right" data-testid="text-credits-available">
+                      {isLoadingActivity ? "..." : (
+                        <div className="text-sm">
+                          <span className="font-bold">{userActivity?.basicCreditsRemaining ?? 0}</span>
+                          <span className="text-muted-foreground"> Basic</span>
+                          <span className="mx-1 text-muted-foreground">/</span>
+                          <span className="font-bold">{userActivity?.proCreditsRemaining ?? 0}</span>
+                          <span className="text-muted-foreground"> Pro</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+                      <BadgePercent className="w-3.5 h-3.5 text-emerald-600" />
+                      Member savings
+                    </span>
+                    <span className="text-lg font-bold text-emerald-600" data-testid="text-discount-saved">
+                      {isLoadingActivity ? "..." : formatShortPrice(userActivity?.discountSaved ?? 0)}
                     </span>
                   </div>
+                  <p className="text-[11px] text-muted-foreground pt-1">
+                    Members pay {formatShortPrice(5000)} for Basic (not {formatShortPrice(10000)}) and {formatShortPrice(45000)} for Pro (not {formatShortPrice(50000)})
+                  </p>
                 </CardContent>
               </Card>
             ) : (
               <LockedFeature
                 title="Your Activity"
-                description="Track your research progress and value unlocked"
+                description="Track your research progress, credits, and member savings"
                 showButton={true}
               >
                 <div className="space-y-3 mt-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Studies completed</span>
-                    <span className="text-lg font-bold">
-                      {isLoadingActivity ? "..." : (userActivity?.studiesCompleted ?? 0)}
-                    </span>
+                    <span className="text-lg font-bold">0</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Reports downloaded</span>
-                    <span className="text-lg font-bold">
-                      {isLoadingActivity ? "..." : (userActivity?.reportsDownloaded ?? 0)}
-                    </span>
+                    <span className="text-sm text-muted-foreground">Live studies</span>
+                    <span className="text-lg font-bold">0</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Value unlocked</span>
-                    <span className="text-lg font-bold text-primary">
-                      {isLoadingActivity ? "..." : formatShortPrice(userActivity?.valueUnlocked ?? 0)}
-                    </span>
+                    <span className="text-sm text-muted-foreground">Member savings</span>
+                    <span className="text-lg font-bold text-primary">{formatShortPrice(0)}</span>
                   </div>
                 </div>
               </LockedFeature>

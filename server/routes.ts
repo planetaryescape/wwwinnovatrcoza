@@ -1426,6 +1426,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin API endpoints - All require admin authentication
+  app.get("/api/admin/engagement-stats", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      const companies = await storage.getAllCompanies();
+      const allStudies = await storage.getAllStudies();
+      
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const nonAdminUsers = users.filter(u => u.role !== "ADMIN");
+      const activeUsers30d = nonAdminUsers.filter(u => u.lastLoginAt && new Date(u.lastLoginAt) >= thirtyDaysAgo).length;
+      const neverLoggedIn = nonAdminUsers.filter(u => !u.lastLoginAt).length;
+      
+      let totalReportViews = 0;
+      try {
+        const adminUserIds = new Set(users.filter(u => u.role === "ADMIN").map(u => u.id));
+        const allEvents = await storage.getActivityEventsSince(new Date(0));
+        totalReportViews = allEvents.filter((e: any) => 
+          (e.actionType === "view_report" || e.actionType === "view_client_report" || e.actionType === "report_view") &&
+          !adminUserIds.has(e.userId)
+        ).length;
+      } catch (e) {
+        // fallback
+      }
+      
+      res.json({
+        totalUsers: nonAdminUsers.length,
+        activeUsers30d,
+        totalCompanies: companies.filter(c => c.name !== "Innovatr").length,
+        totalBriefs: allStudies.length,
+        neverLoggedIn,
+        totalReportViews,
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/admin/users", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const users = await storage.getAllUsers();
@@ -3845,6 +3883,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           proCreditsUsed: newProUsed,
         });
 
+        if (finalBasicCreditsUsed > 0) {
+          const basicRemaining = (company.basicCreditsTotal || 0) - newBasicUsed;
+          await storage.createCreditLedgerEntry({
+            companyId: companyIdStr,
+            creditType: "basic",
+            transactionType: "use",
+            amount: -finalBasicCreditsUsed,
+            balanceAfter: basicRemaining,
+            description: `Brief launch: ${validated.studyType} study (${creditsRequired} concept${creditsRequired > 1 ? 's' : ''})`,
+            userId: validated.userId || null,
+          });
+        }
+        if (finalProCreditsUsed > 0) {
+          const proRemaining = (company.proCreditsTotal || 0) - newProUsed;
+          await storage.createCreditLedgerEntry({
+            companyId: companyIdStr,
+            creditType: "pro",
+            transactionType: "use",
+            amount: -finalProCreditsUsed,
+            balanceAfter: proRemaining,
+            description: `Brief launch: ${validated.studyType} study (${creditsRequired} concept${creditsRequired > 1 ? 's' : ''})`,
+            userId: validated.userId || null,
+          });
+        }
+
         console.log(`Credits deducted for company ${validated.companyId}: Basic ${finalBasicCreditsUsed}, Pro ${finalProCreditsUsed}`);
       }
 
@@ -4094,28 +4157,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const sessionUser = req.user!;
       
-      // Get studies completed by this user (by their email)
       const userStudies = await storage.getStudiesByEmail(sessionUser.email);
       const completedStudies = userStudies.filter(s => s.status === "COMPLETED");
+      const liveStudies = userStudies.filter(s => s.status === "IN_PROGRESS" || s.status === "SUBMITTED" || s.status === "NEW");
       
-      // Get report downloads by this user
       const reportsDownloaded = await storage.getUserReportDownloadCount(sessionUser.id);
       
-      // Calculate value unlocked based on completed study types
-      // Basic = R5,000, Pro = R45,000
-      let valueUnlocked = 0;
+      let discountSaved = 0;
       for (const study of completedStudies) {
         if (study.studyType === "basic") {
-          valueUnlocked += 5000;
+          discountSaved += 5000;
         } else if (study.studyType === "pro") {
-          valueUnlocked += 45000;
+          discountSaved += 5000;
+        }
+      }
+
+      let basicCreditsRemaining = 0;
+      let proCreditsRemaining = 0;
+      if (sessionUser.companyId) {
+        const company = await storage.getCompany(sessionUser.companyId);
+        if (company) {
+          basicCreditsRemaining = (company.basicCreditsTotal || 0) - (company.basicCreditsUsed || 0);
+          proCreditsRemaining = (company.proCreditsTotal || 0) - (company.proCreditsUsed || 0);
         }
       }
       
       res.json({
         studiesCompleted: completedStudies.length,
+        liveStudies: liveStudies.length,
         reportsDownloaded,
-        valueUnlocked,
+        discountSaved,
+        basicCreditsRemaining,
+        proCreditsRemaining,
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
