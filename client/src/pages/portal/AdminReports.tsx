@@ -199,6 +199,7 @@ export default function AdminReports() {
     status: string;
     channel: string;
     attachmentType: string | null;
+    coverImagePath: string | null;
     createdAt: string;
     updatedAt: string;
   }
@@ -1009,21 +1010,24 @@ export default function AdminReports() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           {(report.pdfUrl || report.pdfPath || report.hasDownload) && (
-                            <div className="flex items-center gap-0.5 text-xs text-blue-700" title="Downloadable Report">
-                              <FileText className="w-3.5 h-3.5" />
-                            </div>
+                            <Badge data-testid={`badge-attachment-report-${report.id}`} className="text-[10px] border-0 px-1.5 py-0 bg-blue-50 text-blue-700">
+                              <FileText className="w-2.5 h-2.5 mr-0.5" />
+                              Report
+                            </Badge>
                           )}
                           {report.videoPaths && report.videoPaths.length > 0 && (
-                            <div className="flex items-center gap-0.5 text-xs text-purple-700" title="Video">
-                              <Video className="w-3.5 h-3.5" />
-                            </div>
+                            <Badge data-testid={`badge-attachment-video-${report.id}`} className="text-[10px] border-0 px-1.5 py-0 bg-purple-50 text-purple-700">
+                              <Video className="w-2.5 h-2.5 mr-0.5" />
+                              Video
+                            </Badge>
                           )}
-                          {report.coverImage && !report.pdfUrl && !report.pdfPath && !report.hasDownload && !(report.videoPaths && report.videoPaths.length > 0) && (
-                            <div className="flex items-center gap-0.5 text-xs text-emerald-700" title="Image">
-                              <FileImage className="w-3.5 h-3.5" />
-                            </div>
+                          {report.coverImage && (
+                            <Badge data-testid={`badge-attachment-image-${report.id}`} className="text-[10px] border-0 px-1.5 py-0 bg-emerald-50 text-emerald-700">
+                              <FileImage className="w-2.5 h-2.5 mr-0.5" />
+                              Image
+                            </Badge>
                           )}
                         </div>
                       </TableCell>
@@ -1224,6 +1228,17 @@ export default function AdminReports() {
                                 </div>
                                 {isExpanded && (
                                   <div className="border-t p-2.5 bg-gray-50/50 space-y-2">
+                                    {mailer.coverImagePath && (
+                                      <div>
+                                        <p className="text-[10px] font-medium text-muted-foreground mb-1">Infographic</p>
+                                        <img
+                                          src={mailer.coverImagePath}
+                                          alt={mailer.topic}
+                                          className="w-full rounded-md border max-h-[200px] object-cover object-top"
+                                          data-testid={`img-mailer-cover-${mailer.id}`}
+                                        />
+                                      </div>
+                                    )}
                                     <div>
                                       <p className="text-[10px] font-medium text-muted-foreground mb-0.5">Subject</p>
                                       <p className="text-xs text-gray-900">{mailer.subjectLine}</p>
