@@ -86,6 +86,35 @@ export default function Settings() {
     enabled: isAdmin,
   });
 
+  const [adminPrefs, setAdminPrefs] = useState({
+    dailyDigest: true,
+    newOrderAlerts: true,
+    newUserAlerts: true,
+    lowCreditAlerts: true,
+  });
+  const [savingAdminPrefs, setSavingAdminPrefs] = useState(false);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const fetchAdminPrefs = async () => {
+      try {
+        const res = await fetch("/api/admin/preferences", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          setAdminPrefs({
+            dailyDigest: data.dailyDigest ?? true,
+            newOrderAlerts: data.newOrderAlerts ?? true,
+            newUserAlerts: data.newUserAlerts ?? true,
+            lowCreditAlerts: data.lowCreditAlerts ?? true,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch admin preferences:", err);
+      }
+    };
+    fetchAdminPrefs();
+  }, [isAdmin]);
+
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -134,6 +163,46 @@ export default function Settings() {
       title: "Preferences Saved",
       description: "Your notification preferences have been updated.",
     });
+  };
+
+  const handleSaveAdminPreferences = async () => {
+    if (isViewingAsCompany) {
+      toast({
+        title: "Cannot Save",
+        description: "Settings cannot be changed while viewing as a company.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setSavingAdminPrefs(true);
+    try {
+      const res = await fetch("/api/admin/preferences", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(adminPrefs),
+      });
+      if (!res.ok) throw new Error("Failed to save preferences");
+      const savedPrefs = await res.json();
+      setAdminPrefs({
+        dailyDigest: savedPrefs.dailyDigest ?? true,
+        newOrderAlerts: savedPrefs.newOrderAlerts ?? true,
+        newUserAlerts: savedPrefs.newUserAlerts ?? true,
+        lowCreditAlerts: savedPrefs.lowCreditAlerts ?? true,
+      });
+      toast({
+        title: "Admin Preferences Saved",
+        description: "Your email notification preferences have been updated.",
+      });
+    } catch (err) {
+      toast({
+        title: "Save Failed",
+        description: "Could not save admin preferences. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingAdminPrefs(false);
+    }
   };
 
   const resetPasswordForm = () => {
@@ -538,7 +607,12 @@ export default function Settings() {
                       Receive a summary of platform activity at 4pm on weekdays
                     </p>
                   </div>
-                  <Switch id="dailyDigest" defaultChecked data-testid="switch-daily-digest" />
+                  <Switch
+                    id="dailyDigest"
+                    checked={adminPrefs.dailyDigest}
+                    onCheckedChange={(checked) => setAdminPrefs(prev => ({ ...prev, dailyDigest: checked }))}
+                    data-testid="switch-daily-digest"
+                  />
                 </div>
 
                 <Separator />
@@ -550,7 +624,12 @@ export default function Settings() {
                       Instant email when a new order or brief is submitted
                     </p>
                   </div>
-                  <Switch id="newOrderAlerts" defaultChecked data-testid="switch-new-order-alerts" />
+                  <Switch
+                    id="newOrderAlerts"
+                    checked={adminPrefs.newOrderAlerts}
+                    onCheckedChange={(checked) => setAdminPrefs(prev => ({ ...prev, newOrderAlerts: checked }))}
+                    data-testid="switch-new-order-alerts"
+                  />
                 </div>
 
                 <Separator />
@@ -562,7 +641,12 @@ export default function Settings() {
                       Get notified when new users register on the platform
                     </p>
                   </div>
-                  <Switch id="newUserAlerts" defaultChecked data-testid="switch-new-user-alerts" />
+                  <Switch
+                    id="newUserAlerts"
+                    checked={adminPrefs.newUserAlerts}
+                    onCheckedChange={(checked) => setAdminPrefs(prev => ({ ...prev, newUserAlerts: checked }))}
+                    data-testid="switch-new-user-alerts"
+                  />
                 </div>
 
                 <Separator />
@@ -574,15 +658,20 @@ export default function Settings() {
                       Alert when any company drops below 2 remaining credits
                     </p>
                   </div>
-                  <Switch id="lowCreditAlerts" defaultChecked data-testid="switch-low-credit-alerts" />
+                  <Switch
+                    id="lowCreditAlerts"
+                    checked={adminPrefs.lowCreditAlerts}
+                    onCheckedChange={(checked) => setAdminPrefs(prev => ({ ...prev, lowCreditAlerts: checked }))}
+                    data-testid="switch-low-credit-alerts"
+                  />
                 </div>
 
                 <Button 
-                  onClick={handleSavePreferences}
-                  disabled={isViewingAsCompany}
+                  onClick={handleSaveAdminPreferences}
+                  disabled={isViewingAsCompany || savingAdminPrefs}
                   data-testid="button-save-admin-preferences"
                 >
-                  Save Admin Preferences
+                  {savingAdminPrefs ? "Saving..." : "Save Admin Preferences"}
                 </Button>
               </CardContent>
             </Card>

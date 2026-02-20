@@ -21,7 +21,7 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 import OrderFormDialog from "@/components/OrderFormDialog";
 import type { Order } from "@shared/schema";
 
-const mockCreditPackages = [
+const creditPackages = [
   {
     type: "Basic",
     credits: 1,
@@ -52,30 +52,6 @@ const mockCreditPackages = [
   },
 ];
 
-const mockBillingHistory = [
-  {
-    id: "INV-2024-11-001",
-    date: "2024-11-01",
-    description: "Growth Membership Annual Renewal",
-    amount: 180000,
-    status: "paid",
-  },
-  {
-    id: "INV-2024-10-024",
-    date: "2024-10-15",
-    description: "Test24 Basic Credit Pack (10x)",
-    amount: 45000,
-    status: "paid",
-  },
-  {
-    id: "INV-2024-09-018",
-    date: "2024-09-22",
-    description: "Test24 Pro Study",
-    amount: 45000,
-    status: "paid",
-  },
-];
-
 export default function CreditsAndBilling() {
   const [, setLocation] = useLocation();
   const { isPaidMember, user, company: authCompany } = useAuth();
@@ -85,7 +61,7 @@ export default function CreditsAndBilling() {
   useEffect(() => {
     logActivity("view_credits");
   }, []);
-  const [selectedPack, setSelectedPack] = useState<typeof mockCreditPackages[0] | null>(null);
+  const [selectedPack, setSelectedPack] = useState<typeof creditPackages[0] | null>(null);
 
   // Fetch fresh company data to ensure credits are up-to-date
   const { data: freshCompany } = useQuery({
@@ -178,7 +154,7 @@ export default function CreditsAndBilling() {
     }
   };
 
-  const handlePurchasePack = (pack: typeof mockCreditPackages[0]) => {
+  const handlePurchasePack = (pack: typeof creditPackages[0]) => {
     setSelectedPack(pack);
     setShowOrderForm(true);
   };
@@ -367,7 +343,7 @@ export default function CreditsAndBilling() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {mockCreditPackages.map((pack, index) => (
+              {creditPackages.map((pack, index) => (
                 <Card
                   key={index}
                   className="hover-elevate"
@@ -505,60 +481,18 @@ export default function CreditsAndBilling() {
                     </TableCell>
                   </TableRow>
                 ))}
-                {/* Show mock data if no real orders exist */}
-                {billingHistoryOrders.length === 0 && mockBillingHistory.map((invoice) => (
-                  <TableRow key={invoice.id} data-testid={`invoice-${invoice.id}`}>
-                    <TableCell className="font-medium">{invoice.id}</TableCell>
-                    <TableCell>
-                      {new Date(invoice.date).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>{invoice.description}</TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {formatPriceLocal(invoice.amount)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                        {invoice.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        data-testid={`button-download-invoice-${invoice.id}`}
-                      >
-                        <Download className="w-4 h-4" />
-                      </Button>
+                {billingHistoryOrders.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                      No billing history yet. Your orders and payments will appear here.
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </CardContent>
         </Card>
 
-        {/* Payment Method */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Payment Method</CardTitle>
-            <CardDescription>
-              Manage your payment information
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-4 p-4 border rounded-lg">
-              <CreditCard className="w-8 h-8 text-muted-foreground" />
-              <div className="flex-1">
-                <p className="font-medium">Visa ending in 4242</p>
-                <p className="text-sm text-muted-foreground">Expires 12/2025</p>
-              </div>
-              <Button variant="outline" data-testid="button-update-payment">
-                Update
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Order Form Dialog for Credit Pack Purchases */}

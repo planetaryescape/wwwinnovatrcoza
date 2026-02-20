@@ -49,6 +49,7 @@ import {
   type InsertActivityEvent,
   type InsightMailer,
   type InsertInsightMailer,
+  type AdminPreferences,
   users,
   passwordResets,
   creditLedger,
@@ -73,6 +74,7 @@ import {
   reportRequests,
   activityEvents,
   insightMailers,
+  adminPreferences,
 } from "@shared/schema";
 import { eq, and, lte, gte, desc, sql } from "drizzle-orm";
 import { db } from "./db";
@@ -220,6 +222,10 @@ export interface IStorage {
   createInsightMailer(mailer: InsertInsightMailer): Promise<InsightMailer>;
   updateInsightMailer(id: string, updates: Partial<InsightMailer>): Promise<void>;
   deleteInsightMailer(id: string): Promise<void>;
+
+  // Admin Preferences
+  getAdminPreferences(userId: string): Promise<AdminPreferences | undefined>;
+  upsertAdminPreferences(userId: string, prefs: Partial<AdminPreferences>): Promise<AdminPreferences>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1857,6 +1863,33 @@ export class DatabaseStorage implements IStorage {
 
   async deleteInsightMailer(id: string): Promise<void> {
     await db.delete(insightMailers).where(eq(insightMailers.id, id));
+  }
+
+  async getAdminPreferences(userId: string): Promise<AdminPreferences | undefined> {
+    const [prefs] = await db.select().from(adminPreferences).where(eq(adminPreferences.userId, userId));
+    return prefs;
+  }
+
+  async upsertAdminPreferences(userId: string, prefs: Partial<AdminPreferences>): Promise<AdminPreferences> {
+    const existing = await this.getAdminPreferences(userId);
+    if (existing) {
+      await db.update(adminPreferences)
+        .set({ ...prefs, updatedAt: new Date() })
+        .where(eq(adminPreferences.userId, userId));
+      const [updated] = await db.select().from(adminPreferences).where(eq(adminPreferences.userId, userId));
+      return updated;
+    } else {
+      const [created] = await db.insert(adminPreferences)
+        .values({
+          userId,
+          dailyDigest: prefs.dailyDigest ?? true,
+          newOrderAlerts: prefs.newOrderAlerts ?? true,
+          newUserAlerts: prefs.newUserAlerts ?? true,
+          lowCreditAlerts: prefs.lowCreditAlerts ?? true,
+        })
+        .returning();
+      return created;
+    }
   }
 }
 

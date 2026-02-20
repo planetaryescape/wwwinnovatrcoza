@@ -67,7 +67,7 @@ export const insertUserSchema = createInsertSchema(users)
       .min(6, "Password must be at least 6 characters")
       .optional(),
     name: z.string().optional(),
-    membershipTier: z.enum(["FREE", "STARTER", "GROWTH", "SCALE", "ADMIN"]).default("FREE"),
+    membershipTier: z.enum(["FREE", "STARTER", "GROWTH", "SCALE", "CUSTOM", "ADMIN"]).default("FREE"),
     memberType: z.enum(["companyUser", "independent"]).default("companyUser"),
     role: z.enum(["ADMIN", "DEAL_ADMIN", "MEMBER"]).default("MEMBER"),
   });
@@ -359,7 +359,7 @@ export const insertCompanySchema = createInsertSchema(companies)
   })
   .extend({
     name: z.string().min(1, "Company name is required"),
-    tier: z.enum(["FREE", "STARTER", "GROWTH", "SCALE", "ADMIN"]).default("FREE"),
+    tier: z.enum(["FREE", "STARTER", "GROWTH", "SCALE", "CUSTOM", "ADMIN"]).default("FREE"),
   });
 
 export type InsertCompany = z.infer<typeof insertCompanySchema>;
@@ -868,3 +868,23 @@ export const insertInsightMailerSchema = createInsertSchema(insightMailers).omit
 
 export type InsertInsightMailer = z.infer<typeof insertInsightMailerSchema>;
 export type InsightMailer = typeof insightMailers.$inferSelect;
+
+export const adminPreferences = pgTable("admin_preferences", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().unique(),
+  dailyDigest: boolean("daily_digest").default(true).notNull(),
+  newOrderAlerts: boolean("new_order_alerts").default(true).notNull(),
+  newUserAlerts: boolean("new_user_alerts").default(true).notNull(),
+  lowCreditAlerts: boolean("low_credit_alerts").default(true).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertAdminPreferencesSchema = createInsertSchema(adminPreferences).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export type InsertAdminPreferences = z.infer<typeof insertAdminPreferencesSchema>;
+export type AdminPreferences = typeof adminPreferences.$inferSelect;

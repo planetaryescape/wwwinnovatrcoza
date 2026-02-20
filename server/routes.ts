@@ -1593,7 +1593,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Fetch all data
-      const [users, companies, orders, studies, briefs, subscriptions, deals] = await Promise.all([
+      const [users, companies, orders, initialStudies, briefs, subscriptions, deals] = await Promise.all([
         storage.getAllUsers(),
         storage.getAllCompanies(),
         storage.getAllOrders(),
@@ -1602,6 +1602,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         storage.getAllSubscriptions(),
         storage.getAllDeals(),
       ]);
+
+      // Backfill: auto-create studies for briefs that don't have one yet
+      const existingBriefIds = new Set(initialStudies.filter(s => s.briefId).map(s => s.briefId));
+      for (const brief of briefs) {
+        if (!existingBriefIds.has(brief.id)) {
+          try {
+            const isBasic = brief.studyType?.toLowerCase().includes("basic");
+            await storage.createStudy({
+              briefId: brief.id,
+              companyId: brief.companyId || undefined,
+              companyName: brief.companyName,
+              title: `${brief.companyBrand || brief.companyName} - ${isBasic ? "Test24 Basic" : "Test24 Pro"}`,
+              description: brief.researchObjective?.slice(0, 200) || "",
+              studyType: isBasic ? "basic" : "pro",
+              status: brief.status === "completed" ? "COMPLETED" : brief.status === "in_progress" ? "AUDIENCE_LIVE" : "NEW",
+              isTest24: true,
+              tags: [brief.companyName, isBasic ? "basic" : "pro", brief.industry || ""].filter(Boolean),
+              submittedByEmail: brief.submittedByEmail,
+              submittedByName: brief.submittedByName || undefined,
+            });
+          } catch (e) {
+            // Skip if study creation fails (e.g. duplicate)
+          }
+        }
+      }
+      // Re-fetch studies after backfill
+      const studies = await storage.getAllStudies();
 
       // Filter data by period
       const filterByDate = <T extends { createdAt: Date | string }>(items: T[]) => 
@@ -1804,6 +1831,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             starter: users.filter((u) => u.membershipTier === "STARTER").length,
             growth: users.filter((u) => u.membershipTier === "GROWTH").length,
             scale: users.filter((u) => u.membershipTier === "SCALE").length,
+            custom: users.filter((u) => u.membershipTier === "CUSTOM").length,
           },
         },
         revenue: {
@@ -1862,12 +1890,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Order not found" });
       }
 
-      const validStatuses = ["pending", "processing", "completed", "failed"];
+      const validStatuses = ["pending", "processing", "completed", "paid", "failed"];
       if (!validStatuses.includes(status)) {
         return res.status(400).json({ error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` });
       }
 
       await storage.updateOrder(id, { status });
+
+      // Auto-allocate credits when order is marked as completed or paid (idempotent - only on first transition)
+      if ((status === "completed" || status === "paid") && order.status !== "completed" && order.status !== "paid") {
+        try {
+          // Find the user's company to credit
+          let companyId: string | null = null;
+          if (order.userId) {
+            const orderUser = await storage.getUser(order.userId);
+            if (orderUser?.companyId) {
+              companyId = orderUser.companyId;
+            }
+          }
+          // If no userId, try to find user by email
+          if (!companyId && order.customerEmail) {
+            const users = await storage.getAllUsers();
+            const matchedUser = users.find(u => u.email === order.customerEmail);
+            if (matchedUser?.companyId) {
+              companyId = matchedUser.companyId;
+            }
+          }
+
+          // Parse credit info from order items or purchase type
+          if (companyId) {
+            const orderItems = await storage.getOrderItems(order.id);
+            const purchaseDesc = (order.purchaseType || "").toLowerCase();
+            
+            for (const item of orderItems) {
+              const desc = (item.description || "").toLowerCase();
+              const qty = item.quantity || 1;
+              
+              if (desc.includes("basic") && desc.includes("credit")) {
+                const company = await storage.getCompany(companyId);
+                if (company) {
+                  const newTotal = (company.basicCreditsTotal || 0) + qty;
+                  await storage.updateCompany(companyId, { basicCreditsTotal: newTotal });
+                  await storage.createCreditLedgerEntry({
+                    companyId,
+                    creditType: "basic",
+                    transactionType: "purchase",
+                    amount: qty,
+                    balanceAfter: newTotal - (company.basicCreditsUsed || 0),
+                    description: `Order ${order.id.slice(0, 8)}: ${item.description}`,
+                    userId: order.userId || null,
+                  });
+                }
+              } else if (desc.includes("pro") && desc.includes("credit")) {
+                const company = await storage.getCompany(companyId);
+                if (company) {
+                  const newTotal = (company.proCreditsTotal || 0) + qty;
+                  await storage.updateCompany(companyId, { proCreditsTotal: newTotal });
+                  await storage.createCreditLedgerEntry({
+                    companyId,
+                    creditType: "pro",
+                    transactionType: "purchase",
+                    amount: qty,
+                    balanceAfter: newTotal - (company.proCreditsUsed || 0),
+                    description: `Order ${order.id.slice(0, 8)}: ${item.description}`,
+                    userId: order.userId || null,
+                  });
+                }
+              }
+            }
+
+            // Fallback: check purchase type if no items matched
+            if (orderItems.length === 0 && companyId) {
+              if (purchaseDesc.includes("basic") && purchaseDesc.includes("credit")) {
+                const company = await storage.getCompany(companyId);
+                if (company) {
+                  const newTotal = (company.basicCreditsTotal || 0) + 1;
+                  await storage.updateCompany(companyId, { basicCreditsTotal: newTotal });
+                  await storage.createCreditLedgerEntry({
+                    companyId,
+                    creditType: "basic",
+                    transactionType: "purchase",
+                    amount: 1,
+                    balanceAfter: newTotal - (company.basicCreditsUsed || 0),
+                    description: `Order ${order.id.slice(0, 8)}: ${order.purchaseType}`,
+                    userId: order.userId || null,
+                  });
+                }
+              } else if (purchaseDesc.includes("pro") && purchaseDesc.includes("credit")) {
+                const company = await storage.getCompany(companyId);
+                if (company) {
+                  const newTotal = (company.proCreditsTotal || 0) + 1;
+                  await storage.updateCompany(companyId, { proCreditsTotal: newTotal });
+                  await storage.createCreditLedgerEntry({
+                    companyId,
+                    creditType: "pro",
+                    transactionType: "purchase",
+                    amount: 1,
+                    balanceAfter: newTotal - (company.proCreditsUsed || 0),
+                    description: `Order ${order.id.slice(0, 8)}: ${order.purchaseType}`,
+                    userId: order.userId || null,
+                  });
+                }
+              }
+            }
+          }
+        } catch (creditError) {
+          console.error("Auto-credit allocation failed:", creditError);
+        }
+      }
+
       const updatedOrder = await storage.getOrder(id);
       res.json(updatedOrder);
     } catch (error: any) {
@@ -3952,6 +4083,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "new",
       });
 
+      // Automatically create a Test24 study from the brief for tracking
+      try {
+        const existingStudy = await storage.getStudyByBriefId(brief.id);
+        if (!existingStudy) {
+          await storage.createStudy({
+            briefId: brief.id,
+            companyId: companyIdStr || (validated.companyId ? String(validated.companyId) : undefined),
+            companyName: brief.companyName,
+            title: `${validated.companyBrand || brief.companyName} - ${isBasicStudy ? "Test24 Basic" : "Test24 Pro"}`,
+            description: validated.researchObjective?.slice(0, 200) || "",
+            studyType: isBasicStudy ? "basic" : "pro",
+            status: "NEW",
+            isTest24: true,
+            tags: [brief.companyName, isBasicStudy ? "basic" : "pro", validated.industry || ""].filter(Boolean),
+            submittedByEmail: brief.submittedByEmail,
+            submittedByName: brief.submittedByName || undefined,
+          });
+        }
+      } catch (studyError) {
+        console.error("Failed to auto-create study from brief:", studyError);
+      }
+
       // Get files array for emails (cast to expected type)
       const briefFiles = (brief.files || []) as Array<{
         id: string;
@@ -4740,6 +4893,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(summary);
     } catch (error: any) {
       console.error("Global activity summary error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/admin/preferences", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const prefs = await storage.getAdminPreferences(req.user!.id);
+      res.json(prefs || {
+        dailyDigest: true,
+        newOrderAlerts: true,
+        newUserAlerts: true,
+        lowCreditAlerts: true,
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  const adminPreferencesSchema = z.object({
+    dailyDigest: z.boolean().default(true),
+    newOrderAlerts: z.boolean().default(true),
+    newUserAlerts: z.boolean().default(true),
+    lowCreditAlerts: z.boolean().default(true),
+  });
+
+  app.put("/api/admin/preferences", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const parsed = adminPreferencesSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid preferences data", details: parsed.error.flatten() });
+      }
+      const prefs = await storage.upsertAdminPreferences(req.user!.id, parsed.data);
+      res.json(prefs);
+    } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
   });

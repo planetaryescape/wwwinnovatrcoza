@@ -45,6 +45,7 @@ export const TIER_LEVELS = {
   STARTER: 1,
   GROWTH: 2,
   SCALE: 3,
+  CUSTOM: 4,
 } as const;
 
 export type TierLevel = typeof TIER_LEVELS[keyof typeof TIER_LEVELS];
@@ -98,7 +99,7 @@ const FREE_CONTENT_TITLES = new Set([
 export function normalizeUserTier(tier?: string | null): TierName {
   if (!tier) return "FREE";
   const upperTier = tier.toUpperCase();
-  if (upperTier === "STARTER" || upperTier === "GROWTH" || upperTier === "SCALE") {
+  if (upperTier === "STARTER" || upperTier === "GROWTH" || upperTier === "SCALE" || upperTier === "CUSTOM") {
     return upperTier as TierName;
   }
   return "FREE";

@@ -213,6 +213,7 @@ export default function NewReportModal({
                   <SelectItem value="STARTER">Starter+</SelectItem>
                   <SelectItem value="GROWTH">Growth+</SelectItem>
                   <SelectItem value="SCALE">Scale Only</SelectItem>
+                  <SelectItem value="CUSTOM">Custom</SelectItem>
                 </SelectContent>
               </Select>
             </div>

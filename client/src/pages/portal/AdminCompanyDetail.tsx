@@ -953,6 +953,7 @@ export default function AdminCompanyDetail() {
                     <SelectItem value="STARTER">Starter</SelectItem>
                     <SelectItem value="GROWTH">Growth</SelectItem>
                     <SelectItem value="SCALE">Scale</SelectItem>
+                    <SelectItem value="CUSTOM">Custom</SelectItem>
                     <SelectItem value="ADMIN">Admin</SelectItem>
                   </SelectContent>
                 </Select>

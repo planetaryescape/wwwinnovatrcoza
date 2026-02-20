@@ -12,8 +12,8 @@ import {
   TIER_LEVELS
 } from "@shared/access";
 
-export type UserTier = "free" | "starter" | "growth" | "scale";
-export type MembershipTier = "STARTER" | "GROWTH" | "SCALE" | "ADMIN";
+export type UserTier = "free" | "starter" | "growth" | "scale" | "custom";
+export type MembershipTier = "STARTER" | "GROWTH" | "SCALE" | "CUSTOM" | "ADMIN";
 
 export interface User {
   id: string;

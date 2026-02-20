@@ -416,6 +416,7 @@ export default function AdminUsers() {
                   <SelectItem value="STARTER">Starter</SelectItem>
                   <SelectItem value="GROWTH">Growth</SelectItem>
                   <SelectItem value="SCALE">Scale</SelectItem>
+                  <SelectItem value="CUSTOM">Custom</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -646,6 +647,7 @@ export default function AdminUsers() {
                           <SelectItem value="STARTER">Starter</SelectItem>
                           <SelectItem value="GROWTH">Growth</SelectItem>
                           <SelectItem value="SCALE">Scale</SelectItem>
+                          <SelectItem value="CUSTOM">Custom</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
