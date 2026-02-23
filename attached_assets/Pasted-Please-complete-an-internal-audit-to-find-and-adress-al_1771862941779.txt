@@ -1,0 +1,40 @@
+Please complete an internal audit to find and adress all placeholders or any mock data or anything now that are in place and lets either delete them if they are irrelvant or make them functional and live if they add value. I want to iron out all wrinkled and details that are not fully functional, placeholders or waste of space. In my portal in my admin tab underneath 'PLease comeplete an internal audit to find and address all placeholders or any mock data or anything now that are in place and lets either delete them if they are irrelevant or make them functional and live if they add value. I want to iron out all wrinkled and details that are not fully functional, placeholders or waste of space' i would like for this to interactive and if i select users for example it shows me a list starting with the most recent. Same for my User Engagement (This Month). 
+
+I also feel like 'Test24 Tracker
+Total Basic: 0
+Total Pro: 0
+This month: 0 Basic / 0 Pro
+In progress: 0
+Basic
+Pro
+1 briefs in pipeline
+No Test24 studies yet
+
+Test24 Activity Snapshot
+View all
+0
+
+Total Studies
+
+0
+
+In Progress
+
+0
+
+Completed
+
+Completed Studies Distribution
+
+0
+Test24 Basic (0)
+Test24 Pro (0)
+Live Studies
+
+No live studies' is not actually functional yet, because i hvae had brief this month ect'
+
+I would also like to add a new membership Tier which is custom as recently we have created a lot of custom deals and memberships to suit and be tailered to a comapnies needs for example some companies want 4 or 5 pro's and only 10 basic or visa versa ect. These members are Above starter, growth and scale. 
+
+Also when a member pays and or uses credits these should altomatically be connected to their accounts. 
+
+On my main landing page I would also like to update my "Stay ahead of the trends section. I would like for this to be something simple like subscribe now and from there they are taken to create an account/ login. It's also important to record if they want to subscribe to our mailers and if they do i would like to record them under both 'Pulse Insights Newsletter Subscribers' and Members & Subscribers. Actually lets merge these two into one - we have a company tab so this is not needed to track company info (its good to know what company they are connected to though) but its important to note that they will obviously be made free members. Under their 'view details' that where i would like to see a breakdown of when they joined, how many credits they have, which company they are from, are they subscribed to pulse, what trends and insights have they viewed and downloaded, when they last logged on, a summary of 150 words of their activity.  I would also like to be able to view this information from my companies tab when i am in a specific company. Maybe we have a user break down / tracking thing.
