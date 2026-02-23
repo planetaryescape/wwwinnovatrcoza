@@ -892,14 +892,23 @@ export default function AdminCompanyDetail() {
                   <p className="text-muted-foreground mb-2">{company.domain}</p>
                 )}
                 <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    <span>Contract: {formatDate(company.contractStart)} - {formatDate(company.contractEnd)}</span>
-                  </div>
-                  {daysRemaining !== null && (
-                    <Badge variant={daysRemaining < 30 ? "destructive" : "secondary"}>
-                      {daysRemaining > 0 ? `${daysRemaining} days remaining` : "Contract expired"}
-                    </Badge>
+                  {company.tier === "FREE" ? (
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      <span>Free tier — Unlimited</span>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>Contract: {formatDate(company.contractStart)} - {formatDate(company.contractEnd)}</span>
+                      </div>
+                      {daysRemaining !== null && (
+                        <Badge variant={daysRemaining < 30 ? "destructive" : "secondary"}>
+                          {daysRemaining > 0 ? `${daysRemaining} days remaining` : "Contract expired"}
+                        </Badge>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

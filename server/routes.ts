@@ -404,8 +404,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "User not found" });
       }
       
-      // Update session last active time
-      // (Could be optimized to update less frequently)
+      // Auto-downgrade: check if company membership has expired
+      if (user.companyId && user.membershipTier && user.membershipTier !== "FREE") {
+        try {
+          const company = await storage.getCompany(user.companyId);
+          if (company && company.tier !== "FREE") {
+            const contractEnd = company.contractEnd 
+              ? new Date(company.contractEnd) 
+              : (company.contractStart ? new Date(new Date(company.contractStart).getTime() + 365 * 24 * 60 * 60 * 1000) : null);
+            if (contractEnd && contractEnd < new Date()) {
+              await storage.updateCompany(company.id, { tier: "FREE" });
+              const companyUsers = await storage.getUsersByCompanyId(company.id);
+              for (const cu of companyUsers) {
+                if (cu.membershipTier !== "FREE" && cu.role !== "ADMIN") {
+                  await storage.updateUser(cu.id, { membershipTier: "FREE" });
+                }
+              }
+              user.membershipTier = "FREE";
+            }
+          }
+        } catch (e) {
+          console.error("Auto-downgrade check failed:", e);
+        }
+      }
       
       // Return user without password fields, with demo credits applied
       const { password: _, passwordHash: __, ...safeUser } = user;

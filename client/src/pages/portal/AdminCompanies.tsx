@@ -871,6 +871,7 @@ export default function AdminCompanies() {
                       </TableCell>
                       <TableCell>
                         {(() => {
+                          if (company.tier === "FREE") return <span className="text-muted-foreground">Unlimited</span>;
                           const daysLeft = getContractDaysRemaining(company.contractStart);
                           if (daysLeft === null) return <span className="text-muted-foreground">—</span>;
                           if (daysLeft <= 0) return <Badge variant="destructive">Expired</Badge>;
