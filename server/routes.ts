@@ -3957,6 +3957,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const validated = briefSchema.parse(req.body);
 
+      // Normalize studyType to canonical form for Test24 types
+      const lowerStudyType = validated.studyType.toLowerCase();
+      if (lowerStudyType.includes("basic") || lowerStudyType.includes("pro")) {
+        validated.studyType = lowerStudyType.includes("basic") ? "Test24 Basic" : "Test24 Pro";
+      }
+
       // Server-side credit calculation - derive from brief data, don't trust client
       const creditsRequired = validated.numIdeas; // 1 credit per concept
       const isBasicStudy = validated.studyType.toLowerCase().includes("basic");
@@ -4793,6 +4799,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const events = await storage.getActivityEventsByCompany(id, from, to);
       const users = await storage.getUsersByCompanyId(id);
       const userMap = new Map(users.map(u => [u.id, { name: u.name, email: u.email, surname: u.surname }]));
+      
+      const missingUserIds = new Set(
+        events.filter(e => e.userId && !userMap.has(e.userId)).map(e => e.userId)
+      );
+      if (missingUserIds.size > 0) {
+        const allUsers = await storage.getAllUsers();
+        for (const u of allUsers) {
+          if (missingUserIds.has(u.id)) {
+            userMap.set(u.id, { name: u.name, email: u.email, surname: u.surname });
+          }
+        }
+      }
+      
       const enriched = events.map(e => ({
         ...e,
         userName: userMap.get(e.userId)?.name ?? "Unknown",
@@ -4815,6 +4834,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const events = await storage.getActivityEventsByCompany(id, from, to);
       const users = await storage.getUsersByCompanyId(id);
       const userMap = new Map(users.map(u => [u.id, { name: u.name, email: u.email, surname: u.surname }]));
+      
+      const missingUserIds = new Set(
+        events.filter(e => e.userId && !userMap.has(e.userId)).map(e => e.userId)
+      );
+      if (missingUserIds.size > 0) {
+        const allUsers = await storage.getAllUsers();
+        for (const u of allUsers) {
+          if (missingUserIds.has(u.id)) {
+            userMap.set(u.id, { name: u.name, email: u.email, surname: u.surname });
+          }
+        }
+      }
 
       const summary = {
         totalEvents: events.length,

@@ -49,13 +49,10 @@ const getStudyTypeImage = (studyType: string | null): string | null => {
 
 const formatStudyType = (studyType: string | null): string => {
   if (!studyType) return "";
-  const typeMap: Record<string, string> = {
-    "test24_basic": "Test24 Basic",
-    "test24_pro": "Test24 Pro",
-    "basic": "Test24 Basic",
-    "pro": "Test24 Pro",
-  };
-  return typeMap[studyType.toLowerCase()] || studyType;
+  const lower = studyType.toLowerCase();
+  if (lower.includes("pro")) return "Test24 Pro";
+  if (lower.includes("basic")) return "Test24 Basic";
+  return studyType;
 };
 
 interface ClientReport {

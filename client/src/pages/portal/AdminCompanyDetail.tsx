@@ -179,9 +179,10 @@ const getStudyTypeImage = (studyType: string | null): string | null => {
 
 const formatStudyType = (studyType: string | null): string => {
   if (!studyType) return "Unknown";
-  if (studyType === "test24_basic") return "Test24 Basic";
-  if (studyType === "test24_pro") return "Test24 Pro";
-  if (studyType === "consult") return "Consult";
+  const lower = studyType.toLowerCase();
+  if (lower.includes("pro")) return "Test24 Pro";
+  if (lower.includes("basic")) return "Test24 Basic";
+  if (lower === "consult") return "Consult";
   return studyType;
 };
 

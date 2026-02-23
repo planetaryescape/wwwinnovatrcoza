@@ -99,6 +99,12 @@ interface BriefFile {
   uploadedAt: string;
 }
 
+const formatStudyTypeLabel = (studyType: string): string => {
+  const lower = studyType.toLowerCase();
+  if (lower.includes("pro")) return "Test24 Pro";
+  return "Test24 Basic";
+};
+
 interface BriefSubmission {
   id: string;
   submittedByName: string;
@@ -484,7 +490,7 @@ export default function AdminBriefs() {
                     <TableRow key={brief.id} data-testid={`row-brief-${brief.id}`}>
                       <TableCell>
                         <Badge variant="outline" className="font-medium">
-                          {brief.studyType}
+                          {formatStudyTypeLabel(brief.studyType)}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -631,7 +637,7 @@ export default function AdminBriefs() {
                                 <div className="flex items-center gap-1">
                                   <GripVertical className="w-3 h-3 text-muted-foreground" />
                                   <Badge variant="outline" className="text-xs">
-                                    {brief.studyType}
+                                    {formatStudyTypeLabel(brief.studyType)}
                                   </Badge>
                                 </div>
                                 <span className="text-xs text-muted-foreground">
@@ -686,7 +692,7 @@ export default function AdminBriefs() {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <Badge variant="outline" className="text-base px-3 py-1">
-                  {selectedBrief.studyType}
+                  {formatStudyTypeLabel(selectedBrief.studyType)}
                 </Badge>
                 <div className="flex items-center gap-3">
                   <div className="text-sm text-muted-foreground">
