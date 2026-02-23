@@ -1341,7 +1341,7 @@ export default function AdminCompanyDetail() {
                             <h4 className="font-medium truncate">{report.title}</h4>
                             {report.studyType && (
                               <Badge variant="secondary" className="text-xs">
-                                {report.studyType}
+                                {formatStudyType(report.studyType)}
                               </Badge>
                             )}
                             {report.status && (
