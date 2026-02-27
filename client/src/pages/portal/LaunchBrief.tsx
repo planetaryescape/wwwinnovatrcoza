@@ -752,6 +752,7 @@ export default function LaunchBrief() {
   const queryClient = useQueryClient();
   const [selectedBrief, setSelectedBrief] = useState<BriefType>(null);
   const [consumerReach, setConsumerReach] = useState<number>(100);
+  const [proCustomInput, setProCustomInput] = useState<string>("100");
   const [additionalFiles, setAdditionalFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [isDraggingConcept, setIsDraggingConcept] = useState<string | null>(null);
@@ -827,7 +828,19 @@ export default function LaunchBrief() {
   // Reach-based pricing tiers
   const reachTiers = selectedBrief === "basic" ? BASIC_REACH_TIERS : PRO_REACH_TIERS;
   const selectedReachTier = reachTiers.find(t => t.consumers === consumerReach) || reachTiers[0];
-  const PRICE_PER_CONCEPT = isPaidMember ? selectedReachTier.memberPrice : selectedReachTier.standardPrice;
+
+  // For Pro: get pricing band based on reach count (band = price per consumer tier)
+  const getProPricingBand = (reach: number) => {
+    if (reach <= 100) return PRO_REACH_TIERS[0];
+    if (reach <= 200) return PRO_REACH_TIERS[1];
+    return PRO_REACH_TIERS[2];
+  };
+  const proPricingBand = getProPricingBand(consumerReach);
+
+  // Pro price = per-consumer rate × actual reach; Basic = fixed tier price per concept
+  const PRICE_PER_CONCEPT = selectedBrief === "pro"
+    ? (isPaidMember ? proPricingBand.perConsumerMember : proPricingBand.perConsumerStandard) * consumerReach
+    : (isPaidMember ? selectedReachTier.memberPrice : selectedReachTier.standardPrice);
   const totalPrice = PRICE_PER_CONCEPT * concepts.length;
 
   // Use member pricing only for paid members, otherwise standard pricing for free users
@@ -1428,7 +1441,7 @@ export default function LaunchBrief() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             <Card
               className="hover-elevate active-elevate-2 cursor-pointer border-2 border-accent/30"
-              onClick={() => setSelectedBrief("basic")}
+              onClick={() => { setSelectedBrief("basic"); setConsumerReach(100); setProCustomInput("100"); }}
               data-testid="card-select-basic"
             >
               <CardHeader>
@@ -1478,7 +1491,7 @@ export default function LaunchBrief() {
 
             <Card
               className="hover-elevate active-elevate-2 cursor-pointer border-2 border-primary/30"
-              onClick={() => setSelectedBrief("pro")}
+              onClick={() => { setSelectedBrief("pro"); setConsumerReach(100); setProCustomInput("100"); }}
               data-testid="card-select-pro"
             >
               <CardHeader>
@@ -1544,7 +1557,7 @@ export default function LaunchBrief() {
           </div>
           <Button
             variant="outline"
-            onClick={() => setSelectedBrief(null)}
+            onClick={() => { setSelectedBrief(null); setConsumerReach(100); setProCustomInput("100"); }}
             data-testid="button-change-type"
           >
             Change Type
@@ -1628,14 +1641,71 @@ export default function LaunchBrief() {
           <CardHeader>
             <CardTitle>Consumer Reach</CardTitle>
             <CardDescription>
-              Select how many consumers to test your {selectedBrief === "basic" ? "concept" : "study"} against. More reach = greater confidence. Price per consumer drops at volume.
+              {selectedBrief === "pro"
+                ? "Enter the exact number of consumers to test your study against, or select a volume band below. Price per consumer drops at higher volumes."
+                : "Select how many consumers to test your concept against. More reach = greater confidence. Price per consumer drops at volume."}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            {/* Pro custom reach input */}
+            {selectedBrief === "pro" && (
+              <div className="flex flex-wrap items-center gap-3 p-4 rounded-md border border-border bg-muted/30">
+                <label htmlFor="pro-custom-reach" className="text-sm font-medium whitespace-nowrap">
+                  Exact consumer reach:
+                </label>
+                <div className="flex items-center gap-2 flex-1 min-w-[180px]">
+                  <Input
+                    id="pro-custom-reach"
+                    type="number"
+                    min={1}
+                    max={9999}
+                    value={proCustomInput}
+                    data-testid="input-pro-custom-reach"
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      setProCustomInput(raw);
+                      const parsed = parseInt(raw, 10);
+                      if (!isNaN(parsed) && parsed >= 1) {
+                        setConsumerReach(parsed);
+                      }
+                    }}
+                    onBlur={() => {
+                      const parsed = parseInt(proCustomInput, 10);
+                      if (isNaN(parsed) || parsed < 1) {
+                        setProCustomInput("100");
+                        setConsumerReach(100);
+                      } else {
+                        setProCustomInput(String(parsed));
+                        setConsumerReach(parsed);
+                      }
+                    }}
+                    className="w-32"
+                    placeholder="e.g. 150"
+                  />
+                  <span className="text-sm text-muted-foreground">consumers</span>
+                </div>
+                <div className="text-sm font-semibold text-primary whitespace-nowrap">
+                  R{(isPaidMember ? proPricingBand.perConsumerMember : proPricingBand.perConsumerStandard)}/person
+                  {" "}
+                  <span className="text-muted-foreground font-normal">
+                    = R{PRICE_PER_CONCEPT.toLocaleString()} per survey
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Tier cards — for Basic: select exact tier; for Pro: show pricing bands as reference */}
             <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${reachTiers.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"}`} data-testid="reach-tier-grid">
-              {reachTiers.map((tier) => {
-                const isSelected = consumerReach === tier.consumers;
-                const tierPrice = isPaidMember ? tier.memberPrice : tier.standardPrice;
+              {reachTiers.map((tier, idx) => {
+                let isSelected: boolean;
+                if (selectedBrief === "pro") {
+                  isSelected = proPricingBand === PRO_REACH_TIERS[idx];
+                } else {
+                  isSelected = consumerReach === tier.consumers;
+                }
+                const tierPrice = selectedBrief === "pro"
+                  ? (isPaidMember ? tier.perConsumerMember : tier.perConsumerStandard) * tier.consumers
+                  : (isPaidMember ? tier.memberPrice : tier.standardPrice);
                 const perConsumer = isPaidMember ? tier.perConsumerMember : tier.perConsumerStandard;
                 const isLowest = tier.consumers === reachTiers[0].consumers;
                 return (
@@ -1643,29 +1713,25 @@ export default function LaunchBrief() {
                     key={tier.consumers}
                     type="button"
                     data-testid={`button-reach-${tier.consumers}`}
-                    onClick={() => setConsumerReach(tier.consumers)}
+                    onClick={() => {
+                      setConsumerReach(tier.consumers);
+                      if (selectedBrief === "pro") setProCustomInput(String(tier.consumers));
+                    }}
                     className={`relative rounded-md border p-4 text-left transition-colors ${
                       isSelected
                         ? "border-primary bg-primary/5"
                         : "border-border bg-background hover-elevate"
                     }`}
                   >
-                    {!isLowest && (
-                      <span className="absolute top-2 right-2 text-xs text-green-600 font-medium">
-                        R{perConsumer}/person
-                      </span>
-                    )}
-                    {isLowest && (
-                      <span className="absolute top-2 right-2 text-xs text-muted-foreground">
-                        R{perConsumer}/person
-                      </span>
-                    )}
+                    <span className={`absolute top-2 right-2 text-xs font-medium ${isLowest ? "text-muted-foreground" : "text-green-600"}`}>
+                      R{perConsumer}/person
+                    </span>
                     <div className="font-semibold text-base mb-0.5">{tier.label}</div>
                     <div className="text-2xl font-bold text-primary">
                       R{tierPrice.toLocaleString()}
                     </div>
                     <div className="text-xs text-muted-foreground mt-0.5">
-                      per {selectedBrief === "basic" ? "concept" : "survey"}
+                      {selectedBrief === "pro" ? "band base price" : `per ${selectedBrief === "basic" ? "concept" : "survey"}`}
                     </div>
                     {!isLowest && (
                       <div className="text-xs text-green-600 mt-1.5 font-medium">
@@ -1677,7 +1743,7 @@ export default function LaunchBrief() {
               })}
             </div>
             {concepts.length > 1 && (
-              <p className="text-sm text-muted-foreground mt-3">
+              <p className="text-sm text-muted-foreground">
                 With {concepts.length} concepts: total R{(PRICE_PER_CONCEPT * concepts.length).toLocaleString()} across {consumerReach.toLocaleString()} consumers
               </p>
             )}

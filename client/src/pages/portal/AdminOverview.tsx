@@ -543,7 +543,7 @@ export default function AdminOverview() {
                       </div>
                       <div className="flex items-center justify-between text-xs text-muted-foreground">
                         <span>
-                          {study.studyType === "basic" ? "Test24 Basic" : "Test24 Pro"}
+                          {study.studyType?.toLowerCase().includes("pro") ? "Test24 Pro" : "Test24 Basic"}
                         </span>
                         <span>
                           {study.submittedByName}
