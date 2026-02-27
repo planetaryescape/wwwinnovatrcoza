@@ -114,6 +114,7 @@ interface BriefSubmission {
   companyBrand: string | null;
   studyType: string;
   numIdeas: number;
+  numConsumers: number;
   researchObjective: string;
   regions: string[];
   ages: string[];
@@ -765,6 +766,10 @@ export default function AdminBriefs() {
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4 text-muted-foreground" />
                       <span>Ideas to Test: {selectedBrief.numIdeas}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <span>Consumer Reach: {(selectedBrief.numConsumers || 100).toLocaleString()}</span>
                     </div>
                   </CardContent>
                 </Card>

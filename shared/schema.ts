@@ -631,6 +631,7 @@ export const briefSubmissions = pgTable("brief_submissions", {
   companyBrand: text("company_brand"),
   studyType: varchar("study_type", { length: 50 }).notNull(),
   numIdeas: integer("num_ideas").notNull().default(1),
+  numConsumers: integer("num_consumers").notNull().default(100),
   researchObjective: text("research_objective").notNull(),
   regions: text("regions").array().default([]),
   ages: text("ages").array().default([]),

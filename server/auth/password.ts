@@ -81,11 +81,11 @@ export function validatePasswordStrength(password: string): { valid: boolean; er
 }
 
 /**
- * Calculate password reset token expiry (1 hour from now)
+ * Calculate password reset token expiry (7 days from now)
  */
 export function getResetTokenExpiry(): Date {
   const expiry = new Date();
-  expiry.setHours(expiry.getHours() + 1);
+  expiry.setDate(expiry.getDate() + 7);
   return expiry;
 }
 

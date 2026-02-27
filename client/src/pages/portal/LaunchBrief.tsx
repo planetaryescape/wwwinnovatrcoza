@@ -732,12 +732,26 @@ const BASIC_STANDARD_PRICE = 10000;
 const PRO_MEMBER_PRICE = 45000;
 const PRO_STANDARD_PRICE = 50000;
 
+const BASIC_REACH_TIERS = [
+  { consumers: 100, memberPrice: 5000, standardPrice: 10000, label: "100 consumers", perConsumerMember: 50, perConsumerStandard: 100 },
+  { consumers: 200, memberPrice: 8000, standardPrice: 16000, label: "200 consumers", perConsumerMember: 40, perConsumerStandard: 80 },
+  { consumers: 500, memberPrice: 17500, standardPrice: 35000, label: "500 consumers", perConsumerMember: 35, perConsumerStandard: 70 },
+  { consumers: 1000, memberPrice: 30000, standardPrice: 60000, label: "1,000 consumers", perConsumerMember: 30, perConsumerStandard: 60 },
+];
+
+const PRO_REACH_TIERS = [
+  { consumers: 100, memberPrice: 45000, standardPrice: 50000, label: "100 consumers", perConsumerMember: 450, perConsumerStandard: 500 },
+  { consumers: 200, memberPrice: 80000, standardPrice: 90000, label: "200 consumers", perConsumerMember: 400, perConsumerStandard: 450 },
+  { consumers: 500, memberPrice: 175000, standardPrice: 200000, label: "500 consumers", perConsumerMember: 350, perConsumerStandard: 400 },
+];
+
 export default function LaunchBrief() {
   const { user, company, isPaidMember, isFreeUser } = useAuth();
   const { formatPrice } = useCurrency();
   const [, setLocationHook] = useLocation();
   const queryClient = useQueryClient();
   const [selectedBrief, setSelectedBrief] = useState<BriefType>(null);
+  const [consumerReach, setConsumerReach] = useState<number>(100);
   const [additionalFiles, setAdditionalFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [isDraggingConcept, setIsDraggingConcept] = useState<string | null>(null);
@@ -810,11 +824,15 @@ export default function LaunchBrief() {
   const hasEnoughCredits = availableCreditsForStudy >= creditsRequired;
   const hasAnyCredits = basicCreditsRemaining > 0 || proCreditsRemaining > 0;
 
+  // Reach-based pricing tiers
+  const reachTiers = selectedBrief === "basic" ? BASIC_REACH_TIERS : PRO_REACH_TIERS;
+  const selectedReachTier = reachTiers.find(t => t.consumers === consumerReach) || reachTiers[0];
+  const PRICE_PER_CONCEPT = isPaidMember ? selectedReachTier.memberPrice : selectedReachTier.standardPrice;
+  const totalPrice = PRICE_PER_CONCEPT * concepts.length;
+
   // Use member pricing only for paid members, otherwise standard pricing for free users
   const basicPrice = isPaidMember ? BASIC_MEMBER_PRICE : BASIC_STANDARD_PRICE;
   const proPrice = isPaidMember ? PRO_MEMBER_PRICE : PRO_STANDARD_PRICE;
-  const PRICE_PER_CONCEPT = selectedBrief === "basic" ? basicPrice : proPrice;
-  const totalPrice = PRICE_PER_CONCEPT * concepts.length;
 
   // Partial credit calculations for "credits + payment" option
   const creditsToUse = Math.min(availableCreditsForStudy, creditsRequired);
@@ -1287,6 +1305,7 @@ export default function LaunchBrief() {
         companyName: formData.clientCompany,
         studyType: selectedBrief === "basic" ? "Test24 Basic" : "Test24 Pro",
         numIdeas: concepts.length,
+        numConsumers: consumerReach,
         researchObjective: formData.researchObjective,
         regions: formData.region,
         ages: formData.age,
@@ -1601,6 +1620,67 @@ export default function LaunchBrief() {
                 </a>
               )}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Consumer Reach Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Consumer Reach</CardTitle>
+            <CardDescription>
+              Select how many consumers to test your {selectedBrief === "basic" ? "concept" : "study"} against. More reach = greater confidence. Price per consumer drops at volume.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${reachTiers.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"}`} data-testid="reach-tier-grid">
+              {reachTiers.map((tier) => {
+                const isSelected = consumerReach === tier.consumers;
+                const tierPrice = isPaidMember ? tier.memberPrice : tier.standardPrice;
+                const perConsumer = isPaidMember ? tier.perConsumerMember : tier.perConsumerStandard;
+                const isLowest = tier.consumers === reachTiers[0].consumers;
+                return (
+                  <button
+                    key={tier.consumers}
+                    type="button"
+                    data-testid={`button-reach-${tier.consumers}`}
+                    onClick={() => setConsumerReach(tier.consumers)}
+                    className={`relative rounded-md border p-4 text-left transition-colors ${
+                      isSelected
+                        ? "border-primary bg-primary/5"
+                        : "border-border bg-background hover-elevate"
+                    }`}
+                  >
+                    {!isLowest && (
+                      <span className="absolute top-2 right-2 text-xs text-green-600 font-medium">
+                        R{perConsumer}/person
+                      </span>
+                    )}
+                    {isLowest && (
+                      <span className="absolute top-2 right-2 text-xs text-muted-foreground">
+                        R{perConsumer}/person
+                      </span>
+                    )}
+                    <div className="font-semibold text-base mb-0.5">{tier.label}</div>
+                    <div className="text-2xl font-bold text-primary">
+                      R{tierPrice.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      per {selectedBrief === "basic" ? "concept" : "survey"}
+                    </div>
+                    {!isLowest && (
+                      <div className="text-xs text-green-600 mt-1.5 font-medium">
+                        R{(isPaidMember ? reachTiers[0].perConsumerMember : reachTiers[0].perConsumerStandard) - perConsumer} less per consumer
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            {concepts.length > 1 && (
+              <p className="text-sm text-muted-foreground mt-3">
+                With {concepts.length} concepts: total R{(PRICE_PER_CONCEPT * concepts.length).toLocaleString()} across {consumerReach.toLocaleString()} consumers
+              </p>
+            )}
           </CardContent>
         </Card>
 

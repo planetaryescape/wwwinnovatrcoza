@@ -3953,6 +3953,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         companyBrand: z.string().optional(),
         studyType: z.string().min(1, "Study type is required"),
         numIdeas: z.number().min(1).default(1),
+        numConsumers: z.number().min(100).default(100),
         researchObjective: z.string().min(1, "Research objective is required"),
         regions: z.array(z.string()).default([]),
         ages: z.array(z.string()).default([]),

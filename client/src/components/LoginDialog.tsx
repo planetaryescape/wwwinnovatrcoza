@@ -248,6 +248,7 @@ export function LoginDialog({ open, onOpenChange, defaultSignup = false }: Login
               id="email"
               data-testid="input-email"
               type="email"
+              autoComplete={isSignup ? "email" : "username email"}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@company.com"
@@ -269,6 +270,7 @@ export function LoginDialog({ open, onOpenChange, defaultSignup = false }: Login
               id="password"
               data-testid="input-password"
               type="password"
+              autoComplete={isSignup ? "new-password" : "current-password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={isSignup ? "Create a secure password" : "Enter password"}
