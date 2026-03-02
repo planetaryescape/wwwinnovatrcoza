@@ -17,6 +17,8 @@ import {
   type InsertReport,
   type Deal,
   type InsertDeal,
+  type CaseStudy,
+  type InsertCaseStudy,
   type Inquiry,
   type InsertInquiry,
   type Subscription,
@@ -64,6 +66,7 @@ import {
   companies,
   reports,
   deals,
+  caseStudies,
   clientReports,
   inquiries,
   subscriptions,
@@ -121,6 +124,13 @@ export interface IStorage {
   getDeal(id: string): Promise<Deal | undefined>;
   getAllDeals(): Promise<Deal[]>;
   updateDeal(id: string, updates: Partial<Deal>): Promise<void>;
+  deleteDeal(id: string): Promise<void>;
+
+  getCaseStudies(): Promise<CaseStudy[]>;
+  getCaseStudyBySlug(slug: string): Promise<CaseStudy | undefined>;
+  createCaseStudy(caseStudy: InsertCaseStudy): Promise<CaseStudy>;
+  updateCaseStudy(id: string, updates: Partial<CaseStudy>): Promise<void>;
+  deleteCaseStudy(id: string): Promise<void>;
 
   createInquiry(inquiry: InsertInquiry): Promise<Inquiry>;
   getAllInquiries(): Promise<Inquiry[]>;
@@ -1215,6 +1225,53 @@ export class DatabaseStorage implements IStorage {
     await db.update(deals).set({ ...updates, updatedAt: new Date() }).where(eq(deals.id, id));
   }
 
+  async deleteDeal(id: string): Promise<void> {
+    await db.delete(deals).where(eq(deals.id, id));
+  }
+
+  async getCaseStudies(): Promise<CaseStudy[]> {
+    return db.select().from(caseStudies).orderBy(caseStudies.sortOrder);
+  }
+
+  async getCaseStudyBySlug(slug: string): Promise<CaseStudy | undefined> {
+    const result = await db.select().from(caseStudies).where(eq(caseStudies.slug, slug));
+    return result[0];
+  }
+
+  async createCaseStudy(insertCs: InsertCaseStudy): Promise<CaseStudy> {
+    const id = randomUUID();
+    const now = new Date();
+    const result = await db.insert(caseStudies).values({
+      id,
+      slug: insertCs.slug,
+      client: insertCs.client,
+      industry: insertCs.industry,
+      headline: insertCs.headline,
+      problemShort: insertCs.problemShort,
+      problem: insertCs.problem,
+      process: insertCs.process,
+      results: insertCs.results,
+      phases: insertCs.phases ?? [],
+      duration: insertCs.duration,
+      highlight: insertCs.highlight,
+      bgColor: insertCs.bgColor ?? "#F5F5F5",
+      gifAsset: insertCs.gifAsset ?? "default",
+      sortOrder: insertCs.sortOrder ?? 0,
+      isActive: insertCs.isActive ?? true,
+      createdAt: now,
+      updatedAt: now,
+    }).returning();
+    return result[0];
+  }
+
+  async updateCaseStudy(id: string, updates: Partial<CaseStudy>): Promise<void> {
+    await db.update(caseStudies).set({ ...updates, updatedAt: new Date() }).where(eq(caseStudies.id, id));
+  }
+
+  async deleteCaseStudy(id: string): Promise<void> {
+    await db.delete(caseStudies).where(eq(caseStudies.id, id));
+  }
+
   async createInquiry(insertInquiry: InsertInquiry): Promise<Inquiry> {
     const id = randomUUID();
     const result = await db
@@ -2121,5 +2178,241 @@ The packaging conversations that matter most happen when you have real data on w
 }
 
 seedInsightMailers().catch(console.error);
+
+async function seedDealsAndCaseStudies() {
+  const [existingDeals, existingCaseStudies, allUsers] = await Promise.all([
+    databaseStorage.getAllDeals(),
+    databaseStorage.getCaseStudies(),
+    databaseStorage.getAllUsers(),
+  ]);
+
+  const adminUser = allUsers.find(u => u.email === "hannah@innovatr.co.za" || u.email === "richard@innovatr.co.za");
+  const adminId = adminUser?.id ?? "system";
+
+  if (existingDeals.length === 0) {
+    console.log("Seeding deals...");
+    const dealsToSeed = [
+      {
+        title: "Research Clarity Sprint",
+        description: "3 Test24 Basic credits paired with a dedicated 2-hour strategy workshop facilitated by the Innovatr team. Walk away with a prioritised research agenda and live studies ready to launch.",
+        headlineOffer: "Strategy Workshop + Fieldwork Bundle",
+        originalPrice: "52000",
+        discountedPrice: "42000",
+        discountPercent: 19,
+        creditsIncluded: 3,
+        dealType: "exclusive_offer" as const,
+        slotsTotal: 3,
+        slotsRemaining: 3,
+        sortOrder: 1,
+        targetTierKeys: [],
+        targetUserIds: [],
+        createdByUserId: adminId,
+        validFrom: new Date("2026-03-01"),
+        validTo: new Date("2026-03-31"),
+        isActive: true,
+      },
+      {
+        title: "LITE Brand Health Track",
+        description: "4 Basic credits configured as a lightweight, repeatable brand health tracker. Monitor awareness, consideration, and preference — with a structured research calendar built for you.",
+        headlineOffer: "Structured Brand Measurement",
+        originalPrice: "60000",
+        discountedPrice: "48000",
+        discountPercent: 20,
+        creditsIncluded: 4,
+        dealType: "exclusive_offer" as const,
+        slotsTotal: 3,
+        slotsRemaining: 2,
+        sortOrder: 2,
+        targetTierKeys: [],
+        targetUserIds: [],
+        createdByUserId: adminId,
+        validFrom: new Date("2026-03-01"),
+        validTo: new Date("2026-03-31"),
+        isActive: true,
+      },
+      {
+        title: "Full Brand Health Study",
+        description: "1 Test24 Pro credit deployed as a comprehensive brand health study — with enhanced deliverables including competitive benchmarking, segment-level analysis, and a strategic debrief session.",
+        headlineOffer: "Pro-Level Brand Intelligence",
+        originalPrice: "72000",
+        discountedPrice: "58000",
+        discountPercent: 19,
+        creditsIncluded: 1,
+        dealType: "exclusive_offer" as const,
+        slotsTotal: 3,
+        slotsRemaining: 3,
+        sortOrder: 3,
+        targetTierKeys: [],
+        targetUserIds: [],
+        createdByUserId: adminId,
+        validFrom: new Date("2026-03-01"),
+        validTo: new Date("2026-03-31"),
+        isActive: true,
+      },
+      {
+        title: "Q2 Research Planning Session",
+        description: "All active members this month get a complimentary 45-minute Q2 research planning call with a senior Innovatr strategist. Map your pipeline before the quarter begins.",
+        headlineOffer: "45-min Strategy Call",
+        creditsIncluded: 0,
+        dealType: "perk" as const,
+        sortOrder: 1,
+        targetTierKeys: [],
+        targetUserIds: [],
+        createdByUserId: adminId,
+        validFrom: new Date("2026-03-01"),
+        isActive: true,
+      },
+      {
+        title: "Refer a Company",
+        description: "Know a business that could benefit from Test24? Refer them and receive 3 free Basic credits when they sign up and run their first study.",
+        headlineOffer: "3 Free Basic Credits",
+        creditsIncluded: 3,
+        dealType: "perk" as const,
+        sortOrder: 2,
+        targetTierKeys: [],
+        targetUserIds: [],
+        createdByUserId: adminId,
+        validFrom: new Date("2026-03-01"),
+        isActive: true,
+      },
+      {
+        title: "March Trends Unlocked",
+        description: "All members get complimentary access to our latest consumer sentiment and category reports this month. See what's shaping your market right now.",
+        headlineOffer: "Complimentary Report Access",
+        creditsIncluded: 0,
+        dealType: "perk" as const,
+        sortOrder: 3,
+        targetTierKeys: [],
+        targetUserIds: [],
+        createdByUserId: adminId,
+        validFrom: new Date("2026-03-01"),
+        isActive: true,
+      },
+      {
+        title: "New Product Pipeline Tracker",
+        description: "A structured innovation research programme designed to pressure-test your Q3 pipeline before committing to production.",
+        headlineOffer: "Q3 Pipeline Intelligence",
+        creditsIncluded: 0,
+        dealType: "teaser" as const,
+        sortOrder: 1,
+        targetTierKeys: [],
+        targetUserIds: [],
+        createdByUserId: adminId,
+        validFrom: new Date("2026-04-01"),
+        isActive: true,
+      },
+      {
+        title: "Scale Team Package",
+        description: "Something built for organisations running research across multiple teams or markets — more breadth, more control, more insight.",
+        headlineOffer: "Multi-Team Research Suite",
+        creditsIncluded: 0,
+        dealType: "teaser" as const,
+        sortOrder: 2,
+        targetTierKeys: [],
+        targetUserIds: [],
+        createdByUserId: adminId,
+        validFrom: new Date("2026-04-01"),
+        isActive: true,
+      },
+      {
+        title: "Brand Pulse Check-In",
+        description: "A quarterly pulse study — fast, focused, and built around what matters to your brand right now.",
+        headlineOffer: "Quarterly Brand Monitor",
+        creditsIncluded: 0,
+        dealType: "teaser" as const,
+        sortOrder: 3,
+        targetTierKeys: [],
+        targetUserIds: [],
+        createdByUserId: adminId,
+        validFrom: new Date("2026-04-01"),
+        isActive: true,
+      },
+    ];
+    for (const deal of dealsToSeed) {
+      await databaseStorage.createDeal(deal as any);
+    }
+    console.log(`Seeded ${dealsToSeed.length} deals`);
+  }
+
+  if (existingCaseStudies.length === 0) {
+    console.log("Seeding case studies...");
+    const caseStudiesToSeed = [
+      {
+        slug: "dgb",
+        client: "DGB",
+        industry: "Alcohol",
+        headline: "Transforming a Business for Growth with a Disruptive 3-Year Pipeline",
+        problemShort: "Portfolio lacked clear direction across demand spaces, limiting growth potential against modern competitors.",
+        problem: "Portfolio lacked clear direction across demand spaces, limiting growth potential. Traditional wines significantly underperformed against modern RTD competitors with limited understanding of consumer needs.",
+        process: "Comprehensive 3-phase Demand Space Mapping methodology analyzing Connecting, Relaxing, and Socializing demand spaces. Applied Jobs-to-be-Done framework to identify Total Addressable Problems and validate consumer needs.",
+        results: "7 distinct innovation projects approved for the development pipeline. Robust 18-36 month innovation planning secured. Client requested Innovatr to lead end-to-end NPD execution.",
+        phases: ["strategy", "innovation"],
+        duration: "70 Days",
+        highlight: "7 Pipeline Projects",
+        bgColor: "#FFE8D8",
+        gifAsset: "cooking",
+        sortOrder: 1,
+        isActive: true,
+      },
+      {
+        slug: "namibian-breweries",
+        client: "Namibian Breweries",
+        industry: "Beverages",
+        headline: "Launching & Landing the Non-Alcoholic Category in Namibia",
+        problemShort: "Emerging category with undefined positioning and consumer ambiguity in a crowded market.",
+        problem: "Emerging category with undefined positioning territories and consumer ambiguity. Need for differentiated messaging and clear visual identity in a crowded market.",
+        process: "Rapid 27-day sprint developing positioning territories, category manifesto, and Visual Identity. Consumer validation with 200+ respondents followed by TTL creative rollout.",
+        results: "Full launch campaign executed with complete Through-The-Line creative toolkit. Established regional benchmark for cross-brand portfolio launches.",
+        phases: ["strategy", "execution"],
+        duration: "27 Days",
+        highlight: "Regional Benchmark",
+        bgColor: "#E8F0FF",
+        gifAsset: "airplanes",
+        sortOrder: 2,
+        isActive: true,
+      },
+      {
+        slug: "rain",
+        client: "Rain",
+        industry: "Telecommunications",
+        headline: "Defining Winning Market Entry Strategy Through Consumer Intelligence",
+        problemShort: "Market dominated by established players with high barriers to entry and unclear value proposition.",
+        problem: "Market dominated by established players with high barriers to entry. Undefined category positioning and unclear value proposition within new market territory.",
+        process: "Comprehensive four-phase quantitative research methodology with extensive consumer analysis. Explored category opportunities using proprietary frameworks and developed strategic positioning.",
+        results: "Clear pathway identified to capture substantial market position. Strategic category positioning validated through comprehensive consumer research with innovation development guidance.",
+        phases: ["strategy"],
+        duration: "3 Months",
+        highlight: "Market Entry Roadmap",
+        bgColor: "#FFE4D8",
+        gifAsset: "pen",
+        sortOrder: 3,
+        isActive: true,
+      },
+      {
+        slug: "discovery",
+        client: "Discovery Bank",
+        industry: "Financial Services",
+        headline: "Unlocking Dormant Customer Value Through Engagement Research",
+        problemShort: "Significant portion of inactive accounts with customers using bank for limited needs only.",
+        problem: "Significant portion of inactive accounts with many customers using bank for limited needs only. Multi-banking behavior persists with barriers including perceived fee structures and security concerns.",
+        process: "Proprietary engagement measurement using Interest-Commitment scoring. Deep segmentation into Highly Engaged, Low Engaged, and Disengaged audiences with concept testing for activation strategies.",
+        results: "Strong emotional brand leadership confirmed vs competitors. High-potential product concepts validated as activation drivers with clear strategic roadmap delivered.",
+        phases: ["strategy"],
+        duration: "Comprehensive",
+        highlight: "Emotional Leadership",
+        bgColor: "#E8FFE8",
+        gifAsset: "cooking",
+        sortOrder: 4,
+        isActive: true,
+      },
+    ];
+    for (const cs of caseStudiesToSeed) {
+      await databaseStorage.createCaseStudy(cs as any);
+    }
+    console.log(`Seeded ${caseStudiesToSeed.length} case studies`);
+  }
+}
+
+seedDealsAndCaseStudies().catch(console.error);
 
 export const storage = databaseStorage;

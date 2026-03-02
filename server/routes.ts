@@ -4,7 +4,7 @@ import multer from "multer";
 import crypto from "crypto";
 import { z } from "zod";
 import { storage } from "./storage";
-import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemWithoutOrderIdSchema, insertReportSchema, insertDealSchema, insertInquirySchema } from "@shared/schema";
+import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemWithoutOrderIdSchema, insertReportSchema, insertDealSchema, insertCaseStudySchema, insertInquirySchema } from "@shared/schema";
 import { PaymentService } from "./payments/service";
 import type { PaymentConfig } from "./payments/types";
 import * as emailService from "./emails/email-service";
@@ -2595,11 +2595,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/admin/deals/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const deal = await storage.getDeal(id);
+      if (!deal) {
+        return res.status(404).json({ error: "Deal not found" });
+      }
+      await storage.deleteDeal(id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   app.get("/api/member/deals", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      // All authenticated users can see deals (filtered by their membership tier if needed)
       const deals = await storage.getAllDeals();
       res.json(deals);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Case Studies - public routes
+  app.get("/api/case-studies", async (req, res) => {
+    try {
+      const all = await storage.getCaseStudies();
+      res.json(all.filter(cs => cs.isActive));
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/case-studies/:slug", async (req, res) => {
+    try {
+      const cs = await storage.getCaseStudyBySlug(req.params.slug);
+      if (!cs) return res.status(404).json({ error: "Case study not found" });
+      res.json(cs);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Case Studies - admin routes
+  app.get("/api/admin/case-studies", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const all = await storage.getCaseStudies();
+      res.json(all);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/admin/case-studies", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const validatedData = insertCaseStudySchema.parse(req.body);
+      const cs = await storage.createCaseStudy(validatedData);
+      res.status(201).json(cs);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/admin/case-studies/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      await storage.updateCaseStudy(id, req.body);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.delete("/api/admin/case-studies/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteCaseStudy(id);
+      res.json({ success: true });
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }

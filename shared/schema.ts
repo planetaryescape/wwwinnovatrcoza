@@ -461,6 +461,10 @@ export const deals = pgTable("deals", {
   targetUserIds: text("target_user_ids").array().default([]),
   ownerCompanyId: varchar("owner_company_id"),
   createdByUserId: varchar("created_by_user_id").notNull(),
+  dealType: text("deal_type").notNull().default("exclusive_offer"),
+  slotsTotal: integer("slots_total"),
+  slotsRemaining: integer("slots_remaining"),
+  sortOrder: integer("sort_order").notNull().default(0),
   validFrom: timestamp("valid_from").notNull(),
   validTo: timestamp("valid_to"),
   isActive: boolean("is_active").notNull().default(true),
@@ -478,10 +482,55 @@ export const insertDealSchema = createInsertSchema(deals)
     title: z.string().min(1, "Title is required"),
     headlineOffer: z.string().optional(),
     createdByUserId: z.string(),
+    dealType: z.enum(["exclusive_offer", "perk", "teaser"]).default("exclusive_offer"),
+    slotsTotal: z.number().optional().nullable(),
+    slotsRemaining: z.number().optional().nullable(),
+    sortOrder: z.number().default(0),
   });
 
 export type InsertDeal = z.infer<typeof insertDealSchema>;
 export type Deal = typeof deals.$inferSelect;
+
+export const caseStudies = pgTable("case_studies", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  slug: text("slug").notNull().unique(),
+  client: text("client").notNull(),
+  industry: text("industry").notNull(),
+  headline: text("headline").notNull(),
+  problemShort: text("problem_short").notNull(),
+  problem: text("problem").notNull(),
+  process: text("process").notNull(),
+  results: text("results").notNull(),
+  phases: text("phases").array().notNull().default([]),
+  duration: text("duration").notNull(),
+  highlight: text("highlight").notNull(),
+  bgColor: text("bg_color").notNull().default("#F5F5F5"),
+  gifAsset: text("gif_asset").notNull().default("default"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertCaseStudySchema = createInsertSchema(caseStudies)
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    slug: z.string().min(1, "Slug is required"),
+    client: z.string().min(1, "Client is required"),
+    industry: z.string().min(1, "Industry is required"),
+    headline: z.string().min(1, "Headline is required"),
+    phases: z.array(z.enum(["strategy", "innovation", "execution"])).default([]),
+    gifAsset: z.enum(["cooking", "airplanes", "pen", "default"]).default("default"),
+  });
+
+export type InsertCaseStudy = z.infer<typeof insertCaseStudySchema>;
+export type CaseStudy = typeof caseStudies.$inferSelect;
 
 // Client Reports - Past Research delivered to specific companies
 export const clientReports = pgTable("client_reports", {
