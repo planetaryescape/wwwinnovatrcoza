@@ -3,7 +3,7 @@ import { logActivity } from "@/lib/activityLogger";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Gift, Sparkles, Clock, TrendingUp, Crown, Lock, ArrowRight, Heart, Zap, Users, BookOpen, Eye } from "lucide-react";
+import { Gift, Sparkles, Clock, TrendingUp, Crown, Lock, ArrowRight, BarChart2, Users, BookOpen, Eye, Lightbulb } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,7 +22,7 @@ interface ExclusiveDeal {
   ctaText: string;
   priceZAR: number;
   originalPriceZAR: number;
-  icon: typeof Heart;
+  icon: typeof Gift;
 }
 
 interface MonthlyPerk {
@@ -43,58 +43,58 @@ interface MarchTeaser {
 const exclusiveDealsData: ExclusiveDeal[] = [
   {
     id: 1,
-    title: "Valentine's Bundle",
-    subtitle: "Love Your Research",
-    description: "2 Pro studies + 2 Basic studies in one package. The ultimate quarterly research kit for teams serious about consumer insight.",
-    termsNote: "Includes 2 Pro credits and 2 Basic credits. Member pricing applied.",
+    title: "Research Clarity Sprint",
+    subtitle: "Strategy Workshop + Fieldwork Bundle",
+    description: "3 Test24 Basic credits paired with a dedicated 2-hour strategy workshop facilitated by the Innovatr team. Walk away with a prioritised research agenda and live studies ready to launch.",
+    termsNote: "Includes 3 Basic credits and one facilitated 2-hour strategy workshop. Workshop to be scheduled within 60 days of purchase.",
     totalSlots: 3,
-    claimedSlots: 1,
-    expiresLabel: "28 Feb",
-    badge: "2 Left",
-    ctaText: "Reserve My Bundle",
-    priceZAR: 90000,
-    originalPriceZAR: 100000,
-    icon: Heart,
+    claimedSlots: 0,
+    expiresLabel: "31 Mar",
+    badge: "3 Left",
+    ctaText: "Reserve My Sprint",
+    priceZAR: 42000,
+    originalPriceZAR: 52000,
+    icon: Lightbulb,
   },
   {
     id: 2,
-    title: "Pro Taster",
-    subtitle: "First-Time Pro Access",
-    description: "Get 2 full Test24 Pro studies at an introductory rate. Reserved for companies who haven't run Pro before.",
-    termsNote: "One-time offer for first-time Pro buyers only. 2 Pro credits included.",
+    title: "LITE Brand Health Track",
+    subtitle: "Structured Brand Measurement",
+    description: "4 Basic credits configured as a lightweight, repeatable brand health tracker. Monitor awareness, consideration, and preference — with a structured research calendar built for you.",
+    termsNote: "Includes 4 Basic credits structured as a LITE Brand Health programme. Research calendar setup and tracking template included.",
     totalSlots: 3,
-    claimedSlots: 0,
-    expiresLabel: "28 Feb",
-    badge: "3 Left",
-    ctaText: "Unlock Pro Access",
-    priceZAR: 80000,
-    originalPriceZAR: 90000,
-    icon: Zap,
+    claimedSlots: 1,
+    expiresLabel: "31 Mar",
+    badge: "2 Left",
+    ctaText: "Start Tracking",
+    priceZAR: 48000,
+    originalPriceZAR: 60000,
+    icon: TrendingUp,
   },
   {
     id: 3,
-    title: "Credit Top-Up Bonus",
-    subtitle: "Bulk Commitment Reward",
-    description: "Purchase 5 Basic credits and we'll add a 6th on us. Lock in your research pipeline for the quarter.",
-    termsNote: "Bonus credit added within 24 hours of purchase.",
+    title: "Full Brand Health Study",
+    subtitle: "Pro-Level Brand Intelligence",
+    description: "1 Test24 Pro credit deployed as a comprehensive brand health study — with enhanced deliverables including competitive benchmarking, segment-level analysis, and a strategic debrief session.",
+    termsNote: "Includes 1 Pro credit with full Brand Health configuration, competitive benchmarking, and a 1-hour strategic debrief with Innovatr research leads.",
     totalSlots: 3,
-    claimedSlots: 2,
-    expiresLabel: "28 Feb",
-    badge: "1 Left",
-    ctaText: "Claim Last Spot",
-    priceZAR: 25000,
-    originalPriceZAR: 30000,
-    icon: Gift,
+    claimedSlots: 0,
+    expiresLabel: "31 Mar",
+    badge: "3 Left",
+    ctaText: "Claim This Study",
+    priceZAR: 58000,
+    originalPriceZAR: 72000,
+    icon: BarChart2,
   },
 ];
 
 const monthlyPerksData: MonthlyPerk[] = [
   {
     id: 4,
-    title: "Free Membership Month",
-    description: "New companies signing up in February get their first month's seat fee waived. Share this with a colleague or partner business.",
-    eligibility: "New sign-ups only",
-    ctaText: "Share Invite Link",
+    title: "Q2 Research Planning Session",
+    description: "All active members this month get a complimentary 45-minute Q2 research planning call with a senior Innovatr strategist. Map your pipeline before the quarter begins.",
+    eligibility: "Active members",
+    ctaText: "Book My Session",
     icon: Crown,
   },
   {
@@ -107,29 +107,29 @@ const monthlyPerksData: MonthlyPerk[] = [
   },
   {
     id: 6,
-    title: "February Trends Unlocked",
-    description: "All members get complimentary access to our latest consumer sentiment reports this month. Explore what's shaping your industry.",
+    title: "March Trends Unlocked",
+    description: "All members get complimentary access to our latest consumer sentiment and category reports this month. See what's shaping your market right now.",
     eligibility: "All members",
     ctaText: "Explore Trends",
     icon: BookOpen,
   },
 ];
 
-const marchTeasers: MarchTeaser[] = [
+const aprilTeasers: MarchTeaser[] = [
   {
-    title: "Quarterly Research Sprint",
-    hint: "A structured package for companies planning Q2 campaigns...",
-    availableDate: "1 March",
+    title: "New Product Pipeline Tracker",
+    hint: "A structured innovation research programme designed to pressure-test your Q3 pipeline...",
+    availableDate: "1 April",
   },
   {
-    title: "Insights Masterclass",
-    hint: "Exclusive live session with Innovatr's research leads...",
-    availableDate: "1 March",
+    title: "Scale Team Package",
+    hint: "Something built for organisations running research across multiple teams or markets...",
+    availableDate: "1 April",
   },
   {
-    title: "Team Expansion Offer",
-    hint: "Something special for growing research teams...",
-    availableDate: "1 March",
+    title: "Brand Pulse Check-In",
+    hint: "A quarterly pulse study — fast, focused, and built around what matters to your brand...",
+    availableDate: "1 April",
   },
 ];
 
@@ -250,7 +250,7 @@ export default function MemberDeals() {
       <div className="p-6 max-w-7xl mx-auto space-y-8">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Badge variant="outline" className="text-xs font-normal">February 2026</Badge>
+            <Badge variant="outline" className="text-xs font-normal">March 2026</Badge>
           </div>
           <h1 className="text-4xl font-serif font-bold mb-2 flex items-center gap-3">
             <Gift className="w-10 h-10 text-primary" />
@@ -264,7 +264,7 @@ export default function MemberDeals() {
         {/* Exclusive Offers with Scarcity */}
         <div>
           <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
-            <h2 className="text-2xl font-serif font-bold">February Exclusives</h2>
+            <h2 className="text-2xl font-serif font-bold">March Exclusives</h2>
             <Badge variant="secondary" className="text-xs">
               Only 3 spots per offer
             </Badge>
@@ -337,7 +337,7 @@ export default function MemberDeals() {
 
         {/* Monthly Member Perks */}
         <div>
-          <h2 className="text-2xl font-serif font-bold mb-4">February Perks</h2>
+          <h2 className="text-2xl font-serif font-bold mb-4">March Perks</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {monthlyPerksData.map((perk) => (
               <Card
@@ -377,20 +377,20 @@ export default function MemberDeals() {
           </div>
         </div>
 
-        {/* March Preview - Teaser Cards */}
+        {/* April Preview - Teaser Cards */}
         <div>
           <div className="flex items-center gap-3 mb-4 flex-wrap">
-            <h2 className="text-2xl font-serif font-bold">March Offer Drop</h2>
+            <h2 className="text-2xl font-serif font-bold">April Offer Drop</h2>
             <Badge variant="outline" className="text-xs font-normal">
               Preview
             </Badge>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {marchTeasers.map((teaser, index) => (
+            {aprilTeasers.map((teaser, index) => (
               <Card
                 key={index}
                 className="relative border-dashed"
-                data-testid={`march-teaser-${index}`}
+                data-testid={`april-teaser-${index}`}
               >
                 <div className="absolute inset-0 bg-card/60 backdrop-blur-[2px] rounded-lg z-10 flex items-center justify-center">
                   <div className="text-center space-y-2 px-4">
