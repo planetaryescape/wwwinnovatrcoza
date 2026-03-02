@@ -100,7 +100,7 @@ const monthlyPerksData: MonthlyPerk[] = [
   {
     id: 5,
     title: "Refer a Company",
-    description: "Know a business that could benefit from Test24? Refer them and receive 1 free Basic credit when they sign up and run their first study.",
+    description: "Know a business that could benefit from Test24? Refer them and receive 3 free Basic credits when they sign up and run their first study.",
     eligibility: "All members",
     ctaText: "Get Referral Link",
     icon: Users,
