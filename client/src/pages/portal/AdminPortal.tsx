@@ -5,13 +5,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PortalLayout from "./PortalLayout";
 import AdminOrders from "./AdminOrders";
 import AdminReports from "./AdminReports";
-import AdminDeals from "./AdminDeals";
 import AdminCompanies from "./AdminCompanies";
 import AdminMembers from "./AdminMembers";
 import AdminBriefs from "./AdminBriefs";
 import AdminOverview from "./AdminOverview";
 
-const VALID_TABS = ["overview", "companies", "orders", "briefs", "members", "reports", "offers"];
+const VALID_TABS = ["overview", "companies", "orders", "briefs", "members", "reports"];
 
 export default function AdminPortal() {
   const [location, setLocation] = useLocation();
@@ -63,14 +62,13 @@ export default function AdminPortal() {
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview" data-testid="tab-admin-overview">Overview</TabsTrigger>
             <TabsTrigger value="companies" data-testid="tab-admin-companies">Companies</TabsTrigger>
             <TabsTrigger value="orders" data-testid="tab-admin-orders">Orders</TabsTrigger>
             <TabsTrigger value="briefs" data-testid="tab-admin-briefs">Briefs</TabsTrigger>
             <TabsTrigger value="members" data-testid="tab-admin-members">Members</TabsTrigger>
             <TabsTrigger value="reports" data-testid="tab-admin-reports">Reports</TabsTrigger>
-            <TabsTrigger value="offers" data-testid="tab-admin-offers">Offers</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -97,9 +95,6 @@ export default function AdminPortal() {
             <AdminReports />
           </TabsContent>
 
-          <TabsContent value="offers">
-            <AdminDeals />
-          </TabsContent>
         </Tabs>
       </div>
     </PortalLayout>
