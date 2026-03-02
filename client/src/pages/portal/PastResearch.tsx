@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import PortalLayout from "./PortalLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -121,6 +122,16 @@ export default function PastResearch() {
   const [, setTimeNow] = useState(Date.now());
   const [viewingCompany, setViewingCompany] = useState<{ id: string; name: string } | null>(null);
   
+  // Edit study state (for live/in-progress Test24 studies)
+  const [editStudyOpen, setEditStudyOpen] = useState(false);
+  const [editingStudy, setEditingStudy] = useState<Study | null>(null);
+  const [savingStudy, setSavingStudy] = useState(false);
+  const [studyStatusForm, setStudyStatusForm] = useState({
+    status: "" as Study["status"] | "",
+    reportUrl: "",
+    sendNotification: true,
+  });
+
   // Edit report state
   const [editReportOpen, setEditReportOpen] = useState(false);
   const [editingReport, setEditingReport] = useState<ClientReport | null>(null);
@@ -438,6 +449,44 @@ export default function PastResearch() {
       toast({ title: "Error", description: "Failed to delete report", variant: "destructive" });
     } finally {
       setDeletingReport(false);
+    }
+  };
+
+  const handleEditStudy = (study: Study) => {
+    setEditingStudy(study);
+    setStudyStatusForm({
+      status: study.status,
+      reportUrl: study.reportUrl || "",
+      sendNotification: true,
+    });
+    setEditStudyOpen(true);
+  };
+
+  const handleSaveStudy = async () => {
+    if (!editingStudy || !studyStatusForm.status) return;
+    setSavingStudy(true);
+    try {
+      const body: Record<string, unknown> = {
+        status: studyStatusForm.status,
+        sendNotification: studyStatusForm.sendNotification,
+      };
+      if (studyStatusForm.status === "COMPLETED" && studyStatusForm.reportUrl) {
+        body.reportUrl = studyStatusForm.reportUrl;
+      }
+      const response = await fetch(`/api/admin/studies/${editingStudy.id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) throw new Error("Failed to update study status");
+      toast({ title: "Study updated", description: `Status changed to ${studyStatusForm.status === "COMPLETED" ? "Completed" : studyStatusForm.status === "ANALYSING_DATA" ? "Analysing Data" : studyStatusForm.status === "AUDIENCE_LIVE" ? "Audience Live" : "New"}` });
+      setEditStudyOpen(false);
+      setEditingStudy(null);
+      fetchData();
+    } catch (err) {
+      toast({ title: "Error", description: "Failed to update study status", variant: "destructive" });
+    } finally {
+      setSavingStudy(false);
     }
   };
 
@@ -816,6 +865,19 @@ export default function PastResearch() {
                                   ))}
                                 </div>
                               </div>
+                              {isAdmin && (
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditStudy(study);
+                                  }}
+                                  data-testid={`button-edit-study-${study.id}`}
+                                >
+                                  <Edit className="w-3.5 h-3.5" />
+                                </Button>
+                              )}
                             </div>
                           </CardContent>
                         </Card>
@@ -1662,6 +1724,96 @@ export default function PastResearch() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {/* Study Status Dialog (admin only) */}
+      <Dialog open={editStudyOpen} onOpenChange={setEditStudyOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Update Study Status</DialogTitle>
+            <DialogDescription>
+              {editingStudy?.title} &mdash; {editingStudy?.companyName}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-5 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="study-status">Status</Label>
+              <Select
+                value={studyStatusForm.status}
+                onValueChange={(val) =>
+                  setStudyStatusForm({ ...studyStatusForm, status: val as Study["status"] })
+                }
+              >
+                <SelectTrigger id="study-status" data-testid="select-study-status">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NEW">Submitted — awaiting launch</SelectItem>
+                  <SelectItem value="AUDIENCE_LIVE">Fieldwork Live — audience active</SelectItem>
+                  <SelectItem value="ANALYSING_DATA">Analysing Data — fieldwork closed</SelectItem>
+                  <SelectItem value="COMPLETED">Completed — results ready</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {studyStatusForm.status === "COMPLETED" && (
+              <div className="grid gap-2">
+                <Label htmlFor="study-reportUrl">Report URL (optional)</Label>
+                <Input
+                  id="study-reportUrl"
+                  placeholder="https://..."
+                  value={studyStatusForm.reportUrl}
+                  onChange={(e) =>
+                    setStudyStatusForm({ ...studyStatusForm, reportUrl: e.target.value })
+                  }
+                  data-testid="input-study-reportUrl"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Link to the delivered report or Upsiide dashboard for this study.
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-start gap-3 rounded-md border p-3">
+              <Checkbox
+                id="study-notify"
+                checked={studyStatusForm.sendNotification}
+                onCheckedChange={(checked) =>
+                  setStudyStatusForm({ ...studyStatusForm, sendNotification: !!checked })
+                }
+                data-testid="checkbox-study-notify"
+              />
+              <div className="grid gap-0.5">
+                <Label htmlFor="study-notify" className="cursor-pointer">
+                  Send email notification to client
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {studyStatusForm.status === "AUDIENCE_LIVE"
+                    ? 'Sends a "Your fieldwork is live" notification to the client.'
+                    : studyStatusForm.status === "COMPLETED"
+                    ? 'Sends a "Your results are ready" notification to the client.'
+                    : "An email will be sent to the client about this status change."}
+                </p>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditStudyOpen(false)} data-testid="button-cancel-study-edit">
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveStudy}
+              disabled={savingStudy || !studyStatusForm.status}
+              data-testid="button-save-study-status"
+            >
+              {savingStudy ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4 mr-2" />
+              )}
+              {studyStatusForm.status === "COMPLETED" ? "Mark as Complete" : "Save Status"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PortalLayout>
   );
 }
