@@ -86,6 +86,12 @@ export default function Footer() {
             </ul>
           </div>
         </div>
+        <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
+          <p>© {new Date().getFullYear()} Innovatr (Pty) Ltd. All rights reserved.</p>
+          <Link href="/privacy-policy" className="hover:text-gray-300 transition-colors" data-testid="link-privacy-policy">
+            Privacy Policy
+          </Link>
+        </div>
       </div>
     </footer>
   );

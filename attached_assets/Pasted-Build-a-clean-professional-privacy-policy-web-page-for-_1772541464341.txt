@@ -1,0 +1,42 @@
+Build a clean, professional privacy policy web page for a company called Innovatr (www.innovatr.co.za). The page should match their brand identity exactly as described below.
+Brand Identity:
+
+Primary colour: Deep navy #2D2A6E
+Accent colour: Coral/orange #E8533A
+Secondary accent: Teal #2EC4B6
+Yellow highlight: #F5C842
+Background: White or very light grey #F4F6FB
+Font: Modern sans-serif (use Inter or similar Google Font)
+Tone: Professional, clean, minimal — startup meets enterprise
+
+Page Requirements:
+
+Responsive — mobile and desktop
+Sticky header with Innovatr logo text and nav link back to www.innovatr.co.za
+Hero section with headline "Privacy Policy" and last updated date (March 2026)
+Clean section-by-section layout with left coral border accents on each section heading
+Smooth scroll
+Footer with copyright, website link and contact email richard@innovatr.co.za
+
+Privacy Policy Sections to include:
+
+Introduction — who we are, what this policy covers
+Information We Collect — name, email, company, job title via lead gen forms and website
+How We Use Your Information — to schedule demos, send relevant communications, improve our services
+LinkedIn Lead Gen Forms — specific mention that data collected via LinkedIn ads is used solely for demo booking and follow-up
+Data Storage & Security — how data is stored and protected
+Third Party Services — LinkedIn, CRM tools
+Your Rights — access, correction, deletion of personal data (POPIA compliant — South African law)
+Cookies — basic cookie usage on the website
+Contact Us — richard@innovatr.co.za | www.innovatr.co.za
+
+Important compliance note: This policy must reference POPIA (Protection of Personal Information Act) — South Africa's data protection law — as the governing framework. This is not GDPR. Make it clear data is handled in accordance with POPIA.
+Design details:
+
+Each section has a numbered heading in navy with a coral left border
+Section body text in dark grey #333333
+Subtle dividers between sections
+CTA button at the bottom linking to richard@innovatr.co.za styled in coral
+No stock images — clean text-only layout with strong typography hierarchy
+
+Output a single complete HTML file with all CSS and JavaScript inline. No external dependencies except Google Fonts.
