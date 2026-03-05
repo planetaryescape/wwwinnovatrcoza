@@ -142,6 +142,10 @@ app.use((req, res, next) => {
   const firstRun = new Date(Date.now() + msUntilFirst);
   log(`Report scheduler started (runs at 5am and 5pm, next: ${firstRun.toLocaleString()})`);
 
+  // In-process dedup guard: tracks the UTC date of the last successful digest send.
+  // Prevents the same process from firing twice if the timer is somehow called again.
+  let lastDigestSentDate: string | null = null;
+
   // Daily admin digest email scheduler - runs at 4pm weekdays (SAST / server time)
   function getMillisecondsUntilNext4pm(): number {
     const now = new Date();
@@ -163,6 +167,27 @@ app.use((req, res, next) => {
   async function runDailyDigest() {
     try {
       const now = new Date();
+
+      // ── Layer 1: in-process dedup ──────────────────────────────────────────
+      // Guards against the same Node process calling this twice (edge case).
+      const todayUTC = now.toISOString().slice(0, 10);
+      if (lastDigestSentDate === todayUTC) {
+        log("Daily digest already sent today (in-process guard), skipping.");
+        return;
+      }
+
+      // ── Layer 2: cross-process DB dedup ───────────────────────────────────
+      // Guards against two overlapping processes (e.g. tsx hot-restart) both
+      // firing near 4 pm. We write a sentinel activity event after a successful
+      // send and check for it before sending.
+      const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+      const recentAll = await storage.getActivityEventsSince(twelveHoursAgo);
+      const alreadySentInDB = recentAll.some(e => e.actionType === "digest_sent");
+      if (alreadySentInDB) {
+        log("Daily digest already sent today (DB guard), skipping.");
+        return;
+      }
+
       const dayOfWeek = now.getDay();
       const isMonday = dayOfWeek === 1;
       
@@ -182,25 +207,42 @@ app.use((req, res, next) => {
       const companyMap = new Map(allCompanies.map(c => [c.id, c.name]));
       
       const adminUserIds = new Set(allUsers.filter(u => u.role === "ADMIN").map(u => u.id));
-      const events = allEvents.filter(e => !adminUserIds.has(e.userId));
+      // Also exclude the SYSTEM sentinel events from all user-facing stats
+      const events = allEvents.filter(e => !adminUserIds.has(e.userId) && e.userId !== "SYSTEM");
       
       const newUsers = allUsers.filter(u => u.createdAt && new Date(u.createdAt) >= since && u.role !== "ADMIN");
       
       const loginEvents = events.filter(e => e.actionType === "login");
       const uniqueLoginUserIds = new Set(loginEvents.map(e => e.userId));
-      
-      const companyActivity = Array.from(new Set(events.filter(e => e.companyId).map(e => e.companyId!)))
+
+      // ── T002 fix: resolve null companyId via user record ──────────────────
+      // Login events (and some other early events) may have companyId = null
+      // if the user was added to a company after their first login. Build a
+      // fallback lookup from the already-fetched users list (no extra DB call).
+      const userToCompany = new Map(
+        allUsers.filter(u => u.companyId).map(u => [u.id, u.companyId!])
+      );
+
+      // Enrich each event with an effectiveCompanyId (stored value takes priority)
+      const enrichedEvents = events.map(e => ({
+        ...e,
+        effectiveCompanyId: e.companyId ?? userToCompany.get(e.userId) ?? null,
+      }));
+
+      const companyActivity = Array.from(
+        new Set(enrichedEvents.filter(e => e.effectiveCompanyId).map(e => e.effectiveCompanyId!))
+      )
         .map(cId => ({
           companyName: companyMap.get(cId) ?? "Unknown",
-          totalActions: events.filter(e => e.companyId === cId).length,
-          uniqueUsers: new Set(events.filter(e => e.companyId === cId).map(e => e.userId)).size,
+          totalActions: enrichedEvents.filter(e => e.effectiveCompanyId === cId).length,
+          uniqueUsers: new Set(enrichedEvents.filter(e => e.effectiveCompanyId === cId).map(e => e.userId)).size,
         }))
         .sort((a, b) => b.totalActions - a.totalActions);
       
-      const recentEvents = events.slice(0, 30).map(e => ({
+      const recentEvents = enrichedEvents.slice(0, 30).map(e => ({
         userName: userMap.get(e.userId)?.name ?? "Unknown",
         userEmail: userMap.get(e.userId)?.email ?? "",
-        companyName: e.companyId ? companyMap.get(e.companyId) ?? "" : "",
+        companyName: e.effectiveCompanyId ? companyMap.get(e.effectiveCompanyId) ?? "" : "",
         actionType: e.actionType,
         entityName: e.entityName,
         createdAt: e.createdAt instanceof Date ? e.createdAt.toISOString() : String(e.createdAt),
@@ -239,6 +281,14 @@ app.use((req, res, next) => {
         companyActivity,
         recentEvents,
       });
+
+      // Mark as sent — both in-process and in DB
+      lastDigestSentDate = todayUTC;
+      storage.createActivityEvent({
+        userId: "SYSTEM",
+        companyId: null,
+        actionType: "digest_sent",
+      }).catch(err => console.error("Failed to record digest_sent sentinel:", err));
       
       log(`Daily admin digest sent for period: ${periodLabel}`);
     } catch (err) {
