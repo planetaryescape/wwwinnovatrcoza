@@ -1,3 +1,4 @@
+import PulseKanban from "@/components/PulseKanban";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -95,13 +96,15 @@ interface User {
   email: string;
   phone: string | null;
   name: string;
+  surname?: string | null;
   role: string;
   membershipTier: string;
-  memberType: string; // 'companyUser' or 'independent'
+  memberType: string;
   companyId: string | null;
   createdAt: string;
   updatedAt?: string;
   pulseSubscribed?: boolean;
+  pulseIndustry?: string | null;
 }
 
 interface Company {
@@ -111,6 +114,7 @@ interface Company {
   basicCreditsUsed?: number;
   proCreditsTotal?: number;
   proCreditsUsed?: number;
+  pulseIndustry?: string | null;
 }
 
 interface Study {
@@ -806,13 +810,14 @@ export default function AdminMembers() {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Mail className="w-5 h-5 text-[#5865F2]" />
-            Pulse Insights Newsletter Subscribers
+            Pulse Subscribers
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
             All {pulseCount} subscribers to the Pulse Insights newsletter, including non-members.
           </p>
+
           {pulseSubscribers.length === 0 ? (
             <div className="text-center py-4">
               <p className="text-muted-foreground">No newsletter subscribers yet</p>
@@ -856,6 +861,30 @@ export default function AdminMembers() {
               </Table>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Mail className="w-5 h-5 text-[#5865F2]" />
+            Pulse Industry Sorter
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            Drag members and companies into the appropriate industry column. This determines which mailer lists they belong to.
+          </p>
+          <PulseKanban
+            companies={companies}
+            members={members.map((m) => ({
+              id: m.id,
+              name: m.name,
+              surname: m.surname ?? null,
+              companyId: m.companyId ?? null,
+              pulseIndustry: m.pulseIndustry ?? null,
+            }))}
+          />
         </CardContent>
       </Card>
 

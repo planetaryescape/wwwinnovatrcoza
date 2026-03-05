@@ -91,6 +91,29 @@ app.use((req, res, next) => {
     log(`serving on port ${port}`);
   });
 
+  // Idempotent: create solo companies for Shakira and Claire Braithwaite if they lack one
+  (async () => {
+    try {
+      const allUsers = await storage.getAllUsers();
+      const soloTargets = allUsers.filter(
+        (u) =>
+          !u.companyId &&
+          u.name &&
+          (u.name.toLowerCase().includes("shakira") ||
+            u.name.toLowerCase().includes("claire braithwaite") ||
+            (u.name.toLowerCase().includes("claire") && u.surname?.toLowerCase().includes("braithwaite")))
+      );
+      for (const u of soloTargets) {
+        const displayName = [u.name, u.surname].filter(Boolean).join(" ") || u.email;
+        const newCompany = await storage.createCompany({ name: displayName, tier: "FREE" });
+        await storage.updateUser(u.id, { companyId: newCompany.id, memberType: "companyUser" });
+        log(`Created solo company "${displayName}" for user ${u.email}`);
+      }
+    } catch (err) {
+      console.error("Failed to seed solo companies:", err);
+    }
+  })();
+
   // Run scheduled report publishing on startup
   storage.processScheduledReports().then((result) => {
     if (result.published > 0 || result.unpublished > 0) {

@@ -2885,6 +2885,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  const PULSE_INDUSTRIES = ["food", "bev", "financial", "beauty", "health", "other", null];
+
+  app.patch("/api/admin/companies/:id/pulse-industry", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const { industry } = req.body;
+      if (industry !== null && !PULSE_INDUSTRIES.includes(industry)) {
+        return res.status(400).json({ error: "Invalid industry value" });
+      }
+      const company = await storage.getCompany(id);
+      if (!company) return res.status(404).json({ error: "Company not found" });
+      await storage.updateCompany(id, { pulseIndustry: industry ?? null });
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/admin/users/:id/pulse-industry", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const { industry } = req.body;
+      if (industry !== null && !PULSE_INDUSTRIES.includes(industry)) {
+        return res.status(400).json({ error: "Invalid industry value" });
+      }
+      const user = await storage.getUser(id);
+      if (!user) return res.status(404).json({ error: "User not found" });
+      await storage.updateUser(id, { pulseIndustry: industry ?? null });
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
   app.get("/api/admin/companies/:id/users", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;

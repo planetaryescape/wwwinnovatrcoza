@@ -46,6 +46,7 @@ export const users = pgTable("users", {
   isActive: boolean("is_active").notNull().default(true),
   emailVerified: boolean("email_verified").notNull().default(false),
   pulseSubscribed: boolean("pulse_subscribed").notNull().default(true),
+  pulseIndustry: text("pulse_industry"),
   trendsLastSeenAt: timestamp("trends_last_seen_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -347,6 +348,7 @@ export const companies = pgTable("companies", {
   companySize: text("company_size"),
   dealDetails: jsonb("deal_details"),
   notes: text("notes"),
+  pulseIndustry: text("pulse_industry"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
