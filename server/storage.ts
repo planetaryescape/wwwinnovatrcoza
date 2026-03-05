@@ -79,7 +79,7 @@ import {
   insightMailers,
   adminPreferences,
 } from "@shared/schema";
-import { eq, and, lte, gte, desc, sql } from "drizzle-orm";
+import { eq, and, lte, gte, desc, sql, or, inArray } from "drizzle-orm";
 import { db } from "./db";
 import { randomUUID } from "crypto";
 import { hashPassword } from "./auth/password";
@@ -1875,11 +1875,34 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getActivityEventsByCompany(companyId: string, from: Date, to: Date): Promise<ActivityEvent[]> {
+    // Fetch all user IDs belonging to this company so we can also catch events
+    // that were stored with a null companyId (e.g. login events logged before the
+    // user was assigned to a company, or early sessions).
+    const companyUsers = await db.select({ id: users.id })
+      .from(users)
+      .where(eq(users.companyId, companyId));
+    const userIds = companyUsers.map(u => u.id);
+
+    const timeFilter = and(
+      gte(activityEvents.createdAt, from),
+      lte(activityEvents.createdAt, to),
+    );
+
+    if (userIds.length === 0) {
+      // No users in company — just use companyId filter
+      return db.select().from(activityEvents)
+        .where(and(eq(activityEvents.companyId, companyId), timeFilter!))
+        .orderBy(desc(activityEvents.createdAt));
+    }
+
+    // Match by companyId OR by userId (handles events with null/missing companyId)
     return db.select().from(activityEvents)
       .where(and(
-        eq(activityEvents.companyId, companyId),
-        gte(activityEvents.createdAt, from),
-        lte(activityEvents.createdAt, to),
+        or(
+          eq(activityEvents.companyId, companyId),
+          inArray(activityEvents.userId, userIds),
+        ),
+        timeFilter!,
       ))
       .orderBy(desc(activityEvents.createdAt));
   }

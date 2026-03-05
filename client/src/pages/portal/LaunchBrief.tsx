@@ -751,6 +751,7 @@ export default function LaunchBrief() {
   const [, setLocationHook] = useLocation();
   const queryClient = useQueryClient();
   const [selectedBrief, setSelectedBrief] = useState<BriefType>(null);
+  const [billingManuallySet, setBillingManuallySet] = useState(false);
   const [consumerReach, setConsumerReach] = useState<number>(100);
   const [proCustomInput, setProCustomInput] = useState<string>("100");
   const [additionalFiles, setAdditionalFiles] = useState<File[]>([]);
@@ -814,6 +815,35 @@ export default function LaunchBrief() {
       }));
     }
   }, [user, company]);
+
+  // Auto-select billing method based on credit availability.
+  // Skipped entirely if the user has already made a manual selection.
+  // - has credits for this study type → "credits"
+  // - no credits (or too many concepts) → "invoice" (better default than "online" for members)
+  useEffect(() => {
+    if (billingManuallySet) return;
+    if (!selectedBrief) return; // wait until the user has picked a study type
+
+    const basicRem = company ? getBasicCreditsRemaining(company) : 0;
+    const proRem   = company ? getProCreditsRemaining(company)   : 0;
+    const avail    = selectedBrief === "basic" ? basicRem : proRem;
+    const needed   = concepts.length;
+
+    // Auto-select "credits" when company has credits and they cover the current concept count
+    // (avail > 0 handles the 0-concept case so the radio is pre-selected on form open)
+    if (avail > 0 && avail >= needed) {
+      setFormData(prev => ({ ...prev, billingPreference: "credits" }));
+    } else {
+      // Only revert to invoice if we previously auto-selected credits; leave
+      // "online" / "credits_plus_payment" untouched if the user chose them.
+      setFormData(prev => {
+        if (prev.billingPreference === "credits" || prev.billingPreference === "invoice") {
+          return { ...prev, billingPreference: "invoice" };
+        }
+        return prev;
+      });
+    }
+  }, [selectedBrief, concepts.length, company, billingManuallySet]);
 
   // Credit calculations
   const basicCreditsRemaining = company ? getBasicCreditsRemaining(company) : 0;
@@ -2209,11 +2239,20 @@ export default function LaunchBrief() {
             <CardTitle>Billing Preferences</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {hasEnoughCredits && formData.billingPreference === "credits" && (
+              <div
+                className="bg-primary/5 border border-primary/20 rounded-md p-3 text-sm text-foreground"
+                data-testid="banner-credits-auto-selected"
+              >
+                <strong>{creditsRequired} Test24 {requiredCreditsType} credit{creditsRequired !== 1 ? "s" : ""}</strong> will be automatically deducted from your company balance ({availableCreditsForStudy} available).
+              </div>
+            )}
             <RadioGroup
               value={formData.billingPreference}
-              onValueChange={(value: BillingPreference) => 
-                setFormData({ ...formData, billingPreference: value })
-              }
+              onValueChange={(value: BillingPreference) => {
+                setBillingManuallySet(true);
+                setFormData({ ...formData, billingPreference: value });
+              }}
               className="space-y-4"
             >
               <div className="flex items-start space-x-3">

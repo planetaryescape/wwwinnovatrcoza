@@ -4141,6 +4141,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         console.log(`Credits deducted for company ${validated.companyId}: Basic ${finalBasicCreditsUsed}, Pro ${finalProCreditsUsed}`);
+      } else if (validated.paymentMethod === "invoice" && validated.companyId) {
+        // Auto-deduct credits for invoice-billed briefs when the company has a
+        // sufficient pre-purchased credit balance.  Online (PayFast) payments are
+        // excluded — those are cash transactions, not credit consumption.
+        companyIdStr = String(validated.companyId);
+        const invoiceCompany = await storage.getCompany(companyIdStr);
+
+        if (invoiceCompany) {
+          const basicAvailable = (invoiceCompany.basicCreditsTotal || 0) - (invoiceCompany.basicCreditsUsed || 0);
+          const proAvailable   = (invoiceCompany.proCreditsTotal   || 0) - (invoiceCompany.proCreditsUsed   || 0);
+
+          const hasSufficientCredits = isBasicStudy
+            ? basicAvailable >= creditsRequired
+            : proAvailable   >= creditsRequired;
+
+          if (hasSufficientCredits) {
+            if (isBasicStudy) {
+              finalBasicCreditsUsed = creditsRequired;
+            } else {
+              finalProCreditsUsed = creditsRequired;
+            }
+
+            const newBasicUsed = (invoiceCompany.basicCreditsUsed || 0) + finalBasicCreditsUsed;
+            const newProUsed   = (invoiceCompany.proCreditsUsed   || 0) + finalProCreditsUsed;
+
+            await storage.updateCompany(companyIdStr, {
+              basicCreditsUsed: newBasicUsed,
+              proCreditsUsed:   newProUsed,
+            });
+
+            if (finalBasicCreditsUsed > 0) {
+              const basicRemaining = (invoiceCompany.basicCreditsTotal || 0) - newBasicUsed;
+              await storage.createCreditLedgerEntry({
+                companyId: companyIdStr,
+                creditType: "basic",
+                transactionType: "use",
+                amount: -finalBasicCreditsUsed,
+                balanceAfter: basicRemaining,
+                description: `Brief launch (invoice billing): ${validated.studyType} study (${creditsRequired} concept${creditsRequired > 1 ? "s" : ""})`,
+                userId: validated.userId || null,
+              });
+            }
+            if (finalProCreditsUsed > 0) {
+              const proRemaining = (invoiceCompany.proCreditsTotal || 0) - newProUsed;
+              await storage.createCreditLedgerEntry({
+                companyId: companyIdStr,
+                creditType: "pro",
+                transactionType: "use",
+                amount: -finalProCreditsUsed,
+                balanceAfter: proRemaining,
+                description: `Brief launch (invoice billing): ${validated.studyType} study (${creditsRequired} concept${creditsRequired > 1 ? "s" : ""})`,
+                userId: validated.userId || null,
+              });
+            }
+
+            console.log(`Credits auto-deducted (invoice) for company ${companyIdStr}: Basic ${finalBasicCreditsUsed}, Pro ${finalProCreditsUsed}`);
+          }
+          // Insufficient credits on invoice path → no error, billing proceeds normally
+        }
       }
 
       // Determine if this is an online payment that needs checkout redirect
