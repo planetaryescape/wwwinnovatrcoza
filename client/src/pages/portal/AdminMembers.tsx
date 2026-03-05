@@ -59,9 +59,9 @@ import {
   Activity,
   Download,
   FileText,
-  CreditCard,
   Trash2,
   UserPlus,
+  UserX,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Label } from "@/components/ui/label";
@@ -568,12 +568,12 @@ export default function AdminMembers() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <CreditCard className="w-5 h-5 text-green-600 dark:text-green-400" />
+              <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800/30 flex items-center justify-center">
+                <UserX className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{activePayments}</p>
-                <p className="text-xs text-muted-foreground">Active Payments</p>
+                <p className="text-2xl font-bold">{tierCounts.FREE}</p>
+                <p className="text-xs text-muted-foreground">Free Members</p>
               </div>
             </div>
           </CardContent>
