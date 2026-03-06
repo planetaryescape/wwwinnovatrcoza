@@ -215,17 +215,19 @@ app.use((req, res, next) => {
         },
       ];
 
+      const MAILER_SLUGS = new Set(["cash-is-king-again", "township-beauty-economy", "clinic-vs-clicks-vs-creator", "price-memory-is-brutal"]);
+
       for (const r of newReports) {
         if (!existingSlugs.has(r.slug)) {
           await storage.createReport({
             ...r,
             date: new Date(),
-            status: "published",
+            status: MAILER_SLUGS.has(r.slug) ? "draft" : "published",
             isFeatured: true,
             accessLevel: "member",
             isArchived: false,
           });
-          log(`Seeded report: "${r.title}"`);
+          log(`Seeded report: "${r.title}" (${MAILER_SLUGS.has(r.slug) ? "draft — publishes on send" : "published"})`);
         }
       }
     } catch (err) {
@@ -354,6 +356,23 @@ app.use((req, res, next) => {
         for (const m of due) {
           await storage.updateInsightMailer(m.id, { status: "sent" });
         }
+
+        // Auto-publish the associated reports now that the mailers have been sent
+        const INDUSTRY_SLUG_MAP: Record<string, string> = {
+          financial: "cash-is-king-again",
+          beauty: "township-beauty-economy",
+          health: "clinic-vs-clicks-vs-creator",
+          food: "price-memory-is-brutal",
+        };
+        const allReports = await storage.getAllReports();
+        for (const [, slug] of Object.entries(INDUSTRY_SLUG_MAP)) {
+          const report = allReports.find((r) => r.slug === slug);
+          if (report && report.status === "draft") {
+            await storage.updateReport(report.id, { status: "published" });
+            log(`Published report: "${report.title}"`);
+          }
+        }
+
         log(`Industry batch mailer complete. ${seenEmails.size} unique recipients.`);
       }
     } catch (err) {

@@ -2620,6 +2620,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Auto-publish the associated reports now that the mailers have been sent
+      const INDUSTRY_SLUG_MAP: Record<string, string> = {
+        financial: "cash-is-king-again",
+        beauty: "township-beauty-economy",
+        health: "clinic-vs-clicks-vs-creator",
+        food: "price-memory-is-brutal",
+      };
+      const allReports = await storage.getAllReports();
+      for (const [, slug] of Object.entries(INDUSTRY_SLUG_MAP)) {
+        const report = allReports.find((r) => r.slug === slug);
+        if (report && report.status === "draft") {
+          await storage.updateReport(report.id, { status: "published" });
+        }
+      }
+
       res.json({ success: true, sent: totalSent, skipped: totalSkipped, byIndustry: summary });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
