@@ -127,7 +127,7 @@ app.use((req, res, next) => {
           industry: "alcohol",
           industryTag: "bev",
           date: new Date(),
-          status: "published",
+          status: "draft",
           isFeatured: true,
           accessLevel: "member",
           teaser: "Drinking occasions are shifting into the home. Consumers are going out less often, but upgrading the quality of their at-home social moments.",
@@ -363,6 +363,7 @@ app.use((req, res, next) => {
           beauty: "township-beauty-economy",
           health: "clinic-vs-clicks-vs-creator",
           food: "price-memory-is-brutal",
+          bev: "home-is-the-new-bar",
         };
         const allReports = await storage.getAllReports();
         for (const [, slug] of Object.entries(INDUSTRY_SLUG_MAP)) {

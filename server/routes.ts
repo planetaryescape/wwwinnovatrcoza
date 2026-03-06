@@ -2626,6 +2626,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         beauty: "township-beauty-economy",
         health: "clinic-vs-clicks-vs-creator",
         food: "price-memory-is-brutal",
+        bev: "home-is-the-new-bar",
       };
       const allReports = await storage.getAllReports();
       for (const [, slug] of Object.entries(INDUSTRY_SLUG_MAP)) {
