@@ -1643,4 +1643,182 @@ export async function sendDailyAdminDigest(data: {
   }
 }
 
+export async function sendPulseMailer(to: string) {
+  const resend = await getResendClient();
+  const fromEmail = await getFromEmail();
+
+  const baseUrl = process.env.REPLIT_DEV_DOMAIN
+    ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+    : FRONTEND_URL;
+
+  const portalUrl = `${baseUrl}/portal/insights/home-is-the-new-bar`;
+  const heroImageUrl = `${baseUrl}/reports/home-is-the-new-bar.jpg`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pulse Bev | Innovatr</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
+  <!-- Pre-header -->
+  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;color:#f4f4f5;">
+    The bar hasn't disappeared. It's just moved into the living room. &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
+
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f5;">
+    <tr>
+      <td align="center" style="padding:24px 16px;">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+
+          <!-- Top label bar -->
+          <tr>
+            <td style="background-color:${BRAND_COLOR};padding:10px 24px;">
+              <span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Pulse Bev &nbsp;·&nbsp; Innovatr Market Intelligence</span>
+            </td>
+          </tr>
+
+          <!-- Hero image -->
+          <tr>
+            <td style="padding:0;line-height:0;">
+              <img src="${heroImageUrl}" alt="Home Is the New Bar" width="600" style="display:block;width:100%;max-width:600px;height:auto;" />
+            </td>
+          </tr>
+
+          <!-- Title block -->
+          <tr>
+            <td style="padding:32px 32px 8px;">
+              <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${BRAND_COLOR};">Industry Insight · Beverages</p>
+              <h1 style="margin:0 0 12px;font-size:26px;font-weight:800;color:#0f0f11;line-height:1.25;">Home Is the New Bar<br /><span style="font-style:italic;font-weight:600;">(Again, But Smarter)</span></h1>
+              <p style="margin:0;font-size:16px;color:#444;line-height:1.5;font-weight:500;">South Africans aren't going out less. They're drinking differently.</p>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr><td style="padding:16px 32px 0;"><hr style="border:none;border-top:1px solid #eee;margin:0;" /></td></tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:24px 32px 0;">
+              <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">For years, alcohol culture revolved around going out — bars, restaurants, events, social occasions built around venues.</p>
+              <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">But over the past few years, that behaviour has shifted. South Africans are still socialising. They're still drinking. But increasingly, they're doing it at home.</p>
+              <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">What started as a necessity during pandemic restrictions has quietly evolved into a lasting habit — one that is reshaping how alcohol brands are consumed and what it means to win an occasion.</p>
+            </td>
+          </tr>
+
+          <!-- Stats strip -->
+          <tr>
+            <td style="padding:24px 32px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8f9ff;border-radius:8px;overflow:hidden;">
+                <tr>
+                  <td width="33%" style="padding:20px 16px;text-align:center;border-right:1px solid #eaecf8;">
+                    <p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">72%</p>
+                    <p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">Occasions at home</p>
+                  </td>
+                  <td width="33%" style="padding:20px 16px;text-align:center;border-right:1px solid #eaecf8;">
+                    <p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">58%</p>
+                    <p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">Go out less often</p>
+                  </td>
+                  <td width="33%" style="padding:20px 16px;text-align:center;">
+                    <p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">47%</p>
+                    <p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">Host monthly</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- More body -->
+          <tr>
+            <td style="padding:0 32px 24px;">
+              <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">Frequency may be moderating. But the quality of the occasion is increasing. Consumers are actively upgrading the at-home experience — better glassware, better mixers, ice moulds, cocktail kits, carefully curated drinks selections.</p>
+              <p style="margin:0;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">For many brands, the mental model of drinking occasions still centres on venues. But when occasions move home, the role of the product changes. At a bar, the venue curates the experience. At home, the product becomes the experience.</p>
+            </td>
+          </tr>
+
+          <!-- Callout -->
+          <tr>
+            <td style="padding:0 32px 28px;">
+              <div style="border-left:4px solid ${BRAND_COLOR};background:#f5f6ff;padding:16px 20px;border-radius:0 6px 6px 0;">
+                <p style="margin:0;font-size:15px;color:#1a1a2e;line-height:1.6;font-style:italic;">"Brands that equip the host — not just the drinker — gain relevance. The real growth sits inside the occasion."</p>
+                <p style="margin:8px 0 0;font-size:12px;color:${BRAND_COLOR};font-weight:700;letter-spacing:0.5px;">— INNOVATR TAKEAWAY</p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Primary CTA -->
+          <tr>
+            <td style="padding:0 32px 12px;text-align:center;">
+              <a href="${portalUrl}" style="display:inline-block;background-color:${BRAND_COLOR};color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:6px;font-weight:700;font-size:15px;letter-spacing:0.3px;">Read Full Issue →</a>
+            </td>
+          </tr>
+
+          <!-- Download report card -->
+          <tr>
+            <td style="padding:12px 32px 32px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1.5px solid #e0e3f7;border-radius:8px;overflow:hidden;">
+                <tr>
+                  <td style="padding:20px 24px;">
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr>
+                        <td style="vertical-align:top;">
+                          <p style="margin:0 0 2px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${BRAND_COLOR};">Strategic Market Report</p>
+                          <p style="margin:0 0 12px;font-size:16px;font-weight:700;color:${TEXT_COLOR};line-height:1.3;">Home Is the New Bar<br />(Again, But Smarter)</p>
+                          <p style="margin:0 0 16px;font-size:13px;color:${MUTED_COLOR};line-height:1.5;">Full data, demographic analysis, spend reallocation models and brand strategy implications. Available exclusively for Pulse subscribers.</p>
+                          <a href="${portalUrl}" style="display:inline-block;background-color:#f5f6ff;color:${BRAND_COLOR};text-decoration:none;padding:10px 20px;border-radius:6px;font-weight:600;font-size:14px;border:1.5px solid ${BRAND_COLOR};">Download Report</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#fafafa;border-top:1px solid #eee;padding:20px 32px;text-align:center;">
+              <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#0f0f11;">Innovatr</p>
+              <p style="margin:0;font-size:12px;color:${MUTED_COLOR};line-height:1.6;">
+                You're receiving this as a Pulse Bev subscriber.&nbsp;&nbsp;|&nbsp;&nbsp;
+                <a href="mailto:hannah@innovatr.co.za?subject=Unsubscribe" style="color:${MUTED_COLOR};">Unsubscribe</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+  const text = `PULSE BEV | INNOVATR MARKET INTELLIGENCE
+
+Home Is the New Bar (Again, But Smarter)
+South Africans Aren't Going Out Less. They're Drinking Differently.
+
+72% of alcohol occasions now happen at home. 58% go out less often. 47% host at home monthly.
+
+Brands that equip the host — not just the drinker — gain relevance. The real growth sits inside the occasion.
+
+Read the full issue and download the strategic report:
+${portalUrl}
+
+---
+You're receiving this as a Pulse Bev subscriber. To unsubscribe reply to this email.`;
+
+  const response = await resend.emails.send({
+    from: `Innovatr <${fromEmail}>`,
+    to: [to],
+    subject: "South Africans Aren't Going Out Less. They're Drinking Differently. | Pulse Bev",
+    html,
+    text,
+  });
+
+  console.log("Pulse mailer sent:", response);
+  return response;
+}
+
 export { FRONTEND_URL };

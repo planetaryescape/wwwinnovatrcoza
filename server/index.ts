@@ -114,6 +114,37 @@ app.use((req, res, next) => {
     }
   })();
 
+  // Idempotent: seed "Home Is the New Bar" report if not yet present
+  (async () => {
+    try {
+      const allReports = await storage.getAllReports();
+      const exists = allReports.some((r) => r.slug === "home-is-the-new-bar");
+      if (!exists) {
+        await storage.createReport({
+          title: "Home Is the New Bar (Again, But Smarter)",
+          slug: "home-is-the-new-bar",
+          category: "Insights",
+          industry: "alcohol",
+          industryTag: "bev",
+          date: new Date(),
+          status: "published",
+          isFeatured: true,
+          accessLevel: "member",
+          teaser: "Drinking occasions are shifting into the home. Consumers are going out less often, but upgrading the quality of their at-home social moments.",
+          body: `For years, alcohol culture revolved around going out. Bars. Restaurants. Events. Social occasions built around venues.\n\nBut over the past few years, that behaviour has shifted. South Africans are still socialising. They're still drinking. But increasingly, they're doing it at home.\n\nWhat started as a necessity during pandemic restrictions has quietly evolved into a lasting habit — one that is reshaping how alcohol brands are consumed.\n\n**The shift, in numbers**\n\n72% of alcohol consumption occasions now happen at home rather than at licensed venues. 58% say they go out for drinks less frequently than they did two years ago. Among urban professionals, 47% report hosting friends at home at least once per month. 44% say they are drinking less often but choosing higher-quality drinks. Premium mixer purchases have increased, with 39% of under-35s buying premium mixers in the past three months.\n\nFrequency may be moderating. But the quality of the occasion is increasing.\n\n**The rise of the home host**\n\nAt-home drinking is no longer about convenience alone. Consumers are actively upgrading the experience — better glassware, better mixers, ice moulds, cocktail kits, carefully curated drinks selections.\n\nHosting has become part of the ritual. Instead of multiple rounds at a venue, people create a smaller, more controlled social moment at home — where the environment, budget, and timing all feel easier to manage.\n\nThis shift is particularly visible among younger urban consumers who balance social lives with rising living costs. Hosting offers the same connection, but with greater flexibility.\n\n**What this means for alcohol brands**\n\nFor many brands, the mental model of drinking occasions still centres on venues. But when occasions move home, the role of the product changes. At a bar, the venue curates the experience. At home, the product becomes the experience.\n\nPackaging, mixers, serving suggestions, and occasion cues all start to matter more. Brands that equip the host — not just the drinker — gain relevance.\n\n**Innovatr's takeaway**\n\nThe future of alcohol occasions is not defined by where people drink. It's defined by how intentional the moment becomes. Consumers are drinking slightly less frequently, but with greater attention to the experience around the drink. In that environment, brands that focus only on volume risk missing the opportunity. The real growth sits inside the occasion.`,
+          topics: ["Alcohol", "Social Occasions", "Premiumisation", "Hosting Culture", "Consumer Behaviour"],
+          pdfUrl: "/reports/home-is-the-new-bar.pdf",
+          coverImageUrl: "/reports/home-is-the-new-bar.jpg",
+          thumbnailUrl: "/reports/home-is-the-new-bar.jpg",
+          isArchived: false,
+        });
+        log(`Seeded report: "Home Is the New Bar"`);
+      }
+    } catch (err) {
+      console.error("Failed to seed report:", err);
+    }
+  })();
+
   // Run scheduled report publishing on startup
   storage.processScheduledReports().then((result) => {
     if (result.published > 0 || result.unpublished > 0) {

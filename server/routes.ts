@@ -2561,6 +2561,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Send Pulse industry mailer
+  app.post("/api/admin/send-pulse-mailer", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const to: string = req.body?.to || "hannah@innovatr.co.za";
+      const result = await emailService.sendPulseMailer(to);
+      res.json({ success: true, messageId: (result as any)?.data?.id });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Deals endpoints
   app.get("/api/admin/deals", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
