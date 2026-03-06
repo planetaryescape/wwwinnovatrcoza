@@ -1643,7 +1643,7 @@ export async function sendDailyAdminDigest(data: {
   }
 }
 
-export async function sendPulseMailer(to: string) {
+export async function sendPulseMailer(to: string, firstName: string = "there") {
   const resend = await getResendClient();
   const fromEmail = await getFromEmail();
 
@@ -1659,12 +1659,12 @@ export async function sendPulseMailer(to: string) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pulse Bev | Innovatr</title>
+  <title>Home Is the New Bar (Again, But Smarter) | Innovatr Insights</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f4f4f5;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
-  <!-- Pre-header -->
+  <!-- Pre-header (preview text in inbox) -->
   <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;color:#f4f4f5;">
-    The bar hasn't disappeared. It's just moved into the living room. &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+    South Africans Aren't Going Out Less. They're Drinking Differently. &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
   </div>
 
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f5;">
@@ -1675,7 +1675,7 @@ export async function sendPulseMailer(to: string) {
           <!-- Top label bar -->
           <tr>
             <td style="background-color:${BRAND_COLOR};padding:10px 24px;">
-              <span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Pulse Bev &nbsp;·&nbsp; Innovatr Market Intelligence</span>
+              <span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Innovatr Insights</span>
             </td>
           </tr>
 
@@ -1690,7 +1690,7 @@ export async function sendPulseMailer(to: string) {
           <tr>
             <td style="padding:32px 32px 8px;">
               <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${BRAND_COLOR};">Industry Insight · Beverages</p>
-              <h1 style="margin:0 0 12px;font-size:26px;font-weight:800;color:#0f0f11;line-height:1.25;">Home Is the New Bar<br /><span style="font-style:italic;font-weight:600;">(Again, But Smarter)</span></h1>
+              <h1 style="margin:0 0 12px;font-size:26px;font-weight:800;color:#0f0f11;line-height:1.25;">Home Is the New Bar (Again, But Smarter)</h1>
               <p style="margin:0;font-size:16px;color:#444;line-height:1.5;font-weight:500;">South Africans aren't going out less. They're drinking differently.</p>
             </td>
           </tr>
@@ -1701,6 +1701,7 @@ export async function sendPulseMailer(to: string) {
           <!-- Body -->
           <tr>
             <td style="padding:24px 32px 0;">
+              <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">Hey ${firstName},</p>
               <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">For years, alcohol culture revolved around going out — bars, restaurants, events, social occasions built around venues.</p>
               <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">But over the past few years, that behaviour has shifted. South Africans are still socialising. They're still drinking. But increasingly, they're doing it at home.</p>
               <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">What started as a necessity during pandemic restrictions has quietly evolved into a lasting habit — one that is reshaping how alcohol brands are consumed and what it means to win an occasion.</p>
@@ -1759,17 +1760,11 @@ export async function sendPulseMailer(to: string) {
             <td style="padding:12px 32px 32px;">
               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1.5px solid #e0e3f7;border-radius:8px;overflow:hidden;">
                 <tr>
-                  <td style="padding:20px 24px;">
-                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                      <tr>
-                        <td style="vertical-align:top;">
-                          <p style="margin:0 0 2px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${BRAND_COLOR};">Strategic Market Report</p>
-                          <p style="margin:0 0 12px;font-size:16px;font-weight:700;color:${TEXT_COLOR};line-height:1.3;">Home Is the New Bar<br />(Again, But Smarter)</p>
-                          <p style="margin:0 0 16px;font-size:13px;color:${MUTED_COLOR};line-height:1.5;">Full data, demographic analysis, spend reallocation models and brand strategy implications. Available exclusively for Pulse subscribers.</p>
-                          <a href="${portalUrl}" style="display:inline-block;background-color:#f5f6ff;color:${BRAND_COLOR};text-decoration:none;padding:10px 20px;border-radius:6px;font-weight:600;font-size:14px;border:1.5px solid ${BRAND_COLOR};">Download Report</a>
-                        </td>
-                      </tr>
-                    </table>
+                  <td style="padding:24px 28px;text-align:center;">
+                    <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${BRAND_COLOR};">Strategic Market Report</p>
+                    <p style="margin:0 0 12px;font-size:16px;font-weight:700;color:${TEXT_COLOR};line-height:1.3;">Home Is the New Bar (Again, But Smarter)</p>
+                    <p style="margin:0 0 20px;font-size:13px;color:${MUTED_COLOR};line-height:1.6;">Full data, demographic analysis, spend reallocation models and brand strategy implications. Available exclusively for Innovatr members. Free members can read the full issue — downloading the report requires a paid membership.</p>
+                    <a href="${portalUrl}" style="display:inline-block;background-color:#f5f6ff;color:${BRAND_COLOR};text-decoration:none;padding:10px 24px;border-radius:6px;font-weight:600;font-size:14px;border:1.5px solid ${BRAND_COLOR};">Download Report</a>
                   </td>
                 </tr>
               </table>
@@ -1781,7 +1776,7 @@ export async function sendPulseMailer(to: string) {
             <td style="background-color:#fafafa;border-top:1px solid #eee;padding:20px 32px;text-align:center;">
               <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#0f0f11;">Innovatr</p>
               <p style="margin:0;font-size:12px;color:${MUTED_COLOR};line-height:1.6;">
-                You're receiving this as a Pulse Bev subscriber.&nbsp;&nbsp;|&nbsp;&nbsp;
+                You're receiving this as an Innovatr Insights subscriber.&nbsp;&nbsp;|&nbsp;&nbsp;
                 <a href="mailto:hannah@innovatr.co.za?subject=Unsubscribe" style="color:${MUTED_COLOR};">Unsubscribe</a>
               </p>
             </td>
@@ -1794,10 +1789,16 @@ export async function sendPulseMailer(to: string) {
 </body>
 </html>`;
 
-  const text = `PULSE BEV | INNOVATR MARKET INTELLIGENCE
+  const text = `INNOVATR INSIGHTS
 
 Home Is the New Bar (Again, But Smarter)
 South Africans Aren't Going Out Less. They're Drinking Differently.
+
+Hey ${firstName},
+
+For years, alcohol culture revolved around going out — bars, restaurants, events, social occasions built around venues.
+
+But over the past few years, that behaviour has shifted. South Africans are still socialising. They're still drinking. But increasingly, they're doing it at home.
 
 72% of alcohol occasions now happen at home. 58% go out less often. 47% host at home monthly.
 
@@ -1807,12 +1808,12 @@ Read the full issue and download the strategic report:
 ${portalUrl}
 
 ---
-You're receiving this as a Pulse Bev subscriber. To unsubscribe reply to this email.`;
+You're receiving this as an Innovatr Insights subscriber. To unsubscribe reply to this email.`;
 
   const response = await resend.emails.send({
     from: `Innovatr <${fromEmail}>`,
     to: [to],
-    subject: "South Africans Aren't Going Out Less. They're Drinking Differently. | Pulse Bev",
+    subject: "Home Is the New Bar (Again, But Smarter)",
     html,
     text,
   });

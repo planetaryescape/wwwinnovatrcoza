@@ -2565,7 +2565,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/send-pulse-mailer", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const to: string = req.body?.to || "hannah@innovatr.co.za";
-      const result = await emailService.sendPulseMailer(to);
+      const allUsers = await storage.getAllUsers();
+      const recipient = allUsers.find((u) => u.email?.toLowerCase() === to.toLowerCase());
+      const rawFirst = recipient?.name?.split(" ")[0] || "there";
+      const firstName = rawFirst.charAt(0).toUpperCase() + rawFirst.slice(1).toLowerCase();
+      const result = await emailService.sendPulseMailer(to, firstName);
       res.json({ success: true, messageId: (result as any)?.data?.id });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
