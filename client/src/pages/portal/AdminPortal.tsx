@@ -12,7 +12,7 @@ import AdminMembers from "./AdminMembers";
 import AdminBriefs from "./AdminBriefs";
 import AdminOverview from "./AdminOverview";
 
-const VALID_TABS = ["overview", "companies", "orders", "briefs", "members", "reports", "offers", "casestudies"];
+const VALID_TABS = ["overview", "companies", "members", "reports", "briefs", "orders", "offers", "casestudies"];
 
 export default function AdminPortal() {
   const [location, setLocation] = useLocation();
@@ -60,10 +60,10 @@ export default function AdminPortal() {
           <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview" data-testid="tab-admin-overview">Overview</TabsTrigger>
             <TabsTrigger value="companies" data-testid="tab-admin-companies">Companies</TabsTrigger>
-            <TabsTrigger value="orders" data-testid="tab-admin-orders">Orders</TabsTrigger>
-            <TabsTrigger value="briefs" data-testid="tab-admin-briefs">Briefs</TabsTrigger>
             <TabsTrigger value="members" data-testid="tab-admin-members">Members</TabsTrigger>
-            <TabsTrigger value="reports" data-testid="tab-admin-reports">Reports</TabsTrigger>
+            <TabsTrigger value="reports" data-testid="tab-admin-reports">Intelligence</TabsTrigger>
+            <TabsTrigger value="briefs" data-testid="tab-admin-briefs">Briefs</TabsTrigger>
+            <TabsTrigger value="orders" data-testid="tab-admin-orders">Orders</TabsTrigger>
             <TabsTrigger value="offers" data-testid="tab-admin-offers">Offers</TabsTrigger>
             <TabsTrigger value="casestudies" data-testid="tab-admin-casestudies">Case Studies</TabsTrigger>
           </TabsList>

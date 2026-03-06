@@ -909,6 +909,7 @@ export const insightMailers = pgTable("insight_mailers", {
   channel: varchar("channel", { length: 20 }).default("inside").notNull(),
   attachmentType: varchar("attachment_type", { length: 20 }),
   coverImagePath: text("cover_image_path"),
+  targetIndustry: text("target_industry"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

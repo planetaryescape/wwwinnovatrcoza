@@ -1643,6 +1643,319 @@ export async function sendDailyAdminDigest(data: {
   }
 }
 
+export async function sendFinancialPulseMailer(to: string, firstName: string = "there") {
+  const resend = await getResendClient();
+  const fromEmail = await getFromEmail();
+  const baseUrl = process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : FRONTEND_URL;
+  const portalUrl = `${baseUrl}/portal/insights/cash-is-king-again`;
+  const heroImageUrl = `${baseUrl}/reports/cash-is-king-again.jpg`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Cash Is King Again | Innovatr Insights</title></head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
+  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;color:#f4f4f5;">Digital fatigue is real. And it's reshaping how people spend. &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f5;">
+    <tr><td align="center" style="padding:24px 16px;">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+        <tr><td style="background-color:${BRAND_COLOR};padding:10px 24px;text-align:center;"><span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Innovatr Insights</span></td></tr>
+        <tr><td style="padding:0;line-height:0;"><img src="${heroImageUrl}" alt="Cash Is King Again" width="600" style="display:block;width:100%;max-width:600px;height:auto;" /></td></tr>
+        <tr><td style="padding:32px 32px 8px;text-align:center;">
+          <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${BRAND_COLOR};">Industry Insight · Financial Services</p>
+          <h1 style="margin:0 0 12px;font-size:26px;font-weight:800;color:#0f0f11;line-height:1.25;">The "Cash Is King Again" Comeback</h1>
+          <p style="margin:0;font-size:16px;color:#444;line-height:1.5;font-weight:500;">Why South Africans are taking cash back from the banks.</p>
+        </td></tr>
+        <tr><td style="padding:16px 32px 0;"><hr style="border:none;border-top:1px solid #eee;margin:0;" /></td></tr>
+        <tr><td style="padding:24px 32px 0;">
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">Hey ${firstName},</p>
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">For a decade we were told cash is dying. Banks went mobile-first. Fintechs went wallet-crazy. Everyone acted like notes and coins were basically a museum exhibit.</p>
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">Then 2026 happened. And South Africans quietly did the opposite.</p>
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">Digital payments are still growing — but behaviour is splitting. People are reaching for cash again. Not because they hate tech. Because they hate invisible spending.</p>
+        </td></tr>
+        <tr><td style="padding:24px 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8f9ff;border-radius:8px;overflow:hidden;">
+            <tr>
+              <td width="33%" style="padding:20px 16px;text-align:center;border-right:1px solid #eaecf8;"><p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">61%</p><p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">Use cash to budget</p></td>
+              <td width="33%" style="padding:20px 16px;text-align:center;border-right:1px solid #eaecf8;"><p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">49%</p><p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">Less control digitally</p></td>
+              <td width="33%" style="padding:20px 16px;text-align:center;"><p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">73%</p><p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">Digital for fixed bills</p></td>
+            </tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding:0 32px 24px;">
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">That's not "cash-only". That's cash-on-purpose. Two big pressures are colliding: subscription creep (57% have been surprised by a debit order in the last six months) and fraud anxiety (SABRIC reported digital banking fraud losses up 74% to R1.888bn year-on-year).</p>
+          <p style="margin:0;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">So consumers are doing the simplest risk hack available: use cash when it matters most. Cash creates a boundary.</p>
+        </td></tr>
+        <tr><td style="padding:0 32px 28px;">
+          <div style="border-left:4px solid ${BRAND_COLOR};background:#f5f6ff;padding:16px 20px;border-radius:0 6px 6px 0;">
+            <p style="margin:0;font-size:15px;color:#1a1a2e;line-height:1.6;font-style:italic;">"The next fintech advantage isn't more convenience. It's more control."</p>
+            <p style="margin:8px 0 0;font-size:12px;color:${BRAND_COLOR};font-weight:700;letter-spacing:0.5px;">— INNOVATR TAKEAWAY</p>
+          </div>
+        </td></tr>
+        <tr><td style="padding:0 32px 12px;text-align:center;"><a href="${portalUrl}" style="display:inline-block;background-color:${BRAND_COLOR};color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:6px;font-weight:700;font-size:15px;letter-spacing:0.3px;">Read Full Issue →</a></td></tr>
+        <tr><td style="padding:12px 32px 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1.5px solid #e0e3f7;border-radius:8px;overflow:hidden;">
+            <tr><td style="padding:24px 28px;text-align:center;">
+              <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${BRAND_COLOR};">Strategic Market Report</p>
+              <p style="margin:0 0 12px;font-size:16px;font-weight:700;color:${TEXT_COLOR};line-height:1.3;">Cash Is King Again</p>
+              <p style="margin:0 0 20px;font-size:13px;color:${MUTED_COLOR};line-height:1.6;">Full data, demographic analysis, spend reallocation models and brand strategy implications. Available exclusively for Innovatr members. Free members can read the full issue — downloading the report requires a paid membership.</p>
+              <a href="${portalUrl}" style="display:inline-block;background-color:#f5f6ff;color:${BRAND_COLOR};text-decoration:none;padding:10px 24px;border-radius:6px;font-weight:600;font-size:14px;border:1.5px solid ${BRAND_COLOR};">Download Report</a>
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="background-color:#fafafa;border-top:1px solid #eee;padding:20px 32px;text-align:center;">
+          <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#0f0f11;">Innovatr</p>
+          <p style="margin:0;font-size:12px;color:${MUTED_COLOR};line-height:1.6;">You're receiving this as an Innovatr Insights subscriber.&nbsp;&nbsp;|&nbsp;&nbsp;<a href="mailto:hannah@innovatr.co.za?subject=Unsubscribe" style="color:${MUTED_COLOR};">Unsubscribe</a></p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+
+  const response = await resend.emails.send({
+    from: `Innovatr <${fromEmail}>`,
+    to: [to],
+    subject: "Why South Africans Are Taking Cash Back from the Banks",
+    html,
+    text: `INNOVATR INSIGHTS\n\nThe "Cash Is King Again" Comeback\n\nHey ${firstName},\n\n61% use cash to budget. 49% feel less control digitally. 73% use digital for fixed bills.\n\nThe next fintech advantage isn't more convenience. It's more control.\n\nRead the full issue: ${portalUrl}`,
+  });
+  console.log("Financial Pulse mailer sent:", response);
+  return response;
+}
+
+export async function sendBeautyPulseMailer(to: string, firstName: string = "there") {
+  const resend = await getResendClient();
+  const fromEmail = await getFromEmail();
+  const baseUrl = process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : FRONTEND_URL;
+  const portalUrl = `${baseUrl}/portal/insights/township-beauty-economy`;
+  const heroImageUrl = `${baseUrl}/reports/township-beauty-economy.jpg`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Township Beauty Economy | Innovatr Insights</title></head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
+  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;color:#f4f4f5;">Informal entrepreneurs are becoming micro-brands — and retail is watching. &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f5;">
+    <tr><td align="center" style="padding:24px 16px;">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+        <tr><td style="background-color:${BRAND_COLOR};padding:10px 24px;text-align:center;"><span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Innovatr Insights</span></td></tr>
+        <tr><td style="padding:0;line-height:0;"><img src="${heroImageUrl}" alt="Township Beauty Economy" width="600" style="display:block;width:100%;max-width:600px;height:auto;" /></td></tr>
+        <tr><td style="padding:32px 32px 8px;text-align:center;">
+          <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${BRAND_COLOR};">Industry Insight · Beauty</p>
+          <h1 style="margin:0 0 12px;font-size:26px;font-weight:800;color:#0f0f11;line-height:1.25;">The Township Beauty Economy Is Formalising</h1>
+          <p style="margin:0;font-size:16px;color:#444;line-height:1.5;font-weight:500;">Your next beauty influencer might live next door.</p>
+        </td></tr>
+        <tr><td style="padding:16px 32px 0;"><hr style="border:none;border-top:1px solid #eee;margin:0;" /></td></tr>
+        <tr><td style="padding:24px 32px 0;">
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">Hey ${firstName},</p>
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">South Africa's beauty market isn't slowing down. It's just moving off the shelf.</p>
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">For years, beauty had two worlds: retail (Clicks, malls, counters) and informal (home salons, mobile techs, the girl with the ring light). In 2026, that "informal" world isn't underground anymore. It's formalising fast — and it's starting to look like a real distribution channel.</p>
+        </td></tr>
+        <tr><td style="padding:24px 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8f9ff;border-radius:8px;overflow:hidden;">
+            <tr>
+              <td width="33%" style="padding:20px 16px;text-align:center;border-right:1px solid #eaecf8;"><p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">42%</p><p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">Buy direct from provider</p></td>
+              <td width="33%" style="padding:20px 16px;text-align:center;border-right:1px solid #eaecf8;"><p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">38%</p><p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">Spend outside retail</p></td>
+              <td width="33%" style="padding:20px 16px;text-align:center;"><p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">59%</p><p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">TikTok influenced last buy</p></td>
+            </tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding:0 32px 24px;">
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">Township beauty entrepreneurs are building micro-brands with four things retail can't replicate easily: proximity, proof, personalisation, and payment flexibility. And it's not just services anymore. Some are importing directly, reselling, and developing private-label products.</p>
+          <p style="margin:0;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">The brands that win won't just chase shelf space — they'll build credibility inside communities where trust is already earned.</p>
+        </td></tr>
+        <tr><td style="padding:0 32px 28px;">
+          <div style="border-left:4px solid ${BRAND_COLOR};background:#f5f6ff;padding:16px 20px;border-radius:0 6px 6px 0;">
+            <p style="margin:0;font-size:15px;color:#1a1a2e;line-height:1.6;font-style:italic;">"The future of beauty isn't only in malls. It's in spare rooms with ring lights."</p>
+            <p style="margin:8px 0 0;font-size:12px;color:${BRAND_COLOR};font-weight:700;letter-spacing:0.5px;">— INNOVATR TAKEAWAY</p>
+          </div>
+        </td></tr>
+        <tr><td style="padding:0 32px 12px;text-align:center;"><a href="${portalUrl}" style="display:inline-block;background-color:${BRAND_COLOR};color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:6px;font-weight:700;font-size:15px;letter-spacing:0.3px;">Read Full Issue →</a></td></tr>
+        <tr><td style="padding:12px 32px 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1.5px solid #e0e3f7;border-radius:8px;overflow:hidden;">
+            <tr><td style="padding:24px 28px;text-align:center;">
+              <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${BRAND_COLOR};">Strategic Market Report</p>
+              <p style="margin:0 0 12px;font-size:16px;font-weight:700;color:${TEXT_COLOR};line-height:1.3;">The Township Beauty Economy Is Formalising</p>
+              <p style="margin:0 0 20px;font-size:13px;color:${MUTED_COLOR};line-height:1.6;">Full data, demographic analysis, spend reallocation models and brand strategy implications. Available exclusively for Innovatr members. Free members can read the full issue — downloading the report requires a paid membership.</p>
+              <a href="${portalUrl}" style="display:inline-block;background-color:#f5f6ff;color:${BRAND_COLOR};text-decoration:none;padding:10px 24px;border-radius:6px;font-weight:600;font-size:14px;border:1.5px solid ${BRAND_COLOR};">Download Report</a>
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="background-color:#fafafa;border-top:1px solid #eee;padding:20px 32px;text-align:center;">
+          <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#0f0f11;">Innovatr</p>
+          <p style="margin:0;font-size:12px;color:${MUTED_COLOR};line-height:1.6;">You're receiving this as an Innovatr Insights subscriber.&nbsp;&nbsp;|&nbsp;&nbsp;<a href="mailto:hannah@innovatr.co.za?subject=Unsubscribe" style="color:${MUTED_COLOR};">Unsubscribe</a></p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+
+  const response = await resend.emails.send({
+    from: `Innovatr <${fromEmail}>`,
+    to: [to],
+    subject: "Your Next Beauty Influencer Might Live Next Door",
+    html,
+    text: `INNOVATR INSIGHTS\n\nThe Township Beauty Economy Is Formalising\n\nHey ${firstName},\n\n42% buy direct from providers. 38% of township spend happens outside retail. 59% say TikTok influenced their last beauty purchase.\n\nRead the full issue: ${portalUrl}`,
+  });
+  console.log("Beauty Pulse mailer sent:", response);
+  return response;
+}
+
+export async function sendHealthPulseMailer(to: string, firstName: string = "there") {
+  const resend = await getResendClient();
+  const fromEmail = await getFromEmail();
+  const baseUrl = process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : FRONTEND_URL;
+  const portalUrl = `${baseUrl}/portal/insights/clinic-vs-clicks-vs-creator`;
+  const heroImageUrl = `${baseUrl}/reports/clinic-vs-clicks-vs-creator.jpg`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Clinic vs Clicks vs Creator | Innovatr Insights</title></head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
+  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;color:#f4f4f5;">Doctors still lead. But they're no longer alone. &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f5;">
+    <tr><td align="center" style="padding:24px 16px;">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+        <tr><td style="background-color:${BRAND_COLOR};padding:10px 24px;text-align:center;"><span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Innovatr Insights</span></td></tr>
+        <tr><td style="padding:0;line-height:0;"><img src="${heroImageUrl}" alt="Clinic vs Clicks vs Creator" width="600" style="display:block;width:100%;max-width:600px;height:auto;" /></td></tr>
+        <tr><td style="padding:32px 32px 8px;text-align:center;">
+          <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${BRAND_COLOR};">Industry Insight · Health</p>
+          <h1 style="margin:0 0 12px;font-size:26px;font-weight:800;color:#0f0f11;line-height:1.25;">Clinic vs Clicks vs Creator</h1>
+          <p style="margin:0;font-size:16px;color:#444;line-height:1.5;font-weight:500;">Who do South Africans actually trust for health advice?</p>
+        </td></tr>
+        <tr><td style="padding:16px 32px 0;"><hr style="border:none;border-top:1px solid #eee;margin:0;" /></td></tr>
+        <tr><td style="padding:24px 32px 0;">
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">Hey ${firstName},</p>
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">Health advice used to be simple. You got sick. You saw a doctor. You followed instructions. In 2026, that hierarchy doesn't exist anymore.</p>
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">Consumers now build their own health "panel". They Google symptoms, watch TikTok explainers, read product reviews, ask a pharmacist — and only then decide what to do next. Authority hasn't disappeared. It's fragmented.</p>
+        </td></tr>
+        <tr><td style="padding:24px 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8f9ff;border-radius:8px;overflow:hidden;">
+            <tr>
+              <td width="33%" style="padding:20px 16px;text-align:center;border-right:1px solid #eaecf8;"><p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">71%</p><p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">Research online first</p></td>
+              <td width="33%" style="padding:20px 16px;text-align:center;border-right:1px solid #eaecf8;"><p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">63%</p><p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">Consult 2+ sources</p></td>
+              <td width="33%" style="padding:20px 16px;text-align:center;"><p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">78%</p><p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">Trust doctors most</p></td>
+            </tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding:0 32px 24px;">
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">The supplement economy is accelerating this shift. South Africa's supplement market is now worth $1.06 billion and growing at nearly 10% annually. 62% of South Africans now take vitamins or supplements. 54% of under-35s have purchased a health product based on a creator recommendation.</p>
+          <p style="margin:0;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">For health brands, the challenge isn't choosing a channel. It's surviving all of them at once.</p>
+        </td></tr>
+        <tr><td style="padding:0 32px 28px;">
+          <div style="border-left:4px solid ${BRAND_COLOR};background:#f5f6ff;padding:16px 20px;border-radius:0 6px 6px 0;">
+            <p style="margin:0;font-size:15px;color:#1a1a2e;line-height:1.6;font-style:italic;">"Health authority in South Africa hasn't collapsed. It's decentralised. The brands that win won't rely on one voice — they'll show up everywhere trust is being built."</p>
+            <p style="margin:8px 0 0;font-size:12px;color:${BRAND_COLOR};font-weight:700;letter-spacing:0.5px;">— INNOVATR TAKEAWAY</p>
+          </div>
+        </td></tr>
+        <tr><td style="padding:0 32px 12px;text-align:center;"><a href="${portalUrl}" style="display:inline-block;background-color:${BRAND_COLOR};color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:6px;font-weight:700;font-size:15px;letter-spacing:0.3px;">Read Full Issue →</a></td></tr>
+        <tr><td style="padding:12px 32px 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1.5px solid #e0e3f7;border-radius:8px;overflow:hidden;">
+            <tr><td style="padding:24px 28px;text-align:center;">
+              <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${BRAND_COLOR};">Strategic Market Report</p>
+              <p style="margin:0 0 12px;font-size:16px;font-weight:700;color:${TEXT_COLOR};line-height:1.3;">Clinic vs Clicks vs Creator</p>
+              <p style="margin:0 0 20px;font-size:13px;color:${MUTED_COLOR};line-height:1.6;">Full data, demographic analysis, spend reallocation models and brand strategy implications. Available exclusively for Innovatr members. Free members can read the full issue — downloading the report requires a paid membership.</p>
+              <a href="${portalUrl}" style="display:inline-block;background-color:#f5f6ff;color:${BRAND_COLOR};text-decoration:none;padding:10px 24px;border-radius:6px;font-weight:600;font-size:14px;border:1.5px solid ${BRAND_COLOR};">Download Report</a>
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="background-color:#fafafa;border-top:1px solid #eee;padding:20px 32px;text-align:center;">
+          <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#0f0f11;">Innovatr</p>
+          <p style="margin:0;font-size:12px;color:${MUTED_COLOR};line-height:1.6;">You're receiving this as an Innovatr Insights subscriber.&nbsp;&nbsp;|&nbsp;&nbsp;<a href="mailto:hannah@innovatr.co.za?subject=Unsubscribe" style="color:${MUTED_COLOR};">Unsubscribe</a></p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+
+  const response = await resend.emails.send({
+    from: `Innovatr <${fromEmail}>`,
+    to: [to],
+    subject: "Who Do South Africans Actually Trust for Health Advice?",
+    html,
+    text: `INNOVATR INSIGHTS\n\nClinic vs Clicks vs Creator\n\nHey ${firstName},\n\n71% research online before seeing a doctor. 63% consult 2+ sources. Creators are now part of the decision process.\n\nRead the full issue: ${portalUrl}`,
+  });
+  console.log("Health Pulse mailer sent:", response);
+  return response;
+}
+
+export async function sendFoodPulseMailer(to: string, firstName: string = "there") {
+  const resend = await getResendClient();
+  const fromEmail = await getFromEmail();
+  const baseUrl = process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : FRONTEND_URL;
+  const portalUrl = `${baseUrl}/portal/insights/price-memory-is-brutal`;
+  const heroImageUrl = `${baseUrl}/reports/price-memory-is-brutal.jpg`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Price Memory Is Becoming Brutal | Innovatr Insights</title></head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
+  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;color:#f4f4f5;">When prices move, consumers notice immediately. &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f5;">
+    <tr><td align="center" style="padding:24px 16px;">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+        <tr><td style="background-color:${BRAND_COLOR};padding:10px 24px;text-align:center;"><span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Innovatr Insights</span></td></tr>
+        <tr><td style="padding:0;line-height:0;"><img src="${heroImageUrl}" alt="Price Memory Is Becoming Brutal" width="600" style="display:block;width:100%;max-width:600px;height:auto;" /></td></tr>
+        <tr><td style="padding:32px 32px 8px;text-align:center;">
+          <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${BRAND_COLOR};">Industry Insight · Food & Retail</p>
+          <h1 style="margin:0 0 12px;font-size:26px;font-weight:800;color:#0f0f11;line-height:1.25;">Price Memory Is Becoming Brutal</h1>
+          <p style="margin:0;font-size:16px;color:#444;line-height:1.5;font-weight:500;">South Africans now know exactly what things should cost.</p>
+        </td></tr>
+        <tr><td style="padding:16px 32px 0;"><hr style="border:none;border-top:1px solid #eee;margin:0;" /></td></tr>
+        <tr><td style="padding:24px 32px 0;">
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">Hey ${firstName},</p>
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">For years, brands relied on a quiet assumption: consumers didn't really know what things cost. Prices could creep up. Pack sizes could shrink. Most shoppers felt inflation — but they didn't track it precisely.</p>
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">That assumption no longer holds. In 2026, South African consumers have developed something new: price memory. They know what bread used to cost. They know what yoghurt should cost. And when a product crosses that invisible line, it gets punished.</p>
+        </td></tr>
+        <tr><td style="padding:24px 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8f9ff;border-radius:8px;overflow:hidden;">
+            <tr>
+              <td width="33%" style="padding:20px 16px;text-align:center;border-right:1px solid #eaecf8;"><p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">68%</p><p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">Compare prices actively</p></td>
+              <td width="33%" style="padding:20px 16px;text-align:center;border-right:1px solid #eaecf8;"><p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">61%</p><p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">Switched brand (3 months)</p></td>
+              <td width="33%" style="padding:20px 16px;text-align:center;"><p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">49%</p><p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">Chose smaller packs</p></td>
+            </tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding:0 32px 24px;">
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">Price sensitivity isn't new. What's new is how precise it has become. Consumers are no longer reacting emotionally to "expensive". They're reacting to specific numbers that feel wrong — and when a price increase crosses that invisible benchmark, the brand loses a reference point in the consumer's mind.</p>
+          <p style="margin:0;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">Once a shopper resets their mental benchmark around another product, winning them back becomes much harder.</p>
+        </td></tr>
+        <tr><td style="padding:0 32px 28px;">
+          <div style="border-left:4px solid ${BRAND_COLOR};background:#f5f6ff;padding:16px 20px;border-radius:0 6px 6px 0;">
+            <p style="margin:0;font-size:15px;color:#1a1a2e;line-height:1.6;font-style:italic;">"The brands that survive this shift won't compete on price alone. They'll compete on visible value — clearer quality signals, stronger justification, and smarter pricing architecture."</p>
+            <p style="margin:8px 0 0;font-size:12px;color:${BRAND_COLOR};font-weight:700;letter-spacing:0.5px;">— INNOVATR TAKEAWAY</p>
+          </div>
+        </td></tr>
+        <tr><td style="padding:0 32px 12px;text-align:center;"><a href="${portalUrl}" style="display:inline-block;background-color:${BRAND_COLOR};color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:6px;font-weight:700;font-size:15px;letter-spacing:0.3px;">Read Full Issue →</a></td></tr>
+        <tr><td style="padding:12px 32px 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1.5px solid #e0e3f7;border-radius:8px;overflow:hidden;">
+            <tr><td style="padding:24px 28px;text-align:center;">
+              <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${BRAND_COLOR};">Strategic Market Report</p>
+              <p style="margin:0 0 12px;font-size:16px;font-weight:700;color:${TEXT_COLOR};line-height:1.3;">Price Memory Is Becoming Brutal</p>
+              <p style="margin:0 0 20px;font-size:13px;color:${MUTED_COLOR};line-height:1.6;">Full data, demographic analysis, spend reallocation models and brand strategy implications. Available exclusively for Innovatr members. Free members can read the full issue — downloading the report requires a paid membership.</p>
+              <a href="${portalUrl}" style="display:inline-block;background-color:#f5f6ff;color:${BRAND_COLOR};text-decoration:none;padding:10px 24px;border-radius:6px;font-weight:600;font-size:14px;border:1.5px solid ${BRAND_COLOR};">Download Report</a>
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="background-color:#fafafa;border-top:1px solid #eee;padding:20px 32px;text-align:center;">
+          <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#0f0f11;">Innovatr</p>
+          <p style="margin:0;font-size:12px;color:${MUTED_COLOR};line-height:1.6;">You're receiving this as an Innovatr Insights subscriber.&nbsp;&nbsp;|&nbsp;&nbsp;<a href="mailto:hannah@innovatr.co.za?subject=Unsubscribe" style="color:${MUTED_COLOR};">Unsubscribe</a></p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+
+  const response = await resend.emails.send({
+    from: `Innovatr <${fromEmail}>`,
+    to: [to],
+    subject: "South Africans Now Know Exactly What Things Should Cost",
+    html,
+    text: `INNOVATR INSIGHTS\n\nPrice Memory Is Becoming Brutal\n\nHey ${firstName},\n\n68% compare prices actively. 61% have switched brands. 49% chose smaller packs to manage cash flow.\n\nRead the full issue: ${portalUrl}`,
+  });
+  console.log("Food Pulse mailer sent:", response);
+  return response;
+}
+
 export async function sendPulseMailer(to: string, firstName: string = "there") {
   const resend = await getResendClient();
   const fromEmail = await getFromEmail();

@@ -154,6 +154,220 @@ app.use((req, res, next) => {
     console.error("Failed to process scheduled reports on startup:", err);
   });
 
+  // Idempotent: seed 4 additional Trends & Insights reports
+  (async () => {
+    try {
+      const allReports = await storage.getAllReports();
+      const existingSlugs = new Set(allReports.map((r) => r.slug));
+
+      const newReports = [
+        {
+          slug: "cash-is-king-again",
+          title: "The \"Cash Is King Again\" Comeback",
+          category: "Insights" as const,
+          industry: "financial",
+          industryTag: "financial",
+          teaser: "Cash isn't back because tech failed. It's back because invisible spending feels unsafe — and South Africans are choosing control over convenience.",
+          body: `For a decade we were told cash is dying. Banks went mobile-first. Fintechs went wallet-crazy. Everyone acted like notes and coins were basically a museum exhibit.\n\nThen 2026 happened. And South Africans quietly did the opposite.\n\nDigital payments are still growing — but behaviour is splitting. People are reaching for cash again. Not because they hate tech. Because they hate invisible spending.\n\n**The cash comeback, in numbers**\n\n61% say they use cash for day-to-day spending because it "helps me control my budget" (LSM 5–7: 68%). 49% of urban consumers say they feel less in control spending digitally. 73% use digital for fixed monthly bills — but 58% deliberately switch to cash for groceries and discretionary spend. That's not "cash-only". That's cash-on-purpose.\n\n**What changed? Invisibility became stressful**\n\nTwo big pressures are colliding: subscription creep (57% say they've been surprised by a debit order or subscription charge in the last six months, rising to 64% among under-35s) and fraud anxiety (SABRIC's 2024 crime stats showed digital banking fraud incidents up 86% year-on-year, with losses up 74% to R1.888bn).\n\nSo consumers are doing the simplest risk hack available: use cash when it matters most. Cash creates a boundary.\n\n**The real insight: friction is now a feature**\n\nCash isn't "better". It's just more felt. It forces a pause. It makes spending real. And right now, that's the point.\n\n**Innovatr's takeaway**\n\nThe next fintech advantage isn't more convenience. It's more control. If your digital experience can't make money movement feel visible, deliberate, and easy to manage, cash will keep winning the emotional battle — even while digital wins the infrastructure war. Convenience is expected. Control is reassuring.`,
+          topics: ["Financial Services", "Payments", "Consumer Behaviour", "Budgeting", "Risk & Trust"],
+          pdfUrl: "/reports/cash-is-king-again.pdf",
+          coverImageUrl: "/reports/cash-is-king-again.jpg",
+          thumbnailUrl: "/reports/cash-is-king-again.jpg",
+        },
+        {
+          slug: "township-beauty-economy",
+          title: "The Township Beauty Economy Is Formalising",
+          category: "Insights" as const,
+          industry: "beauty",
+          industryTag: "beauty",
+          teaser: "Beauty is shifting off the shelf. Home salons and service providers are becoming micro-brands — and a real channel retailers can't ignore.",
+          body: `South Africa's beauty market isn't slowing down. It's just moving off the shelf.\n\nFor years, beauty had two worlds: retail (Clicks, malls, counters) and informal (home salons, mobile techs, the girl with the ring light). In 2026, that "informal" world isn't underground anymore. It's formalising fast — and it's starting to look like a real distribution channel.\n\n**The shift, in numbers**\n\n42% of women aged 18–34 buy beauty products directly from a service provider (nails, lashes, hair) at least once a quarter. In township and peri-urban areas, 38% of beauty spend now happens outside formal retail. 59% of Gen Z say TikTok/Instagram influenced their last beauty purchase. And 46% trust product recommendations from their personal beauty service provider more than in-store consultants.\n\n**Why this channel wins**\n\nTownship beauty entrepreneurs are building micro-brands with four things retail can't replicate easily: proximity (ten minutes away beats parking and queues), proof (before-and-after content, reviews, DMs — constant social verification), personalisation (they tailor the look, the routine, the price), and payment flexibility (split payments, package deals, monthly touch-ups).\n\nAnd it's not just services anymore. Some are importing directly, sourcing wholesale, reselling, and even developing private-label products. This isn't hustle culture. It's micro-commerce with an audience.\n\n**Innovatr's takeaway**\n\nIn 2026, the future of beauty isn't only in malls. It's in spare rooms with ring lights. The brands that win won't just chase shelf space — they'll build credibility inside communities where trust is already earned.`,
+          topics: ["Beauty", "Retail", "Township Economy", "Creator Commerce", "Informal Trade"],
+          pdfUrl: "/reports/township-beauty-economy.pdf",
+          coverImageUrl: "/reports/township-beauty-economy.jpg",
+          thumbnailUrl: "/reports/township-beauty-economy.jpg",
+        },
+        {
+          slug: "clinic-vs-clicks-vs-creator",
+          title: "Clinic vs Clicks vs Creator",
+          category: "Insights" as const,
+          industry: "health",
+          industryTag: "health",
+          teaser: "Health authority is fragmenting. Doctors still lead, but creators, reviews and pharmacists now shape the purchase journey.",
+          body: `Health advice used to be simple. You got sick. You saw a doctor. You followed instructions.\n\nIn 2026, that hierarchy doesn't exist anymore. Consumers now build their own health "panel". They Google symptoms, watch TikTok explainers, read product reviews, ask a pharmacist at Clicks, and only then decide what to do next. Authority hasn't disappeared. It's fragmented.\n\n**The trust landscape, in numbers**\n\n71% of South Africans research health information online before consulting a healthcare professional. 63% consult two or more sources before buying a health or wellness product. Trust levels break down like this: Doctors: 78%. Pharmacists: 74%. Online reviews: 52%. Influencers/creators: 41% (rising to 58% among Gen Z).\n\nThat last number matters. Creators aren't replacing doctors. They're becoming part of the decision process. And increasingly, they're making the purchase happen first.\n\n**The supplement economy is accelerating this shift**\n\nSouth Africa's supplement market is now worth $1.06 billion and growing at nearly 10% annually. 62% of South Africans now take vitamins or supplements. 54% of under-35s say they have purchased a health product based on a creator recommendation.\n\nThis category sits in the grey space between medicine and lifestyle. Doctors treat illness. Creators talk about optimisation. Consumers want both. So they triangulate: doctor for credibility, pharmacist for accessibility, creator for relatability.\n\n**Innovatr's takeaway**\n\nHealth authority in South Africa hasn't collapsed. It's decentralised. The brands that win won't rely on one voice. They'll show up everywhere trust is being built.`,
+          topics: ["Health", "Wellness", "Supplements", "Trust", "Consumer Behaviour"],
+          pdfUrl: "/reports/clinic-vs-clicks-vs-creator.pdf",
+          coverImageUrl: "/reports/clinic-vs-clicks-vs-creator.jpg",
+          thumbnailUrl: "/reports/clinic-vs-clicks-vs-creator.jpg",
+        },
+        {
+          slug: "price-memory-is-brutal",
+          title: "Price Memory Is Becoming Brutal",
+          category: "Insights" as const,
+          industry: "food",
+          industryTag: "food",
+          teaser: "Consumers now remember what products should cost. When prices cross that mental line, brand loyalty disappears quickly.",
+          body: `For years, brands relied on a quiet assumption: consumers didn't really know what things cost. Prices could creep up. Pack sizes could shrink. Promotions could rotate. Most shoppers felt inflation — but they didn't track it precisely.\n\nThat assumption no longer holds. In 2026, South African consumers have developed something new: price memory. They know what bread used to cost. They know what yoghurt should cost. They know what chicken portions are supposed to be. And when a product crosses that invisible line, it gets punished.\n\n**The shift, in numbers**\n\n68% of households now say they actively compare food prices across retailers before buying. 61% have switched a food brand in the past three months because of price increases. Private label penetration has reached 57% nationally, with 44% saying they buy house brands regularly. 64% say they now wait for promotions before buying certain food categories. 49% report deliberately choosing smaller pack sizes to manage weekly cash flow.\n\nPrice sensitivity isn't new. What's new is how precise it has become. Consumers are no longer reacting emotionally to "expensive". They're reacting to specific numbers that feel wrong.\n\n**Why this is happening now**\n\nTwo forces are sharpening price awareness: sustained inflation (food inflation has been a constant presence for years, forcing households to watch spending closely) and digital comparison (consumers now check multiple retailers, apps, and catalogues before shopping, reinforcing mental benchmarks).\n\nOnce those benchmarks form, they stick. A price increase that once went unnoticed now feels like a betrayal.\n\n**Innovatr's takeaway**\n\nPrice has always mattered. But in 2026, price memory is becoming structural. Consumers are not just asking "Can I afford this?" They're asking "Is this still worth what it used to be?" The brands that survive this shift won't simply compete on price. They will compete on visible value.`,
+          topics: ["Food", "Pricing", "Inflation", "Consumer Behaviour", "Retail"],
+          pdfUrl: "/reports/price-memory-is-brutal.pdf",
+          coverImageUrl: "/reports/price-memory-is-brutal.jpg",
+          thumbnailUrl: "/reports/price-memory-is-brutal.jpg",
+        },
+      ];
+
+      for (const r of newReports) {
+        if (!existingSlugs.has(r.slug)) {
+          await storage.createReport({
+            ...r,
+            date: new Date(),
+            status: "published",
+            isFeatured: true,
+            accessLevel: "member",
+            isArchived: false,
+          });
+          log(`Seeded report: "${r.title}"`);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to seed additional reports:", err);
+    }
+  })();
+
+  // Idempotent: seed 5 InsightMailer Content Schedule entries for Tue 10 March 09:30 SAST
+  (async () => {
+    try {
+      const scheduledDate = new Date("2026-03-10T07:30:00.000Z"); // 09:30 SAST
+      const existingMailers = await storage.getAllInsightMailers();
+
+      const mailerSeeds = [
+        {
+          targetIndustry: "bev",
+          topic: "Home Is the New Bar (Again, But Smarter)",
+          subjectLine: "Home Is the New Bar (Again, But Smarter)",
+          previewText: "South Africans Aren't Going Out Less. They're Drinking Differently.",
+          bodyContent: "Drinking occasions are shifting into the home. 72% of occasions happen at home vs licensed venues. 58% go out less often. 47% host at home monthly. Brands that equip the host — not just the drinker — gain relevance.",
+          coverImagePath: "/reports/home-is-the-new-bar.jpg",
+          mailerNumber: 1,
+        },
+        {
+          targetIndustry: "financial",
+          topic: "The \"Cash Is King Again\" Comeback",
+          subjectLine: "Why South Africans Are Taking Cash Back from the Banks",
+          previewText: "Digital fatigue is real. And it's reshaping how people spend.",
+          bodyContent: "Cash isn't back because tech failed. It's back because invisible spending feels unsafe. 61% use cash to budget. 49% feel less in control digitally. 73% use digital only for fixed bills.",
+          coverImagePath: "/reports/cash-is-king-again.jpg",
+          mailerNumber: 2,
+        },
+        {
+          targetIndustry: "beauty",
+          topic: "The Township Beauty Economy Is Formalising",
+          subjectLine: "Your Next Beauty Influencer Might Live Next Door",
+          previewText: "Informal entrepreneurs are becoming micro-brands — and retail is watching.",
+          bodyContent: "42% of women aged 18-34 buy beauty products directly from service providers. 38% of township beauty spend happens outside retail. The informal channel is formalising fast.",
+          coverImagePath: "/reports/township-beauty-economy.jpg",
+          mailerNumber: 3,
+        },
+        {
+          targetIndustry: "health",
+          topic: "Clinic vs Clicks vs Creator",
+          subjectLine: "Who Do South Africans Actually Trust for Health Advice?",
+          previewText: "Doctors still lead. But they're no longer alone.",
+          bodyContent: "71% research health online before consulting a professional. 63% consult 2+ sources. Creators are becoming part of the decision process — especially for supplements.",
+          coverImagePath: "/reports/clinic-vs-clicks-vs-creator.jpg",
+          mailerNumber: 4,
+        },
+        {
+          targetIndustry: "food",
+          topic: "Price Memory Is Becoming Brutal",
+          subjectLine: "South Africans Now Know Exactly What Things Should Cost",
+          previewText: "When prices move, consumers notice immediately.",
+          bodyContent: "68% of households actively compare food prices. 61% switched brands due to price increases. 49% chose smaller pack sizes to manage cash flow. Price memory is now structural.",
+          coverImagePath: "/reports/price-memory-is-brutal.jpg",
+          mailerNumber: 5,
+        },
+      ];
+
+      for (const seed of mailerSeeds) {
+        const alreadyExists = existingMailers.some(
+          (m) => (m as any).targetIndustry === seed.targetIndustry && m.month === "March 2026"
+        );
+        if (!alreadyExists) {
+          await storage.createInsightMailer({
+            ...seed,
+            month: "March 2026",
+            scheduledDate,
+            day: "Tuesday",
+            sendTime: "09:30",
+            channel: "insights",
+            status: "scheduled",
+            attachmentType: "report",
+          });
+          log(`Seeded InsightMailer: "${seed.topic}"`);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to seed insight mailers:", err);
+    }
+  })();
+
+  // 09:30 SAST (07:30 UTC) industry mailer scheduler
+  function getMillisecondsUntilNext0930Sast(): number {
+    const now = new Date();
+    const target = new Date(now);
+    target.setUTCHours(7, 30, 0, 0);
+    if (target <= now) {
+      target.setUTCDate(target.getUTCDate() + 1);
+    }
+    return target.getTime() - now.getTime();
+  }
+
+  async function runIndustryMailerCheck() {
+    try {
+      const now = new Date();
+      const allMailers = await storage.getAllInsightMailers();
+      const due = allMailers.filter(
+        (m) => m.status === "scheduled" && (m as any).targetIndustry && new Date(m.scheduledDate) <= now
+      );
+      if (due.length > 0) {
+        log(`Industry mailer check: ${due.length} due mailer(s) found — triggering batch send`);
+        const INDUSTRY_ORDER = ["financial", "beauty", "health", "food", "bev"];
+        const { sendFinancialPulseMailer, sendBeautyPulseMailer, sendHealthPulseMailer, sendFoodPulseMailer, sendPulseMailer: sendBevMailer } = await import("./emails/email-service");
+        const mailerFnMap: Record<string, (to: string, firstName: string) => Promise<any>> = {
+          financial: sendFinancialPulseMailer,
+          beauty: sendBeautyPulseMailer,
+          health: sendHealthPulseMailer,
+          food: sendFoodPulseMailer,
+          bev: sendBevMailer,
+        };
+        const seenEmails = new Set<string>();
+        for (const industry of INDUSTRY_ORDER) {
+          const subs = await storage.getPulseSubscribersByIndustry(industry);
+          for (const sub of subs) {
+            const email = sub.email.toLowerCase();
+            if (seenEmails.has(email)) continue;
+            seenEmails.add(email);
+            const rawFirst = sub.name?.split(" ")[0] || "there";
+            const firstName = rawFirst.charAt(0).toUpperCase() + rawFirst.slice(1).toLowerCase();
+            try { await mailerFnMap[industry](sub.email, firstName); } catch (e) { console.error(`Failed sending to ${sub.email}:`, e); }
+          }
+        }
+        for (const m of due) {
+          await storage.updateInsightMailer(m.id, { status: "sent" });
+        }
+        log(`Industry batch mailer complete. ${seenEmails.size} unique recipients.`);
+      }
+    } catch (err) {
+      console.error("Industry mailer check error:", err);
+    }
+    const msUntilNext = getMillisecondsUntilNext0930Sast();
+    setTimeout(runIndustryMailerCheck, msUntilNext);
+  }
+
+  const msUntilFirst0930 = getMillisecondsUntilNext0930Sast();
+  setTimeout(runIndustryMailerCheck, msUntilFirst0930);
+  const first0930 = new Date(Date.now() + msUntilFirst0930);
+  log(`Industry mailer scheduler started (09:30 SAST daily, next: ${first0930.toLocaleString()})`);
+
   // Calculate milliseconds until next 5am or 5pm
   function getMillisecondsUntilNext5() {
     const now = new Date();

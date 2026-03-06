@@ -232,6 +232,7 @@ export interface IStorage {
   createInsightMailer(mailer: InsertInsightMailer): Promise<InsightMailer>;
   updateInsightMailer(id: string, updates: Partial<InsightMailer>): Promise<void>;
   deleteInsightMailer(id: string): Promise<void>;
+  getPulseSubscribersByIndustry(industry: string): Promise<{ email: string; name: string }[]>;
 
   // Admin Preferences
   getAdminPreferences(userId: string): Promise<AdminPreferences | undefined>;
@@ -1943,6 +1944,21 @@ export class DatabaseStorage implements IStorage {
 
   async deleteInsightMailer(id: string): Promise<void> {
     await db.delete(insightMailers).where(eq(insightMailers.id, id));
+  }
+
+  async getPulseSubscribersByIndustry(industry: string): Promise<{ email: string; name: string }[]> {
+    const allUsers = await db.select().from(users);
+    const allCompanies = await db.select().from(companies);
+    const companyMap = new Map(allCompanies.map((c) => [c.id, c]));
+    const result: { email: string; name: string }[] = [];
+    for (const u of allUsers) {
+      if (!u.pulseSubscribed || !u.email) continue;
+      const effectiveIndustry = u.pulseIndustry || (u.companyId ? companyMap.get(u.companyId)?.pulseIndustry : null);
+      if (effectiveIndustry === industry) {
+        result.push({ email: u.email, name: u.name || "" });
+      }
+    }
+    return result;
   }
 
   async getAdminPreferences(userId: string): Promise<AdminPreferences | undefined> {

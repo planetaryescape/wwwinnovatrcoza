@@ -2561,6 +2561,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Send full industry batch mailer (all 5 industries, deduplicated)
+  app.post("/api/admin/send-industry-mailer-batch", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const INDUSTRY_ORDER = ["financial", "beauty", "health", "food", "bev"];
+      const mailerFnMap: Record<string, (to: string, firstName: string) => Promise<any>> = {
+        financial: emailService.sendFinancialPulseMailer,
+        beauty: emailService.sendBeautyPulseMailer,
+        health: emailService.sendHealthPulseMailer,
+        food: emailService.sendFoodPulseMailer,
+        bev: emailService.sendPulseMailer,
+      };
+
+      const seenEmails = new Set<string>();
+      const summary: Record<string, number> = {};
+      let totalSent = 0;
+      let totalSkipped = 0;
+
+      for (const industry of INDUSTRY_ORDER) {
+        const subscribers = await storage.getPulseSubscribersByIndustry(industry);
+        let sent = 0;
+        for (const sub of subscribers) {
+          const email = sub.email.toLowerCase();
+          if (seenEmails.has(email)) { totalSkipped++; continue; }
+          seenEmails.add(email);
+          const rawFirst = sub.name?.split(" ")[0] || "there";
+          const firstName = rawFirst.charAt(0).toUpperCase() + rawFirst.slice(1).toLowerCase();
+          await mailerFnMap[industry](sub.email, firstName);
+          sent++;
+          totalSent++;
+        }
+        summary[industry] = sent;
+      }
+
+      // Mark all scheduled insight mailer entries as sent
+      const allMailers = await storage.getAllInsightMailers();
+      for (const m of allMailers) {
+        if (m.targetIndustry && INDUSTRY_ORDER.includes(m.targetIndustry) && m.status === "scheduled") {
+          await storage.updateInsightMailer(m.id, { status: "sent" });
+        }
+      }
+
+      res.json({ success: true, sent: totalSent, skipped: totalSkipped, byIndustry: summary });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Send Pulse industry mailer
   app.post("/api/admin/send-pulse-mailer", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
