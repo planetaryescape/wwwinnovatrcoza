@@ -2140,6 +2140,7 @@ export async function sendPredictiveModellingMailer(to: string, firstName: strin
   const fromEmail = await getFromEmail();
   const baseUrl = process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : FRONTEND_URL;
   const portalUrl = `${baseUrl}/portal/insights`;
+  const heroImageUrl = `${baseUrl}/reports/predictive-modelling.jpg`;
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -2152,14 +2153,7 @@ export async function sendPredictiveModellingMailer(to: string, firstName: strin
 
         <tr><td style="background-color:${BRAND_COLOR};padding:10px 24px;text-align:center;"><span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Innovatr Insights</span></td></tr>
 
-        <tr><td style="padding:0;line-height:0;">
-          <div style="background:linear-gradient(135deg,#0f0f2e 0%,#1a1a4e 40%,#2d2d7e 70%,${BRAND_COLOR} 100%);padding:56px 40px 48px;text-align:center;">
-            <p style="margin:0 0 10px;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.6);">Cross-Industry Insight</p>
-            <h1 style="margin:0 0 12px;font-size:32px;font-weight:900;color:#ffffff;line-height:1.2;letter-spacing:-0.5px;">Predictive Modelling<br>Behaviour</h1>
-            <p style="margin:0;font-size:16px;color:rgba(255,255,255,0.8);line-height:1.5;font-weight:400;">South African consumers are now predictable enough<br>to model — 4 to 6 weeks before they act.</p>
-            <div style="margin:24px auto 0;width:48px;height:2px;background:rgba(255,255,255,0.3);border-radius:2px;"></div>
-          </div>
-        </td></tr>
+        <tr><td style="padding:0;line-height:0;"><img src="${heroImageUrl}" alt="Predictive Modelling Behaviour" width="600" style="display:block;width:100%;max-width:600px;height:auto;" /></td></tr>
 
         <tr><td style="padding:32px 32px 8px;text-align:center;">
           <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${BRAND_COLOR};">Innovatr Research · Methodology Series</p>
