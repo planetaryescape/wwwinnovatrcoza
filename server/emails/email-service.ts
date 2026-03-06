@@ -1674,7 +1674,7 @@ export async function sendPulseMailer(to: string, firstName: string = "there") {
 
           <!-- Top label bar -->
           <tr>
-            <td style="background-color:${BRAND_COLOR};padding:10px 24px;">
+            <td style="background-color:${BRAND_COLOR};padding:10px 24px;text-align:center;">
               <span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Innovatr Insights</span>
             </td>
           </tr>
@@ -1688,7 +1688,7 @@ export async function sendPulseMailer(to: string, firstName: string = "there") {
 
           <!-- Title block -->
           <tr>
-            <td style="padding:32px 32px 8px;">
+            <td style="padding:32px 32px 8px;text-align:center;">
               <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${BRAND_COLOR};">Industry Insight · Beverages</p>
               <h1 style="margin:0 0 12px;font-size:26px;font-weight:800;color:#0f0f11;line-height:1.25;">Home Is the New Bar (Again, But Smarter)</h1>
               <p style="margin:0;font-size:16px;color:#444;line-height:1.5;font-weight:500;">South Africans aren't going out less. They're drinking differently.</p>
