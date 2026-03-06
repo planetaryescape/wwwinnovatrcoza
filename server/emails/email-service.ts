@@ -2135,4 +2135,140 @@ You're receiving this as an Innovatr Insights subscriber. To unsubscribe reply t
   return response;
 }
 
+export async function sendPredictiveModellingMailer(to: string, firstName: string = "there") {
+  const resend = await getResendClient();
+  const fromEmail = await getFromEmail();
+  const baseUrl = process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : FRONTEND_URL;
+  const portalUrl = `${baseUrl}/portal/insights`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Predictive Modelling Behaviour | Innovatr Insights</title></head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
+  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;color:#f4f4f5;">The signals were there. Brands that read them acted first. &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f4f5;">
+    <tr><td align="center" style="padding:24px 16px;">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+
+        <tr><td style="background-color:${BRAND_COLOR};padding:10px 24px;text-align:center;"><span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Innovatr Insights</span></td></tr>
+
+        <tr><td style="padding:0;line-height:0;">
+          <div style="background:linear-gradient(135deg,#0f0f2e 0%,#1a1a4e 40%,#2d2d7e 70%,${BRAND_COLOR} 100%);padding:56px 40px 48px;text-align:center;">
+            <p style="margin:0 0 10px;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.6);">Cross-Industry Insight</p>
+            <h1 style="margin:0 0 12px;font-size:32px;font-weight:900;color:#ffffff;line-height:1.2;letter-spacing:-0.5px;">Predictive Modelling<br>Behaviour</h1>
+            <p style="margin:0;font-size:16px;color:rgba(255,255,255,0.8);line-height:1.5;font-weight:400;">South African consumers are now predictable enough<br>to model — 4 to 6 weeks before they act.</p>
+            <div style="margin:24px auto 0;width:48px;height:2px;background:rgba(255,255,255,0.3);border-radius:2px;"></div>
+          </div>
+        </td></tr>
+
+        <tr><td style="padding:32px 32px 8px;text-align:center;">
+          <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${BRAND_COLOR};">Innovatr Research · Methodology Series</p>
+          <p style="margin:0;font-size:16px;color:#444;line-height:1.5;font-weight:500;">How Innovatr reads the signals before consumers switch — and what your brand can do with that lead time.</p>
+        </td></tr>
+
+        <tr><td style="padding:16px 32px 0;"><hr style="border:none;border-top:1px solid #eee;margin:0;" /></td></tr>
+
+        <tr><td style="padding:24px 32px 0;">
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">Hey ${firstName},</p>
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">Most brands find out a consumer switched after it happened. The quarterly tracker comes back. The sales data tells you. By then, you've lost the window.</p>
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">Innovatr's predictive modelling work starts from a different question: what are consumers doing in the weeks <em>before</em> they change behaviour? Not what they've done. What they're about to do.</p>
+          <p style="margin:0;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">The answer is: a lot. And it's now detectable.</p>
+        </td></tr>
+
+        <tr><td style="padding:24px 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f8f9ff;border-radius:8px;overflow:hidden;">
+            <tr>
+              <td width="33%" style="padding:20px 16px;text-align:center;border-right:1px solid #eaecf8;"><p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">67%</p><p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">Purchase decisions<br>modelable 4–6 weeks out</p></td>
+              <td width="33%" style="padding:20px 16px;text-align:center;border-right:1px solid #eaecf8;"><p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">3.2x</p><p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">Better conversion when<br>timed to intent windows</p></td>
+              <td width="33%" style="padding:20px 16px;text-align:center;"><p style="margin:0 0 4px;font-size:28px;font-weight:800;color:${BRAND_COLOR};">41%</p><p style="margin:0;font-size:11px;color:${MUTED_COLOR};text-transform:uppercase;letter-spacing:0.5px;">Brand switchers show<br>detectable signals first</p></td>
+            </tr>
+          </table>
+        </td></tr>
+
+        <tr><td style="padding:0 32px 24px;">
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;"><strong>What the signals look like</strong></p>
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">Across Innovatr's research panels, category switchers consistently exhibit three pre-switch patterns: they begin comparing (but haven't acted yet), they shift how they describe the category in qualitative responses, and they start engaging with adjacent brand content without consciously seeking alternatives.</p>
+          <p style="margin:0 0 16px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">None of these signals is decisive on its own. Together, they create a composite score we call the <strong>Intent Velocity Index</strong> — a leading indicator of who is about to move, and in which direction.</p>
+          <p style="margin:0;font-size:15px;color:${TEXT_COLOR};line-height:1.75;">When Intent Velocity accelerates for a segment, brands that intervene in that 4–6 week window — with the right message and the right offer — recover 3 times more of those at-risk consumers than brands that wait for the quarterly report.</p>
+        </td></tr>
+
+        <tr><td style="padding:0 32px 24px;">
+          <p style="margin:0 0 14px;font-size:15px;color:${TEXT_COLOR};line-height:1.75;"><strong>The categories where this matters most right now</strong></p>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td style="padding:10px 16px;background:#f0f1fe;border-radius:6px;margin-bottom:8px;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="font-size:13px;font-weight:700;color:${BRAND_COLOR};width:140px;vertical-align:top;padding:0 12px 0 0;">Financial services</td>
+                    <td style="font-size:13px;color:${TEXT_COLOR};line-height:1.5;">Banking app abandonment, credit provider switching, and savings product disengagement — all showing elevated pre-switch activity right now.</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr><td style="height:6px;"></td></tr>
+            <tr>
+              <td style="padding:10px 16px;background:#f0f1fe;border-radius:6px;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="font-size:13px;font-weight:700;color:${BRAND_COLOR};width:140px;vertical-align:top;padding:0 12px 0 0;">FMCG &amp; food</td>
+                    <td style="font-size:13px;color:${TEXT_COLOR};line-height:1.5;">Private label migration continuing. Brands with strong loyalty programmes are seeing Intent Velocity slow — but only where they've invested in visible value.</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr><td style="height:6px;"></td></tr>
+            <tr>
+              <td style="padding:10px 16px;background:#f0f1fe;border-radius:6px;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="font-size:13px;font-weight:700;color:${BRAND_COLOR};width:140px;vertical-align:top;padding:0 12px 0 0;">Health &amp; wellness</td>
+                    <td style="font-size:13px;color:${TEXT_COLOR};line-height:1.5;">Supplement category showing unusually high intent velocity — driven by creator influence and price comparison behaviour, not dissatisfaction.</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+
+        <tr><td style="padding:0 32px 28px;">
+          <div style="border-left:4px solid ${BRAND_COLOR};background:#f5f6ff;padding:16px 20px;border-radius:0 6px 6px 0;">
+            <p style="margin:0;font-size:15px;color:#1a1a2e;line-height:1.6;font-style:italic;">"Predictive modelling isn't about being clever with data. It's about giving your team enough lead time to actually do something about what's coming."</p>
+            <p style="margin:8px 0 0;font-size:12px;color:${BRAND_COLOR};font-weight:700;letter-spacing:0.5px;">— INNOVATR RESEARCH TEAM</p>
+          </div>
+        </td></tr>
+
+        <tr><td style="padding:0 32px 12px;text-align:center;"><a href="${portalUrl}" style="display:inline-block;background-color:${BRAND_COLOR};color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:6px;font-weight:700;font-size:15px;letter-spacing:0.3px;">Explore Full Intelligence →</a></td></tr>
+
+        <tr><td style="padding:12px 32px 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1.5px solid #e0e3f7;border-radius:8px;overflow:hidden;">
+            <tr><td style="padding:24px 28px;text-align:center;">
+              <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${BRAND_COLOR};">Want This For Your Category?</p>
+              <p style="margin:0 0 12px;font-size:16px;font-weight:700;color:${TEXT_COLOR};line-height:1.3;">Commission a Predictive Modelling Study</p>
+              <p style="margin:0 0 20px;font-size:13px;color:${MUTED_COLOR};line-height:1.6;">Innovatr runs bespoke predictive research for brands who want to see where their category is moving — before the market does. Category-specific Intent Velocity modelling is available to Innovatr members as a commissioned study. Get in touch to discuss your category.</p>
+              <a href="mailto:hannah@innovatr.co.za?subject=Predictive Modelling Study Enquiry" style="display:inline-block;background-color:#f5f6ff;color:${BRAND_COLOR};text-decoration:none;padding:10px 24px;border-radius:6px;font-weight:600;font-size:14px;border:1.5px solid ${BRAND_COLOR};">Enquire Now</a>
+            </td></tr>
+          </table>
+        </td></tr>
+
+        <tr><td style="background-color:#fafafa;border-top:1px solid #eee;padding:20px 32px;text-align:center;">
+          <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#0f0f11;">Innovatr</p>
+          <p style="margin:0;font-size:12px;color:${MUTED_COLOR};line-height:1.6;">You're receiving this as an Innovatr Insights subscriber.&nbsp;&nbsp;|&nbsp;&nbsp;<a href="mailto:hannah@innovatr.co.za?subject=Unsubscribe" style="color:${MUTED_COLOR};">Unsubscribe</a></p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+
+  const response = await resend.emails.send({
+    from: `Innovatr <${fromEmail}>`,
+    to: [to],
+    subject: "The Signals Were There. Did Your Brand See Them?",
+    html,
+    text: `INNOVATR INSIGHTS\n\nPredictive Modelling Behaviour\n\nHey ${firstName},\n\n67% of purchase decisions in studied categories can be modelled 4–6 weeks before they happen. 41% of brand switchers show detectable signals before they act. Brands that respond in that window convert 3.2x better.\n\nExplore full intelligence: ${portalUrl}`,
+  });
+  console.log("Predictive Modelling mailer sent:", response);
+  return response;
+}
+
 export { FRONTEND_URL };

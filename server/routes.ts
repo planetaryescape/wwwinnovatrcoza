@@ -2561,6 +2561,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Send a preview mailer to a single address (for internal testing)
+  app.post("/api/admin/send-preview-mailer", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { type, to } = req.body;
+      const recipient = to || "hannah@innovatr.co.za";
+      const firstName = "Hannah";
+      let response: any;
+      if (type === "predictive-modelling") {
+        response = await emailService.sendPredictiveModellingMailer(recipient, firstName);
+      } else {
+        return res.status(400).json({ error: "Unknown preview type" });
+      }
+      res.json({ success: true, response });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Send full industry batch mailer (all 5 industries, deduplicated)
   app.post("/api/admin/send-industry-mailer-batch", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
