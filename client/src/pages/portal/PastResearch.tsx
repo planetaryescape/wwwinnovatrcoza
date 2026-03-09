@@ -100,6 +100,7 @@ interface Study {
   tags: string[];
   reportUrl: string | null;
   deliveryDate: string | null;
+  clientReportId: string | null;
   submittedByEmail: string;
   submittedByName: string | null;
   createdAt: string;
@@ -285,9 +286,12 @@ export default function PastResearch() {
   const completedStudies = studies.filter(s => {
     if (s.status !== "COMPLETED") return false;
     
-    // Check if there's a client report with the same title - if so, skip this study
+    // If the study is directly linked to a client report, hide it (report card will show)
+    if (s.clientReportId) return false;
+    
+    // Also check if there's a client report with the same title (trim to avoid trailing-space mismatches)
     const hasMatchingReport = reports.some(r => 
-      r.title.toLowerCase() === s.title.toLowerCase()
+      r.title.trim().toLowerCase() === s.title.trim().toLowerCase()
     );
     if (hasMatchingReport) return false;
     
