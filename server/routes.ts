@@ -1654,7 +1654,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               title: `${brief.companyBrand || brief.companyName} - ${isBasic ? "Test24 Basic" : "Test24 Pro"}`,
               description: brief.researchObjective?.slice(0, 200) || "",
               studyType: isBasic ? "basic" : "pro",
-              status: brief.status === "completed" ? "COMPLETED" : brief.status === "in_progress" ? "AUDIENCE_LIVE" : "NEW",
+              status: brief.status === "in_progress" ? "AUDIENCE_LIVE" : "NEW",
               isTest24: true,
               tags: [brief.companyName, isBasic ? "basic" : "pro", brief.industry || ""].filter(Boolean),
               submittedByEmail: brief.submittedByEmail,
