@@ -91,6 +91,8 @@ interface AnalyticsData {
     };
     newUsersThisMonth: number;
     newCompaniesThisMonth: number;
+    newUsersInPeriod: number;
+    newCompaniesInPeriod: number;
   };
   authActivity?: AuthActivity;
   test24Stats: Test24Stats;
@@ -106,6 +108,8 @@ interface AnalyticsData {
     totalDownloads: number;
     viewsThisMonth: number;
     downloadsThisMonth: number;
+    allTimeViews: number;
+    allTimeDownloads: number;
     mostPopularReport: { id: string; title: string; views: number } | null;
   };
   periodLabel?: string;
@@ -284,7 +288,7 @@ export default function AdminOverview() {
                     {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.metrics.totalUsers || 0}</p>}
                   </div>
                 </div>
-                {!loading && <p className="text-xs text-muted-foreground pl-10">+{analytics?.metrics.newUsersThisMonth || 0} this month</p>}
+                {!loading && <p className="text-xs text-muted-foreground pl-10">+{analytics?.metrics.newUsersInPeriod ?? analytics?.metrics.newUsersThisMonth ?? 0} in {periodLabel.toLowerCase()}</p>}
               </div>
               
               <div className="space-y-1" data-testid="stat-companies">
@@ -297,7 +301,7 @@ export default function AdminOverview() {
                     {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.metrics.totalCompanies || 0}</p>}
                   </div>
                 </div>
-                {!loading && <p className="text-xs text-muted-foreground pl-10">+{analytics?.metrics.newCompaniesThisMonth || 0} this month</p>}
+                {!loading && <p className="text-xs text-muted-foreground pl-10">+{analytics?.metrics.newCompaniesInPeriod ?? analytics?.metrics.newCompaniesThisMonth ?? 0} in {periodLabel.toLowerCase()}</p>}
               </div>
               
               <div className="space-y-1" data-testid="stat-studies">
@@ -357,11 +361,11 @@ export default function AdminOverview() {
                     <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Total Views</p>
+                    <p className="text-xs text-muted-foreground">Views</p>
                     {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.reportEngagement?.totalViews || 0}</p>}
                   </div>
                 </div>
-                {!loading && <p className="text-xs text-muted-foreground pl-10">+{analytics?.reportEngagement?.viewsThisMonth || 0} in period</p>}
+                {!loading && <p className="text-xs text-muted-foreground pl-10">{analytics?.reportEngagement?.allTimeViews || 0} all time</p>}
               </div>
               
               <div className="space-y-1" data-testid="stat-total-downloads">
@@ -370,11 +374,11 @@ export default function AdminOverview() {
                     <Download className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Total Downloads</p>
+                    <p className="text-xs text-muted-foreground">Downloads</p>
                     {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.reportEngagement?.totalDownloads || 0}</p>}
                   </div>
                 </div>
-                {!loading && <p className="text-xs text-muted-foreground pl-10">+{analytics?.reportEngagement?.downloadsThisMonth || 0} in period</p>}
+                {!loading && <p className="text-xs text-muted-foreground pl-10">{analytics?.reportEngagement?.allTimeDownloads || 0} all time</p>}
               </div>
             </div>
             

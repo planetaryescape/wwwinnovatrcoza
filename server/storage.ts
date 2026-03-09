@@ -208,6 +208,8 @@ export interface IStorage {
     totalDownloads: number;
     viewsThisMonth: number;
     downloadsThisMonth: number;
+    allTimeViews: number;
+    allTimeDownloads: number;
     mostPopularReport: { id: string; title: string; views: number } | null;
   }>;
   
@@ -1779,12 +1781,15 @@ export class DatabaseStorage implements IStorage {
 
     const allEvents = await db.select().from(reportEvents);
     
-    const totalViews = allEvents.filter(e => e.eventType === 'view').length;
-    const totalDownloads = allEvents.filter(e => e.eventType === 'download').length;
+    const allViews = allEvents.filter(e => e.eventType === 'view').length;
+    const allDownloads = allEvents.filter(e => e.eventType === 'download').length;
     
-    const periodEvents = allEvents.filter(e => new Date(e.createdAt) >= periodStart);
+    const periodEvents = allEvents.filter(e => new Date(e.occurredAt) >= periodStart);
     const viewsThisMonth = periodEvents.filter(e => e.eventType === 'view').length;
     const downloadsThisMonth = periodEvents.filter(e => e.eventType === 'download').length;
+    
+    const totalViews = viewsThisMonth;
+    const totalDownloads = downloadsThisMonth;
     
     const periodViews = periodEvents.filter(e => e.eventType === 'view');
     const viewsByReport: Record<string, number> = {};
@@ -1804,7 +1809,7 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
-    return { totalViews, totalDownloads, viewsThisMonth, downloadsThisMonth, mostPopularReport };
+    return { totalViews, totalDownloads, viewsThisMonth, downloadsThisMonth, allTimeViews: allViews, allTimeDownloads: allDownloads, mostPopularReport };
   }
   
   async getUserReportDownloadCount(userId: string): Promise<number> {

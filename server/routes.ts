@@ -1786,6 +1786,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const usersThisMonth = users.filter((u) => new Date(u.createdAt) >= calendarMonthStart).length;
       const companiesThisMonth = companies.filter((c) => new Date(c.createdAt) >= calendarMonthStart).length;
       
+      // Period-based "new" counters for sub-labels that respond to period selector
+      const newUsersInPeriod = users.filter((u) => new Date(u.createdAt) >= startDate).length;
+      const newCompaniesInPeriod = companies.filter((c) => new Date(c.createdAt) >= startDate).length;
+      
       // Count PUBLIC reports (truly free to all)
       const freeReportsCount = reports.filter((r) => 
         r.status === "published" && 
@@ -1841,6 +1845,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
           newUsersThisMonth: usersThisMonth,
           newCompaniesThisMonth: companiesThisMonth,
+          newUsersInPeriod,
+          newCompaniesInPeriod,
         },
         authActivity: {
           loginsThisMonth: totalLogins,
