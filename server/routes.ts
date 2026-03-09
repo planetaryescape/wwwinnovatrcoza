@@ -1599,18 +1599,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const now = new Date();
       let startDate: Date;
       
+      let periodLabel: string;
       switch (period) {
+        case "1d":
+          startDate = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
+          periodLabel = "Last 24 hrs";
+          break;
+        case "3d":
+          startDate = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+          periodLabel = "Last 3 days";
+          break;
         case "7d":
           startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          periodLabel = "Last 7 days";
           break;
         case "30d":
           startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          periodLabel = "Last 30 days";
           break;
         case "year":
           startDate = new Date(now.getFullYear(), 0, 1);
+          periodLabel = "This year";
+          break;
+        case "all":
+          startDate = new Date(0);
+          periodLabel = "All time";
           break;
         default:
-          startDate = new Date(0); // All time
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          periodLabel = "Last 30 days";
       }
 
       // Fetch all data
@@ -1764,10 +1781,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           topics: r.topics || [],
         }));
 
-      // Calculate "this month" metrics
-      const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const usersThisMonth = users.filter((u) => new Date(u.createdAt) >= thisMonthStart).length;
-      const companiesThisMonth = companies.filter((c) => new Date(c.createdAt) >= thisMonthStart).length;
+      // Calendar "this month" for absolute counters (always calendar-month, not period-dependent)
+      const calendarMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const usersThisMonth = users.filter((u) => new Date(u.createdAt) >= calendarMonthStart).length;
+      const companiesThisMonth = companies.filter((c) => new Date(c.createdAt) >= calendarMonthStart).length;
       
       // Count PUBLIC reports (truly free to all)
       const freeReportsCount = reports.filter((r) => 
@@ -1776,12 +1793,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         (r.accessLevel === "PUBLIC" || r.accessLevel === "public")
       ).length;
 
-      // Test24 tracker stats
+      // Test24 tracker stats — all-time totals stay all-time; period stats use startDate
       const test24BasicTotal = studies.filter((s) => s.isTest24 && s.studyType === "basic").length;
       const test24ProTotal = studies.filter((s) => s.isTest24 && s.studyType === "pro").length;
-      const test24ThisMonth = studies.filter((s) => s.isTest24 && new Date(s.createdAt) >= thisMonthStart);
-      const test24BasicThisMonth = test24ThisMonth.filter((s) => s.studyType === "basic").length;
-      const test24ProThisMonth = test24ThisMonth.filter((s) => s.studyType === "pro").length;
+      const test24InPeriod = studies.filter((s) => s.isTest24 && new Date(s.createdAt) >= startDate);
+      const test24BasicThisMonth = test24InPeriod.filter((s) => s.studyType === "basic").length;
+      const test24ProThisMonth = test24InPeriod.filter((s) => s.studyType === "pro").length;
       const test24InProgress = studies.filter((s) => 
         s.isTest24 && 
         (s.status === "in_progress" || s.status === "AUDIENCE_LIVE" || s.status === "ANALYSING_DATA" || s.status === "IN_PROGRESS")
@@ -1790,13 +1807,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const test24CompletedPro = studies.filter((s) => s.isTest24 && s.studyType === "pro" && s.status === "COMPLETED").length;
       const test24Completed = test24CompletedBasic + test24CompletedPro;
 
-      const recentActivity = await storage.getActivityEventsSince(thisMonthStart);
+      // Activity metrics — now use startDate so they respond to the selected period
+      const recentActivity = await storage.getActivityEventsSince(startDate);
       const loginFailures = recentActivity.filter(a => a.actionType === "login_failed").length;
       const passwordResetRequests = recentActivity.filter(a => a.actionType === "password_reset_requested").length;
       const passwordResetCompletions = recentActivity.filter(a => a.actionType === "password_reset_completed").length;
       const totalLogins = recentActivity.filter(a => a.actionType === "login").length;
       
-      const activeUsersThisMonth = new Set(
+      const activeUsersInPeriod = new Set(
         recentActivity.filter(a => a.actionType === "login").map(a => a.userId)
       ).size;
       
@@ -1829,10 +1847,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           loginFailuresThisMonth: loginFailures,
           passwordResetRequestsThisMonth: passwordResetRequests,
           passwordResetCompletionsThisMonth: passwordResetCompletions,
-          activeUsersThisMonth,
+          activeUsersThisMonth: activeUsersInPeriod,
           usersNeverLoggedIn,
           usersInactive30Days,
         },
+        periodLabel,
         test24Stats: {
           totalBasic: test24BasicTotal,
           totalPro: test24ProTotal,
@@ -1877,7 +1896,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         test24Studies,
         freeReports,
         activeDeals: deals.filter((d) => d.isActive).length,
-        reportEngagement: await storage.getGlobalReportEngagement(),
+        reportEngagement: await storage.getGlobalReportEngagement(startDate),
         timestamp: new Date(),
       });
     } catch (error: any) {
@@ -2820,18 +2839,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Company management endpoints
   app.get("/api/admin/companies", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
-      const companies = await storage.getAllCompanies();
-      // Get study counts for each company
-      const companiesWithStudyCounts = await Promise.all(
+      const [companies, allUsers, allActivity] = await Promise.all([
+        storage.getAllCompanies(),
+        storage.getAllUsers(),
+        storage.getActivityEventsSince(new Date(0)),
+      ]);
+
+      const companiesWithStats = await Promise.all(
         companies.map(async (company) => {
           const briefs = await storage.getBriefSubmissionsByCompanyId(company.id);
+          
+          // Members in this company
+          const companyUsers = allUsers.filter(u => u.companyId === company.id);
+          const memberCount = companyUsers.length;
+          
+          // Last activity: most recent lastLoginAt across all company users
+          const loginDates = companyUsers
+            .map(u => u.lastLoginAt ? new Date(u.lastLoginAt).getTime() : 0)
+            .filter(t => t > 0);
+          const lastActivityAt = loginDates.length > 0
+            ? new Date(Math.max(...loginDates)).toISOString()
+            : null;
+
+          // Activity event counts for this company
+          const companyUserIds = new Set(companyUsers.map(u => u.id));
+          const companyEvents = allActivity.filter(e => 
+            e.companyId === company.id || companyUserIds.has(e.userId || "")
+          );
+          const totalLogins = companyEvents.filter(e => e.actionType === "login").length;
+          const reportActionTypes = ["view_report", "download_report", "view_client_report", "download_client_report"];
+          const reportsAccessed = companyEvents.filter(e => reportActionTypes.includes(e.actionType)).length;
+
           return {
             ...company,
             studyCount: briefs.length,
+            memberCount,
+            lastActivityAt,
+            totalLogins,
+            reportsAccessed,
           };
         })
       );
-      res.json(companiesWithStudyCounts);
+      res.json(companiesWithStats);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }

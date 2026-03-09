@@ -203,7 +203,7 @@ export interface IStorage {
   }>;
   upsertReportLastViewed(data: { reportId: string; userId: string; userName?: string; userEmail?: string; memberTier?: string; companyName?: string }): Promise<ReportLastViewed>;
   getReportViewers(reportId: string): Promise<ReportLastViewed[]>;
-  getGlobalReportEngagement(): Promise<{
+  getGlobalReportEngagement(since?: Date): Promise<{
     totalViews: number;
     totalDownloads: number;
     viewsThisMonth: number;
@@ -1768,38 +1768,27 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(reportLastViewed.lastViewedAt));
   }
 
-  async getGlobalReportEngagement(): Promise<{
+  async getGlobalReportEngagement(since?: Date): Promise<{
     totalViews: number;
     totalDownloads: number;
     viewsThisMonth: number;
     downloadsThisMonth: number;
     mostPopularReport: { id: string; title: string; views: number } | null;
   }> {
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const periodStart = since ?? new Date(0);
 
-    // Get all report events
     const allEvents = await db.select().from(reportEvents);
     
-    // Calculate totals
     const totalViews = allEvents.filter(e => e.eventType === 'view').length;
     const totalDownloads = allEvents.filter(e => e.eventType === 'download').length;
     
-    // Calculate this month's stats
-    const viewsThisMonth = allEvents.filter(e => 
-      e.eventType === 'view' && new Date(e.createdAt) >= monthStart
-    ).length;
-    const downloadsThisMonth = allEvents.filter(e => 
-      e.eventType === 'download' && new Date(e.createdAt) >= monthStart
-    ).length;
+    const periodEvents = allEvents.filter(e => new Date(e.createdAt) >= periodStart);
+    const viewsThisMonth = periodEvents.filter(e => e.eventType === 'view').length;
+    const downloadsThisMonth = periodEvents.filter(e => e.eventType === 'download').length;
     
-    // Find most popular report this month (by views)
-    const thisMonthViews = allEvents.filter(e => 
-      e.eventType === 'view' && new Date(e.createdAt) >= monthStart
-    );
-    
+    const periodViews = periodEvents.filter(e => e.eventType === 'view');
     const viewsByReport: Record<string, number> = {};
-    thisMonthViews.forEach(e => {
+    periodViews.forEach(e => {
       viewsByReport[e.reportId] = (viewsByReport[e.reportId] || 0) + 1;
     });
     
@@ -1809,25 +1798,13 @@ export class DatabaseStorage implements IStorage {
       const topReportId = Object.entries(viewsByReport)
         .sort((a, b) => b[1] - a[1])[0][0];
       const topViews = viewsByReport[topReportId];
-      
-      // Get report title
       const report = await this.getReport(topReportId);
       if (report) {
-        mostPopularReport = {
-          id: topReportId,
-          title: report.title,
-          views: topViews,
-        };
+        mostPopularReport = { id: topReportId, title: report.title, views: topViews };
       }
     }
     
-    return {
-      totalViews,
-      totalDownloads,
-      viewsThisMonth,
-      downloadsThisMonth,
-      mostPopularReport,
-    };
+    return { totalViews, totalDownloads, viewsThisMonth, downloadsThisMonth, mostPopularReport };
   }
   
   async getUserReportDownloadCount(userId: string): Promise<number> {

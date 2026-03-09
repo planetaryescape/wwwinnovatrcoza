@@ -62,7 +62,9 @@ import {
   Eye,
   Check,
   X,
-  Pencil
+  Pencil,
+  LogIn,
+  FlaskConical,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -87,6 +89,10 @@ interface Company {
   logoUrl: string | null;
   dealDetails: string | null;
   studyCount: number;
+  memberCount: number;
+  lastActivityAt: string | null;
+  totalLogins: number;
+  reportsAccessed: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -285,6 +291,9 @@ export default function AdminCompanies() {
   const stats = {
     total: companies.length,
     totalStudies: companies.reduce((sum, c) => sum + (c.studyCount || 0), 0),
+    totalMembers: companies.reduce((sum, c) => sum + (c.memberCount || 0), 0),
+    totalLogins: companies.reduce((sum, c) => sum + (c.totalLogins || 0), 0),
+    totalReportsAccessed: companies.reduce((sum, c) => sum + (c.reportsAccessed || 0), 0),
     free: companies.filter(c => c.tier === "FREE").length,
     starter: companies.filter(c => c.tier === "STARTER").length,
     growth: companies.filter(c => c.tier === "GROWTH").length,
@@ -293,6 +302,20 @@ export default function AdminCompanies() {
     usedBasicCredits: companies.reduce((sum, c) => sum + c.basicCreditsUsed, 0),
     totalProCredits: companies.reduce((sum, c) => sum + c.proCreditsTotal, 0),
     usedProCredits: companies.reduce((sum, c) => sum + c.proCreditsUsed, 0),
+  };
+
+  const formatRelativeDate = (dateStr: string | null): string => {
+    if (!dateStr) return "Never";
+    const now = Date.now();
+    const then = new Date(dateStr).getTime();
+    const diffMs = now - then;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
+    return `${Math.floor(diffDays / 365)}y ago`;
   };
 
   const handleOpenProfile = async (company: Company) => {
@@ -734,10 +757,18 @@ export default function AdminCompanies() {
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4 text-center">
+            <div className="grid grid-cols-2 gap-3 text-center">
               <div>
                 <div className="text-lg font-bold" data-testid="text-total-companies">{stats.total}</div>
                 <div className="text-[10px] text-muted-foreground">Companies</div>
+              </div>
+              <div>
+                <div className="text-lg font-bold" data-testid="text-total-members">{stats.totalMembers}</div>
+                <div className="text-[10px] text-muted-foreground">Members</div>
+              </div>
+              <div>
+                <div className="text-lg font-bold" data-testid="text-total-logins">{stats.totalLogins}</div>
+                <div className="text-[10px] text-muted-foreground">Total Logins</div>
               </div>
               <div>
                 <div className="text-lg font-bold" data-testid="text-total-studies">{stats.totalStudies}</div>
@@ -843,9 +874,11 @@ export default function AdminCompanies() {
                 <TableRow>
                   <TableHead>Company</TableHead>
                   <TableHead>Tier</TableHead>
-                  <TableHead>Days Left</TableHead>
-                  <TableHead>Basic Credits</TableHead>
-                  <TableHead>Pro Credits</TableHead>
+                  <TableHead>Members</TableHead>
+                  <TableHead>Last Active</TableHead>
+                  <TableHead>Logins</TableHead>
+                  <TableHead>Reports</TableHead>
+                  <TableHead>Credits (B/P)</TableHead>
                   <TableHead>Studies</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
@@ -854,6 +887,9 @@ export default function AdminCompanies() {
                 {filteredCompanies.map((company) => {
                   const tierInfo = tierConfig[company.tier] || tierConfig.STARTER;
                   const TierIcon = tierInfo.icon;
+                  const lastActive = formatRelativeDate(company.lastActivityAt);
+                  const isInactive = company.lastActivityAt === null || 
+                    (Date.now() - new Date(company.lastActivityAt).getTime()) > 30 * 24 * 60 * 60 * 1000;
                   return (
                     <TableRow key={company.id} data-testid={`row-company-${company.id}`}>
                       <TableCell>
@@ -870,25 +906,41 @@ export default function AdminCompanies() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {(() => {
-                          if (company.tier === "FREE") return <span className="text-muted-foreground">Unlimited</span>;
-                          const daysLeft = getContractDaysRemaining(company.contractStart);
-                          if (daysLeft === null) return <span className="text-muted-foreground">—</span>;
-                          if (daysLeft <= 0) return <Badge variant="destructive">Expired</Badge>;
-                          if (daysLeft <= 30) return <Badge variant="destructive">{daysLeft} days</Badge>;
-                          if (daysLeft <= 90) return <Badge variant="secondary" className="bg-amber-100 text-amber-800">{daysLeft} days</Badge>;
-                          return <span className="font-medium">{daysLeft} days</span>;
-                        })()}
+                        <div className="flex items-center gap-1">
+                          <Users className="w-3 h-3 text-muted-foreground" />
+                          <span className="font-medium">{company.memberCount || 0}</span>
+                        </div>
                       </TableCell>
                       <TableCell>
-                        <span className="font-medium">{company.basicCreditsTotal - company.basicCreditsUsed}</span>
+                        <span 
+                          className={`text-sm ${isInactive ? "text-amber-600 dark:text-amber-400" : "text-foreground"}`}
+                          data-testid={`text-last-active-${company.id}`}
+                        >
+                          {lastActive}
+                        </span>
                       </TableCell>
                       <TableCell>
-                        <span className="font-medium">{company.proCreditsTotal - company.proCreditsUsed}</span>
+                        <div className="flex items-center gap-1">
+                          <LogIn className="w-3 h-3 text-muted-foreground" />
+                          <span className="font-medium">{company.totalLogins || 0}</span>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <FileText className="w-3 h-3 text-muted-foreground" />
+                          <span className="font-medium">{company.reportsAccessed || 0}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-medium">
+                          {company.basicCreditsTotal - company.basicCreditsUsed}
+                          <span className="text-muted-foreground"> / </span>
+                          {company.proCreditsTotal - company.proCreditsUsed}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <FlaskConical className="w-3 h-3 text-muted-foreground" />
                           <span>{company.studyCount || 0}</span>
                         </div>
                       </TableCell>

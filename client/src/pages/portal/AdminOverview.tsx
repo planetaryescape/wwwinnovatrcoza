@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Users, 
   Building2, 
@@ -107,8 +108,18 @@ interface AnalyticsData {
     downloadsThisMonth: number;
     mostPopularReport: { id: string; title: string; views: number } | null;
   };
+  periodLabel?: string;
   timestamp: string;
 }
+
+const PERIOD_OPTIONS = [
+  { value: "1d",   label: "Last 24 hrs" },
+  { value: "3d",   label: "Last 3 days" },
+  { value: "7d",   label: "Last 7 days" },
+  { value: "30d",  label: "Last 30 days" },
+  { value: "year", label: "This year" },
+  { value: "all",  label: "All time" },
+];
 
 const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
   "AUDIENCE_LIVE": { label: "Live", color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300", icon: Play },
@@ -122,12 +133,13 @@ export default function AdminOverview() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [period, setPeriod] = useState("30d");
 
-  const fetchAnalytics = useCallback(async () => {
+  const fetchAnalytics = useCallback(async (activePeriod: string) => {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch("/api/admin/analytics?period=all");
+      const res = await fetch(`/api/admin/analytics?period=${activePeriod}`);
       if (!res.ok) throw new Error("Failed to fetch analytics");
       const data = await res.json();
       setAnalytics(data);
@@ -140,10 +152,16 @@ export default function AdminOverview() {
   }, []);
 
   useEffect(() => {
-    fetchAnalytics();
-    const interval = setInterval(fetchAnalytics, 60000);
+    fetchAnalytics(period);
+    const interval = setInterval(() => fetchAnalytics(period), 60000);
     return () => clearInterval(interval);
-  }, [fetchAnalytics]);
+  }, [fetchAnalytics, period]);
+
+  const handlePeriodChange = (val: string) => {
+    setPeriod(val);
+  };
+
+  const periodLabel = analytics?.periodLabel || PERIOD_OPTIONS.find(o => o.value === period)?.label || "Last 30 days";
 
   const MetricCard = ({ 
     label, 
@@ -215,16 +233,27 @@ export default function AdminOverview() {
             )}
           </p>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={fetchAnalytics}
-          disabled={loading}
-          data-testid="button-refresh-analytics"
-        >
-          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <Select value={period} onValueChange={handlePeriodChange}>
+            <SelectTrigger className="w-36" data-testid="select-period">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PERIOD_OPTIONS.map(opt => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={() => fetchAnalytics(period)}
+            disabled={loading}
+            data-testid="button-refresh-analytics"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -317,7 +346,7 @@ export default function AdminOverview() {
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-emerald-500" />
-              Report Engagement
+              Report Engagement ({periodLabel})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -332,7 +361,7 @@ export default function AdminOverview() {
                     {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.reportEngagement?.totalViews || 0}</p>}
                   </div>
                 </div>
-                {!loading && <p className="text-xs text-muted-foreground pl-10">+{analytics?.reportEngagement?.viewsThisMonth || 0} this month</p>}
+                {!loading && <p className="text-xs text-muted-foreground pl-10">+{analytics?.reportEngagement?.viewsThisMonth || 0} in period</p>}
               </div>
               
               <div className="space-y-1" data-testid="stat-total-downloads">
@@ -345,12 +374,12 @@ export default function AdminOverview() {
                     {loading ? <Skeleton className="h-6 w-12" /> : <p className="text-xl font-bold">{analytics?.reportEngagement?.totalDownloads || 0}</p>}
                   </div>
                 </div>
-                {!loading && <p className="text-xs text-muted-foreground pl-10">+{analytics?.reportEngagement?.downloadsThisMonth || 0} this month</p>}
+                {!loading && <p className="text-xs text-muted-foreground pl-10">+{analytics?.reportEngagement?.downloadsThisMonth || 0} in period</p>}
               </div>
             </div>
             
             <div className="mt-4 pt-4 border-t" data-testid="stat-most-popular">
-              <p className="text-xs font-medium text-muted-foreground mb-2">Most Popular Report This Month</p>
+              <p className="text-xs font-medium text-muted-foreground mb-2">Most Popular Report ({periodLabel})</p>
               {loading ? (
                 <Skeleton className="h-12 w-full" />
               ) : analytics?.reportEngagement?.mostPopularReport ? (
@@ -375,7 +404,7 @@ export default function AdminOverview() {
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <Shield className="w-5 h-5 text-indigo-500" />
-            User Engagement (This Month)
+            User Engagement ({periodLabel})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -484,7 +513,7 @@ export default function AdminOverview() {
                 Total Pro: {analytics?.test24Stats?.totalPro || 0}
               </Badge>
               <Badge variant="outline" className="text-xs px-3 py-1">
-                This month: {analytics?.test24Stats?.basicThisMonth || 0} Basic / {analytics?.test24Stats?.proThisMonth || 0} Pro
+                {periodLabel}: {analytics?.test24Stats?.basicThisMonth || 0} Basic / {analytics?.test24Stats?.proThisMonth || 0} Pro
               </Badge>
               <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 text-xs px-3 py-1">
                 In progress: {analytics?.test24Stats?.inProgress || 0}
@@ -668,11 +697,11 @@ export default function AdminOverview() {
                     .map((study) => (
                       <div 
                         key={study.id} 
-                        className="flex items-center justify-between p-2 rounded-lg border hover-elevate"
-                        data-testid={`snapshot-study-${study.id}`}
+                        className="flex items-center justify-between p-2 border rounded-lg"
+                        data-testid={`live-study-${study.id}`}
                       >
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">{study.title}</p>
+                          <p className="text-sm font-medium truncate">{study.title}</p>
                           <p className="text-xs text-muted-foreground">{study.companyName}</p>
                         </div>
                         {getStatusBadge(study.status)}
@@ -681,79 +710,13 @@ export default function AdminOverview() {
                 </div>
               ) : (
                 <div className="text-center py-4 text-muted-foreground text-sm">
-                  No live studies
+                  No live studies at the moment
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <FileCheck className="w-5 h-5 text-emerald-500" />
-            Free Reports Library
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-24 w-full" />
-              ))}
-            </div>
-          ) : analytics?.freeReports && analytics.freeReports.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {analytics.freeReports.map((report) => (
-                <div 
-                  key={report.id} 
-                  className="p-3 border rounded-lg hover-elevate"
-                  data-testid={`report-item-${report.id}`}
-                >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <p className="font-medium text-sm line-clamp-2">{report.title}</p>
-                    <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="secondary" className="text-xs">
-                      {report.category}
-                    </Badge>
-                    {report.topics?.slice(0, 2).map((topic) => (
-                      <Badge key={topic} variant="outline" className="text-xs">
-                        {topic}
-                      </Badge>
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {formatDate(report.date)}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p>No free reports available</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card className="bg-muted/30">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-6 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500" />
-              <span className="text-muted-foreground">System Status: Online</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500" />
-              <span className="text-muted-foreground">Database: Connected</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
