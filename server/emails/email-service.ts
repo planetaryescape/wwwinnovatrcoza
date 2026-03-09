@@ -3,14 +3,14 @@ import { Resend } from "resend";
 let connectionSettings: any;
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "https://www.innovatr.co.za";
-const BRAND_COLOR = "#3A2FBF";
-const BRAND_COLOR_LIGHT = "#EAE8FF";
+const BRAND_COLOR = "#5865F2";
+const BRAND_COLOR_LIGHT = "#EEF0FE";
 const CORAL_COLOR = "#E8503A";
-const TEXT_COLOR = "#1E1B3A";
-const MUTED_COLOR = "#8A7260";
-const FOOTER_COLOR = "#A89078";
-const BG_COLOR = "#FAF3E8";
-const CARD_BG = "#FFFFFF";
+const TEXT_COLOR = "#1a1a1a";
+const MUTED_COLOR = "#666666";
+const FOOTER_COLOR = "#888888";
+const BG_COLOR = "#f5f5f5";
+const CARD_BG = "#ffffff";
 const EMAIL_FONT = "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
 async function getCredentials() {
@@ -151,7 +151,7 @@ function renderBaseEmail(options: BaseEmailOptions): string {
     <table width="100%" cellpadding="0" cellspacing="0" style="background-color: ${BG_COLOR}; padding: 40px 20px;">
       <tr>
         <td align="center">
-          <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: ${CARD_BG}; border-radius: 14px; overflow: hidden; border: 1px solid #E2D5BF;">
+          <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: ${CARD_BG}; border-radius: 8px; overflow: hidden;">
             <tr>
               <td style="background-color: ${BRAND_COLOR}; padding: 24px 40px;">
                 <p style="margin: 0; font-family: Georgia, serif; font-size: 20px; font-weight: 400; color: #ffffff; letter-spacing: -0.01em;">Innovatr</p>
@@ -177,7 +177,7 @@ function renderBaseEmail(options: BaseEmailOptions): string {
               </td>
             </tr>
             <tr>
-              <td style="background-color: #F0E6D0; padding: 24px 40px; border-top: 1px solid #E2D5BF;">
+              <td style="background-color: #f9f9f9; padding: 24px 40px; border-top: 1px solid #eeeeee;">
                 <p style="margin: 0 0 8px 0; font-size: 12px; color: ${FOOTER_COLOR};">
                   This is an automated message from Innovatr.
                 </p>

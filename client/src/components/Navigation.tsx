@@ -75,16 +75,16 @@ export default function Navigation() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-12">
+            <div className="flex items-center gap-8 min-w-0">
               <button 
                 onClick={() => setLocation("/")}
-                className={`text-2xl font-serif font-bold transition-colors ${isScrolled ? 'text-[#5669ed]' : 'text-white drop-shadow-lg'}`} 
+                className={`text-2xl font-serif font-bold transition-colors flex-shrink-0 ${isScrolled ? 'text-[#5669ed]' : 'text-white drop-shadow-lg'}`} 
                 data-testid="link-logo"
               >
                 Innovatr
               </button>
               
-              <div className="hidden md:flex items-center gap-8">
+              <div className="hidden md:flex items-center gap-6">
                 <button 
                   onClick={() => scrollToSection('services')}
                   className={`transition-colors ${isScrolled ? 'text-foreground hover:text-primary' : 'text-white hover:text-primary'}`}
@@ -130,7 +130,7 @@ export default function Navigation() {
               </div>
             </div>
 
-            <div className="hidden md:flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-3 flex-shrink-0">
               <CurrencyToggle />
               <ThemeToggle />
               
