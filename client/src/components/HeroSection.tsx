@@ -98,7 +98,7 @@ export default function HeroSection() {
               className="text-white leading-relaxed"
               style={{ fontSize: "clamp(0.95rem, 4vw, 1.1rem)" }}
             >
-              Through Smart 24hr Research &amp; Growth Consulting.
+              Through Smart 24hr Research<br />&amp; Growth Consulting.
             </p>
           </div>
 
@@ -111,9 +111,8 @@ export default function HeroSection() {
               <button
                 onClick={scrollToServices}
                 data-testid="button-explore-research-mobile"
-                className="flex items-center gap-3 text-left group w-fit"
+                className="text-left group w-fit"
               >
-                <Microscope className="w-5 h-5 text-[#ED876E] flex-shrink-0" />
                 <span className="text-white font-semibold text-base group-hover:text-[#ED876E] transition-colors duration-150">
                   Rapid Consumer Research
                 </span>
@@ -122,9 +121,8 @@ export default function HeroSection() {
               <button
                 onClick={() => setLocation("/consult")}
                 data-testid="button-explore-consulting-mobile"
-                className="flex items-center gap-3 text-left group w-fit"
+                className="text-left group w-fit"
               >
-                <Brain className="w-5 h-5 text-[#ED876E] flex-shrink-0" />
                 <span className="text-white font-semibold text-base group-hover:text-[#ED876E] transition-colors duration-150">
                   Innovation Growth Consulting
                 </span>
