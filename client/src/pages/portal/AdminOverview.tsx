@@ -37,6 +37,7 @@ interface Study {
   submittedByName: string;
   createdAt: string;
   deliveryDate?: string;
+  clientReportId?: string | null;
 }
 
 interface Report {
@@ -500,227 +501,146 @@ export default function AdminOverview() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader className="pb-3">
+      <Card data-testid="card-research-overview">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <CardTitle className="text-lg flex items-center gap-2">
               <FlaskConical className="w-5 h-5 text-orange-500" />
-              Test24 Tracker
+              Research Overview
             </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary" className="text-xs px-3 py-1">
-                Total Basic: {analytics?.test24Stats?.totalBasic || 0}
-              </Badge>
-              <Badge variant="secondary" className="text-xs px-3 py-1">
-                Total Pro: {analytics?.test24Stats?.totalPro || 0}
-              </Badge>
-              <Badge variant="outline" className="text-xs px-3 py-1">
-                {periodLabel}: {analytics?.test24Stats?.basicThisMonth || 0} Basic / {analytics?.test24Stats?.proThisMonth || 0} Pro
-              </Badge>
-              <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 text-xs px-3 py-1">
-                In progress: {analytics?.test24Stats?.inProgress || 0}
-              </Badge>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs text-muted-foreground"
+              onClick={() => window.location.href = "/portal/research"}
+              data-testid="button-view-my-research"
+            >
+              View My Research
+              <ExternalLink className="w-3 h-3 ml-1" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="text-center p-3 border rounded-lg" data-testid="stat-total-test24">
+              <p className="text-2xl font-bold">
+                {(analytics?.test24Stats?.totalBasic || 0) + (analytics?.test24Stats?.totalPro || 0)}
+              </p>
+              <p className="text-xs text-muted-foreground">Total Studies</p>
             </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div 
-                  className="h-3 bg-blue-500 rounded-l-full transition-all" 
-                  style={{ 
-                    width: `${(analytics?.test24Stats?.totalBasic || 0) / Math.max(1, (analytics?.test24Stats?.totalBasic || 0) + (analytics?.test24Stats?.totalPro || 0)) * 100}%`,
-                    minWidth: analytics?.test24Stats?.totalBasic ? '20%' : '0'
-                  }}
-                />
-                <div 
-                  className="h-3 bg-violet-500 rounded-r-full transition-all" 
-                  style={{ 
-                    width: `${(analytics?.test24Stats?.totalPro || 0) / Math.max(1, (analytics?.test24Stats?.totalBasic || 0) + (analytics?.test24Stats?.totalPro || 0)) * 100}%`,
-                    minWidth: analytics?.test24Stats?.totalPro ? '20%' : '0'
-                  }}
-                />
-              </div>
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-blue-500" /> Basic
-                </span>
-                <span className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-violet-500" /> Pro
-                </span>
-                <span>{analytics?.test24Stats?.briefsInPipeline || 0} briefs in pipeline</span>
-              </div>
+            <div className="text-center p-3 border rounded-lg bg-orange-50 dark:bg-orange-900/20" data-testid="stat-inprogress-test24">
+              <p className="text-2xl font-bold text-orange-700 dark:text-orange-400">
+                {analytics?.test24Stats?.inProgress || 0}
+              </p>
+              <p className="text-xs text-muted-foreground">In Progress</p>
             </div>
+            <div className="text-center p-3 border rounded-lg bg-green-50 dark:bg-green-900/20" data-testid="stat-completed-test24">
+              <p className="text-2xl font-bold text-green-700 dark:text-green-400">
+                {analytics?.test24Stats?.completed || 0}
+              </p>
+              <p className="text-xs text-muted-foreground">Completed</p>
+            </div>
+            <div className="text-center p-3 border rounded-lg" data-testid="stat-basicpro-test24">
+              <p className="text-2xl font-bold">
+                {analytics?.test24Stats?.totalBasic || 0}
+                <span className="text-muted-foreground text-lg"> / </span>
+                {analytics?.test24Stats?.totalPro || 0}
+              </p>
+              <p className="text-xs text-muted-foreground">Basic / Pro</p>
+            </div>
+          </div>
 
-            <div className="border-t pt-4">
-              {loading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <Skeleton key={i} className="h-16 w-full" />
-                  ))}
+          {(() => {
+            const basic = analytics?.test24Stats?.totalBasic || 0;
+            const pro = analytics?.test24Stats?.totalPro || 0;
+            const total = basic + pro;
+            const basicPct = total > 0 ? (basic / total) * 100 : 100;
+            const proPct = total > 0 ? (pro / total) * 100 : 0;
+            return (
+              <div className="space-y-2">
+                <div className="h-5 flex rounded-md overflow-hidden border" data-testid="bar-basic-pro-distribution">
+                  <div className="bg-blue-500 flex items-center justify-center transition-all duration-300" style={{ width: `${basicPct}%` }}>
+                    {basicPct >= 25 && <span className="text-xs font-medium text-white">{basic}</span>}
+                  </div>
+                  {pro > 0 && (
+                    <div className="bg-violet-500 flex items-center justify-center transition-all duration-300" style={{ width: `${proPct}%` }}>
+                      {proPct >= 25 && <span className="text-xs font-medium text-white">{pro}</span>}
+                    </div>
+                  )}
                 </div>
-              ) : analytics?.test24Studies && analytics.test24Studies.length > 0 ? (
-                <div className="space-y-3">
-                  {analytics.test24Studies.map((study) => (
-                    <div 
-                      key={study.id} 
-                      className="p-3 border rounded-lg hover-elevate"
-                      data-testid={`study-item-${study.id}`}
-                    >
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{study.title}</p>
-                          <p className="text-sm text-muted-foreground">{study.companyName}</p>
-                        </div>
-                        {getStatusBadge(study.status)}
+                <div className="flex flex-wrap justify-between gap-2 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-blue-500" /> Test24 Basic ({basic})
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-violet-500" /> Test24 Pro ({pro})
+                  </span>
+                  <span>{periodLabel}: {analytics?.test24Stats?.basicThisMonth || 0} Basic / {analytics?.test24Stats?.proThisMonth || 0} Pro</span>
+                </div>
+              </div>
+            );
+          })()}
+
+          <div className="border-t pt-4">
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-14 w-full" />)}
+              </div>
+            ) : analytics?.test24Studies && analytics.test24Studies.length > 0 ? (
+              <div className="space-y-2">
+                {analytics.test24Studies.map((study) => (
+                  <div
+                    key={study.id}
+                    className="flex items-center gap-3 p-3 border rounded-lg hover-elevate"
+                    data-testid={`study-item-${study.id}`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-medium text-sm truncate">{study.title}</p>
+                        {study.clientReportId && (
+                          <Badge variant="secondary" className="text-[10px] shrink-0">Report</Badge>
+                        )}
                       </div>
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>
+                      <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                        <span className="text-xs text-muted-foreground">{study.companyName}</span>
+                        <span className="text-xs text-muted-foreground">
                           {study.studyType?.toLowerCase().includes("pro") ? "Test24 Pro" : "Test24 Basic"}
                         </span>
-                        <span>
-                          {study.submittedByName}
-                        </span>
+                        {study.submittedByName && study.submittedByName !== "Unknown" && (
+                          <span className="text-xs text-muted-foreground">{study.submittedByName}</span>
+                        )}
                         {study.deliveryDate && (
-                          <span>Delivered: {formatDate(study.deliveryDate)}</span>
+                          <span className="text-xs text-muted-foreground">Delivered {formatDate(study.deliveryDate)}</span>
                         )}
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <FlaskConical className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p>No Test24 studies yet</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <FlaskConical className="w-5 h-5 text-blue-500" />
-                Test24 Activity Snapshot
-              </CardTitle>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="text-xs text-muted-foreground hover:text-foreground"
-                onClick={() => window.location.href = "/portal/admin?tab=briefs"}
-                data-testid="button-view-all-briefs"
-              >
-                View all
-                <ExternalLink className="w-3 h-3 ml-1" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-3">
-              <div className="text-center p-3 border rounded-lg">
-                <p className="text-2xl font-bold">
-                  {(analytics?.test24Stats?.totalBasic || 0) + (analytics?.test24Stats?.totalPro || 0)}
-                </p>
-                <p className="text-xs text-muted-foreground">Total Studies</p>
-              </div>
-              <div className="text-center p-3 border rounded-lg bg-orange-50 dark:bg-orange-900/20">
-                <p className="text-2xl font-bold text-orange-700 dark:text-orange-400">
-                  {analytics?.test24Stats?.inProgress || 0}
-                </p>
-                <p className="text-xs text-muted-foreground">In Progress</p>
-              </div>
-              <div className="text-center p-3 border rounded-lg bg-green-50 dark:bg-green-900/20">
-                <p className="text-2xl font-bold text-green-700 dark:text-green-400">
-                  {analytics?.test24Stats?.completed || 0}
-                </p>
-                <p className="text-xs text-muted-foreground">Completed</p>
-              </div>
-            </div>
-
-            <div className="border-t pt-4">
-              <p className="text-xs font-medium text-muted-foreground mb-3">Completed Studies Distribution</p>
-              {(() => {
-                const basic = analytics?.test24Stats?.completedBasic || 0;
-                const pro = analytics?.test24Stats?.completedPro || 0;
-                const total = basic + pro;
-                const basicPercent = total > 0 ? (basic / total) * 100 : 100;
-                const proPercent = total > 0 ? (pro / total) * 100 : 0;
-                
-                return (
-                  <div className="space-y-3">
-                    <div className="h-6 flex rounded-md overflow-hidden border" data-testid="bar-basic-pro-distribution">
-                      <div 
-                        className="bg-blue-500 flex items-center justify-center transition-all duration-300"
-                        style={{ width: `${basicPercent}%` }}
-                      >
-                        {basicPercent >= 20 && (
-                          <span className="text-xs font-medium text-white">{basic}</span>
-                        )}
-                      </div>
-                      {pro > 0 && (
-                        <div 
-                          className="bg-violet-500 flex items-center justify-center transition-all duration-300"
-                          style={{ width: `${proPercent}%` }}
+                    <div className="flex items-center gap-2 shrink-0">
+                      {getStatusBadge(study.status)}
+                      {study.clientReportId && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => window.location.href = "/portal/research"}
+                          data-testid={`button-view-report-${study.id}`}
+                          title="View report in My Research"
                         >
-                          {proPercent >= 20 && (
-                            <span className="text-xs font-medium text-white">{pro}</span>
-                          )}
-                        </div>
+                          <ExternalLink className="w-3 h-3" />
+                        </Button>
                       )}
                     </div>
-                    <div className="flex justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded bg-blue-500"></div>
-                        <span>Test24 Basic ({basic})</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded bg-violet-500"></div>
-                        <span>Test24 Pro ({pro})</span>
-                      </div>
-                    </div>
                   </div>
-                );
-              })()}
-            </div>
-
-            <div className="border-t pt-4">
-              <p className="text-xs font-medium text-muted-foreground mb-3">Live Studies</p>
-              {loading ? (
-                <div className="space-y-2">
-                  {[1, 2, 3].map((i) => (
-                    <Skeleton key={i} className="h-12 w-full" />
-                  ))}
-                </div>
-              ) : analytics?.test24Studies && analytics.test24Studies.filter(s => s.status !== "COMPLETED").length > 0 ? (
-                <div className="space-y-2">
-                  {analytics.test24Studies
-                    .filter(s => s.status !== "COMPLETED")
-                    .slice(0, 3)
-                    .map((study) => (
-                      <div 
-                        key={study.id} 
-                        className="flex items-center justify-between p-2 border rounded-lg"
-                        data-testid={`live-study-${study.id}`}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{study.title}</p>
-                          <p className="text-xs text-muted-foreground">{study.companyName}</p>
-                        </div>
-                        {getStatusBadge(study.status)}
-                      </div>
-                    ))}
-                </div>
-              ) : (
-                <div className="text-center py-4 text-muted-foreground text-sm">
-                  No live studies at the moment
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10 text-muted-foreground">
+                <FlaskConical className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                <p className="text-sm">No Test24 studies yet</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

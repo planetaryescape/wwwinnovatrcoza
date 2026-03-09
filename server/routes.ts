@@ -1749,11 +1749,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .filter((c) => c.remaining > 0 && c.rate > 0)
         .sort((a, b) => a.remaining / a.rate - b.remaining / b.rate)[0];
 
-      // Get Test24 studies - all studies marked as Test24
+      // Get Test24 studies - all studies marked as Test24, sorted: in-progress first, then completed
+      const statusOrder: Record<string, number> = {
+        "AUDIENCE_LIVE": 0, "ANALYSING_DATA": 1, "IN_PROGRESS": 2, "NEW": 3, "COMPLETED": 4
+      };
       const test24Studies = studies
         .filter((s) => s.isTest24)
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 10)
+        .sort((a, b) => {
+          const oa = statusOrder[a.status] ?? 5;
+          const ob = statusOrder[b.status] ?? 5;
+          if (oa !== ob) return oa - ob;
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        })
         .map((s) => ({
           id: s.id,
           title: s.title,
@@ -1764,6 +1771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           submittedByName: s.submittedByName || "Unknown",
           createdAt: s.createdAt,
           deliveryDate: s.deliveryDate,
+          clientReportId: s.clientReportId || null,
         }));
 
       // Get all reports for free reports library (only PUBLIC access level)
