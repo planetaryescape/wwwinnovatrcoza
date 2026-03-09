@@ -37,45 +37,31 @@ export default function HeroSection() {
             </p>
 
             {/* What are you looking for? */}
-            <p className="text-gray-300 text-sm font-medium mb-3 uppercase tracking-widest">
+            <p className="text-gray-300 text-sm font-medium mb-4 uppercase tracking-widest">
               What are you looking for?
             </p>
-            <div className="flex gap-4">
-              {/* Option 1 */}
-              <div className="flex-1 rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm p-5 flex flex-col gap-3">
-                <div className="flex items-center gap-2">
-                  <Microscope className="w-5 h-5 text-[#ED876E] flex-shrink-0" />
-                  <span className="text-white font-semibold text-sm">Rapid Consumer Research</span>
-                </div>
-                <p className="text-gray-300 text-xs leading-relaxed">
-                  Test concepts, products and campaigns with real consumers in as little as 24 hours.
-                </p>
-                <button
-                  onClick={scrollToServices}
-                  data-testid="button-explore-research"
-                  className="mt-auto w-full rounded-lg bg-[#ED876E] hover:bg-[#e07560] text-white text-sm font-semibold py-2.5 px-4 transition-colors duration-150"
-                >
-                  Explore Research
-                </button>
-              </div>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={scrollToServices}
+                data-testid="button-explore-research"
+                className="flex items-center gap-3 text-left group w-fit"
+              >
+                <Microscope className="w-5 h-5 text-[#ED876E] flex-shrink-0" />
+                <span className="text-white font-semibold text-base group-hover:text-[#ED876E] transition-colors duration-150">
+                  Rapid Consumer Research
+                </span>
+              </button>
 
-              {/* Option 2 */}
-              <div className="flex-1 rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm p-5 flex flex-col gap-3">
-                <div className="flex items-center gap-2">
-                  <Brain className="w-5 h-5 text-[#ED876E] flex-shrink-0" />
-                  <span className="text-white font-semibold text-sm">Innovation Growth Consulting</span>
-                </div>
-                <p className="text-gray-300 text-xs leading-relaxed">
-                  Work with our strategists to shape better propositions, brands and innovation pipelines.
-                </p>
-                <button
-                  onClick={() => setLocation("/consult")}
-                  data-testid="button-explore-consulting"
-                  className="mt-auto w-full rounded-lg border border-white/40 hover:bg-white/10 text-white text-sm font-semibold py-2.5 px-4 transition-colors duration-150"
-                >
-                  Explore Consulting
-                </button>
-              </div>
+              <button
+                onClick={() => setLocation("/consult")}
+                data-testid="button-explore-consulting"
+                className="flex items-center gap-3 text-left group w-fit"
+              >
+                <Brain className="w-5 h-5 text-[#ED876E] flex-shrink-0" />
+                <span className="text-white font-semibold text-base group-hover:text-[#ED876E] transition-colors duration-150">
+                  Innovation Growth Consulting
+                </span>
+              </button>
             </div>
           </div>
 
@@ -96,8 +82,7 @@ export default function HeroSection() {
 
       {/* Mobile layout */}
       <div className="lg:hidden flex flex-col min-h-screen pt-16">
-        {/* Text + cards */}
-        <div className="flex-1 flex flex-col px-4 py-6 gap-5">
+        <div className="flex-1 flex flex-col px-4 py-6 gap-6">
           <div>
             <h1
               className="font-serif font-bold mb-3 leading-[1.1]"
@@ -119,45 +104,31 @@ export default function HeroSection() {
 
           {/* What are you looking for? */}
           <div>
-            <p className="text-gray-300 text-xs font-medium mb-3 uppercase tracking-widest">
+            <p className="text-gray-300 text-xs font-medium mb-4 uppercase tracking-widest">
               What are you looking for?
             </p>
             <div className="flex flex-col gap-3">
-              {/* Option 1 */}
-              <div className="rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm p-4 flex flex-col gap-2.5">
-                <div className="flex items-center gap-2">
-                  <Microscope className="w-4 h-4 text-[#ED876E] flex-shrink-0" />
-                  <span className="text-white font-semibold text-sm">Rapid Consumer Research</span>
-                </div>
-                <p className="text-gray-300 text-xs leading-relaxed">
-                  Test concepts, products and campaigns with real consumers in as little as 24 hours.
-                </p>
-                <button
-                  onClick={scrollToServices}
-                  data-testid="button-explore-research-mobile"
-                  className="w-full rounded-lg bg-[#ED876E] hover:bg-[#e07560] text-white text-sm font-semibold py-2.5 px-4 transition-colors duration-150"
-                >
-                  Explore Research
-                </button>
-              </div>
+              <button
+                onClick={scrollToServices}
+                data-testid="button-explore-research-mobile"
+                className="flex items-center gap-3 text-left group w-fit"
+              >
+                <Microscope className="w-5 h-5 text-[#ED876E] flex-shrink-0" />
+                <span className="text-white font-semibold text-base group-hover:text-[#ED876E] transition-colors duration-150">
+                  Rapid Consumer Research
+                </span>
+              </button>
 
-              {/* Option 2 */}
-              <div className="rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm p-4 flex flex-col gap-2.5">
-                <div className="flex items-center gap-2">
-                  <Brain className="w-4 h-4 text-[#ED876E] flex-shrink-0" />
-                  <span className="text-white font-semibold text-sm">Innovation Growth Consulting</span>
-                </div>
-                <p className="text-gray-300 text-xs leading-relaxed">
-                  Work with our strategists to shape better propositions, brands and innovation pipelines.
-                </p>
-                <button
-                  onClick={() => setLocation("/consult")}
-                  data-testid="button-explore-consulting-mobile"
-                  className="w-full rounded-lg border border-white/40 hover:bg-white/10 text-white text-sm font-semibold py-2.5 px-4 transition-colors duration-150"
-                >
-                  Explore Consulting
-                </button>
-              </div>
+              <button
+                onClick={() => setLocation("/consult")}
+                data-testid="button-explore-consulting-mobile"
+                className="flex items-center gap-3 text-left group w-fit"
+              >
+                <Brain className="w-5 h-5 text-[#ED876E] flex-shrink-0" />
+                <span className="text-white font-semibold text-base group-hover:text-[#ED876E] transition-colors duration-150">
+                  Innovation Growth Consulting
+                </span>
+              </button>
             </div>
           </div>
         </div>
