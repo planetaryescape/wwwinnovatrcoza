@@ -1,17 +1,6 @@
 import heroVideo from "@assets/ScreenRecording_01-21-2026_15_1769001798127.mov";
-import { Microscope, Brain } from "lucide-react";
-import { useLocation } from "wouter";
-
-function scrollToServices() {
-  const el = document.getElementById("services");
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-}
 
 export default function HeroSection() {
-  const [, setLocation] = useLocation();
-
   return (
     <section className="relative min-h-screen flex flex-col overflow-hidden bg-[#4c4de1]">
       {/* Desktop layout */}
@@ -30,42 +19,14 @@ export default function HeroSection() {
               <span className="text-[#ED876E]">Stop Guessing.<br />Launch Better Innovation.</span>
             </h1>
             <p
-              className="text-white mb-8"
+              className="text-white"
               style={{ fontSize: "clamp(1rem, 1.6vw, 1.2rem)", fontWeight: 400 }}
             >
               Through Smart 24hr Research &amp; Growth Consulting.
             </p>
-
-            {/* What are you looking for? */}
-            <p className="text-gray-300 text-sm font-medium mb-4 uppercase tracking-widest">
-              What are you looking for?
-            </p>
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={scrollToServices}
-                data-testid="button-explore-research"
-                className="flex items-center gap-3 text-left group w-fit"
-              >
-                <Microscope className="w-5 h-5 text-[#ED876E] flex-shrink-0" />
-                <span className="text-white font-semibold text-base group-hover:text-[#ED876E] transition-colors duration-150">
-                  Rapid Consumer Research
-                </span>
-              </button>
-
-              <button
-                onClick={() => setLocation("/consult")}
-                data-testid="button-explore-consulting"
-                className="flex items-center gap-3 text-left group w-fit"
-              >
-                <Brain className="w-5 h-5 text-[#ED876E] flex-shrink-0" />
-                <span className="text-white font-semibold text-base group-hover:text-[#ED876E] transition-colors duration-150">
-                  Innovation Growth Consulting
-                </span>
-              </button>
-            </div>
           </div>
 
-          {/* Right side - Hero Video (desktop) */}
+          {/* Right side - Hero Video */}
           <div className="flex justify-center items-center relative">
             <video
               src={heroVideo}
@@ -82,53 +43,23 @@ export default function HeroSection() {
 
       {/* Mobile layout */}
       <div className="lg:hidden flex flex-col min-h-screen pt-16">
-        <div className="flex-1 flex flex-col px-4 py-6 gap-6">
-          <div>
-            <h1
-              className="font-serif font-bold mb-3 leading-[1.1]"
-              style={{
-                fontFamily: "'DM Serif Display', serif",
-                letterSpacing: "0.02em",
-                fontSize: "clamp(1.8rem, 8vw, 2.6rem)",
-              }}
-            >
-              <span className="text-[#ED876E]">Stop Guessing.<br />Launch Better Innovation.</span>
-            </h1>
-            <p
-              className="text-white leading-relaxed"
-              style={{ fontSize: "clamp(0.95rem, 4vw, 1.1rem)" }}
-            >
-              Through Smart 24hr Research<br />&amp; Growth Consulting.
-            </p>
-          </div>
-
-          {/* What are you looking for? */}
-          <div>
-            <p className="text-gray-300 text-xs font-medium mb-4 uppercase tracking-widest">
-              What are you looking for?
-            </p>
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={scrollToServices}
-                data-testid="button-explore-research-mobile"
-                className="text-left group w-fit"
-              >
-                <span className="text-white font-semibold text-base group-hover:text-[#ED876E] transition-colors duration-150">
-                  Rapid Consumer Research
-                </span>
-              </button>
-
-              <button
-                onClick={() => setLocation("/consult")}
-                data-testid="button-explore-consulting-mobile"
-                className="text-left group w-fit"
-              >
-                <span className="text-white font-semibold text-base group-hover:text-[#ED876E] transition-colors duration-150">
-                  Innovation Growth Consulting
-                </span>
-              </button>
-            </div>
-          </div>
+        <div className="flex-1 flex flex-col justify-center px-4 py-6">
+          <h1
+            className="font-serif font-bold mb-3 leading-[1.1]"
+            style={{
+              fontFamily: "'DM Serif Display', serif",
+              letterSpacing: "0.02em",
+              fontSize: "clamp(1.8rem, 8vw, 2.6rem)",
+            }}
+          >
+            <span className="text-[#ED876E]">Stop Guessing.<br />Launch Better Innovation.</span>
+          </h1>
+          <p
+            className="text-white leading-relaxed"
+            style={{ fontSize: "clamp(0.95rem, 4vw, 1.1rem)" }}
+          >
+            Through Smart 24hr Research<br />&amp; Growth Consulting.
+          </p>
         </div>
 
         {/* Video at bottom edge */}
