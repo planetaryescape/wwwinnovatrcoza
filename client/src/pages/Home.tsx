@@ -24,10 +24,10 @@ function WhatAreYouLookingFor() {
   return (
     <section className="bg-[#4338ca] py-10 px-4" data-testid="section-what-looking-for">
       <div className="max-w-7xl mx-auto">
-        <p className="text-white/60 text-xs font-medium uppercase tracking-widest mb-6">
+        <p className="text-white/60 text-xs font-medium uppercase tracking-widest mb-6 lg:text-center">
           What are you looking for?
         </p>
-        <div className="flex flex-col sm:flex-row gap-6 sm:gap-12">
+        <div className="flex flex-col sm:flex-row gap-6 sm:gap-12 lg:justify-evenly">
           <button
             onClick={scrollToServices}
             data-testid="button-explore-research-band"
