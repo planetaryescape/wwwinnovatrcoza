@@ -804,6 +804,29 @@ export default function InsightDetail() {
                 </article>
               )}
 
+              {!report.content && report.body && (
+                <article className="prose prose-lg max-w-none">
+                  {report.body.split(/\n{2,}/).map((paragraph, idx) => {
+                    const trimmed = paragraph.trim();
+                    if (!trimmed) return null;
+                    const isShortLine = trimmed.length < 80 && !trimmed.includes(".");
+                    return isShortLine ? (
+                      <h3
+                        key={idx}
+                        className="text-lg font-bold text-gray-900 mt-8 mb-2"
+                        style={{ fontFamily: "DM Serif Display, serif" }}
+                      >
+                        {trimmed}
+                      </h3>
+                    ) : (
+                      <p key={idx} className="text-gray-700 leading-relaxed mb-4">
+                        {trimmed}
+                      </p>
+                    );
+                  })}
+                </article>
+              )}
+
               {(report.pdfPath || report.dashboardLink) && (
                 <div id="report-download" className="mt-12 pt-8 border-t border-gray-100 text-center">
                   <h3 
