@@ -2675,6 +2675,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Send all 5 industry mailers to a single test address
+  app.post("/api/admin/send-all-test-mailers", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const to: string = req.body?.to || "hannah@innovatr.co.za";
+      const firstName: string = req.body?.firstName || "Hannah";
+      const results: Record<string, any> = {};
+      const mailerFnMap: Record<string, (to: string, firstName: string) => Promise<any>> = {
+        financial: emailService.sendFinancialPulseMailer,
+        beauty: emailService.sendBeautyPulseMailer,
+        health: emailService.sendHealthPulseMailer,
+        food: emailService.sendFoodPulseMailer,
+        bev: emailService.sendPulseMailer,
+      };
+      for (const [industry, fn] of Object.entries(mailerFnMap)) {
+        try {
+          const r = await fn(to, firstName);
+          results[industry] = { success: true, messageId: (r as any)?.data?.id };
+        } catch (err: any) {
+          results[industry] = { success: false, error: err.message };
+        }
+      }
+      res.json({ success: true, to, results });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Send Pulse industry mailer
   app.post("/api/admin/send-pulse-mailer", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {

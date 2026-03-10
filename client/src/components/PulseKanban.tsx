@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import {
   DndContext,
   DragEndEvent,
@@ -171,16 +171,22 @@ function DropZone({
 export default function PulseKanban({ companies, members }: Props) {
   const { toast } = useToast();
 
-  const [assignments, setAssignments] = useState<Record<string, IndustrySlug | null>>(() => {
-    const map: Record<string, IndustrySlug | null> = {};
-    companies.forEach((c) => {
-      map[`company::${c.id}`] = (c.pulseIndustry as IndustrySlug) ?? null;
-    });
-    members.forEach((m) => {
-      map[`user::${m.id}`] = (m.pulseIndustry as IndustrySlug) ?? null;
-    });
-    return map;
-  });
+  const [assignments, setAssignments] = useState<Record<string, IndustrySlug | null>>({});
+  const initializedRef = useRef(false);
+
+  useEffect(() => {
+    if (!initializedRef.current && (companies.length > 0 || members.length > 0)) {
+      initializedRef.current = true;
+      const map: Record<string, IndustrySlug | null> = {};
+      companies.forEach((c) => {
+        map[`company::${c.id}`] = (c.pulseIndustry as IndustrySlug) ?? null;
+      });
+      members.forEach((m) => {
+        map[`user::${m.id}`] = (m.pulseIndustry as IndustrySlug) ?? null;
+      });
+      setAssignments(map);
+    }
+  }, [companies, members]);
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overZoneId, setOverZoneId] = useState<string | null>(null);
