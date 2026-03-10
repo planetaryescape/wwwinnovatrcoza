@@ -16,7 +16,7 @@ export default function HeroSection() {
                 fontSize: "clamp(2rem, 3.8vw, 3.5rem)",
               }}
             >
-              <span className="text-[#ED876E]">Stop Guessing.<br />Launch Better Innovation.</span>
+              <span className="text-white">Stop Guessing.</span><br /><span className="text-[#ED876E]">Launch Better Innovation.</span>
             </h1>
             <p
               className="text-white"
@@ -52,7 +52,7 @@ export default function HeroSection() {
               fontSize: "clamp(1.8rem, 8vw, 2.6rem)",
             }}
           >
-            <span className="text-[#ED876E]">Stop Guessing.<br />Launch Better Innovation.</span>
+            <span className="text-white">Stop Guessing.</span><br /><span className="text-[#ED876E]">Launch Better Innovation.</span>
           </h1>
           <p
             className="text-white leading-relaxed"
