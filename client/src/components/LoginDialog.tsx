@@ -44,9 +44,10 @@ interface LoginDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultSignup?: boolean;
+  returnTo?: string;
 }
 
-export function LoginDialog({ open, onOpenChange, defaultSignup = false }: LoginDialogProps) {
+export function LoginDialog({ open, onOpenChange, defaultSignup = false, returnTo }: LoginDialogProps) {
   const [isSignup, setIsSignup] = useState(defaultSignup);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -157,7 +158,7 @@ export function LoginDialog({ open, onOpenChange, defaultSignup = false }: Login
       
       onOpenChange(false);
       setTimeout(() => {
-        setLocation("/portal");
+        setLocation(returnTo ?? "/portal");
       }, 100);
     } catch (error: any) {
       const newAttempts = loginAttempts + 1;

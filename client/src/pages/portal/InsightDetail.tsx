@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { logActivity } from "@/lib/activityLogger";
 import { useRoute, useLocation } from "wouter";
+import { LoginDialog } from "@/components/LoginDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -294,6 +295,7 @@ export default function InsightDetail() {
   const { toast } = useToast();
   const { user, isAuthenticated, hasPaidSeatAccess } = useAuth();
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [report, setReport] = useState<Report | null>(null);
   const [relatedReports, setRelatedReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
@@ -440,7 +442,7 @@ export default function InsightDetail() {
   };
 
   const handleLogin = () => {
-    setLocation("/login");
+    setLoginDialogOpen(true);
   };
 
   const handleUpgrade = () => {
@@ -966,6 +968,13 @@ export default function InsightDetail() {
           </button>
         )}
       </div>
+
+      <LoginDialog
+        open={loginDialogOpen}
+        onOpenChange={setLoginDialogOpen}
+        defaultSignup={false}
+        returnTo={params?.slug ? `/portal/insights/${params.slug}` : "/portal"}
+      />
     </InsightPageWrapper>
   );
 }

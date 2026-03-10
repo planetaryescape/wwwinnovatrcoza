@@ -398,6 +398,7 @@ export default function TrendsInsights() {
   const [, navigate] = useLocation();
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [loginDialogSignup, setLoginDialogSignup] = useState(false);
+  const [loginDialogReturnTo, setLoginDialogReturnTo] = useState<string | undefined>(undefined);
   const { user, isAdmin, hasPaidSeatAccess, isAuthenticated, isPaidMember } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -414,8 +415,14 @@ export default function TrendsInsights() {
   }, [loading, reports.length, queryClient]);
   
   const handleLockedClick = (report: Report) => {
-    setTeaseReport(report);
-    setTeaseModalOpen(true);
+    if (!isAuthenticated) {
+      setLoginDialogReturnTo(`/portal/insights/${report.slug}`);
+      setLoginDialogSignup(true);
+      setLoginDialogOpen(true);
+    } else {
+      setTeaseReport(report);
+      setTeaseModalOpen(true);
+    }
   };
   
   const handleUnlockedClick = (report: Report) => {
@@ -680,7 +687,7 @@ export default function TrendsInsights() {
           </p>
         </div>
 
-        <LoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} defaultSignup={loginDialogSignup} />
+        <LoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} defaultSignup={loginDialogSignup} returnTo={loginDialogReturnTo} />
       </div>
     );
   }
