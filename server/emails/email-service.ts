@@ -1460,6 +1460,8 @@ export async function sendDailyAdminDigest(data: {
   isMonday: boolean;
   periodLabel: string;
   newUsers: { name: string; surname: string; email: string; company: string }[];
+  activeUsers: number;
+  freshLogins: number;
   totalLogins: number;
   uniqueLoginUsers: number;
   reportViews: number;
@@ -1530,8 +1532,8 @@ export async function sendDailyAdminDigest(data: {
             <table width="100%" cellpadding="0" cellspacing="0">
               <tr>
                 <td width="25%" style="padding: 12px; text-align: center; background-color: #f8f9fa; border-radius: 8px;">
-                  <div style="font-size: 28px; font-weight: 700; color: ${TEXT_COLOR};">${data.totalLogins}</div>
-                  <div style="font-size: 12px; color: ${MUTED_COLOR}; margin-top: 4px;">Logins (${data.uniqueLoginUsers} users)</div>
+                  <div style="font-size: 28px; font-weight: 700; color: ${TEXT_COLOR};">${data.activeUsers}</div>
+                  <div style="font-size: 12px; color: ${MUTED_COLOR}; margin-top: 4px;">Active Users (${data.freshLogins} fresh logins)</div>
                 </td>
                 <td width="25%" style="padding: 12px; text-align: center; background-color: #f8f9fa; border-radius: 8px;">
                   <div style="font-size: 28px; font-weight: 700; color: ${TEXT_COLOR};">${data.reportViews}</div>

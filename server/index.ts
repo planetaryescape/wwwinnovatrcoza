@@ -502,6 +502,8 @@ app.use((req, res, next) => {
       
       const loginEvents = events.filter(e => e.actionType === "login");
       const uniqueLoginUserIds = new Set(loginEvents.map(e => e.userId));
+      // Active users = anyone with ANY event in the period (including existing-session visits)
+      const activeUserIds = new Set(events.map(e => e.userId));
 
       // ── T002 fix: resolve null companyId via user record ──────────────────
       // Login events (and some other early events) may have companyId = null
@@ -558,6 +560,8 @@ app.use((req, res, next) => {
           email: u.email,
           company: u.companyId ? companyMap.get(u.companyId) ?? "No company" : "No company",
         })),
+        activeUsers: activeUserIds.size,
+        freshLogins: loginEvents.length,
         totalLogins: loginEvents.length,
         uniqueLoginUsers: uniqueLoginUserIds.size,
         reportViews: reportViewDetails.length,
