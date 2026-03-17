@@ -1509,7 +1509,7 @@ export async function sendDailyAdminDigest(data: {
       view_dashboard: "Visited Dashboard",
       view_settings: "Visited Settings",
       view_credits: "Viewed Credits & Billing",
-      view_client_report: "Viewed client report",
+      view_client_report: "Viewed report",
     };
 
     const recentHtml = data.recentEvents.slice(0, 20).map(ev =>

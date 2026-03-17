@@ -1064,7 +1064,7 @@ export default function PastResearch() {
                                 size="sm"
                                 onClick={() => {
                                   if (study.reportUrl) {
-                                    logActivity("view_client_report", { entityType: "study", entityId: study.id, entityName: study.title });
+                                    logActivity("view_client_report", { entityType: "client_report", entityId: study.id, entityName: study.title });
                                     window.open(study.reportUrl, '_blank');
                                   }
                                 }}
@@ -1323,7 +1323,7 @@ export default function PastResearch() {
                                   size="sm"
                                   onClick={() => {
                                     if (study.reportUrl) {
-                                      logActivity("view_client_report", { entityType: "study", entityId: study.id, entityName: study.title });
+                                      logActivity("view_client_report", { entityType: "client_report", entityId: study.id, entityName: study.title });
                                       window.open(study.reportUrl, '_blank');
                                     }
                                   }}
