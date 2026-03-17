@@ -1041,7 +1041,10 @@ export default function PastResearch() {
                                 <Button 
                                   variant="outline" 
                                   size="sm" 
-                                  onClick={() => window.open('https://app.upsiide.com/', '_blank')}
+                                  onClick={() => {
+                                    logActivity("view_client_report", { entityType: "client_report", entityId: study.id, entityName: study.title });
+                                    window.open('https://app.upsiide.com/', '_blank');
+                                  }}
                                   data-testid={`button-view-study-${study.id}`}
                                 >
                                   <Eye className="w-4 h-4 mr-1" />
@@ -1062,12 +1065,7 @@ export default function PastResearch() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => {
-                                  if (study.reportUrl) {
-                                    logActivity("view_client_report", { entityType: "client_report", entityId: study.id, entityName: study.title });
-                                    window.open(study.reportUrl, '_blank');
-                                  }
-                                }}
+                                onClick={() => study.reportUrl && window.open(study.reportUrl, '_blank')}
                                 disabled={!study.reportUrl}
                                 data-testid={`button-download-study-${study.id}`}
                               >
@@ -1300,7 +1298,10 @@ export default function PastResearch() {
                                   <Button 
                                     variant="outline" 
                                     size="sm"
-                                    onClick={() => window.open('https://app.upsiide.com/', '_blank')}
+                                    onClick={() => {
+                                      logActivity("view_client_report", { entityType: "client_report", entityId: study.id, entityName: study.title });
+                                      window.open('https://app.upsiide.com/', '_blank');
+                                    }}
                                     data-testid={`button-view-study-${study.id}`}
                                   >
                                     <Eye className="w-4 h-4 mr-1" />
@@ -1321,12 +1322,7 @@ export default function PastResearch() {
                                 <Button 
                                   variant="outline" 
                                   size="sm"
-                                  onClick={() => {
-                                    if (study.reportUrl) {
-                                      logActivity("view_client_report", { entityType: "client_report", entityId: study.id, entityName: study.title });
-                                      window.open(study.reportUrl, '_blank');
-                                    }
-                                  }}
+                                  onClick={() => study.reportUrl && window.open(study.reportUrl, '_blank')}
                                   disabled={!study.reportUrl}
                                   data-testid={`button-download-study-${study.id}`}
                                 >
