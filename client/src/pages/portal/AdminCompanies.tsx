@@ -877,7 +877,7 @@ export default function AdminCompanies() {
                   <TableHead>Members</TableHead>
                   <TableHead>Last Active</TableHead>
                   <TableHead>Logins</TableHead>
-                  <TableHead>Reports</TableHead>
+                  <TableHead>Client Reports</TableHead>
                   <TableHead>Credits (B/P)</TableHead>
                   <TableHead>Studies</TableHead>
                   <TableHead></TableHead>

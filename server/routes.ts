@@ -2923,47 +2923,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Company management endpoints
   app.get("/api/admin/companies", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
-      const [companies, allUsers, allActivity] = await Promise.all([
+      const [companies, allUsers, allActivity, allStudies, allClientReports] = await Promise.all([
         storage.getAllCompanies(),
         storage.getAllUsers(),
         storage.getActivityEventsSince(new Date(0)),
+        storage.getAllStudies(),
+        storage.getAllClientReports(),
       ]);
 
-      const companiesWithStats = await Promise.all(
-        companies.map(async (company) => {
-          const briefs = await storage.getBriefSubmissionsByCompanyId(company.id);
-          
+      // Build a name→id map for matching studies (which store companyName, not companyId)
+      const companyNameToId = new Map(companies.map(c => [c.name?.toLowerCase().trim(), c.id]));
+
+      const companiesWithStats = companies.map((company) => {
           // Members in this company
           const companyUsers = allUsers.filter(u => u.companyId === company.id);
           const memberCount = companyUsers.length;
-          
-          // Last activity: most recent lastLoginAt across all company users
-          const loginDates = companyUsers
-            .map(u => u.lastLoginAt ? new Date(u.lastLoginAt).getTime() : 0)
-            .filter(t => t > 0);
-          const lastActivityAt = loginDates.length > 0
-            ? new Date(Math.max(...loginDates)).toISOString()
-            : null;
-
-          // Activity event counts for this company
           const companyUserIds = new Set(companyUsers.map(u => u.id));
-          const companyEvents = allActivity.filter(e => 
+
+          // Activity events for this company (by companyId OR by user membership)
+          const companyEvents = allActivity.filter(e =>
             e.companyId === company.id || companyUserIds.has(e.userId || "")
           );
+
+          // Last active: most recent activity event timestamp, falling back to lastLoginAt
+          const eventTimestamps = companyEvents.map(e => new Date(e.createdAt).getTime()).filter(t => t > 0);
+          const loginTimestamps = companyUsers
+            .map(u => u.lastLoginAt ? new Date(u.lastLoginAt).getTime() : 0)
+            .filter(t => t > 0);
+          const allTimestamps = [...eventTimestamps, ...loginTimestamps];
+          const lastActivityAt = allTimestamps.length > 0
+            ? new Date(Math.max(...allTimestamps)).toISOString()
+            : null;
+
+          // Login count
           const totalLogins = companyEvents.filter(e => e.actionType === "login").length;
-          const reportActionTypes = ["view_report", "download_report", "view_client_report", "download_client_report"];
-          const reportsAccessed = companyEvents.filter(e => reportActionTypes.includes(e.actionType)).length;
+
+          // Client reports delivered to this company
+          const companyClientReports = allClientReports.filter(cr => cr.companyId === company.id);
+          const reportsAccessed = companyClientReports.length;
+
+          // Studies for this company (matched by companyName since studies don't store companyId)
+          const companyStudies = allStudies.filter(s =>
+            s.companyName && companyNameToId.get(s.companyName.toLowerCase().trim()) === company.id
+          );
+          const studyCount = companyStudies.length;
 
           return {
             ...company,
-            studyCount: briefs.length,
+            studyCount,
             memberCount,
             lastActivityAt,
             totalLogins,
             reportsAccessed,
           };
-        })
-      );
+        });
+
       res.json(companiesWithStats);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
