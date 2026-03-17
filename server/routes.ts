@@ -1667,6 +1667,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       // Re-fetch studies after backfill
       const studies = await storage.getAllStudies();
+      const allClientReports = await storage.getAllClientReports();
+      const companyMap = new Map(companies.map(c => [c.id, c.name]));
 
       // Filter data by period
       const filterByDate = <T extends { createdAt: Date | string }>(items: T[]) => 
@@ -1805,6 +1807,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         (r.accessLevel === "PUBLIC" || r.accessLevel === "public")
       ).length;
 
+      // Combined "My Research" — all studies + standalone client_reports (not already linked via study.clientReportId)
+      const linkedClientReportIds = new Set(studies.map(s => s.clientReportId).filter(Boolean));
+      const standaloneClientReports = allClientReports.filter(cr => !linkedClientReportIds.has(cr.id));
+      
+      const allResearchItems: {
+        id: string; title: string; companyName: string; status: string;
+        studyType: string | null; clientReportId: string | null;
+        deliveryDate: Date | string | null; kind: "study" | "report";
+      }[] = [
+        ...studies.map(s => ({
+          id: s.id, title: s.title, companyName: s.companyName || "",
+          status: s.status, studyType: s.studyType || null,
+          clientReportId: s.clientReportId || null,
+          deliveryDate: s.deliveryDate || null, kind: "study" as const,
+        })),
+        ...standaloneClientReports.map(cr => ({
+          id: cr.id, title: cr.title,
+          companyName: cr.companyId ? (companyMap.get(cr.companyId) || "") : "",
+          status: cr.status || "Completed",
+          studyType: cr.studyType || null, clientReportId: null,
+          deliveryDate: cr.deliveredAt || null, kind: "report" as const,
+        })),
+      ].sort((a, b) => {
+        const activeStatuses = ["AUDIENCE_LIVE","ANALYSING_DATA","IN_PROGRESS","NEW","Brief Submitted","In Progress"];
+        const aActive = activeStatuses.some(s => a.status?.includes(s));
+        const bActive = activeStatuses.some(s => b.status?.includes(s));
+        if (aActive !== bActive) return aActive ? -1 : 1;
+        return a.title.localeCompare(b.title);
+      });
+      
+      const researchStats = {
+        total: allResearchItems.length,
+        active: allResearchItems.filter(i => {
+          const s = i.status?.toLowerCase();
+          return s && !s.includes("complet") && s !== "";
+        }).length,
+        completed: allResearchItems.filter(i => i.status?.toLowerCase().includes("complet")).length,
+      };
+
       // Test24 tracker stats — all-time totals stay all-time; period stats use startDate
       const test24BasicTotal = studies.filter((s) => s.isTest24 && s.studyType === "basic").length;
       const test24ProTotal = studies.filter((s) => s.isTest24 && s.studyType === "pro").length;
@@ -1908,6 +1949,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           studyTrend,
         },
         test24Studies,
+        allResearchItems,
+        researchStats,
         freeReports,
         activeDeals: deals.filter((d) => d.isActive).length,
         reportEngagement: await storage.getGlobalReportEngagement(startDate),

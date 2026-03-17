@@ -103,6 +103,12 @@ interface AnalyticsData {
     activeStudies: number;
   };
   test24Studies: Study[];
+  allResearchItems?: {
+    id: string; title: string; companyName: string; status: string;
+    studyType: string | null; clientReportId: string | null;
+    deliveryDate: string | null; kind: "study" | "report";
+  }[];
+  researchStats?: { total: number; active: number; completed: number };
   freeReports: Report[];
   reportEngagement?: {
     totalViews: number;
@@ -506,7 +512,7 @@ export default function AdminOverview() {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <CardTitle className="text-lg flex items-center gap-2">
               <FlaskConical className="w-5 h-5 text-orange-500" />
-              Research Overview
+              My Research
             </CardTitle>
             <Button
               variant="ghost"
@@ -521,113 +527,73 @@ export default function AdminOverview() {
           </div>
         </CardHeader>
         <CardContent className="space-y-5">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="text-center p-3 border rounded-lg" data-testid="stat-total-test24">
+          <div className="grid grid-cols-3 gap-3">
+            <div className="text-center p-3 border rounded-lg" data-testid="stat-total-research">
               <p className="text-2xl font-bold">
-                {(analytics?.test24Stats?.totalBasic || 0) + (analytics?.test24Stats?.totalPro || 0)}
+                {analytics?.researchStats?.total ?? (analytics?.allResearchItems?.length || 0)}
               </p>
-              <p className="text-xs text-muted-foreground">Total Studies</p>
+              <p className="text-xs text-muted-foreground">Total</p>
             </div>
-            <div className="text-center p-3 border rounded-lg bg-orange-50 dark:bg-orange-900/20" data-testid="stat-inprogress-test24">
+            <div className="text-center p-3 border rounded-lg bg-orange-50 dark:bg-orange-900/20" data-testid="stat-active-research">
               <p className="text-2xl font-bold text-orange-700 dark:text-orange-400">
-                {analytics?.test24Stats?.inProgress || 0}
+                {analytics?.researchStats?.active ?? 0}
               </p>
               <p className="text-xs text-muted-foreground">In Progress</p>
             </div>
-            <div className="text-center p-3 border rounded-lg bg-green-50 dark:bg-green-900/20" data-testid="stat-completed-test24">
+            <div className="text-center p-3 border rounded-lg bg-green-50 dark:bg-green-900/20" data-testid="stat-completed-research">
               <p className="text-2xl font-bold text-green-700 dark:text-green-400">
-                {analytics?.test24Stats?.completed || 0}
+                {analytics?.researchStats?.completed ?? 0}
               </p>
               <p className="text-xs text-muted-foreground">Completed</p>
             </div>
-            <div className="text-center p-3 border rounded-lg" data-testid="stat-basicpro-test24">
-              <p className="text-2xl font-bold">
-                {analytics?.test24Stats?.totalBasic || 0}
-                <span className="text-muted-foreground text-lg"> / </span>
-                {analytics?.test24Stats?.totalPro || 0}
-              </p>
-              <p className="text-xs text-muted-foreground">Basic / Pro</p>
-            </div>
           </div>
-
-          {(() => {
-            const basic = analytics?.test24Stats?.totalBasic || 0;
-            const pro = analytics?.test24Stats?.totalPro || 0;
-            const total = basic + pro;
-            const basicPct = total > 0 ? (basic / total) * 100 : 100;
-            const proPct = total > 0 ? (pro / total) * 100 : 0;
-            return (
-              <div className="space-y-2">
-                <div className="h-5 flex rounded-md overflow-hidden border" data-testid="bar-basic-pro-distribution">
-                  <div className="bg-blue-500 flex items-center justify-center transition-all duration-300" style={{ width: `${basicPct}%` }}>
-                    {basicPct >= 25 && <span className="text-xs font-medium text-white">{basic}</span>}
-                  </div>
-                  {pro > 0 && (
-                    <div className="bg-violet-500 flex items-center justify-center transition-all duration-300" style={{ width: `${proPct}%` }}>
-                      {proPct >= 25 && <span className="text-xs font-medium text-white">{pro}</span>}
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-wrap justify-between gap-2 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <div className="w-2 h-2 rounded-full bg-blue-500" /> Test24 Basic ({basic})
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <div className="w-2 h-2 rounded-full bg-violet-500" /> Test24 Pro ({pro})
-                  </span>
-                  <span>{periodLabel}: {analytics?.test24Stats?.basicThisMonth || 0} Basic / {analytics?.test24Stats?.proThisMonth || 0} Pro</span>
-                </div>
-              </div>
-            );
-          })()}
 
           <div className="border-t pt-4">
             {loading ? (
               <div className="space-y-3">
                 {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-14 w-full" />)}
               </div>
-            ) : analytics?.test24Studies && analytics.test24Studies.length > 0 ? (
+            ) : analytics?.allResearchItems && analytics.allResearchItems.length > 0 ? (
               <div className="space-y-2">
-                {analytics.test24Studies.map((study) => (
+                {analytics.allResearchItems.map((item) => (
                   <div
-                    key={study.id}
+                    key={item.id}
                     className="flex items-center gap-3 p-3 border rounded-lg hover-elevate"
-                    data-testid={`study-item-${study.id}`}
+                    data-testid={`research-item-${item.id}`}
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-medium text-sm truncate">{study.title}</p>
-                        {study.clientReportId && (
+                        <p className="font-medium text-sm truncate">{item.title}</p>
+                        {(item.kind === "report" || item.clientReportId) && (
                           <Badge variant="secondary" className="text-[10px] shrink-0">Report</Badge>
+                        )}
+                        {item.kind === "study" && item.studyType && (
+                          <Badge variant="outline" className="text-[10px] shrink-0">
+                            {item.studyType.toLowerCase().includes("pro") ? "Test24 Pro" : "Test24 Basic"}
+                          </Badge>
                         )}
                       </div>
                       <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                        <span className="text-xs text-muted-foreground">{study.companyName}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {study.studyType?.toLowerCase().includes("pro") ? "Test24 Pro" : "Test24 Basic"}
-                        </span>
-                        {study.submittedByName && study.submittedByName !== "Unknown" && (
-                          <span className="text-xs text-muted-foreground">{study.submittedByName}</span>
+                        {item.companyName && (
+                          <span className="text-xs text-muted-foreground">{item.companyName}</span>
                         )}
-                        {study.deliveryDate && (
-                          <span className="text-xs text-muted-foreground">Delivered {formatDate(study.deliveryDate)}</span>
+                        {item.deliveryDate && (
+                          <span className="text-xs text-muted-foreground">Delivered {formatDate(item.deliveryDate)}</span>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      {getStatusBadge(study.status)}
-                      {study.clientReportId && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          onClick={() => window.location.href = "/portal/research"}
-                          data-testid={`button-view-report-${study.id}`}
-                          title="View report in My Research"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                        </Button>
-                      )}
+                      {getStatusBadge(item.status)}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => window.location.href = "/portal/research"}
+                        data-testid={`button-view-research-${item.id}`}
+                        title="View in My Research"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -635,7 +601,7 @@ export default function AdminOverview() {
             ) : (
               <div className="text-center py-10 text-muted-foreground">
                 <FlaskConical className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                <p className="text-sm">No Test24 studies yet</p>
+                <p className="text-sm">No research yet</p>
               </div>
             )}
           </div>
