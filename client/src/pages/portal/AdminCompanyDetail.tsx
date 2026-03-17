@@ -1586,7 +1586,8 @@ export default function AdminCompanyDetail() {
                                   {ev.actionType === "view_trends" && <TrendingUp className="w-3.5 h-3.5 text-amber-500" />}
                                   {ev.actionType === "launch_brief" && <Target className="w-3.5 h-3.5 text-red-500" />}
                                   {ev.actionType === "view_past_research" && <Clock className="w-3.5 h-3.5 text-cyan-500" />}
-                                  {!["login", "view_report", "download_report", "view_trends", "launch_brief", "view_past_research"].includes(ev.actionType) && <Activity className="w-3.5 h-3.5 text-muted-foreground" />}
+                                  {ev.actionType === "view_client_report" && <Eye className="w-3.5 h-3.5 text-violet-500" />}
+                                  {!["login", "view_report", "download_report", "view_trends", "launch_brief", "view_past_research", "view_client_report"].includes(ev.actionType) && <Activity className="w-3.5 h-3.5 text-muted-foreground" />}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className="font-medium">
@@ -1603,6 +1604,7 @@ export default function AdminCompanyDetail() {
                                       {ev.actionType === "view_dashboard" && "visited Dashboard"}
                                       {ev.actionType === "view_settings" && "visited Settings"}
                                       {ev.actionType === "view_credits" && "viewed Credits & Billing"}
+                                      {ev.actionType === "view_client_report" && `viewed report${ev.entityName ? `: "${ev.entityName}"` : ""}`}
                                     </span>
                                   </p>
                                   <p className="text-xs text-muted-foreground">

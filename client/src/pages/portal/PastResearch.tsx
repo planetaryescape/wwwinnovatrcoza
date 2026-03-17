@@ -1062,7 +1062,12 @@ export default function PastResearch() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => study.reportUrl && window.open(study.reportUrl, '_blank')}
+                                onClick={() => {
+                                  if (study.reportUrl) {
+                                    logActivity("view_client_report", { entityType: "study", entityId: study.id, entityName: study.title });
+                                    window.open(study.reportUrl, '_blank');
+                                  }
+                                }}
                                 disabled={!study.reportUrl}
                                 data-testid={`button-download-study-${study.id}`}
                               >
@@ -1221,7 +1226,10 @@ export default function PastResearch() {
                                 <Button 
                                   variant="outline" 
                                   size="sm" 
-                                  onClick={() => window.open(report.upsiideUrl || 'https://app.upsiide.com/', '_blank')}
+                                  onClick={() => {
+                                    logActivity("view_client_report", { entityType: "client_report", entityId: report.id, entityName: report.title });
+                                    window.open(report.upsiideUrl || 'https://app.upsiide.com/', '_blank');
+                                  }}
                                   data-testid={`button-view-${report.id}`}
                                 >
                                   <Eye className="w-4 h-4 mr-1" />
@@ -1313,7 +1321,12 @@ export default function PastResearch() {
                                 <Button 
                                   variant="outline" 
                                   size="sm"
-                                  onClick={() => study.reportUrl && window.open(study.reportUrl, '_blank')}
+                                  onClick={() => {
+                                    if (study.reportUrl) {
+                                      logActivity("view_client_report", { entityType: "study", entityId: study.id, entityName: study.title });
+                                      window.open(study.reportUrl, '_blank');
+                                    }
+                                  }}
                                   disabled={!study.reportUrl}
                                   data-testid={`button-download-study-${study.id}`}
                                 >
@@ -1380,7 +1393,10 @@ export default function PastResearch() {
                                   <Button 
                                     variant="outline" 
                                     size="sm"
-                                    onClick={() => window.open(report.upsiideUrl || 'https://app.upsiide.com/', '_blank')}
+                                    onClick={() => {
+                                      logActivity("view_client_report", { entityType: "client_report", entityId: report.id, entityName: report.title });
+                                      window.open(report.upsiideUrl || 'https://app.upsiide.com/', '_blank');
+                                    }}
                                     data-testid={`button-view-${report.id}`}
                                   >
                                     <Eye className="w-4 h-4 mr-1" />
