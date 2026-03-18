@@ -189,6 +189,12 @@ export interface IStorage {
   createCreditLedgerEntry(entry: InsertCreditLedger): Promise<CreditLedgerEntry>;
   getCreditLedgerByCompanyId(companyId: string): Promise<CreditLedgerEntry[]>;
   getCompanyCreditBalance(companyId: string, creditType: 'basic' | 'pro'): Promise<number>;
+  atomicDeductCredits(companyId: string, creditType: 'basic' | 'pro', amount: number): Promise<{ success: boolean; newUsed: number; total: number }>;
+  submitBriefWithCredits(params: {
+    briefData: InsertBriefSubmission;
+    studyData: InsertStudy;
+    creditDeduction: { companyId: string; creditType: 'basic' | 'pro'; amount: number; description: string; userId?: string | null } | null;
+  }): Promise<{ brief: BriefSubmission; study: Study; creditsDeducted: boolean }>;
   
   // Report Analytics
   createReportEvent(event: InsertReportEvent): Promise<ReportEvent>;
@@ -1646,6 +1652,170 @@ export class DatabaseStorage implements IStorage {
     if (filtered.length === 0) return 0;
     const sorted = filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     return sorted[0].balanceAfter;
+  }
+
+  async atomicDeductCredits(companyId: string, creditType: 'basic' | 'pro', amount: number): Promise<{ success: boolean; newUsed: number; total: number }> {
+    if (creditType === 'basic') {
+      const result = await db
+        .update(companies)
+        .set({ basicCreditsUsed: sql`${companies.basicCreditsUsed} + ${amount}` })
+        .where(
+          and(
+            eq(companies.id, companyId),
+            sql`${companies.basicCreditsUsed} + ${amount} >= 0`,
+            sql`${companies.basicCreditsUsed} + ${amount} <= ${companies.basicCreditsTotal}`
+          )
+        )
+        .returning({ newUsed: companies.basicCreditsUsed, total: companies.basicCreditsTotal });
+      if (result.length === 0) {
+        const company = await db.select({ used: companies.basicCreditsUsed, total: companies.basicCreditsTotal }).from(companies).where(eq(companies.id, companyId));
+        return { success: false, newUsed: company[0]?.used ?? 0, total: company[0]?.total ?? 0 };
+      }
+      return { success: true, newUsed: result[0].newUsed, total: result[0].total };
+    } else {
+      const result = await db
+        .update(companies)
+        .set({ proCreditsUsed: sql`${companies.proCreditsUsed} + ${amount}` })
+        .where(
+          and(
+            eq(companies.id, companyId),
+            sql`${companies.proCreditsUsed} + ${amount} >= 0`,
+            sql`${companies.proCreditsUsed} + ${amount} <= ${companies.proCreditsTotal}`
+          )
+        )
+        .returning({ newUsed: companies.proCreditsUsed, total: companies.proCreditsTotal });
+      if (result.length === 0) {
+        const company = await db.select({ used: companies.proCreditsUsed, total: companies.proCreditsTotal }).from(companies).where(eq(companies.id, companyId));
+        return { success: false, newUsed: company[0]?.used ?? 0, total: company[0]?.total ?? 0 };
+      }
+      return { success: true, newUsed: result[0].newUsed, total: result[0].total };
+    }
+  }
+
+  async submitBriefWithCredits(params: {
+    briefData: InsertBriefSubmission;
+    studyData: InsertStudy;
+    creditDeduction: { companyId: string; creditType: 'basic' | 'pro'; amount: number; description: string; userId?: string | null } | null;
+  }): Promise<{ brief: BriefSubmission; study: Study; creditsDeducted: boolean }> {
+    const { briefData, studyData, creditDeduction } = params;
+
+    return db.transaction(async (tx) => {
+      let creditsDeducted = false;
+
+      // Step 1: Atomically deduct credits (if required). This is the critical check-and-decrement.
+      if (creditDeduction) {
+        const { companyId, creditType, amount, description, userId } = creditDeduction;
+
+        let deductResult: { newUsed: number; total: number }[] = [];
+
+        if (creditType === 'basic') {
+          deductResult = await tx
+            .update(companies)
+            .set({ basicCreditsUsed: sql`${companies.basicCreditsUsed} + ${amount}` })
+            .where(
+              and(
+                eq(companies.id, companyId),
+                sql`${companies.basicCreditsUsed} + ${amount} >= 0`,
+                sql`${companies.basicCreditsUsed} + ${amount} <= ${companies.basicCreditsTotal}`
+              )
+            )
+            .returning({ newUsed: companies.basicCreditsUsed, total: companies.basicCreditsTotal });
+        } else {
+          deductResult = await tx
+            .update(companies)
+            .set({ proCreditsUsed: sql`${companies.proCreditsUsed} + ${amount}` })
+            .where(
+              and(
+                eq(companies.id, companyId),
+                sql`${companies.proCreditsUsed} + ${amount} >= 0`,
+                sql`${companies.proCreditsUsed} + ${amount} <= ${companies.proCreditsTotal}`
+              )
+            )
+            .returning({ newUsed: companies.proCreditsUsed, total: companies.proCreditsTotal });
+        }
+
+        if (deductResult.length === 0) {
+          // Insufficient credits — throw to trigger transaction rollback
+          throw Object.assign(new Error(`Insufficient ${creditType === 'basic' ? 'Basic' : 'Pro'} credits`), { code: 'INSUFFICIENT_CREDITS' });
+        }
+
+        // Step 2: Insert ledger entry within the same transaction
+        const remaining = deductResult[0].total - deductResult[0].newUsed;
+        await tx.insert(creditLedger).values({
+          id: randomUUID(),
+          companyId,
+          creditType,
+          transactionType: 'use',
+          amount: -amount,
+          balanceAfter: remaining,
+          description,
+          userId: userId ?? null,
+          createdAt: new Date(),
+        });
+
+        creditsDeducted = true;
+      }
+
+      // Step 3: Insert brief submission within the same transaction
+      const briefId = randomUUID();
+      const now = new Date();
+      const briefRows = await tx.insert(briefSubmissions).values({
+        id: briefId,
+        submittedByName: briefData.submittedByName,
+        submittedByEmail: briefData.submittedByEmail,
+        submittedByContact: briefData.submittedByContact ?? null,
+        companyId: briefData.companyId ?? null,
+        companyName: briefData.companyName,
+        companyBrand: briefData.companyBrand ?? null,
+        studyType: briefData.studyType,
+        numIdeas: briefData.numIdeas ?? 1,
+        researchObjective: briefData.researchObjective,
+        regions: briefData.regions ?? [],
+        ages: briefData.ages ?? [],
+        genders: briefData.genders ?? [],
+        incomes: briefData.incomes ?? [],
+        industry: briefData.industry ?? null,
+        competitors: briefData.competitors ?? [],
+        projectFileUrls: briefData.projectFileUrls ?? [],
+        files: briefData.files ?? [],
+        concepts: briefData.concepts ?? [],
+        paymentMethod: briefData.paymentMethod ?? 'online',
+        paymentStatus: briefData.paymentStatus ?? null,
+        basicCreditsUsed: briefData.basicCreditsUsed ?? 0,
+        proCreditsUsed: briefData.proCreditsUsed ?? 0,
+        status: briefData.status ?? 'new',
+        notes: briefData.notes ?? null,
+        createdAt: now,
+        updatedAt: now,
+      }).returning();
+      const brief = briefRows[0];
+
+      // Step 4: Insert study within the same transaction
+      const studyId = randomUUID();
+      const studyRows = await tx.insert(studies).values({
+        id: studyId,
+        companyId: studyData.companyId ?? null,
+        companyName: studyData.companyName,
+        briefId: brief.id,
+        clientReportId: studyData.clientReportId ?? null,
+        title: studyData.title,
+        description: studyData.description ?? null,
+        studyType: studyData.studyType,
+        isTest24: studyData.isTest24 ?? true,
+        tags: studyData.tags ?? [],
+        status: studyData.status ?? 'NEW',
+        statusUpdatedAt: now,
+        reportUrl: studyData.reportUrl ?? null,
+        deliveryDate: studyData.deliveryDate ?? null,
+        submittedByEmail: studyData.submittedByEmail,
+        submittedByName: studyData.submittedByName ?? null,
+        createdAt: now,
+        updatedAt: now,
+      }).returning();
+      const study = studyRows[0];
+
+      return { brief, study, creditsDeducted };
+    });
   }
 
   // Report Analytics Methods

@@ -4,7 +4,7 @@ import multer from "multer";
 import crypto from "crypto";
 import { z } from "zod";
 import { storage } from "./storage";
-import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemWithoutOrderIdSchema, insertReportSchema, insertDealSchema, insertCaseStudySchema, insertInquirySchema } from "@shared/schema";
+import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemWithoutOrderIdSchema, insertReportSchema, insertDealSchema, insertCaseStudySchema, insertInquirySchema, type BriefSubmission } from "@shared/schema";
 import { PaymentService } from "./payments/service";
 import type { PaymentConfig } from "./payments/types";
 import * as emailService from "./emails/email-service";
@@ -694,7 +694,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/orders", async (req, res) => {
+  app.post("/api/orders", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const validatedOrder = insertOrderSchema.parse(req.body.order);
       const validatedItems = req.body.items?.map((item: any) => insertOrderItemWithoutOrderIdSchema.parse(item)) || [];
@@ -3962,10 +3962,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Public endpoint for brief files - accessible from email links without authentication
+  // Brief files endpoint - requires authentication and company ownership check
   // Brief files are stored as: briefs/{companyName}/{filename}
-  app.get("/api/public/brief-files/*", async (req, res) => {
+  app.get("/api/public/brief-files/*", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const sessionUser = req.user!;
       const filePath = (req.params as Record<string, string>)[0];
       
       if (!filePath) {
@@ -3975,6 +3976,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate this is a brief file path (security: only allow access to brief files)
       if (!filePath.startsWith("briefs/")) {
         return res.status(403).json({ error: "Access denied - invalid file path" });
+      }
+
+      // Non-admins must own the company whose files they are requesting
+      if (!isAdminUser(sessionUser.email)) {
+        if (!sessionUser.companyId) {
+          return res.status(403).json({ error: "Access denied" });
+        }
+        const company = await storage.getCompany(sessionUser.companyId);
+        if (!company) {
+          return res.status(403).json({ error: "Access denied" });
+        }
+        const sanitizedCompanyName = company.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "")
+          .slice(0, 50) || "unknown";
+        const pathParts = filePath.split("/");
+        const fileCompanySegment = pathParts[1]; // briefs/{company-name}/{file}
+        if (fileCompanySegment !== sanitizedCompanyName) {
+          return res.status(403).json({ error: "Access denied" });
+        }
       }
 
       const exists = await fileExists(filePath);
@@ -4013,7 +4035,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader("Cache-Control", "private, max-age=3600"); // 1 hour cache
       res.send(fileBuffer);
     } catch (error: any) {
-      console.error("Public brief file serve error:", error);
+      console.error("Brief file serve error:", error);
       res.status(500).json({ error: error.message });
     }
   });
@@ -4074,12 +4096,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Admins can access all files; regular users can only access:
       // - Public files (thumbnails, general pdfs)
       // - Their own company's client reports
+      // - Their own company's brief files
       if (!isAdminUser(sessionUser.email)) {
         // Check if this is a client report - restrict to company owner
         if (filePath.startsWith("client_reports/")) {
           const pathParts = filePath.split("/");
           const companyId = pathParts[1]; // client_reports/{companyId}/{file}
           if (sessionUser.companyId !== companyId) {
+            return res.status(403).json({ error: "Access denied" });
+          }
+        }
+
+        // Check if this is a brief file - restrict to owning company
+        if (filePath.startsWith("briefs/")) {
+          // Brief files are stored as: briefs/{sanitized-company-name}/{filename}
+          // We verify ownership by looking up the user's company and comparing the sanitized name
+          if (!sessionUser.companyId) {
+            return res.status(403).json({ error: "Access denied" });
+          }
+          const company = await storage.getCompany(sessionUser.companyId);
+          if (!company) {
+            return res.status(403).json({ error: "Access denied" });
+          }
+          const sanitizedCompanyName = company.name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, "")
+            .slice(0, 50) || "unknown";
+          const pathParts = filePath.split("/");
+          const fileCompanySegment = pathParts[1]; // briefs/{company-name}/{file}
+          if (fileCompanySegment !== sanitizedCompanyName) {
             return res.status(403).json({ error: "Access denied" });
           }
         }
@@ -4198,7 +4244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ======= Brief Submission Endpoints =======
 
   // Upload files for brief submission
-  app.post("/api/briefs/upload", briefFileUpload.array("files", 5), async (req, res) => {
+  app.post("/api/briefs/upload", requireAuth, briefFileUpload.array("files", 5), async (req: AuthenticatedRequest, res) => {
     try {
       const files = req.files as Express.Multer.File[];
       const companyName = req.body.companyName || "unknown";
@@ -4342,146 +4388,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let finalProCreditsUsed = 0;
       let companyIdStr: string | null = null;
 
-      // Handle credit deduction if using credits payment method
-      if (validated.paymentMethod === "credits") {
-        // Early validation: must have company for credits payment
-        if (!validated.companyId) {
-          return res.status(400).json({ 
-            success: false, 
-            error: "Company account required for credit payments" 
-          });
-        }
+      // Determine credit deduction requirement
+      // - "credits" payment: deduction required, reject if insufficient
+      // - "invoice" payment with a companyId: attempt deduction, proceed if insufficient
+      // - "online" payment: no credit deduction
+      const isOnlinePayment = validated.paymentMethod === "online";
 
+      if (validated.paymentMethod === "credits" && !validated.companyId) {
+        return res.status(400).json({
+          success: false,
+          error: "Company account required for credit payments",
+        });
+      }
+
+      if (validated.companyId) {
         companyIdStr = String(validated.companyId);
-        
-        // Refetch company to get current credit state (prevents race conditions)
+      }
+
+      // Verify company exists when a company ID is provided
+      if (companyIdStr && validated.paymentMethod === "credits") {
         const company = await storage.getCompany(companyIdStr);
         if (!company) {
           return res.status(400).json({ success: false, error: "Company not found" });
         }
-
-        // Calculate available credits based on current database state
-        const basicAvailable = (company.basicCreditsTotal || 0) - (company.basicCreditsUsed || 0);
-        const proAvailable = (company.proCreditsTotal || 0) - (company.proCreditsUsed || 0);
-
-        // Determine which credit bucket to use based on study type (server-side decision)
-        if (isBasicStudy) {
-          if (basicAvailable < creditsRequired) {
-            return res.status(400).json({ 
-              success: false, 
-              error: `Insufficient Basic credits. Available: ${basicAvailable}, Required: ${creditsRequired}` 
-            });
-          }
-          finalBasicCreditsUsed = creditsRequired;
-        } else {
-          if (proAvailable < creditsRequired) {
-            return res.status(400).json({ 
-              success: false, 
-              error: `Insufficient Pro credits. Available: ${proAvailable}, Required: ${creditsRequired}` 
-            });
-          }
-          finalProCreditsUsed = creditsRequired;
-        }
-
-        // Atomic deduction: compute new values based on current DB state
-        const newBasicUsed = (company.basicCreditsUsed || 0) + finalBasicCreditsUsed;
-        const newProUsed = (company.proCreditsUsed || 0) + finalProCreditsUsed;
-        
-        await storage.updateCompany(companyIdStr, {
-          basicCreditsUsed: newBasicUsed,
-          proCreditsUsed: newProUsed,
-        });
-
-        if (finalBasicCreditsUsed > 0) {
-          const basicRemaining = (company.basicCreditsTotal || 0) - newBasicUsed;
-          await storage.createCreditLedgerEntry({
-            companyId: companyIdStr,
-            creditType: "basic",
-            transactionType: "use",
-            amount: -finalBasicCreditsUsed,
-            balanceAfter: basicRemaining,
-            description: `Brief launch: ${validated.studyType} study (${creditsRequired} concept${creditsRequired > 1 ? 's' : ''})`,
-            userId: validated.userId || null,
-          });
-        }
-        if (finalProCreditsUsed > 0) {
-          const proRemaining = (company.proCreditsTotal || 0) - newProUsed;
-          await storage.createCreditLedgerEntry({
-            companyId: companyIdStr,
-            creditType: "pro",
-            transactionType: "use",
-            amount: -finalProCreditsUsed,
-            balanceAfter: proRemaining,
-            description: `Brief launch: ${validated.studyType} study (${creditsRequired} concept${creditsRequired > 1 ? 's' : ''})`,
-            userId: validated.userId || null,
-          });
-        }
-
-        console.log(`Credits deducted for company ${validated.companyId}: Basic ${finalBasicCreditsUsed}, Pro ${finalProCreditsUsed}`);
-      } else if (validated.paymentMethod === "invoice" && validated.companyId) {
-        // Auto-deduct credits for invoice-billed briefs when the company has a
-        // sufficient pre-purchased credit balance.  Online (PayFast) payments are
-        // excluded — those are cash transactions, not credit consumption.
-        companyIdStr = String(validated.companyId);
-        const invoiceCompany = await storage.getCompany(companyIdStr);
-
-        if (invoiceCompany) {
-          const basicAvailable = (invoiceCompany.basicCreditsTotal || 0) - (invoiceCompany.basicCreditsUsed || 0);
-          const proAvailable   = (invoiceCompany.proCreditsTotal   || 0) - (invoiceCompany.proCreditsUsed   || 0);
-
-          const hasSufficientCredits = isBasicStudy
-            ? basicAvailable >= creditsRequired
-            : proAvailable   >= creditsRequired;
-
-          if (hasSufficientCredits) {
-            if (isBasicStudy) {
-              finalBasicCreditsUsed = creditsRequired;
-            } else {
-              finalProCreditsUsed = creditsRequired;
-            }
-
-            const newBasicUsed = (invoiceCompany.basicCreditsUsed || 0) + finalBasicCreditsUsed;
-            const newProUsed   = (invoiceCompany.proCreditsUsed   || 0) + finalProCreditsUsed;
-
-            await storage.updateCompany(companyIdStr, {
-              basicCreditsUsed: newBasicUsed,
-              proCreditsUsed:   newProUsed,
-            });
-
-            if (finalBasicCreditsUsed > 0) {
-              const basicRemaining = (invoiceCompany.basicCreditsTotal || 0) - newBasicUsed;
-              await storage.createCreditLedgerEntry({
-                companyId: companyIdStr,
-                creditType: "basic",
-                transactionType: "use",
-                amount: -finalBasicCreditsUsed,
-                balanceAfter: basicRemaining,
-                description: `Brief launch (invoice billing): ${validated.studyType} study (${creditsRequired} concept${creditsRequired > 1 ? "s" : ""})`,
-                userId: validated.userId || null,
-              });
-            }
-            if (finalProCreditsUsed > 0) {
-              const proRemaining = (invoiceCompany.proCreditsTotal || 0) - newProUsed;
-              await storage.createCreditLedgerEntry({
-                companyId: companyIdStr,
-                creditType: "pro",
-                transactionType: "use",
-                amount: -finalProCreditsUsed,
-                balanceAfter: proRemaining,
-                description: `Brief launch (invoice billing): ${validated.studyType} study (${creditsRequired} concept${creditsRequired > 1 ? "s" : ""})`,
-                userId: validated.userId || null,
-              });
-            }
-
-            console.log(`Credits auto-deducted (invoice) for company ${companyIdStr}: Basic ${finalBasicCreditsUsed}, Pro ${finalProCreditsUsed}`);
-          }
-          // Insufficient credits on invoice path → no error, billing proceeds normally
-        }
       }
 
-      // Determine if this is an online payment that needs checkout redirect
-      const isOnlinePayment = validated.paymentMethod === "online";
-      
+      // Determine credit deduction payload for the transaction
+      const creditType = isBasicStudy ? 'basic' : 'pro';
+      const isCreditsPayment = validated.paymentMethod === "credits";
+      const isInvoicePayment = validated.paymentMethod === "invoice";
+
+      // For invoice path we still try to deduct, but insufficient credits won't block submission.
+      // The transaction method throws with code INSUFFICIENT_CREDITS if deduction fails;
+      // we only surface that error for the "credits" payment method.
+      const creditDeductionPayload = (isCreditsPayment || isInvoicePayment) && companyIdStr ? {
+        companyId: companyIdStr,
+        creditType,
+        amount: creditsRequired,
+        description: `Brief launch${isInvoicePayment ? " (invoice billing)" : ""}: ${validated.studyType} study (${creditsRequired} concept${creditsRequired > 1 ? 's' : ''})`,
+        userId: validated.userId || null,
+      } : null;
+
       // Check if user is logged in to determine pricing tier
       let isMember = false;
       const sessionToken = req.cookies?.session;
@@ -4508,38 +4455,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const pricePerConcept = isBasicStudy ? basicPrice : proPrice;
       const totalAmount = pricePerConcept * creditsRequired;
 
-      // Create brief submission with server-computed credit values
-      const brief = await storage.createBriefSubmission({
-        ...validated,
-        concepts: validated.concepts || [],
-        companyId: companyIdStr || (validated.companyId ? String(validated.companyId) : null),
-        paymentMethod: validated.paymentMethod || "online",
-        paymentStatus: isOnlinePayment ? "pending" : null,
-        basicCreditsUsed: finalBasicCreditsUsed,
-        proCreditsUsed: finalProCreditsUsed,
-        status: "new",
-      });
+      // Execute the entire brief submission inside a single DB transaction:
+      // credit deduction + ledger entry + brief creation + study creation are atomic.
+      // If any step fails the entire transaction is rolled back.
+      let brief: BriefSubmission;
+      let submissionCreditsDeducted = false;
 
-      // Automatically create a Test24 study from the brief for tracking
       try {
-        const existingStudy = await storage.getStudyByBriefId(brief.id);
-        if (!existingStudy) {
-          await storage.createStudy({
-            briefId: brief.id,
-            companyId: companyIdStr || (validated.companyId ? String(validated.companyId) : undefined),
-            companyName: brief.companyName,
-            title: `${validated.companyBrand || brief.companyName} - ${isBasicStudy ? "Test24 Basic" : "Test24 Pro"}`,
+        const result = await storage.submitBriefWithCredits({
+          briefData: {
+            ...validated,
+            concepts: validated.concepts || [],
+            companyId: companyIdStr || null,
+            paymentMethod: validated.paymentMethod || "online",
+            paymentStatus: isOnlinePayment ? "pending" : null,
+            basicCreditsUsed: isBasicStudy && creditDeductionPayload ? creditsRequired : 0,
+            proCreditsUsed: !isBasicStudy && creditDeductionPayload ? creditsRequired : 0,
+            status: "new",
+          },
+          studyData: {
+            briefId: undefined, // assigned inside transaction from the created brief
+            companyId: companyIdStr || undefined,
+            companyName: validated.companyName,
+            title: `${validated.companyBrand || validated.companyName} - ${isBasicStudy ? "Test24 Basic" : "Test24 Pro"}`,
             description: validated.researchObjective?.slice(0, 200) || "",
             studyType: isBasicStudy ? "basic" : "pro",
             status: "NEW",
             isTest24: true,
-            tags: [brief.companyName, isBasicStudy ? "basic" : "pro", validated.industry || ""].filter(Boolean),
-            submittedByEmail: brief.submittedByEmail,
-            submittedByName: brief.submittedByName || undefined,
+            tags: [validated.companyName, isBasicStudy ? "basic" : "pro", validated.industry || ""].filter(Boolean),
+            submittedByEmail: validated.submittedByEmail,
+            submittedByName: validated.submittedByName || undefined,
+          },
+          creditDeduction: creditDeductionPayload,
+        });
+        brief = result.brief;
+        submissionCreditsDeducted = result.creditsDeducted;
+        if (submissionCreditsDeducted) {
+          if (isBasicStudy) finalBasicCreditsUsed = creditsRequired;
+          else finalProCreditsUsed = creditsRequired;
+          console.log(`Credits deducted in transaction for company ${companyIdStr}: Basic ${finalBasicCreditsUsed}, Pro ${finalProCreditsUsed}`);
+        }
+      } catch (txError: any) {
+        // If insufficient credits and payment method requires them, return a user-friendly error
+        if (txError.code === 'INSUFFICIENT_CREDITS' && isCreditsPayment) {
+          return res.status(400).json({
+            success: false,
+            error: `Insufficient ${isBasicStudy ? "Basic" : "Pro"} credits. Required: ${creditsRequired}`,
           });
         }
-      } catch (studyError) {
-        console.error("Failed to auto-create study from brief:", studyError);
+        // For invoice path, insufficient credits just means we proceed without deducting —
+        // re-run the transaction without credit deduction
+        if (txError.code === 'INSUFFICIENT_CREDITS' && isInvoicePayment) {
+          const result2 = await storage.submitBriefWithCredits({
+            briefData: {
+              ...validated,
+              concepts: validated.concepts || [],
+              companyId: companyIdStr || null,
+              paymentMethod: validated.paymentMethod || "online",
+              paymentStatus: isOnlinePayment ? "pending" : null,
+              basicCreditsUsed: 0,
+              proCreditsUsed: 0,
+              status: "new",
+            },
+            studyData: {
+              briefId: undefined,
+              companyId: companyIdStr || undefined,
+              companyName: validated.companyName,
+              title: `${validated.companyBrand || validated.companyName} - ${isBasicStudy ? "Test24 Basic" : "Test24 Pro"}`,
+              description: validated.researchObjective?.slice(0, 200) || "",
+              studyType: isBasicStudy ? "basic" : "pro",
+              status: "NEW",
+              isTest24: true,
+              tags: [validated.companyName, isBasicStudy ? "basic" : "pro", validated.industry || ""].filter(Boolean),
+              submittedByEmail: validated.submittedByEmail,
+              submittedByName: validated.submittedByName || undefined,
+            },
+            creditDeduction: null,
+          });
+          brief = result2.brief;
+        } else {
+          throw txError;
+        }
       }
 
       // Get files array for emails (cast to expected type)
