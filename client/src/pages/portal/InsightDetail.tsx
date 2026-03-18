@@ -528,78 +528,80 @@ export default function InsightDetail() {
   const hasOwnCover = !!(report.coverImageUrl || report.coverImage?.startsWith('/api/files'));
   const subtitle = report.content?.subtitle;
 
-  const sections = report.content?.sections ?? [];
-
-  const scrollToSection = (index: number) => {
-    const el = document.getElementById(`section-${index}`);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   return (
     <InsightPageWrapper isAuthenticated={isAuthenticated}>
       <div className="min-h-screen bg-white">
-
-        {/* ── Hero ── */}
-        <div className={`relative w-full ${hasOwnCover ? 'h-80 md:h-[30rem]' : 'h-72 md:h-[26rem]'} overflow-hidden`}>
+        <div className={`relative w-full ${hasOwnCover ? 'h-80 md:h-[28rem]' : 'h-72 md:h-96'} overflow-hidden`}>
           <img
             src={heroImage}
             alt={report.title}
             className="w-full h-full object-cover"
           />
-          <div className={`absolute inset-0 ${hasOwnCover ? 'bg-gradient-to-t from-black/85 via-black/35 to-black/10' : 'bg-gradient-to-t from-black/75 via-black/40 to-black/10'}`} />
-
-          <div className="absolute bottom-0 left-0 right-0 px-6 pb-8 pt-4 md:px-10 md:pb-10">
-            <div className="max-w-5xl mx-auto">
+          <div className={`absolute inset-0 ${hasOwnCover ? 'bg-gradient-to-t from-black/80 via-black/30 to-transparent' : 'bg-gradient-to-t from-black/70 via-black/40 to-transparent'}`} />
+          
+          <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
+            <div className="max-w-3xl mx-auto">
               <Button
                 variant="ghost"
                 onClick={() => setLocation("/portal/trends")}
-                className="mb-5 text-white/90 hover:text-white hover:bg-white/15 -ml-2 text-sm"
+                className="mb-4 text-white hover:text-white hover:bg-white/20 -ml-2"
                 data-testid="button-back"
               >
-                <ArrowLeft className="w-4 h-4 mr-1.5" />
+                <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Library
               </Button>
-
+              
               <div className="flex items-center gap-2 mb-3 flex-wrap">
-                <Badge className={`${categoryStyle.bg} ${categoryStyle.text} text-xs font-semibold px-2.5 py-1 border-0`}>
+                <Badge 
+                  className={`${categoryStyle.bg} ${categoryStyle.text} text-xs font-medium px-2.5 py-1 border-0`}
+                >
                   {report.category}
                 </Badge>
-                <Badge variant="secondary" className="text-xs px-2.5 py-1 bg-white/90 text-gray-700">
+                <Badge 
+                  variant="secondary"
+                  className="text-xs px-2.5 py-1 bg-white/90 text-gray-700"
+                >
                   {report.industry}
                 </Badge>
                 {report.content?.retailerHook && (
-                  <Badge variant="secondary" className="text-xs px-2.5 py-1 bg-orange-50 text-orange-700">
+                  <Badge 
+                    variant="secondary"
+                    className="text-xs px-2.5 py-1 bg-orange-50 text-orange-700"
+                  >
                     {report.content.retailerHook}
                   </Badge>
                 )}
                 {report.isNew && (
-                  <Badge className="text-white text-xs font-semibold px-2.5 py-1" style={{ backgroundColor: '#5B6EF7' }}>
+                  <Badge 
+                    className="text-white text-xs font-medium px-2 py-1"
+                    style={{ backgroundColor: '#5B6EF7' }}
+                  >
                     NEW
                   </Badge>
                 )}
               </div>
 
-              <h1
-                className="text-2xl md:text-4xl lg:text-5xl font-bold mb-2 text-white leading-tight max-w-3xl"
+              <h1 
+                className="text-2xl md:text-4xl font-bold mb-1 text-white leading-tight"
                 style={{ fontFamily: 'DM Serif Display, serif' }}
                 data-testid="text-report-title"
               >
                 {report.title}
               </h1>
-
+              
               {subtitle && (
-                <p className="text-base md:text-lg text-white/85 mb-3 italic max-w-2xl" data-testid="text-report-subtitle">
+                <p className="text-lg md:text-xl text-white/90 mb-3 italic" data-testid="text-report-subtitle">
                   {subtitle}
                 </p>
               )}
 
-              <div className="flex items-center gap-4 text-xs text-white/70 mt-3">
+              <div className="flex items-center gap-4 text-sm text-white/80">
                 <div className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5" />
+                  <Calendar className="w-4 h-4" />
                   <span>{formattedDate}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Briefcase className="w-3.5 h-3.5" />
+                  <Briefcase className="w-4 h-4" />
                   <span>{report.industry}</span>
                 </div>
               </div>
@@ -607,423 +609,328 @@ export default function InsightDetail() {
           </div>
         </div>
 
-        {/* ── Two-column body ── */}
-        <div className="max-w-5xl mx-auto px-4 md:px-8 py-10">
-          <div className="flex flex-col lg:flex-row gap-10 lg:gap-14 items-start">
+        <div className="max-w-3xl mx-auto px-6 py-8">
+          <div className="flex flex-wrap gap-2 mb-6">
+            {report.tags.map((tag, index) => (
+              <Badge 
+                key={index} 
+                variant="secondary"
+                className="text-xs px-3 py-1 bg-gray-100 text-gray-600"
+              >
+                {tag}
+              </Badge>
+            ))}
+          </div>
 
-            {/* ── Main article column ── (order-last on mobile so sidebar appears first) */}
-            <div className="flex-1 min-w-0 order-last lg:order-first">
+          <p className="text-lg text-gray-700 leading-relaxed mb-4">
+            {report.teaser}
+          </p>
 
-              {/* Lead / teaser */}
-              <p className="text-xl leading-relaxed text-gray-600 font-light mb-8 border-b border-gray-100 pb-8">
-                {report.teaser}
-              </p>
+          {/* Jump to report link - visible when there's a downloadable report or dashboard */}
+          {(report.pdfPath || report.dashboardLink) && (
+            <div className="mb-8">
+              <button
+                onClick={scrollToDownload}
+                className="inline-flex items-center gap-1.5 text-[#5B6EF7] hover:text-[#4958d6] text-sm font-medium transition-colors"
+                data-testid="button-jump-to-report"
+              >
+                <FileText className="w-4 h-4" />
+                Jump to report
+              </button>
+            </div>
+          )}
 
-              {/* Locked state */}
-              {!accessResult.hasAccess ? (
-                <div>
-                  {report.content && (
-                    <article className="mb-10">
-                      <p className="text-base text-gray-700 leading-relaxed mb-8 font-medium">
-                        {report.content.intro}
-                      </p>
+          {!accessResult.hasAccess ? (
+            <div className="my-8">
+              {report.content && (
+                <article className="prose prose-lg max-w-none mb-8">
+                  <p className="text-lg text-gray-700 leading-relaxed font-medium mb-6">
+                    {report.content.intro}
+                  </p>
 
-                      {sections.map((section, index) => (
-                        <div key={index} id={`section-${index}`} className="mb-10 scroll-mt-6">
-                          {index > 0 && <hr className="border-gray-100 mb-10" />}
-                          <h2
-                            className="text-2xl font-bold mb-4 text-gray-900"
-                            style={{ fontFamily: 'DM Serif Display, serif' }}
-                          >
-                            {section.heading}
-                          </h2>
-                          {section.heading.toLowerCase().includes("what you") ? (
-                            <ul className="space-y-3">
-                              {section.body.split('\n').filter(l => l.trim()).map((line, i) => (
-                                <li key={i} className="flex items-start gap-3 text-gray-700">
-                                  <CheckCircle2 className="w-5 h-5 text-[#5B6EF7] flex-shrink-0 mt-0.5" />
-                                  <span className="leading-relaxed">{line.trim()}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          ) : section.heading.toLowerCase().includes("featured") || section.heading.toLowerCase().includes("signal") ? (
-                            <div className="space-y-3">
-                              {section.body.split('\n').filter(l => l.trim()).map((line, i) => (
-                                <div key={i} className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
-                                  <TrendingUp className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
-                                  <span className="text-gray-700 font-medium leading-relaxed">{line.trim()}</span>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="text-gray-700 leading-relaxed whitespace-pre-line text-[15px]">
-                              {section.body}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-
-                      {report.content.closingLine && (
-                        <blockquote className="border-l-4 border-[#5B6EF7] pl-5 py-1 mt-8 mb-10">
-                          <p className="text-lg text-gray-800 font-medium italic leading-relaxed">
-                            {report.content.closingLine}
-                          </p>
-                        </blockquote>
-                      )}
-                    </article>
-                  )}
-
-                  <Card className="border border-[#5B6EF7]/20 bg-gradient-to-br from-blue-50 to-white" id="report-download">
-                    <CardContent className="p-8 text-center">
-                      <div className="w-14 h-14 rounded-full bg-[#5B6EF7]/10 flex items-center justify-center mx-auto mb-4">
-                        <Lock className="w-7 h-7 text-[#5B6EF7]" />
-                      </div>
-                      <h3
-                        className="text-xl font-bold mb-2 text-gray-900"
+                  {report.content.sections.map((section, index) => (
+                    <div key={index} className="mb-8">
+                      <h2 
+                        className="text-xl font-bold mb-3 text-gray-900"
                         style={{ fontFamily: 'DM Serif Display, serif' }}
                       >
-                        {report.content?.ctaLabel || "Members-Only Content"}
-                      </h3>
-                      <p className="text-gray-600 mb-6 max-w-md mx-auto text-sm leading-relaxed">
-                        {report.content?.ctaHelper || accessResult.message || "Become a member to access this content."}
-                      </p>
-
-                      {accessResult.reason === "not_logged_in" ? (
-                        <div className="flex flex-col items-center gap-3">
-                          <Button
-                            onClick={handleLogin}
-                            className="rounded-full"
-                            style={{ backgroundColor: '#5B6EF7' }}
-                            data-testid="button-login-access"
-                          >
-                            <LogIn className="w-4 h-4 mr-2" />
-                            Sign In to Continue
-                          </Button>
-                          {report.content?.ctaEmail && (
-                            <p className="text-sm text-gray-500">
-                              Or email{' '}
-                              <a href={`mailto:${report.content.ctaEmail}`} className="text-[#5B6EF7] hover:underline" data-testid="link-cta-email">
-                                {report.content.ctaEmail}
-                              </a>
-                            </p>
-                          )}
+                        {section.heading}
+                      </h2>
+                      {section.heading.toLowerCase().includes("what you") ? (
+                        <ul className="space-y-2">
+                          {section.body.split('\n').filter(l => l.trim()).map((line, i) => (
+                            <li key={i} className="flex items-start gap-2.5 text-gray-700">
+                              <CheckCircle2 className="w-5 h-5 text-[#5B6EF7] flex-shrink-0 mt-0.5" />
+                              <span>{line.trim()}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : section.heading.toLowerCase().includes("featured") || section.heading.toLowerCase().includes("signal") ? (
+                        <div className="space-y-3">
+                          {section.body.split('\n').filter(l => l.trim()).map((line, i) => (
+                            <div key={i} className="flex items-start gap-2.5 p-3 bg-gray-50 rounded-lg">
+                              <TrendingUp className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                              <span className="text-gray-700 font-medium">{line.trim()}</span>
+                            </div>
+                          ))}
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center gap-3">
-                          <Button
-                            onClick={handleUpgrade}
-                            className="rounded-full"
-                            style={{ backgroundColor: '#5B6EF7' }}
-                            data-testid="button-upgrade-tier"
-                          >
-                            <Crown className="w-4 h-4 mr-2" />
-                            Become a Member
-                          </Button>
-                          {report.content?.ctaEmail && (
-                            <p className="text-sm text-gray-500">
-                              Or email{' '}
-                              <a href={`mailto:${report.content.ctaEmail}`} className="text-[#5B6EF7] hover:underline" data-testid="link-cta-email">
-                                {report.content.ctaEmail}
-                              </a>
-                            </p>
-                          )}
+                        <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                          {section.body}
                         </div>
                       )}
-                    </CardContent>
-                  </Card>
-                </div>
-              ) : (
-                <>
-                  {/* Accessible article */}
-                  {report.content && (
-                    <article>
-                      <p className="text-base text-gray-700 leading-relaxed mb-10 font-medium">
-                        {report.content.intro}
-                      </p>
+                    </div>
+                  ))}
 
-                      {sections.map((section, index) => (
-                        <div key={index} id={`section-${index}`} className="mb-10 scroll-mt-6">
-                          {index > 0 && <hr className="border-gray-100 mb-10" />}
-                          <h2
-                            className="text-2xl font-bold mb-4 text-gray-900"
-                            style={{ fontFamily: 'DM Serif Display, serif' }}
-                          >
-                            {section.heading}
-                          </h2>
-                          {section.heading.toLowerCase().includes("what you") ? (
-                            <ul className="space-y-3">
-                              {section.body.split('\n').filter(l => l.trim()).map((line, i) => (
-                                <li key={i} className="flex items-start gap-3 text-gray-700">
-                                  <CheckCircle2 className="w-5 h-5 text-[#5B6EF7] flex-shrink-0 mt-0.5" />
-                                  <span className="leading-relaxed">{line.trim()}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          ) : section.heading.toLowerCase().includes("featured") || section.heading.toLowerCase().includes("signal") ? (
-                            <div className="space-y-3">
-                              {section.body.split('\n').filter(l => l.trim()).map((line, i) => (
-                                <div key={i} className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
-                                  <TrendingUp className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
-                                  <span className="text-gray-700 font-medium leading-relaxed">{line.trim()}</span>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="text-gray-700 leading-relaxed whitespace-pre-line text-[15px]">
-                              {section.body}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-
-                      {report.content.closingLine && (
-                        <blockquote className="border-l-4 border-[#5B6EF7] pl-5 py-1 mt-8 mb-10">
-                          <p className="text-lg text-gray-800 font-medium italic leading-relaxed">
-                            {report.content.closingLine}
-                          </p>
-                        </blockquote>
-                      )}
-                    </article>
+                  {report.content.closingLine && (
+                    <p className="text-lg text-gray-900 font-medium italic border-l-4 border-[#5B6EF7] pl-4 mt-8">
+                      {report.content.closingLine}
+                    </p>
                   )}
+                </article>
+              )}
 
-                  {/* Raw body fallback */}
-                  {!report.content && (report as any).body && (
-                    <article>
-                      {((report as any).body as string).split(/\n{2,}/).map((paragraph: string, idx: number) => {
-                        const trimmed = paragraph.trim();
-                        if (!trimmed) return null;
-                        const isShortLine = trimmed.length < 80 && !trimmed.includes(".");
-                        return isShortLine ? (
-                          <h3
-                            key={idx}
-                            className="text-xl font-bold text-gray-900 mt-10 mb-3"
-                            style={{ fontFamily: "DM Serif Display, serif" }}
-                          >
-                            {trimmed}
-                          </h3>
-                        ) : (
-                          <p key={idx} className="text-gray-700 leading-relaxed mb-5 text-[15px]">
-                            {trimmed}
-                          </p>
-                        );
-                      })}
-                    </article>
-                  )}
-
-                  {/* Download / dashboard CTA */}
-                  {(report.pdfPath || report.dashboardLink) && (
-                    <div id="report-download" className="mt-12 pt-10 border-t border-gray-100">
-                      <h3
-                        className="text-2xl font-bold mb-2 text-gray-900"
-                        style={{ fontFamily: 'DM Serif Display, serif' }}
+              <Card className="border-2 border-[#5B6EF7]/20 bg-gradient-to-br from-blue-50 to-white" id="report-download">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 rounded-full bg-[#5B6EF7]/10 flex items-center justify-center mx-auto mb-4">
+                    <Lock className="w-8 h-8 text-[#5B6EF7]" />
+                  </div>
+                  <h3 
+                    className="text-xl font-bold mb-2 text-gray-900"
+                    style={{ fontFamily: 'DM Serif Display, serif' }}
+                  >
+                    {report.content?.ctaLabel || "Members-Only Content"}
+                  </h3>
+                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                    {report.content?.ctaHelper || accessResult.message || "Become a member to access this content."}
+                  </p>
+                  
+                  {accessResult.reason === "not_logged_in" ? (
+                    <div className="flex flex-col items-center gap-3">
+                      <Button 
+                        onClick={handleLogin}
+                        className="rounded-full"
+                        style={{ backgroundColor: '#5B6EF7' }}
+                        data-testid="button-login-access"
                       >
-                        Go deeper with the full report
-                      </h3>
-                      <p className="text-gray-500 mb-6 text-sm leading-relaxed">
-                        {report.content?.ctaHelper || "This article gives you the full story. If you need all diagnostics, numbers, and charts, access the full research report."}
-                      </p>
-                      <div className="flex flex-wrap gap-3">
-                        {report.pdfPath && (
-                          <Button
-                            size="lg"
-                            onClick={handleDownload}
-                            className="rounded-full"
-                            style={{ backgroundColor: '#5B6EF7' }}
-                            data-testid="button-download-footer"
-                          >
-                            <Download className="w-4 h-4 mr-2" />
-                            Download full report
-                          </Button>
-                        )}
-                        {report.dashboardLink && (
-                          <Button
-                            size="lg"
-                            onClick={() => window.open(report.dashboardLink!, '_blank')}
-                            variant="outline"
-                            className="rounded-full border-[#5B6EF7] text-[#5B6EF7]"
-                            data-testid="button-open-dashboard"
-                          >
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            Open Interactive Dashboard
-                          </Button>
-                        )}
-                      </div>
+                        <LogIn className="w-4 h-4 mr-2" />
+                        Sign In to Continue
+                      </Button>
                       {report.content?.ctaEmail && (
-                        <p className="text-xs text-gray-400 mt-4">
+                        <p className="text-sm text-gray-500">
                           Or email{' '}
-                          <a href={`mailto:${report.content.ctaEmail}`} className="text-[#5B6EF7] hover:underline">
+                          <a 
+                            href={`mailto:${report.content.ctaEmail}`} 
+                            className="text-[#5B6EF7] hover:underline"
+                            data-testid="link-cta-email"
+                          >
+                            {report.content.ctaEmail}
+                          </a>
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-3">
+                      <Button 
+                        onClick={handleUpgrade}
+                        className="rounded-full"
+                        style={{ backgroundColor: '#5B6EF7' }}
+                        data-testid="button-upgrade-tier"
+                      >
+                        <Crown className="w-4 h-4 mr-2" />
+                        Become a Member
+                      </Button>
+                      {report.content?.ctaEmail && (
+                        <p className="text-sm text-gray-500">
+                          Or email{' '}
+                          <a 
+                            href={`mailto:${report.content.ctaEmail}`} 
+                            className="text-[#5B6EF7] hover:underline"
+                            data-testid="link-cta-email"
+                          >
                             {report.content.ctaEmail}
                           </a>
                         </p>
                       )}
                     </div>
                   )}
-
-                  {/* Video section */}
-                  {report.series === "Inside" && report.videoPaths && report.videoPaths.length > 0 && (
-                    <div className="mt-12 pt-10 border-t border-gray-100">
-                      <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center flex-shrink-0">
-                          <Play className="w-5 h-5 text-violet-700" />
-                        </div>
-                        <div>
-                          <h3
-                            className="text-2xl font-bold text-gray-900"
-                            style={{ fontFamily: 'DM Serif Display, serif' }}
-                          >
-                            Watch the Demo
-                          </h3>
-                          <p className="text-gray-500 text-sm">See how this tool works in action</p>
-                        </div>
-                      </div>
-                      <div className="space-y-6">
-                        {report.videoPaths.map((videoPath, index) => {
-                          const videoName = videoPath.split('/').pop()?.replace('.mp4', '').replace(/-/g, ' ').replace('Innovatr Inside X ', '') || `Video ${index + 1}`;
-                          return (
-                            <div key={index} className="rounded-lg overflow-hidden border border-gray-200">
-                              {report.videoPaths && report.videoPaths.length > 1 && (
-                                <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
-                                  <span className="text-sm font-medium text-gray-700">{videoName}</span>
-                                </div>
-                              )}
-                              <video
-                                controls
-                                className="w-full aspect-video bg-gray-900"
-                                preload="metadata"
-                                data-testid={`video-player-${index}`}
-                              >
-                                <source src={videoPath} type="video/mp4" />
-                                Your browser does not support the video tag.
-                              </video>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
+                </CardContent>
+              </Card>
             </div>
+          ) : (
+            <>
+              {report.content && (
+                <article className="prose prose-lg max-w-none">
+                  <p className="text-lg text-gray-700 leading-relaxed font-medium mb-8">
+                    {report.content.intro}
+                  </p>
 
-            {/* ── Sticky sidebar (order-first on mobile so it appears between hero and article) ── */}
-            <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0 order-first lg:order-last">
-              <div className="lg:sticky lg:top-6 space-y-6">
+                  {report.content.sections.map((section, index) => (
+                    <div key={index} className="mb-8">
+                      {index > 0 && <hr className="border-gray-100 my-8" />}
+                      <h2 
+                        className="text-xl font-bold mb-3 text-gray-900"
+                        style={{ fontFamily: 'DM Serif Display, serif' }}
+                      >
+                        {section.heading}
+                      </h2>
+                      {section.heading.toLowerCase().includes("what you") ? (
+                        <ul className="space-y-2">
+                          {section.body.split('\n').filter(l => l.trim()).map((line, i) => (
+                            <li key={i} className="flex items-start gap-2.5 text-gray-700">
+                              <CheckCircle2 className="w-5 h-5 text-[#5B6EF7] flex-shrink-0 mt-0.5" />
+                              <span>{line.trim()}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : section.heading.toLowerCase().includes("featured") || section.heading.toLowerCase().includes("signal") ? (
+                        <div className="space-y-3">
+                          {section.body.split('\n').filter(l => l.trim()).map((line, i) => (
+                            <div key={i} className="flex items-start gap-2.5 p-3 bg-gray-50 rounded-lg">
+                              <TrendingUp className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                              <span className="text-gray-700 font-medium">{line.trim()}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                          {section.body}
+                        </div>
+                      )}
+                    </div>
+                  ))}
 
-                {/* Metadata card */}
-                <div className="rounded-lg border border-gray-100 bg-gray-50 p-5">
-                  <div className="space-y-3 text-sm text-gray-600">
-                    <div className="flex items-start gap-2.5">
-                      <Badge className={`${categoryStyle.bg} ${categoryStyle.text} text-xs font-semibold px-2.5 py-1 border-0`}>
-                        {report.category}
-                      </Badge>
-                    </div>
-                    <div className="flex items-start gap-2.5">
-                      <Calendar className="w-4 h-4 mt-0.5 text-gray-400 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-0.5">Published</p>
-                        <p className="font-medium text-gray-800">{formattedDate}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2.5">
-                      <Briefcase className="w-4 h-4 mt-0.5 text-gray-400 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-0.5">Industry</p>
-                        <p className="font-medium text-gray-800">{report.industry}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {report.tags.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-2">Tags</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {report.tags.map((tag, i) => (
-                          <Badge key={i} variant="secondary" className="text-xs px-2 py-0.5 bg-white text-gray-600 border border-gray-200">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
+                  {report.content.closingLine && (
+                    <p className="text-lg text-gray-900 font-medium italic border-l-4 border-[#5B6EF7] pl-4 mt-8 mb-8">
+                      {report.content.closingLine}
+                    </p>
                   )}
-                </div>
+                </article>
+              )}
 
-                {/* Section nav — only when there are named sections */}
-                {accessResult.hasAccess && sections.length > 0 && (
-                  <div className="rounded-lg border border-gray-100 p-5">
-                    <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-3">In this report</p>
-                    <nav className="space-y-1">
-                      {sections.map((section, index) => (
-                        <button
-                          key={index}
-                          onClick={() => scrollToSection(index)}
-                          className="block w-full text-left text-sm text-gray-600 hover:text-[#5B6EF7] py-1.5 px-2 rounded hover-elevate transition-colors leading-snug"
-                          data-testid={`sidebar-section-${index}`}
-                        >
-                          {section.heading}
-                        </button>
-                      ))}
-                    </nav>
-                  </div>
-                )}
+              {!report.content && report.body && (
+                <article className="prose prose-lg max-w-none">
+                  {report.body.split(/\n{2,}/).map((paragraph, idx) => {
+                    const trimmed = paragraph.trim();
+                    if (!trimmed) return null;
+                    const isShortLine = trimmed.length < 80 && !trimmed.includes(".");
+                    return isShortLine ? (
+                      <h3
+                        key={idx}
+                        className="text-lg font-bold text-gray-900 mt-8 mb-2"
+                        style={{ fontFamily: "DM Serif Display, serif" }}
+                      >
+                        {trimmed}
+                      </h3>
+                    ) : (
+                      <p key={idx} className="text-gray-700 leading-relaxed mb-4">
+                        {trimmed}
+                      </p>
+                    );
+                  })}
+                </article>
+              )}
 
-                {/* Sidebar download shortcut */}
-                {accessResult.hasAccess && (report.pdfPath || report.dashboardLink) && (
-                  <div className="space-y-2">
+              {(report.pdfPath || report.dashboardLink) && (
+                <div id="report-download" className="mt-12 pt-8 border-t border-gray-100 text-center">
+                  <h3 
+                    className="text-2xl font-bold mb-2 text-gray-900"
+                    style={{ fontFamily: 'DM Serif Display, serif' }}
+                  >
+                    Go deeper with the full report
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    {report.content?.ctaHelper || "This article gives you the full story. If you need all diagnostics, numbers, and charts, access the full research report."}
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     {report.pdfPath && (
-                      <Button
+                      <Button 
+                        size="lg"
                         onClick={handleDownload}
-                        className="w-full rounded-full justify-center"
+                        className="rounded-full"
                         style={{ backgroundColor: '#5B6EF7' }}
-                        data-testid="button-download-sidebar"
+                        data-testid="button-download-footer"
                       >
                         <Download className="w-4 h-4 mr-2" />
-                        Download report
+                        Download full report
                       </Button>
                     )}
                     {report.dashboardLink && (
-                      <Button
+                      <Button 
+                        size="lg"
                         onClick={() => window.open(report.dashboardLink!, '_blank')}
                         variant="outline"
-                        className="w-full rounded-full justify-center border-[#5B6EF7] text-[#5B6EF7]"
-                        data-testid="button-dashboard-sidebar"
+                        className="rounded-full border-[#5B6EF7] text-[#5B6EF7] hover:bg-[#5B6EF7]/10"
+                        data-testid="button-open-dashboard"
                       >
                         <ExternalLink className="w-4 h-4 mr-2" />
-                        Open dashboard
+                        Open Interactive Dashboard
                       </Button>
                     )}
                   </div>
-                )}
-
-                {/* Upgrade prompt in sidebar for locked users */}
-                {!accessResult.hasAccess && (
-                  <div className="rounded-lg border border-[#5B6EF7]/20 bg-blue-50 p-5 text-center">
-                    <Lock className="w-6 h-6 text-[#5B6EF7] mx-auto mb-2" />
-                    <p className="text-xs text-gray-600 mb-3 leading-relaxed">
-                      {accessResult.reason === "not_logged_in"
-                        ? "Sign in to access member reports."
-                        : "Upgrade your membership to access the full report."}
+                  {report.content?.ctaEmail && (
+                    <p className="text-sm text-gray-500 mt-4">
+                      Or email{' '}
+                      <a 
+                        href={`mailto:${report.content.ctaEmail}`} 
+                        className="text-[#5B6EF7] hover:underline"
+                      >
+                        {report.content.ctaEmail}
+                      </a>
                     </p>
-                    {accessResult.reason === "not_logged_in" ? (
-                      <Button size="sm" onClick={handleLogin} className="rounded-full w-full" style={{ backgroundColor: '#5B6EF7' }} data-testid="button-sidebar-login">
-                        <LogIn className="w-3.5 h-3.5 mr-1.5" />
-                        Sign in
-                      </Button>
-                    ) : (
-                      <Button size="sm" onClick={handleUpgrade} className="rounded-full w-full" style={{ backgroundColor: '#5B6EF7' }} data-testid="button-sidebar-upgrade">
-                        <Crown className="w-3.5 h-3.5 mr-1.5" />
-                        Become a member
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
-            </aside>
-          </div>
+                  )}
+                </div>
+              )}
 
-          {/* ── Full-width footer sections ── */}
+              {report.series === "Inside" && report.videoPaths && report.videoPaths.length > 0 && (
+                <div className="mt-12 pt-8 border-t border-gray-100">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center">
+                      <Play className="w-5 h-5 text-violet-700" />
+                    </div>
+                    <div>
+                      <h3 
+                        className="text-2xl font-bold text-gray-900"
+                        style={{ fontFamily: 'DM Serif Display, serif' }}
+                      >
+                        Watch the Demo
+                      </h3>
+                      <p className="text-gray-600 text-sm">
+                        See how this tool works in action
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-6">
+                    {report.videoPaths.map((videoPath, index) => {
+                      const videoName = videoPath.split('/').pop()?.replace('.mp4', '').replace(/-/g, ' ').replace('Innovatr Inside X ', '') || `Video ${index + 1}`;
+                      return (
+                        <div key={index} className="rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                          {report.videoPaths && report.videoPaths.length > 1 && (
+                            <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                              <span className="text-sm font-medium text-gray-700">{videoName}</span>
+                            </div>
+                          )}
+                          <video
+                            controls
+                            className="w-full aspect-video bg-gray-900"
+                            preload="metadata"
+                            data-testid={`video-player-${index}`}
+                          >
+                            <source src={videoPath} type="video/mp4" />
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
           {relatedReports.length > 0 && (
-            <div className="mt-14 pt-10 border-t border-gray-100">
-              <h3
+            <div className="mt-12 pt-8 border-t border-gray-100">
+              <h3 
                 className="text-xl font-bold mb-6 text-gray-900"
                 style={{ fontFamily: 'DM Serif Display, serif' }}
               >
@@ -1037,11 +944,11 @@ export default function InsightDetail() {
             </div>
           )}
 
-          <div className="mt-10 pb-10 text-center">
+          <div className="text-center py-8">
             <Button
               variant="outline"
               onClick={() => setLocation("/portal/trends")}
-              className="rounded-full border-[#5B6EF7] text-[#5B6EF7]"
+              className="rounded-full border-[#5B6EF7] text-[#5B6EF7] hover:bg-[#5B6EF7] hover:text-white"
               data-testid="button-back-footer"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -1050,15 +957,15 @@ export default function InsightDetail() {
           </div>
         </div>
 
-        {/* Floating Back to Top */}
+        {/* Floating Back to Top button */}
         {showBackToTop && (
           <button
             onClick={scrollToTop}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 bg-[#5B6EF7] text-white rounded-full shadow-lg hover:bg-[#4958d6] transition-all duration-300"
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-[#5B6EF7] text-white rounded-full shadow-lg hover:bg-[#4958d6] transition-all duration-300 md:px-4 md:py-2"
             aria-label="Back to top"
             data-testid="button-back-to-top"
           >
-            <ChevronUp className="w-4 h-4" />
+            <ChevronUp className="w-5 h-5" />
             <span className="hidden md:inline text-sm font-medium">Back to top</span>
           </button>
         )}
