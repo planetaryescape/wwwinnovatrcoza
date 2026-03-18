@@ -565,6 +565,7 @@ export const clientReports = pgTable("client_reports", {
   // Consumer verbatims
   verbatim1: text("verbatim_1"),
   verbatim2: text("verbatim_2"),
+  isArchived: boolean("is_archived").notNull().default(false),
   uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

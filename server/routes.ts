@@ -5278,12 +5278,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      const reportViewTypes = ["view_report", "view_client_report"];
+      const reportDownloadTypes = ["download_report", "download_client_report"];
       const summary = {
         totalEvents: events.length,
         uniqueUsers: new Set(events.map(e => e.userId)).size,
         logins: events.filter(e => e.actionType === "login").length,
-        reportViews: events.filter(e => e.actionType === "view_report").length,
-        reportDownloads: events.filter(e => e.actionType === "download_report").length,
+        reportViews: events.filter(e => reportViewTypes.includes(e.actionType)).length,
+        reportDownloads: events.filter(e => reportDownloadTypes.includes(e.actionType)).length,
         trendsViews: events.filter(e => e.actionType === "view_trends").length,
         pastResearchViews: events.filter(e => e.actionType === "view_past_research").length,
         briefLaunches: events.filter(e => e.actionType === "launch_brief").length,
@@ -5298,8 +5300,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userEmail: u?.email ?? "",
             totalActions: userEvents.length,
             logins: userEvents.filter(e => e.actionType === "login").length,
-            reportViews: userEvents.filter(e => e.actionType === "view_report").length,
-            reportDownloads: userEvents.filter(e => e.actionType === "download_report").length,
+            reportViews: userEvents.filter(e => reportViewTypes.includes(e.actionType)).length,
+            reportDownloads: userEvents.filter(e => reportDownloadTypes.includes(e.actionType)).length,
             lastActive: userEvents[0]?.createdAt ?? null,
           };
         }),
@@ -5329,8 +5331,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalEvents: events.length,
         uniqueUsers: new Set(events.map(e => e.userId)).size,
         logins: events.filter(e => e.actionType === "login").length,
-        reportViews: events.filter(e => e.actionType === "view_report").length,
-        reportDownloads: events.filter(e => e.actionType === "download_report").length,
+        reportViews: events.filter(e => ["view_report", "view_client_report"].includes(e.actionType)).length,
+        reportDownloads: events.filter(e => ["download_report", "download_client_report"].includes(e.actionType)).length,
         briefLaunches: events.filter(e => e.actionType === "launch_brief").length,
         newUsers: newUsers.map(u => ({
           name: u.name,

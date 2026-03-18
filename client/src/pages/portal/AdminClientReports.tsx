@@ -50,7 +50,9 @@ import {
   Trash2,
   ExternalLink,
   Tag,
-  Pencil
+  Pencil,
+  Archive,
+  ArchiveRestore
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -80,6 +82,7 @@ interface ClientReport {
   // Consumer verbatims
   verbatim1: string | null;
   verbatim2: string | null;
+  isArchived: boolean;
   uploadedAt: string;
   createdAt: string;
   updatedAt: string;
@@ -104,6 +107,7 @@ export default function AdminClientReports() {
   const [editingReport, setEditingReport] = useState<ClientReport | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [reportToDelete, setReportToDelete] = useState<ClientReport | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
   
   const [formData, setFormData] = useState({
     title: "",
@@ -170,6 +174,9 @@ export default function AdminClientReports() {
   useEffect(() => {
     let filtered = [...reports];
     
+    // By default hide archived unless showArchived is true
+    filtered = filtered.filter(r => showArchived ? r.isArchived : !r.isArchived);
+
     if (search) {
       const searchLower = search.toLowerCase();
       filtered = filtered.filter(
@@ -187,7 +194,7 @@ export default function AdminClientReports() {
     filtered.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
     
     setFilteredReports(filtered);
-  }, [reports, search, companyFilter]);
+  }, [reports, search, companyFilter, showArchived]);
 
   const getCompanyName = (companyId: string) => {
     const company = companies.find(c => c.id === companyId);
@@ -383,6 +390,27 @@ export default function AdminClientReports() {
     setDeleteDialogOpen(true);
   };
 
+  const handleArchive = async (report: ClientReport) => {
+    try {
+      const res = await fetch(`/api/admin/client-reports/${report.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isArchived: !report.isArchived }),
+      });
+      if (!res.ok) throw new Error("Failed to update report");
+      const updated = await res.json();
+      setReports(prev => prev.map(r => r.id === updated.id ? updated : r));
+      toast({
+        title: report.isArchived ? "Report Restored" : "Report Archived",
+        description: report.isArchived
+          ? `"${report.title}" has been restored.`
+          : `"${report.title}" has been archived.`,
+      });
+    } catch {
+      toast({ title: "Error", description: "Failed to archive report", variant: "destructive" });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -466,6 +494,14 @@ export default function AdminClientReports() {
                 ))}
               </SelectContent>
             </Select>
+            <Button
+              variant={showArchived ? "default" : "outline"}
+              onClick={() => setShowArchived(v => !v)}
+              data-testid="button-toggle-archived"
+            >
+              <Archive className="w-4 h-4 mr-2" />
+              {showArchived ? "Archived" : "Show Archived"}
+            </Button>
           </div>
 
           <div className="rounded-md border overflow-x-auto">
@@ -547,6 +583,18 @@ export default function AdminClientReports() {
                             data-testid={`button-edit-${report.id}`}
                           >
                             <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleArchive(report)}
+                            title={report.isArchived ? "Restore report" : "Archive report"}
+                            data-testid={`button-archive-${report.id}`}
+                          >
+                            {report.isArchived
+                              ? <ArchiveRestore className="w-4 h-4" />
+                              : <Archive className="w-4 h-4" />
+                            }
                           </Button>
                           <Button 
                             variant="ghost" 

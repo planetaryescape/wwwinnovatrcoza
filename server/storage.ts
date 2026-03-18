@@ -1412,6 +1412,7 @@ export class DatabaseStorage implements IStorage {
       lowestIdeaCommitment: insertReport.lowestIdeaCommitment ?? null,
       verbatim1: insertReport.verbatim1 ?? null,
       verbatim2: insertReport.verbatim2 ?? null,
+      isArchived: false,
       uploadedAt: insertReport.uploadedAt ?? now,
       createdAt: now,
       updatedAt: now,

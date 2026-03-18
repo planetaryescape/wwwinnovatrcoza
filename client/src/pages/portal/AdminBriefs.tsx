@@ -474,6 +474,7 @@ export default function AdminBriefs() {
                   <TableHead>Study Type</TableHead>
                   <TableHead>Client</TableHead>
                   <TableHead>Company</TableHead>
+                  <TableHead>Project</TableHead>
                   <TableHead>Ideas</TableHead>
                   <TableHead>Files</TableHead>
                   <TableHead>Status</TableHead>
@@ -507,6 +508,16 @@ export default function AdminBriefs() {
                             <span className="text-xs text-muted-foreground">{brief.companyBrand}</span>
                           )}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-muted-foreground line-clamp-2 max-w-[180px]">
+                          {brief.researchObjective
+                            ? brief.researchObjective.length > 60
+                              ? brief.researchObjective.slice(0, 60) + "…"
+                              : brief.researchObjective
+                            : <span className="italic">No objective</span>
+                          }
+                        </span>
                       </TableCell>
                       <TableCell>
                         <span className="font-medium">{brief.numIdeas}</span>
