@@ -611,8 +611,8 @@ export default function InsightDetail() {
         <div className="max-w-5xl mx-auto px-4 md:px-8 py-10">
           <div className="flex flex-col lg:flex-row gap-10 lg:gap-14 items-start">
 
-            {/* ── Main article column ── */}
-            <div className="flex-1 min-w-0">
+            {/* ── Main article column ── (order-last on mobile so sidebar appears first) */}
+            <div className="flex-1 min-w-0 order-last lg:order-first">
 
               {/* Lead / teaser */}
               <p className="text-xl leading-relaxed text-gray-600 font-light mb-8 border-b border-gray-100 pb-8">
@@ -905,13 +905,18 @@ export default function InsightDetail() {
               )}
             </div>
 
-            {/* ── Sticky sidebar ── */}
-            <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0">
+            {/* ── Sticky sidebar (order-first on mobile so it appears between hero and article) ── */}
+            <aside className="w-full lg:w-64 xl:w-72 flex-shrink-0 order-first lg:order-last">
               <div className="lg:sticky lg:top-6 space-y-6">
 
                 {/* Metadata card */}
                 <div className="rounded-lg border border-gray-100 bg-gray-50 p-5">
                   <div className="space-y-3 text-sm text-gray-600">
+                    <div className="flex items-start gap-2.5">
+                      <Badge className={`${categoryStyle.bg} ${categoryStyle.text} text-xs font-semibold px-2.5 py-1 border-0`}>
+                        {report.category}
+                      </Badge>
+                    </div>
                     <div className="flex items-start gap-2.5">
                       <Calendar className="w-4 h-4 mt-0.5 text-gray-400 flex-shrink-0" />
                       <div>
