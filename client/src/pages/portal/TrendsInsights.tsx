@@ -145,7 +145,16 @@ function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: bool
     return null; // No locks for paid seat holders
   }
   
-  // Use shared access helpers for consistent tier gating
+  // Logged-in FREE tier members: all content is locked (show lock on every report)
+  if (isLoggedIn) {
+    return (
+      <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Members only">
+        <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // Not logged in: only show lock for non-public content
   const effectiveAccess = getEffectiveAccessLevel({
     slug: report.slug,
     title: report.title,
@@ -153,12 +162,10 @@ function getAccessIndicator(report: Report, userTier?: string, isLoggedIn?: bool
     accessLevel: report.accessLevel
   });
   
-  // Free/public content - no indicator
   if (effectiveAccess === "PUBLIC") {
     return null;
   }
   
-  // Show lock for non-public content when user is not a paid member
   return (
     <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1.5 shadow-sm" title="Members only">
       <Lock className="w-3.5 h-3.5 text-muted-foreground" />
@@ -272,10 +279,11 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId, isPaidSeat, o
     accessLevel: report.accessLevel
   });
   
-  // Use hasPaidSeatAccess (passed as isPaidSeat) for consistent gating
-  const isLocked = !isPublicContent && !isPaidSeat;
+  // Logged-in users must have a paid seat for ALL content
+  // Non-logged-in users can freely access public/free content
+  const isLocked = isLoggedIn ? !isPaidSeat : !isPublicContent;
   
-  const isPublicWithPdf = isPublicContent && report.pdfPath;
+  const isPublicWithPdf = !isLocked && isPublicContent && report.pdfPath;
   const ctaText = isLocked ? "Members only" : (isPublicWithPdf ? "Download full report" : "Read full issue");
 
   const handleClick = (e: React.MouseEvent) => {
@@ -870,7 +878,7 @@ export default function TrendsInsights() {
                   const accessIndicator = getAccessIndicator(report, user?.membershipTier, !!user, user?.companyId ?? undefined, hasPaidSeatAccess);
                   const colors = getCategoryStyle(report.category);
                   const readingTime = Math.max(2, Math.ceil((report.teaser?.length || 0) / 500));
-                  const isLocked = !hasPaidSeatAccess && report.accessLevel !== "PUBLIC";
+                  const isLocked = user ? !hasPaidSeatAccess : !isFreeContent({ slug: report.slug, title: report.title, category: report.category, accessLevel: report.accessLevel });
 
                   return (
                     <div
@@ -978,8 +986,8 @@ export default function TrendsInsights() {
                   category: report.category,
                   accessLevel: report.accessLevel
                 });
-                // Use hasPaidSeatAccess for consistent gating
-                const isLocked = !isPublicContent && !userIsPaidSeat;
+                // Logged-in users need a paid seat for ALL content; non-logged-in can access public content
+                const isLocked = user ? !userIsPaidSeat : !isPublicContent;
                 
                 return (
                   <div 

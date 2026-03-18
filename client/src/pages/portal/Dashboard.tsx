@@ -63,19 +63,13 @@ function canAccessReport(
   userTier: string | undefined,
   isPaidMember: boolean
 ): boolean {
-  const accessLevel = (report.accessLevel || "PUBLIC").toUpperCase();
-  const accessField = (report.access || "free").toLowerCase();
-  
-  if (accessLevel === "PUBLIC" || accessField === "free") {
-    return true;
-  }
-  
-  // Paid members (STARTER, GROWTH, SCALE) have full access to all content
+  // All reports require at least a paid membership (STARTER+)
+  // FREE tier members can see cards but cannot open any report
   if (!isPaidMember) {
     return false;
   }
   
-  // All paid members can access all content - no tier hierarchy
+  // All paid members can access all content
   return true;
 }
 

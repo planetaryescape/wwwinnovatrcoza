@@ -125,15 +125,17 @@ function checkReportAccess(
   hasPaidSeatAccess?: boolean
 ): AccessCheckResult {
   const accessLevel = report.accessLevel || "PUBLIC";
-  
-  if (accessLevel === "PUBLIC" || accessLevel === "public") {
-    return { hasAccess: true, reason: "public" };
-  }
-  
+
+  // Not logged in: only allow PUBLIC/free content
   if (!user) {
+    if (accessLevel === "PUBLIC" || accessLevel === "public" || accessLevel === "FREE" || accessLevel === "free") {
+      return { hasAccess: true, reason: "public" };
+    }
     return { hasAccess: false, reason: "not_logged_in", message: "Sign in to access this members-only content" };
   }
-  
+
+  // Logged-in users: ALL content requires a paid membership (STARTER+)
+  // FREE tier members see a paywall on every report, including public/free ones
   if (hasPaidSeatAccess) {
     return { hasAccess: true, reason: "member" };
   }
