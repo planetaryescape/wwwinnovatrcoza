@@ -354,7 +354,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         tier: tierMap[company.tier] || "free",
         membershipTier: company.tier,
         isAdmin: false,
-        isPaidSeat: true, // When viewing as company, treat as paid seat for full access
+        isPaidSeat: ["STARTER", "GROWTH", "SCALE"].includes(company.tier), // Reflect actual company paid status
       };
       
       const newImpersonation: ImpersonationState = {

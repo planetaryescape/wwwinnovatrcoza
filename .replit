@@ -49,3 +49,7 @@ DEV_URL = "https://b10ca654-ef82-4605-a864-72371f27268f-00-1proe9ll7b5k0.kirk.re
 
 [objectStorage]
 defaultBucketID = "replit-objstore-c87ea3ed-b8b8-4f41-a0ea-456a5c4c2139"
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
