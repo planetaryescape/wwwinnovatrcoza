@@ -1150,6 +1150,9 @@ export default function LaunchBrief() {
         queryClient.invalidateQueries({ queryKey: ['/api/companies', company.id] });
       }
       
+      // Invalidate activity so dashboard credit and activity counts refresh immediately
+      queryClient.invalidateQueries({ queryKey: ['/api/member/activity'] });
+      
       // Reset form
       setSelectedBrief(null);
       setAdditionalFiles([]);

@@ -79,7 +79,7 @@ export default function CreditsAndBilling() {
 
   // Fetch user's orders
   const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
-    queryKey: ['/api/member/orders', { email: user?.email }],
+    queryKey: ['/api/member/orders'],
     queryFn: async () => {
       const response = await fetch(`/api/member/orders?email=${encodeURIComponent(user?.email || '')}`);
       if (!response.ok) throw new Error('Failed to fetch orders');

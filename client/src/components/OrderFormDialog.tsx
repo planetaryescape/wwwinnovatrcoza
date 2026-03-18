@@ -469,7 +469,7 @@ export default function OrderFormDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+        <form ref={formRef} onSubmit={(e) => { e.preventDefault(); }} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="customerName">Full Name</Label>
             <Input
