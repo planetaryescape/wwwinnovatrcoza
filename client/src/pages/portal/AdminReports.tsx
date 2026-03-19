@@ -581,7 +581,7 @@ export default function AdminReports() {
         >
           <div className="flex items-center gap-2">
             <MessageSquarePlus className="w-5 h-5 text-[#0033A0]" />
-            <h3 className="text-lg font-semibold text-gray-900">Report Requests</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Trend Report Requests</h3>
             {pendingRequestsCount > 0 && (
               <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">
                 {pendingRequestsCount} pending
@@ -678,7 +678,7 @@ export default function AdminReports() {
             className="text-2xl font-bold mb-1 text-gray-900"
             style={{ fontFamily: 'DM Serif Display, serif' }}
           >
-            Reports Management
+            Intelligence Management
           </h2>
           <p className="text-sm text-muted-foreground">
             Create, edit and schedule research reports and insights
@@ -992,7 +992,6 @@ export default function AdminReports() {
                         ) : (
                           <div className="max-w-[300px] group/title">
                             <p className="font-medium text-sm text-gray-900 truncate flex items-center gap-1.5">
-                              {report.isFeatured && <Sparkles className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />}
                               {report.title}
                             </p>
                             <p className="text-xs text-muted-foreground truncate">{report.teaser}</p>
@@ -1069,13 +1068,6 @@ export default function AdminReports() {
                             <DropdownMenuItem onClick={() => window.open(`/portal/insights/${report.slug}`, '_blank')}>
                               <Eye className="w-4 h-4 mr-2" />
                               View
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => handleToggleFeatured(report)}
-                              data-testid={`button-toggle-featured-${report.id}`}
-                            >
-                              <Sparkles className={`w-4 h-4 mr-2 ${report.isFeatured ? 'text-amber-500' : ''}`} />
-                              {report.isFeatured ? 'Remove from Featured' : 'Feature Report'}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
@@ -1173,7 +1165,7 @@ export default function AdminReports() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                 {channelConfig.map((channel) => {
-                  const channelMailers = insightMailers.filter(m => m.channel === channel.key);
+                  const channelMailers = insightMailers.filter(m => m.channel === channel.key && m.status !== "sent");
                   const ChannelIcon = channel.icon;
                   return (
                     <Card key={channel.key} className="bg-white border" data-testid={`channel-column-${channel.key}`}>

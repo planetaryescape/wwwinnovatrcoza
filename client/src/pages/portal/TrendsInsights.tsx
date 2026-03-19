@@ -20,7 +20,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Building2, Grid3x3, List, RefreshCw, Loader2, Crown, Clock, Sparkles, MessageSquarePlus, TrendingUp, LogIn, UserPlus, CheckCircle2 } from "lucide-react";
+import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Building2, Grid3x3, List, RefreshCw, Loader2, Crown, Clock, MessageSquarePlus, TrendingUp, LogIn, UserPlus, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PortalLayout from "./PortalLayout";
 import { LoginDialog } from "@/components/LoginDialog";
@@ -556,10 +556,6 @@ export default function TrendsInsights() {
   const displayedReports = filters.showAll ? filteredAndSortedReports : filteredAndSortedReports.slice(0, 6);
   const hasMoreReports = filteredAndSortedReports.length > 6;
 
-  const featuredReports = useMemo(() => {
-    return reports.filter(r => r.isFeatured).slice(0, 3);
-  }, [reports]);
-
   const { data: companyData } = useQuery<{ industry?: string }>({
     queryKey: ['/api/companies', user?.companyId],
     enabled: !!user?.companyId,
@@ -864,71 +860,6 @@ export default function TrendsInsights() {
               </Select>
             </div>
           </div>
-
-          {featuredReports.length > 0 && (
-            <div className="mb-10" data-testid="featured-reports-section">
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-5 h-5 text-amber-500" />
-                <h2 className="text-xl font-semibold text-foreground" style={{ fontFamily: 'DM Serif Display, serif' }}>
-                  Featured Reports
-                </h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {featuredReports.map((report) => {
-                  const accessIndicator = getAccessIndicator(report, user?.membershipTier, !!user, user?.companyId ?? undefined, hasPaidSeatAccess);
-                  const colors = getCategoryStyle(report.category);
-                  const readingTime = Math.max(2, Math.ceil((report.teaser?.length || 0) / 500));
-                  const isLocked = user ? !hasPaidSeatAccess : !isFreeContent({ slug: report.slug, title: report.title, category: report.category, accessLevel: report.accessLevel });
-
-                  return (
-                    <div
-                      key={`featured-${report.id}`}
-                      className="group relative rounded-md overflow-hidden cursor-pointer ring-2 ring-amber-500/30 hover-elevate"
-                      onClick={() => isLocked ? handleLockedClick(report) : handleUnlockedClick(report)}
-                      data-testid={`featured-card-${report.id}`}
-                    >
-                      <div className="relative h-48 overflow-hidden">
-                        <img
-                          src={report.coverImage}
-                          alt={report.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-                        <Badge
-                          className={`absolute top-3 left-3 text-xs no-default-hover-elevate no-default-active-elevate ${colors.bg} ${colors.text}`}
-                        >
-                          {report.category}
-                        </Badge>
-                        <Badge
-                          className="absolute top-3 right-3 text-xs bg-amber-500 text-white border-amber-600 no-default-hover-elevate no-default-active-elevate"
-                        >
-                          <Sparkles className="w-3 h-3 mr-1" />
-                          Featured
-                        </Badge>
-                        {accessIndicator}
-                        {isLocked && !accessIndicator && (
-                          <div className="absolute bottom-3 right-3 bg-black/60 rounded-full p-1.5">
-                            <Lock className="w-3.5 h-3.5 text-white" />
-                          </div>
-                        )}
-                        <div className="absolute bottom-3 left-3 right-12">
-                          <h3 className="text-white font-semibold text-base leading-tight line-clamp-2" style={{ fontFamily: 'DM Serif Display, serif' }}>
-                            {report.title}
-                          </h3>
-                        </div>
-                      </div>
-                      <div className="p-4 bg-card border border-t-0 border-border rounded-b-md">
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{report.teaser}</p>
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>{report.date} · <Clock className="w-3 h-3 inline-block" /> {readingTime} min</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
 
           {recommendedReports.length > 0 && user && (
             <div className="mb-10" data-testid="recommended-reports-section">
