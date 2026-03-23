@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
+import { useGtmPageTracking } from "@/hooks/use-gtm-page-tracking";
 import CinematicLanding from "@/pages/CinematicLanding";
 import Home from "@/pages/Home";
 import Test24BasicPage from "@/pages/Test24BasicPage";
@@ -36,6 +37,7 @@ import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import NotFound from "@/pages/not-found";
 
 function Router() {
+  useGtmPageTracking();
   return (
     <Switch>
       <Route path="/" component={Home} />
