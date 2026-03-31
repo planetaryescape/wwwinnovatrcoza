@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "RTwvQceqIR9m5xFZZchLc"
+uri = "file://innovatr-backend-reference.md"
+type = "text"
+title = "Innovatr — Full Backend Reference"
