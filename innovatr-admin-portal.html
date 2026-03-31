@@ -1,0 +1,2084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Innovatr — Admin Portal</title>
+<style>
+  /* ── Reset & Base ─────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f5f7;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --muted: #f3f4f6;
+    --muted-fg: #6b7280;
+    --fg: #111827;
+    --fg2: #374151;
+    --accent: #5865f2;
+    --accent-light: #eef0fe;
+    --coral: #e8503a;
+    --green: #16a34a;
+    --green-light: #dcfce7;
+    --amber: #d97706;
+    --amber-light: #fef3c7;
+    --violet: #7c3aed;
+    --violet-light: #ede9fe;
+    --blue: #2563eb;
+    --blue-light: #dbeafe;
+    --red: #dc2626;
+    --red-light: #fee2e2;
+    --gray: #6b7280;
+    --gray-light: #f3f4f6;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,.12);
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'SF Mono', ui-monospace, monospace;
+  }
+  html { font-family: var(--font); font-size: 14px; color: var(--fg); background: var(--bg); }
+  body { min-height: 100vh; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ── Layout ───────────────────────────────────────── */
+  .layout { display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 220px; background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-logo { padding: 20px 18px 16px; border-bottom: 1px solid var(--border); }
+  .sidebar-logo .brand { font-size: 18px; font-weight: 700; letter-spacing: -.4px; color: var(--accent); }
+  .sidebar-logo .subbrand { font-size: 11px; color: var(--muted-fg); font-weight: 500; }
+  .sidebar-nav { padding: 12px 8px; flex: 1; overflow-y: auto; }
+  .nav-label { font-size: 10px; font-weight: 600; letter-spacing: .06em; color: var(--muted-fg); text-transform: uppercase; padding: 8px 10px 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--radius); cursor: pointer; font-size: 13px; font-weight: 500; color: var(--fg2); transition: background .15s; margin-bottom: 2px; }
+  .nav-item:hover { background: var(--muted); }
+  .nav-item.active { background: var(--accent-light); color: var(--accent); }
+  .nav-item svg { flex-shrink: 0; }
+  .sidebar-footer { padding: 12px; border-top: 1px solid var(--border); }
+  .user-pill { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--radius); background: var(--muted); }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .user-info .name { font-size: 12px; font-weight: 600; }
+  .user-info .role { font-size: 10px; color: var(--muted-fg); }
+
+  .main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+  .topbar { background: var(--card); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; position: sticky; top: 0; z-index: 10; }
+  .topbar-title { font-size: 16px; font-weight: 700; letter-spacing: -.3px; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .content { padding: 24px; flex: 1; }
+
+  /* ── Tabs ─────────────────────────────────────────── */
+  .tabs-list { display: flex; gap: 2px; background: var(--muted); border-radius: var(--radius); padding: 3px; width: fit-content; flex-wrap: wrap; }
+  .tab-btn { padding: 6px 14px; border-radius: 6px; border: none; background: none; font-size: 13px; font-weight: 500; color: var(--muted-fg); cursor: pointer; transition: all .15s; white-space: nowrap; }
+  .tab-btn.active { background: var(--card); color: var(--fg); box-shadow: var(--shadow); font-weight: 600; }
+  .tab-content { display: none; margin-top: 20px; }
+  .tab-content.active { display: block; }
+
+  /* ── Cards ────────────────────────────────────────── */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+  .card-header { padding: 16px 20px 0; }
+  .card-title { font-size: 14px; font-weight: 700; color: var(--fg); }
+  .card-desc { font-size: 12px; color: var(--muted-fg); margin-top: 2px; }
+  .card-body { padding: 16px 20px; }
+  .card-footer { padding: 12px 20px; border-top: 1px solid var(--border); }
+
+  /* ── Metric cards ─────────────────────────────────── */
+  .metric-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+  .metric-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
+  .metric-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+  .metric-value { font-size: 26px; font-weight: 800; letter-spacing: -.5px; line-height: 1; }
+  .metric-label { font-size: 12px; color: var(--muted-fg); margin-top: 4px; font-weight: 500; }
+  .metric-sub { font-size: 11px; color: var(--muted-fg); margin-top: 2px; }
+
+  /* ── Table ────────────────────────────────────────── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 12px; font-size: 11px; font-weight: 600; letter-spacing: .04em; color: var(--muted-fg); text-transform: uppercase; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 11px 12px; border-bottom: 1px solid var(--border); color: var(--fg2); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--muted); }
+  .td-name { font-weight: 600; color: var(--fg); }
+  .td-mono { font-family: var(--mono); font-size: 12px; }
+  .td-muted { color: var(--muted-fg); }
+
+  /* ── Badges ───────────────────────────────────────── */
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .badge-scale { background: var(--amber-light); color: var(--amber); }
+  .badge-growth { background: var(--violet-light); color: var(--violet); }
+  .badge-starter { background: var(--blue-light); color: var(--blue); }
+  .badge-free { background: var(--gray-light); color: var(--gray); }
+  .badge-admin { background: var(--red-light); color: var(--red); }
+  .badge-green { background: var(--green-light); color: var(--green); }
+  .badge-amber { background: var(--amber-light); color: var(--amber); }
+  .badge-blue { background: var(--blue-light); color: var(--blue); }
+  .badge-red { background: var(--red-light); color: var(--red); }
+  .badge-gray { background: var(--gray-light); color: var(--gray); }
+  .badge-violet { background: var(--violet-light); color: var(--violet); }
+
+  /* ── Buttons ──────────────────────────────────────── */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--radius); border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s, box-shadow .15s; }
+  .btn:hover { opacity: .88; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-secondary { background: var(--muted); color: var(--fg2); border: 1px solid var(--border); }
+  .btn-ghost { background: none; color: var(--fg2); }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-icon { padding: 6px; border-radius: var(--radius); }
+  .btn-destructive { background: var(--red-light); color: var(--red); }
+
+  /* ── Form ─────────────────────────────────────────── */
+  .field { margin-bottom: 14px; }
+  .label { display: block; font-size: 12px; font-weight: 600; color: var(--fg2); margin-bottom: 5px; }
+  .input { width: 100%; padding: 8px 11px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; color: var(--fg); background: var(--card); outline: none; }
+  .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(88,101,242,.12); }
+  .select { width: 100%; padding: 8px 11px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; background: var(--card); color: var(--fg); outline: none; }
+  .textarea { width: 100%; padding: 8px 11px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; color: var(--fg); background: var(--card); outline: none; min-height: 80px; resize: vertical; font-family: var(--font); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  /* ── Progress bar ─────────────────────────────────── */
+  .progress-bar { height: 6px; background: var(--muted); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; transition: width .3s; }
+  .fill-accent { background: var(--accent); }
+  .fill-green { background: var(--green); }
+  .fill-amber { background: var(--amber); }
+  .fill-red { background: var(--red); }
+
+  /* ── Drawer (slide-over) ──────────────────────────── */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 40; display: none; }
+  .drawer-overlay.open { display: block; }
+  .drawer { position: fixed; right: 0; top: 0; bottom: 0; width: 540px; max-width: 95vw; background: var(--card); z-index: 50; overflow-y: auto; box-shadow: var(--shadow-lg); transform: translateX(100%); transition: transform .25s ease; }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; position: sticky; top: 0; background: var(--card); z-index: 2; }
+  .drawer-title { font-size: 17px; font-weight: 700; }
+  .drawer-sub { font-size: 12px; color: var(--muted-fg); margin-top: 2px; }
+  .drawer-body { padding: 20px 24px; }
+  .drawer-section { margin-bottom: 22px; }
+  .drawer-section-title { font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted-fg); margin-bottom: 10px; }
+  .close-btn { background: none; border: none; cursor: pointer; color: var(--muted-fg); padding: 4px; border-radius: 6px; flex-shrink: 0; font-size: 18px; line-height: 1; }
+  .close-btn:hover { background: var(--muted); }
+
+  /* ── Modal ────────────────────────────────────────── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 60; display: none; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--card); border-radius: 12px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); margin: 16px; }
+  .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .modal-title { font-size: 16px; font-weight: 700; }
+  .modal-desc { font-size: 13px; color: var(--muted-fg); margin-top: 3px; }
+  .modal-body { padding: 20px 24px; }
+  .modal-footer { padding: 14px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+  /* ── Alerts ───────────────────────────────────────── */
+  .alert { padding: 12px 14px; border-radius: var(--radius); font-size: 13px; margin-bottom: 14px; display: flex; gap: 10px; align-items: flex-start; }
+  .alert-info { background: var(--blue-light); color: var(--blue); border: 1px solid #bfdbfe; }
+  .alert-warn { background: var(--amber-light); color: var(--amber); border: 1px solid #fcd34d; }
+  .alert-success { background: var(--green-light); color: var(--green); border: 1px solid #86efac; }
+
+  /* ── Utils ────────────────────────────────────────── */
+  .flex { display: flex; }
+  .flex-col { flex-direction: column; }
+  .items-center { align-items: center; }
+  .items-start { align-items: flex-start; }
+  .justify-between { justify-content: space-between; }
+  .justify-end { justify-content: flex-end; }
+  .gap-2 { gap: 8px; }
+  .gap-3 { gap: 12px; }
+  .gap-4 { gap: 16px; }
+  .flex-1 { flex: 1; }
+  .flex-wrap { flex-wrap: wrap; }
+  .w-full { width: 100%; }
+  .mt-1 { margin-top: 4px; }
+  .mt-2 { margin-top: 8px; }
+  .mt-3 { margin-top: 12px; }
+  .mt-4 { margin-top: 16px; }
+  .mb-1 { margin-bottom: 4px; }
+  .mb-2 { margin-bottom: 8px; }
+  .mb-3 { margin-bottom: 12px; }
+  .mb-4 { margin-bottom: 16px; }
+  .mb-5 { margin-bottom: 20px; }
+  .text-sm { font-size: 12px; }
+  .text-muted { color: var(--muted-fg); }
+  .text-green { color: var(--green); }
+  .text-amber { color: var(--amber); }
+  .text-red { color: var(--red); }
+  .text-accent { color: var(--accent); }
+  .font-bold { font-weight: 700; }
+  .font-semibold { font-weight: 600; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .sep { height: 1px; background: var(--border); margin: 16px 0; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .dot-green { background: var(--green); }
+  .dot-amber { background: var(--amber); }
+  .dot-red { background: var(--red); }
+  .dot-gray { background: var(--gray); }
+  .dot-blue { background: var(--blue); }
+  .credit-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .credit-label { font-size: 13px; font-weight: 600; }
+  .credit-used { font-size: 12px; color: var(--muted-fg); }
+  .search-wrap { position: relative; }
+  .search-wrap input { padding-left: 34px; }
+  .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted-fg); pointer-events: none; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .section-title { font-size: 20px; font-weight: 800; letter-spacing: -.4px; }
+  .section-sub { font-size: 13px; color: var(--muted-fg); margin-top: 2px; }
+  .tag { display: inline-flex; align-items: center; padding: 2px 8px; background: var(--muted); color: var(--fg2); border-radius: 4px; font-size: 11px; font-weight: 500; margin: 2px; }
+  .action-row { display: flex; align-items: center; gap: 6px; }
+  .inline-edit { display: flex; align-items: center; gap: 6px; }
+  .info-row { display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .info-row:last-child { border-bottom: none; }
+  .info-key { font-size: 12px; color: var(--muted-fg); font-weight: 500; width: 130px; flex-shrink: 0; padding-top: 1px; }
+  .info-val { font-size: 13px; font-weight: 500; flex: 1; }
+  .pipeline-col { flex: 1; min-width: 160px; }
+  .pipeline-col-header { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 8px 12px; border-radius: 6px 6px 0 0; }
+  .pipeline-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 8px; }
+  .pipeline-card-co { font-size: 11px; color: var(--muted-fg); }
+  .pipeline-card-title { font-size: 13px; font-weight: 600; margin-top: 2px; }
+  .pipeline-card-meta { font-size: 11px; color: var(--muted-fg); margin-top: 4px; }
+  .chip { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .company-logo { width: 36px; height: 36px; border-radius: 8px; background: var(--accent-light); color: var(--accent); font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .stat-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; }
+  .stat-label { font-size: 13px; color: var(--muted-fg); }
+  .stat-val { font-size: 13px; font-weight: 700; }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted-fg); }
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state .title { font-size: 15px; font-weight: 700; color: var(--fg); margin-bottom: 4px; }
+  .deal-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; gap: 12px; align-items: flex-start; }
+  .deal-icon { width: 38px; height: 38px; border-radius: 8px; background: var(--muted); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .activity-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .activity-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .activity-text { font-size: 13px; flex: 1; }
+  .activity-time { font-size: 11px; color: var(--muted-fg); margin-top: 2px; }
+  .view-toggle { display: flex; gap: 2px; background: var(--muted); padding: 3px; border-radius: 6px; }
+  .view-btn { padding: 5px 10px; border: none; background: none; cursor: pointer; border-radius: 4px; font-size: 12px; font-weight: 600; color: var(--muted-fg); }
+  .view-btn.active { background: var(--card); color: var(--fg); box-shadow: var(--shadow); }
+  .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; inset: 0; background: var(--border); border-radius: 99px; transition: .2s; }
+  .slider:before { content: ''; position: absolute; height: 14px; width: 14px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .2s; }
+  input:checked + .slider { background: var(--accent); }
+  input:checked + .slider:before { transform: translateX(16px); }
+  .member-row-actions { visibility: hidden; }
+  tr:hover .member-row-actions { visibility: visible; }
+  .contract-bar { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; margin-top: 6px; }
+  .contract-fill { height: 100%; border-radius: 99px; background: var(--accent); }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted-fg); margin-bottom: 16px; }
+  .breadcrumb a { color: var(--muted-fg); cursor: pointer; }
+  .breadcrumb a:hover { color: var(--accent); }
+  .breadcrumb span { color: var(--fg); font-weight: 600; }
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .form-row, .form-row-3, .grid-3 { grid-template-columns: 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ── Sidebar ─────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="brand">Innovatr</div>
+      <div class="subbrand">Admin Portal</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Navigation</div>
+      <div class="nav-item" onclick="showSection('portal-nav')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Member Portal
+      </div>
+      <div class="nav-item active" onclick="showSection('admin-nav')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Admin Dashboard
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="avatar">HH</div>
+        <div class="user-info">
+          <div class="name">HannaH Steven</div>
+          <div class="role">Admin · Innovatr</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main ───────────────────────────────── -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">Admin Dashboard</div>
+      <div class="topbar-right">
+        <button class="btn btn-secondary btn-sm" onclick="refreshData()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+          Refresh
+        </button>
+        <button class="btn btn-primary btn-sm">New Company</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="mb-4">
+        <div style="font-size:28px;font-weight:800;letter-spacing:-.5px;">Admin Dashboard</div>
+        <div class="text-muted" style="margin-top:4px;font-size:13px;">Oversee companies, briefs, orders, reports, deals, and the smooth running of… everything.</div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs-list" id="adminTabs">
+        <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+        <button class="tab-btn" onclick="switchTab('companies')">Companies</button>
+        <button class="tab-btn" onclick="switchTab('members')">Members</button>
+        <button class="tab-btn" onclick="switchTab('reports')">Intelligence</button>
+        <button class="tab-btn" onclick="switchTab('briefs')">Briefs</button>
+        <button class="tab-btn" onclick="switchTab('orders')">Orders</button>
+        <button class="tab-btn" onclick="switchTab('offers')">Offers</button>
+        <button class="tab-btn" onclick="switchTab('casestudies')">Case Studies</button>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           TAB: OVERVIEW
+      ══════════════════════════════════════ -->
+      <div class="tab-content active" id="tab-overview">
+
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <div style="font-size:16px;font-weight:700;">Platform Overview</div>
+          <div class="flex gap-2 items-center">
+            <select class="select" style="width:auto;">
+              <option>Last 30 days</option>
+              <option>Last 7 days</option>
+              <option>Last 24 hrs</option>
+              <option>This year</option>
+              <option>All time</option>
+            </select>
+            <button class="btn btn-secondary btn-sm">↻ Refresh</button>
+          </div>
+        </div>
+
+        <!-- Headline metrics -->
+        <div class="metric-grid mb-4">
+          <div class="metric-card">
+            <div class="metric-icon" style="background:var(--blue-light);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="metric-value">23</div>
+            <div class="metric-label">Total Members</div>
+            <div class="metric-sub">+3 this month</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon" style="background:var(--violet-light);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--violet)" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            </div>
+            <div class="metric-value">8</div>
+            <div class="metric-label">Companies</div>
+            <div class="metric-sub">3 Scale · 3 Growth · 1 Starter</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon" style="background:#d1fae5;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <div class="metric-value">4</div>
+            <div class="metric-label">Active Studies</div>
+            <div class="metric-sub">1 Fieldwork Live</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon" style="background:var(--amber-light);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div class="metric-value">18</div>
+            <div class="metric-label">Reports Published</div>
+            <div class="metric-sub">4 free-access</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon" style="background:var(--blue-light);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="metric-value">14</div>
+            <div class="metric-label">Active Users (30d)</div>
+            <div class="metric-sub">5 never logged in</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon" style="background:#fce7f3;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            </div>
+            <div class="metric-value">347</div>
+            <div class="metric-label">Report Views</div>
+            <div class="metric-sub">All time (non-admin)</div>
+          </div>
+        </div>
+
+        <div class="grid-2 gap-4">
+          <!-- Auth Activity -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Auth Activity — Last 30 Days</div>
+            </div>
+            <div class="card-body">
+              <div class="stat-row"><span class="stat-label">Logins</span><span class="stat-val">42</span></div>
+              <div class="stat-row"><span class="stat-label">Failed logins</span><span class="stat-val text-red">3</span></div>
+              <div class="stat-row"><span class="stat-label">Password reset requests</span><span class="stat-val">2</span></div>
+              <div class="stat-row"><span class="stat-label">Password resets completed</span><span class="stat-val">2</span></div>
+              <div class="stat-row"><span class="stat-label">Active users this month</span><span class="stat-val text-green">14</span></div>
+              <div class="stat-row"><span class="stat-label">Never logged in</span><span class="stat-val text-amber">5</span></div>
+              <div class="stat-row"><span class="stat-label">Inactive 30+ days</span><span class="stat-val text-amber">4</span></div>
+            </div>
+          </div>
+
+          <!-- Test24 Pipeline -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Test24 Pipeline</div>
+            </div>
+            <div class="card-body">
+              <div class="stat-row"><span class="stat-label">Total Basic studies</span><span class="stat-val">3</span></div>
+              <div class="stat-row"><span class="stat-label">Total Pro studies</span><span class="stat-val">2</span></div>
+              <div class="stat-row"><span class="stat-label">Completed (Basic)</span><span class="stat-val">2</span></div>
+              <div class="stat-row"><span class="stat-label">Completed (Pro)</span><span class="stat-val">2</span></div>
+              <div class="stat-row"><span class="stat-label">Basic this month</span><span class="stat-val">0</span></div>
+              <div class="stat-row"><span class="stat-label">Pro this month</span><span class="stat-val">0</span></div>
+              <div class="stat-row"><span class="stat-label">Studies in progress</span><span class="stat-val text-amber">1</span></div>
+              <div class="stat-row"><span class="stat-label">Briefs in pipeline</span><span class="stat-val text-blue">2</span></div>
+            </div>
+          </div>
+
+          <!-- Active Studies -->
+          <div class="card" style="grid-column:1/-1;">
+            <div class="card-header"><div class="card-title">Active Studies</div></div>
+            <div class="card-body">
+              <div class="table-wrap">
+                <table>
+                  <thead><tr>
+                    <th>Study</th><th>Company</th><th>Type</th><th>Status</th><th>Submitted by</th><th>Created</th>
+                  </tr></thead>
+                  <tbody>
+                    <tr>
+                      <td class="td-name">Nando's Menu Test</td>
+                      <td>Nando's South Africa</td>
+                      <td><span class="badge badge-blue">Test24 Basic</span></td>
+                      <td><span class="badge badge-green">Fieldwork Live</span></td>
+                      <td>Simone Kakana</td>
+                      <td class="td-muted">Mar 2026</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Report Engagement -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">Report Engagement</div></div>
+            <div class="card-body">
+              <div class="stat-row"><span class="stat-label">Total views (all time)</span><span class="stat-val">347</span></div>
+              <div class="stat-row"><span class="stat-label">Total downloads (all time)</span><span class="stat-val">89</span></div>
+              <div class="stat-row"><span class="stat-label">Views this month</span><span class="stat-val">24</span></div>
+              <div class="stat-row"><span class="stat-label">Downloads this month</span><span class="stat-val">7</span></div>
+              <div class="stat-row"><span class="stat-label">Most popular report</span><span class="stat-val text-accent" style="font-size:12px;">Banking Monogamy Is Dead</span></div>
+            </div>
+          </div>
+
+          <!-- Free Reports -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">Publicly Accessible Reports</div></div>
+            <div class="card-body">
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Report</th><th>Category</th></tr></thead>
+                  <tbody>
+                    <tr><td class="td-name" style="font-size:12px;">Banking Monogamy Is Dead</td><td><span class="badge badge-blue">Insights</span></td></tr>
+                    <tr><td class="td-name" style="font-size:12px;">Simplicity Has Status</td><td><span class="badge badge-blue">Insights</span></td></tr>
+                    <tr><td class="td-name" style="font-size:12px;">From Vegan to Vital</td><td><span class="badge badge-blue">Insights</span></td></tr>
+                    <tr><td class="td-name" style="font-size:12px;">Innovatr Inside — Issue 01</td><td><span class="badge badge-violet">Inside</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           TAB: COMPANIES
+      ══════════════════════════════════════ -->
+      <div class="tab-content" id="tab-companies">
+
+        <!-- Company summary stats -->
+        <div class="metric-grid mb-4">
+          <div class="metric-card">
+            <div class="metric-value">8</div>
+            <div class="metric-label">Total Companies</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">3</div>
+            <div class="metric-label">Scale</div>
+            <div class="metric-sub">Revlon, Mitchum, Elizabeth Arden + Innovatr</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">3</div>
+            <div class="metric-label">Growth</div>
+            <div class="metric-sub">Rugani, Greenway, Nando's</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">1</div>
+            <div class="metric-label">Starter</div>
+            <div class="metric-sub">DGB</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">37</div>
+            <div class="metric-label">Basic Credits Sold</div>
+            <div class="metric-sub">8 used · 29 remaining</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">8</div>
+            <div class="metric-label">Pro Credits Sold</div>
+            <div class="metric-sub">0 used · 8 remaining</div>
+          </div>
+        </div>
+
+        <!-- Filters + New Company button -->
+        <div class="filters">
+          <div class="search-wrap" style="flex:1;min-width:200px;">
+            <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="input" placeholder="Search companies…" style="padding-left:34px;" />
+          </div>
+          <select class="select" style="width:auto;">
+            <option>All tiers</option>
+            <option>Scale</option>
+            <option>Growth</option>
+            <option>Starter</option>
+            <option>Free</option>
+          </select>
+          <button class="btn btn-primary" onclick="openModal('modal-create-company')">+ New Company</button>
+        </div>
+
+        <!-- Company table -->
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Company</th><th>Tier</th><th>Industry</th>
+                <th>Basic Credits</th><th>Pro Credits</th>
+                <th>Members</th><th>Last Activity</th><th>Contract End</th><th></th>
+              </tr></thead>
+              <tbody id="companyTableBody">
+
+                <tr onclick="openCompanyDrawer('Innovatr')" style="cursor:pointer;">
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="company-logo">IN</div>
+                      <div>
+                        <div class="td-name">Innovatr</div>
+                        <div class="text-sm text-muted">innovatr.co.za</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge badge-scale">Scale</span></td>
+                  <td class="td-muted">Market Research</td>
+                  <td>
+                    <div>25 / 25</div>
+                    <div class="progress-bar mt-1" style="width:80px;"><div class="progress-fill fill-accent" style="width:0%"></div></div>
+                  </td>
+                  <td>4 / 4</td>
+                  <td>2</td>
+                  <td class="td-muted">—</td>
+                  <td class="td-muted">—</td>
+                  <td class="action-row">
+                    <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openCompanyDrawer('Innovatr')">View</button>
+                  </td>
+                </tr>
+
+                <tr onclick="openCompanyDrawer('Rugani Juice')" style="cursor:pointer;">
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="company-logo" style="background:var(--green-light);color:var(--green);">RJ</div>
+                      <div>
+                        <div class="td-name">Rugani Juice</div>
+                        <div class="text-sm text-muted">ruganijuice.co.za</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge badge-growth">Growth</span></td>
+                  <td class="td-muted">Beverages</td>
+                  <td>
+                    <div class="flex items-center gap-1">
+                      <span>8 / 10</span>
+                      <span class="text-muted text-sm">(2 used)</span>
+                    </div>
+                    <div class="progress-bar mt-1" style="width:80px;"><div class="progress-fill fill-accent" style="width:20%"></div></div>
+                  </td>
+                  <td>2 / 2</td>
+                  <td>2</td>
+                  <td class="td-muted">2w ago</td>
+                  <td class="td-muted">Nov 2026</td>
+                  <td class="action-row">
+                    <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openCompanyDrawer('Rugani Juice')">View</button>
+                  </td>
+                </tr>
+
+                <tr onclick="openCompanyDrawer('Greenway Farms')" style="cursor:pointer;">
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="company-logo" style="background:#d1fae5;color:var(--green);">GF</div>
+                      <div>
+                        <div class="td-name">Greenway Farms</div>
+                        <div class="text-sm text-muted">greenwayfarm.co.za</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge badge-growth">Growth</span></td>
+                  <td class="td-muted">Agriculture</td>
+                  <td>
+                    <div>10 / 10</div>
+                    <div class="progress-bar mt-1" style="width:80px;"><div class="progress-fill fill-accent" style="width:0%"></div></div>
+                  </td>
+                  <td>2 / 2</td>
+                  <td>2</td>
+                  <td class="td-muted">1mo ago</td>
+                  <td class="td-muted">Nov 2026</td>
+                  <td class="action-row">
+                    <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openCompanyDrawer('Greenway Farms')">View</button>
+                  </td>
+                </tr>
+
+                <tr onclick="openCompanyDrawer('Nandos')" style="cursor:pointer;">
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="company-logo" style="background:#ffe4e6;color:var(--coral);">NA</div>
+                      <div>
+                        <div class="td-name">Nando's South Africa</div>
+                        <div class="text-sm text-muted">nandos.co.za</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge badge-growth">Growth</span></td>
+                  <td class="td-muted">Quick Service Restaurant</td>
+                  <td>
+                    <div class="flex items-center gap-1">
+                      <span>0 / 5</span>
+                      <span class="badge badge-red" style="font-size:10px;padding:1px 5px;">All used</span>
+                    </div>
+                    <div class="progress-bar mt-1" style="width:80px;"><div class="progress-fill fill-red" style="width:100%"></div></div>
+                  </td>
+                  <td>0 / 0</td>
+                  <td>1</td>
+                  <td class="td-muted">Today</td>
+                  <td class="td-muted">—</td>
+                  <td class="action-row">
+                    <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openCompanyDrawer('Nandos')">View</button>
+                  </td>
+                </tr>
+
+                <tr onclick="openCompanyDrawer('DGB')" style="cursor:pointer;">
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="company-logo" style="background:var(--muted);color:var(--muted-fg);">DG</div>
+                      <div>
+                        <div class="td-name">DGB</div>
+                        <div class="text-sm text-muted">dgb.co.za</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge badge-starter">Starter</span></td>
+                  <td class="td-muted">Wine &amp; Spirits</td>
+                  <td>
+                    <div class="flex items-center gap-1">
+                      <span>0 / 1</span>
+                      <span class="badge badge-red" style="font-size:10px;padding:1px 5px;">Used</span>
+                    </div>
+                    <div class="progress-bar mt-1" style="width:80px;"><div class="progress-fill fill-red" style="width:100%"></div></div>
+                  </td>
+                  <td>0 / 0</td>
+                  <td>0</td>
+                  <td class="td-muted">Never</td>
+                  <td class="td-muted">—</td>
+                  <td class="action-row">
+                    <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openCompanyDrawer('DGB')">View</button>
+                  </td>
+                </tr>
+
+                <tr style="cursor:pointer;">
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="company-logo" style="background:#fce7f3;color:#be185d;">RE</div>
+                      <div>
+                        <div class="td-name">Revlon</div>
+                        <div class="text-sm text-muted">revlon.com</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge badge-scale">Scale</span></td>
+                  <td class="td-muted">Beauty &amp; Cosmetics</td>
+                  <td>0 / 0</td><td>0 / 0</td>
+                  <td>0</td>
+                  <td class="td-muted">Never</td>
+                  <td class="td-muted">—</td>
+                  <td class="action-row">
+                    <button class="btn btn-ghost btn-sm">View</button>
+                  </td>
+                </tr>
+
+                <tr style="cursor:pointer;">
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="company-logo" style="background:var(--blue-light);color:var(--blue);">MI</div>
+                      <div>
+                        <div class="td-name">Mitchum</div>
+                        <div class="text-sm text-muted">mitchum.com</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge badge-scale">Scale</span></td>
+                  <td class="td-muted">Personal Care</td>
+                  <td>0 / 0</td><td>0 / 0</td>
+                  <td>0</td>
+                  <td class="td-muted">Never</td>
+                  <td class="td-muted">—</td>
+                  <td class="action-row">
+                    <button class="btn btn-ghost btn-sm">View</button>
+                  </td>
+                </tr>
+
+                <tr style="cursor:pointer;">
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="company-logo" style="background:#fef9c3;color:#854d0e;">EA</div>
+                      <div>
+                        <div class="td-name">Elizabeth Arden</div>
+                        <div class="text-sm text-muted">elizabetharden.com</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge badge-scale">Scale</span></td>
+                  <td class="td-muted">Beauty &amp; Cosmetics</td>
+                  <td>0 / 0</td><td>0 / 0</td>
+                  <td>0</td>
+                  <td class="td-muted">Never</td>
+                  <td class="td-muted">—</td>
+                  <td class="action-row">
+                    <button class="btn btn-ghost btn-sm">View</button>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           TAB: MEMBERS
+      ══════════════════════════════════════ -->
+      <div class="tab-content" id="tab-members">
+        <div class="filters mb-3">
+          <div class="search-wrap" style="flex:1;min-width:200px;">
+            <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="input" placeholder="Search by name or email…" style="padding-left:34px;" />
+          </div>
+          <select class="select" style="width:auto;">
+            <option>All tiers</option>
+            <option>Scale</option><option>Growth</option><option>Starter</option><option>Free</option><option>Admin</option>
+          </select>
+          <select class="select" style="width:auto;">
+            <option>All companies</option>
+            <option>Innovatr</option><option>Rugani Juice</option><option>Greenway Farms</option>
+            <option>Nando's South Africa</option><option>DGB</option>
+          </select>
+          <button class="btn btn-primary">+ New Member</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Member</th><th>Company</th><th>Tier</th><th>Type</th><th>Role</th><th>Last Login</th><th>Pulse</th><th></th>
+              </tr></thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="avatar" style="width:30px;height:30px;font-size:12px;">HH</div>
+                      <div>
+                        <div class="font-semibold">HannaH Steven</div>
+                        <div class="text-sm text-muted">hannah@innovatr.co.za</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Innovatr</td>
+                  <td><span class="badge badge-scale">Scale</span></td>
+                  <td><span class="badge badge-gray">Company</span></td>
+                  <td><span class="badge badge-red">Admin</span></td>
+                  <td class="td-muted">Today</td>
+                  <td><span class="badge badge-green">Active</span></td>
+                  <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="avatar" style="width:30px;height:30px;font-size:12px;">RL</div>
+                      <div>
+                        <div class="font-semibold">Richard Lawrence</div>
+                        <div class="text-sm text-muted">richard@innovatr.co.za</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Innovatr</td>
+                  <td><span class="badge badge-scale">Scale</span></td>
+                  <td><span class="badge badge-gray">Company</span></td>
+                  <td><span class="badge badge-red">Admin</span></td>
+                  <td class="td-muted">Today</td>
+                  <td><span class="badge badge-green">Active</span></td>
+                  <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="avatar" style="width:30px;height:30px;font-size:12px;background:var(--green);">SK</div>
+                      <div>
+                        <div class="font-semibold">Simone Kakana</div>
+                        <div class="text-sm text-muted">simone.kakana@nandos.co.za</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Nando's South Africa</td>
+                  <td><span class="badge badge-growth">Growth</span></td>
+                  <td><span class="badge badge-gray">Company</span></td>
+                  <td><span class="badge badge-blue">Member</span></td>
+                  <td class="td-muted">Today</td>
+                  <td><span class="badge badge-green">Active</span></td>
+                  <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="avatar" style="width:30px;height:30px;font-size:12px;background:#7c3aed;">TY</div>
+                      <div>
+                        <div class="font-semibold">Tymon</div>
+                        <div class="text-sm text-muted">tymon@rugani.co.za</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Rugani Juice</td>
+                  <td><span class="badge badge-growth">Growth</span></td>
+                  <td><span class="badge badge-gray">Company</span></td>
+                  <td><span class="badge badge-blue">Member</span></td>
+                  <td class="td-muted">2w ago</td>
+                  <td><span class="badge badge-green">Active</span></td>
+                  <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="avatar" style="width:30px;height:30px;font-size:12px;background:#7c3aed;">SI</div>
+                      <div>
+                        <div class="font-semibold">Simonne</div>
+                        <div class="text-sm text-muted">simonne@rugani.co.za</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Rugani Juice</td>
+                  <td><span class="badge badge-growth">Growth</span></td>
+                  <td><span class="badge badge-gray">Company</span></td>
+                  <td><span class="badge badge-blue">Member</span></td>
+                  <td class="td-muted">1mo ago</td>
+                  <td><span class="badge badge-gray">Inactive</span></td>
+                  <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="avatar" style="width:30px;height:30px;font-size:12px;background:var(--green);">DB</div>
+                      <div>
+                        <div class="font-semibold">Duncan Buhr</div>
+                        <div class="text-sm text-muted">duncan@greenwayfarm.co.za</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Greenway Farms</td>
+                  <td><span class="badge badge-growth">Growth</span></td>
+                  <td><span class="badge badge-gray">Company</span></td>
+                  <td><span class="badge badge-blue">Member</span></td>
+                  <td class="td-muted">Never</td>
+                  <td><span class="badge badge-gray">Inactive</span></td>
+                  <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <div class="avatar" style="width:30px;height:30px;font-size:12px;background:var(--green);">WB</div>
+                      <div>
+                        <div class="font-semibold">Wesley Browne</div>
+                        <div class="text-sm text-muted">Wesley@greenwayfarm.co.za</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>Greenway Farms</td>
+                  <td><span class="badge badge-growth">Growth</span></td>
+                  <td><span class="badge badge-gray">Company</span></td>
+                  <td><span class="badge badge-blue">Member</span></td>
+                  <td class="td-muted">Never</td>
+                  <td><span class="badge badge-gray">Inactive</span></td>
+                  <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           TAB: REPORTS / INTELLIGENCE
+      ══════════════════════════════════════ -->
+      <div class="tab-content" id="tab-reports">
+        <div class="filters">
+          <div class="search-wrap" style="flex:1;min-width:200px;">
+            <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="input" placeholder="Search reports…" style="padding-left:34px;" />
+          </div>
+          <select class="select" style="width:auto;">
+            <option>All status</option><option>Published</option><option>Draft</option><option>Scheduled</option><option>Archived</option>
+          </select>
+          <select class="select" style="width:auto;">
+            <option>All access</option><option>Public</option><option>Member</option><option>Growth+</option><option>Scale</option>
+          </select>
+          <button class="btn btn-primary">+ New Report</button>
+          <button class="btn btn-secondary">Export CSV</button>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Report</th><th>Category</th><th>Access</th><th>Status</th><th>Views</th><th>Downloads</th><th>Date</th><th></th>
+              </tr></thead>
+              <tbody>
+                <tr>
+                  <td class="td-name">Banking Monogamy Is Dead</td>
+                  <td><span class="badge badge-blue">Insights</span></td>
+                  <td><span class="badge badge-green">Public</span></td>
+                  <td><span class="badge badge-green">Published</span></td>
+                  <td>142</td><td>34</td>
+                  <td class="td-muted">Jan 2026</td>
+                  <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+                </tr>
+                <tr>
+                  <td class="td-name">Simplicity Has Status</td>
+                  <td><span class="badge badge-blue">Insights</span></td>
+                  <td><span class="badge badge-green">Public</span></td>
+                  <td><span class="badge badge-green">Published</span></td>
+                  <td>98</td><td>22</td>
+                  <td class="td-muted">Feb 2026</td>
+                  <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+                </tr>
+                <tr>
+                  <td class="td-name">The Return of the Third Place</td>
+                  <td><span class="badge badge-blue">Insights</span></td>
+                  <td><span class="badge badge-violet">Member</span></td>
+                  <td><span class="badge badge-green">Published</span></td>
+                  <td>67</td><td>18</td>
+                  <td class="td-muted">Mar 2026</td>
+                  <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+                </tr>
+                <tr>
+                  <td class="td-name">From Vegan to Vital</td>
+                  <td><span class="badge badge-amber">Launch</span></td>
+                  <td><span class="badge badge-green">Public</span></td>
+                  <td><span class="badge badge-green">Published</span></td>
+                  <td>40</td><td>15</td>
+                  <td class="td-muted">Nov 2025</td>
+                  <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+                </tr>
+                <tr>
+                  <td class="td-name">Innovatr Inside — Issue 01</td>
+                  <td><span class="badge badge-violet">Inside</span></td>
+                  <td><span class="badge badge-green">Public</span></td>
+                  <td><span class="badge badge-green">Published</span></td>
+                  <td>31</td><td>0</td>
+                  <td class="td-muted">Dec 2025</td>
+                  <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+                </tr>
+                <tr>
+                  <td class="td-name">Q1 Trends — Consumer Confidence</td>
+                  <td><span class="badge badge-blue">Insights</span></td>
+                  <td><span class="badge badge-scale">Scale</span></td>
+                  <td><span class="badge badge-gray">Draft</span></td>
+                  <td>0</td><td>0</td>
+                  <td class="td-muted">—</td>
+                  <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           TAB: BRIEFS
+      ══════════════════════════════════════ -->
+      <div class="tab-content" id="tab-briefs">
+
+        <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <div class="filters" style="margin:0;flex:1;">
+            <div class="search-wrap" style="flex:1;min-width:200px;">
+              <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="input" placeholder="Search briefs…" style="padding-left:34px;" />
+            </div>
+            <select class="select" style="width:auto;">
+              <option>All status</option><option>New</option><option>In Progress</option><option>Completed</option><option>On Hold</option>
+            </select>
+          </div>
+          <div class="view-toggle">
+            <button class="view-btn active">Table</button>
+            <button class="view-btn" onclick="showPipeline()">Pipeline</button>
+          </div>
+        </div>
+
+        <!-- Table view -->
+        <div id="briefsTable">
+          <div class="card">
+            <div class="table-wrap">
+              <table>
+                <thead><tr>
+                  <th>Brief</th><th>Company</th><th>Study Type</th><th>Concepts</th>
+                  <th>Payment</th><th>Brief Status</th><th>Study Status</th><th>Submitted</th><th></th>
+                </tr></thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="font-semibold">Simone Kakana</div>
+                      <div class="text-sm text-muted">simone.kakana@nandos.co.za</div>
+                    </td>
+                    <td>Nando's South Africa</td>
+                    <td><span class="badge badge-blue">Test24 Basic</span></td>
+                    <td>5</td>
+                    <td><span class="badge badge-gray">Credits</span></td>
+                    <td><span class="badge badge-green">Completed</span></td>
+                    <td><span class="badge badge-green">Fieldwork Live</span></td>
+                    <td class="td-muted">Mar 2026</td>
+                    <td><button class="btn btn-ghost btn-sm">View</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="font-semibold">Tymon</div>
+                      <div class="text-sm text-muted">tymon@rugani.co.za</div>
+                    </td>
+                    <td>Rugani Juice</td>
+                    <td><span class="badge badge-blue">Test24 Basic</span></td>
+                    <td>2</td>
+                    <td><span class="badge badge-gray">Credits</span></td>
+                    <td><span class="badge badge-amber">In Progress</span></td>
+                    <td><span class="badge badge-blue">Submitted</span></td>
+                    <td class="td-muted">Feb 2026</td>
+                    <td><button class="btn btn-ghost btn-sm">View</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pipeline view -->
+        <div id="briefsPipeline" style="display:none;">
+          <div class="flex gap-3" style="overflow-x:auto;padding-bottom:8px;">
+
+            <div class="pipeline-col">
+              <div class="pipeline-col-header" style="background:var(--blue-light);color:var(--blue);">New (0)</div>
+              <div class="empty-state" style="padding:20px;background:var(--muted);border-radius:0 0 6px 6px;">
+                <div style="font-size:12px;">No new briefs</div>
+              </div>
+            </div>
+
+            <div class="pipeline-col">
+              <div class="pipeline-col-header" style="background:var(--amber-light);color:var(--amber);">In Progress (1)</div>
+              <div class="pipeline-card" style="margin-top:4px;">
+                <div class="pipeline-card-co">Rugani Juice</div>
+                <div class="pipeline-card-title">Test24 Basic · 2 concepts</div>
+                <div class="pipeline-card-meta">Tymon · Feb 2026</div>
+              </div>
+            </div>
+
+            <div class="pipeline-col">
+              <div class="pipeline-col-header" style="background:#d1fae5;color:var(--green);">Completed (1)</div>
+              <div class="pipeline-card" style="margin-top:4px;">
+                <div class="pipeline-card-co">Nando's South Africa</div>
+                <div class="pipeline-card-title">Test24 Basic · 5 concepts</div>
+                <div class="pipeline-card-meta">Simone Kakana · Mar 2026</div>
+              </div>
+            </div>
+
+            <div class="pipeline-col">
+              <div class="pipeline-col-header" style="background:var(--gray-light);color:var(--gray);">On Hold (0)</div>
+              <div class="empty-state" style="padding:20px;background:var(--muted);border-radius:0 0 6px 6px;">
+                <div style="font-size:12px;">None on hold</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           TAB: ORDERS
+      ══════════════════════════════════════ -->
+      <div class="tab-content" id="tab-orders">
+
+        <div class="metric-grid mb-4">
+          <div class="metric-card"><div class="metric-value">3</div><div class="metric-label">Total Orders</div></div>
+          <div class="metric-card"><div class="metric-value">0</div><div class="metric-label">This Month</div></div>
+          <div class="metric-card"><div class="metric-value">3</div><div class="metric-label">Completed</div></div>
+          <div class="metric-card"><div class="metric-value text-amber">0</div><div class="metric-label">Pending</div></div>
+        </div>
+
+        <div class="filters">
+          <div class="search-wrap" style="flex:1;min-width:200px;">
+            <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="input" placeholder="Search orders…" style="padding-left:34px;" />
+          </div>
+          <select class="select" style="width:auto;">
+            <option>All status</option><option>Completed</option><option>Pending</option><option>Failed</option>
+          </select>
+          <select class="select" style="width:auto;">
+            <option>All companies</option>
+            <option>Nando's South Africa</option><option>Rugani Juice</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Customer</th><th>Company</th><th>Purchase Type</th><th>Amount</th><th>Status</th><th>Date</th><th></th>
+              </tr></thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="font-semibold">Simone Kakana</div>
+                    <div class="text-sm text-muted">simone.kakana@nandos.co.za</div>
+                  </td>
+                  <td>Nando's South Africa</td>
+                  <td>Growth Membership</td>
+                  <td class="font-semibold">R 45,000</td>
+                  <td><span class="badge badge-green">Completed</span></td>
+                  <td class="td-muted">Dec 2025</td>
+                  <td><button class="btn btn-ghost btn-sm">View</button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="font-semibold">Tymon</div>
+                    <div class="text-sm text-muted">tymon@rugani.co.za</div>
+                  </td>
+                  <td>Rugani Juice</td>
+                  <td>10× Basic Credits</td>
+                  <td class="font-semibold">R 45,000</td>
+                  <td><span class="badge badge-green">Completed</span></td>
+                  <td class="td-muted">Jan 2026</td>
+                  <td><button class="btn btn-ghost btn-sm">View</button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="font-semibold">DGB Team</div>
+                    <div class="text-sm text-muted">pilot@dgb.co.za</div>
+                  </td>
+                  <td>DGB</td>
+                  <td>Starter Membership + 1× Basic</td>
+                  <td class="font-semibold">R 5,000</td>
+                  <td><span class="badge badge-green">Completed</span></td>
+                  <td class="td-muted">Oct 2025</td>
+                  <td><button class="btn btn-ghost btn-sm">View</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           TAB: OFFERS / DEALS
+      ══════════════════════════════════════ -->
+      <div class="tab-content" id="tab-offers">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Member Offers</div>
+            <div class="section-sub">Manage exclusive deals and perks visible to members</div>
+          </div>
+          <button class="btn btn-primary">+ New Deal</button>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+
+          <div class="deal-card">
+            <div class="deal-icon">🏷</div>
+            <div style="flex:1;">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-semibold">50% off 10-Credit Pack</span>
+                <span class="badge badge-green">Active</span>
+                <span class="badge badge-scale">Scale</span>
+                <span class="badge badge-growth">Growth</span>
+              </div>
+              <div class="text-sm text-muted mt-1">Buy 10 Basic credits for R 45,000 instead of R 100,000</div>
+              <div class="flex items-center gap-4 mt-2 text-sm text-muted flex-wrap">
+                <span>Type: Exclusive Offer</span>
+                <span>Valid: Ongoing</span>
+                <span>Slots: Unlimited</span>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost btn-sm">Edit</button>
+              <button class="btn btn-ghost btn-sm">Delete</button>
+            </div>
+          </div>
+
+          <div class="deal-card">
+            <div class="deal-icon">🎁</div>
+            <div style="flex:1;">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-semibold">Member Consultation Perk</span>
+                <span class="badge badge-green">Active</span>
+                <span class="badge badge-growth">Growth</span>
+              </div>
+              <div class="text-sm text-muted mt-1">Free 30-min strategy call with our research team</div>
+              <div class="flex items-center gap-4 mt-2 text-sm text-muted flex-wrap">
+                <span>Type: Perk</span>
+                <span>Valid: Ongoing</span>
+                <span>Slots: 5 remaining</span>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost btn-sm">Edit</button>
+              <button class="btn btn-ghost btn-sm">Delete</button>
+            </div>
+          </div>
+
+          <div class="deal-card" style="opacity:.6;">
+            <div class="deal-icon">✨</div>
+            <div style="flex:1;">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-semibold">Upgrade to Scale — Teaser</span>
+                <span class="badge badge-gray">Inactive</span>
+                <span class="badge badge-starter">Starter</span>
+              </div>
+              <div class="text-sm text-muted mt-1">Unlock Pro studies, full report library, and priority turnaround</div>
+              <div class="flex items-center gap-4 mt-2 text-sm text-muted flex-wrap">
+                <span>Type: Teaser</span>
+                <span>Valid: Expired</span>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost btn-sm">Edit</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           TAB: CASE STUDIES
+      ══════════════════════════════════════ -->
+      <div class="tab-content" id="tab-casestudies">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Case Studies</div>
+            <div class="section-sub">Public-facing client success stories shown on the marketing site</div>
+          </div>
+          <button class="btn btn-primary">+ New Case Study</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Client</th><th>Industry</th><th>Phases</th><th>Duration</th><th>Status</th><th></th>
+              </tr></thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="font-semibold">Rugani Juice × Clicks</div>
+                    <div class="text-sm text-muted">Beverage positioning study</div>
+                  </td>
+                  <td>Beverages</td>
+                  <td>
+                    <span class="tag">Strategy</span>
+                    <span class="tag">Innovation</span>
+                  </td>
+                  <td>6 weeks</td>
+                  <td><span class="badge badge-green">Active</span></td>
+                  <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="font-semibold">Durbanville Hills — DGB</div>
+                    <div class="text-sm text-muted">Wine brand pilot</div>
+                  </td>
+                  <td>Wine &amp; Spirits</td>
+                  <td>
+                    <span class="tag">Innovation</span>
+                    <span class="tag">Execution</span>
+                  </td>
+                  <td>4 weeks</td>
+                  <td><span class="badge badge-green">Active</span></td>
+                  <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+
+<!-- ══════════════════════════════════════════════════
+     DRAWER: COMPANY PROFILE
+══════════════════════════════════════════════════ -->
+<div class="drawer-overlay" id="companyDrawerOverlay" onclick="closeCompanyDrawer()"></div>
+<div class="drawer" id="companyDrawer">
+  <div class="drawer-header">
+    <div>
+      <div class="drawer-title" id="drawerCompanyName">Rugani Juice</div>
+      <div class="drawer-sub" id="drawerCompanyMeta">Growth · Beverages · ruganijuice.co.za</div>
+    </div>
+    <button class="close-btn" onclick="closeCompanyDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+
+    <!-- Tier + Contract -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">Company Settings</div>
+      <div class="grid-2">
+        <div class="field">
+          <div class="label">Membership Tier</div>
+          <select class="select">
+            <option>Free</option><option>Starter</option><option selected>Growth</option><option>Scale</option><option>Custom</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="label">Industry</div>
+          <input class="input" value="Beverages" />
+        </div>
+        <div class="field">
+          <div class="label">Contract Start</div>
+          <input class="input" type="date" value="2025-12-01" />
+        </div>
+        <div class="field">
+          <div class="label">Contract End</div>
+          <input class="input" type="date" value="2026-11-30" />
+        </div>
+        <div class="field">
+          <div class="label">Monthly Fee (ZAR)</div>
+          <input class="input" type="number" placeholder="e.g. 9500" />
+        </div>
+        <div class="field">
+          <div class="label">Domain</div>
+          <input class="input" value="ruganijuice.co.za" />
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm mt-2">Save Changes</button>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Credits -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">Credits</div>
+
+      <div class="credit-row">
+        <div>
+          <div class="credit-label">Basic Credits</div>
+          <div class="credit-used">8 remaining of 10 total · 2 used</div>
+        </div>
+        <div class="flex gap-2 items-center">
+          <button class="btn btn-secondary btn-sm">− Remove</button>
+          <button class="btn btn-primary btn-sm">+ Add</button>
+        </div>
+      </div>
+      <div class="progress-bar mb-3"><div class="progress-fill fill-accent" style="width:80%"></div></div>
+
+      <div class="credit-row">
+        <div>
+          <div class="credit-label">Pro Credits</div>
+          <div class="credit-used">2 remaining of 2 total · 0 used</div>
+        </div>
+        <div class="flex gap-2 items-center">
+          <button class="btn btn-secondary btn-sm">− Remove</button>
+          <button class="btn btn-primary btn-sm">+ Add</button>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill fill-violet" style="width:100%"></div></div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Members in company -->
+    <div class="drawer-section">
+      <div class="flex items-center justify-between mb-2">
+        <div class="drawer-section-title" style="margin:0;">Members</div>
+        <button class="btn btn-secondary btn-sm">+ Assign User</button>
+      </div>
+      <table style="font-size:13px;width:100%;">
+        <thead><tr>
+          <th style="text-align:left;font-size:11px;color:var(--muted-fg);padding:6px 4px;">Name</th>
+          <th style="text-align:left;font-size:11px;color:var(--muted-fg);padding:6px 4px;">Last Login</th>
+          <th style="text-align:left;font-size:11px;color:var(--muted-fg);padding:6px 4px;">Paid Seat</th>
+          <th></th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td style="padding:6px 4px;">
+              <div class="font-semibold">Tymon</div>
+              <div class="text-sm text-muted">tymon@rugani.co.za</div>
+            </td>
+            <td style="padding:6px 4px;" class="td-muted">2w ago</td>
+            <td style="padding:6px 4px;">
+              <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+            </td>
+            <td style="padding:6px 4px;"><button class="btn btn-ghost btn-sm text-red">Remove</button></td>
+          </tr>
+          <tr>
+            <td style="padding:6px 4px;">
+              <div class="font-semibold">Simonne</div>
+              <div class="text-sm text-muted">simonne@rugani.co.za</div>
+            </td>
+            <td style="padding:6px 4px;" class="td-muted">1mo ago</td>
+            <td style="padding:6px 4px;">
+              <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+            </td>
+            <td style="padding:6px 4px;"><button class="btn btn-ghost btn-sm text-red">Remove</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Client Reports -->
+    <div class="drawer-section">
+      <div class="flex items-center justify-between mb-2">
+        <div class="drawer-section-title" style="margin:0;">Client Reports (Past Research)</div>
+        <button class="btn btn-secondary btn-sm">+ Add Report</button>
+      </div>
+      <div class="card" style="padding:10px 14px;margin-bottom:8px;">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <div class="font-semibold" style="font-size:13px;">Rugani × Clicks Wellness Beverage Positioning</div>
+            <div class="text-sm text-muted">Test24 Pro · Completed · Nov 2025</div>
+          </div>
+          <div class="flex gap-2">
+            <button class="btn btn-ghost btn-sm">↗ Dashboard</button>
+            <button class="btn btn-ghost btn-sm">↓ PDF</button>
+            <button class="btn btn-ghost btn-sm text-red">Delete</button>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="padding:10px 14px;margin-bottom:8px;">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <div class="font-semibold" style="font-size:13px;">Rugani New Key Visual Optimisation</div>
+            <div class="text-sm text-muted">Test24 Pro · Completed · Nov 2025</div>
+          </div>
+          <div class="flex gap-2">
+            <button class="btn btn-ghost btn-sm">↗ Dashboard</button>
+            <button class="btn btn-ghost btn-sm">↓ PDF</button>
+            <button class="btn btn-ghost btn-sm text-red">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Admin notes -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">Admin Notes</div>
+      <textarea class="textarea">Parent company: Greenway Farms. Has 2 client reports. Originally 10 Basic, 2 Pro - used 2 Basic.</textarea>
+      <button class="btn btn-secondary btn-sm mt-2">Save Notes</button>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Danger zone -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">Actions</div>
+      <div class="flex gap-2 flex-wrap">
+        <button class="btn btn-secondary btn-sm">View Client Portal</button>
+        <button class="btn btn-destructive btn-sm">Delete Company</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     MODAL: CREATE NEW COMPANY
+══════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-create-company">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Create New Company</div>
+        <div class="modal-desc">A welcome email with password setup will be sent to the user email.</div>
+      </div>
+      <button class="close-btn" onclick="closeModal('modal-create-company')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted-fg);margin-bottom:10px;">Company Details</div>
+
+      <div class="form-row">
+        <div class="field">
+          <div class="label">Company Name *</div>
+          <input class="input" placeholder="Acme Corp" />
+        </div>
+        <div class="field">
+          <div class="label">Domain</div>
+          <input class="input" placeholder="acmecorp.com" />
+        </div>
+        <div class="field">
+          <div class="label">Membership Tier *</div>
+          <select class="select">
+            <option>Free</option><option selected>Starter</option><option>Growth</option><option>Scale</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="label">Industry</div>
+          <select class="select">
+            <option value="">Select industry…</option>
+            <option>Food &amp; Beverage</option><option>Retail</option><option>Financial Services</option>
+            <option>Technology</option><option>Beauty &amp; Personal Care</option>
+            <option>Quick Service Restaurants</option><option>Wine &amp; Spirits</option>
+            <option>FMCG / Packaged Goods</option><option>Market Research</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="label">Contract Start</div>
+          <input class="input" type="date" />
+        </div>
+        <div class="field">
+          <div class="label">Contract End</div>
+          <input class="input" type="date" />
+        </div>
+        <div class="field">
+          <div class="label">Basic Credits</div>
+          <input class="input" type="number" value="0" min="0" />
+        </div>
+        <div class="field">
+          <div class="label">Pro Credits</div>
+          <input class="input" type="number" value="0" min="0" />
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label">Admin Notes</div>
+        <textarea class="textarea" placeholder="Internal notes…"></textarea>
+      </div>
+
+      <div class="sep"></div>
+
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted-fg);margin-bottom:10px;">First User</div>
+
+      <div class="form-row">
+        <div class="field">
+          <div class="label">Full Name *</div>
+          <input class="input" placeholder="Jane Smith" />
+        </div>
+        <div class="field">
+          <div class="label">Email Address *</div>
+          <input class="input" type="email" placeholder="jane@acmecorp.com" />
+        </div>
+        <div class="field">
+          <div class="label">Phone / WhatsApp</div>
+          <input class="input" placeholder="+27 82 000 0000" />
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-create-company')">Cancel</button>
+      <button class="btn btn-primary">Create Company &amp; Send Welcome Email</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     MODAL: ADD REPORT TO COMPANY
+══════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-add-report">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Add Client Report</div>
+        <div class="modal-desc">Add a completed Test24 study report to this company's Past Research</div>
+      </div>
+      <button class="close-btn" onclick="closeModal('modal-add-report')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <div class="label">Report Title *</div>
+        <input class="input" placeholder="e.g. Rugani Summer Range Test" />
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <div class="label">Study Type</div>
+          <select class="select">
+            <option>Test24 Basic</option><option>Test24 Pro</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="label">Status</div>
+          <select class="select">
+            <option>Completed</option><option>In Progress</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="label">Delivery Date</div>
+          <input class="input" type="date" />
+        </div>
+        <div class="field">
+          <div class="label">Primary Contact Email</div>
+          <input class="input" type="email" placeholder="contact@company.com" />
+        </div>
+      </div>
+      <div class="field">
+        <div class="label">Description</div>
+        <textarea class="textarea" placeholder="Brief description of the study…"></textarea>
+      </div>
+      <div class="field">
+        <div class="label">Dashboard URL</div>
+        <input class="input" placeholder="https://app.upsiide.com/…" />
+      </div>
+      <div class="field">
+        <div class="label">Upload Report PDF</div>
+        <input type="file" accept=".pdf" style="font-size:13px;" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-report')">Cancel</button>
+      <button class="btn btn-primary">Add Report</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     COMPANY DETAIL PAGE (full-page lens)
+══════════════════════════════════════════════════ -->
+<div id="companyDetailPage" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:100;overflow-y:auto;">
+  <div style="background:var(--card);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;">
+    <button class="btn btn-ghost btn-sm" onclick="closeCompanyDetail()" style="display:flex;align-items:center;gap:6px;">
+      ← Back to Admin
+    </button>
+    <div style="width:1px;height:20px;background:var(--border);"></div>
+    <div style="font-size:14px;font-weight:700;" id="detailTopbarTitle">Company Detail</div>
+    <div style="flex:1;"></div>
+    <button class="btn btn-secondary btn-sm">View Client Portal</button>
+    <button class="btn btn-destructive btn-sm">Delete Company</button>
+  </div>
+
+  <div style="padding:24px;max-width:1100px;margin:0 auto;">
+
+    <div class="breadcrumb">
+      <a onclick="closeCompanyDetail()">Admin</a>
+      <span>›</span>
+      <a onclick="closeCompanyDetail(); switchTab('companies')">Companies</a>
+      <span>›</span>
+      <span id="detailBreadcrumb">Rugani Juice</span>
+    </div>
+
+    <!-- Company hero card -->
+    <div class="card mb-4" style="padding:20px 24px;">
+      <div class="flex items-start gap-4 flex-wrap">
+        <div class="company-logo" style="width:56px;height:56px;font-size:22px;border-radius:12px;" id="detailLogo">RJ</div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div style="font-size:22px;font-weight:800;letter-spacing:-.4px;" id="detailCompanyName2">Rugani Juice</div>
+            <span class="badge badge-growth" id="detailTierBadge">Growth</span>
+          </div>
+          <div class="text-muted text-sm mt-1" id="detailCompanyMeta2">ruganijuice.co.za · Beverages</div>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn btn-secondary btn-sm">Upload Logo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabbed detail view -->
+    <div class="tabs-list mb-4" id="detailTabs">
+      <button class="tab-btn active" onclick="switchDetailTab('overview')">Overview</button>
+      <button class="tab-btn" onclick="switchDetailTab('members')">Members</button>
+      <button class="tab-btn" onclick="switchDetailTab('research')">Research</button>
+      <button class="tab-btn" onclick="switchDetailTab('briefs')">Briefs</button>
+      <button class="tab-btn" onclick="switchDetailTab('activity')">Activity</button>
+      <button class="tab-btn" onclick="switchDetailTab('settings')">Settings</button>
+    </div>
+
+    <!-- Detail: Overview -->
+    <div id="detail-overview" class="detail-tab active">
+      <div class="grid-3 mb-4">
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Credit Balance</div></div>
+          <div class="card-body">
+            <div class="credit-row">
+              <div>
+                <div class="credit-label">Basic</div>
+                <div class="credit-used">8 remaining · 2 used</div>
+              </div>
+              <div style="font-size:24px;font-weight:800;">8<span style="font-size:14px;color:var(--muted-fg);font-weight:400;">/10</span></div>
+            </div>
+            <div class="progress-bar mb-3"><div class="progress-fill fill-accent" style="width:80%"></div></div>
+            <div class="credit-row">
+              <div>
+                <div class="credit-label">Pro</div>
+                <div class="credit-used">2 remaining · 0 used</div>
+              </div>
+              <div style="font-size:24px;font-weight:800;">2<span style="font-size:14px;color:var(--muted-fg);font-weight:400;">/2</span></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill fill-violet" style="width:100%"></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Contract</div></div>
+          <div class="card-body">
+            <div class="stat-row"><span class="stat-label">Start</span><span class="stat-val">1 Dec 2025</span></div>
+            <div class="stat-row"><span class="stat-label">End</span><span class="stat-val">30 Nov 2026</span></div>
+            <div class="stat-row"><span class="stat-label">Days remaining</span><span class="stat-val text-green">244</span></div>
+            <div class="contract-bar"><div class="contract-fill" style="width:30%"></div></div>
+            <div class="text-sm text-muted mt-1">30% through contract year</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Activity Summary</div></div>
+          <div class="card-body">
+            <div class="stat-row"><span class="stat-label">Members</span><span class="stat-val">2</span></div>
+            <div class="stat-row"><span class="stat-label">Studies</span><span class="stat-val">2</span></div>
+            <div class="stat-row"><span class="stat-label">Briefs submitted</span><span class="stat-val">1</span></div>
+            <div class="stat-row"><span class="stat-label">Last login</span><span class="stat-val">2w ago</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Admin Notes</div></div>
+        <div class="card-body">
+          <textarea class="textarea">Parent company: Greenway Farms. Has 2 client reports. Originally 10 Basic, 2 Pro - used 2 Basic.</textarea>
+          <button class="btn btn-secondary btn-sm mt-2">Save Notes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail: Members -->
+    <div id="detail-members" class="detail-tab" style="display:none;">
+      <div class="flex items-center justify-between mb-3">
+        <div class="font-semibold">Company Members (2)</div>
+        <div class="flex gap-2">
+          <button class="btn btn-secondary btn-sm">+ Assign Existing</button>
+          <button class="btn btn-primary btn-sm">+ Add New User</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Member</th><th>Email</th><th>Last Login</th><th>Member Type</th><th>Paid Seat</th><th></th>
+            </tr></thead>
+            <tbody>
+              <tr>
+                <td class="font-semibold">Tymon</td>
+                <td class="td-muted">tymon@rugani.co.za</td>
+                <td class="td-muted">2w ago</td>
+                <td><span class="badge badge-gray">Company</span></td>
+                <td><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+                <td>
+                  <div class="flex gap-2">
+                    <button class="btn btn-ghost btn-sm">Edit</button>
+                    <button class="btn btn-ghost btn-sm text-red">Remove</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="font-semibold">Simonne</td>
+                <td class="td-muted">simonne@rugani.co.za</td>
+                <td class="td-muted">1mo ago</td>
+                <td><span class="badge badge-gray">Company</span></td>
+                <td><label class="switch"><input type="checkbox"><span class="slider"></span></label></td>
+                <td>
+                  <div class="flex gap-2">
+                    <button class="btn btn-ghost btn-sm">Edit</button>
+                    <button class="btn btn-ghost btn-sm text-red">Remove</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail: Research (Client Reports) -->
+    <div id="detail-research" class="detail-tab" style="display:none;">
+      <div class="flex items-center justify-between mb-3">
+        <div class="font-semibold">Client Reports / Past Research (2)</div>
+        <button class="btn btn-primary btn-sm">+ Add Report</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="card" style="padding:16px 20px;">
+          <div class="flex items-start justify-between gap-3 flex-wrap">
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-semibold">Rugani × Clicks Wellness Beverage Positioning</span>
+                <span class="badge badge-green">Completed</span>
+                <span class="badge badge-violet">Test24 Pro</span>
+              </div>
+              <div class="text-sm text-muted mt-1">Delivered Nov 2025 · tymon@rugani.co.za</div>
+              <div class="flex gap-2 mt-2">
+                <span class="tag">Beverages</span>
+                <span class="tag">Retail</span>
+                <span class="tag">Test24 Pro</span>
+              </div>
+            </div>
+            <div class="flex gap-2 flex-wrap">
+              <button class="btn btn-secondary btn-sm">↗ Upsiide</button>
+              <button class="btn btn-secondary btn-sm">↗ Dashboard</button>
+              <button class="btn btn-secondary btn-sm">↓ PDF</button>
+              <button class="btn btn-ghost btn-sm">Edit</button>
+              <button class="btn btn-ghost btn-sm text-red">Delete</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="padding:16px 20px;">
+          <div class="flex items-start justify-between gap-3 flex-wrap">
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-semibold">Rugani New Key Visual Optimisation</span>
+                <span class="badge badge-green">Completed</span>
+                <span class="badge badge-violet">Test24 Pro</span>
+              </div>
+              <div class="text-sm text-muted mt-1">Delivered Nov 2025 · tymon@rugani.co.za</div>
+              <div class="flex gap-2 mt-2">
+                <span class="tag">Creative Testing</span>
+                <span class="tag">Key Visual</span>
+              </div>
+            </div>
+            <div class="flex gap-2 flex-wrap">
+              <button class="btn btn-secondary btn-sm">↗ Dashboard</button>
+              <button class="btn btn-secondary btn-sm">↓ PDF</button>
+              <button class="btn btn-ghost btn-sm">Edit</button>
+              <button class="btn btn-ghost btn-sm text-red">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail: Briefs -->
+    <div id="detail-briefs" class="detail-tab" style="display:none;">
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Submitted By</th><th>Study Type</th><th>Concepts</th><th>Status</th><th>Date</th><th></th>
+            </tr></thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="font-semibold">Tymon</div>
+                  <div class="text-sm text-muted">Test24 Basic · Credits</div>
+                </td>
+                <td><span class="badge badge-blue">Test24 Basic</span></td>
+                <td>2</td>
+                <td><span class="badge badge-amber">In Progress</span></td>
+                <td class="td-muted">Feb 2026</td>
+                <td><button class="btn btn-ghost btn-sm">View</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail: Activity -->
+    <div id="detail-activity" class="detail-tab" style="display:none;">
+      <div class="flex items-center justify-between mb-3">
+        <div class="font-semibold">Activity Log</div>
+        <select class="select" style="width:auto;">
+          <option>Last 7 days</option>
+          <option>Last 14 days</option>
+          <option>Last 30 days</option>
+        </select>
+      </div>
+      <div class="grid-3 mb-4">
+        <div class="metric-card"><div class="metric-value">8</div><div class="metric-label">Logins</div></div>
+        <div class="metric-card"><div class="metric-value">14</div><div class="metric-label">Page Views</div></div>
+        <div class="metric-card"><div class="metric-value">3</div><div class="metric-label">Report Views</div></div>
+      </div>
+      <div class="card" style="padding:16px 20px;">
+        <div class="activity-item">
+          <div class="activity-dot dot-green"></div>
+          <div class="activity-text">
+            <span class="font-semibold">Tymon</span> logged in
+            <div class="activity-time">2 weeks ago · 192.168.1.1</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot dot-blue"></div>
+          <div class="activity-text">
+            <span class="font-semibold">Tymon</span> viewed report: The Return of the Third Place
+            <div class="activity-time">2 weeks ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot dot-blue"></div>
+          <div class="activity-text">
+            <span class="font-semibold">Simonne</span> viewed dashboard
+            <div class="activity-time">1 month ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail: Settings -->
+    <div id="detail-settings" class="detail-tab" style="display:none;">
+      <div class="grid-2 mb-4">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Company Info</div></div>
+          <div class="card-body">
+            <div class="field"><div class="label">Company Name</div><input class="input" value="Rugani Juice" /></div>
+            <div class="field"><div class="label">Domain</div><input class="input" value="ruganijuice.co.za" /></div>
+            <div class="field"><div class="label">Industry</div><input class="input" value="Beverages" /></div>
+            <button class="btn btn-primary btn-sm">Save</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Membership &amp; Contract</div></div>
+          <div class="card-body">
+            <div class="field"><div class="label">Tier</div>
+              <select class="select"><option>Free</option><option>Starter</option><option selected>Growth</option><option>Scale</option></select>
+            </div>
+            <div class="field"><div class="label">Contract Start</div><input class="input" type="date" value="2025-12-01" /></div>
+            <div class="field"><div class="label">Contract End</div><input class="input" type="date" value="2026-11-30" /></div>
+            <div class="field"><div class="label">Monthly Fee (ZAR)</div><input class="input" type="number" placeholder="Optional" /></div>
+            <button class="btn btn-primary btn-sm">Save</button>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="border-color:var(--red-light);">
+        <div class="card-header"><div class="card-title text-red">Danger Zone</div></div>
+        <div class="card-body">
+          <p class="text-sm text-muted mb-3">Permanently delete this company and all associated users. This cannot be undone.</p>
+          <button class="btn btn-destructive">Delete Company &amp; All Users</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════ -->
+<script>
+// Tab switching
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('#adminTabs .tab-btn').forEach(el => el.classList.remove('active'));
+  const content = document.getElementById('tab-' + tab);
+  if (content) content.classList.add('active');
+  const buttons = document.querySelectorAll('#adminTabs .tab-btn');
+  const tabIndex = ['overview','companies','members','reports','briefs','orders','offers','casestudies'].indexOf(tab);
+  if (buttons[tabIndex]) buttons[tabIndex].classList.add('active');
+}
+
+// Detail tab switching
+function switchDetailTab(tab) {
+  document.querySelectorAll('.detail-tab').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('#detailTabs .tab-btn').forEach(el => el.classList.remove('active'));
+  const content = document.getElementById('detail-' + tab);
+  if (content) content.style.display = 'block';
+  const tabs = ['overview','members','research','briefs','activity','settings'];
+  const idx = tabs.indexOf(tab);
+  const buttons = document.querySelectorAll('#detailTabs .tab-btn');
+  if (buttons[idx]) buttons[idx].classList.add('active');
+}
+
+// Company drawer
+const companyData = {
+  'Rugani Juice': { meta: 'Growth · Beverages · ruganijuice.co.za' },
+  'Innovatr': { meta: 'Scale · Market Research · innovatr.co.za' },
+  'Greenway Farms': { meta: 'Growth · Agriculture · greenwayfarm.co.za' },
+  'Nandos': { meta: 'Growth · Quick Service Restaurant · nandos.co.za' },
+  'DGB': { meta: 'Starter · Wine & Spirits · dgb.co.za' },
+};
+
+function openCompanyDrawer(name) {
+  const data = companyData[name] || {};
+  document.getElementById('drawerCompanyName').textContent = name;
+  document.getElementById('drawerCompanyMeta').textContent = data.meta || name;
+  document.getElementById('companyDrawerOverlay').classList.add('open');
+  document.getElementById('companyDrawer').classList.add('open');
+}
+
+function closeCompanyDrawer() {
+  document.getElementById('companyDrawerOverlay').classList.remove('open');
+  document.getElementById('companyDrawer').classList.remove('open');
+}
+
+// Company detail (full page)
+function openCompanyDetail(name) {
+  document.getElementById('detailBreadcrumb').textContent = name;
+  document.getElementById('detailTopbarTitle').textContent = name;
+  document.getElementById('detailCompanyName2').textContent = name;
+  document.getElementById('companyDetailPage').style.display = 'block';
+}
+
+function closeCompanyDetail() {
+  document.getElementById('companyDetailPage').style.display = 'none';
+}
+
+// Modals
+function openModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.add('open');
+}
+
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('open');
+}
+
+// Click outside to close modals
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// Brief pipeline toggle
+function showPipeline() {
+  document.getElementById('briefsTable').style.display = 'none';
+  document.getElementById('briefsPipeline').style.display = 'block';
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function showSection(section) {
+  // Future: handle sidebar nav switching between admin and portal views
+  console.log('Navigate to:', section);
+}
+
+function refreshData() {
+  alert('In the live portal, this reloads all data from the server.');
+}
+</script>
+</body>
+</html>
