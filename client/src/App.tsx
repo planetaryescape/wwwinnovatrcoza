@@ -30,6 +30,9 @@ import MemberDeals from "@/pages/portal/MemberDeals";
 import Settings from "@/pages/portal/Settings";
 import AdminPortal from "@/pages/portal/AdminPortal";
 import AdminCompanyDetail from "@/pages/portal/AdminCompanyDetail";
+import ExplorePage from "@/pages/portal/ExplorePage";
+import TestPage from "@/pages/portal/TestPage";
+import ActPage from "@/pages/portal/ActPage";
 import CouponSignup from "@/pages/CouponSignup";
 import ResetPassword from "@/pages/ResetPassword";
 import CaseStudyDetail from "@/pages/CaseStudyDetail";
@@ -67,6 +70,9 @@ function Router() {
       <Route path="/portal/insights/:slug" component={InsightDetail} />
       <Route path="/portal/launch" component={LaunchBrief} />
       <Route path="/portal/credits" component={CreditsAndBilling} />
+      <Route path="/portal/explore" component={ExplorePage} />
+      <Route path="/portal/test" component={TestPage} />
+      <Route path="/portal/act" component={ActPage} />
       <Route path="/portal/research" component={PastResearch} />
       <Route path="/portal/deals" component={MemberDeals} />
       <Route path="/portal/admin" component={AdminPortal} />

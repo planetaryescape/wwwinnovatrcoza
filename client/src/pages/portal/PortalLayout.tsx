@@ -3,99 +3,47 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Sidebar,
   SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarProvider,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
-  TrendingUp,
-  FileText,
-  CreditCard,
-  Archive,
-  Gift,
   Settings,
   LogOut,
-  Lock,
   Shield,
   Eye,
   X,
+  Search,
+  ChevronRight,
+  Lock,
 } from "lucide-react";
 import { useLocation } from "wouter";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 
-const menuItems = [
-  {
-    title: "Dashboard",
-    url: "/portal",
-    icon: LayoutDashboard,
-    lockedForFree: false,
-    adminOnly: false,
-  },
-  {
-    title: "Trends & Insights",
-    url: "/portal/trends",
-    icon: TrendingUp,
-    lockedForFree: false,
-    adminOnly: false,
-  },
-  {
-    title: "Launch New Brief",
-    url: "/portal/launch",
-    icon: FileText,
-    lockedForFree: false,
-    adminOnly: false,
-  },
-  {
-    title: "Credits & Billing",
-    url: "/portal/credits",
-    icon: CreditCard,
-    lockedForFree: false,
-    adminOnly: false,
-  },
-  {
-    title: "My Research",
-    url: "/portal/research",
-    icon: Archive,
-    lockedForFree: false,
-    adminOnly: false,
-  },
-  {
-    title: "Member Offers",
-    url: "/portal/deals",
-    icon: Gift,
-    lockedForFree: true,
-    adminOnly: false,
-  },
-  {
-    title: "Admin",
-    url: "/portal/admin",
-    icon: Shield,
-    lockedForFree: false,
-    adminOnly: true,
-  },
-  {
-    title: "Settings",
-    url: "/portal/settings",
-    icon: Settings,
-    lockedForFree: false,
-    adminOnly: false,
-  },
-];
+const CORAL = "#C45A38";
+const EXPLORE_COLOR = "#2563EB";
+const TEST_COLOR = "#059669";
+const HEALTH_COLOR = "#7C3AED";
+
+function getInitials(name?: string) {
+  if (!name) return "?";
+  const parts = name.split(" ");
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name[0].toUpperCase();
+}
+
+function getTierLabel(user: any, isAdmin: boolean, isPaidMember: boolean) {
+  if (isAdmin) return "ADMIN";
+  if (isPaidMember) return user?.membershipTier?.toUpperCase() || "STARTER";
+  return "FREE";
+}
 
 interface PortalLayoutProps {
   children: React.ReactNode;
+  showPhaseTopbar?: boolean;
 }
 
-export default function PortalLayout({ children }: PortalLayoutProps) {
+export default function PortalLayout({ children, showPhaseTopbar = true }: PortalLayoutProps) {
   const [location, setLocation] = useLocation();
   const { user, logout, isAuthenticated, isPaidMember, isAdmin, impersonation, exitImpersonation, isViewingAsCompany, viewingCompanyName } = useAuth();
 
@@ -111,158 +59,190 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
     }
   }, [isAuthenticated, setLocation]);
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  if (!isAuthenticated) return null;
 
   const handleLogout = () => {
     logout();
     setLocation("/");
   };
 
-  const handleMenuClick = (url: string) => {
-    setLocation(url);
-  };
-
-  const getTierColor = (tier: string) => {
-    switch (tier?.toUpperCase()) {
-      case "SCALE":
-        return "bg-primary text-primary-foreground";
-      case "GROWTH":
-        return "bg-accent text-accent-foreground";
-      case "STARTER":
-        return "bg-primary/60 text-primary-foreground";
-      default:
-        return "bg-muted text-muted-foreground";
-    }
-  };
+  const isDashboard = location === "/portal" || location === "/portal/dashboard";
+  const isExplore = location === "/portal/explore";
+  const isTest = location === "/portal/test";
+  const isAct = location === "/portal/act";
 
   const style = {
-    "--sidebar-width": "16rem",
+    "--sidebar-width": "14.5rem",
     "--sidebar-width-icon": "3rem",
   };
 
+  const tierLabel = getTierLabel(user, isAdmin, isPaidMember);
+  const initials = getInitials(user?.name);
+
   return (
     <SidebarProvider style={style as React.CSSProperties}>
-      <div className="flex h-screen w-full">
-        <Sidebar>
-          <SidebarContent>
-            <SidebarGroup>
-              <div className="px-4 py-4 border-b">
-                <div className="flex items-center gap-3 mb-3">
-                  <button 
-                    onClick={() => setLocation("/")}
-                    className="text-xl font-serif font-bold text-primary"
-                    data-testid="link-sidebar-logo"
-                  >
-                    Innovatr
-                  </button>
+      <div className="flex h-screen w-full overflow-hidden bg-stone-50 dark:bg-background">
+        <Sidebar className="border-r border-stone-200 dark:border-border">
+          <SidebarContent className="flex flex-col h-full p-0 overflow-hidden bg-white dark:bg-sidebar">
+            {/* Logo */}
+            <div className="px-5 py-4 border-b border-stone-100 dark:border-sidebar-border flex items-center gap-2.5 flex-shrink-0">
+              <button
+                onClick={() => setLocation("/")}
+                className="flex items-center gap-2.5"
+                data-testid="link-sidebar-logo"
+              >
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-serif text-base flex-shrink-0"
+                  style={{ background: CORAL }}
+                >
+                  I
                 </div>
-                <div>
-                  <p className="text-sm font-medium" data-testid="text-member-name">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground mb-2" data-testid="text-member-company">
-                    {user?.company || user?.email}
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    <Badge 
-                      className={`${isAdmin ? 'bg-primary text-primary-foreground' : isPaidMember ? getTierColor(user?.membershipTier || 'STARTER') : 'bg-muted text-muted-foreground'} text-xs`}
-                      data-testid={`badge-member-tier-${isAdmin ? 'admin' : user?.membershipTier?.toLowerCase() || 'free'}`}
-                    >
-                      {isAdmin ? 'ADMIN' : isPaidMember ? `${user?.membershipTier?.toUpperCase() || 'STARTER'}` : 'FREE TIER'}
-                    </Badge>
-                    {!isAdmin && user?.companyId && (
-                      <Badge 
-                        className={`${user?.isPaidSeat ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' : 'bg-muted text-muted-foreground'} text-xs`}
-                        data-testid={`badge-seat-type-${user?.isPaidSeat ? 'paid' : 'team'}`}
-                      >
-                        {user?.isPaidSeat ? 'Paid Seat' : 'Team Member'}
-                      </Badge>
-                    )}
-                  </div>
+                <span className="font-serif text-base text-foreground">Innovatr</span>
+              </button>
+            </div>
+
+            {/* User section */}
+            <div className="px-4 py-3 border-b border-stone-100 dark:border-sidebar-border flex items-center gap-2.5 flex-shrink-0">
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0"
+                style={{ background: CORAL }}
+              >
+                {initials}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-foreground truncate" data-testid="text-member-name">
+                  {user?.name}
+                </div>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-xs text-muted-foreground truncate">{user?.company || user?.email}</span>
+                  <span
+                    className="text-[9px] font-bold tracking-widest px-1.5 py-0.5 rounded-sm flex-shrink-0"
+                    style={{ background: "#FDF2EE", color: CORAL, border: `1px solid #F2C4B4` }}
+                    data-testid={`badge-member-tier`}
+                  >
+                    {tierLabel}
+                  </span>
                 </div>
               </div>
-              <SidebarGroupLabel data-testid="label-portal-menu">Portal Menu</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {menuItems.map((item) => {
-                    // Hide admin items for non-admins AND during impersonation mode
-                    if (item.adminOnly && (!isAdmin || impersonation.isImpersonating)) return null;
-                    const isLocked = !isPaidMember && item.lockedForFree;
-                    const isActive = item.url === "/portal" 
-                      ? (location === "/portal" || location === "/portal/dashboard")
-                      : location === item.url;
-                    return (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={isActive}
-                          data-testid={`menu-item-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
-                        >
-                          <button 
-                            onClick={() => handleMenuClick(item.url)}
-                            className="w-full"
-                          >
-                            <item.icon className="h-4 w-4" />
-                            <span className="flex-1 text-left">{item.title}</span>
-                            {item.title === "Trends & Insights" && trendsStatus?.hasNew && (
-                              <Badge 
-                                className="bg-blue-500 text-white text-[10px] px-1.5 py-0 leading-4 ml-auto"
-                                data-testid="badge-trends-new"
-                              >
-                                New
-                              </Badge>
-                            )}
-                            {isLocked && <Lock className="h-3 w-3 ml-auto text-muted-foreground" />}
-                          </button>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  })}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+            </div>
 
-            <div className="mt-auto p-4 border-t">
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
+            {/* Navigation */}
+            <nav className="flex-1 overflow-y-auto py-2 px-2">
+              {/* Research section */}
+              <div className="px-2 py-1.5 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
+                Research
+              </div>
+              <SidebarNavItem
+                icon={<LayoutDashboard className="w-4 h-4" />}
+                label="Dashboard"
+                isActive={isDashboard}
+                onClick={() => setLocation("/portal/dashboard")}
+                testId="menu-item-dashboard"
+                badge={trendsStatus?.hasNew ? (
+                  <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
+                ) : undefined}
+              />
+
+              {/* 3 Phases */}
+              <div className="px-2 pt-3 pb-1.5 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
+                3 Phases
+              </div>
+              <PhaseNavItem
+                num="01"
+                label="Explore"
+                color={EXPLORE_COLOR}
+                isActive={isExplore}
+                onClick={() => setLocation("/portal/explore")}
+                testId="menu-item-explore"
+              />
+              <PhaseNavItem
+                num="02"
+                label="Test"
+                color={TEST_COLOR}
+                isActive={isTest}
+                onClick={() => setLocation("/portal/test")}
+                testId="menu-item-test"
+              />
+              <PhaseNavItem
+                num="03"
+                label="Act"
+                color={CORAL}
+                isActive={isAct}
+                onClick={() => setLocation("/portal/act")}
+                testId="menu-item-act"
+              />
+              <PhaseNavItem
+                num="04"
+                label="Health"
+                color={HEALTH_COLOR}
+                isActive={false}
+                onClick={() => {}}
+                testId="menu-item-health"
+                locked
+              />
+
+              {/* Company & System */}
+              {isAdmin && !impersonation.isImpersonating && (
+                <>
+                  <div className="px-2 pt-3 pb-1.5 text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
+                    System
+                  </div>
+                  <SidebarNavItem
+                    icon={<Shield className="w-4 h-4" />}
+                    label="Admin"
+                    isActive={location.startsWith("/portal/admin")}
+                    onClick={() => setLocation("/portal/admin")}
+                    testId="menu-item-admin"
+                  />
+                </>
+              )}
+            </nav>
+
+            {/* Bottom */}
+            <div className="border-t border-stone-100 dark:border-sidebar-border p-2 flex-shrink-0">
+              <SidebarNavItem
+                icon={<Settings className="w-4 h-4" />}
+                label="Settings"
+                isActive={location === "/portal/settings"}
+                onClick={() => setLocation("/portal/settings")}
+                testId="menu-item-settings"
+              />
+              <SidebarNavItem
+                icon={<LogOut className="w-4 h-4" />}
+                label="Log out"
+                isActive={false}
                 onClick={handleLogout}
-                data-testid="button-sidebar-logout"
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </Button>
+                testId="button-sidebar-logout"
+              />
             </div>
           </SidebarContent>
         </Sidebar>
 
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1 overflow-hidden">
+          {/* Impersonation bar */}
           {impersonation.isImpersonating && (
-            <div 
-              className="bg-amber-500 text-amber-950 px-4 py-2 flex items-center justify-between"
+            <div
+              className="bg-amber-500 text-amber-950 px-4 py-2 flex items-center justify-between flex-shrink-0"
               data-testid="impersonation-bar"
             >
               <div className="flex items-center gap-2">
                 <Eye className="w-4 h-4" />
                 <span className="text-sm font-medium">
                   {isViewingAsCompany ? (
-                    <>Viewing: <strong>{viewingCompanyName || user?.company}</strong> - You&apos;re viewing this company&apos;s portal as an admin</>
+                    <>Viewing: <strong>{viewingCompanyName || user?.company}</strong></>
                   ) : (
-                    <>Viewing as: <strong>{user?.name || user?.email}</strong>
-                    {user?.company && <span className="ml-1">({user.company})</span>}</>
+                    <>Viewing as: <strong>{user?.name || user?.email}</strong></>
                   )}
                 </span>
               </div>
-              <Button 
-                size="sm" 
-                variant="ghost" 
+              <Button
+                size="sm"
+                variant="ghost"
                 onClick={() => {
-                  // Clear impersonation state and navigate back to Admin → Companies tab
                   exitImpersonation();
-                  // Navigate to admin portal with companies tab active
                   setLocation("/portal/admin?tab=companies");
                 }}
-                className="text-amber-950 hover:bg-amber-600 hover:text-amber-950"
+                className="text-amber-950"
                 data-testid="button-exit-impersonation"
               >
                 <X className="w-4 h-4 mr-1" />
@@ -270,15 +250,188 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
               </Button>
             </div>
           )}
-          <header className="flex items-center justify-between p-4 border-b">
-            <SidebarTrigger data-testid="button-sidebar-toggle" />
-            <ThemeToggle />
-          </header>
+
+          {/* Topbar with phase tabs */}
+          {showPhaseTopbar && (
+            <header className="h-12 bg-white dark:bg-sidebar border-b border-stone-100 dark:border-border px-4 flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center">
+                <PhaseTab
+                  num="1"
+                  label="Explore"
+                  color={EXPLORE_COLOR}
+                  isActive={isExplore}
+                  onClick={() => setLocation("/portal/explore")}
+                />
+                <ChevronRight className="w-3 h-3 text-stone-300 mx-1" />
+                <PhaseTab
+                  num="2"
+                  label="Test"
+                  color={TEST_COLOR}
+                  isActive={isTest}
+                  onClick={() => setLocation("/portal/test")}
+                />
+                <ChevronRight className="w-3 h-3 text-stone-300 mx-1" />
+                <PhaseTab
+                  num="3"
+                  label="Act"
+                  color={CORAL}
+                  isActive={isAct}
+                  onClick={() => setLocation("/portal/act")}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  className="flex items-center gap-2 bg-stone-100 dark:bg-sidebar-accent border border-stone-200 dark:border-sidebar-border rounded-md px-3 py-1.5 text-xs text-muted-foreground cursor-text min-w-[160px]"
+                  data-testid="input-search"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                  <span>Search anything…</span>
+                  <kbd className="ml-auto bg-white dark:bg-sidebar border border-stone-200 dark:border-sidebar-border rounded px-1 text-[10px] font-mono">⌘K</kbd>
+                </button>
+                <div
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold cursor-pointer flex-shrink-0"
+                  style={{ background: CORAL }}
+                  data-testid="button-user-avatar"
+                >
+                  {initials}
+                </div>
+              </div>
+            </header>
+          )}
+
           <main className="flex-1 overflow-auto">
             {children}
           </main>
         </div>
       </div>
     </SidebarProvider>
+  );
+}
+
+function SidebarNavItem({
+  icon,
+  label,
+  isActive,
+  onClick,
+  testId,
+  badge,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  isActive: boolean;
+  onClick: () => void;
+  testId?: string;
+  badge?: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      data-testid={testId}
+      className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors mb-0.5 relative ${
+        isActive
+          ? "bg-stone-100 dark:bg-sidebar-accent text-foreground"
+          : "text-muted-foreground hover:bg-stone-50 dark:hover:bg-sidebar-accent/50 hover:text-foreground"
+      }`}
+    >
+      {isActive && (
+        <span
+          className="absolute left-0 top-1 bottom-1 w-0.5 rounded-r"
+          style={{ background: "#C45A38" }}
+        />
+      )}
+      <span className={`flex-shrink-0 ${isActive ? "text-[#C45A38]" : ""}`}>{icon}</span>
+      <span className="flex-1 text-left">{label}</span>
+      {badge}
+    </button>
+  );
+}
+
+function PhaseNavItem({
+  num,
+  label,
+  color,
+  isActive,
+  onClick,
+  testId,
+  locked,
+}: {
+  num: string;
+  label: string;
+  color: string;
+  isActive: boolean;
+  onClick: () => void;
+  testId?: string;
+  locked?: boolean;
+}) {
+  return (
+    <button
+      onClick={locked ? undefined : onClick}
+      data-testid={testId}
+      disabled={locked}
+      className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors mb-0.5 relative ${
+        isActive
+          ? "bg-stone-100 dark:bg-sidebar-accent text-foreground"
+          : locked
+          ? "opacity-50 cursor-not-allowed text-muted-foreground"
+          : "text-muted-foreground hover:bg-stone-50 dark:hover:bg-sidebar-accent/50 hover:text-foreground"
+      }`}
+    >
+      {isActive && (
+        <span
+          className="absolute left-0 top-1 bottom-1 w-0.5 rounded-r"
+          style={{ background: color }}
+        />
+      )}
+      <span
+        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 border"
+        style={
+          isActive
+            ? { borderColor: color, color: color }
+            : { borderColor: "#D4CEC6", color: "#A8A29E" }
+        }
+      >
+        {num}
+      </span>
+      <span className="flex-1 text-left">{label}</span>
+      {locked && <Lock className="w-3 h-3 flex-shrink-0" />}
+    </button>
+  );
+}
+
+function PhaseTab({
+  num,
+  label,
+  color,
+  isActive,
+  onClick,
+}: {
+  num: string;
+  label: string;
+  color: string;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-1.5 px-3.5 py-1 h-12 text-sm font-medium transition-colors border-b-2 ${
+        isActive
+          ? "text-foreground"
+          : "text-muted-foreground hover:text-foreground border-transparent"
+      }`}
+      style={isActive ? { borderBottomColor: color } : { borderBottomColor: "transparent" }}
+    >
+      <span
+        className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[9px] font-bold"
+        style={
+          isActive
+            ? { background: color, color: "#fff" }
+            : { background: "#EAE6E0", color: "#A8A29E" }
+        }
+      >
+        {num}
+      </span>
+      <span style={isActive ? { color } : {}}>{label}</span>
+    </button>
   );
 }

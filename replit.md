@@ -37,10 +37,16 @@ Preferred communication style: Simple, everyday language.
 - **Access Control**: Implemented via middleware (`requireAuth`, `requireAdmin`) and ownership verification for data access and destructive actions. Sensitive data is redacted.
 
 ### Members Portal
-- **Purpose**: Personalized dashboard for authenticated members.
-- **Sections**: Dashboard, Trends & Insights Library, Launch New Brief, Credits & Billing, Past Research Dashboard, Member Deals, Settings.
+- **Purpose**: Personalized dashboard for authenticated members built around a 3-Phase research journey: Explore → Test → Act.
+- **Layout**: Custom `PortalLayout` with Shadcn Sidebar (coral "I" logo, user avatar with tier badge, phase navigation 01/02/03, section headers). A phase topbar shows Explore/Test/Act tabs with chevron separators.
+- **Dashboard** (`/portal/dashboard`): Credit strip (Basic/Pro credits + studies done), 3 journey phase cards, 4 stat cards, 3 phase preview cards, studies portfolio pulled from `/api/member/reports`.
+- **Phase Pages** (full-screen, no sidebar):
+  - **Explore** (`/portal/explore`): Market Signals, Sandbox, Intelligence Library tabs + Explore AI panel + Team Chat. 
+  - **Test** (`/portal/test`): Launch a Brief wizard, Studies list, Research Assistant tabs + Research AI panel + Team Chat.
+  - **Act** (`/portal/act`): Gaps analysis, Next Steps, Planning Assistant tabs + Insights Query AI panel + Team Chat.
+- **Other Sections**: Trends & Insights Library, Launch New Brief, Credits & Billing, Past Research Dashboard, Member Deals, Settings.
 - **Admin Section**: Dedicated `/portal/admin` for ADMIN users with tabs for Overview, Companies, Users, Orders, Briefs, Reports, Deals.
-- **Trends & Insights Library**: Dynamic content with search, filtering, sorting, and access level gating (PUBLIC, STARTER, GROWTH, SCALE).
+- **Design**: Warm stone/off-white background (#F7F5F2), coral (#C45A38) brand color, DM Serif Display headings, phase colors: Explore (blue #2563EB), Test (emerald #059669), Act (coral #C45A38), Health (violet #7C3AED).
 
 ### Admin Portal B2B Client System
 - **Overview Tab**: Clean, simplified design with Test24 Tracker (active/completed studies), Free Reports library, and Research Snapshot (brief status counts). Credit totals exclude Innovatr's fictional demo credits.
