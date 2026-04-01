@@ -38,15 +38,17 @@ Preferred communication style: Simple, everyday language.
 
 ### Members Portal
 - **Purpose**: Personalized dashboard for authenticated members built around a 3-Phase research journey: Explore → Test → Act.
-- **Layout**: Custom `PortalLayout` with Shadcn Sidebar (coral "I" logo, user avatar with tier badge, phase navigation 01/02/03, section headers). A phase topbar shows Explore/Test/Act tabs with chevron separators.
-- **Dashboard** (`/portal/dashboard`): Credit strip (Basic/Pro credits + studies done), 3 journey phase cards, 4 stat cards, 3 phase preview cards, studies portfolio pulled from `/api/member/reports`.
+- **Layout**: Custom `PortalLayout` with Shadcn Sidebar (coral "I" logo, user avatar with tier badge, phase navigation 01/02/03, section headers). A phase topbar shows Explore/Test/Act tabs with chevron separators. **⌘K / Ctrl+K** global keyboard shortcut opens a Command dialog for quick navigation to all portal sections.
+- **Dashboard** (`/portal/dashboard`): Credit strip (Basic/Pro credits + studies done), 3 journey phase cards, 4 stat cards, 3 phase preview cards, studies portfolio pulled from `/api/member/reports`. Amber warning banner appears when basicCredits ≤ 2.
 - **Phase Pages** (full-screen, no sidebar):
-  - **Explore** (`/portal/explore`): Market Signals, Sandbox, Intelligence Library tabs + Explore AI panel + Team Chat. 
-  - **Test** (`/portal/test`): Launch a Brief wizard, Studies list, Research Assistant tabs + Research AI panel + Team Chat.
-  - **Act** (`/portal/act`): Gaps analysis, Next Steps, Planning Assistant tabs + Insights Query AI panel + Team Chat.
+  - **Explore** (`/portal/explore`): Market Signals, Sandbox, Intelligence Library tabs + Explore AI panel + Team Chat. Sandbox run results are persisted to the `sandbox_runs` table via POST `/api/member/sandbox-runs`; history loaded on page mount from GET `/api/member/sandbox-runs`.
+  - **Test** (`/portal/test`): Launch a Brief wizard, Studies list, Research Assistant tabs + Research AI panel + Team Chat. Download PDF button opens `pdfUrl` if present or shows toast. Build Slide Deck button shows "coming soon" toast.
+  - **Act** (`/portal/act`): Gaps analysis, Next Steps, Planning Assistant tabs + Insights Query AI panel + Team Chat. Connected Studies block populated from `/api/member/client-reports` (real data, not hardcoded). Planning greeting updates dynamically with actual user name + study count.
+  - **Health/Company** (`/portal/health`): Company IIC score history, brand pillars, strategic gaps — all calculated dynamically from `/api/member/client-reports`.
 - **Other Sections**: Trends & Insights Library, Launch New Brief, Credits & Billing, Past Research Dashboard, Member Deals, Settings.
 - **Admin Section**: Dedicated `/portal/admin` for ADMIN users with tabs for Overview, Companies, Users, Orders, Briefs, Reports, Deals.
-- **Design**: Warm stone/off-white background (#F7F5F2), coral (#C45A38) brand color, DM Serif Display headings, phase colors: Explore (blue #2563EB), Test (emerald #059669), Act (coral #C45A38), Health (violet #7C3AED).
+- **Design**: Dark violet sidebar/topbar (VDK #1E1B3A), coral branding (#E8503A), cream background (#FAF3E8), phase colors: Explore (violet #3A2FBF), Test (green #2A9E5C), Act (coral #E8503A), Health (cyan #4EC9E8).
+- **Sandbox Runs DB Table**: `sandbox_runs` — stores companyId, userId, concept, personas[], interestScore, commitmentScore, ideaScore, createdAt. API: GET/POST `/api/member/sandbox-runs` (requires auth, scoped to authenticated company).
 
 ### Admin Portal B2B Client System
 - **Overview Tab**: Clean, simplified design with Test24 Tracker (active/completed studies), Free Reports library, and Research Snapshot (brief status counts). Credit totals exclude Innovatr's fictional demo credits.

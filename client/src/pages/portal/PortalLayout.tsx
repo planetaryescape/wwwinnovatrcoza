@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Sidebar,
@@ -15,7 +15,19 @@ import {
   Search,
   ChevronRight,
   Lock,
+  BarChart2,
+  FlaskConical,
+  Lightbulb,
+  Building2,
 } from "lucide-react";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -62,6 +74,8 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
     impersonation, exitImpersonation, isViewingAsCompany, viewingCompanyName,
   } = useAuth();
 
+  const [searchOpen, setSearchOpen] = useState(false);
+
   const { data: trendsStatus } = useQuery<{ hasNew: boolean }>({
     queryKey: ["/api/trends/has-new"],
     enabled: isAuthenticated,
@@ -71,6 +85,19 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
   useEffect(() => {
     if (!isAuthenticated) setLocation("/");
   }, [isAuthenticated, setLocation]);
+
+  /* Cmd+K / Ctrl+K listener */
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      e.preventDefault();
+      setSearchOpen(open => !open);
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   if (!isAuthenticated) return null;
 
@@ -226,6 +253,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
               </div>
               <div className="flex items-center gap-2">
                 <button
+                  onClick={() => setSearchOpen(true)}
                   className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs min-w-[160px]"
                   style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", color: N400 }}
                   data-testid="input-search"
@@ -250,6 +278,67 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
           </main>
         </div>
       </div>
+
+      {/* ── Global ⌘K Search Dialog ──────────────────────── */}
+      <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
+        <CommandInput placeholder="Search pages, features…" data-testid="input-search-dialog" />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup heading="Navigation">
+            <CommandItem
+              onSelect={() => { setSearchOpen(false); setLocation("/portal/dashboard"); }}
+              data-testid="search-item-dashboard"
+            >
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              Dashboard
+            </CommandItem>
+            <CommandItem
+              onSelect={() => { setSearchOpen(false); setLocation("/portal/explore"); }}
+              data-testid="search-item-explore"
+            >
+              <FlaskConical className="mr-2 h-4 w-4" />
+              Explore — Market Signals & Sandbox
+            </CommandItem>
+            <CommandItem
+              onSelect={() => { setSearchOpen(false); setLocation("/portal/test"); }}
+              data-testid="search-item-test"
+            >
+              <BarChart2 className="mr-2 h-4 w-4" />
+              Test — Studies & Briefs
+            </CommandItem>
+            <CommandItem
+              onSelect={() => { setSearchOpen(false); setLocation("/portal/act"); }}
+              data-testid="search-item-act"
+            >
+              <Lightbulb className="mr-2 h-4 w-4" />
+              Act — Planning & Gaps
+            </CommandItem>
+            <CommandItem
+              onSelect={() => { setSearchOpen(false); setLocation("/portal/health"); }}
+              data-testid="search-item-company"
+            >
+              <Building2 className="mr-2 h-4 w-4" />
+              Company Health
+            </CommandItem>
+            <CommandItem
+              onSelect={() => { setSearchOpen(false); setLocation("/portal/settings"); }}
+              data-testid="search-item-settings"
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </CommandItem>
+            {isAdmin && (
+              <CommandItem
+                onSelect={() => { setSearchOpen(false); setLocation("/portal/admin"); }}
+                data-testid="search-item-admin"
+              >
+                <Shield className="mr-2 h-4 w-4" />
+                Admin Panel
+              </CommandItem>
+            )}
+          </CommandGroup>
+        </CommandList>
+      </CommandDialog>
     </SidebarProvider>
   );
 }

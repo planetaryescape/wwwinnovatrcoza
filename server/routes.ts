@@ -4,7 +4,7 @@ import multer from "multer";
 import crypto from "crypto";
 import { z } from "zod";
 import { storage } from "./storage";
-import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemWithoutOrderIdSchema, insertReportSchema, insertDealSchema, insertCaseStudySchema, insertInquirySchema, type BriefSubmission } from "@shared/schema";
+import { insertCouponClaimSchema, insertMailerSubscriptionSchema, insertOrderSchema, insertOrderItemWithoutOrderIdSchema, insertReportSchema, insertDealSchema, insertCaseStudySchema, insertInquirySchema, insertSandboxRunSchema, type BriefSubmission } from "@shared/schema";
 import { PaymentService } from "./payments/service";
 import type { PaymentConfig } from "./payments/types";
 import * as emailService from "./emails/email-service";
@@ -4858,6 +4858,34 @@ Income: ${(incomes || []).join(", ") || "All"} · Region: ${(regions || []).join
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Sandbox Runs
+  app.get("/api/member/sandbox-runs", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const sessionUser = req.user!;
+      if (!sessionUser.companyId) return res.json([]);
+      const runs = await storage.getSandboxRunsByCompanyId(sessionUser.companyId);
+      res.json(runs);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/member/sandbox-runs", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const sessionUser = req.user!;
+      if (!sessionUser.companyId) return res.status(400).json({ error: "No company associated with account" });
+      const parsed = insertSandboxRunSchema.parse({
+        ...req.body,
+        companyId: sessionUser.companyId,
+        userId: sessionUser.id,
+      });
+      const run = await storage.createSandboxRun(parsed);
+      res.status(201).json(run);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
     }
   });
 

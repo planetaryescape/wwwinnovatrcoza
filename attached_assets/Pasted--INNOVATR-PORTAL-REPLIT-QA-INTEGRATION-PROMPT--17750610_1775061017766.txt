@@ -1,0 +1,524 @@
+
+INNOVATR PORTAL — REPLIT QA & INTEGRATION PROMPT
+=================================================
+Paste this entire prompt into your Replit AI agent (or as a comment block at the top
+of your main server file) to run a full end-to-end QA check on the portal.
+=================================================
+
+
+You are a senior full-stack QA engineer reviewing the Innovatr Autonomous Intelligence
+Portal — a market research intelligence platform built on Replit. The portal ingests
+research PDF reports and trend reports, and uses them to power AI-driven client insights,
+strategic recommendations, and autonomous analysis across three core phases:
+Explore, Test, and Act.
+
+Your job is to systematically test every feature, surface every broken integration,
+identify any gaps between the intended design and the current implementation, and
+produce a clear fix-list ordered by priority.
+
+Work through each section below in sequence. For each item, test it, report the result
+(PASS / FAIL / PARTIAL), and if it fails, state exactly what needs to be fixed and how.
+
+
+═══════════════════════════════════════════════════════════════════
+SECTION 1 — PORTAL SHELL & NAVIGATION
+═══════════════════════════════════════════════════════════════════
+
+1.1  Does the portal load without console errors? Check the browser console for
+     any 404s, uncaught exceptions, or failed network requests on first load.
+
+1.2  Sidebar navigation — verify all links work:
+     · Dashboard loads the main dashboard view
+     · Clicking "1 Explore" opens the Explore modal/panel
+     · Clicking "2 Test" opens the Test modal/panel
+     · Clicking "3 Act" opens the Act modal/panel
+     · Clicking "Company" opens the Health Centre
+     · Admin link routes correctly (or is hidden for non-admin users)
+     · Settings opens the settings panel
+     · Log out terminates the session and redirects to login
+
+1.3  Topbar phase tabs (1 Explore › 2 Test › 3 Act) — verify each opens the
+     correct phase panel. Verify the active tab is visually highlighted correctly.
+
+1.4  Search bar (⌘K / Ctrl+K) — verify the keyboard shortcut opens a search
+     interface. Verify the search queries across studies, reports, and trend signals.
+     Verify results are clickable and navigate to the correct content.
+
+1.5  Modal close behaviour — verify:
+     · ✕ button closes the modal
+     · Clicking the backdrop (outside the panel) closes the modal
+     · Pressing Escape closes the modal
+     · Closing a modal returns focus to the underlying dashboard correctly
+
+1.6  Responsive layout — verify the portal renders correctly at:
+     · 1440px wide (standard desktop)
+     · 1280px wide (laptop)
+     · 1024px wide (small laptop/tablet)
+     · Report any layout breaks, overflow, or hidden content
+
+
+═══════════════════════════════════════════════════════════════════
+SECTION 2 — AUTHENTICATION & USER CONTEXT
+═══════════════════════════════════════════════════════════════════
+
+2.1  Login — verify that:
+     · Login form submits credentials correctly
+     · Invalid credentials show a clear error message
+     · Valid credentials create a session and redirect to the dashboard
+     · Session persists across page refresh
+
+2.2  User context — verify that after login:
+     · The correct user name, company name, and membership tier appear in
+       the sidebar user block (e.g. "Jane Smith / Acme Corp · GROWTH")
+     · The membership tier badge (STARTER / GROWTH / SCALE) displays correctly
+     · Credit balances (Basic and Pro) shown in the dashboard and sidebar
+       reflect the actual values from the database for this user's account
+
+2.3  Multi-company access — if the user has access to multiple companies,
+     verify that:
+     · The company switcher works and reloads data for the selected company
+     · Study cards, credits, and health metrics all update to reflect the
+       selected company's data
+
+2.4  Admin vs client view — verify that:
+     · Admin users see the Admin section in the sidebar
+     · Standard client users do NOT see admin controls
+     · The "Enter Portal" / company-switching admin feature is restricted to
+       admin roles only
+
+
+═══════════════════════════════════════════════════════════════════
+SECTION 3 — PDF & REPORT INGESTION PIPELINE
+═══════════════════════════════════════════════════════════════════
+
+This is the core intelligence layer. Test it thoroughly.
+
+3.1  PDF upload (admin side) — verify that:
+     · An admin can upload a new research PDF report via the Admin panel
+     · The upload is accepted and stored (check your storage bucket or database)
+     · The report appears in the Trends & Insights library after upload
+     · The report metadata (title, category, industry, access level, published date)
+       is saved correctly
+
+3.2  PDF text extraction — verify that:
+     · After upload, the PDF's text content is successfully extracted
+     · The extraction handles multi-page documents correctly
+     · Scanned/image-based PDFs either extract via OCR or surface a clear error
+     · The extracted text is stored in the database associated with the report record
+
+3.3  Vector embedding — verify that:
+     · After text extraction, the content is chunked and embedded into your
+       vector database (MongoDB Atlas Vector Search or Pinecone)
+     · The embedding process completes without errors
+     · The report is searchable via semantic query within 60 seconds of upload
+     · Check the embedding count in your vector DB matches the expected chunk count
+
+3.4  Trend report visibility — verify that:
+     · Reports marked "Live" appear in the Explore → Trends & Insights tab
+     · Reports marked "Draft" do NOT appear to clients
+     · Access level filters work: Growth-only reports are hidden from Starter users
+     · Category filters (Insights / Launch / IRL / Inside) filter correctly
+     · Industry filters filter correctly
+
+3.5  Report reading — verify that:
+     · Clicking a report card opens the report (PDF viewer or detail page)
+     · The PDF renders correctly without broken images or missing pages
+     · The reading time estimate is displayed
+
+
+═══════════════════════════════════════════════════════════════════
+SECTION 4 — EXPLORE PHASE
+═══════════════════════════════════════════════════════════════════
+
+4.1  Live Market Signals — verify that:
+     · Signals are populated from real data (not hardcoded placeholders)
+     · Signal cards show category, industry, relevance level, and detection date
+     · Signals are sorted by recency by default
+     · Filter pills (All Categories / Insights / Launch etc.) filter signals correctly
+     · "Newest First / Oldest First" sort toggle works
+
+4.2  Market Gaps — verify that:
+     · AI-identified gaps are generated from the ingested PDF and trend data
+     · Gap score, priority label, and market potential figures are populated
+     · "Run Sandbox Test →" link from a gap card correctly pre-populates the
+       Sandbox with that gap's context
+
+4.3  AI Trends Consultant (chat) — this is critical:
+     · Verify the chat sends user messages to the Claude API (or your chosen LLM)
+     · Verify the system prompt instructs the AI to query ONLY from the ingested
+       Innovatr report corpus — not from general internet knowledge
+     · Send this test query: "What are the biggest emerging trends in functional
+       beverages for SA consumers right now?"
+       Expected: a response grounded in the uploaded reports, citing specific
+       data points, not generic market commentary
+     · Send: "What categories are most underserved in SA right now?"
+       Expected: response references specific reports or signals in the corpus
+     · Verify the AI suggests next actions (brief, sandbox, read report) at the
+       end of relevant responses
+     · Verify quick-start prompt chips are clickable and pre-fill the input
+
+4.4  Sandbox — verify that:
+     · Concept description textarea accepts input
+     · Target audience and category pill selectors toggle correctly
+     · "Run Simulation →" triggers the synthetic respondent AI model
+     · Results return within 60 seconds with a purchase intent percentage
+     · The result is saved to "Recent Sandbox Runs" with date and respondent count
+     · NO credits are deducted for sandbox runs (confirm in database)
+     · Recent runs list persists across sessions for the same user
+
+4.5  Request a Custom Report — verify that:
+     · The submission form accepts a topic description
+     · Submission creates a record in the admin panel under Reports
+     · An email or notification is sent to the Innovatr team
+
+
+═══════════════════════════════════════════════════════════════════
+SECTION 5 — TEST PHASE
+═══════════════════════════════════════════════════════════════════
+
+5.1  AI Briefing Assistant (multi-step wizard) — verify each step:
+
+     Step 1 — Objectives:
+     · Project name field is required and validated
+     · Research objective textarea is required
+     · Study type selection (Basic / Pro) toggles correctly and shows pricing
+     · "Next: Audience →" is disabled if required fields are empty
+
+     Step 2 — Audience:
+     · Country dropdown populates correctly
+     · Province / Region dropdown populates correctly
+     · Age range, gender, and income level multi-selects work
+     · "← Back" returns to Step 1 with previously entered data retained
+
+     Step 3 — Concepts:
+     · Concept name field accepts input
+     · File upload accepts images, videos, PDFs, and docs
+     · Drag-and-drop upload works
+     · "Add Another Concept" adds a second concept block
+     · Competitor fields are optional and accept input
+
+     Step 4 — Billing:
+     · User's available credits (Basic and Pro) are shown accurately
+     · "Use My Credits" option is available if credits exist
+     · "Pay Online" option routes to payment gateway
+     · "Invoice Me" option is available for approved accounts
+     · Correct credit type is highlighted based on study type selected in Step 1
+
+     Step 5 — Review & Submit:
+     · All entered data is summarised accurately
+     · Checkbox consent is required before submit button activates
+     · "Submit Brief" triggers the study creation in the backend
+     · On success: a confirmation is shown, credits are deducted, and the study
+       appears in the Studies list with status "In Progress"
+     · On failure: a clear error message is shown and NO credits are deducted
+
+5.2  Studies list — verify that:
+     · All studies for the logged-in company are listed
+     · Study type filter (Basic / Pro) works
+     · Status filter (Completed / In Progress) works
+     · Search input filters by study name
+     · Study cards show all six metrics: Idea, Interest, Commitment,
+       Meaning, Difference, Worth
+     · Metric colour coding works: green for strong, amber for watch, red for weak
+     · "QA Verified" badge appears on verified studies
+     · "Key Takeaways" section shows AI-generated bullet points from the study data
+     · "Recommended Next Steps" shows actionable follow-up suggestions
+     · "Analyse in Act" button opens the Act phase with this study's data pre-loaded
+     · "Download PDF" generates and downloads a formatted PDF report
+     · "Build Slide Deck" generates a downloadable PowerPoint from the study findings
+
+5.3  In-progress studies — verify that:
+     · Studies currently in field show a progress indicator (e.g. "67% complete")
+     · Estimated delivery date is shown
+     · The study card is clearly visually distinct from completed studies
+
+
+═══════════════════════════════════════════════════════════════════
+SECTION 6 — ACT PHASE
+═══════════════════════════════════════════════════════════════════
+
+6.1  Strategic Gaps — verify that:
+     · Gaps are generated by the AI from the actual study data in the database
+     · Each gap has a priority label (High / Medium / Opportunity / Preliminary)
+     · Gap descriptions reference specific data points from the studies
+       (e.g. "52% purchase intent in township vs 84% urban")
+     · "See Next Steps →" link navigates to the Next Steps tab
+     · "Explore Trend →" link opens the Explore phase to the relevant signal
+
+6.2  Next Steps — verify that:
+     · Recommended actions are sequenced by strategic priority, not arbitrary order
+     · Each next step has a clear CTA button that routes to the correct phase
+       ("Launch Packaging Brief →" opens the Test brief wizard)
+       ("Open Sandbox →" opens the Explore Sandbox tab)
+       ("Browse Trend Reports →" opens the Explore Trends tab)
+     · Steps that are locked (e.g. "Unlocks when study completes") are
+       visually greyed out and their CTA is disabled
+
+6.3  Planning Assistant — verify that:
+     · The AI has context of the user's active studies (names, statuses, scores)
+     · Send: "What do I still need to test before launching the Energy Drink?"
+       Expected: a specific, sequenced response referencing real study data,
+       not generic advice
+     · Send: "Plan my next 6-month research cycle"
+       Expected: a phased plan grounded in current gaps and coverage
+     · The AI does NOT give advice that contradicts the actual study data
+     · Quick-start prompt chips pre-fill the input and auto-submit
+
+6.4  Insights Query (right panel AI) — verify that:
+     · The AI can answer cross-study questions by querying the vector database
+     · Send: "What commitment gap patterns exist across all my studies?"
+       Expected: synthesised answer across multiple studies with specific figures
+     · Send: "Which segment has the lowest purchase intent across all studies?"
+       Expected: correct answer drawn from real data, not hallucinated
+     · The AI correctly says "I don't have data on that" when asked about
+       topics outside the uploaded corpus
+
+6.5  Research Coverage tracker — verify that:
+     · Coverage status (Strong / In Progress / Gap) reflects actual study coverage
+     · Categories with no studies show as "Gap"
+
+
+═══════════════════════════════════════════════════════════════════
+SECTION 7 — COMPANY HEALTH CENTRE
+═══════════════════════════════════════════════════════════════════
+
+7.1  Verify the three headline scores (Idea, Interest, Commitment) are calculated
+     as averages across all completed studies for the selected company —
+     not hardcoded values.
+
+7.2  Verify delta indicators (▲ +4pts / ▼ −3pts) compare the latest study
+     against the previous study in the sequence — not against a fixed baseline.
+
+7.3  Brand Pillars (Meaning / Difference / Worth) — verify that:
+     · The pillar scores and sub-metric scores are calculated from real study data
+     · Progress bars fill to the correct percentage
+     · The weakest pillar is visually distinct (lower colour saturation or red tint)
+
+7.4  Score Over Time table — verify that:
+     · Study rows are sorted by date (oldest to newest)
+     · Trend labels (Strong / Mixed / Weak) are generated by logic
+       (e.g. all three IIC scores above 70% = Strong; any below 45% = Weak)
+     · Clicking a study row navigates to that study in Test
+
+7.5  Strategic Takeaways (AI Generated) — verify that:
+     · Takeaways are generated dynamically from the data, not hardcoded
+     · The "Recommended Next Study" suggestion references an actual gap in coverage
+
+7.6  Gaps to Bridge — verify that the three gaps shown match the actual
+     lowest-scoring areas in the portfolio data
+
+
+═══════════════════════════════════════════════════════════════════
+SECTION 8 — TEAM CHAT
+═══════════════════════════════════════════════════════════════════
+
+8.1  Verify team chat is visible (collapsed by default, expandable) on:
+     · Explore modal — right panel bottom
+     · Test modal — right panel bottom
+     · Act modal — right panel bottom
+     · Dashboard — visible in the main content area
+
+8.2  Verify that:
+     · Messages send and appear in the chat thread in real time (or near real time)
+     · Messages are persisted in the database (reload and check history is retained)
+     · The @mention autocomplete works: typing "@" shows a list of team members
+     · Tagging a teammate creates a visible styled mention in the message
+     · Unread message count badge updates correctly
+     · Messages are scoped to the correct company — users from Company A
+       cannot see Company B's chat
+
+8.3  Verify that chat is contextual — a message sent in the Explore panel is
+     associated with Explore, not appearing in Act's chat thread
+
+
+═══════════════════════════════════════════════════════════════════
+SECTION 9 — CREDITS SYSTEM
+═══════════════════════════════════════════════════════════════════
+
+9.1  Verify credit display is accurate:
+     · Sidebar credit pill shows current Basic and Pro counts
+     · Dashboard credit chips show the same values
+     · Settings → Credits Summary shows the same values
+     · All three pull from the same database source (no stale caching)
+
+9.2  Verify credit deduction on brief submission:
+     · Submit a Test24 Basic brief → Basic credit count decreases by exactly 1
+     · Submit a Test24 Pro brief → Pro credit count decreases by exactly 1
+     · If the user has 0 credits for the chosen type, submission is blocked
+       with a clear message directing them to top up
+
+9.3  Verify Sandbox runs do NOT deduct credits (confirmed in database after run)
+
+9.4  Verify "Manage Credits →" link navigates to the credits/billing section
+
+9.5  Verify low-credit warning: when Basic credits drop to 2 or fewer,
+     a visible warning appears somewhere on the dashboard or sidebar
+
+
+═══════════════════════════════════════════════════════════════════
+SECTION 10 — ADMIN PANEL
+═══════════════════════════════════════════════════════════════════
+
+10.1 Overview tab — verify all stats are live:
+     · Total Members, Active Companies, Studies in Pipeline, Reports Published
+     · Test24 Stats (Basic count, Pro count, avg delivery time)
+     · Auth Activity (logins, MAUs, inactive users)
+
+10.2 Companies tab — verify:
+     · Company list loads with tier, member count, credit balances, status
+     · "+ Add Company" modal submits and creates the company in the database
+     · Company detail page shows overview, members, briefs, activity, settings
+     · "Enter Portal" switches admin view to that company's client view
+     · "Delete Company" requires confirmation and removes all associated data
+
+10.3 Members tab — verify:
+     · Member list loads with name, email, company, tier, last login
+     · "+ Add Member" creates user, sends welcome email
+     · Member edit updates name, role, tier, paid seat status
+     · "Delete User" removes user from database
+
+10.4 Reports tab — verify:
+     · Report list shows title, category, industry, access level, status, views
+     · "+ New Report" creates a report record and triggers PDF upload + ingestion
+     · Report edit updates metadata and re-indexes if content changed
+     · "Delete Report" removes from library and purges from vector database
+
+10.5 Briefs tab — verify submitted briefs appear with status (New / In Progress /
+     Done / On Hold), QA status, and delivery date
+
+10.6 Orders tab — verify:
+     · Order list shows company, type, quantity, amount, status, date
+     · "+ New Order" creates an order record and applies credits to the company
+
+10.7 Deals tab — verify:
+     · Active deals/offers are listed
+     · "+ New Deal" creates a deal visible to the targeted membership tiers
+     · Deals appear in the client-facing Offers section (if this is wired up)
+
+
+═══════════════════════════════════════════════════════════════════
+SECTION 11 — SETTINGS
+═══════════════════════════════════════════════════════════════════
+
+11.1 Personal Details — verify name, email, job title save correctly and
+     update the sidebar user block immediately on save
+
+11.2 Company Details — verify company name and industry save, and that
+     updates are reflected across the portal immediately
+
+11.3 Security — verify password change:
+     · Requires current password before accepting a new one
+     · New password must meet minimum strength requirements
+     · Shows success/failure feedback
+
+11.4 Notifications — verify each toggle saves to the user's preferences
+     and that toggling OFF actually suppresses that notification type
+
+11.5 Membership — verify:
+     · Current tier name, status, and renewal date are shown correctly
+     · "Upgrade to SCALE" routes to the upgrade flow
+     · "Cancel Membership" triggers a confirmation before proceeding
+
+
+═══════════════════════════════════════════════════════════════════
+SECTION 12 — AI QUALITY & GROUNDING CHECKS
+═══════════════════════════════════════════════════════════════════
+
+These are the most important tests. The portal's value depends on the AI
+responses being grounded in the actual ingested data — not hallucinated.
+
+12.1 Grounding test — upload a PDF report that contains a very specific,
+     unusual data point (e.g. "68.3% of LSM 7 consumers in Limpopo prefer
+     rooibos-infused RTD drinks in the 250ml format"). Then ask the Research
+     Assistant: "What does the data say about rooibos RTD preferences?"
+     PASS: The AI returns that specific figure and cites the source document.
+     FAIL: The AI gives a generic answer or invents different numbers.
+
+12.2 Out-of-scope test — ask the Research Assistant: "What is the current
+     share price of Unilever?"
+     PASS: The AI says it only has access to Innovatr's research corpus and
+     cannot answer general market or financial questions.
+     FAIL: The AI answers using general knowledge.
+
+12.3 Cross-study synthesis test — with at least 3 studies uploaded, ask
+     the Act Planning Assistant: "Which study shows the biggest commitment gap?"
+     PASS: The AI correctly identifies the study with the lowest Commitment
+     score relative to its Idea score, citing the actual percentage figures.
+     FAIL: The AI names the wrong study or invents figures.
+
+12.4 Recency test — upload a new report after the session has started.
+     Ask the Explore Consultant about the topic of the new report.
+     PASS: The AI references content from the newly uploaded report.
+     FAIL: The AI says it has no data on the topic (indicates re-indexing
+     is not running on new uploads, or has a significant delay).
+
+12.5 Strategic recommendation quality — after running a synthetic Sandbox
+     test on a concept, ask the AI: "What should I do with these sandbox results?"
+     PASS: The AI gives a specific recommendation that references the intent
+     score from the sandbox run and suggests a logical next step
+     (e.g. "At 73% intent you should proceed to a Test24 Basic study to
+     validate with real respondents before investing in production.")
+     FAIL: Generic advice with no reference to the actual sandbox data.
+
+
+═══════════════════════════════════════════════════════════════════
+SECTION 13 — PERFORMANCE & RELIABILITY
+═══════════════════════════════════════════════════════════════════
+
+13.1 Page load time — the dashboard should fully load (including user data,
+     credits, phase preview cards) within 3 seconds on a standard connection.
+     Report actual load time.
+
+13.2 AI response latency — chat responses should begin streaming within
+     5 seconds of sending. If responses take longer than 10 seconds to start,
+     flag this as a UX issue requiring a loading indicator or streaming implementation.
+
+13.3 PDF ingestion time — a 20-page PDF should be uploaded, extracted,
+     embedded, and searchable within 60 seconds. Test and report actual time.
+
+13.4 Concurrent session test — open the portal in two different browser
+     windows logged in as the same user. Verify that:
+     · Credit changes in one window reflect in the other within 30 seconds
+     · A brief submitted in one window appears in Studies in the other window
+
+13.5 Error handling — simulate the following failure conditions and verify
+     the portal handles each gracefully (no crashes, clear user-facing messages):
+     · Upload a corrupted PDF → should show "File could not be processed"
+     · Submit a brief with 0 credits → should show "You have no credits remaining"
+     · Disconnect internet mid-chat → should show a reconnection message
+     · API rate limit exceeded → should show "AI is busy, please try again"
+
+
+═══════════════════════════════════════════════════════════════════
+OUTPUT FORMAT — WHAT TO PRODUCE
+═══════════════════════════════════════════════════════════════════
+
+After running all tests, produce a report in this exact format:
+
+---
+INNOVATR PORTAL QA REPORT
+Tested: [date and time]
+Tester: Replit AI Agent
+---
+
+CRITICAL ISSUES (portal cannot function without these fixes)
+  [numbered list — each item: what fails, why it matters, exact fix]
+
+HIGH PRIORITY ISSUES (significant UX or data integrity problems)
+  [numbered list]
+
+MEDIUM PRIORITY ISSUES (noticeable gaps, not blocking)
+  [numbered list]
+
+LOW PRIORITY / POLISH
+  [numbered list]
+
+PASSED CHECKS
+  [list of section numbers and items that passed cleanly]
+
+RECOMMENDED NEXT BUILD TASKS (in priority order)
+  [ordered list of what to build or fix next to reach a production-ready state]
+---
+
+Be specific. Reference section numbers. Quote actual error messages or
+unexpected outputs where they occurred. Do not summarise — list every issue found.

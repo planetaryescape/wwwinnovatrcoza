@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
 import {
   X, Sparkles, Send, MessageSquare, ChevronDown, ExternalLink,
@@ -175,6 +176,7 @@ const MOCK_ASSISTANT = {
 export default function TestPage() {
   const [, setLocation]           = useLocation();
   const { user }                  = useAuth();
+  const { toast }                 = useToast();
   const [activeTab, setActiveTab] = useState<Tab>("studies");
   const [briefMode, setBriefMode] = useState<BriefMode>("choose");
   const [aiInput, setAiInput]     = useState("");
@@ -929,10 +931,27 @@ export default function TestPage() {
                         >
                           <Sparkles className="w-3 h-3" /> Analyse in Act
                         </button>
-                        <button className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5" style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}>
+                        <button
+                          onClick={() => {
+                            const url = (study as any).pdfUrl || (study as any).reportUrl;
+                            if (url) {
+                              window.open(url, "_blank");
+                            } else {
+                              toast({ title: "PDF Report", description: "Your full study report is delivered via email. Contact your Innovatr account manager to access the interactive dashboard." });
+                            }
+                          }}
+                          className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                          style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}
+                          data-testid={`button-download-pdf-${study.id}`}
+                        >
                           <ChevronRight className="w-3 h-3" /> Download PDF
                         </button>
-                        <button className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5" style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}>
+                        <button
+                          onClick={() => toast({ title: "Coming soon", description: "Slide deck export launches in Q2 2025 — we'll notify you when it's ready." })}
+                          className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                          style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}
+                          data-testid={`button-slide-deck-${study.id}`}
+                        >
                           <FileText className="w-3 h-3" /> Build Slide Deck
                         </button>
                       </div>

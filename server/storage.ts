@@ -52,6 +52,8 @@ import {
   type InsightMailer,
   type InsertInsightMailer,
   type AdminPreferences,
+  type SandboxRun,
+  type InsertSandboxRun,
   users,
   passwordResets,
   creditLedger,
@@ -78,6 +80,7 @@ import {
   activityEvents,
   insightMailers,
   adminPreferences,
+  sandboxRuns,
 } from "@shared/schema";
 import { eq, and, lte, gte, desc, sql, or, inArray } from "drizzle-orm";
 import { db } from "./db";
@@ -245,6 +248,10 @@ export interface IStorage {
   // Admin Preferences
   getAdminPreferences(userId: string): Promise<AdminPreferences | undefined>;
   upsertAdminPreferences(userId: string, prefs: Partial<AdminPreferences>): Promise<AdminPreferences>;
+
+  // Sandbox Runs
+  createSandboxRun(run: InsertSandboxRun): Promise<SandboxRun>;
+  getSandboxRunsByCompanyId(companyId: string): Promise<SandboxRun[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2139,6 +2146,18 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return created;
     }
+  }
+
+  async createSandboxRun(run: InsertSandboxRun): Promise<SandboxRun> {
+    const [created] = await db.insert(sandboxRuns).values(run).returning();
+    return created;
+  }
+
+  async getSandboxRunsByCompanyId(companyId: string): Promise<SandboxRun[]> {
+    return db.select().from(sandboxRuns)
+      .where(eq(sandboxRuns.companyId, companyId))
+      .orderBy(desc(sandboxRuns.createdAt))
+      .limit(20);
   }
 }
 

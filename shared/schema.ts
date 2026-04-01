@@ -943,3 +943,25 @@ export const insertAdminPreferencesSchema = createInsertSchema(adminPreferences)
 
 export type InsertAdminPreferences = z.infer<typeof insertAdminPreferencesSchema>;
 export type AdminPreferences = typeof adminPreferences.$inferSelect;
+
+export const sandboxRuns = pgTable("sandbox_runs", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  concept: text("concept").notNull(),
+  personas: text("personas").array().notNull().default(sql`ARRAY[]::text[]`),
+  interestScore: integer("interest_score").notNull(),
+  commitmentScore: integer("commitment_score").notNull(),
+  ideaScore: integer("idea_score").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertSandboxRunSchema = createInsertSchema(sandboxRuns).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertSandboxRun = z.infer<typeof insertSandboxRunSchema>;
+export type SandboxRun = typeof sandboxRuns.$inferSelect;

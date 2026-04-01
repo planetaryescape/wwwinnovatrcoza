@@ -3,7 +3,7 @@ import { logActivity } from "@/lib/activityLogger";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Download, ArrowRight, Sparkles, BarChart3,
-  Zap, CreditCard, Home, Search,
+  Zap, CreditCard, Home, Search, AlertTriangle,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
@@ -149,6 +149,28 @@ export default function Dashboard() {
               ))}
             </div>
           </div>
+
+          {/* ── Low credit warning ── */}
+          {!loadingAct && basicCredits <= 2 && (
+            <div className="rounded-xl px-4 py-3 flex items-center gap-3 flex-wrap" style={{ background: AMBER_LT, border: `1px solid ${AMBER_DK}33` }} data-testid="banner-low-credits">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: AMBER_DK }} />
+              <div className="flex-1 min-w-0">
+                <span className="text-sm font-semibold" style={{ color: AMBER_DK }}>Low credits — </span>
+                <span className="text-sm" style={{ color: "#7a5c10" }}>
+                  You have <strong>{basicCredits}</strong> Basic credit{basicCredits !== 1 ? "s" : ""} remaining.
+                  {proCredits <= 0 && " Pro credits are also at zero."} Top up to keep researching.
+                </span>
+              </div>
+              <button
+                onClick={() => setLocation("/portal/credits")}
+                className="text-xs font-bold px-3 py-1.5 rounded-lg flex-shrink-0"
+                style={{ background: AMBER_DK, color: "#fff", borderRadius: 8 }}
+                data-testid="button-manage-credits-warn"
+              >
+                Manage Credits →
+              </button>
+            </div>
+          )}
 
           {/* ── Journey phase cards ── */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

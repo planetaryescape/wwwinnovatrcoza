@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import {
   X, MessageSquare, ChevronDown, ArrowRight, Lock, Send,
   FlaskConical, Layers, Lightbulb, CheckCircle2, Gift, Brain, Palette,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
+import type { ClientReport } from "@shared/schema";
 
 /* ── Design System tokens ─────────────────────────────── */
 const VDK      = "#1E1B3A";
@@ -216,11 +218,54 @@ export default function ActPage() {
   const [showChat, setShowChat]   = useState(false);
   const [planningInput, setPlanningInput] = useState("");
   const [offerState, setOfferState] = useState<Record<string, "idle" | "accepted" | "declined">>({ strategy: "idle", design: "idle" });
-  const [planningMsgs, setPlanningMsgs] = useState<{ role: "user" | "ai"; text: string }[]>([
-    { role: "ai",   text: PLANNING_GREETING },
-    { role: "user", text: "What do I still need to test before launching the Energy Drink?" },
-    { role: "ai",   text: PLANNING_AI_RESPONSE },
+
+  /* ── Real study data ── */
+  const { data: clientReports = [] } = useQuery<ClientReport[]>({
+    queryKey: ["/api/member/client-reports"],
+    enabled: !!user,
+  });
+
+  const liveStudies = useMemo(() => {
+    const completed = clientReports.filter(r => r.status === "Completed");
+    const inProgress = clientReports.filter(r => r.status !== "Completed");
+    return [...inProgress, ...completed].slice(0, 5);
+  }, [clientReports]);
+
+  const connectedStudies = useMemo(() => {
+    if (liveStudies.length === 0) return CONNECTED_STUDIES;
+    return liveStudies.map(r => {
+      const isCompleted = r.status === "Completed";
+      return {
+        name: r.title,
+        status: isCompleted ? "Complete" : "Active",
+        statusColor: isCompleted ? SUCCESS : AMBER_DK,
+        statusBg: isCompleted ? SUC_LT : AMBER_LT,
+      };
+    });
+  }, [liveStudies]);
+
+  const planningGreeting = useMemo(() => {
+    const firstName = user?.name?.split(" ")[0] || "there";
+    const count = clientReports.length;
+    if (count === 0) return `Hi ${firstName}. No studies in your portfolio yet. Once you launch your first brief, I'll have data to work with. Ask me anything to get started.`;
+    return `Hi ${firstName}. I've reviewed your ${count} ${count === 1 ? "study" : "studies"}. Ask me anything — or pick a prompt below to get started.`;
+  }, [user, clientReports]);
+
+  const [planningMsgs, setPlanningMsgs] = useState<{ role: "user" | "ai"; text: string }[]>(() => [
+    { role: "ai", text: PLANNING_GREETING },
   ]);
+
+  /* Update greeting when real data loads */
+  useEffect(() => {
+    if (clientReports.length > 0) {
+      setPlanningMsgs(prev => {
+        if (prev.length === 1 && prev[0].role === "ai") {
+          return [{ role: "ai", text: planningGreeting }];
+        }
+        return prev;
+      });
+    }
+  }, [planningGreeting, clientReports.length]);
 
   const handleSendPlanning = () => {
     const msg = planningInput.trim();
@@ -592,15 +637,15 @@ export default function ActPage() {
                   <div style={CARD} className="p-5">
                     <div className="text-sm font-semibold mb-3" style={{ color: VDK }}>Connected Studies</div>
                     <div className="space-y-0">
-                      {CONNECTED_STUDIES.map((s, i) => (
+                      {connectedStudies.map((s, i) => (
                         <div
                           key={i}
                           className="flex items-center justify-between py-2.5"
-                          style={{ borderBottom: i < CONNECTED_STUDIES.length - 1 ? `1px solid ${N200}` : "none" }}
+                          style={{ borderBottom: i < connectedStudies.length - 1 ? `1px solid ${N200}` : "none" }}
                           data-testid={`connected-study-${i}`}
                         >
                           <span className="text-xs font-medium" style={{ color: VDK }}>{s.name}</span>
-                          <span className="text-xs font-bold" style={{ color: s.statusColor }}>{s.status}</span>
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full text-[10px]" style={{ color: s.statusColor, background: s.statusBg }}>{s.status}</span>
                         </div>
                       ))}
                     </div>

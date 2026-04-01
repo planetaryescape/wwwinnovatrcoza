@@ -1,11 +1,13 @@
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import {
-  X, MessageSquare, Send, ArrowRight, ChevronDown, Loader2, BookOpen, Lock, Zap,
+  X, MessageSquare, Send, ArrowRight, ChevronDown, Loader2, BookOpen, Lock, Zap, Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
+import type { SandboxRun } from "@shared/schema";
 
 /* ── Design System tokens ─────────────────────────────── */
 const VDK      = "#1E1B3A";
@@ -126,6 +128,7 @@ function BenchmarkBar({ value, benchmark, color }: { value: number; benchmark: n
 export default function ExplorePage() {
   const [, setLocation] = useLocation();
   const { user }        = useAuth();
+  const queryClient     = useQueryClient();
   const [activeTab, setActiveTab]           = useState<Tab>("signals");
   const [chatInput, setChatInput]           = useState("");
   const [showChat, setShowChat]             = useState(false);
@@ -138,6 +141,18 @@ export default function ExplorePage() {
   const runCountRef = useRef(0);
 
   const { data: reports } = useQuery<any[]>({ queryKey: ["/api/reports"], enabled: !!user });
+
+  /* Sandbox run history */
+  const { data: sandboxHistory = [] } = useQuery<SandboxRun[]>({
+    queryKey: ["/api/member/sandbox-runs"],
+    enabled: !!user,
+  });
+
+  const saveSandboxRun = useMutation({
+    mutationFn: (run: { concept: string; personas: string[]; interestScore: number; commitmentScore: number; ideaScore: number }) =>
+      apiRequest("POST", "/api/member/sandbox-runs", run),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/member/sandbox-runs"] }),
+  });
 
   const initials = (name?: string) => {
     if (!name) return "?";
@@ -162,6 +177,13 @@ export default function ExplorePage() {
       const ideaScore   = Math.round((interest + commitment) / 2);
       setSandboxResult({ interest, commitment, ideaScore });
       setSandboxRunning(false);
+      saveSandboxRun.mutate({
+        concept: sandboxIdea,
+        personas: sandboxPersonas,
+        interestScore: interest,
+        commitmentScore: commitment,
+        ideaScore,
+      });
     }, 2200);
   };
 
@@ -289,17 +311,24 @@ export default function ExplorePage() {
                         <div className="text-xs" style={{ color: N500 }}>Your simulations · no credits used</div>
                       </div>
                       <div className="space-y-0">
-                        {RECENT_RUNS.map((run, i) => (
-                          <div key={run.id} className="flex items-center justify-between py-3" style={{ borderBottom: i < RECENT_RUNS.length - 1 ? `1px solid ${N200}` : "none" }}>
-                            <div>
-                              <div className="text-sm font-medium" style={{ color: VDK }}>{run.title}</div>
-                              <div className="text-xs mt-0.5" style={{ color: N500 }}>{run.date} · {run.respondents} synthetic respondents</div>
-                            </div>
-                            <div className="text-sm font-bold font-mono flex-shrink-0 ml-4" style={{ color: run.intent >= 65 ? SUCCESS : AMBER_DK }}>
-                              {run.intent}% intent
-                            </div>
+                        {sandboxHistory.length === 0 ? (
+                          <div className="text-xs py-4 text-center" style={{ color: N500 }}>
+                            No runs yet — simulate a concept below to see results here.
                           </div>
-                        ))}
+                        ) : sandboxHistory.map((run, i) => {
+                          const dateStr = new Date(run.createdAt).toLocaleDateString("en-ZA", { day: "2-digit", month: "short", year: "numeric" });
+                          return (
+                            <div key={run.id} className="flex items-center justify-between py-3" style={{ borderBottom: i < sandboxHistory.length - 1 ? `1px solid ${N200}` : "none" }} data-testid={`sandbox-run-row-${run.id}`}>
+                              <div className="min-w-0">
+                                <div className="text-sm font-medium truncate" style={{ color: VDK }}>{run.concept}</div>
+                                <div className="text-xs mt-0.5" style={{ color: N500 }}>{dateStr} · synthetic model</div>
+                              </div>
+                              <div className="text-sm font-bold font-mono flex-shrink-0 ml-4" style={{ color: run.interestScore >= 65 ? SUCCESS : AMBER_DK }}>
+                                {run.interestScore}% interest
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
 

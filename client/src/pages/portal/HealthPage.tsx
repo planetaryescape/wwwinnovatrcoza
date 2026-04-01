@@ -1,18 +1,18 @@
-import { useState } from "react";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
 import { useLocation } from "wouter";
 import {
-  X, Sparkles, Send, TrendingUp, TrendingDown, Activity,
+  X, Sparkles, TrendingUp, TrendingDown, Activity,
   MessageSquare, Star, DollarSign, Eye, Clock, AlertTriangle,
-  Search, Table2,
+  Search, Table2, Loader2,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import type { ClientReport } from "@shared/schema";
 
 /* ── Design System ───────────────────────────────────────── */
 const VDK      = "#1E1B3A";
 const VIO      = "#3A2FBF";
-const VIO_LT   = "#EAE8FF";
-const CORAL    = "#E8503A";
 const N200     = "#E2D5BF";
 const N400     = "#A89078";
 const N500     = "#8A7260";
@@ -21,7 +21,8 @@ const SUC_LT   = "#D1FAE5";
 const AMBER_DK = "#B8911A";
 const AMBER_LT = "#FEF6D6";
 const CYAN     = "#4EC9E8";
-const CYAN_DK  = "#1A8FAD";
+const CORAL    = "#E8503A";
+const CORAL_LT = "#FDECEA";
 const CREAM    = "#FAF3E8";
 
 const CARD: React.CSSProperties = {
@@ -31,161 +32,22 @@ const CARD: React.CSSProperties = {
   boxShadow: "0 1px 4px rgba(58,47,191,.06)",
 };
 
-/* ── Mock data ───────────────────────────────────────────── */
-const SCORE_CARDS = [
-  {
-    label: "IDEA SCORE",
-    value: 82,
-    delta: +4,
-    icon: Clock,
-    gradient: "linear-gradient(135deg, #2A9E5C 0%, #1e7a46 100%)",
-    circleColor: "rgba(255,255,255,0.5)",
-    circleBg: "rgba(255,255,255,0.15)",
-  },
-  {
-    label: "INTEREST SCORE",
-    value: 67,
-    delta: +9,
-    icon: Eye,
-    gradient: "linear-gradient(135deg, #3A2FBF 0%, #5b50d9 100%)",
-    circleColor: "rgba(255,255,255,0.5)",
-    circleBg: "rgba(255,255,255,0.15)",
-  },
-  {
-    label: "COMMITMENT SCORE",
-    value: 54,
-    delta: -3,
-    icon: Sparkles,
-    gradient: "linear-gradient(135deg, #E8503A 0%, #c23a26 50%, #b8360a 100%)",
-    circleColor: "rgba(255,255,255,0.5)",
-    circleBg: "rgba(255,255,255,0.15)",
-  },
-];
-
-const BRAND_PILLARS = [
-  {
-    label: "Meaning",
-    sub: "Brand resonance & purpose",
-    value: 78,
-    icon: MessageSquare,
-    color: "#3A2FBF",
-    barColor: "#3A2FBF",
-    tags: "Relevance 81% · Emotional 74% · Trust 79%",
-  },
-  {
-    label: "Difference",
-    sub: "Distinctiveness & uniqueness",
-    value: 63,
-    icon: Star,
-    color: "#E8503A",
-    barColor: "#E8503A",
-    tags: "Unique 65% · Innovative 59% · Modern 64%",
-  },
-  {
-    label: "Worth",
-    sub: "Perceived value & premium",
-    value: 71,
-    icon: DollarSign,
-    color: "#2A9E5C",
-    barColor: "#2A9E5C",
-    tags: "Price fair 73% · Premium 68% · Value 72%",
-  },
-];
-
-const SCORE_HISTORY = [
-  {
-    label: "Idea Score",
-    color: "#2A9E5C",
-    delta: "+4",
-    deltaColor: SUCCESS,
-    points: [78, 80, 82],
-  },
-  {
-    label: "Interest",
-    color: "#5b50d9",
-    delta: "+9",
-    deltaColor: SUCCESS,
-    points: [58, 64, 67],
-  },
-  {
-    label: "Commitment",
-    color: "#E8503A",
-    delta: "−3",
-    deltaColor: CORAL,
-    points: [57, 57, 54],
-  },
-  {
-    label: "MDW Overall",
-    color: VIO,
-    delta: "0",
-    deltaColor: N400,
-    points: [68, 71, 71],
-  },
-];
-const HISTORY_LABELS = ["Study 1", "Study 2", "Latest"];
-
-const STRATEGIC_TAKEAWAYS = [
-  {
-    icon: "💡",
-    bold: "Idea traction strong",
-    rest: " — concept scores above 80% in 3 of 5 studies, confirming robust unmet-need signals across portfolio.",
-  },
-  {
-    icon: "⚠️",
-    bold: "Commitment gap widening",
-    rest: " — Commitment trails Idea by 28 pts on average. Pricing narrative and CTA clarity are the primary levers.",
-  },
-  {
-    icon: "📈",
-    bold: "Interest momentum building",
-    rest: " — Interest Score up +9 pts vs last study, driven by Discovery Bank Banking and Rugani × Clicks results.",
-  },
-  {
-    icon: "🔍",
-    bold: "Difference pillar weakest",
-    rest: " at 63% — distinctiveness below Meaning (78%) and Worth (71%). Brand differentiation work needed across both clients.",
-  },
-];
-
-const GAPS = [
-  {
-    title: "Commitment–Interest Gap",
-    level: "MEDIUM",
-    levelBg: AMBER_LT,
-    levelColor: AMBER_DK,
-    detail: "Interest 67% → Commitment 54%",
-    value: "13 pts",
-  },
-  {
-    title: "Differentiation Deficit",
-    level: "MEDIUM",
-    levelBg: AMBER_LT,
-    levelColor: AMBER_DK,
-    detail: "Worth 71% vs Difference 63%",
-    value: "8 pts",
-  },
-  {
-    title: "Rugani Packaging Commitment",
-    level: "HIGH",
-    levelBg: "#FDECEA",
-    levelColor: CORAL,
-    detail: "Well below 40% threshold — urgent",
-    value: "20.6%",
-  },
-];
-
-const STUDIES = [
-  { name: "Project Aurum",  idea: 97, interest: 67, commit: 54, trend: "Strong",  tBg: SUC_LT,   tColor: SUCCESS  },
-  { name: "Low/No Audit",  idea: 98, interest: 95, commit: 77, trend: "Strong",  tBg: SUC_LT,   tColor: SUCCESS  },
-  { name: "Meta Creative", idea: 74, interest: 54, commit: 41, trend: "Mixed",   tBg: AMBER_LT, tColor: AMBER_DK },
-  { name: "Rugani Ad",     idea: 68, interest: 54, commit: 21, trend: "Weak",    tBg: "#FDECEA", tColor: CORAL   },
-  { name: "Rugani × Clicks",idea:92, interest: 81, commit: 54, trend: "Strong",  tBg: SUC_LT,   tColor: SUCCESS  },
-];
+/* ── Helpers ─────────────────────────────────────────────── */
+function avg(arr: (number | null | undefined)[]): number {
+  const v = arr.filter((x): x is number => x != null && !isNaN(x));
+  return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : 0;
+}
 
 function scoreColor(v: number) {
-  if (v >= 80) return SUCCESS;
-  if (v >= 65) return AMBER_DK;
+  if (v >= 70) return SUCCESS;
+  if (v >= 50) return AMBER_DK;
   return CORAL;
+}
+
+function trendLabel(idea: number, interest: number, commit: number) {
+  if (idea >= 70 && interest >= 65 && commit >= 55) return { label: "Strong",  bg: SUC_LT,   color: SUCCESS  };
+  if (idea < 50 || interest < 45 || commit < 35)    return { label: "Weak",    bg: CORAL_LT, color: CORAL   };
+  return                                                    { label: "Mixed",   bg: AMBER_LT, color: AMBER_DK };
 }
 
 /* ── Circular progress SVG ───────────────────────────────── */
@@ -194,7 +56,7 @@ function CircleProgress({ value, size = 60, strokeWidth = 5, color, bg }: {
 }) {
   const r = (size - strokeWidth) / 2;
   const circ = 2 * Math.PI * r;
-  const dash = (value / 100) * circ;
+  const dash = (Math.min(value, 100) / 100) * circ;
   return (
     <svg width={size} height={size} className="flex-shrink-0">
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={bg} strokeWidth={strokeWidth} />
@@ -212,7 +74,6 @@ function CircleProgress({ value, size = 60, strokeWidth = 5, color, bg }: {
 function ScoreRow({ label, color, delta, deltaColor, points }: {
   label: string; color: string; delta: string; deltaColor: string; points: number[];
 }) {
-  const max = 100;
   return (
     <div className="py-5" style={{ borderBottom: `1px solid ${N200}` }}>
       <div className="flex items-center justify-between mb-3">
@@ -226,7 +87,7 @@ function ScoreRow({ label, color, delta, deltaColor, points }: {
         {points.map((p, i) => (
           <div key={i} className="flex items-center gap-3">
             <div className="flex-1 h-4 rounded-full overflow-hidden relative" style={{ background: "#F0EBE0" }}>
-              <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${(p / max) * 100}%`, background: color, opacity: 0.9 - i * 0.15 }} />
+              <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${(Math.max(0, Math.min(p, 100)) / 100) * 100}%`, background: color, opacity: 0.9 - i * 0.15 }} />
             </div>
             <span className="text-xs w-6 text-right font-mono" style={{ color: N500 }}>{p}</span>
           </div>
@@ -236,9 +97,173 @@ function ScoreRow({ label, color, delta, deltaColor, points }: {
   );
 }
 
+/* ── Empty state ─────────────────────────────────────────── */
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4" style={{ background: VIO + "15" }}>
+        <Activity className="w-6 h-6" style={{ color: VIO }} />
+      </div>
+      <h3 className="text-base font-semibold mb-2" style={{ color: VDK }}>No studies yet</h3>
+      <p className="text-sm max-w-xs" style={{ color: N500 }}>
+        Once your first research study is completed and delivered, your health metrics will appear here.
+      </p>
+    </div>
+  );
+}
+
 export default function HealthPage() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
+
+  const { data: rawReports = [], isLoading } = useQuery<ClientReport[]>({
+    queryKey: ["/api/member/client-reports"],
+    enabled: !!user,
+  });
+
+  /* ── Derive all computed values from real data ─────────── */
+  const completed = useMemo(() =>
+    rawReports
+      .filter(r => r.status === "Completed" && r.topIdeaIdeaScore != null)
+      .sort((a, b) =>
+        new Date(a.deliveredAt ?? a.createdAt).getTime() -
+        new Date(b.deliveredAt ?? b.createdAt).getTime()
+      ),
+    [rawReports]
+  );
+
+  const avgIdea     = useMemo(() => avg(completed.map(r => r.topIdeaIdeaScore)), [completed]);
+  const avgInterest = useMemo(() => avg(completed.map(r => r.topIdeaInterest)),  [completed]);
+  const avgCommit   = useMemo(() => avg(completed.map(r => r.topIdeaCommitment)), [completed]);
+
+  const latest = completed[completed.length - 1];
+  const prev   = completed[completed.length - 2];
+  const deltaIdea     = latest && prev ? (latest.topIdeaIdeaScore  ?? 0) - (prev.topIdeaIdeaScore  ?? 0) : 0;
+  const deltaInterest = latest && prev ? (latest.topIdeaInterest   ?? 0) - (prev.topIdeaInterest   ?? 0) : 0;
+  const deltaCommit   = latest && prev ? (latest.topIdeaCommitment ?? 0) - (prev.topIdeaCommitment ?? 0) : 0;
+
+  /* Score history — last 3 data points per metric */
+  const histSlice    = completed.slice(-3);
+  const histLabels   = histSlice.length === 0 ? [] : histSlice.length === 1 ? ["Latest"] : histSlice.length === 2 ? ["Study 1", "Latest"] : ["Study 1", "Study 2", "Latest"];
+  const ideaPoints   = histSlice.map(r => r.topIdeaIdeaScore  ?? 0);
+  const intPoints    = histSlice.map(r => r.topIdeaInterest   ?? 0);
+  const comPoints    = histSlice.map(r => r.topIdeaCommitment ?? 0);
+  const mdwPoints    = histSlice.map(r => avg([r.topIdeaIdeaScore, r.topIdeaInterest, r.topIdeaCommitment]));
+
+  const scoreHistory = [
+    { label: "Idea Score",   color: "#2A9E5C", delta: deltaIdea     > 0 ? `+${deltaIdea}`   : String(deltaIdea),     deltaColor: deltaIdea     >= 0 ? SUCCESS : CORAL, points: ideaPoints  },
+    { label: "Interest",     color: "#5b50d9", delta: deltaInterest > 0 ? `+${deltaInterest}` : String(deltaInterest), deltaColor: deltaInterest >= 0 ? SUCCESS : CORAL, points: intPoints   },
+    { label: "Commitment",   color: "#E8503A", delta: deltaCommit   > 0 ? `+${deltaCommit}`  : String(deltaCommit),   deltaColor: deltaCommit   >= 0 ? SUCCESS : CORAL, points: comPoints   },
+    { label: "MDW Overall",  color: VIO,       delta: "Avg",         deltaColor: N400, points: mdwPoints   },
+  ].filter(row => row.points.length > 0);
+
+  /* Brand Pillars — derived from IIC averages */
+  const brandPillars = useMemo(() => {
+    const minPillar = Math.min(avgIdea, avgInterest, avgCommit);
+    return [
+      {
+        label: "Meaning", sub: "Brand resonance & purpose",
+        value: avgIdea, icon: MessageSquare, color: "#3A2FBF", barColor: "#3A2FBF",
+        tags: `Idea strength ${avgIdea}% · Top concept resonance`,
+        isWeakest: avgIdea === minPillar,
+      },
+      {
+        label: "Difference", sub: "Distinctiveness & uniqueness",
+        value: avgInterest, icon: Star, color: "#E8503A", barColor: "#E8503A",
+        tags: `Interest score ${avgInterest}% · Audience curiosity`,
+        isWeakest: avgInterest === minPillar,
+      },
+      {
+        label: "Worth", sub: "Perceived value & premium",
+        value: avgCommit, icon: DollarSign, color: "#2A9E5C", barColor: "#2A9E5C",
+        tags: `Commitment ${avgCommit}% · Purchase intent driver`,
+        isWeakest: avgCommit === minPillar,
+      },
+    ];
+  }, [avgIdea, avgInterest, avgCommit]);
+
+  /* Study rows for scores table */
+  const studyRows = useMemo(() =>
+    completed.map(r => {
+      const idea     = r.topIdeaIdeaScore  ?? 0;
+      const interest = r.topIdeaInterest   ?? 0;
+      const commit   = r.topIdeaCommitment ?? 0;
+      const { label, bg, color } = trendLabel(idea, interest, commit);
+      return { id: r.id, name: r.title, idea, interest, commit, trend: label, tBg: bg, tColor: color };
+    }),
+    [completed]
+  );
+
+  /* Gaps — derived from score patterns */
+  const gaps = useMemo(() => {
+    const g: { title: string; level: string; levelBg: string; levelColor: string; detail: string; value: string }[] = [];
+    const ciGap = avgInterest - avgCommit;
+    if (ciGap >= 8) {
+      g.push({
+        title: "Commitment–Interest Gap",
+        level: ciGap >= 20 ? "HIGH" : "MEDIUM",
+        levelBg: ciGap >= 20 ? CORAL_LT : AMBER_LT,
+        levelColor: ciGap >= 20 ? CORAL : AMBER_DK,
+        detail: `Interest ${avgInterest}% → Commitment ${avgCommit}%`,
+        value: `${ciGap} pts`,
+      });
+    }
+    const diffDeficit = avgIdea - avgInterest;
+    if (diffDeficit >= 8) {
+      g.push({
+        title: "Differentiation Deficit",
+        level: "MEDIUM",
+        levelBg: AMBER_LT,
+        levelColor: AMBER_DK,
+        detail: `Idea resonance ${avgIdea}% vs Interest ${avgInterest}%`,
+        value: `${diffDeficit} pts`,
+      });
+    }
+    const weakStudy = completed.find(r => (r.topIdeaCommitment ?? 100) < 35);
+    if (weakStudy) {
+      g.push({
+        title: `Low commitment — ${weakStudy.title}`,
+        level: "HIGH",
+        levelBg: CORAL_LT,
+        levelColor: CORAL,
+        detail: `Commitment below 35% threshold — needs urgent attention`,
+        value: `${weakStudy.topIdeaCommitment}%`,
+      });
+    }
+    if (g.length === 0) {
+      g.push({
+        title: "Portfolio looking healthy",
+        level: "OK",
+        levelBg: SUC_LT,
+        levelColor: SUCCESS,
+        detail: "No critical gaps detected in current study set",
+        value: "—",
+      });
+    }
+    return g;
+  }, [completed, avgIdea, avgInterest, avgCommit]);
+
+  /* Strategic takeaways — derived from patterns */
+  const takeaways = useMemo(() => {
+    const t: { icon: string; bold: string; rest: string }[] = [];
+    if (completed.length === 0) return t;
+    if (avgIdea >= 75) t.push({ icon: "💡", bold: "Idea traction strong", rest: ` — concept scores average ${avgIdea}% across your portfolio, confirming robust unmet-need signals.` });
+    if (avgCommit < avgInterest - 15) t.push({ icon: "⚠️", bold: "Commitment gap widening", rest: ` — Commitment trails Interest by ${avgInterest - avgCommit} pts. Pricing narrative and CTA clarity are the primary levers.` });
+    if (deltaInterest > 0 && completed.length >= 2) t.push({ icon: "📈", bold: "Interest momentum building", rest: ` — Interest Score up +${deltaInterest} pts vs last study. Audience curiosity is growing.` });
+    const weakestPillar = brandPillars.reduce((a, b) => a.value < b.value ? a : b);
+    if (weakestPillar.value < 60) t.push({ icon: "🔍", bold: `${weakestPillar.label} pillar is weakest`, rest: ` at ${weakestPillar.value}% — this is the area most in need of focused research investment.` });
+    if (t.length === 0) t.push({ icon: "✅", bold: "Portfolio healthy", rest: ` — All three pillars are scoring above 60%. Continue building on this momentum.` });
+    return t;
+  }, [completed, avgIdea, avgInterest, avgCommit, deltaInterest, brandPillars]);
+
+  /* Score Cards config */
+  const scoreCards = [
+    { label: "IDEA SCORE",       value: avgIdea,     delta: deltaIdea,     icon: Clock,    gradient: "linear-gradient(135deg, #2A9E5C 0%, #1e7a46 100%)", circleColor: "rgba(255,255,255,0.5)", circleBg: "rgba(255,255,255,0.15)" },
+    { label: "INTEREST SCORE",   value: avgInterest, delta: deltaInterest, icon: Eye,      gradient: "linear-gradient(135deg, #3A2FBF 0%, #5b50d9 100%)", circleColor: "rgba(255,255,255,0.5)", circleBg: "rgba(255,255,255,0.15)" },
+    { label: "COMMITMENT SCORE", value: avgCommit,   delta: deltaCommit,   icon: Sparkles, gradient: "linear-gradient(135deg, #E8503A 0%, #c23a26 50%, #b8360a 100%)", circleColor: "rgba(255,255,255,0.5)", circleBg: "rgba(255,255,255,0.15)" },
+  ];
+
+  const hasData = completed.length > 0;
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: CREAM }}>
@@ -277,190 +302,217 @@ export default function HealthPage() {
                 <p className="text-sm" style={{ color: N500 }}>Track overall health, idea traction, and commitment signals across all studies.</p>
               </div>
               <div className="flex items-center gap-3 flex-wrap">
-                <select className="rounded-lg px-3 py-2 text-sm focus:outline-none" style={{ background: "#fff", border: `1px solid ${N200}`, color: VDK }} data-testid="select-company-filter">
-                  <option>All Companies</option>
-                  <option>Rugani Juice</option>
-                  <option>Discovery Bank</option>
-                  <option>Meta</option>
-                </select>
-                <div className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: SUCCESS }}>
-                  <span className="w-2 h-2 rounded-full" style={{ background: SUCCESS }} />
-                  Live data
-                </div>
-              </div>
-            </div>
-
-            {/* ── 3 Score Cards ── */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              {SCORE_CARDS.map((card, i) => {
-                const Icon = card.icon;
-                return (
-                  <div key={i} className="rounded-2xl p-5 relative overflow-hidden" style={{ background: card.gradient }} data-testid={`health-score-card-${i}`}>
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <div className="text-[10px] font-bold tracking-widest uppercase text-white opacity-80 mb-2">{card.label}</div>
-                        <div className="flex items-end gap-1">
-                          <span className="text-4xl font-bold text-white">{card.value}</span>
-                          <span className="text-2xl font-bold text-white opacity-80 mb-1">%</span>
-                        </div>
-                        <div className="flex items-center gap-1 mt-1">
-                          {card.delta > 0
-                            ? <TrendingUp className="w-3.5 h-3.5 text-white opacity-80" />
-                            : card.delta < 0
-                            ? <TrendingDown className="w-3.5 h-3.5 text-white opacity-80" />
-                            : null
-                          }
-                          <span className="text-xs font-medium text-white opacity-80">
-                            {card.delta > 0 ? `+${card.delta}` : card.delta} vs last study
-                          </span>
-                        </div>
-                      </div>
-                      <CircleProgress value={card.value} size={56} strokeWidth={5} color={card.circleColor} bg={card.circleBg} />
-                    </div>
-                    <div className="absolute bottom-3 right-4 opacity-15">
-                      <Icon className="w-16 h-16 text-white" />
-                    </div>
+                {isLoading ? (
+                  <div className="flex items-center gap-1.5 text-xs" style={{ color: N400 }}>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Loading data…
                   </div>
-                );
-              })}
+                ) : (
+                  <div className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: SUCCESS }}>
+                    <span className="w-2 h-2 rounded-full" style={{ background: SUCCESS }} />
+                    {completed.length} {completed.length === 1 ? "study" : "studies"} analysed
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* ── Brand Pillars ── */}
-            <div style={{ ...CARD, marginBottom: 20 }} className="p-5">
-              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" style={{ color: VIO }} />
-                  <span className="text-sm font-semibold" style={{ color: VDK }}>Brand Pillars</span>
-                </div>
-                <div className="text-xs" style={{ color: N500 }}>Meaning · Difference · Worth</div>
+            {/* Loading state */}
+            {isLoading && (
+              <div className="flex flex-col items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin mb-3" style={{ color: VIO }} />
+                <p className="text-sm" style={{ color: N500 }}>Loading your health data…</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {BRAND_PILLARS.map((p, i) => {
-                  const Icon = p.icon;
-                  return (
-                    <div key={i} className="rounded-xl p-4" style={{ border: `1px solid ${N200}`, background: "#FAFAF8" }}>
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-start gap-2">
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: p.color + "18", border: `1px solid ${p.color}22` }}>
-                            <Icon className="w-4 h-4" style={{ color: p.color }} />
-                          </div>
+            )}
+
+            {/* Empty state */}
+            {!isLoading && !hasData && <EmptyState />}
+
+            {/* ── Data content ── */}
+            {!isLoading && hasData && (
+              <>
+                {/* ── 3 Score Cards ── */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  {scoreCards.map((card, i) => {
+                    const Icon = card.icon;
+                    return (
+                      <div key={i} className="rounded-2xl p-5 relative overflow-hidden" style={{ background: card.gradient }} data-testid={`health-score-card-${i}`}>
+                        <div className="flex items-start justify-between mb-3">
                           <div>
-                            <div className="text-sm font-semibold" style={{ color: VDK }}>{p.label}</div>
-                            <div className="text-xs" style={{ color: N500 }}>{p.sub}</div>
+                            <div className="text-[10px] font-bold tracking-widest uppercase text-white opacity-80 mb-2">{card.label}</div>
+                            <div className="flex items-end gap-1">
+                              <span className="text-4xl font-bold text-white">{card.value}</span>
+                              <span className="text-2xl font-bold text-white opacity-80 mb-1">%</span>
+                            </div>
+                            <div className="flex items-center gap-1 mt-1">
+                              {card.delta > 0 ? <TrendingUp  className="w-3.5 h-3.5 text-white opacity-80" />
+                               : card.delta < 0 ? <TrendingDown className="w-3.5 h-3.5 text-white opacity-80" />
+                               : null}
+                              <span className="text-xs font-medium text-white opacity-80">
+                                {completed.length >= 2
+                                  ? `${card.delta > 0 ? `+${card.delta}` : card.delta} vs last study`
+                                  : "First study baseline"}
+                              </span>
+                            </div>
+                          </div>
+                          <CircleProgress value={card.value} size={56} strokeWidth={5} color={card.circleColor} bg={card.circleBg} />
+                        </div>
+                        <div className="absolute bottom-3 right-4 opacity-15">
+                          <Icon className="w-16 h-16 text-white" />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* ── Brand Pillars ── */}
+                <div style={{ ...CARD, marginBottom: 20 }} className="p-5">
+                  <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" style={{ color: VIO }} />
+                      <span className="text-sm font-semibold" style={{ color: VDK }}>Brand Pillars</span>
+                    </div>
+                    <div className="text-xs" style={{ color: N500 }}>Meaning · Difference · Worth</div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {brandPillars.map((p, i) => {
+                      const Icon = p.icon;
+                      const weakColor = p.isWeakest ? "#C0392B" : p.color;
+                      return (
+                        <div key={i} className="rounded-xl p-4" style={{ border: `1px solid ${p.isWeakest ? "#fca5a5" : N200}`, background: p.isWeakest ? "#FFF8F8" : "#FAFAF8" }}>
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-start gap-2">
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: weakColor + "18", border: `1px solid ${weakColor}22` }}>
+                                <Icon className="w-4 h-4" style={{ color: weakColor }} />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-sm font-semibold" style={{ color: VDK }}>{p.label}</span>
+                                  {p.isWeakest && <AlertTriangle className="w-3 h-3" style={{ color: weakColor }} />}
+                                </div>
+                                <div className="text-xs" style={{ color: N500 }}>{p.sub}</div>
+                              </div>
+                            </div>
+                            <span className="text-xl font-bold font-mono" style={{ color: weakColor }}>{p.value}%</span>
+                          </div>
+                          <div className="h-1.5 rounded-full overflow-hidden mb-2" style={{ background: "#F0EBE0" }}>
+                            <div className="h-full rounded-full" style={{ width: `${p.value}%`, background: p.isWeakest ? weakColor : p.barColor }} />
+                          </div>
+                          <div className="text-[10px]" style={{ color: N500 }}>{p.tags}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* ── Score Over Time ── */}
+                {histSlice.length >= 2 && (
+                  <div style={{ ...CARD, marginBottom: 20 }} className="p-5">
+                    <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
+                      <div className="flex items-center gap-2">
+                        <Activity className="w-4 h-4" style={{ color: VIO }} />
+                        <span className="text-sm font-semibold" style={{ color: VDK }}>Score Over Time</span>
+                      </div>
+                      <span className="text-xs" style={{ color: N500 }}>Across {completed.length} studies</span>
+                    </div>
+                    <div>
+                      {scoreHistory.map((row, i) => <ScoreRow key={i} {...row} />)}
+                    </div>
+                    <div className="flex items-center justify-center gap-4 mt-4">
+                      {histLabels.map((l, i) => (
+                        <span key={i} className="text-xs" style={{ color: N500 }}>{l}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Strategic Takeaways + Gaps ── */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+
+                  {/* Strategic Takeaways */}
+                  <div className="rounded-2xl p-5" style={{ background: VDK }}>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <Search className="w-4 h-4 text-white opacity-70" />
+                        <span className="text-sm font-semibold text-white">Strategic Takeaways</span>
+                      </div>
+                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: VIO, color: "#fff" }}>AI Generated</span>
+                    </div>
+                    <div className="space-y-4">
+                      {takeaways.map((t, i) => (
+                        <div key={i} className="flex items-start gap-3">
+                          <span className="text-lg leading-none flex-shrink-0 mt-0.5">{t.icon}</span>
+                          <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.82)" }}>
+                            <strong className="text-white">{t.bold}</strong>{t.rest}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Gaps to Bridge */}
+                  <div style={CARD} className="p-5">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4" style={{ color: CORAL }} />
+                        <span className="text-sm font-semibold" style={{ color: VDK }}>Gaps to Bridge</span>
+                      </div>
+                      <span className="text-xs" style={{ color: N500 }}>{gaps.length} identified</span>
+                    </div>
+                    <div className="space-y-0">
+                      {gaps.map((gap, i) => (
+                        <div key={i} className="flex items-start justify-between gap-3 py-3" style={{ borderBottom: i < gaps.length - 1 ? `1px solid ${N200}` : "none" }} data-testid={`gap-row-${i}`}>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold mb-1" style={{ color: VDK }}>{gap.title}</div>
+                            <div className="text-xs" style={{ color: N500 }}>{gap.detail}</div>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded" style={{ background: gap.levelBg, color: gap.levelColor }}>{gap.level}</span>
+                            <span className="text-sm font-bold font-mono" style={{ color: VDK }}>{gap.value}</span>
                           </div>
                         </div>
-                        <span className="text-xl font-bold font-mono" style={{ color: p.color }}>{p.value}%</span>
-                      </div>
-                      <div className="h-1.5 rounded-full overflow-hidden mb-2" style={{ background: "#F0EBE0" }}>
-                        <div className="h-full rounded-full" style={{ width: `${p.value}%`, background: p.barColor }} />
-                      </div>
-                      <div className="text-[10px]" style={{ color: N500 }}>{p.tags}</div>
+                      ))}
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* ── Score Over Time ── */}
-            <div style={{ ...CARD, marginBottom: 20 }} className="p-5">
-              <div className="flex items-center justify-between mb-1 flex-wrap gap-2">
-                <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4" style={{ color: VIO }} />
-                  <span className="text-sm font-semibold" style={{ color: VDK }}>Score Over Time</span>
-                </div>
-                <span className="text-xs" style={{ color: N500 }}>Across all studies</span>
-              </div>
-              <div>
-                {SCORE_HISTORY.map((row, i) => (
-                  <ScoreRow key={i} {...row} />
-                ))}
-              </div>
-              <div className="flex items-center justify-center gap-4 mt-4">
-                {HISTORY_LABELS.map((l, i) => (
-                  <span key={i} className="text-xs" style={{ color: N500 }}>{l}</span>
-                ))}
-              </div>
-            </div>
-
-            {/* ── Strategic Takeaways + Gaps to Bridge (side by side on large) ── */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-
-              {/* Strategic Takeaways — dark card */}
-              <div className="rounded-2xl p-5" style={{ background: VDK }}>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Search className="w-4 h-4 text-white opacity-70" />
-                    <span className="text-sm font-semibold text-white">Strategic Takeaways</span>
                   </div>
-                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: VIO, color: "#fff" }}>AI Generated</span>
                 </div>
-                <div className="space-y-4">
-                  {STRATEGIC_TAKEAWAYS.map((t, i) => (
-                    <div key={i} className="flex items-start gap-3">
-                      <span className="text-lg leading-none flex-shrink-0 mt-0.5">{t.icon}</span>
-                      <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.82)" }}>
-                        <strong className="text-white">{t.bold}</strong>{t.rest}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Gaps to Bridge */}
-              <div style={CARD} className="p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" style={{ color: CORAL }} />
-                    <span className="text-sm font-semibold" style={{ color: VDK }}>Gaps to Bridge</span>
+                {/* ── Study Scores table ── */}
+                <div style={CARD} className="p-5 mb-4">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Table2 className="w-4 h-4" style={{ color: VIO }} />
+                    <span className="text-sm font-semibold" style={{ color: VDK }}>Study Scores</span>
+                    <span className="text-xs ml-1" style={{ color: N500 }}>({studyRows.length} {studyRows.length === 1 ? "study" : "studies"})</span>
                   </div>
-                  <span className="text-xs" style={{ color: N500 }}>3 identified</span>
+                  <table className="w-full text-sm" data-testid="table-study-scores">
+                    <thead>
+                      <tr>
+                        {["STUDY", "IDEA", "INTEREST", "COMMIT", "TREND"].map(h => (
+                          <th key={h} className="text-left text-[10px] font-bold tracking-widest uppercase pb-3 pr-4" style={{ color: N500 }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {studyRows.map((s, i) => (
+                        <tr
+                          key={s.id}
+                          className="cursor-pointer hover-elevate"
+                          style={{ borderTop: `1px solid ${N200}` }}
+                          data-testid={`study-row-${i}`}
+                          onClick={() => setLocation("/portal/test")}
+                        >
+                          <td className="py-3 pr-4 font-semibold" style={{ color: VDK }}>{s.name}</td>
+                          <td className="py-3 pr-4 font-bold font-mono" style={{ color: scoreColor(s.idea) }}>{s.idea}%</td>
+                          <td className="py-3 pr-4 font-bold font-mono" style={{ color: scoreColor(s.interest) }}>{s.interest}%</td>
+                          <td className="py-3 pr-4 font-bold font-mono" style={{ color: scoreColor(s.commit) }}>{s.commit}%</td>
+                          <td className="py-3">
+                            <span className="text-xs font-bold px-2.5 py-1 rounded" style={{ background: s.tBg, color: s.tColor }}>{s.trend}</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-                <div className="space-y-0">
-                  {GAPS.map((gap, i) => (
-                    <div key={i} className="flex items-start justify-between gap-3 py-3" style={{ borderBottom: i < GAPS.length - 1 ? `1px solid ${N200}` : "none" }} data-testid={`gap-row-${i}`}>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold mb-1" style={{ color: VDK }}>{gap.title}</div>
-                        <div className="text-xs" style={{ color: N500 }}>{gap.detail}</div>
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded" style={{ background: gap.levelBg, color: gap.levelColor }}>{gap.level}</span>
-                        <span className="text-sm font-bold font-mono" style={{ color: VDK }}>{gap.value}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* ── Study Scores table ── */}
-            <div style={CARD} className="p-5 mb-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Table2 className="w-4 h-4" style={{ color: VIO }} />
-                <span className="text-sm font-semibold" style={{ color: VDK }}>Study Scores</span>
-              </div>
-              <table className="w-full text-sm" data-testid="table-study-scores">
-                <thead>
-                  <tr>
-                    {["STUDY", "IDEA", "INTEREST", "COMMIT", "TREND"].map(h => (
-                      <th key={h} className="text-left text-[10px] font-bold tracking-widest uppercase pb-3 pr-4" style={{ color: N500 }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {STUDIES.map((s, i) => (
-                    <tr key={i} style={{ borderTop: `1px solid ${N200}` }} data-testid={`study-row-${i}`}>
-                      <td className="py-3 pr-4 font-semibold" style={{ color: VDK }}>{s.name}</td>
-                      <td className="py-3 pr-4 font-bold font-mono" style={{ color: scoreColor(s.idea) }}>{s.idea}%</td>
-                      <td className="py-3 pr-4 font-bold font-mono" style={{ color: scoreColor(s.interest) }}>{s.interest}%</td>
-                      <td className="py-3 pr-4 font-bold font-mono" style={{ color: scoreColor(s.commit) }}>{s.commit}%</td>
-                      <td className="py-3">
-                        <span className="text-xs font-bold px-2.5 py-1 rounded" style={{ background: s.tBg, color: s.tColor }}>{s.trend}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+              </>
+            )}
 
           </div>
 
