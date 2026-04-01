@@ -539,7 +539,6 @@ export default function ExplorePage() {
                 accentColor={VIO}
                 label="Explore AI"
                 suggestedPrompts={AI_PROMPTS}
-                companyId={user?.companyId ?? undefined}
                 defaultSource="combined"
               />
             </div>

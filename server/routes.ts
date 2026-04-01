@@ -5473,9 +5473,10 @@ Income: ${(incomes || []).join(", ") || "All"} · Region: ${(regions || []).join
 
   // ─── AI Query endpoint ───────────────────────────────────────────────────
   const aiQuerySchema = z.object({
-    query:    z.string().min(1).max(500),
-    sources:  z.enum(["trends", "research", "combined"]).default("combined"),
-    companyId: z.string().optional(),
+    query:   z.string().min(1).max(500),
+    sources: z.enum(["trends", "research", "combined"]).default("combined"),
+    // companyId is intentionally NOT accepted from the client — research is
+    // always scoped to the authenticated user's company via req.user.companyId
   });
 
   app.post("/api/ai/query", requireAuth, async (req: AuthenticatedRequest, res) => {
@@ -5485,14 +5486,15 @@ Income: ${(incomes || []).join(", ") || "All"} · Region: ${(regions || []).join
         return res.status(400).json({ error: "Invalid request", details: parsed.error.flatten() });
       }
 
-      const { query, sources, companyId } = parsed.data;
+      const { query, sources } = parsed.data;
 
-      // Fetch company research studies if needed
+      // Research is ALWAYS scoped to the authenticated user's own company.
+      // We never trust a client-supplied companyId — this prevents one client
+      // from requesting another client's private research data.
       const studies: any[] = [];
-      if ((sources === "research" || sources === "combined") && (companyId || req.user?.companyId)) {
+      if ((sources === "research" || sources === "combined") && req.user?.companyId) {
         try {
-          const cId = companyId || req.user!.companyId!;
-          const rawStudies = await storage.getMemberStudies(cId);
+          const rawStudies = await storage.getMemberStudies(req.user.companyId);
           for (const s of rawStudies.slice(0, 8)) {
             studies.push({
               title: s.title,

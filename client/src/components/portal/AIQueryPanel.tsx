@@ -45,8 +45,9 @@ interface Props {
   accentColor?: string;
   suggestedPrompts?: string[];
   label?: string;
-  companyId?: string;
   defaultSource?: Source;
+  // companyId is deliberately excluded — the server resolves the company
+  // from the authenticated session, preventing cross-client data leakage
 }
 
 const SOURCE_OPTIONS: { value: Source; label: string; icon: any; desc: string }[] = [
@@ -205,7 +206,6 @@ export default function AIQueryPanel({
   accentColor = VIO,
   suggestedPrompts = [],
   label = "Insights AI",
-  companyId,
   defaultSource = "combined",
 }: Props) {
   const [source, setSource]       = useState<Source>(defaultSource);
@@ -219,7 +219,6 @@ export default function AIQueryPanel({
       const res = await apiRequest("POST", "/api/ai/query", {
         query: q,
         sources: src,
-        companyId,
       });
       return res.json() as Promise<AIResponse>;
     },

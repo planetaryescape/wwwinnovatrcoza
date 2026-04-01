@@ -1096,7 +1096,6 @@ export default function TestPage() {
                     accentColor={TEST_COLOR}
                     label="Research AI"
                     suggestedPrompts={MOCK_ASSISTANT.queries}
-                    companyId={user?.companyId ?? undefined}
                     defaultSource="research"
                   />
                 </div>
@@ -1109,7 +1108,6 @@ export default function TestPage() {
                     accentColor={TEST_COLOR}
                     label="Research AI"
                     suggestedPrompts={AI_PROMPTS}
-                    companyId={user?.companyId ?? undefined}
                     defaultSource="combined"
                   />
                 </div>

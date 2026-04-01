@@ -249,12 +249,26 @@ const STOP_WORDS = new Set([
   "some","such","no","not","only","same","so","than","too","very","just",
 ]);
 
+/** Lightweight stem: strip common suffixes so "snacking"→"snack", "brands"→"brand" etc. */
+function stem(word: string): string {
+  return word
+    .replace(/ing$/, "")
+    .replace(/tion$/, "")
+    .replace(/ness$/, "")
+    .replace(/ment$/, "")
+    .replace(/ity$/, "")
+    .replace(/ies$/, "y")
+    .replace(/ers?$/, "")
+    .replace(/s$/, "");
+}
+
 function tokenize(text: string): string[] {
   return text
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, " ")
     .split(/\s+/)
-    .filter(w => w.length > 2 && !STOP_WORDS.has(w));
+    .filter(w => w.length > 2 && !STOP_WORDS.has(w))
+    .map(stem);
 }
 
 function splitParagraphs(text: string): string[] {
@@ -301,28 +315,38 @@ export async function searchPDFs(
 
   await Promise.all(
     candidates.map(async (entry) => {
-      const text = await extractPdfText(entry);
-      if (!text) return;
-
-      const paragraphs = splitParagraphs(text);
-
-      // Also consider tag overlap for pre-filtering
+      // Tag overlap score — compute BEFORE attempting PDF extraction so that
+      // a failed/missing PDF still surfaces in tag-matched results
       const tagScore = entry.tags.some(t =>
-        queryTokens.some(qt => t.includes(qt) || qt.includes(t))
+        queryTokens.some(qt =>
+          stem(t).includes(qt) || qt.includes(stem(t)) ||
+          t.includes(qt)       || qt.includes(t)
+        )
       ) ? 0.3 : 0;
+
+      const text = await extractPdfText(entry);
 
       let best = 0;
       let bestPara = "";
 
-      for (const para of paragraphs) {
-        const tokens = tokenize(para);
-        const s = scoreParagraph(tokens, queryTokens);
-        if (s > best) { best = s; bestPara = para; }
+      if (text) {
+        const paragraphs = splitParagraphs(text);
+        for (const para of paragraphs) {
+          const tokens = tokenize(para);
+          const s = scoreParagraph(tokens, queryTokens);
+          if (s > best) { best = s; bestPara = para; }
+        }
+        // If no paragraph scored but tag matched, use first paragraph as excerpt
+        if (!bestPara && paragraphs.length > 0) bestPara = paragraphs[0];
       }
 
       const total = best + tagScore;
-      if (total > 0.1 && bestPara) {
-        results.push({ entry, excerpt: bestPara, score: total });
+
+      // Include if score threshold met; fall back to entry title as excerpt if
+      // the PDF couldn't be parsed at all — ensures tag-matched reports are surfaced
+      if (total > 0.1) {
+        const excerpt = bestPara || entry.title;
+        results.push({ entry, excerpt, score: total });
       }
     })
   );

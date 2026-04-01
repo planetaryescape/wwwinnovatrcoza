@@ -368,7 +368,6 @@ export default function ActPage() {
                         "How do I close the commitment gap?",
                         "Find trends on indulgence and snacking",
                       ]}
-                      companyId={user?.companyId ?? undefined}
                       defaultSource="combined"
                     />
                   </div>

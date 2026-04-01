@@ -475,7 +475,6 @@ export default function HealthPage() {
                 "How do I improve the Difference pillar?",
                 "Compare my brand pillars vs benchmark",
               ]}
-              companyId={user?.companyId ?? undefined}
               defaultSource="research"
             />
           </div>
