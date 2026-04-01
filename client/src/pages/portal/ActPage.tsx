@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import {
   X, Sparkles, Send, MessageSquare, ChevronDown, ArrowRight, Lock,
+  FlaskConical, Layers, Lightbulb, CheckCircle2, Gift, Brain, Palette,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -18,6 +19,7 @@ const SUCCESS  = "#2A9E5C";
 const SUC_LT   = "#D1FAE5";
 const AMBER_DK = "#B8911A";
 const AMBER_LT = "#FEF6D6";
+const CYAN_DK  = "#1A8FAD";
 const CREAM    = "#FAF3E8";
 const ACT_COLOR = CORAL;
 
@@ -121,6 +123,74 @@ const CONNECTED_STUDIES = [
   { name: "Skincare Repositioning",     status: "Partial (67%)", statusColor: AMBER_DK, statusBg: AMBER_LT },
 ];
 
+const RESEARCH_RECS = [
+  {
+    title: "Packaging Variants — Energy Drink",
+    method: "Test24 Basic",
+    methodColor: CYAN_DK,
+    methodBg: "#DFF6FC",
+    types: ["Concept", "Claims"],
+    desc: "Test 3–4 pack options with 25–34 urban cohort before committing to production. 1 Basic Credit.",
+    priority: "High",
+    priorityColor: CORAL,
+    priorityBg: CORAL_LT,
+  },
+  {
+    title: "Price-Entry SKU — Township",
+    method: "Sandbox",
+    methodColor: VIO,
+    methodBg: VIO_LT,
+    types: ["Pricing Testing"],
+    desc: "Model R12, R14, R16 price points with synthetic respondents. No credits — 30 minutes.",
+    priority: "High",
+    priorityColor: CORAL,
+    priorityBg: CORAL_LT,
+  },
+  {
+    title: "Skincare — 35–49 Repositioning",
+    method: "Test24 Pro",
+    methodColor: "#7C3AED",
+    methodBg: "#EDE9FE",
+    types: ["Positioning", "Brand Health"],
+    desc: "AI-moderated qual with 20 respondents in the 35–49 segment once current study completes.",
+    priority: "Medium",
+    priorityColor: AMBER_DK,
+    priorityBg: AMBER_LT,
+  },
+  {
+    title: "Channel Preference — Energy Drink",
+    method: "Test24 Basic",
+    methodColor: CYAN_DK,
+    methodBg: "#DFF6FC",
+    types: ["Campaign", "Ad"],
+    desc: "Convenience vs grocery vs online — reduce channel launch risk with a quick signal study.",
+    priority: "Low",
+    priorityColor: N500,
+    priorityBg: "#F5F0E8",
+  },
+];
+
+const CONSULT_OFFERS = [
+  {
+    id: "strategy",
+    Icon: Brain,
+    type: "Strategy",
+    title: "Brand Positioning Strategy Session",
+    desc: "Translate your research findings into a clear positioning platform and go-to-market narrative. Includes a written positioning brief and category landscape framing.",
+    discount: "10% off",
+    note: "Custom proposal sent offline",
+  },
+  {
+    id: "design",
+    Icon: Palette,
+    type: "Design",
+    title: "Creative Concepts & Design Sprint",
+    desc: "Commission packaging, campaign creative, or brand identity concepts to run alongside your next study — designed before fielding so findings directly validate the work.",
+    discount: "10% off",
+    note: "Custom proposal sent offline",
+  },
+];
+
 const PLANNING_GREETING = "Hi Jane. I've reviewed your 3 active studies. Ask me anything — or pick a prompt below to get started.";
 const PLANNING_AI_RESPONSE = `Energy Drink — pre-launch research sequence
 
@@ -149,6 +219,7 @@ export default function ActPage() {
   const [chatInput, setChatInput] = useState("");
   const [showChat, setShowChat]   = useState(false);
   const [planningInput, setPlanningInput] = useState("");
+  const [offerState, setOfferState] = useState<Record<string, "idle" | "accepted" | "declined">>({ strategy: "idle", design: "idle" });
   const [planningMsgs, setPlanningMsgs] = useState<{ role: "user" | "ai"; text: string }[]>([
     { role: "ai",   text: PLANNING_GREETING },
     { role: "user", text: "What do I still need to test before launching the Energy Drink?" },
@@ -553,8 +624,8 @@ export default function ActPage() {
                   </div>
                 </div>
 
-                {/* Right: Prompts + Connected Studies */}
-                <div className="w-80 min-w-[300px] flex-shrink-0 space-y-4">
+                {/* Right: full scrollable panel */}
+                <div className="w-80 min-w-[300px] flex-shrink-0 space-y-4 overflow-y-auto" style={{ maxHeight: "calc(100vh - 200px)" }}>
 
                   {/* Suggested Prompts */}
                   <div style={CARD} className="p-5">
@@ -564,7 +635,7 @@ export default function ActPage() {
                         <button
                           key={q}
                           onClick={() => { setPlanningInput(q); }}
-                          className="w-full text-left text-xs px-3 py-3 rounded-lg transition-colors"
+                          className="w-full text-left text-xs px-3 py-3 rounded-lg"
                           style={{ background: "#F9F8FF", border: `1px solid ${N200}`, color: VDK }}
                           data-testid={`prompt-${q.substring(0, 15)}`}
                         >
@@ -591,6 +662,123 @@ export default function ActPage() {
                       ))}
                     </div>
                   </div>
+
+                  {/* ── Recommended Research ── */}
+                  <div style={CARD} className="p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <FlaskConical className="w-4 h-4" style={{ color: VIO }} />
+                      <div className="text-sm font-semibold" style={{ color: VDK }}>Recommended Research</div>
+                    </div>
+                    <div className="space-y-3">
+                      {RESEARCH_RECS.map((rec, i) => (
+                        <div key={i} className="rounded-xl p-3" style={{ background: "#FAFAF8", border: `1px solid ${N200}` }} data-testid={`research-rec-${i}`}>
+                          {/* Method + Priority row */}
+                          <div className="flex items-center gap-1.5 mb-2 flex-wrap">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: rec.methodBg, color: rec.methodColor }}>
+                              {rec.method}
+                            </span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: rec.priorityBg, color: rec.priorityColor }}>
+                              {rec.priority}
+                            </span>
+                          </div>
+                          {/* Title */}
+                          <div className="text-xs font-semibold mb-1" style={{ color: VDK }}>{rec.title}</div>
+                          {/* Research type tags */}
+                          <div className="flex gap-1 flex-wrap mb-1.5">
+                            {rec.types.map(t => (
+                              <span key={t} className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: VIO_LT, color: VIO }}>
+                                {t}
+                              </span>
+                            ))}
+                          </div>
+                          {/* Description */}
+                          <p className="text-[11px] leading-relaxed" style={{ color: N500 }}>{rec.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* ── Tailored Consult Offer ── */}
+                  <div className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid #D4B896` }}>
+                    {/* Offer header */}
+                    <div className="px-5 py-3 flex items-center gap-2" style={{ background: "linear-gradient(135deg, #2A1F6B 0%, #3A2FBF 100%)" }}>
+                      <Gift className="w-4 h-4 text-white opacity-80" />
+                      <div className="flex-1">
+                        <div className="text-xs font-bold text-white">Tailored Consult Offer</div>
+                        <div className="text-[10px] opacity-70 text-white">Available for your portfolio</div>
+                      </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: "rgba(232,80,58,0.8)" }}>
+                        10% off
+                      </span>
+                    </div>
+
+                    {/* Offer body */}
+                    <div className="bg-white p-4 space-y-3" data-testid="consult-offer">
+                      <p className="text-xs leading-relaxed" style={{ color: N500 }}>
+                        Based on your research portfolio, we can offer tailored consulting to convert your insights into strategic action and creative output. Accept any offer below — we'll build a custom proposal and send it separately.
+                      </p>
+
+                      {CONSULT_OFFERS.map(offer => {
+                        const state = offerState[offer.id];
+                        const { Icon } = offer;
+                        return (
+                          <div key={offer.id} className="rounded-xl p-4" style={{ background: "#FAFAF8", border: `1px solid ${N200}` }} data-testid={`consult-offer-${offer.id}`}>
+                            <div className="flex items-start gap-2.5 mb-2">
+                              <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: VIO }}>
+                                <Icon className="w-3.5 h-3.5 text-white" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-xs font-bold" style={{ color: VDK }}>{offer.type}</span>
+                                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: CORAL_LT, color: CORAL }}>10% off</span>
+                                </div>
+                                <div className="text-xs font-semibold mt-0.5" style={{ color: VDK }}>{offer.title}</div>
+                              </div>
+                            </div>
+                            <p className="text-[11px] leading-relaxed mb-3" style={{ color: N500 }}>{offer.desc}</p>
+
+                            {state === "accepted" ? (
+                              <div className="flex items-center gap-2 rounded-lg px-3 py-2.5" style={{ background: SUC_LT }}>
+                                <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: SUCCESS }} />
+                                <div>
+                                  <div className="text-xs font-semibold" style={{ color: SUCCESS }}>Offer accepted!</div>
+                                  <div className="text-[10px]" style={{ color: SUCCESS }}>We'll send your custom proposal shortly.</div>
+                                </div>
+                              </div>
+                            ) : state === "declined" ? (
+                              <div className="text-[11px] text-center py-1" style={{ color: N500 }}>
+                                Offer noted — you can revisit this anytime.
+                              </div>
+                            ) : (
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => setOfferState(prev => ({ ...prev, [offer.id]: "accepted" }))}
+                                  className="flex-1 text-xs font-semibold py-2 rounded-lg text-white"
+                                  style={{ background: VIO }}
+                                  data-testid={`accept-offer-${offer.id}`}
+                                >
+                                  Accept Offer
+                                </button>
+                                <button
+                                  onClick={() => setOfferState(prev => ({ ...prev, [offer.id]: "declined" }))}
+                                  className="flex-1 text-xs font-semibold py-2 rounded-lg"
+                                  style={{ background: "#F5F0E8", color: N500, border: `1px solid ${N200}` }}
+                                  data-testid={`decline-offer-${offer.id}`}
+                                >
+                                  Not now
+                                </button>
+                              </div>
+                            )}
+
+                            <div className="text-[10px] text-center mt-2" style={{ color: N400 }}>
+                              {offer.note}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
                 </div>
               </div>
             )}
