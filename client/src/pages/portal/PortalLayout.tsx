@@ -159,7 +159,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
               <PhaseNavItem num="01" label="Explore" color={EXPLORE_COLOR} isActive={isExplore} onClick={() => setLocation("/portal/explore")} testId="menu-item-explore" />
               <PhaseNavItem num="02" label="Test"    color={TEST_COLOR}    isActive={isTest}    onClick={() => setLocation("/portal/test")}    testId="menu-item-test"    />
               <PhaseNavItem num="03" label="Act"     color={ACT_COLOR}     isActive={isAct}     onClick={() => setLocation("/portal/act")}     testId="menu-item-act"     />
-              <PhaseNavItem num="04" label="Health"  color={HEALTH_COLOR}  isActive={false}     onClick={() => {}}                            testId="menu-item-health"  locked />
+              <PhaseNavItem num="04" label="Health"  color={HEALTH_COLOR}  isActive={location.startsWith("/portal/health")} onClick={() => setLocation("/portal/health")} testId="menu-item-health" />
 
               {isAdmin && !impersonation.isImpersonating && (
                 <>

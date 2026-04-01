@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import {
-  X, Sparkles, MessageSquare, Send, ArrowRight, ChevronDown,
+  X, Sparkles, MessageSquare, Send, ArrowRight, ChevronDown, Loader2, BookOpen, Lock,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
-import reportsData from "@/data/reports.json";
 
 /* ── Design System tokens ─────────────────────────────── */
 const VDK      = "#1E1B3A";
@@ -30,17 +29,20 @@ const CARD: React.CSSProperties = {
 };
 
 const SIGNALS = [
-  { id: 1, tag: "Trend",      tagBg: VIO_LT,   tagColor: VIO,      title: "Nootropic beverages up +41% search intent",         meta: "Urban 25–34 · Food & Bev · Detected overnight",     chip: { label: "High",   bg: "#FDECEA", color: CORAL } },
-  { id: 2, tag: "Opportunity",tagBg: VIO_LT,   tagColor: VIO,      title: "Township segment at 52% intent — entry SKU gap",    meta: "Energy Drink category · Township consumers",         chip: { label: "Medium", bg: AMBER_LT,  color: AMBER_DK } },
-  { id: 3, tag: "Trend",      tagBg: VIO_LT,   tagColor: VIO,      title: "Sustainable packaging premium +18% WTP",            meta: "Beauty & Personal Care · 25–44 urban",               chip: { label: "Watch",  bg: AMBER_LT,  color: AMBER_DK } },
-  { id: 4, tag: "New Report", tagBg: VIO_LT,   tagColor: VIO,      title: "Functional Beverages 2025 — full category audit",   meta: "Innovatr Inside · GROWTH+ · 3 min read",             chip: { label: "New",    bg: VIO_LT,    color: VIO } },
-  { id: 5, tag: "Signal",     tagBg: SUC_LT,   tagColor: SUCCESS,  title: "Plant-based protein growing in Gauteng convenience", meta: "FMCG · Convenience retail · Q1 2025",               chip: { label: "Low",    bg: SUC_LT,    color: SUCCESS } },
-  { id: 6, tag: "Signal",     tagBg: SUC_LT,   tagColor: SUCCESS,  title: "Skincare ingredient transparency demand rising",     meta: "Beauty · 30–45 urban female · Digital",             chip: { label: "Watch",  bg: AMBER_LT,  color: AMBER_DK } },
+  { id: 1, tag: "Trend",       tagBg: VIO_LT,  tagColor: VIO,      title: "Nootropic beverages up +41% search intent",          meta: "Urban 25–34 · Food & Bev · Detected overnight",     chip: { label: "High",   bg: "#FDECEA", color: CORAL } },
+  { id: 2, tag: "Opportunity", tagBg: VIO_LT,  tagColor: VIO,      title: "Township segment at 52% intent — entry SKU gap",     meta: "Energy Drink category · Township consumers",         chip: { label: "Medium", bg: AMBER_LT,  color: AMBER_DK } },
+  { id: 3, tag: "Trend",       tagBg: VIO_LT,  tagColor: VIO,      title: "Sustainable packaging premium +18% WTP",             meta: "Beauty & Personal Care · 25–44 urban",               chip: { label: "Watch",  bg: AMBER_LT,  color: AMBER_DK } },
+  { id: 4, tag: "New Report",  tagBg: VIO_LT,  tagColor: VIO,      title: "Functional Beverages 2025 — full category audit",    meta: "Innovatr Inside · GROWTH+ · 3 min read",             chip: { label: "New",    bg: VIO_LT,    color: VIO } },
+  { id: 5, tag: "Signal",      tagBg: SUC_LT,  tagColor: SUCCESS,  title: "Plant-based protein growing in Gauteng convenience", meta: "FMCG · Convenience retail · Q1 2025",               chip: { label: "Low",    bg: SUC_LT,    color: SUCCESS } },
+  { id: 6, tag: "Signal",      tagBg: SUC_LT,  tagColor: SUCCESS,  title: "Skincare ingredient transparency demand rising",      meta: "Beauty · 30–45 urban female · Digital",             chip: { label: "Watch",  bg: AMBER_LT,  color: AMBER_DK } },
 ];
 
-const SANDBOX_ITEMS = [
-  { label: "Energy Drink — R12 Entry SKU",      intent: "52%", intentColor: AMBER_DK },
-  { label: "Nootropic Concept — Exec audience", intent: "71%", intentColor: SUCCESS  },
+const PERSONAS = [
+  { id: "urban_pro",   label: "Urban Professionals",   sub: "25–34 · Gauteng" },
+  { id: "township",    label: "Township Consumers",     sub: "18–30 · metros" },
+  { id: "suburban",    label: "Suburban Families",      sub: "30–44 · all areas" },
+  { id: "genz",        label: "Gen Z",                  sub: "18–25 · digital native" },
+  { id: "mature",      label: "Mature Market",          sub: "45–60 · all areas" },
 ];
 
 const AI_MESSAGES = [
@@ -60,21 +62,47 @@ const AI_PROMPTS = [
 
 type Tab = "signals" | "sandbox" | "intelligence";
 
+function scoreFromSeed(seed: number, min: number, max: number): number {
+  const x = Math.sin(seed) * 10000;
+  return Math.round(min + (x - Math.floor(x)) * (max - min));
+}
+
+function BenchmarkBar({ value, benchmark, color }: { value: number; benchmark: number; color: string }) {
+  const atBench = value >= benchmark;
+  return (
+    <div>
+      <div className="flex justify-between text-[10px] mb-1" style={{ color: N500 }}>
+        <span>0%</span>
+        <span style={{ color }}>Benchmark {benchmark}%</span>
+        <span>100%</span>
+      </div>
+      <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "#F0EBE0", position: "relative" }}>
+        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${value}%`, background: atBench ? SUCCESS : color }} />
+      </div>
+      <div className="relative h-0" style={{ marginTop: -11 }}>
+        <div className="absolute top-0 w-0.5 h-3.5" style={{ left: `${benchmark}%`, background: N400 }} />
+      </div>
+    </div>
+  );
+}
+
 export default function ExplorePage() {
   const [, setLocation] = useLocation();
   const { user }        = useAuth();
-  const [activeTab, setActiveTab]       = useState<Tab>("signals");
-  const [aiInput, setAiInput]           = useState("");
-  const [chatMessages, setChatMessages] = useState<any[]>(AI_MESSAGES);
-  const [chatInput, setChatInput]       = useState("");
-  const [showChat, setShowChat]         = useState(false);
+  const [activeTab, setActiveTab]           = useState<Tab>("signals");
+  const [aiInput, setAiInput]               = useState("");
+  const [chatMessages, setChatMessages]     = useState<any[]>(AI_MESSAGES);
+  const [chatInput, setChatInput]           = useState("");
+  const [showChat, setShowChat]             = useState(false);
+
+  /* Sandbox state */
+  const [sandboxIdea, setSandboxIdea]       = useState("");
+  const [sandboxPersonas, setSandboxPersonas] = useState<string[]>([]);
+  const [sandboxRunning, setSandboxRunning] = useState(false);
+  const [sandboxResult, setSandboxResult]   = useState<{ interest: number; commitment: number; ideaScore: number } | null>(null);
+  const runCountRef = useRef(0);
 
   const { data: reports } = useQuery<any[]>({ queryKey: ["/api/reports"], enabled: !!user });
-
-  const latestReports = (reports || (reportsData as any[])).slice(0, 4).map((r: any) => ({
-    title: r.title,
-    series: r.series || r.category || "",
-  }));
 
   const initials = (name?: string) => {
     if (!name) return "?";
@@ -90,6 +118,34 @@ export default function ExplorePage() {
       { type: "system", text: "I'm analysing that now. Based on your portfolio signals, here's what I see…", rec: "→ This is indicative — I'll update when I have more data." },
     ]);
     setAiInput("");
+  };
+
+  const togglePersona = (id: string) => {
+    setSandboxPersonas(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]);
+  };
+
+  const runSandbox = () => {
+    if (!sandboxIdea.trim()) return;
+    setSandboxRunning(true);
+    setSandboxResult(null);
+    const seed = runCountRef.current++;
+    const ideaSeed = sandboxIdea.length + seed * 7;
+
+    setTimeout(() => {
+      const interest    = scoreFromSeed(ideaSeed * 1.3,  52, 91);
+      const commitment  = scoreFromSeed(ideaSeed * 2.7,  38, 71);
+      const ideaScore   = Math.round((interest + commitment) / 2);
+      setSandboxResult({ interest, commitment, ideaScore });
+      setSandboxRunning(false);
+    }, 2200);
+  };
+
+  const accessColor = (access: string) => {
+    const a = (access || "").toLowerCase();
+    if (a.includes("scale") || a.includes("platinum")) return { bg: VIO_LT,  color: VIO,      label: "SCALE" };
+    if (a.includes("growth") || a.includes("gold"))    return { bg: AMBER_LT, color: AMBER_DK, label: "GROWTH" };
+    if (a.includes("entry") || a.includes("starter"))  return { bg: SUC_LT,   color: SUCCESS,  label: "STARTER" };
+    return { bg: "#F0EBE0", color: N500, label: "ALL" };
   };
 
   return (
@@ -150,6 +206,8 @@ export default function ExplorePage() {
         <div className="flex flex-1 overflow-hidden">
           {/* Main content */}
           <div className="flex-1 overflow-y-auto p-6" style={{ background: CREAM }}>
+
+            {/* ── SIGNALS ── */}
             {activeTab === "signals" && (
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -190,58 +248,158 @@ export default function ExplorePage() {
               </div>
             )}
 
+            {/* ── SANDBOX ── */}
             {activeTab === "sandbox" && (
               <div>
-                <div className="mb-4">
+                <div className="mb-5">
                   <div className="text-[11px] font-bold tracking-widest uppercase mb-1" style={{ color: CORAL }}>
-                    Sandbox — Quick Intent Modelling
+                    Sandbox — Idea Potential Scoring
                   </div>
-                  <p className="text-sm" style={{ color: N500 }}>Model purchase intent before commissioning a full study. No credits required.</p>
+                  <p className="text-sm" style={{ color: N500 }}>Describe your concept and select your target personas to get a simulated interest and commitment score before commissioning a full study.</p>
                 </div>
-                <div className="flex gap-3 mb-5">
-                  <input
-                    className="flex-1 rounded-lg px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none"
-                    style={{ background: "#fff", border: `1.5px solid ${N200}`, color: VDK }}
-                    placeholder="Describe your concept or product idea…"
+
+                {/* Idea input */}
+                <div style={CARD} className="p-5 mb-4">
+                  <label className="text-xs font-semibold mb-2 block" style={{ color: N500 }}>Describe your concept or idea</label>
+                  <textarea
+                    className="w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none resize-none mb-4"
+                    rows={3}
+                    style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
+                    placeholder="e.g. A sugar-free energy drink with nootropic ingredients, targeting urban professionals who want sustained focus without a crash. Priced at R22 per 330ml can."
+                    value={sandboxIdea}
+                    onChange={e => { setSandboxIdea(e.target.value); setSandboxResult(null); }}
                     data-testid="input-sandbox-concept"
                     onFocus={e => (e.target.style.borderColor = VIO)}
                     onBlur={e => (e.target.style.borderColor = N200)}
                   />
+
+                  <label className="text-xs font-semibold mb-2 block" style={{ color: N500 }}>Target Personas (select all that apply)</label>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {PERSONAS.map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => togglePersona(p.id)}
+                        data-testid={`persona-${p.id}`}
+                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition-all"
+                        style={sandboxPersonas.includes(p.id)
+                          ? { background: VIO, color: "#fff", border: `1.5px solid ${VIO}` }
+                          : { background: "#fff", border: `1.5px solid ${N200}`, color: N500 }
+                        }
+                      >
+                        <span className="font-semibold">{p.label}</span>
+                        <span className="ml-1 opacity-70">{p.sub}</span>
+                      </button>
+                    ))}
+                  </div>
+
                   <button
-                    className="flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 text-white rounded-lg"
-                    style={{ background: VIO, borderRadius: 8 }}
+                    onClick={runSandbox}
+                    disabled={!sandboxIdea.trim() || sandboxRunning}
                     data-testid="button-run-sandbox"
+                    className="flex items-center gap-2 text-sm font-semibold px-5 py-2.5 text-white rounded-lg transition-opacity"
+                    style={{ background: VIO, borderRadius: 8, opacity: !sandboxIdea.trim() ? 0.5 : 1 }}
                   >
-                    Run Model <ArrowRight className="w-4 h-4" />
+                    {sandboxRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                    {sandboxRunning ? "Running model…" : "Run Sandbox"}
                   </button>
                 </div>
-                <div className="space-y-2 mb-6">
-                  {SANDBOX_ITEMS.map((item, i) => (
-                    <div key={i} style={CARD} className="px-4 py-3 flex items-center justify-between cursor-pointer hover:shadow-md transition-shadow" data-testid={`sandbox-item-${i}`}>
-                      <span className="text-sm font-medium" style={{ color: VDK }}>{item.label}</span>
-                      <div className="flex items-center gap-3">
-                        <span className="text-lg font-bold font-mono" style={{ color: item.intentColor }}>{item.intent}</span>
-                        <span className="text-xs" style={{ color: N500 }}>intent</span>
-                        <ArrowRight className="w-4 h-4" style={{ color: N500 }} />
+
+                {/* Results */}
+                {sandboxResult && (
+                  <div className="space-y-3 mb-6">
+                    <div className="text-[11px] font-bold tracking-widest uppercase" style={{ color: CORAL }}>Sandbox Results</div>
+
+                    {/* Interest */}
+                    <div style={CARD} className="p-5" data-testid="sandbox-result-interest">
+                      <div className="flex items-center justify-between mb-1">
+                        <div>
+                          <div className="text-xs font-bold uppercase tracking-wide mb-0.5" style={{ color: N500 }}>Interest Score</div>
+                          <div className="text-[11px]" style={{ color: N500 }}>Purchase Intent Potential &mdash; benchmark &gt;81%</div>
+                        </div>
+                        <div className="text-3xl font-bold font-mono" style={{ color: sandboxResult.interest >= 81 ? SUCCESS : sandboxResult.interest >= 65 ? AMBER_DK : CORAL }}>
+                          {sandboxResult.interest}%
+                        </div>
+                      </div>
+                      <BenchmarkBar value={sandboxResult.interest} benchmark={81} color={CORAL} />
+                      <div className="mt-2 text-xs" style={{ color: N500 }}>
+                        {sandboxResult.interest >= 81
+                          ? "Above benchmark — strong interest signal. This concept resonates with your selected personas."
+                          : sandboxResult.interest >= 65
+                          ? "Approaching benchmark. Refining the price-value message could push this above threshold."
+                          : "Below benchmark. Consider rethinking the core proposition before testing with real consumers."}
                       </div>
                     </div>
-                  ))}
-                </div>
-                <div className="rounded-xl p-5" style={{ background: VIO_LT, border: `1px solid rgba(58,47,191,0.2)` }}>
-                  <div className="text-sm font-semibold mb-1" style={{ color: VIO }}>When to move from Sandbox to Test</div>
-                  <p className="text-sm leading-relaxed" style={{ color: N500 }}>If Sandbox intent is above 55%, it's worth commissioning a Test24 Brief to validate with real SA consumers. Below 55%, refine your concept first.</p>
-                  <button
-                    className="mt-3 text-sm font-semibold px-4 py-2 text-white rounded-lg"
-                    onClick={() => setLocation("/portal/launch")}
-                    style={{ background: CORAL, borderRadius: 8 }}
-                    data-testid="button-launch-from-sandbox"
-                  >
-                    Launch a Brief →
-                  </button>
-                </div>
+
+                    {/* Commitment */}
+                    <div style={CARD} className="p-5" data-testid="sandbox-result-commitment">
+                      <div className="flex items-center justify-between mb-1">
+                        <div>
+                          <div className="text-xs font-bold uppercase tracking-wide mb-0.5" style={{ color: N500 }}>Commitment Score</div>
+                          <div className="text-[11px]" style={{ color: N500 }}>Purchase Likelihood &mdash; benchmark &gt;53%</div>
+                        </div>
+                        <div className="text-3xl font-bold font-mono" style={{ color: sandboxResult.commitment >= 53 ? SUCCESS : sandboxResult.commitment >= 40 ? AMBER_DK : CORAL }}>
+                          {sandboxResult.commitment}%
+                        </div>
+                      </div>
+                      <BenchmarkBar value={sandboxResult.commitment} benchmark={53} color={AMBER_DK} />
+                      <div className="mt-2 text-xs" style={{ color: N500 }}>
+                        {sandboxResult.commitment >= 53
+                          ? "Above benchmark — consumers who like this concept are likely to follow through to purchase."
+                          : sandboxResult.commitment >= 40
+                          ? "Interest is there but commitment lags. Price or distribution friction may be reducing purchase likelihood."
+                          : "Significant gap between interest and purchase likelihood. Investigate barriers to conversion."}
+                      </div>
+                    </div>
+
+                    {/* Idea Score */}
+                    <div style={{ ...CARD, borderColor: sandboxResult.ideaScore >= 81 ? "rgba(42,158,92,0.3)" : N200 }} className="p-5" data-testid="sandbox-result-idea-score">
+                      <div className="flex items-center justify-between mb-1">
+                        <div>
+                          <div className="text-xs font-bold uppercase tracking-wide mb-0.5" style={{ color: N500 }}>Idea Score</div>
+                          <div className="text-[11px]" style={{ color: N500 }}>Average of Interest + Commitment &mdash; benchmark &gt;81%</div>
+                        </div>
+                        <div className="text-3xl font-bold font-mono" style={{ color: sandboxResult.ideaScore >= 81 ? SUCCESS : sandboxResult.ideaScore >= 65 ? AMBER_DK : CORAL }}>
+                          {sandboxResult.ideaScore}%
+                        </div>
+                      </div>
+                      <BenchmarkBar value={sandboxResult.ideaScore} benchmark={81} color={VIO} />
+                      <div className="mt-3 rounded-xl px-4 py-3" style={{ background: sandboxResult.ideaScore >= 81 ? SUC_LT : sandboxResult.ideaScore >= 65 ? AMBER_LT : "#FDECEA" }}>
+                        <div className="text-xs font-semibold mb-0.5" style={{ color: sandboxResult.ideaScore >= 81 ? SUCCESS : sandboxResult.ideaScore >= 65 ? AMBER_DK : CORAL }}>
+                          {sandboxResult.ideaScore >= 81 ? "Strong — ready for a full Test24 study" : sandboxResult.ideaScore >= 65 ? "Promising — refine before testing" : "Needs work — revisit the concept first"}
+                        </div>
+                        <div className="text-xs" style={{ color: N500 }}>
+                          {sandboxResult.ideaScore >= 81
+                            ? "This idea scores above the commercialisation threshold. Commission a Test24 Brief to validate with real SA consumers."
+                            : sandboxResult.ideaScore >= 65
+                            ? "Approaching threshold. A second Sandbox run after concept refinement is recommended before committing to a full study."
+                            : "The concept needs stronger differentiation. Use Explore signals to re-identify the unmet need before re-running."}
+                        </div>
+                      </div>
+                    </div>
+
+                    {sandboxResult.ideaScore >= 65 && (
+                      <button
+                        onClick={() => setLocation("/portal/test")}
+                        className="text-sm font-semibold px-5 py-2.5 text-white rounded-lg flex items-center gap-2"
+                        style={{ background: CORAL, borderRadius: 8 }}
+                        data-testid="button-launch-from-sandbox"
+                      >
+                        Launch a Test24 Brief <ArrowRight className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {!sandboxResult && !sandboxRunning && (
+                  <div className="rounded-xl p-5" style={{ background: VIO_LT, border: `1px solid rgba(58,47,191,0.2)` }}>
+                    <div className="text-sm font-semibold mb-1" style={{ color: VIO }}>When to move from Sandbox to Test</div>
+                    <p className="text-sm leading-relaxed" style={{ color: N500 }}>If your Idea Score is above 81%, it's worth commissioning a Test24 Brief to validate with real SA consumers. Between 65–81%, refine your concept first. Below 65%, revisit the core proposition.</p>
+                  </div>
+                )}
               </div>
             )}
 
+            {/* ── INTELLIGENCE LIBRARY ── */}
             {activeTab === "intelligence" && (
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -250,21 +408,75 @@ export default function ExplorePage() {
                     Browse all <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
-                <div className="space-y-3">
-                  {latestReports.map((r, i) => (
-                    <div key={i} style={CARD} className="p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation("/portal/trends")} data-testid={`report-card-${i}`}>
-                      <div className="text-sm font-semibold mb-1" style={{ color: VDK }}>{r.title}</div>
-                      <div className="text-xs" style={{ color: N500 }}>{r.series}</div>
-                    </div>
-                  ))}
-                </div>
+
+                {(!reports || reports.length === 0) ? (
+                  <div style={CARD} className="p-10 text-center">
+                    <BookOpen className="w-8 h-8 mx-auto mb-3" style={{ color: N400 }} />
+                    <p className="text-sm font-semibold mb-1" style={{ color: VDK }}>No reports available yet</p>
+                    <p className="text-xs" style={{ color: N500 }}>Trends reports will appear here as they are published.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4">
+                    {reports.map((r: any, i: number) => {
+                      const badge = accessColor(r.access || r.accessLevel || "");
+                      const teaser = r.teaser || r.summary || r.description || "";
+                      const truncated = teaser.length > 160 ? teaser.slice(0, 160) + "…" : teaser;
+                      const isLocked = (r.access || r.accessLevel || "").toLowerCase().includes("scale") || (r.access || r.accessLevel || "").toLowerCase().includes("platinum");
+
+                      return (
+                        <div
+                          key={r.id || i}
+                          style={CARD}
+                          className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer flex"
+                          onClick={() => r.slug ? setLocation(`/portal/insights/${r.slug}`) : setLocation("/portal/trends")}
+                          data-testid={`report-card-${i}`}
+                        >
+                          {/* Cover image */}
+                          {r.coverImage || r.imageUrl ? (
+                            <div className="w-32 flex-shrink-0 relative overflow-hidden" style={{ minHeight: 120 }}>
+                              <img
+                                src={r.coverImage || r.imageUrl}
+                                alt={r.title}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-32 flex-shrink-0 flex items-center justify-center" style={{ background: VIO_LT, minHeight: 120 }}>
+                              <BookOpen className="w-8 h-8" style={{ color: VIO }} />
+                            </div>
+                          )}
+
+                          {/* Content */}
+                          <div className="flex-1 p-4 min-w-0">
+                            <div className="flex items-start justify-between gap-2 mb-1.5">
+                              <div className="text-sm font-semibold leading-snug" style={{ color: VDK }}>{r.title}</div>
+                              <div className="flex items-center gap-1.5 flex-shrink-0">
+                                <span className="text-[10px] font-bold px-2 py-0.5" style={{ background: badge.bg, color: badge.color, borderRadius: 9999 }}>{badge.label}</span>
+                                {isLocked && <Lock className="w-3 h-3" style={{ color: N400 }} />}
+                              </div>
+                            </div>
+                            {(r.series || r.category) && (
+                              <div className="text-[10px] font-bold uppercase tracking-wide mb-1.5" style={{ color: CORAL }}>{r.series || r.category}</div>
+                            )}
+                            {truncated && (
+                              <p className="text-xs leading-relaxed" style={{ color: N500 }}>{truncated}</p>
+                            )}
+                            <div className="flex items-center gap-2 mt-2">
+                              {r.date && <span className="text-[10px]" style={{ color: N400 }}>{new Date(r.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span>}
+                              {r.readTime && <span className="text-[10px]" style={{ color: N400 }}>{r.readTime}</span>}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>
 
           {/* Right: AI Panel */}
           <div className="w-80 min-w-[320px] flex flex-col overflow-hidden" style={{ background: "#fff", borderLeft: `1px solid ${N200}` }}>
-            {/* AI Header */}
             <div className="px-4 py-3 flex-shrink-0" style={{ borderBottom: `1px solid ${N200}` }}>
               <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: VDK }}>
                 <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: VIO }}>
@@ -278,7 +490,6 @@ export default function ExplorePage() {
               </div>
             </div>
 
-            {/* Messages */}
             <div className="flex-1 overflow-y-auto p-3 space-y-3">
               {chatMessages.map((msg, i) => (
                 <div key={i} className={msg.type === "user" ? "ml-4" : ""}>
@@ -304,7 +515,6 @@ export default function ExplorePage() {
               ))}
             </div>
 
-            {/* Suggested prompts */}
             <div className="flex gap-1.5 px-3 py-2 flex-wrap flex-shrink-0" style={{ borderTop: `1px solid ${N200}`, background: "#FAFAF8" }}>
               {AI_PROMPTS.map(p => (
                 <button
@@ -319,7 +529,6 @@ export default function ExplorePage() {
               ))}
             </div>
 
-            {/* AI input */}
             <div className="p-3 flex gap-2 flex-shrink-0" style={{ borderTop: `1px solid ${N200}` }}>
               <input
                 value={aiInput}
@@ -342,7 +551,6 @@ export default function ExplorePage() {
               </button>
             </div>
 
-            {/* Team chat */}
             <button
               onClick={() => setShowChat(!showChat)}
               className="px-4 py-2.5 flex items-center justify-between flex-shrink-0 transition-colors"

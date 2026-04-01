@@ -33,6 +33,7 @@ import AdminCompanyDetail from "@/pages/portal/AdminCompanyDetail";
 import ExplorePage from "@/pages/portal/ExplorePage";
 import TestPage from "@/pages/portal/TestPage";
 import ActPage from "@/pages/portal/ActPage";
+import HealthPage from "@/pages/portal/HealthPage";
 import CouponSignup from "@/pages/CouponSignup";
 import ResetPassword from "@/pages/ResetPassword";
 import CaseStudyDetail from "@/pages/CaseStudyDetail";
@@ -73,6 +74,7 @@ function Router() {
       <Route path="/portal/explore" component={ExplorePage} />
       <Route path="/portal/test" component={TestPage} />
       <Route path="/portal/act" component={ActPage} />
+      <Route path="/portal/health" component={HealthPage} />
       <Route path="/portal/research" component={PastResearch} />
       <Route path="/portal/deals" component={MemberDeals} />
       <Route path="/portal/admin" component={AdminPortal} />
