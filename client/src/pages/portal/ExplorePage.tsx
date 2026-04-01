@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import {
-  X, Sparkles, MessageSquare, Send, ArrowRight, ChevronDown, Loader2, BookOpen, Lock,
+  X, Sparkles, MessageSquare, Send, ArrowRight, ChevronDown, Loader2, BookOpen, Lock, Zap,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -43,6 +43,42 @@ const PERSONAS = [
   { id: "suburban",    label: "Suburban Families",      sub: "30–44 · all areas" },
   { id: "genz",        label: "Gen Z",                  sub: "18–25 · digital native" },
   { id: "mature",      label: "Mature Market",          sub: "45–60 · all areas" },
+];
+
+const RECENT_RUNS = [
+  { id: "run-1", title: "RTD Energy — Concept A",    date: "28/03/2026", respondents: "1 200", intent: 73 },
+  { id: "run-2", title: "Skincare Relaunch Pack B",  date: "22/03/2026", respondents: "800",   intent: 48 },
+];
+
+const MARKET_GAPS = [
+  {
+    id: "gap-1",
+    useZap: true,
+    title: "Nootropic Beverages",
+    meta: "Food & Bev · Urban 25–34",
+    score: 94,
+    desc: "No dominant SA player in cognitive-performance beverages. Search intent up 41% YoY. First-mover window is open now.",
+    priority: "High Priority",
+    priorityColor: "#2A9E5C",
+    priorityBg: "#D1FAE5",
+    potential: "R85m+ potential",
+    barPct: 94,
+    concept: "A premium nootropic energy drink targeting urban professionals aged 25–34. Cognitive-performance claims with adaptogen ingredients, priced at R22 per 330ml can. No dominant SA player in this space.",
+  },
+  {
+    id: "gap-2",
+    useZap: false,
+    title: "Price-Entry Skincare",
+    meta: "Beauty · LSM 5–8",
+    score: 81,
+    desc: "Affordable skincare with credible efficacy claims — underserved in LSM 5–8. Current options are either too cheap or too premium.",
+    priority: "Medium Priority",
+    priorityColor: "#B8911A",
+    priorityBg: "#FEF6D6",
+    potential: "R45m+ potential",
+    barPct: 81,
+    concept: "An accessible skincare range targeting LSM 5–8 consumers, priced R49–R89. Dermatologist-tested efficacy claims with locally-relevant ingredients for SA skin types.",
+  },
 ];
 
 const AI_MESSAGES = [
@@ -251,151 +287,182 @@ export default function ExplorePage() {
             {/* ── SANDBOX ── */}
             {activeTab === "sandbox" && (
               <div>
-                <div className="mb-5">
-                  <div className="text-[11px] font-bold tracking-widest uppercase mb-1" style={{ color: CORAL }}>
-                    Sandbox — Idea Potential Scoring
+                {/* Two-column layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5">
+
+                  {/* LEFT: Recent runs + Market Gaps */}
+                  <div className="space-y-5">
+
+                    {/* Recent Sandbox Runs */}
+                    <div style={CARD} className="p-5">
+                      <div className="mb-4">
+                        <div className="text-sm font-semibold" style={{ color: VDK }}>Recent Sandbox Runs</div>
+                        <div className="text-xs" style={{ color: N500 }}>Your simulations · no credits used</div>
+                      </div>
+                      <div className="space-y-0">
+                        {RECENT_RUNS.map((run, i) => (
+                          <div key={run.id} className="flex items-center justify-between py-3" style={{ borderBottom: i < RECENT_RUNS.length - 1 ? `1px solid ${N200}` : "none" }}>
+                            <div>
+                              <div className="text-sm font-medium" style={{ color: VDK }}>{run.title}</div>
+                              <div className="text-xs mt-0.5" style={{ color: N500 }}>{run.date} · {run.respondents} synthetic respondents</div>
+                            </div>
+                            <div className="text-sm font-bold font-mono flex-shrink-0 ml-4" style={{ color: run.intent >= 65 ? SUCCESS : AMBER_DK }}>
+                              {run.intent}% intent
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Market Gaps to Watch */}
+                    <div>
+                      <div className="mb-3">
+                        <div className="text-base font-semibold" style={{ color: VDK }}>Market Gaps to Watch</div>
+                        <div className="text-xs" style={{ color: N500 }}>AI-identified white spaces — ranked by opportunity score</div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {MARKET_GAPS.map(gap => (
+                          <div key={gap.id} style={CARD} className="p-4">
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex items-start gap-2.5">
+                                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#FFF1ED", border: "1px solid rgba(232,80,58,0.15)" }}>
+                                  {gap.useZap
+                                    ? <Zap className="w-4 h-4" style={{ color: CORAL }} />
+                                    : <Sparkles className="w-4 h-4" style={{ color: CORAL }} />
+                                  }
+                                </div>
+                                <div>
+                                  <div className="text-sm font-semibold leading-snug" style={{ color: VDK }}>{gap.title}</div>
+                                  <div className="text-xs" style={{ color: N500 }}>{gap.meta}</div>
+                                </div>
+                              </div>
+                              <div className="text-right flex-shrink-0 ml-2">
+                                <div className="text-2xl font-bold font-mono" style={{ color: VIO }}>{gap.score}</div>
+                                <div className="text-[10px]" style={{ color: N500 }}>Gap Score</div>
+                              </div>
+                            </div>
+                            <p className="text-xs leading-relaxed mb-3" style={{ color: N500 }}>{gap.desc}</p>
+                            <div className="flex flex-wrap gap-1.5 mb-3">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: gap.priorityBg, color: gap.priorityColor }}>{gap.priority}</span>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: gap.priorityBg, color: gap.priorityColor }}>{gap.potential}</span>
+                            </div>
+                            <div className="h-1.5 rounded-full mb-3 overflow-hidden" style={{ background: "#F0EBE0" }}>
+                              <div className="h-full rounded-full" style={{ width: `${gap.barPct}%`, background: gap.priorityColor }} />
+                            </div>
+                            <button
+                              onClick={() => { setSandboxIdea(gap.concept); setSandboxResult(null); }}
+                              className="w-full text-xs font-semibold py-2.5 rounded-lg text-white flex items-center justify-center gap-1.5"
+                              style={{ background: CORAL }}
+                              data-testid={`button-gap-sandbox-${gap.id}`}
+                            >
+                              Run Sandbox Test <ArrowRight className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-sm" style={{ color: N500 }}>Describe your concept and select your target personas to get a simulated interest and commitment score before commissioning a full study.</p>
+
+                  {/* RIGHT: New Sandbox Run form */}
+                  <div>
+                    <div style={{ ...CARD, position: "sticky", top: 20 }}>
+                      <div className="px-5 py-4" style={{ borderBottom: `1px solid ${N200}` }}>
+                        <div className="text-sm font-semibold" style={{ color: VDK }}>New Sandbox Run</div>
+                        <div className="text-xs mt-0.5" style={{ color: N500 }}>No credits consumed</div>
+                      </div>
+                      <div className="p-5 space-y-4">
+                        <div>
+                          <label className="text-xs font-semibold mb-1.5 block" style={{ color: N500 }}>Concept Description</label>
+                          <textarea
+                            className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none resize-none"
+                            rows={5}
+                            style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
+                            placeholder="Describe the product, positioning, price point, and target consumer..."
+                            value={sandboxIdea}
+                            onChange={e => { setSandboxIdea(e.target.value); setSandboxResult(null); }}
+                            data-testid="input-sandbox-concept"
+                            onFocus={e => (e.target.style.borderColor = VIO)}
+                            onBlur={e => (e.target.style.borderColor = N200)}
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-xs font-semibold mb-1.5 block" style={{ color: N500 }}>Target Audience</label>
+                            <select className="w-full rounded-lg px-3 py-2 text-xs focus:outline-none" style={{ background: "#fff", border: `1px solid ${N200}`, color: VDK }}>
+                              <option>Urban SA · 25–34</option>
+                              <option>Urban SA · 18–24</option>
+                              <option>Township · 25–34</option>
+                              <option>Suburban · 30–44</option>
+                              <option>Gen Z · 18–24</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold mb-1.5 block" style={{ color: N500 }}>Category</label>
+                            <select className="w-full rounded-lg px-3 py-2 text-xs focus:outline-none" style={{ background: "#fff", border: `1px solid ${N200}`, color: VDK }}>
+                              <option>Beverages</option>
+                              <option>Food</option>
+                              <option>Beauty &amp; Personal Care</option>
+                              <option>Financial Services</option>
+                              <option>Tech &amp; Electronics</option>
+                            </select>
+                          </div>
+                        </div>
+                        <button
+                          onClick={runSandbox}
+                          disabled={!sandboxIdea.trim() || sandboxRunning}
+                          data-testid="button-run-sandbox"
+                          className="w-full flex items-center justify-center gap-2 text-sm font-semibold py-3 text-white rounded-lg transition-opacity"
+                          style={{ background: CORAL, borderRadius: 8, opacity: !sandboxIdea.trim() ? 0.5 : 1 }}
+                        >
+                          {sandboxRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                          {sandboxRunning ? "Running model…" : "Run Simulation →"}
+                        </button>
+                      </div>
+
+                      {/* Simulation Results */}
+                      {sandboxResult && (
+                        <div className="px-5 pb-5 space-y-0" style={{ borderTop: `1px solid ${N200}` }}>
+                          <div className="text-[10px] font-bold tracking-widest uppercase pt-4 mb-3" style={{ color: CORAL }}>Simulation Results</div>
+                          {[
+                            { label: "IDEA SCORE",  val: sandboxResult.ideaScore,  bench: 81, isGood: (v: number) => v >= 81 },
+                            { label: "INTEREST",    val: sandboxResult.interest,   bench: 81, isGood: (v: number) => v >= 81 },
+                            { label: "COMMITMENT",  val: sandboxResult.commitment, bench: 53, isGood: (v: number) => v >= 53 },
+                          ].map((m, i, arr) => {
+                            const c = m.isGood(m.val) ? SUCCESS : m.val >= m.bench * 0.8 ? AMBER_DK : CORAL;
+                            return (
+                              <div key={m.label} className="flex items-center justify-between py-2.5" style={{ borderBottom: i < arr.length - 1 ? `1px solid ${N200}` : "none" }}>
+                                <div>
+                                  <div className="text-[10px] font-bold uppercase tracking-wide" style={{ color: N500 }}>{m.label}</div>
+                                  <div className="text-[10px]" style={{ color: N400 }}>Benchmark &gt;{m.bench}%</div>
+                                </div>
+                                <div className="text-xl font-bold font-mono" style={{ color: c }}>{m.val}%</div>
+                              </div>
+                            );
+                          })}
+                          {sandboxResult.ideaScore >= 65 && (
+                            <button
+                              onClick={() => setLocation("/portal/test")}
+                              className="w-full text-xs font-semibold py-2.5 rounded-lg text-white mt-3 flex items-center justify-center gap-1.5"
+                              style={{ background: SUCCESS }}
+                              data-testid="button-launch-from-sandbox"
+                            >
+                              Launch a Test24 Brief <ArrowRight className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {!sandboxResult && !sandboxRunning && (
+                        <div className="px-5 pb-5">
+                          <div className="rounded-xl p-4" style={{ background: VIO_LT, border: `1px solid rgba(58,47,191,0.2)` }}>
+                            <div className="text-xs font-semibold mb-1" style={{ color: VIO }}>When to move from Sandbox to Test</div>
+                            <p className="text-xs leading-relaxed" style={{ color: N500 }}>Idea Score above 81% means it's worth commissioning a Test24 Brief. Between 65–81%, refine first. Below 65%, revisit the core proposition.</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-
-                {/* Idea input */}
-                <div style={CARD} className="p-5 mb-4">
-                  <label className="text-xs font-semibold mb-2 block" style={{ color: N500 }}>Describe your concept or idea</label>
-                  <textarea
-                    className="w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none resize-none mb-4"
-                    rows={3}
-                    style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
-                    placeholder="e.g. A sugar-free energy drink with nootropic ingredients, targeting urban professionals who want sustained focus without a crash. Priced at R22 per 330ml can."
-                    value={sandboxIdea}
-                    onChange={e => { setSandboxIdea(e.target.value); setSandboxResult(null); }}
-                    data-testid="input-sandbox-concept"
-                    onFocus={e => (e.target.style.borderColor = VIO)}
-                    onBlur={e => (e.target.style.borderColor = N200)}
-                  />
-
-                  <label className="text-xs font-semibold mb-2 block" style={{ color: N500 }}>Target Personas (select all that apply)</label>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {PERSONAS.map(p => (
-                      <button
-                        key={p.id}
-                        onClick={() => togglePersona(p.id)}
-                        data-testid={`persona-${p.id}`}
-                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition-all"
-                        style={sandboxPersonas.includes(p.id)
-                          ? { background: VIO, color: "#fff", border: `1.5px solid ${VIO}` }
-                          : { background: "#fff", border: `1.5px solid ${N200}`, color: N500 }
-                        }
-                      >
-                        <span className="font-semibold">{p.label}</span>
-                        <span className="ml-1 opacity-70">{p.sub}</span>
-                      </button>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={runSandbox}
-                    disabled={!sandboxIdea.trim() || sandboxRunning}
-                    data-testid="button-run-sandbox"
-                    className="flex items-center gap-2 text-sm font-semibold px-5 py-2.5 text-white rounded-lg transition-opacity"
-                    style={{ background: VIO, borderRadius: 8, opacity: !sandboxIdea.trim() ? 0.5 : 1 }}
-                  >
-                    {sandboxRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                    {sandboxRunning ? "Running model…" : "Run Sandbox"}
-                  </button>
-                </div>
-
-                {/* Results */}
-                {sandboxResult && (
-                  <div className="space-y-3 mb-6">
-                    <div className="text-[11px] font-bold tracking-widest uppercase" style={{ color: CORAL }}>Sandbox Results</div>
-
-                    {/* Interest */}
-                    <div style={CARD} className="p-5" data-testid="sandbox-result-interest">
-                      <div className="flex items-center justify-between mb-1">
-                        <div>
-                          <div className="text-xs font-bold uppercase tracking-wide mb-0.5" style={{ color: N500 }}>Interest Score</div>
-                          <div className="text-[11px]" style={{ color: N500 }}>Purchase Intent Potential &mdash; benchmark &gt;81%</div>
-                        </div>
-                        <div className="text-3xl font-bold font-mono" style={{ color: sandboxResult.interest >= 81 ? SUCCESS : sandboxResult.interest >= 65 ? AMBER_DK : CORAL }}>
-                          {sandboxResult.interest}%
-                        </div>
-                      </div>
-                      <BenchmarkBar value={sandboxResult.interest} benchmark={81} color={CORAL} />
-                      <div className="mt-2 text-xs" style={{ color: N500 }}>
-                        {sandboxResult.interest >= 81
-                          ? "Above benchmark — strong interest signal. This concept resonates with your selected personas."
-                          : sandboxResult.interest >= 65
-                          ? "Approaching benchmark. Refining the price-value message could push this above threshold."
-                          : "Below benchmark. Consider rethinking the core proposition before testing with real consumers."}
-                      </div>
-                    </div>
-
-                    {/* Commitment */}
-                    <div style={CARD} className="p-5" data-testid="sandbox-result-commitment">
-                      <div className="flex items-center justify-between mb-1">
-                        <div>
-                          <div className="text-xs font-bold uppercase tracking-wide mb-0.5" style={{ color: N500 }}>Commitment Score</div>
-                          <div className="text-[11px]" style={{ color: N500 }}>Purchase Likelihood &mdash; benchmark &gt;53%</div>
-                        </div>
-                        <div className="text-3xl font-bold font-mono" style={{ color: sandboxResult.commitment >= 53 ? SUCCESS : sandboxResult.commitment >= 40 ? AMBER_DK : CORAL }}>
-                          {sandboxResult.commitment}%
-                        </div>
-                      </div>
-                      <BenchmarkBar value={sandboxResult.commitment} benchmark={53} color={AMBER_DK} />
-                      <div className="mt-2 text-xs" style={{ color: N500 }}>
-                        {sandboxResult.commitment >= 53
-                          ? "Above benchmark — consumers who like this concept are likely to follow through to purchase."
-                          : sandboxResult.commitment >= 40
-                          ? "Interest is there but commitment lags. Price or distribution friction may be reducing purchase likelihood."
-                          : "Significant gap between interest and purchase likelihood. Investigate barriers to conversion."}
-                      </div>
-                    </div>
-
-                    {/* Idea Score */}
-                    <div style={{ ...CARD, borderColor: sandboxResult.ideaScore >= 81 ? "rgba(42,158,92,0.3)" : N200 }} className="p-5" data-testid="sandbox-result-idea-score">
-                      <div className="flex items-center justify-between mb-1">
-                        <div>
-                          <div className="text-xs font-bold uppercase tracking-wide mb-0.5" style={{ color: N500 }}>Idea Score</div>
-                          <div className="text-[11px]" style={{ color: N500 }}>Average of Interest + Commitment &mdash; benchmark &gt;81%</div>
-                        </div>
-                        <div className="text-3xl font-bold font-mono" style={{ color: sandboxResult.ideaScore >= 81 ? SUCCESS : sandboxResult.ideaScore >= 65 ? AMBER_DK : CORAL }}>
-                          {sandboxResult.ideaScore}%
-                        </div>
-                      </div>
-                      <BenchmarkBar value={sandboxResult.ideaScore} benchmark={81} color={VIO} />
-                      <div className="mt-3 rounded-xl px-4 py-3" style={{ background: sandboxResult.ideaScore >= 81 ? SUC_LT : sandboxResult.ideaScore >= 65 ? AMBER_LT : "#FDECEA" }}>
-                        <div className="text-xs font-semibold mb-0.5" style={{ color: sandboxResult.ideaScore >= 81 ? SUCCESS : sandboxResult.ideaScore >= 65 ? AMBER_DK : CORAL }}>
-                          {sandboxResult.ideaScore >= 81 ? "Strong — ready for a full Test24 study" : sandboxResult.ideaScore >= 65 ? "Promising — refine before testing" : "Needs work — revisit the concept first"}
-                        </div>
-                        <div className="text-xs" style={{ color: N500 }}>
-                          {sandboxResult.ideaScore >= 81
-                            ? "This idea scores above the commercialisation threshold. Commission a Test24 Brief to validate with real SA consumers."
-                            : sandboxResult.ideaScore >= 65
-                            ? "Approaching threshold. A second Sandbox run after concept refinement is recommended before committing to a full study."
-                            : "The concept needs stronger differentiation. Use Explore signals to re-identify the unmet need before re-running."}
-                        </div>
-                      </div>
-                    </div>
-
-                    {sandboxResult.ideaScore >= 65 && (
-                      <button
-                        onClick={() => setLocation("/portal/test")}
-                        className="text-sm font-semibold px-5 py-2.5 text-white rounded-lg flex items-center gap-2"
-                        style={{ background: CORAL, borderRadius: 8 }}
-                        data-testid="button-launch-from-sandbox"
-                      >
-                        Launch a Test24 Brief <ArrowRight className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                {!sandboxResult && !sandboxRunning && (
-                  <div className="rounded-xl p-5" style={{ background: VIO_LT, border: `1px solid rgba(58,47,191,0.2)` }}>
-                    <div className="text-sm font-semibold mb-1" style={{ color: VIO }}>When to move from Sandbox to Test</div>
-                    <p className="text-sm leading-relaxed" style={{ color: N500 }}>If your Idea Score is above 81%, it's worth commissioning a Test24 Brief to validate with real SA consumers. Between 65–81%, refine your concept first. Below 65%, revisit the core proposition.</p>
-                  </div>
-                )}
               </div>
             )}
 

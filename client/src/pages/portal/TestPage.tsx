@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import {
   X, Sparkles, Send, MessageSquare, ChevronDown, ExternalLink,
   ArrowRight, Loader2, Upload, CheckCircle2, ChevronRight, FileText,
+  Search, AlertTriangle, BarChart2, Star,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -78,6 +79,98 @@ const AI_PROMPTS = [
   "Build me a brief for next steps",
 ];
 
+/* ── Mock study result cards (Upsiide format) ──────────── */
+const MOCK_STUDIES_DATA = [
+  {
+    id: "mock-1",
+    title: "Project Aurum — Home Loan Positioning",
+    company: "Discovery Bank",
+    studyTypeDetail: "Concept Testing",
+    studyType: "BASIC",
+    respondents: 300,
+    date: "20 Jan 2025",
+    status: "COMPLETED",
+    qaVerified: true,
+    metrics: [
+      { label: "IDEA",       val: 97, signal: "Strong",     up: true  },
+      { label: "INTEREST",   val: 67, signal: "Above norm", up: true  },
+      { label: "COMMITMENT", val: 54, signal: "Watch",      up: false },
+      { label: "MEANING",    val: 76, signal: null,         up: null  },
+      { label: "DIFFERENCE", val: 61, signal: null,         up: null  },
+      { label: "WORTH",      val: 69, signal: null,         up: null  },
+    ],
+    takeaways: [
+      { kind: "star",  text: "Concept resonates strongly — 97% idea score signals clear unmet need for fee-free home loans." },
+      { kind: "warn",  text: "Commitment gap of 43 pts (Idea 97% → Commit 54%) — pricing narrative needs strengthening to close the gap." },
+      { kind: "chart", text: "Difference pillar weakest at 61% — category-level parity risk; needs sharper RTB." },
+    ],
+    nextSteps: [
+      "Run a price-anchoring concept test to lift commitment from 54% toward 65%+.",
+      "Test 2–3 differentiation messages on the \"zero-fee\" angle with the 25–44 urban segment.",
+    ],
+  },
+  {
+    id: "mock-2",
+    title: "New Energy Drink — Concept A",
+    company: "RedBull SA",
+    studyTypeDetail: "TEST24 PRO",
+    studyType: "PRO",
+    respondents: 1200,
+    date: "15 Mar 2025",
+    status: "COMPLETED",
+    qaVerified: true,
+    metrics: [
+      { label: "IDEA",       val: 73, signal: "Above norm", up: true  },
+      { label: "INTEREST",   val: 72, signal: "Above norm", up: true  },
+      { label: "COMMITMENT", val: 61, signal: "Strong",     up: true  },
+      { label: "MEANING",    val: 68, signal: null,         up: null  },
+      { label: "DIFFERENCE", val: 59, signal: null,         up: null  },
+      { label: "WORTH",      val: 61, signal: null,         up: null  },
+    ],
+    takeaways: [
+      { kind: "star",  text: "Urban Males 25–34 at 84% purchase intent — your primary launch cohort. Dual-claim messaging is the key driver." },
+      { kind: "warn",  text: "Township segment at 52% intent — a R12–15 entry SKU could unlock volume without cannibalising the premium tier." },
+      { kind: "chart", text: "Dual energy + hydration claim outperforms category norms significantly as the primary purchase driver." },
+    ],
+    nextSteps: [
+      "Lead with dual-claim messaging in the R18–25 price band for the urban 25–34 core.",
+      "Consider a price-entry SKU to address the township gap before rollout.",
+    ],
+  },
+];
+
+const MOCK_ASSISTANT = {
+  title:       "New Energy Drink Concept Test",
+  type:        "TEST24 BASIC",
+  respondents: "1 200",
+  metrics: [
+    { label: "Purchase Intent", valStr: "72%", sub: "+14pp vs norm",  color: "#3B82F6" },
+    { label: "Likability",      valStr: "4.1",  sub: "Out of 5",       color: "#2A9E5C" },
+    { label: "Uniqueness",      valStr: "68%",  sub: "",               color: "#B8911A" },
+    { label: "Value for Money", valStr: "61%",  sub: "Watch",          color: "#B8911A" },
+  ],
+  segments: [
+    { label: "Urban Male 25–34",   pct: 84, color: "#3B82F6" },
+    { label: "Urban Female 25–34", pct: 71, color: "#2A9E5C" },
+    { label: "Urban Male 18–24",   pct: 65, color: "#B8911A" },
+    { label: "Township 25–49",     pct: 52, color: "#E8503A" },
+  ],
+  drivers: [
+    { ok: true,  highlight: "#2A9E5C", title: "Dual energy + hydration claim",   sub: "Primary driver — outperforms category norms significantly" },
+    { ok: true,  highlight: "#3A2FBF", title: "Packaging design",                sub: "\"Looks premium but accessible\" — resonates strongly with 25–34" },
+    { ok: false, highlight: "#B8911A", title: "Value for money concern — 18–24", sub: "Intent 65% but value score 58% — 13pp below study average" },
+  ],
+  keyTakeout:       "Urban Males 25–34 at 84% purchase intent are your primary launch cohort. Lead with dual-claim messaging in the R18–25 price band.",
+  watchSignal:      "Township segment at 52% intent — a R12–15 entry SKU could unlock significant volume without cannibalising the premium tier.",
+  strategicSummary: "Concept is launch-ready for the urban 25–34 core. Prioritise packaging variants testing before rollout, and consider a price-entry SKU to address the township gap.",
+  queries: [
+    "What drove the township intent gap?",
+    "Compare commitment vs industry norms",
+    "Which segment to prioritise for launch?",
+    "What packaging variants should we test?",
+  ],
+};
+
 export default function TestPage() {
   const [, setLocation]           = useLocation();
   const { user }                  = useAuth();
@@ -106,6 +199,11 @@ export default function TestPage() {
   /* Standard brief quick-form state */
   const [selectedStudyType, setSelectedStudyType] = useState("basic");
 
+  /* Research Assistant tab state */
+  const [assistantInput, setAssistantInput]     = useState("");
+  const [assistantMsgs, setAssistantMsgs]       = useState<{ role: "user" | "ai"; text: string }[]>([]);
+  const [selectedAssistStudy, setSelectedAssistStudy] = useState(MOCK_STUDIES_DATA[1].id);
+
   const { data: studies, isLoading: isLoadingStudies } = useQuery<any[]>({
     queryKey: ["/api/member/studies"],
     enabled: !!user,
@@ -130,6 +228,33 @@ export default function TestPage() {
       { type: "system", text: "Based on your study portfolio, here's what I can see from that angle…", rec: "→ I'll need more study data to give a definitive answer, but this direction looks strong." },
     ]);
     setAiInput("");
+  };
+
+  const handleSendAssistant = () => {
+    if (!assistantInput.trim()) return;
+    const q = assistantInput;
+    setAssistantInput("");
+    setAssistantMsgs(prev => [
+      ...prev,
+      { role: "user", text: q },
+      { role: "ai",   text: "Based on the study data, the township intent gap is driven primarily by value-for-money perception. At 52% intent vs. 84% for urban 25–34, the R12–15 price point appears to be the key unlock. An entry SKU strategy is recommended before the premium launch." },
+    ]);
+  };
+
+  const mColor = (val: number, signal: string | null) => {
+    if (signal === "Watch") return CORAL;
+    if (val >= 75) return SUCCESS;
+    if (val >= 55) return AMBER_DK;
+    return CORAL;
+  };
+
+  const signalMeta = (signal: string | null, val: number) => {
+    if (!signal) return null;
+    if (signal === "Watch")     return { color: CORAL,    bg: "#FDECEA", arrow: "▼" };
+    if (signal === "Strong")    return { color: SUCCESS,  bg: SUC_LT,    arrow: "▲" };
+    return val >= 75
+      ? { color: SUCCESS,  bg: SUC_LT,    arrow: "▲" }
+      : { color: AMBER_DK, bg: AMBER_LT,  arrow: "▲" };
   };
 
   const formatDate = (d: string) => {
@@ -689,117 +814,164 @@ export default function TestPage() {
             {/* ── STUDIES ── */}
             {activeTab === "studies" && (
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: CORAL }}>
-                    {isLoadingStudies ? "Loading…" : `${studies?.length ?? 0} ${studies?.length === 1 ? "Study" : "Studies"}`}
-                  </span>
-                  <div className="flex gap-2">
-                    <select className="rounded-lg px-3 py-1.5 text-xs focus:outline-none" style={{ background: "#fff", border: `1px solid ${N200}`, color: VDK }}>
-                      <option>All statuses</option>
-                      <option>Complete</option>
-                      <option>In Field</option>
-                      <option>Analysing</option>
-                    </select>
-                    <button
-                      onClick={() => { setActiveTab("brief"); setBriefMode("choose"); }}
-                      className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg"
-                      style={{ background: TEST_COLOR, borderRadius: 8 }}
-                      data-testid="button-new-brief"
-                    >
-                      + New Brief
-                    </button>
+                {/* Filter bar */}
+                <div className="flex flex-wrap items-center gap-2 mb-5">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style={{ color: N400 }} />
+                    <input className="pl-8 pr-3 py-1.5 text-xs rounded-lg focus:outline-none w-40"
+                      style={{ background: "#fff", border: `1px solid ${N200}`, color: VDK }}
+                      placeholder="Search studies..."
+                      data-testid="input-search-studies"
+                    />
                   </div>
+                  <select className="rounded-lg px-3 py-1.5 text-xs focus:outline-none" style={{ background: "#fff", border: `1px solid ${N200}`, color: VDK }} data-testid="select-study-type">
+                    <option>All Types</option>
+                    <option>BASIC</option>
+                    <option>PRO</option>
+                  </select>
+                  <select className="rounded-lg px-3 py-1.5 text-xs focus:outline-none" style={{ background: "#fff", border: `1px solid ${N200}`, color: VDK }} data-testid="select-study-status">
+                    <option>All Statuses</option>
+                    <option>Completed</option>
+                    <option>In Field</option>
+                    <option>Analysing</option>
+                  </select>
+                  <span className="text-xs ml-auto" style={{ color: N400 }}>
+                    {MOCK_STUDIES_DATA.length + (studies?.length ?? 0)} studies
+                  </span>
                 </div>
 
+                {/* Rich mock study cards */}
+                {MOCK_STUDIES_DATA.map(study => {
+                  const typeBadge = study.studyType === "PRO"
+                    ? { label: "PRO",   bg: VIO_LT,  color: VIO    }
+                    : { label: "BASIC", bg: CYAN_LT, color: CYAN_DK };
+
+                  return (
+                    <div key={study.id} style={{ ...CARD, marginBottom: 20 }} className="overflow-hidden" data-testid={`study-card-${study.id}`}>
+
+                      {/* Card header */}
+                      <div className="flex items-start justify-between gap-3 px-5 py-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#FFF1ED", border: "1px solid rgba(232,80,58,0.2)" }}>
+                            <BarChart2 className="w-5 h-5" style={{ color: CORAL }} />
+                          </div>
+                          <div>
+                            <div className="text-base font-semibold leading-snug" style={{ color: VDK }}>{study.title}</div>
+                            <div className="text-xs mt-0.5" style={{ color: N500 }}>
+                              {study.company} · {study.studyTypeDetail} · {study.respondents.toLocaleString()} respondents · {study.date}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <span className="text-[10px] font-bold px-2 py-0.5" style={{ background: typeBadge.bg, color: typeBadge.color, borderRadius: 9999 }}>{typeBadge.label}</span>
+                          {study.qaVerified && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 flex items-center gap-1" style={{ background: SUC_LT, color: SUCCESS, borderRadius: 9999 }}>
+                              <CheckCircle2 className="w-2.5 h-2.5" /> QA Verified
+                            </span>
+                          )}
+                          <span className="text-[10px] font-bold px-2 py-0.5" style={{ background: SUC_LT, color: SUCCESS, borderRadius: 9999 }}>Completed</span>
+                        </div>
+                      </div>
+
+                      {/* Metrics grid */}
+                      <div className="grid grid-cols-3" style={{ borderTop: `1px solid ${N200}`, borderLeft: `1px solid ${N200}` }}>
+                        {study.metrics.map((m, i) => {
+                          const mc = mColor(m.val, m.signal);
+                          const sm = signalMeta(m.signal, m.val);
+                          return (
+                            <div key={m.label} className="py-4 px-5 text-center" style={{ borderRight: `1px solid ${N200}`, borderBottom: i < 3 ? `1px solid ${N200}` : "none" }}>
+                              <div className="text-[28px] font-bold font-mono leading-none mb-0.5" style={{ color: mc }}>{m.val}%</div>
+                              <div className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: N500 }}>{m.label}</div>
+                              {sm && (
+                                <div className="text-[10px] font-semibold" style={{ color: sm.color }}>{sm.arrow} {m.signal}</div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Takeaways */}
+                      <div className="px-5 py-4" style={{ borderTop: `1px solid ${N200}` }}>
+                        <div className="text-[10px] font-bold tracking-widest uppercase mb-3" style={{ color: CORAL }}>Key Takeaways</div>
+                        <div className="space-y-2 mb-4">
+                          {study.takeaways.map((t, i) => (
+                            <div key={i} className="flex gap-2.5 items-start">
+                              <div className="flex-shrink-0 mt-0.5">
+                                {t.kind === "star"  && <Star className="w-3.5 h-3.5" style={{ color: CORAL }} />}
+                                {t.kind === "warn"  && <AlertTriangle className="w-3.5 h-3.5" style={{ color: AMBER_DK }} />}
+                                {t.kind === "chart" && <BarChart2 className="w-3.5 h-3.5" style={{ color: VIO }} />}
+                              </div>
+                              <p className="text-xs leading-relaxed" style={{ color: VDK }}>
+                                <span dangerouslySetInnerHTML={{ __html: t.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="text-[10px] font-bold tracking-widest uppercase mb-2" style={{ color: N400 }}>Recommended Next Steps</div>
+                        <div className="space-y-1.5">
+                          {study.nextSteps.map((s, i) => (
+                            <div key={i} className="flex gap-2 items-start">
+                              <div className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5" style={{ background: SUCCESS }} />
+                              <p className="text-xs leading-relaxed" style={{ color: N500 }}>{s}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="px-5 py-3 flex gap-2" style={{ borderTop: `1px solid ${N200}`, background: "#FAFAF8" }}>
+                        <button
+                          onClick={() => { setActiveTab("assistant"); setSelectedAssistStudy(study.id); }}
+                          className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg flex items-center gap-1.5"
+                          style={{ background: CORAL, borderRadius: 8 }}
+                          data-testid={`button-act-study-${study.id}`}
+                        >
+                          <Sparkles className="w-3 h-3" /> Analyse in Act
+                        </button>
+                        <button className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5" style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}>
+                          <ChevronRight className="w-3 h-3" /> Download PDF
+                        </button>
+                        <button className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5" style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}>
+                          <FileText className="w-3 h-3" /> Build Slide Deck
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Live API studies (simpler format if metrics unavailable) */}
                 {isLoadingStudies
-                  ? [1, 2, 3].map(i => (
+                  ? [1, 2].map(i => (
                       <div key={i} style={{ ...CARD, marginBottom: 12, padding: 20 }}>
                         <Skeleton className="h-4 w-1/2 mb-2" />
                         <Skeleton className="h-3 w-1/3 mb-3" />
                         <Skeleton className="h-3 w-3/4" />
                       </div>
                     ))
-                  : studies && studies.length > 0
-                    ? studies.map((study: any) => {
-                        const statusBadge = getStatusBadge(study.status);
-                        const typeBadge   = getStudyTypeBadge(study.studyType);
-
-                        return (
-                          <div key={study.id} style={{ ...CARD, marginBottom: 12 }} className="overflow-hidden hover:shadow-md transition-shadow" data-testid={`study-card-${study.id}`}>
-                            <div className="px-5 py-4">
-                              <div className="flex items-start justify-between gap-3 mb-2">
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-base font-semibold mb-0.5" style={{ color: VDK }}>{study.title}</div>
-                                  <div className="text-xs flex flex-wrap gap-2" style={{ color: N500 }}>
-                                    {study.companyName && <span>{study.companyName}</span>}
-                                    {study.submittedByName && <span>· {study.submittedByName}</span>}
-                                    {study.createdAt && <span>· {formatDate(study.createdAt)}</span>}
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-1.5 flex-shrink-0">
-                                  <span className="text-[10px] font-bold px-2 py-0.5" style={{ background: typeBadge.bg, color: typeBadge.color, borderRadius: 9999 }}>{typeBadge.label}</span>
-                                  <span className="text-[10px] font-bold px-2 py-0.5" style={{ background: statusBadge.bg, color: statusBadge.color, borderRadius: 9999 }}>{statusBadge.label}</span>
-                                </div>
-                              </div>
-
-                              {study.description && (
-                                <div className="text-xs leading-relaxed mb-3 px-3 py-2 rounded-lg" style={{ background: "#FAFAF8", border: `1px solid ${N200}`, color: N500 }}>
-                                  <span className="font-semibold" style={{ color: VDK }}>Research objective: </span>{study.description}
-                                </div>
-                              )}
-
-                              {study.tags && study.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1.5 mb-3">
-                                  {study.tags.map((tag: string) => (
-                                    <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: VIO_LT, color: VIO }}>{tag}</span>
-                                  ))}
-                                </div>
-                              )}
-
-                              {study.deliveryDate && (
-                                <div className="text-xs mb-2" style={{ color: N500 }}>
-                                  <span className="font-semibold" style={{ color: VDK }}>Est. delivery: </span>{formatDate(study.deliveryDate)}
-                                </div>
-                              )}
+                  : studies?.map((study: any) => {
+                      const statusBadge = getStatusBadge(study.status);
+                      const typeBadge   = getStudyTypeBadge(study.studyType);
+                      return (
+                        <div key={study.id} style={{ ...CARD, marginBottom: 12 }} className="overflow-hidden" data-testid={`study-card-api-${study.id}`}>
+                          <div className="flex items-start justify-between gap-3 px-5 py-4">
+                            <div>
+                              <div className="text-sm font-semibold mb-0.5" style={{ color: VDK }}>{study.title}</div>
+                              <div className="text-xs" style={{ color: N500 }}>{study.companyName}{study.createdAt ? ` · ${formatDate(study.createdAt)}` : ""}</div>
                             </div>
-
-                            <div className="px-5 py-3 flex gap-2" style={{ borderTop: `1px solid ${N200}` }}>
-                              <button
-                                onClick={() => setLocation("/portal/act")}
-                                className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg"
-                                style={{ background: CORAL, borderRadius: 8 }}
-                                data-testid={`button-act-study-${study.id}`}
-                              >
-                                Analyse in Act
-                              </button>
-                              {study.reportUrl && (
-                                <button
-                                  onClick={() => window.open(study.reportUrl, "_blank")}
-                                  className="text-xs font-semibold px-3 py-1.5 flex items-center gap-1 rounded-lg"
-                                  style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}
-                                  data-testid={`button-report-study-${study.id}`}
-                                >
-                                  <ExternalLink className="w-3 h-3" /> View Report
-                                </button>
-                              )}
+                            <div className="flex gap-1.5 flex-shrink-0">
+                              <span className="text-[10px] font-bold px-2 py-0.5" style={{ background: typeBadge.bg, color: typeBadge.color, borderRadius: 9999 }}>{typeBadge.label}</span>
+                              <span className="text-[10px] font-bold px-2 py-0.5" style={{ background: statusBadge.bg, color: statusBadge.color, borderRadius: 9999 }}>{statusBadge.label}</span>
                             </div>
                           </div>
-                        );
-                      })
-                    : (
-                      <div style={CARD} className="p-10 text-center">
-                        <p className="text-sm font-semibold mb-1" style={{ color: VDK }}>No studies yet</p>
-                        <p className="text-xs mb-4" style={{ color: N500 }}>Launch your first brief to start collecting consumer insights.</p>
-                        <button
-                          onClick={() => { setActiveTab("brief"); setBriefMode("choose"); }}
-                          className="text-sm font-semibold px-5 py-2 text-white rounded-lg"
-                          style={{ background: TEST_COLOR, borderRadius: 8 }}
-                          data-testid="button-start-first-brief"
-                        >
-                          Launch a Brief
-                        </button>
-                      </div>
-                    )
+                          {study.description && (
+                            <div className="px-5 pb-3 text-xs" style={{ color: N500 }}>{study.description}</div>
+                          )}
+                          <div className="px-5 py-3 flex gap-2" style={{ borderTop: `1px solid ${N200}`, background: "#FAFAF8" }}>
+                            <button onClick={() => setLocation("/portal/act")} className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg" style={{ background: CORAL, borderRadius: 8 }}>Analyse in Act</button>
+                          </div>
+                        </div>
+                      );
+                    })
                 }
               </div>
             )}
@@ -807,84 +979,228 @@ export default function TestPage() {
             {/* ── RESEARCH ASSISTANT ── */}
             {activeTab === "assistant" && (
               <div>
-                <div className="text-[11px] font-bold tracking-widest uppercase mb-2" style={{ color: CORAL }}>Research Assistant</div>
-                <p className="text-sm mb-4" style={{ color: N500 }}>Your AI-powered research partner. Ask questions about your studies, generate summaries, or build your next brief.</p>
-                <div style={{ ...CARD, padding: 0 }}>
-                  <div className="px-5 py-4" style={{ borderBottom: `1px solid ${N200}`, background: "#FAFAF8" }}>
-                    <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: VDK }}>
-                      <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: VIO }}>
-                        <Sparkles className="w-3 h-3 text-white" />
-                      </div>
-                      Research AI
-                    </div>
-                    <div className="text-xs mt-0.5" style={{ color: N500 }}>Analysing {studies?.length ?? 0} studies in your portfolio</div>
-                  </div>
-                  <div className="p-4">
-                    <p className="text-xs" style={{ color: N500 }}>Ask me anything about your study results, gaps, or what to test next.</p>
+                {/* Study selector */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="text-[11px] font-bold tracking-widest uppercase" style={{ color: CORAL }}>Study Results</div>
+                  <select
+                    value={selectedAssistStudy}
+                    onChange={e => setSelectedAssistStudy(e.target.value)}
+                    className="rounded-lg px-3 py-1.5 text-xs focus:outline-none max-w-[220px] truncate"
+                    style={{ background: "#fff", border: `1px solid ${N200}`, color: VDK }}
+                    data-testid="select-assistant-study"
+                  >
+                    {MOCK_STUDIES_DATA.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
+                  </select>
+                </div>
+
+                {/* Study header bar */}
+                <div className="px-5 py-3 rounded-xl mb-4" style={{ background: VDK }}>
+                  <div className="text-[10px] font-bold tracking-widest uppercase text-white opacity-80">
+                    {MOCK_ASSISTANT.title} · {MOCK_ASSISTANT.type} · {MOCK_ASSISTANT.respondents} RESPONDENTS
                   </div>
                 </div>
+
+                {/* 4 key metrics */}
+                <div className="grid grid-cols-4 gap-2 mb-4">
+                  {MOCK_ASSISTANT.metrics.map(m => (
+                    <div key={m.label} style={CARD} className="p-3 text-center">
+                      <div className="text-2xl font-bold font-mono leading-none mb-0.5" style={{ color: m.color }}>{m.valStr}</div>
+                      <div className="text-[9px] font-bold uppercase tracking-wide leading-tight mb-0.5" style={{ color: N500 }}>{m.label}</div>
+                      {m.sub && <div className="text-[9px] leading-tight" style={{ color: m.sub === "Watch" ? CORAL : N400 }}>{m.sub}</div>}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Segment Breakdown */}
+                <div style={{ ...CARD, marginBottom: 16 }} className="p-5">
+                  <div className="text-sm font-semibold mb-0.5" style={{ color: VDK }}>Segment Breakdown</div>
+                  <div className="text-xs mb-4" style={{ color: N500 }}>Purchase intent by audience</div>
+                  <div className="space-y-3">
+                    {MOCK_ASSISTANT.segments.map(seg => (
+                      <div key={seg.label}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-medium" style={{ color: VDK }}>{seg.label}</span>
+                          <span className="text-xs font-bold font-mono" style={{ color: seg.color }}>{seg.pct}%</span>
+                        </div>
+                        <div className="h-2 rounded-full overflow-hidden" style={{ background: "#F0EBE0" }}>
+                          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${seg.pct}%`, background: seg.color }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Key Drivers */}
+                <div style={CARD} className="p-5">
+                  <div className="text-sm font-semibold mb-0.5" style={{ color: VDK }}>Key Drivers</div>
+                  <div className="text-xs mb-4" style={{ color: N500 }}>What moved the needle</div>
+                  <div className="space-y-2">
+                    {MOCK_ASSISTANT.drivers.map((d, i) => (
+                      <div key={i} className="flex gap-3 items-start p-3 rounded-xl" style={{ background: "#FAFAF8", border: `1px solid ${N200}` }}>
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: d.highlight + "22" }}>
+                          {d.ok
+                            ? <CheckCircle2 className="w-4 h-4" style={{ color: d.highlight }} />
+                            : <AlertTriangle className="w-4 h-4" style={{ color: d.highlight }} />
+                          }
+                        </div>
+                        <div>
+                          <div className="text-xs font-semibold" style={{ color: VDK }}>{d.title}</div>
+                          <div className="text-xs" style={{ color: N500 }}>{d.sub}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Chat messages (if any sent from assistant panel) */}
+                {assistantMsgs.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {assistantMsgs.map((m, i) => (
+                      <div key={i} className={`text-xs p-3 rounded-xl leading-relaxed ${m.role === "user" ? "ml-4" : ""}`} style={{ background: m.role === "user" ? "#FAF3E8" : "#F0FDF4", border: `1px solid ${m.role === "user" ? N200 : "rgba(42,158,92,0.15)"}`, color: VDK }}>
+                        {m.text}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
 
           {/* Right: AI Panel */}
-          <div className="w-80 min-w-[320px] flex flex-col overflow-hidden" style={{ background: "#fff", borderLeft: `1px solid ${N200}` }}>
-            <div className="px-4 py-3 flex-shrink-0" style={{ borderBottom: `1px solid ${N200}` }}>
-              <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: VDK }}>
-                <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: TEST_COLOR }}>
-                  <Sparkles className="w-3 h-3 text-white" />
-                </div>
-                Research AI
-              </div>
-              <div className="text-[11px] mt-0.5 flex items-center gap-1.5 font-semibold" style={{ color: TEST_COLOR }}>
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: TEST_COLOR }} />
-                {studies?.length ?? 0} studies indexed
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-3 space-y-3">
-              {chatMessages.map((msg, i) => (
-                <div key={i} className={msg.type === "user" ? "ml-4" : ""}>
-                  <div className="text-[10px] mb-1 flex items-center gap-1.5" style={{ color: N500 }}>
-                    {msg.type === "system"
-                      ? <><div className="w-4 h-4 rounded-sm flex items-center justify-center" style={{ background: TEST_COLOR }}><Sparkles className="w-2.5 h-2.5 text-white" /></div> Research AI</>
-                      : <><div className="w-4 h-4 rounded-full flex items-center justify-center text-white text-[8px] font-bold" style={{ background: CORAL }}>{initials(user?.name)}</div> {user?.name}</>
-                    }
+          <div
+            className={`flex flex-col overflow-hidden flex-shrink-0 ${activeTab === "assistant" ? "w-[340px] min-w-[340px]" : "w-80 min-w-[320px]"}`}
+            style={{ background: "#fff", borderLeft: `1px solid ${N200}` }}
+          >
+            {activeTab === "assistant" ? (
+              /* ── Research Assistant Panel (Image 2 right) ── */
+              <div className="flex flex-col h-full">
+                <div className="px-5 py-4 flex-shrink-0" style={{ borderBottom: `1px solid ${N200}` }}>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: TEST_COLOR }}>
+                      <Sparkles className="w-3 h-3 text-white" />
+                    </div>
+                    <div className="text-sm font-semibold" style={{ color: VDK }}>Research Assistant</div>
                   </div>
-                  <div className="text-xs leading-relaxed p-3 rounded-xl" style={{ background: msg.type === "user" ? "#FAF3E8" : "#F0FDF4", border: `1px solid ${msg.type === "user" ? N200 : "rgba(42,158,92,0.15)"}` }}>
-                    <p style={{ color: VDK, whiteSpace: "pre-line" }}>{msg.text}</p>
-                    {msg.rec && (
-                      <div className="mt-2 pl-2 py-1.5 text-xs font-medium rounded-r" style={{ background: SUC_LT, borderLeft: `2px solid ${TEST_COLOR}`, color: TEST_COLOR }}>
-                        {msg.rec}
+                  <div className="text-xs" style={{ color: N500 }}>Key takeaways &amp; strategic summary</div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+                  {/* Key Takeout */}
+                  <div>
+                    <div className="text-xs font-bold mb-1.5" style={{ color: VDK }}>Key Takeout</div>
+                    <p className="text-xs leading-relaxed" style={{ color: N500 }}>{MOCK_ASSISTANT.keyTakeout}</p>
+                  </div>
+
+                  {/* Watch Signal */}
+                  <div className="rounded-xl p-3" style={{ background: AMBER_LT, border: `1px solid ${AMBER_DK}22` }}>
+                    <div className="text-xs font-bold mb-1" style={{ color: AMBER_DK }}>Watch Signal</div>
+                    <p className="text-xs leading-relaxed" style={{ color: N500 }}>{MOCK_ASSISTANT.watchSignal}</p>
+                  </div>
+
+                  {/* Strategic Summary */}
+                  <div>
+                    <div className="text-xs font-bold mb-1.5" style={{ color: VDK }}>Strategic Summary</div>
+                    <p className="text-xs leading-relaxed" style={{ color: N500 }}>{MOCK_ASSISTANT.strategicSummary}</p>
+                  </div>
+
+                  {/* Dynamic chat messages */}
+                  {assistantMsgs.map((m, i) => (
+                    <div key={i} className={`text-xs p-3 rounded-xl leading-relaxed ${m.role === "user" ? "ml-2" : ""}`}
+                      style={{ background: m.role === "user" ? "#FAF3E8" : "#F0FDF4", border: `1px solid ${m.role === "user" ? N200 : "rgba(42,158,92,0.15)"}`, color: VDK }}>
+                      {m.text}
+                    </div>
+                  ))}
+
+                  {/* Insights Queries */}
+                  <div>
+                    <div className="text-xs font-bold mb-2" style={{ color: VDK }}>Insights Queries</div>
+                    <div className="space-y-1.5">
+                      {MOCK_ASSISTANT.queries.map(q => (
+                        <button key={q} onClick={() => setAssistantInput(q)} className="w-full text-left text-xs px-3 py-2.5 rounded-lg transition-colors" style={{ background: "#fff", border: `1px solid ${N200}`, color: N500 }} data-testid={`query-${q.substring(0, 20)}`}>
+                          {q}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Chat input */}
+                <div className="p-3 flex gap-2 flex-shrink-0" style={{ borderTop: `1px solid ${N200}` }}>
+                  <input
+                    value={assistantInput}
+                    onChange={e => setAssistantInput(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && handleSendAssistant()}
+                    className="flex-1 rounded-lg px-3 py-2 text-xs placeholder:text-muted-foreground focus:outline-none"
+                    style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
+                    placeholder="Ask about these results..."
+                    data-testid="input-assistant-message"
+                    onFocus={e => (e.target.style.borderColor = TEST_COLOR)}
+                    onBlur={e => (e.target.style.borderColor = N200)}
+                  />
+                  <button onClick={handleSendAssistant} className="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: TEST_COLOR }} data-testid="button-send-assistant">
+                    <Send className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* ── Normal Research AI Panel ── */
+              <>
+                <div className="px-4 py-3 flex-shrink-0" style={{ borderBottom: `1px solid ${N200}` }}>
+                  <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: VDK }}>
+                    <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: TEST_COLOR }}>
+                      <Sparkles className="w-3 h-3 text-white" />
+                    </div>
+                    Research AI
+                  </div>
+                  <div className="text-[11px] mt-0.5 flex items-center gap-1.5 font-semibold" style={{ color: TEST_COLOR }}>
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: TEST_COLOR }} />
+                    {studies?.length ?? 0} studies indexed
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-3 space-y-3">
+                  {chatMessages.map((msg, i) => (
+                    <div key={i} className={msg.type === "user" ? "ml-4" : ""}>
+                      <div className="text-[10px] mb-1 flex items-center gap-1.5" style={{ color: N500 }}>
+                        {msg.type === "system"
+                          ? <><div className="w-4 h-4 rounded-sm flex items-center justify-center" style={{ background: TEST_COLOR }}><Sparkles className="w-2.5 h-2.5 text-white" /></div> Research AI</>
+                          : <><div className="w-4 h-4 rounded-full flex items-center justify-center text-white text-[8px] font-bold" style={{ background: CORAL }}>{initials(user?.name)}</div> {user?.name}</>
+                        }
                       </div>
-                    )}
-                  </div>
+                      <div className="text-xs leading-relaxed p-3 rounded-xl" style={{ background: msg.type === "user" ? "#FAF3E8" : "#F0FDF4", border: `1px solid ${msg.type === "user" ? N200 : "rgba(42,158,92,0.15)"}` }}>
+                        <p style={{ color: VDK, whiteSpace: "pre-line" }}>{msg.text}</p>
+                        {msg.rec && (
+                          <div className="mt-2 pl-2 py-1.5 text-xs font-medium rounded-r" style={{ background: SUC_LT, borderLeft: `2px solid ${TEST_COLOR}`, color: TEST_COLOR }}>
+                            {msg.rec}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            <div className="flex gap-1.5 px-3 py-2 flex-wrap flex-shrink-0" style={{ borderTop: `1px solid ${N200}`, background: "#FAFAF8" }}>
-              {AI_PROMPTS.map(p => (
-                <button key={p} onClick={() => setAiInput(p)} className="text-[11px] px-2.5 py-1 rounded-full whitespace-nowrap" style={{ background: "#fff", border: `1px solid ${N200}`, color: N500 }} data-testid={`ai-prompt-${p.substring(0, 20)}`}>{p}</button>
-              ))}
-            </div>
+                <div className="flex gap-1.5 px-3 py-2 flex-wrap flex-shrink-0" style={{ borderTop: `1px solid ${N200}`, background: "#FAFAF8" }}>
+                  {AI_PROMPTS.map(p => (
+                    <button key={p} onClick={() => setAiInput(p)} className="text-[11px] px-2.5 py-1 rounded-full whitespace-nowrap" style={{ background: "#fff", border: `1px solid ${N200}`, color: N500 }} data-testid={`ai-prompt-${p.substring(0, 20)}`}>{p}</button>
+                  ))}
+                </div>
 
-            <div className="p-3 flex gap-2 flex-shrink-0" style={{ borderTop: `1px solid ${N200}` }}>
-              <input
-                value={aiInput}
-                onChange={e => setAiInput(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && handleSendAI()}
-                className="flex-1 rounded-lg px-3 py-2 text-xs placeholder:text-muted-foreground focus:outline-none"
-                style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
-                placeholder="Ask about your studies…"
-                data-testid="input-ai-message"
-                onFocus={e => (e.target.style.borderColor = TEST_COLOR)}
-                onBlur={e => (e.target.style.borderColor = N200)}
-              />
-              <button onClick={handleSendAI} className="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: TEST_COLOR }} data-testid="button-send-ai">
-                <Send className="w-3.5 h-3.5" />
-              </button>
-            </div>
+                <div className="p-3 flex gap-2 flex-shrink-0" style={{ borderTop: `1px solid ${N200}` }}>
+                  <input
+                    value={aiInput}
+                    onChange={e => setAiInput(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && handleSendAI()}
+                    className="flex-1 rounded-lg px-3 py-2 text-xs placeholder:text-muted-foreground focus:outline-none"
+                    style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
+                    placeholder="Ask about your studies…"
+                    data-testid="input-ai-message"
+                    onFocus={e => (e.target.style.borderColor = TEST_COLOR)}
+                    onBlur={e => (e.target.style.borderColor = N200)}
+                  />
+                  <button onClick={handleSendAI} className="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: TEST_COLOR }} data-testid="button-send-ai">
+                    <Send className="w-3.5 h-3.5" />
+                  </button>
+                </div>
 
             <button
               onClick={() => setShowChat(!showChat)}
@@ -910,6 +1226,8 @@ export default function TestPage() {
                   <button className="w-7 h-7 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: TEST_COLOR }} data-testid="button-send-chat"><Send className="w-3 h-3" /></button>
                 </div>
               </div>
+            )}
+            </>
             )}
           </div>
         </div>
