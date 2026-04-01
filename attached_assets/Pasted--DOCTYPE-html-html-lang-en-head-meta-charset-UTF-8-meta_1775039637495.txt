@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Innovatr Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F7F5F2;
+  --surface:#FFFFFF;
+  --surface2:#F2EFEB;
+  --surface3:#EAE6E0;
+  --border:#E2DDD6;
+  --border2:#D4CEC6;
+  --text:#1C1917;
+  --text2:#57534E;
+  --text3:#A8A29E;
+  --coral:#C45A38;
+  --coral-bg:#FDF2EE;
+  --coral-border:#F2C4B4;
+  --explore:#2563EB;
+  --explore-bg:#EFF6FF;
+  --explore-border:#BFDBFE;
+  --test:#059669;
+  --test-bg:#ECFDF5;
+  --test-border:#A7F3D0;
+  --act:#C45A38;
+  --act-bg:#FDF2EE;
+  --act-border:#F2C4B4;
+  --health:#7C3AED;
+  --health-bg:#F5F3FF;
+  --health-border:#DDD6FE;
+  --amber:#B45309;
+  --amber-bg:#FFFBEB;
+  --warn:#DC2626;
+  --warn-bg:#FEF2F2;
+  --radius:10px;
+  --radius-sm:6px;
+  --radius-xs:4px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.1),0 2px 4px rgba(0,0,0,0.06);
+  --shadow-lg:0 8px 24px rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.06);
+  --font-head:'DM Serif Display',serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;font-size:14px;line-height:1.5}
+
+/* ── SIDEBAR ─────────────────────────────────────────────────── */
+.sidebar{width:232px;min-width:232px;background:var(–surface);border-right:1px solid var(–border);display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.sb-logo{padding:18px 20px 14px;border-bottom:1px solid var(–border);display:flex;align-items:center;gap:10px}
+.sb-logo-mark{width:32px;height:32px;background:var(–coral);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(–font-head);font-size:16px;color:#fff;font-weight:400;flex-shrink:0}
+.sb-logo-text{font-family:var(–font-head);font-size:16px;color:var(–text)}
+.sb-user{padding:12px 16px;border-bottom:1px solid var(–border);display:flex;align-items:center;gap:10px;cursor:pointer}
+.sb-user:hover{background:var(–surface2)}
+.sb-avatar{width:30px;height:30px;background:var(–coral);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0;font-family:var(–font-body)}
+.sb-user-info{flex:1;min-width:0}
+.sb-user-name{font-size:13px;font-weight:500;color:var(–text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-user-company{font-size:11px;color:var(–text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-tier{font-size:9px;font-weight:700;letter-spacing:0.1em;padding:2px 6px;border-radius:3px;background:var(–coral-bg);color:var(–coral);border:1px solid var(–coral-border)}
+
+.sb-section{padding:10px 12px 4px;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(–text3)}
+.sb-nav{padding:0 8px;flex:1;overflow-y:auto}
+.sb-nav::-webkit-scrollbar{display:none}
+
+.sb-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(–radius-sm);cursor:pointer;transition:background 0.15s;margin-bottom:1px;position:relative}
+.sb-item:hover{background:var(–surface2)}
+.sb-item.active{background:var(–surface2)}
+.sb-item.active::before{content:’’;position:absolute;left:0;top:4px;bottom:4px;width:3px;background:var(–coral);border-radius:0 2px 2px 0}
+.sb-item-icon{width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;color:var(–text3)}
+.sb-item.active .sb-item-icon{color:var(–coral)}
+.sb-item-label{font-size:13px;font-weight:500;color:var(–text2);flex:1}
+.sb-item.active .sb-item-label{color:var(–text)}
+.sb-badge{font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;background:var(–coral);color:#fff}
+
+.phase-items{padding:0 8px}
+.phase-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(–radius-sm);cursor:pointer;transition:background 0.15s;margin-bottom:1px;position:relative}
+.phase-item:hover{background:var(–surface2)}
+.phase-item.active{background:var(–surface2)}
+.phase-num{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;font-family:var(–font-mono);border:1.5px solid var(–border2);color:var(–text3)}
+.phase-item.active .phase-num,.phase-item:hover .phase-num{border-color:var(–phase-col);color:var(–phase-col)}
+.phase-item-label{font-size:13px;font-weight:500;color:var(–text2)}
+.phase-item.active .phase-item-label{color:var(–text)}
+
+.sb-bottom{padding:8px;border-top:1px solid var(–border);margin-top:auto}
+.sb-bottom-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(–radius-sm);cursor:pointer;font-size:13px;color:var(–text3);transition:all 0.15s}
+.sb-bottom-item:hover{background:var(–surface2);color:var(–text2)}
+
+/* ── MAIN ─────────────────────────────────────────────────────── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* Topbar */
+.topbar{height:50px;background:var(–surface);border-bottom:1px solid var(–border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-left{display:flex;align-items:center;gap:0}
+.phase-tab{display:flex;align-items:center;gap:6px;padding:6px 14px;font-size:13px;font-weight:500;color:var(–text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s;height:50px}
+.phase-tab:hover{color:var(–text2)}
+.phase-tab.active{color:var(–text);border-bottom-color:var(–phase-col)}
+.phase-tab-num{width:18px;height:18px;border-radius:50%;font-size:9px;font-weight:700;font-family:var(–font-mono);display:flex;align-items:center;justify-content:center;background:var(–surface3);color:var(–text3)}
+.phase-tab.active .phase-tab-num{background:var(–phase-col);color:#fff}
+.phase-tab.active .phase-tab-label{color:var(–phase-col)}
+.topbar-sep{color:var(–border2);margin:0 4px;font-size:12px}
+
+.topbar-right{display:flex;align-items:center;gap:8px}
+.search-bar{display:flex;align-items:center;gap:6px;background:var(–surface2);border:1px solid var(–border);border-radius:var(–radius-sm);padding:6px 12px;font-size:13px;color:var(–text3);cursor:text;min-width:180px}
+.search-bar kbd{background:var(–surface3);border:1px solid var(–border2);border-radius:3px;padding:1px 4px;font-size:10px;font-family:var(–font-mono);color:var(–text3)}
+.tb-avatar{width:28px;height:28px;background:var(–coral);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;cursor:pointer}
+
+/* Content */
+.content{flex:1;overflow-y:auto;overflow-x:hidden}
+.content::-webkit-scrollbar{width:5px}
+.content::-webkit-scrollbar-track{background:transparent}
+.content::-webkit-scrollbar-thumb{background:var(–border2);border-radius:3px}
+
+/* ── SHARED COMPONENTS ────────────────────────────────────────── */
+.page-header{padding:24px 24px 0}
+.page-greeting{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(–coral);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.page-title{font-family:var(–font-head);font-size:28px;color:var(–text);margin-bottom:4px}
+.page-sub{font-size:13px;color:var(–text2)}
+
+.card{background:var(–surface);border:1px solid var(–border);border-radius:var(–radius);overflow:hidden;box-shadow:var(–shadow)}
+.card-head{padding:14px 18px 12px;border-bottom:1px solid var(–border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(–text3)}
+.card-body{padding:16px 18px}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(–radius-sm);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;border:1px solid transparent;font-family:var(–font-body);text-decoration:none}
+.btn-primary{background:var(–coral);color:#fff;border-color:var(–coral)}
+.btn-primary:hover{background:#b04f30}
+.btn-secondary{background:var(–surface2);color:var(–text2);border-color:var(–border)}
+.btn-secondary:hover{background:var(–surface3);color:var(–text)}
+.btn-ghost{background:transparent;color:var(–text2);border-color:var(–border)}
+.btn-ghost:hover{background:var(–surface2)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-xs{padding:3px 8px;font-size:11px}
+
+.badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;letter-spacing:0.08em;padding:2px 7px;border-radius:3px;text-transform:uppercase}
+.badge-basic{background:#E0F2FE;color:#0369A1}
+.badge-pro{background:#F3E8FF;color:#7E22CE}
+.badge-complete{background:var(–test-bg);color:var(–test)}
+.badge-inprogress{background:#FFFBEB;color:#B45309}
+.badge-qa{background:var(–explore-bg);color:var(–explore)}
+
+.metric-block{text-align:center;padding:8px 6px}
+.metric-val{font-size:18px;font-weight:700;font-family:var(–font-mono);display:block;line-height:1}
+.metric-lbl{font-size:10px;color:var(–text3);margin-top:3px}
+.metric-up{color:var(–test)}
+.metric-down{color:var(–warn)}
+.metric-mid{color:var(–amber)}
+
+/* Phase colour helper classes */
+.phase-explore{–phase-col:var(–explore)}
+.phase-test{–phase-col:var(–test)}
+.phase-act{–phase-col:var(–act)}
+.phase-health{–phase-col:var(–health)}
+
+/* Signal/gap status chips */
+.status-chip{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;letter-spacing:0.04em}
+.chip-high{background:var(–warn-bg);color:var(–warn)}
+.chip-med{background:var(–amber-bg);color:var(–amber)}
+.chip-low{background:var(–test-bg);color:var(–test)}
+.chip-new{background:var(–explore-bg);color:var(–explore)}
+.chip-action{background:var(–coral-bg);color:var(–coral)}
+.chip-watch{background:var(–amber-bg);color:var(–amber)}
+.chip-trend{background:var(–health-bg);color:var(–health)}
+
+/* AI panel */
+.ai-panel{display:flex;flex-direction:column;height:100%;background:var(–surface)}
+.ai-panel-head{padding:14px 16px 12px;border-bottom:1px solid var(–border);flex-shrink:0}
+.ai-panel-title{font-size:12px;font-weight:600;color:var(–text);display:flex;align-items:center;gap:6px}
+.ai-panel-sub{font-size:11px;color:var(–test);margin-top:2px;display:flex;align-items:center;gap:4px}
+.ai-messages{flex:1;overflow-y:auto;padding:14px 14px;display:flex;flex-direction:column;gap:10px}
+.ai-messages::-webkit-scrollbar{width:3px}
+.ai-messages::-webkit-scrollbar-thumb{background:var(–border2)}
+.ai-msg{max-width:100%}
+.ai-msg-user .ai-msg-bubble{background:var(–surface2);border:1px solid var(–border);border-radius:var(–radius-sm) var(–radius-sm) 0 var(–radius-sm);margin-left:24px}
+.ai-msg-system .ai-msg-bubble{background:var(–surface);border:1px solid var(–border);border-radius:0 var(–radius-sm) var(–radius-sm) var(–radius-sm)}
+.ai-msg-bubble{padding:10px 12px;font-size:12.5px;line-height:1.65;color:var(–text)}
+.ai-msg-bubble strong{color:var(–text);font-weight:600}
+.ai-msg-bubble p{margin-bottom:6px}
+.ai-msg-bubble p:last-child{margin-bottom:0}
+.ai-msg-author{font-size:10px;color:var(–text3);margin-bottom:3px;display:flex;align-items:center;gap:5px}
+.ai-spark{width:16px;height:16px;background:var(–coral);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff}
+.ai-rec-block{margin-top:8px;padding:7px 10px;background:var(–test-bg);border-left:2px solid var(–test);border-radius:0 var(–radius-xs) var(–radius-xs) 0;font-size:11.5px;color:var(–test);font-weight:500}
+.ai-input-row{padding:10px 14px;border-top:1px solid var(–border);display:flex;gap:6px;background:var(–surface);flex-shrink:0}
+.ai-input{flex:1;background:var(–surface2);border:1px solid var(–border);border-radius:var(–radius-sm);padding:8px 12px;font-size:12.5px;color:var(–text);font-family:var(–font-body);outline:none;resize:none}
+.ai-input:focus{border-color:var(–coral)}
+.ai-input::placeholder{color:var(–text3)}
+.ai-send{width:32px;height:32px;background:var(–coral);border:none;border-radius:var(–radius-sm);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ai-prompts{padding:8px 14px;border-top:1px solid var(–border);display:flex;flex-wrap:wrap;gap:5px;background:var(–surface2)}
+.ai-prompt-chip{padding:4px 10px;background:var(–surface);border:1px solid var(–border);border-radius:12px;font-size:11px;color:var(–text2);cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.ai-prompt-chip:hover{background:var(–surface3);border-color:var(–border2)}
+
+/* Team chat */
+.chat-toggle{padding:9px 16px;border-top:1px solid var(–border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:var(–surface2);flex-shrink:0}
+.chat-toggle:hover{background:var(–surface3)}
+.chat-toggle-label{font-size:11.5px;font-weight:600;color:var(–text2);display:flex;align-items:center;gap:6px}
+.chat-unread-dot{width:16px;height:16px;background:var(–coral);border-radius:50%;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff}
+.chat-pane{background:var(–surface);border-top:1px solid var(–border);flex-shrink:0}
+.chat-msgs{padding:10px 14px;max-height:200px;overflow-y:auto}
+.chat-msgs::-webkit-scrollbar{width:3px}
+.chat-msgs::-webkit-scrollbar-thumb{background:var(–border2)}
+.chat-msg{margin-bottom:10px}
+.chat-msg-head{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.chat-av{width:20px;height:20px;border-radius:50%;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+.chat-author{font-size:11px;font-weight:600;color:var(–text)}
+.chat-time{font-size:10px;color:var(–text3)}
+.chat-bubble{background:var(–surface2);border:1px solid var(–border);border-radius:0 var(–radius-sm) var(–radius-sm) var(–radius-sm);padding:7px 10px;font-size:11.5px;color:var(–text2);line-height:1.5;margin-left:26px}
+.chat-tag{color:var(–explore);font-weight:600}
+.chat-input-row{padding:8px 12px;border-top:1px solid var(–border);display:flex;gap:6px}
+.chat-input{flex:1;background:var(–surface2);border:1px solid var(–border);border-radius:var(–radius-sm);padding:7px 10px;font-size:11.5px;color:var(–text);font-family:var(–font-body);outline:none}
+.chat-input:focus{border-color:var(–explore)}
+.chat-input::placeholder{color:var(–text3)}
+.chat-send-btn{width:28px;height:28px;background:var(–explore);border:none;border-radius:var(–radius-sm);color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* ═══════════════════════════════════════════════════════════════
+DASHBOARD
+═══════════════════════════════════════════════════════════════ */
+#view-dashboard{padding:0}
+.dash-wrap{padding:24px}
+
+/* Credit pills */
+.credit-strip{display:flex;gap:10px;margin-bottom:20px}
+.credit-chip{background:var(–surface);border:1px solid var(–border);border-radius:var(–radius-sm);padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:var(–shadow)}
+.credit-num{font-size:22px;font-weight:700;font-family:var(–font-mono);line-height:1}
+.credit-label{font-size:11px;color:var(–text3);line-height:1.3}
+
+/* Journey cards */
+.journey-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.j-card{background:var(–surface);border:1px solid var(–border);border-radius:var(–radius);padding:18px;cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden;box-shadow:var(–shadow)}
+.j-card:hover{transform:translateY(-2px);box-shadow:var(–shadow-md)}
+.j-card::before{content:’’;position:absolute;top:0;left:0;right:0;height:3px;background:var(–phase-col)}
+.j-card-num{width:28px;height:28px;border-radius:50%;border:2px solid var(–phase-col);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:var(–font-mono);color:var(–phase-col);margin-bottom:10px}
+.j-card-title{font-family:var(–font-head);font-size:20px;color:var(–text);margin-bottom:3px}
+.j-card-q{font-size:12px;font-weight:600;color:var(–phase-col);margin-bottom:4px}
+.j-card-sub{font-size:11.5px;color:var(–text3);margin-bottom:12px;line-height:1.5}
+.j-card-stat{font-size:12px;color:var(–text2);font-weight:500}
+.j-card-cta{position:absolute;bottom:14px;right:14px;font-size:11px;font-weight:600;color:var(–phase-col);display:flex;align-items:center;gap:3px}
+
+/* Stat row */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(–surface);border:1px solid var(–border);border-radius:var(–radius);padding:14px 16px;box-shadow:var(–shadow);cursor:pointer;transition:all 0.15s}
+.stat-card:hover{box-shadow:var(–shadow-md)}
+.stat-num{font-size:28px;font-weight:700;font-family:var(–font-mono);color:var(–text);line-height:1;margin-bottom:3px}
+.stat-label{font-size:12px;color:var(–text3);margin-bottom:2px}
+.stat-sub{font-size:11px;color:var(–text3);margin-bottom:8px}
+.stat-cta{font-size:11px;font-weight:600;color:var(–phase-col);display:inline-flex;align-items:center;gap:3px}
+
+/* Phase preview cards */
+.preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.prev-card{background:var(–surface);border:1px solid var(–border);border-radius:var(–radius);overflow:hidden;box-shadow:var(–shadow)}
+.prev-head{padding:12px 16px;border-bottom:1px solid var(–border);display:flex;align-items:center;justify-content:space-between;background:var(–surface2)}
+.prev-num-label{display:flex;align-items:center;gap:8px}
+.prev-num{width:22px;height:22px;border-radius:50%;border:2px solid var(–phase-col);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:var(–font-mono);color:var(–phase-col)}
+.prev-title{font-size:13px;font-weight:600;color:var(–text)}
+.prev-sub{font-size:11px;color:var(–text3);margin-top:1px}
+.prev-body{padding:12px 16px;display:flex;flex-direction:column;gap:7px}
+.prev-item{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;background:var(–surface2);border-radius:var(–radius-sm);font-size:12px}
+.prev-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.prev-item-text{color:var(–text2);line-height:1.4;flex:1}
+.prev-item-tag{}
+
+/* Studies table */
+.studies-section{margin-bottom:20px}
+.studies-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.studies-filters{display:flex;gap:8px;align-items:center}
+.filter-btn{padding:5px 12px;border-radius:var(–radius-sm);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(–border);background:var(–surface);color:var(–text2);font-family:var(–font-body);transition:all 0.15s}
+.filter-btn.active{background:var(–text);color:#fff;border-color:var(–text)}
+.study-cards{display:flex;flex-direction:column;gap:10px}
+.study-card{background:var(–surface);border:1px solid var(–border);border-radius:var(–radius);overflow:hidden;box-shadow:var(–shadow);transition:all 0.15s}
+.study-card:hover{box-shadow:var(–shadow-md)}
+.sc-head{padding:14px 18px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.sc-info{flex:1}
+.sc-title{font-size:15px;font-weight:600;color:var(–text);margin-bottom:3px}
+.sc-meta{font-size:12px;color:var(–text3)}
+.sc-badges{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sc-metrics{padding:0 18px 12px;display:grid;grid-template-columns:repeat(6,1fr);gap:4px;border-bottom:1px solid var(–border)}
+.sc-metric{text-align:center;padding:6px 4px;border-radius:var(–radius-xs);background:var(–surface2)}
+.sc-metric-val{font-size:16px;font-weight:700;font-family:var(–font-mono);display:block;line-height:1}
+.sc-metric-lbl{font-size:9px;color:var(–text3);margin-top:2px}
+.sc-actions{padding:10px 18px;display:flex;gap:8px}
+.sc-takeaways{padding:12px 18px;border-top:1px solid var(–border);background:var(–surface2)}
+.sc-takeaway-title{font-size:11px;font-weight:600;color:var(–text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+.sc-takeaway-item{font-size:12px;color:var(–text2);line-height:1.6;margin-bottom:4px}
+.sc-next-steps{margin-top:8px;padding-top:8px;border-top:1px solid var(–border)}
+.sc-next-title{font-size:11px;font-weight:600;color:var(–text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+.sc-next-item{font-size:12px;color:var(–text2);padding:4px 0;padding-left:14px;position:relative;line-height:1.5}
+.sc-next-item::before{content:‘→’;position:absolute;left:0;color:var(–coral)}
+
+/* ═══════════════════════════════════════════════════════════════
+MODAL OVERLAY (for full phase views)
+═══════════════════════════════════════════════════════════════ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:100;display:flex;align-items:stretch;backdrop-filter:blur(2px)}
+.modal-overlay.hidden{display:none}
+.modal-panel{background:var(–bg);width:100%;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.modal-topbar{height:52px;background:var(–surface);border-bottom:1px solid var(–border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-phase-label{display:flex;align-items:center;gap:10px}
+.modal-phase-badge{font-size:10px;font-weight:700;letter-spacing:0.12em;padding:3px 10px;border-radius:4px;text-transform:uppercase}
+.modal-title{font-family:var(–font-head);font-size:20px;color:var(–text)}
+.modal-close{width:32px;height:32px;background:var(–surface2);border:1px solid var(–border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(–text2);transition:all 0.15s}
+.modal-close:hover{background:var(–surface3)}
+.modal-sub-tabs{display:flex;gap:0;border-bottom:1px solid var(–border);background:var(–surface);padding:0 20px;flex-shrink:0}
+.modal-tab{padding:11px 18px;font-size:13px;font-weight:500;color:var(–text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap}
+.modal-tab:hover{color:var(–text2)}
+.modal-tab.active{color:var(–phase-col);border-bottom-color:var(–phase-col)}
+.modal-body{flex:1;display:flex;overflow:hidden}
+.modal-main{flex:1;overflow-y:auto;padding:24px}
+.modal-main::-webkit-scrollbar{width:5px}
+.modal-main::-webkit-scrollbar-thumb{background:var(–border2)}
+.modal-side{width:340px;min-width:340px;border-left:1px solid var(–border);display:flex;flex-direction:column;overflow:hidden}
+
+/* Explore specifics */
+.signal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+.signal-card{background:var(–surface);border:1px solid var(–border);border-radius:var(–radius);padding:14px 16px;cursor:pointer;transition:all 0.15s;box-shadow:var(–shadow)}
+.signal-card:hover{box-shadow:var(–shadow-md);border-color:var(–explore)}
+.signal-tag-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.signal-title{font-size:13px;font-weight:600;color:var(–text);margin-bottom:3px;line-height:1.3}
+.signal-meta{font-size:11px;color:var(–text3)}
+
+.gap-card{background:var(–surface);border:1px solid var(–border);border-radius:var(–radius);overflow:hidden;box-shadow:var(–shadow);margin-bottom:10px}
+.gap-item{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid var(–border)}
+.gap-item:last-child{border-bottom:none}
+.gap-priority{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px}
+.gap-score{min-width:52px;text-align:right}
+.gap-score-num{font-size:22px;font-weight:700;font-family:var(–font-mono);line-height:1}
+.gap-score-lbl{font-size:9px;color:var(–text3)}
+.gap-content{flex:1}
+.gap-title{font-size:13px;font-weight:600;color:var(–text);margin-bottom:3px}
+.gap-desc{font-size:12px;color:var(–text2);line-height:1.55;margin-bottom:6px}
+.gap-action-link{font-size:11px;font-weight:600;color:var(–explore);cursor:pointer;display:inline-flex;align-items:center;gap:3px}
+.gap-action-link:hover{text-decoration:underline}
+
+/* Sandbox */
+.sandbox-run-row{display:flex;gap:10px;margin-bottom:16px}
+.sandbox-prev{background:var(–surface);border:1px solid var(–border);border-radius:var(–radius-sm);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.15s}
+.sandbox-prev:hover{border-color:var(–explore)}
+.sandbox-intent{font-size:16px;font-weight:700;font-family:var(–font-mono);color:var(–explore)}
+
+/* Test - brief wizard */
+.brief-wizard{background:var(–surface);border:1px solid var(–border);border-radius:var(–radius);overflow:hidden;box-shadow:var(–shadow);margin-bottom:20px}
+.bw-head{padding:14px 18px;border-bottom:1px solid var(–border);display:flex;align-items:center;justify-content:space-between;background:var(–surface2)}
+.bw-steps{display:flex;gap:0;padding:0 18px;border-bottom:1px solid var(–border);overflow-x:auto}
+.bw-step{padding:10px 14px;font-size:12px;font-weight:500;color:var(–text3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.15s}
+.bw-step.active{color:var(–test);border-bottom-color:var(–test)}
+.bw-step.done{color:var(–text2)}
+.bw-body{padding:20px 18px}
+.form-row{margin-bottom:16px}
+.form-label{font-size:12px;font-weight:600;color:var(–text2);margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.form-label .req{color:var(–coral)}
+.form-input{width:100%;background:var(–surface2);border:1px solid var(–border);border-radius:var(–radius-sm);padding:9px 12px;font-size:13px;color:var(–text);font-family:var(–font-body);outline:none;transition:border-color 0.15s}
+.form-input:focus{border-color:var(–test)}
+.form-textarea{min-height:80px;resize:vertical}
+.option-grid{display:flex;gap:8px;flex-wrap:wrap}
+.option-pill{padding:6px 14px;background:var(–surface2);border:1.5px solid var(–border);border-radius:20px;font-size:12px;font-weight:500;color:var(–text2);cursor:pointer;transition:all 0.15s}
+.option-pill:hover{border-color:var(–test);color:var(–test)}
+.option-pill.selected{border-color:var(–test);background:var(–test-bg);color:var(–test)}
+.study-type-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stype-card{border:1.5px solid var(–border);border-radius:var(–radius);padding:14px 16px;cursor:pointer;transition:all 0.15s}
+.stype-card:hover{border-color:var(–test)}
+.stype-card.selected{border-color:var(–test);background:var(–test-bg)}
+.stype-name{font-size:14px;font-weight:600;color:var(–text);margin-bottom:3px}
+.stype-desc{font-size:11.5px;color:var(–text3);margin-bottom:6px}
+.stype-price{font-size:13px;font-weight:700;color:var(–test)}
+.bw-actions{display:flex;justify-content:flex-end;gap:8px;padding-top:8px;border-top:1px solid var(–border);margin-top:16px}
+
+/* Act - next steps */
+.next-step-card{background:var(–surface);border:1px solid var(–border);border-radius:var(–radius);overflow:hidden;box-shadow:var(–shadow);margin-bottom:10px}
+.ns-item{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border-bottom:1px solid var(–border)}
+.ns-item:last-child{border-bottom:none}
+.ns-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;background:var(–surface2);border:1.5px solid var(–border2);color:var(–text3);font-family:var(–font-mono)}
+.ns-content{flex:1}
+.ns-title{font-size:13px;font-weight:600;color:var(–text);margin-bottom:4px}
+.ns-desc{font-size:12px;color:var(–text2);line-height:1.55;margin-bottom:8px}
+.ns-cta-row{display:flex;gap:6px;flex-wrap:wrap}
+
+/* Health */
+.health-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.health-metric-card{background:var(–surface);border:1px solid var(–border);border-radius:var(–radius);padding:16px;text-align:center;box-shadow:var(–shadow)}
+.hm-num{font-size:32px;font-weight:700;font-family:var(–font-mono);line-height:1;margin-bottom:4px}
+.hm-label{font-size:12px;color:var(–text3);margin-bottom:2px}
+.hm-delta{font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:2px}
+.hm-up{color:var(–test)}
+.hm-down{color:var(–warn)}
+
+.pillar-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.pillar-card{background:var(–surface);border:1px solid var(–border);border-radius:var(–radius);padding:14px 16px;box-shadow:var(–shadow)}
+.pillar-name{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(–text3);margin-bottom:4px}
+.pillar-sub{font-size:11px;color:var(–text3);margin-bottom:10px}
+.pillar-num{font-size:24px;font-weight:700;font-family:var(–font-mono);color:var(–text);margin-bottom:8px}
+.pillar-bars{display:flex;flex-direction:column;gap:5px}
+.pillar-bar-row{display:flex;align-items:center;gap:8px}
+.pillar-bar-label{font-size:10px;color:var(–text3);width:60px}
+.pillar-bar-track{flex:1;height:5px;background:var(–surface3);border-radius:3px;overflow:hidden}
+.pillar-bar-fill{height:100%;border-radius:3px;background:var(–health)}
+.pillar-bar-val{font-size:10px;font-family:var(–font-mono);color:var(–text2);width:28px;text-align:right}
+
+/* Score table */
+.score-table{width:100%;border-collapse:collapse;font-size:13px}
+.score-table th{text-align:left;padding:8px 12px;border-bottom:2px solid var(–border);font-size:11px;font-weight:600;letter-spacing:0.06em;color:var(–text3);text-transform:uppercase}
+.score-table td{padding:10px 12px;border-bottom:1px solid var(–border);color:var(–text2)}
+.score-table tr:last-child td{border-bottom:none}
+.score-table tr:hover td{background:var(–surface2)}
+.trend-strong{color:var(–test);font-weight:600}
+.trend-mixed{color:var(–amber);font-weight:600}
+.trend-weak{color:var(–warn);font-weight:600}
+
+/* Misc */
+.divider{border:none;border-top:1px solid var(–border);margin:16px 0}
+.hidden{display:none!important}
+.section-label{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(–text3);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.link{color:var(–explore);font-weight:500;cursor:pointer;text-decoration:none;font-size:13px}
+.link:hover{text-decoration:underline}
+.tag-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.filter-row{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+</style>
+
+</head>
+<body>
+
+<!-- ── SIDEBAR ─────────────────────────────────────────────────── -->
+
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-mark">I</div>
+    <span class="sb-logo-text">Innovatr</span>
+  </div>
+  <div class="sb-user">
+    <div class="sb-avatar">JS</div>
+    <div class="sb-user-info">
+      <div class="sb-user-name">Jane Smith</div>
+      <div class="sb-user-company">Acme Corp · <span class="sb-tier">GROWTH</span></div>
+    </div>
+  </div>
+
+  <div class="sb-nav">
+    <div class="sb-section">Research</div>
+    <div class="sb-item active" onclick="showMain('dashboard')">
+      <span class="sb-item-icon">⬛</span>
+      <span class="sb-item-label">Dashboard</span>
+    </div>
+
+```
+<div class="sb-section" style="margin-top:8px">3 Phases</div>
+<div class="phase-items">
+  <div class="phase-item phase-explore" onclick="openPhase('explore')">
+    <div class="phase-num">1</div>
+    <span class="phase-item-label">Explore</span>
+  </div>
+  <div class="phase-item phase-test" onclick="openPhase('test')">
+    <div class="phase-num">2</div>
+    <span class="phase-item-label">Test</span>
+  </div>
+  <div class="phase-item phase-act" onclick="openPhase('act')">
+    <div class="phase-num">3</div>
+    <span class="phase-item-label">Act</span>
+  </div>
+</div>
+
+<div class="sb-section" style="margin-top:8px">Company</div>
+<div class="sb-item" onclick="openPhase('health')">
+  <span class="sb-item-icon">📊</span>
+  <span class="sb-item-label">Company</span>
+</div>
+<div class="sb-section" style="margin-top:8px">System</div>
+<div class="sb-item">
+  <span class="sb-item-icon">🛡</span>
+  <span class="sb-item-label">Admin</span>
+</div>
+```
+
+  </div>
+
+  <div class="sb-bottom">
+    <div class="sb-bottom-item">⚙ Settings</div>
+    <div class="sb-bottom-item">↪ Log out</div>
+  </div>
+</aside>
+
+<!-- ── MAIN ─────────────────────────────────────────────────────── -->
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="phase-tab phase-explore" onclick="openPhase('explore')">
+        <div class="phase-tab-num">1</div>
+        <span class="phase-tab-label">Explore</span>
+      </div>
+      <span class="topbar-sep">›</span>
+      <div class="phase-tab phase-test" onclick="openPhase('test')">
+        <div class="phase-tab-num">2</div>
+        <span class="phase-tab-label">Test</span>
+      </div>
+      <span class="topbar-sep">›</span>
+      <div class="phase-tab phase-act" onclick="openPhase('act')">
+        <div class="phase-tab-num">3</div>
+        <span class="phase-tab-label">Act</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-bar">🔍 Search anything… <kbd>⌘K</kbd></div>
+      <div class="tb-avatar">JS</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+```
+<!-- ═══ DASHBOARD ═══ -->
+<div id="view-dashboard">
+  <div class="page-header">
+    <div class="page-greeting">✦ Good morning, Jane · GROWTH Tier</div>
+    <div class="page-title">Dashboard</div>
+    <div class="page-sub" style="margin-bottom:22px">Your intelligence hub — trends, live studies, and strategic signals, all in one place.</div>
+  </div>
+
+  <div class="dash-wrap" style="padding-top:0">
+    <!-- Credits -->
+    <div class="credit-strip" style="margin-bottom:18px">
+      <div class="credit-chip">
+        <div class="credit-num" style="color:var(--test)">7</div>
+        <div class="credit-label">Basic credits<br><span style="color:var(--test);font-weight:600;font-size:10px">available</span></div>
+      </div>
+      <div class="credit-chip">
+        <div class="credit-num" style="color:var(--explore)">2</div>
+        <div class="credit-label">Pro credits<br><span style="color:var(--explore);font-weight:600;font-size:10px">available</span></div>
+      </div>
+      <div class="credit-chip">
+        <div class="credit-num" style="color:var(--text2)">4</div>
+        <div class="credit-label">Studies done<br><span style="color:var(--text3);font-size:10px">this year</span></div>
+      </div>
+      <div style="flex:1"></div>
+      <button class="btn btn-secondary btn-sm" onclick="openPhase('act')">View recommendations →</button>
+    </div>
+
+    <!-- Journey cards -->
+    <div class="journey-row">
+      <div class="j-card phase-explore" onclick="openPhase('explore')" style="--phase-col:var(--explore)">
+        <div class="j-card-num">1</div>
+        <div class="j-card-q">What's happening?</div>
+        <div class="j-card-title">Explore</div>
+        <div class="j-card-sub">Trends & Insights · Sandbox · Market Signals</div>
+        <div class="j-card-stat" style="color:var(--explore)">12 signals active</div>
+        <span class="j-card-cta">Open →</span>
+      </div>
+      <div class="j-card phase-test" onclick="openPhase('test')" style="--phase-col:var(--test)">
+        <div class="j-card-num">2</div>
+        <div class="j-card-q">Does my idea work?</div>
+        <div class="j-card-title">Test</div>
+        <div class="j-card-sub">Projects Overview · Test24 · QA Results</div>
+        <div class="j-card-stat" style="color:var(--test)">2 live studies</div>
+        <span class="j-card-cta" style="color:var(--test)">Open →</span>
+      </div>
+      <div class="j-card phase-act" onclick="openPhase('act')" style="--phase-col:var(--act)">
+        <div class="j-card-num">3</div>
+        <div class="j-card-q">What should I do?</div>
+        <div class="j-card-title">Act</div>
+        <div class="j-card-sub">Gaps · Recommendations · Strategic Next Steps</div>
+        <div class="j-card-stat" style="color:var(--act)">4 recommendations</div>
+        <span class="j-card-cta" style="color:var(--act)">Open →</span>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-row">
+      <div class="stat-card" onclick="openPhase('explore')" style="border-top:3px solid var(--explore)">
+        <div class="stat-num">12</div>
+        <div class="stat-label">Signals</div>
+        <div class="stat-sub">Trends & Insights active<br>+3 overnight</div>
+        <span class="stat-cta" style="--phase-col:var(--explore)">Explore →</span>
+      </div>
+      <div class="stat-card" onclick="openPhase('test')" style="border-top:3px solid var(--test)">
+        <div class="stat-num">2</div>
+        <div class="stat-label">Live Studies</div>
+        <div class="stat-sub">In field now<br>67% complete</div>
+        <span class="stat-cta" style="--phase-col:var(--test)">Test →</span>
+      </div>
+      <div class="stat-card" onclick="openPhase('act')" style="border-top:3px solid var(--act)">
+        <div class="stat-num">4</div>
+        <div class="stat-label">Recommendations</div>
+        <div class="stat-sub">Strategic actions ready<br>2 high priority</div>
+        <span class="stat-cta" style="--phase-col:var(--act)">Act →</span>
+      </div>
+      <div class="stat-card" onclick="openPhase('health')" style="border-top:3px solid var(--health)">
+        <div class="stat-num">4</div>
+        <div class="stat-label">Studies Done</div>
+        <div class="stat-sub">Complete this year<br>+1 this month</div>
+        <span class="stat-cta" style="--phase-col:var(--health)">Portfolio →</span>
+      </div>
+    </div>
+
+    <!-- Phase previews -->
+    <div class="preview-grid">
+      <div class="prev-card">
+        <div class="prev-head" style="--phase-col:var(--explore)">
+          <div class="prev-num-label">
+            <div class="prev-num">1</div>
+            <div>
+              <div class="prev-title">Explore</div>
+              <div class="prev-sub">Trends, insights & market signals</div>
+            </div>
+          </div>
+          <span class="link" style="color:var(--explore);font-size:12px" onclick="openPhase('explore')">Open →</span>
+        </div>
+        <div class="prev-body">
+          <div class="prev-item">
+            <div class="prev-dot" style="background:var(--explore)"></div>
+            <div class="prev-item-text">Nootropic beverages +41% search intent<br><span style="color:var(--text3);font-size:11px">25–34 urban cohort · Detected overnight</span></div>
+            <span class="status-chip chip-trend">Trend</span>
+          </div>
+          <div class="prev-item">
+            <div class="prev-dot" style="background:var(--test)"></div>
+            <div class="prev-item-text">Functional Beverages 2025 — new report<br><span style="color:var(--text3);font-size:11px">Innovatr Inside · GROWTH+ · 3 min read</span></div>
+            <span class="status-chip chip-new">New</span>
+          </div>
+          <div class="prev-item">
+            <div class="prev-dot" style="background:var(--text3)"></div>
+            <div class="prev-item-text">12 active market signals across categories<br><span style="color:var(--text3);font-size:11px">Food & Bev · Beauty · FMCG</span></div>
+            <span class="status-chip chip-new">Signals</span>
+          </div>
+        </div>
+      </div>
+      <div class="prev-card">
+        <div class="prev-head" style="--phase-col:var(--test)">
+          <div class="prev-num-label">
+            <div class="prev-num">2</div>
+            <div>
+              <div class="prev-title">Test</div>
+              <div class="prev-sub">Live studies & projects overview</div>
+            </div>
+          </div>
+          <span class="link" style="color:var(--test);font-size:12px" onclick="openPhase('test')">Open →</span>
+        </div>
+        <div class="prev-body">
+          <div class="prev-item">
+            <div class="prev-dot" style="background:var(--amber)"></div>
+            <div class="prev-item-text">Skincare Repositioning — 67% field complete<br><span style="color:var(--text3);font-size:11px">Test24 Pro · Est. delivery Tue 03 Mar</span></div>
+          </div>
+          <div class="prev-item">
+            <div class="prev-dot" style="background:var(--test)"></div>
+            <div class="prev-item-text">4 studies completed — results available<br><span style="color:var(--text3);font-size:11px">Project Aurum · Low/No · Meta Creative · Rugani</span></div>
+            <span class="status-chip chip-low">Done</span>
+          </div>
+        </div>
+      </div>
+      <div class="prev-card">
+        <div class="prev-head" style="--phase-col:var(--act)">
+          <div class="prev-num-label">
+            <div class="prev-num">3</div>
+            <div>
+              <div class="prev-title">Act</div>
+              <div class="prev-sub">Strategic gaps & recommendations</div>
+            </div>
+          </div>
+          <span class="link" style="color:var(--act);font-size:12px" onclick="openPhase('act')">Open →</span>
+        </div>
+        <div class="prev-body">
+          <div class="prev-item">
+            <div class="prev-dot" style="background:var(--act)"></div>
+            <div class="prev-item-text">Energy Drink — autonomous narrative ready<br><span style="color:var(--text3);font-size:11px">72% purchase intent · 3 strategic gaps identified</span></div>
+            <span class="status-chip chip-action">Action</span>
+          </div>
+          <div class="prev-item">
+            <div class="prev-dot" style="background:var(--amber)"></div>
+            <div class="prev-item-text">Commitment gap widening — 28pt below Idea<br><span style="color:var(--text3);font-size:11px">Recommend packaging/pricing bridge study</span></div>
+            <span class="status-chip chip-watch">Watch</span>
+          </div>
+          <div class="prev-item">
+            <div class="prev-dot" style="background:var(--test)"></div>
+            <div class="prev-item-text">4 strategic recommendations available<br><span style="color:var(--text3);font-size:11px">2 high priority · 2 medium priority</span></div>
+            <span class="status-chip chip-low">Ready</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Studies portfolio -->
+    <div class="studies-section">
+      <div class="studies-header">
+        <div class="section-label" style="margin-bottom:0">Studies <span style="font-weight:400;color:var(--text3);letter-spacing:0">Your complete research portfolio</span></div>
+        <div class="studies-filters">
+          <span class="filter-btn active">All Clients</span>
+          <span class="filter-btn">Discovery Bank</span>
+          <span class="filter-btn">Rugani</span>
+          <span class="link" style="font-size:12px">View All →</span>
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+      <div class="study-cards">
+        <!-- Study 1 -->
+        <div class="study-card">
+          <div class="sc-head">
+            <div class="sc-info">
+              <div class="sc-title">Project Aurum</div>
+              <div class="sc-meta">Discovery Bank · Concept Testing · 300 respondents</div>
+            </div>
+            <div class="sc-badges">
+              <span class="badge badge-basic">BASIC</span>
+              <span class="badge badge-complete">Complete</span>
+            </div>
+          </div>
+          <div class="sc-metrics">
+            <div class="sc-metric"><span class="sc-metric-val metric-up">97%</span><div class="sc-metric-lbl">Idea</div></div>
+            <div class="sc-metric"><span class="sc-metric-val metric-mid">67%</span><div class="sc-metric-lbl">Interest</div></div>
+            <div class="sc-metric"><span class="sc-metric-val metric-mid">54%</span><div class="sc-metric-lbl">Commitment</div></div>
+            <div class="sc-metric"><span class="sc-metric-val metric-up">76%</span><div class="sc-metric-lbl">Meaning</div></div>
+            <div class="sc-metric"><span class="sc-metric-val metric-mid">61%</span><div class="sc-metric-lbl">Difference</div></div>
+            <div class="sc-metric"><span class="sc-metric-val metric-mid">69%</span><div class="sc-metric-lbl">Worth</div></div>
+          </div>
+          <div class="sc-actions">
+            <button class="btn btn-primary btn-sm" onclick="openPhase('act')">Analyse in Act</button>
+            <button class="btn btn-secondary btn-sm">Download PDF</button>
+          </div>
+        </div>
+        <!-- Study 2 -->
+        <div class="study-card">
+          <div class="sc-head">
+            <div class="sc-info">
+              <div class="sc-title">Low/No Audit</div>
+              <div class="sc-meta">Discovery Bank · Demand Space · 601 respondents</div>
+            </div>
+            <div class="sc-badges">
+              <span class="badge badge-pro">PRO</span>
+              <span class="badge badge-complete">Complete</span>
+            </div>
+          </div>
+          <div class="sc-metrics">
+            <div class="sc-metric"><span class="sc-metric-val metric-up">98%</span><div class="sc-metric-lbl">Idea</div></div>
+            <div class="sc-metric"><span class="sc-metric-val metric-up">95%</span><div class="sc-metric-lbl">Interest</div></div>
+            <div class="sc-metric"><span class="sc-metric-val metric-up">77%</span><div class="sc-metric-lbl">Commitment</div></div>
+            <div class="sc-metric"><span class="sc-metric-val metric-up">84%</span><div class="sc-metric-lbl">Meaning</div></div>
+            <div class="sc-metric"><span class="sc-metric-val metric-up">79%</span><div class="sc-metric-lbl">Difference</div></div>
+            <div class="sc-metric"><span class="sc-metric-val metric-up">81%</span><div class="sc-metric-lbl">Worth</div></div>
+          </div>
+          <div class="sc-actions">
+            <button class="btn btn-primary btn-sm" onclick="openPhase('act')">Analyse in Act</button>
+            <button class="btn btn-secondary btn-sm">Download PDF</button>
+          </div>
+        </div>
+        <!-- Study 3 -->
+        <div class="study-card">
+          <div class="sc-head">
+            <div class="sc-info">
+              <div class="sc-title">Rugani Ad Campaign</div>
+              <div class="sc-meta">Rugani · Positioning · 1 200 respondents</div>
+            </div>
+            <div class="sc-badges">
+              <span class="badge badge-basic">BASIC</span>
+              <span class="badge badge-complete">Complete</span>
+            </div>
+          </div>
+          <div class="sc-metrics">
+            <div class="sc-metric"><span class="sc-metric-val metric-mid">68%</span><div class="sc-metric-lbl">Idea</div></div>
+            <div class="sc-metric"><span class="sc-metric-val metric-mid">54%</span><div class="sc-metric-lbl">Interest</div></div>
+            <div class="sc-metric"><span class="sc-metric-val metric-down">21%</span><div class="sc-metric-lbl">Commitment</div></div>
+            <div class="sc-metric"><span class="sc-metric-val metric-mid">64%</span><div class="sc-metric-lbl">Meaning</div></div>
+            <div class="sc-metric"><span class="sc-metric-val metric-down">48%</span><div class="sc-metric-lbl">Difference</div></div>
+            <div class="sc-metric"><span class="sc-metric-val metric-mid">59%</span><div class="sc-metric-lbl">Worth</div></div>
+          </div>
+          <div class="sc-actions">
+            <button class="btn btn-primary btn-sm" onclick="openPhase('act')">Analyse in Act</button>
+            <button class="btn btn-secondary btn-sm">Download PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- end dashboard -->
+```
+
+  </div><!-- end content -->
+</div><!-- end main -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PHASE MODALS
+═══════════════════════════════════════════════════════════════ -->
+
+<!-- ── EXPLORE ─────────────────────────────────────────────────── -->
+
+<div class="modal-overlay hidden" id="modal-explore">
+<div class="modal-panel">
+  <div class="modal-topbar">
+    <div class="modal-phase-label">
+      <span class="modal-phase-badge" style="background:var(--explore-bg);color:var(--explore);border:1px solid var(--explore-border)">PHASE 01</span>
+      <div class="modal-title" style="font-family:var(--font-head)">Explore</div>
+      <span style="font-size:13px;color:var(--text3);margin-left:8px">What's moving in your market.</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:12px;color:var(--explore);font-weight:600">12 signals active</span>
+      <button class="modal-close" onclick="closeModal('explore')">✕</button>
+    </div>
+  </div>
+  <div class="modal-sub-tabs" style="--phase-col:var(--explore)">
+    <div class="modal-tab active" onclick="switchTab(this,'explore','signals')">Trends & Insights</div>
+    <div class="modal-tab" onclick="switchTab(this,'explore','sandbox')">Sandbox</div>
+    <div class="modal-tab" onclick="switchTab(this,'explore','assistant')">Research Assistant</div>
+  </div>
+  <div class="modal-body">
+    <div class="modal-main">
+
+```
+  <!-- SIGNALS tab -->
+  <div id="explore-tab-signals">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <div class="section-label" style="margin-bottom:2px">Live Market Signals</div>
+        <div style="font-size:12px;color:var(--text3)">SA consumer tracking · Q1 2025 · rolling 90-day window</div>
+      </div>
+      <span class="status-chip chip-new">12 signals active</span>
+    </div>
+    <div class="filter-row">
+      <span class="filter-btn active">All Categories</span>
+      <span class="filter-btn">Insights</span>
+      <span class="filter-btn">Launch</span>
+      <span class="filter-btn">Inside</span>
+      <span class="filter-btn">IRL</span>
+      <span style="flex:1"></span>
+      <span class="filter-btn active">All Industries</span>
+      <span class="filter-btn">Food & Bev</span>
+      <span class="filter-btn">Beauty</span>
+    </div>
+    <div class="signal-grid">
+      <div class="signal-card">
+        <div class="signal-tag-row">
+          <span class="status-chip chip-trend">Trend</span>
+          <span style="font-size:11px;color:var(--text3)">Food & Bev · Urban 25–34</span>
+        </div>
+        <div class="signal-title">Nootropic beverages +41% search intent</div>
+        <div class="signal-meta">Detected overnight · High relevance · No SA brand owns this space</div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-tag-row">
+          <span class="status-chip chip-new">New Report</span>
+          <span style="font-size:11px;color:var(--text3)">Innovatr Inside · GROWTH+</span>
+        </div>
+        <div class="signal-title">Functional Beverages 2025</div>
+        <div class="signal-meta">3 min read · Published today · Hydration + function outperforming energy</div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-tag-row">
+          <span class="status-chip chip-watch">Watch</span>
+          <span style="font-size:11px;color:var(--text3)">Beauty · LSM 5–8</span>
+        </div>
+        <div class="signal-title">Price-entry skincare whitespace widening</div>
+        <div class="signal-meta">Affordable efficacy claims underserved · R45M+ potential</div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-tag-row">
+          <span class="status-chip chip-action">Alert</span>
+          <span style="font-size:11px;color:var(--text3)">FMCG · LSM 6–8</span>
+        </div>
+        <div class="signal-title">LSM 6–8 premium resistance rising</div>
+        <div class="signal-meta">Price sensitivity up 8pts since Q3 2025 · Repositioning recommended</div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:8px">Market Gaps to Watch <span style="font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0">AI-identified white spaces — ranked by opportunity score</span></div>
+    <div class="gap-card">
+      <div class="gap-item">
+        <div class="gap-priority" style="background:var(--warn-bg);color:var(--warn);border:1.5px solid var(--warn)">1</div>
+        <div class="gap-content">
+          <div class="gap-title">Nootropic Beverages</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Food & Bev · Urban 25–34</div>
+          <div class="gap-desc">No dominant SA player in cognitive-performance beverages. Search intent up 41% YoY. First-mover window is open now.</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="status-chip chip-high">High Priority</span>
+            <span style="font-size:11px;color:var(--test);font-weight:600">R85M+ potential</span>
+            <span class="gap-action-link" onclick="switchExploreToSandbox()">Run Sandbox Test →</span>
+          </div>
+        </div>
+        <div class="gap-score"><div class="gap-score-num" style="color:var(--warn)">94</div><div class="gap-score-lbl">Gap Score</div></div>
+      </div>
+      <div class="gap-item">
+        <div class="gap-priority" style="background:var(--amber-bg);color:var(--amber);border:1.5px solid var(--amber)">2</div>
+        <div class="gap-content">
+          <div class="gap-title">Price-Entry Skincare</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Beauty · LSM 5–8</div>
+          <div class="gap-desc">Affordable skincare with credible efficacy claims — underserved in LSM 5–8. Current options are either too cheap or too premium.</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="status-chip chip-med">Medium Priority</span>
+            <span style="font-size:11px;color:var(--test);font-weight:600">R45M+ potential</span>
+            <span class="gap-action-link">Run Sandbox Test →</span>
+          </div>
+        </div>
+        <div class="gap-score"><div class="gap-score-num" style="color:var(--amber)">81</div><div class="gap-score-lbl">Gap Score</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SANDBOX tab -->
+  <div id="explore-tab-sandbox" class="hidden">
+    <div style="background:var(--explore-bg);border:1px solid var(--explore-border);border-radius:var(--radius);padding:18px 20px;margin-bottom:20px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:var(--explore);margin-bottom:6px">SYNTHETIC RESPONDENT SANDBOX · BETA</div>
+      <div style="font-family:var(--font-head);font-size:20px;color:var(--text);margin-bottom:4px">Test Concepts Before You Field Them</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:14px">AI digital twins trained on Innovatr's SA corpus. Pressure-test up to 5 concepts in minutes — zero credits consumed.</div>
+      <div style="display:flex;gap:8px"><button class="btn btn-primary">Start Synthetic Test</button><button class="btn btn-ghost">How it works</button></div>
+    </div>
+    <div class="section-label">Recent Sandbox Runs <span style="font-weight:400;letter-spacing:0;text-transform:none;color:var(--text3)">no credits used</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+      <div class="sandbox-prev"><div><div style="font-size:13px;font-weight:600;color:var(--text)">RTD Energy — Concept A</div><div style="font-size:11px;color:var(--text3)">28/03/2026 · 1 200 synthetic respondents</div></div><div class="sandbox-intent">73% intent</div></div>
+      <div class="sandbox-prev"><div><div style="font-size:13px;font-weight:600;color:var(--text)">Skincare Relaunch Pack B</div><div style="font-size:11px;color:var(--text3)">22/03/2026 · 800 synthetic respondents</div></div><div class="sandbox-intent" style="color:var(--amber)">48% intent</div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">New Sandbox Run</span><span style="font-size:12px;color:var(--test)">No credits consumed</span></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:12px">
+        <div class="form-row" style="margin-bottom:0">
+          <div class="form-label">Concept Description</div>
+          <textarea class="form-input form-textarea" placeholder="Describe your concept, idea, or product…"></textarea>
+        </div>
+        <div>
+          <div class="form-label">Target Audience</div>
+          <div class="option-grid">
+            <span class="option-pill selected">Urban SA · 25–34</span>
+            <span class="option-pill">Urban SA · 18–24</span>
+            <span class="option-pill">Township Economy</span>
+          </div>
+        </div>
+        <div>
+          <div class="form-label">Category</div>
+          <div class="option-grid">
+            <span class="option-pill selected">Beverages</span>
+            <span class="option-pill">Food</span>
+            <span class="option-pill">Beauty</span>
+            <span class="option-pill">Alcohol</span>
+            <span class="option-pill">Financial</span>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="align-self:flex-end">Run Simulation →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASSISTANT tab -->
+  <div id="explore-tab-assistant" class="hidden">
+    <div style="background:var(--test-bg);border:1px solid var(--test-border);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px">
+      <div class="ai-spark">✦</div>
+      <div><div style="font-size:13px;font-weight:600;color:var(--text)">Research Assistant</div><div style="font-size:11px;color:var(--test)">● Connected to Innovatr's full SA trend corpus</div></div>
+    </div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px">Hi Jane — I'm plugged into Innovatr's full SA research corpus and live trend signals. Ask me anything about what's happening in your market.</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--text2);font-style:italic">What are the biggest emerging trends in functional beverages for SA consumers right now?</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:16px">
+      <strong>Three signals are standing out right now:</strong><br><br>
+      <strong>1. Nootropic claims</strong> — cognitive performance drinks are up 41% in search intent among urban 25–34s. No local product currently owns this space.<br>
+      <strong>2. Hydration + function</strong> — electrolyte-enhanced waters with added benefits are outperforming pure energy drinks on purchase intent.<br>
+      <strong>3. Price-conscious premiumisation</strong> — consumers want premium positioning but at R18–25. The sweet spot is shifting down fast.<br><br>
+      Want me to pull the full dataset, shape this into a research brief, or run a quick Sandbox simulation?
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <span class="ai-prompt-chip">What price sensitivity signals exist in skincare?</span>
+      <span class="ai-prompt-chip">Show me township economy patterns</span>
+      <span class="ai-prompt-chip">What categories are underserved in SA?</span>
+      <span class="ai-prompt-chip">Help me shape a brief around nootropics</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <input class="ai-input" placeholder="Ask anything about your market…" style="flex:1">
+      <button class="ai-send">→</button>
+    </div>
+  </div>
+
+</div><!-- modal-main -->
+
+<!-- Right: Team Chat -->
+<div class="modal-side" style="--phase-col:var(--explore)">
+  <div class="ai-panel-head">
+    <div class="ai-panel-title"><div class="ai-spark">✦</div>Explore Assistant</div>
+    <div class="ai-panel-sub">● Connected to trend corpus</div>
+  </div>
+  <div class="ai-messages" style="flex:1">
+    <div class="ai-msg ai-msg-user">
+      <div class="ai-msg-author"><span style="width:16px;height:16px;background:var(--coral);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;color:#fff">JS</span> Jane S.</div>
+      <div class="ai-msg-bubble">What do the latest township trends mean for our beverage strategy?</div>
+    </div>
+    <div class="ai-msg ai-msg-system">
+      <div class="ai-msg-author"><div class="ai-spark">✦</div> AI Consultant</div>
+      <div class="ai-msg-bubble">Based on 3 recent reports, key beverage implications:<br><br><strong>1.</strong> Home occasions replacing bar visits — home formats win.<br><strong>2.</strong> Cash preference signals value-sensitivity — affordable premiums outperform.<br><strong>3.</strong> Social belonging is #1 driver (6.8 avg importance).
+        <div class="ai-rec">→ Rec: position around 'affordable ritual' with home-serving formats. Sandbox before fieldwork.</div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;padding:8px 14px;border-top:1px solid var(--border);flex-wrap:wrap">
+    <span class="ai-prompt-chip">Which trend to act on first?</span>
+    <span class="ai-prompt-chip">Draft a brief</span>
+  </div>
+  <div class="ai-input-row">
+    <input class="ai-input" placeholder="Ask about trends…">
+    <button class="ai-send">→</button>
+  </div>
+
+  <div class="chat-toggle" onclick="this.nextElementSibling.classList.toggle('hidden')">
+    <span class="chat-toggle-label">💬 Team Chat <span class="chat-unread-dot">2</span></span>
+    <span style="color:var(--text3);font-size:12px">▲</span>
+  </div>
+  <div class="chat-pane">
+    <div class="chat-msgs">
+      <div class="chat-msg">
+        <div class="chat-msg-head"><div class="chat-av" style="background:var(--explore)">TM</div><span class="chat-author">Thabo M.</span><span class="chat-time">10:31</span></div>
+        <div class="chat-bubble">Agree on home-format angle. Let's sandbox the smaller SKU first before briefing the client.</div>
+      </div>
+      <div class="chat-msg">
+        <div class="chat-msg-head"><div class="chat-av" style="background:var(--health)">SW</div><span class="chat-author">Sarah W.</span><span class="chat-time">10:34</span></div>
+        <div class="chat-bubble"><span class="chat-tag">@Jane</span> — I've tagged this insight. Move it to Act for the client strategy deck?</div>
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" placeholder="Reply… use @ to tag">
+      <button class="chat-send-btn">→</button>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+</div>
+
+<!-- ── TEST ────────────────────────────────────────────────────── -->
+
+<div class="modal-overlay hidden" id="modal-test">
+<div class="modal-panel">
+  <div class="modal-topbar">
+    <div class="modal-phase-label">
+      <span class="modal-phase-badge" style="background:var(--test-bg);color:var(--test);border:1px solid var(--test-border)">PHASE 02</span>
+      <div class="modal-title" style="font-family:var(--font-head)">Test</div>
+      <span style="font-size:13px;color:var(--text3);margin-left:8px">Put your ideas in front of real SA consumers.</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="btn btn-primary btn-sm" onclick="switchTab(document.querySelector('#modal-test .modal-tab'),'test','brief')">Launch a Brief</button>
+      <button class="modal-close" onclick="closeModal('test')">✕</button>
+    </div>
+  </div>
+  <div class="modal-sub-tabs" style="--phase-col:var(--test)">
+    <div class="modal-tab" onclick="switchTab(this,'test','brief')">Launch a Brief</div>
+    <div class="modal-tab active" onclick="switchTab(this,'test','studies')">Studies</div>
+    <div class="modal-tab" onclick="switchTab(this,'test','assistant')">Research Assistant</div>
+  </div>
+  <div class="modal-body">
+    <div class="modal-main">
+
+```
+  <!-- BRIEF wizard -->
+  <div id="test-tab-brief" class="hidden">
+    <div class="brief-wizard">
+      <div class="bw-head">
+        <div><div style="font-size:13px;font-weight:600;color:var(--text)">AI Briefing Assistant</div><div style="font-size:12px;color:var(--text3)">Answer a few questions and we'll build your complete Upsiide survey brief automatically</div></div>
+      </div>
+      <div class="bw-steps">
+        <span class="bw-step active">1 Objectives</span>
+        <span class="bw-step">2 Audience</span>
+        <span class="bw-step">3 Concepts</span>
+        <span class="bw-step">4 Billing</span>
+        <span class="bw-step">5 Review</span>
+      </div>
+      <div class="bw-body">
+        <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px">1 Research Objectives</div>
+        <div class="form-row"><div class="form-label">Brief / Project Name <span class="req">*</span></div><input class="form-input" placeholder="e.g. Energy Drink Concept Test Q2 2026"></div>
+        <div class="form-row"><div class="form-label">Research Objective <span class="req">*</span></div><textarea class="form-input form-textarea" placeholder="Be as specific as possible. This drives the entire survey structure."></textarea></div>
+        <div class="form-row">
+          <div class="form-label">Study Type <span class="req">*</span></div>
+          <div class="study-type-cards">
+            <div class="stype-card selected">
+              <div class="stype-name">Test24 Basic</div>
+              <div class="stype-desc">100 consumers · 5 min · 24hr · 1 credit</div>
+              <div class="stype-price">R5,000</div>
+            </div>
+            <div class="stype-card">
+              <div class="stype-name">Test24 Pro</div>
+              <div class="stype-desc">100+ consumers · 10–15 min · 24hr · AI Qual included</div>
+              <div class="stype-price">From R45,000</div>
+            </div>
+          </div>
+        </div>
+        <div class="bw-actions"><button class="btn btn-secondary">← Back</button><button class="btn btn-primary">Next: Audience →</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STUDIES tab -->
+  <div id="test-tab-studies">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div class="section-label" style="margin-bottom:0">5 studies</div>
+      <div style="display:flex;gap:8px">
+        <select class="form-input" style="width:auto;padding:5px 10px;font-size:12px"><option>All Types</option><option>Test24 Basic</option><option>Test24 Pro</option></select>
+        <select class="form-input" style="width:auto;padding:5px 10px;font-size:12px"><option>All Statuses</option><option>Completed</option><option>In Progress</option></select>
+      </div>
+    </div>
+    <div class="study-cards">
+      <div class="study-card">
+        <div class="sc-head">
+          <div class="sc-info">
+            <div class="sc-title">Project Aurum — Home Loan Positioning</div>
+            <div class="sc-meta">Discovery Bank · Concept Testing · 300 respondents · 20 Jan 2025</div>
+          </div>
+          <div class="sc-badges">
+            <span class="badge badge-basic">BASIC</span>
+            <span class="badge badge-qa">QA Verified</span>
+            <span class="badge badge-complete">Completed</span>
+          </div>
+        </div>
+        <div class="sc-metrics">
+          <div class="sc-metric"><span class="sc-metric-val metric-up">97%</span><div class="sc-metric-lbl">Idea</div></div>
+          <div class="sc-metric"><span class="sc-metric-val metric-mid">67%</span><div class="sc-metric-lbl">Interest</div></div>
+          <div class="sc-metric"><span class="sc-metric-val metric-mid">54%</span><div class="sc-metric-lbl">Commitment</div></div>
+          <div class="sc-metric"><span class="sc-metric-val metric-up">76%</span><div class="sc-metric-lbl">Meaning</div></div>
+          <div class="sc-metric"><span class="sc-metric-val metric-mid">61%</span><div class="sc-metric-lbl">Difference</div></div>
+          <div class="sc-metric"><span class="sc-metric-val metric-mid">69%</span><div class="sc-metric-lbl">Worth</div></div>
+        </div>
+        <div class="sc-takeaways">
+          <div class="sc-takeaway-title">Key Takeaways</div>
+          <div class="sc-takeaway-item">✨ <strong>Concept resonates strongly</strong> — 97% idea score signals clear unmet need for fee-free home loans.</div>
+          <div class="sc-takeaway-item">⚠️ <strong>Commitment gap of 43 pts</strong> (Idea 97% → Commit 54%) — pricing narrative needs strengthening.</div>
+          <div class="sc-takeaway-item">📈 <strong>Difference pillar weakest</strong> at 61% — category-level parity risk; needs sharper RTB.</div>
+          <div class="sc-next-steps">
+            <div class="sc-next-title">Recommended Next Steps</div>
+            <div class="sc-next-item">Run a price-anchoring concept test to lift commitment from 54% toward 65%+.</div>
+            <div class="sc-next-item">Test 2–3 differentiation messages on the "zero-fee" angle with the 25–44 urban segment.</div>
+          </div>
+        </div>
+        <div class="sc-actions">
+          <button class="btn btn-primary btn-sm" onclick="openPhase('act')">Analyse in Act</button>
+          <button class="btn btn-secondary btn-sm">Download PDF</button>
+          <button class="btn btn-secondary btn-sm">Build Slide Deck</button>
+        </div>
+      </div>
+
+      <div class="study-card">
+        <div class="sc-head">
+          <div class="sc-info">
+            <div class="sc-title">Rugani Ad — Key Visual Assessment</div>
+            <div class="sc-meta">Rugani · Positioning · 1 200 respondents · 10 Dec 2024</div>
+          </div>
+          <div class="sc-badges">
+            <span class="badge badge-basic">BASIC</span>
+            <span class="badge badge-qa">QA Verified</span>
+            <span class="badge badge-complete">Completed</span>
+          </div>
+        </div>
+        <div class="sc-metrics">
+          <div class="sc-metric"><span class="sc-metric-val metric-mid">68%</span><div class="sc-metric-lbl">Idea</div></div>
+          <div class="sc-metric"><span class="sc-metric-val metric-mid">54%</span><div class="sc-metric-lbl">Interest</div></div>
+          <div class="sc-metric"><span class="sc-metric-val metric-down">21%</span><div class="sc-metric-lbl">Commitment</div></div>
+          <div class="sc-metric"><span class="sc-metric-val metric-mid">64%</span><div class="sc-metric-lbl">Meaning</div></div>
+          <div class="sc-metric"><span class="sc-metric-val metric-down">48%</span><div class="sc-metric-lbl">Difference</div></div>
+          <div class="sc-metric"><span class="sc-metric-val metric-mid">59%</span><div class="sc-metric-lbl">Worth</div></div>
+        </div>
+        <div class="sc-takeaways">
+          <div class="sc-takeaway-title">Key Takeaways</div>
+          <div class="sc-takeaway-item">🚨 <strong>Commitment gap of 47 pts</strong> (Idea 68% → Commit 21%) — highest commitment gap in portfolio; urgent attention needed.</div>
+          <div class="sc-takeaway-item">🚫 <strong>Difference score at 48%</strong> — well below category threshold; packaging visual is not differentiating.</div>
+          <div class="sc-next-steps">
+            <div class="sc-next-title">Recommended Next Steps</div>
+            <div class="sc-next-item">Prioritise a full packaging redesign brief — test 3 new visual directions.</div>
+            <div class="sc-next-item">Run a brand-differentiation concept test on RTD innovation.</div>
+          </div>
+        </div>
+        <div class="sc-actions">
+          <button class="btn btn-primary btn-sm" onclick="openPhase('act')">Analyse in Act</button>
+          <button class="btn btn-secondary btn-sm">Download PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASSISTANT tab -->
+  <div id="test-tab-assistant" class="hidden">
+    <div style="background:var(--test-bg);border:1px solid var(--test-border);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px"><div style="font-size:13px;color:var(--text2);line-height:1.7"><strong>Key Takeout:</strong> Urban Males 25–34 at 84% purchase intent are your primary launch cohort. Lead with dual-claim messaging in the R18–25 price band.<br><br><strong>Watch Signal:</strong> Township segment at 52% intent — a R12–15 entry SKU could unlock significant volume.<br><br><div class="ai-rec" style="background:var(--explore-bg);border-left-color:var(--explore);color:var(--explore)">→ Concept is launch-ready for urban 25–34. Prioritise packaging variants testing before rollout.</div></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <span class="ai-prompt-chip">What drove the township intent gap?</span>
+      <span class="ai-prompt-chip">Compare energy drink vs plant snacks</span>
+      <span class="ai-prompt-chip">Generate a slide deck summary</span>
+    </div>
+    <div style="display:flex;gap:8px"><input class="ai-input" placeholder="Ask about your studies…" style="flex:1"><button class="ai-send" style="background:var(--test)">→</button></div>
+  </div>
+
+</div>
+
+<!-- Right side: Research AI -->
+<div class="modal-side" style="--phase-col:var(--test)">
+  <div class="ai-panel-head">
+    <div class="ai-panel-title"><div class="ai-spark" style="background:var(--test)">✦</div>Research AI</div>
+    <div class="ai-panel-sub" style="color:var(--test)">● Active study insights</div>
+  </div>
+  <div class="ai-messages">
+    <div class="ai-msg ai-msg-system">
+      <div class="ai-msg-author"><div class="ai-spark" style="background:var(--test)">✦</div> Research AI</div>
+      <div class="ai-msg-bubble"><strong>Project Aurum — Key Finding:</strong><br><br>The commitment gap (Interest 67% → Commit 54%) is the critical issue. A 43-point drop — among the widest in your library.<div class="ai-rec">→ Investigate price anchoring. The gap closes when price message is explicit.</div></div>
+    </div>
+    <div class="ai-msg ai-msg-user">
+      <div class="ai-msg-author"><span style="width:16px;height:16px;background:var(--coral);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;color:#fff">JS</span> Jane S.</div>
+      <div class="ai-msg-bubble">Build me a deck on this for the client meeting.</div>
+    </div>
+    <div class="ai-msg ai-msg-system">
+      <div class="ai-msg-author"><div class="ai-spark" style="background:var(--test)">✦</div> Research AI</div>
+      <div class="ai-msg-bubble">Deck built. Choose format:
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-xs">Executive (3 slides)</button>
+          <button class="btn btn-ghost btn-xs">Deep Dive (8)</button>
+          <button class="btn btn-ghost btn-xs">Custom</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ai-input-row"><input class="ai-input" placeholder="Ask about results…"><button class="ai-send" style="background:var(--test)">→</button></div>
+  <div class="chat-toggle" onclick="this.nextElementSibling.classList.toggle('hidden')">
+    <span class="chat-toggle-label">💬 Team Chat <span class="chat-unread-dot">1</span></span>
+    <span style="color:var(--text3);font-size:12px">▲</span>
+  </div>
+  <div class="chat-pane">
+    <div class="chat-msgs">
+      <div class="chat-msg">
+        <div class="chat-msg-head"><div class="chat-av" style="background:var(--health)">SW</div><span class="chat-author">Sarah W.</span><span class="chat-time">11:02</span></div>
+        <div class="chat-bubble"><span class="chat-tag">@Jane</span> — commitment gap is exactly what client raised. Needs to be clear in the deck.</div>
+      </div>
+    </div>
+    <div class="chat-input-row"><input class="chat-input" placeholder="Reply…"><button class="chat-send-btn" style="background:var(--test)">→</button></div>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+</div>
+
+<!-- ── ACT ─────────────────────────────────────────────────────── -->
+
+<div class="modal-overlay hidden" id="modal-act">
+<div class="modal-panel">
+  <div class="modal-topbar">
+    <div class="modal-phase-label">
+      <span class="modal-phase-badge" style="background:var(--act-bg);color:var(--act);border:1px solid var(--act-border)">PHASE 03</span>
+      <div class="modal-title" style="font-family:var(--font-head)">Act</div>
+      <span style="font-size:13px;color:var(--text3);margin-left:8px">Where to move next.</span>
+    </div>
+    <button class="modal-close" onclick="closeModal('act')">✕</button>
+  </div>
+  <div class="modal-sub-tabs" style="--phase-col:var(--act)">
+    <div class="modal-tab active" onclick="switchTab(this,'act','gaps')">Gaps</div>
+    <div class="modal-tab" onclick="switchTab(this,'act','nextsteps')">Next Steps</div>
+    <div class="modal-tab" onclick="switchTab(this,'act','planning')">Planning Assistant</div>
+  </div>
+  <div class="modal-body">
+    <div class="modal-main">
+
+```
+  <!-- GAPS tab -->
+  <div id="act-tab-gaps">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div class="section-label" style="margin-bottom:0">Strategic Gaps <span style="font-weight:400;letter-spacing:0;text-transform:none;color:var(--text3)">4 identified</span></div>
+    </div>
+    <div class="gap-card">
+      <div class="gap-item">
+        <div class="gap-priority" style="background:var(--warn-bg);color:var(--warn);border:1.5px solid var(--warn)">1</div>
+        <div class="gap-content">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><div class="gap-title">Commitment gap — Township segment</div><span class="status-chip chip-high">High Priority</span></div>
+          <div class="gap-desc">Energy Drink: 52% purchase intent in township vs 84% urban. Price friction at R22+ is the primary barrier. A R12–15 entry SKU could close 15pp of this gap and unlock meaningful volume.</div>
+          <span class="gap-action-link" style="color:var(--act)">See Next Steps →</span>
+        </div>
+      </div>
+      <div class="gap-item">
+        <div class="gap-priority" style="background:var(--amber-bg);color:var(--amber);border:1.5px solid var(--amber)">2</div>
+        <div class="gap-content">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><div class="gap-title">Value perception lag — 18–24 cohort</div><span class="status-chip chip-med">Medium Priority</span></div>
+          <div class="gap-desc">Purchase intent sits at 65%, but value-for-money scores at 58% — 13pp below the study average. Messaging must shift to emphasise accessible value, not aspirational positioning.</div>
+        </div>
+      </div>
+      <div class="gap-item">
+        <div class="gap-priority" style="background:var(--explore-bg);color:var(--explore);border:1.5px solid var(--explore)">3</div>
+        <div class="gap-content">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><div class="gap-title">Nootropic whitespace — unclaimed territory</div><span class="status-chip chip-new">Opportunity</span></div>
+          <div class="gap-desc">Cognitive-performance beverages are up 41% in search intent among urban 25–34 professionals. No local brand has moved to own this space. First-mover window is open — and narrowing.</div>
+          <span class="gap-action-link" onclick="closeModal('act');openPhase('explore')">Explore Trend →</span>
+        </div>
+      </div>
+      <div class="gap-item">
+        <div class="gap-priority" style="background:var(--amber-bg);color:var(--amber);border:1.5px solid var(--amber)">4</div>
+        <div class="gap-content">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><div class="gap-title">Skincare — repositioning not landing in 35–49</div><span class="status-chip" style="background:#F3F4F6;color:#6B7280">Preliminary</span></div>
+          <div class="gap-desc">Preliminary data (67% field complete) shows the new brand story resonates in 25–34 but fails to convert the 35–49 segment. A dual-message strategy is recommended before full launch.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:8px">Research Coverage</div>
+    <div class="card"><div class="card-body" style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;color:var(--text2);font-weight:500">Food & Beverage</span><span class="status-chip chip-low">Strong</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;color:var(--text2);font-weight:500">Beauty & Personal Care</span><span class="status-chip chip-watch">In Progress</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;color:var(--text2);font-weight:500">Retail / FMCG</span><span class="status-chip chip-high">Gap</span></div>
+    </div></div>
+  </div>
+
+  <!-- NEXT STEPS tab -->
+  <div id="act-tab-nextsteps" class="hidden">
+    <div class="section-label">Next Moves</div>
+    <div class="next-step-card">
+      <div class="ns-item">
+        <div class="ns-num">1</div>
+        <div class="ns-content">
+          <div class="ns-title">Test packaging variants — Energy Drink</div>
+          <div class="ns-desc">Concept scored 72% purchase intent. Test 3–4 packaging variants with the 25–34 urban cohort before committing to production. Design drives "premium but accessible" perception.</div>
+          <div class="ns-cta-row"><button class="btn btn-primary btn-sm" onclick="closeModal('act');openPhase('test')">Launch Packaging Brief →</button></div>
+        </div>
+      </div>
+      <div class="ns-item">
+        <div class="ns-num">2</div>
+        <div class="ns-content">
+          <div class="ns-title">Sandbox — price-entry SKU for Township</div>
+          <div class="ns-desc">Before investing a full study, pressure-test a R12–15 entry SKU concept in the Sandbox. The 52% intent gap suggests the volume is there.</div>
+          <div class="ns-cta-row"><button class="btn btn-secondary btn-sm" onclick="closeModal('act');openPhase('explore')">Open Sandbox →</button></div>
+        </div>
+      </div>
+      <div class="ns-item">
+        <div class="ns-num">3</div>
+        <div class="ns-content">
+          <div class="ns-title">Read the Nootropic Beverage trend report</div>
+          <div class="ns-desc">41% search intent growth with no dominant local player. Understanding the category before building a brief will sharpen your methodology significantly.</div>
+          <div class="ns-cta-row"><button class="btn btn-secondary btn-sm" onclick="closeModal('act');openPhase('explore')">Browse Trend Reports →</button></div>
+        </div>
+      </div>
+      <div class="ns-item">
+        <div class="ns-num" style="opacity:0.5">4</div>
+        <div class="ns-content">
+          <div class="ns-title" style="opacity:0.6">Qual deep-dive — Skincare 35–49 segment</div>
+          <div class="ns-desc" style="opacity:0.6">Once the Pro study completes, run AI-moderated qual interviews with 20 respondents in the 35–49 group.</div>
+          <div><span style="font-size:11px;color:var(--text3);background:var(--surface2);border:1px solid var(--border);padding:3px 8px;border-radius:4px">Unlocks when Skincare study completes</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLANNING tab -->
+  <div id="act-tab-planning" class="hidden">
+    <div style="background:var(--act-bg);border:1px solid var(--act-border);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;color:var(--act);margin-bottom:4px">Planning Assistant</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.7">I've sequenced your 4 next steps above in order of strategic momentum. Packaging variants should come first — concept scores are strong enough. The Township SKU is your biggest volume unlock. Want me to help you draft a brief for any of these?</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <span class="ai-prompt-chip">Plan my next 6-month research cycle</span>
+      <span class="ai-prompt-chip">Draft a brief for Township SKU test</span>
+      <span class="ai-prompt-chip">What's my biggest commercial risk?</span>
+      <span class="ai-prompt-chip">Frame Skincare findings for my team</span>
+    </div>
+    <div style="display:flex;gap:8px"><input class="ai-input" placeholder="Ask how to sequence your next moves…" style="flex:1"><button class="ai-send" style="background:var(--act)">→</button></div>
+  </div>
+
+</div>
+
+<!-- Right: Act AI + chat -->
+<div class="modal-side" style="--phase-col:var(--act)">
+  <div class="ai-panel-head">
+    <div class="ai-panel-title"><div class="ai-spark" style="background:var(--act)">✦</div>Insights Query</div>
+    <div class="ai-panel-sub" style="color:var(--act)">● 3 studies connected</div>
+  </div>
+  <div class="ai-messages">
+    <div class="ai-msg ai-msg-user">
+      <div class="ai-msg-author"><span style="width:16px;height:16px;background:var(--coral);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;color:#fff">JS</span> Jane S.</div>
+      <div class="ai-msg-bubble">What do I still need to test before launching the Energy Drink?</div>
+    </div>
+    <div class="ai-msg ai-msg-system">
+      <div class="ai-msg-author"><div class="ai-spark" style="background:var(--act)">✦</div> Planning AI</div>
+      <div class="ai-msg-bubble"><strong>Energy Drink — pre-launch sequence:</strong><br><br><strong>1. Packaging Variants Test</strong> (1 Basic Credit) — test 3–4 options with 25–34 urban cohort.<br><strong>2. Price Sensitivity — Township</strong> (Sandbox, no credits) — model R12, R14, R16 price points.<br><strong>3. Channel Strategy Signal</strong> (optional, 1 Pro Credit) — if considering multiple channels.
+        <div class="ai-rec">→ Want me to draft a brief for step 1 now?</div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;padding:8px 14px;border-top:1px solid var(--border);flex-wrap:wrap;background:var(--surface2)">
+    <span class="ai-prompt-chip">What are my biggest gaps?</span>
+    <span class="ai-prompt-chip">Draft next brief</span>
+  </div>
+  <div class="ai-input-row"><input class="ai-input" placeholder="Ask about your strategy…"><button class="ai-send" style="background:var(--act)">→</button></div>
+  <div class="chat-toggle" onclick="this.nextElementSibling.classList.toggle('hidden')">
+    <span class="chat-toggle-label">💬 Team Chat <span class="chat-unread-dot">3</span></span>
+    <span style="color:var(--text3);font-size:12px">▲</span>
+  </div>
+  <div class="chat-pane">
+    <div class="chat-msgs">
+      <div class="chat-msg">
+        <div class="chat-msg-head"><div class="chat-av" style="background:var(--health)">SW</div><span class="chat-author">Sarah W.</span><span class="chat-time">11:08</span></div>
+        <div class="chat-bubble"><span class="chat-tag">@Jane</span> — Gap 1 is exactly what client raised. Prioritise in Q2 strategy?</div>
+      </div>
+      <div class="chat-msg">
+        <div class="chat-msg-head"><div class="chat-av" style="background:var(--explore)">TM</div><span class="chat-author">Thabo M.</span><span class="chat-time">11:12</span></div>
+        <div class="chat-bubble">Design sprint looks good — Sela already showed the visual cue insight. Two birds one stone.</div>
+      </div>
+    </div>
+    <div class="chat-input-row"><input class="chat-input" placeholder="Reply…"><button class="chat-send-btn" style="background:var(--act)">→</button></div>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+</div>
+
+<!-- ── HEALTH ───────────────────────────────────────────────────── -->
+
+<div class="modal-overlay hidden" id="modal-health">
+<div class="modal-panel">
+  <div class="modal-topbar">
+    <div class="modal-phase-label">
+      <span class="modal-phase-badge" style="background:var(--health-bg);color:var(--health);border:1px solid var(--health-border)">OVERALL HEALTH</span>
+      <div class="modal-title" style="font-family:var(--font-head)">Company Health Centre</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <select class="form-input" style="width:auto;padding:5px 12px;font-size:12px"><option>All Companies</option><option>Discovery Bank</option><option>Rugani</option></select>
+      <button class="modal-close" onclick="closeModal('health')">✕</button>
+    </div>
+  </div>
+  <div class="modal-body" style="display:block;overflow-y:auto">
+    <div style="padding:24px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
+        <span style="font-size:11px;font-weight:600;background:var(--test-bg);color:var(--test);padding:3px 8px;border-radius:4px">Live data</span>
+        <span style="font-size:12px;color:var(--text3)">Track overall health, idea traction, and commitment signals across all studies.</span>
+      </div>
+
+```
+  <div class="health-metrics">
+    <div class="health-metric-card"><div class="hm-num" style="color:var(--explore)">82%</div><div class="hm-label">Idea Score</div><span class="hm-delta hm-up">▲ +4pts vs last study</span></div>
+    <div class="health-metric-card"><div class="hm-num" style="color:var(--test)">67%</div><div class="hm-label">Interest Score</div><span class="hm-delta hm-up">▲ +9pts vs last study</span></div>
+    <div class="health-metric-card"><div class="hm-num" style="color:var(--warn)">54%</div><div class="hm-label">Commitment Score</div><span class="hm-delta hm-down">▼ −3pts vs last study</span></div>
+  </div>
+
+  <div class="section-label">Brand Pillars <span style="font-weight:400;letter-spacing:0;text-transform:none;color:var(--text3)">Meaning · Difference · Worth</span></div>
+  <div class="pillar-cards">
+    <div class="pillar-card">
+      <div class="pillar-name">Meaning</div>
+      <div class="pillar-sub">Brand resonance & purpose</div>
+      <div class="pillar-num">78%</div>
+      <div class="pillar-bars">
+        <div class="pillar-bar-row"><span class="pillar-bar-label">Relevance</span><div class="pillar-bar-track"><div class="pillar-bar-fill" style="width:81%"></div></div><span class="pillar-bar-val">81%</span></div>
+        <div class="pillar-bar-row"><span class="pillar-bar-label">Emotional</span><div class="pillar-bar-track"><div class="pillar-bar-fill" style="width:74%"></div></div><span class="pillar-bar-val">74%</span></div>
+        <div class="pillar-bar-row"><span class="pillar-bar-label">Trust</span><div class="pillar-bar-track"><div class="pillar-bar-fill" style="width:79%"></div></div><span class="pillar-bar-val">79%</span></div>
+      </div>
+    </div>
+    <div class="pillar-card">
+      <div class="pillar-name">Difference</div>
+      <div class="pillar-sub">Distinctiveness & uniqueness</div>
+      <div class="pillar-num" style="color:var(--warn)">63%</div>
+      <div class="pillar-bars">
+        <div class="pillar-bar-row"><span class="pillar-bar-label">Unique</span><div class="pillar-bar-track"><div class="pillar-bar-fill" style="width:65%;background:var(--warn)"></div></div><span class="pillar-bar-val">65%</span></div>
+        <div class="pillar-bar-row"><span class="pillar-bar-label">Innovative</span><div class="pillar-bar-track"><div class="pillar-bar-fill" style="width:59%;background:var(--warn)"></div></div><span class="pillar-bar-val">59%</span></div>
+        <div class="pillar-bar-row"><span class="pillar-bar-label">Modern</span><div class="pillar-bar-track"><div class="pillar-bar-fill" style="width:64%;background:var(--warn)"></div></div><span class="pillar-bar-val">64%</span></div>
+      </div>
+    </div>
+    <div class="pillar-card">
+      <div class="pillar-name">Worth</div>
+      <div class="pillar-sub">Perceived value & premium</div>
+      <div class="pillar-num" style="color:var(--amber)">71%</div>
+      <div class="pillar-bars">
+        <div class="pillar-bar-row"><span class="pillar-bar-label">Price fair</span><div class="pillar-bar-track"><div class="pillar-bar-fill" style="width:73%;background:var(--amber)"></div></div><span class="pillar-bar-val">73%</span></div>
+        <div class="pillar-bar-row"><span class="pillar-bar-label">Premium</span><div class="pillar-bar-track"><div class="pillar-bar-fill" style="width:68%;background:var(--amber)"></div></div><span class="pillar-bar-val">68%</span></div>
+        <div class="pillar-bar-row"><span class="pillar-bar-label">Value</span><div class="pillar-bar-track"><div class="pillar-bar-fill" style="width:72%;background:var(--amber)"></div></div><span class="pillar-bar-val">72%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Study Scores <span style="font-weight:400;letter-spacing:0;text-transform:none;color:var(--text3)">Across all studies</span></div>
+  <div class="card" style="margin-bottom:20px"><div class="card-body" style="padding:0">
+    <table class="score-table">
+      <thead><tr><th>Study</th><th>Idea</th><th>Interest</th><th>Commit</th><th>Trend</th></tr></thead>
+      <tbody>
+        <tr><td>Project Aurum</td><td class="metric-up">97%</td><td class="metric-mid">66%</td><td class="metric-mid">54%</td><td class="trend-strong">Strong</td></tr>
+        <tr><td>Low/No Audit</td><td class="metric-up">98%</td><td class="metric-up">95%</td><td class="metric-up">77%</td><td class="trend-strong">Strong</td></tr>
+        <tr><td>Meta Creative</td><td class="metric-mid">74%</td><td class="metric-mid">54%</td><td class="metric-down">41%</td><td class="trend-mixed">Mixed</td></tr>
+        <tr><td>Rugani Ad</td><td class="metric-mid">68%</td><td class="metric-mid">54%</td><td class="metric-down">21%</td><td class="trend-weak">Weak</td></tr>
+        <tr><td>Rugani × Clicks</td><td class="metric-up">92%</td><td class="metric-up">81%</td><td class="metric-mid">54%</td><td class="trend-strong">Strong</td></tr>
+      </tbody>
+    </table>
+  </div></div>
+
+  <div class="section-label">Strategic Takeaways <span style="font-weight:400;letter-spacing:0;text-transform:none;color:var(--text3)">AI Generated</span></div>
+  <div class="card"><div class="card-body" style="display:flex;flex-direction:column;gap:12px">
+    <div><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">Idea Traction Is Strong</div><div style="font-size:12px;color:var(--text2)">Concept scores above 80% across 3 of 5 studies. Your ideas are landing — execution is the next frontier.</div></div>
+    <hr class="divider" style="margin:0">
+    <div><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">Commitment Gap Widening</div><div style="font-size:12px;color:var(--text2)">Commitment scores trail idea by 28pts on average. Interest converts — but final purchase intent needs bridging with pricing or packaging work.</div></div>
+    <hr class="divider" style="margin:0">
+    <div><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">Difference Score Lowest Pillar</div><div style="font-size:12px;color:var(--text2)">At 63%, your brand's distinctiveness lags Meaning (78%) and Worth (71%). Recommend a differentiation-focused creative study in Q3.</div></div>
+  </div></div>
+</div>
+```
+
+  </div>
+</div>
+</div>
+
+<script>
+function showMain(view){ /* stub — only dashboard shown */ }
+
+function openPhase(phase){
+  document.getElementById('modal-'+phase).classList.remove('hidden');
+  document.body.style.overflow='hidden';
+}
+function closeModal(phase){
+  document.getElementById('modal-'+phase).classList.add('hidden');
+  document.body.style.overflow='';
+}
+
+// Close on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(overlay=>{
+  overlay.addEventListener('click',e=>{
+    if(e.target===overlay) overlay.classList.add('hidden');
+  });
+});
+
+// Sub-tab switching
+function switchTab(el, phase, tab){
+  const modal=document.getElementById('modal-'+phase);
+  modal.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  // Hide all tab panes
+  modal.querySelectorAll('[id^="'+phase+'-tab-"]').forEach(p=>p.classList.add('hidden'));
+  const target=document.getElementById(phase+'-tab-'+tab);
+  if(target) target.classList.remove('hidden');
+}
+
+function switchExploreToSandbox(){
+  const tabs=document.querySelectorAll('#modal-explore .modal-tab');
+  tabs.forEach(t=>t.classList.remove('active'));
+  tabs[1].classList.add('active');
+  document.querySelectorAll('[id^="explore-tab-"]').forEach(p=>p.classList.add('hidden'));
+  document.getElementById('explore-tab-sandbox').classList.remove('hidden');
+}
+
+// Filter button toggle
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    const siblings=[...this.parentElement.children].filter(c=>c.classList.contains('filter-btn'));
+    siblings.forEach(s=>s.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Option pill toggle
+document.querySelectorAll('.option-pill').forEach(pill=>{
+  pill.addEventListener('click',function(){
+    this.classList.toggle('selected');
+  });
+});
+
+// Study type card select
+document.querySelectorAll('.stype-card').forEach(card=>{
+  card.addEventListener('click',function(){
+    this.closest('.study-type-cards').querySelectorAll('.stype-card').forEach(c=>c.classList.remove('selected'));
+    this.classList.add('selected');
+  });
+});
+</script>
+
+</body>
+</html>

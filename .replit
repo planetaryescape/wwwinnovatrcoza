@@ -53,3 +53,12 @@ defaultBucketID = "replit-objstore-c87ea3ed-b8b8-4f41-a0ea-456a5c4c2139"
 [postMerge]
 path = "scripts/post-merge.sh"
 timeoutMs = 20000
+
+[rules]
+
+[rules.formatter]
+
+[rules.formatter.fileExtensions]
+
+[rules.formatter.fileExtensions.".html"]
+id = "module:web/languageServer:html"
