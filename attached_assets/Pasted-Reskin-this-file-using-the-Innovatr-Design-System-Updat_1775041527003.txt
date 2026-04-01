@@ -1,0 +1,84 @@
+Reskin this file using the Innovatr Design System. Update visual styling only — do not change any functionality, layout structure, user flows, video embeds, images, JavaScript logic, or HTML element order.
+
+━━━━━━━━━━━━━━━━━━━━━━
+FONTS
+━━━━━━━━━━━━━━━━━━━━━━
+Add to <head>:
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+
+Headings h1–h4, display text, section titles, card titles:
+  font-family: 'DM Serif Display', Georgia, serif
+
+Body, labels, buttons, nav, inputs, captions, all UI text:
+  font-family: 'DM Sans', system-ui, sans-serif
+
+━━━━━━━━━━━━━━━━━━━━━━
+CSS TOKENS — add to :root
+━━━━━━━━━━━━━━━━━━━━━━
+--violet:    #3A2FBF;
+--violet-dk: #1E1B3A;
+--violet-md: #5046D4;
+--violet-lt: #EAE8FF;
+--coral:     #E8503A;
+--coral-dk:  #B53425;
+--coral-lt:  #FDECEA;
+--cyan:      #4EC9E8;
+--cyan-dk:   #1A8FAD;
+--cyan-lt:   #DFF6FC;
+--amber:     #F5C842;
+--amber-dk:  #B8911A;
+--amber-lt:  #FEF6D6;
+--cream:     #FAF3E8;
+--cream-dk:  #F0E6D0;
+--n0:   #FFFFFF;
+--n100: #F0E6D0;
+--n200: #E2D5BF;
+--n300: #C9B99A;
+--n400: #A89078;
+--n500: #8A7260;
+--n600: #6B5744;
+--n900: #1E1B3A;
+--sh-sm: 0 1px 4px rgba(58,47,191,.08);
+--sh-md: 0 4px 14px rgba(58,47,191,.12);
+--sh-lg: 0 8px 32px rgba(58,47,191,.18);
+--r-sm: 4px; --r-md: 8px; --r-lg: 14px;
+--r-xl: 20px; --r-full: 9999px;
+
+━━━━━━━━━━━━━━━━━━━━━━
+COLOUR RULES
+━━━━━━━━━━━━━━━━━━━━━━
+Page background          → var(--cream)
+All body & heading text  → var(--violet-dk)
+Muted / supporting text  → var(--n500)
+Primary buttons & links  → var(--violet)
+CTA / high-energy buttons → var(--coral)
+Info states & charts     → var(--cyan)
+Warnings & highlights    → var(--amber) — dark text only, never white
+Card backgrounds         → white with border: 1px solid var(--n200)
+Card shadow              → var(--sh-sm)
+Dark nav / header / overlay → var(--violet-dk)
+Borders                  → var(--n200)
+Active / selected states → var(--violet)
+Error states             → var(--coral)
+Success states           → #2A9E5C
+
+━━━━━━━━━━━━━━━━━━━━━━
+COMPONENT RULES
+━━━━━━━━━━━━━━━━━━━━━━
+Buttons       border-radius: 8px · font-weight: 600 · DM Sans
+Cards         border-radius: 14px · white bg · 1px solid var(--n200) · var(--sh-sm)
+Inputs        border: 1.5px solid var(--n300) · focus → var(--violet) · error → var(--coral)
+Badges/pills  border-radius: 9999px · tint bg + dark text from same colour family
+Nav/header    var(--violet-dk) bg · white text · active items → var(--coral)
+Overlines     var(--coral) · font-weight: 700 · letter-spacing: .1em · uppercase
+Section dividers → var(--n200)
+
+━━━━━━━━━━━━━━━━━━━━━━
+DO NOT TOUCH
+━━━━━━━━━━━━━━━━━━━━━━
+<video>  <iframe>  <img>  <source>  and all their attributes
+Any src, href, or data- attributes pointing to media
+JavaScript functions, event handlers, routing logic
+HTML structure, element order, and nesting
+CSS class names referenced by JavaScript
+Existing scroll, animation, or transition behaviour tied to JS

@@ -170,6 +170,39 @@
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
+/* ── Innovatr Design System Tokens ────────────────────────── */
+:root {
+  --ds-violet:    #3A2FBF;
+  --ds-violet-dk: #1E1B3A;
+  --ds-violet-md: #5046D4;
+  --ds-violet-lt: #EAE8FF;
+  --ds-coral:     #E8503A;
+  --ds-coral-dk:  #B53425;
+  --ds-coral-lt:  #FDECEA;
+  --ds-cyan:      #4EC9E8;
+  --ds-cyan-dk:   #1A8FAD;
+  --ds-cyan-lt:   #DFF6FC;
+  --ds-amber:     #F5C842;
+  --ds-amber-dk:  #B8911A;
+  --ds-amber-lt:  #FEF6D6;
+  --ds-cream:     #FAF3E8;
+  --ds-cream-dk:  #F0E6D0;
+  --ds-n0:        #FFFFFF;
+  --ds-n100:      #F0E6D0;
+  --ds-n200:      #E2D5BF;
+  --ds-n300:      #C9B99A;
+  --ds-n400:      #A89078;
+  --ds-n500:      #8A7260;
+  --ds-n600:      #6B5744;
+  --ds-n900:      #1E1B3A;
+  --ds-success:   #2A9E5C;
+  --ds-sh-sm: 0 1px 4px rgba(58,47,191,.08);
+  --ds-sh-md: 0 4px 14px rgba(58,47,191,.12);
+  --ds-sh-lg: 0 8px 32px rgba(58,47,191,.18);
+  --ds-r-sm: 4px; --ds-r-md: 8px; --ds-r-lg: 14px;
+  --ds-r-xl: 20px; --ds-r-full: 9999px;
+}
+
 @layer base {
   * {
     @apply border-border;
