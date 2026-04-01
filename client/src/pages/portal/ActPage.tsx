@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import {
-  X, MessageSquare, ChevronDown, ArrowRight, Lock,
+  X, MessageSquare, ChevronDown, ArrowRight, Lock, Send,
   FlaskConical, Layers, Lightbulb, CheckCircle2, Gift, Brain, Palette,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
