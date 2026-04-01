@@ -162,10 +162,12 @@ function buildRecommendations(query: string, results: SearchResult[], studies: R
 export async function processAIQuery(
   query: string,
   sources: AISource,
-  studies: ResearchStudy[] = []
+  studies: ResearchStudy[] = [],
+  /** Industry groups allowed for this client. null = no restriction. */
+  allowedIndustries: string[] | null = null
 ): Promise<AIQueryResponse> {
   const trendResults = (sources === "trends" || sources === "combined")
-    ? await searchPDFs(query, "trends", 8)
+    ? await searchPDFs(query, "trends", 8, allowedIndustries)
     : [];
 
   const summary = buildSummary(query, trendResults, studies, sources);

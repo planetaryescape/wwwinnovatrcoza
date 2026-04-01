@@ -5507,8 +5507,20 @@ Income: ${(incomes || []).join(", ") || "All"} · Region: ${(regions || []).join
         } catch { /* studies remain empty */ }
       }
 
+      // Resolve which trend-report industry groups this client may access.
+      // We look up the company's industry from the DB (never from the client)
+      // and map it to permitted report groups via resolveIndustryGroups().
+      let allowedIndustries: string[] | null = null;
+      if (req.user?.companyId) {
+        try {
+          const { resolveIndustryGroups } = await import("./pdf-library");
+          const company = await storage.getCompany(req.user.companyId);
+          allowedIndustries = resolveIndustryGroups(company?.industry ?? null);
+        } catch { /* fall back to no restriction */ }
+      }
+
       const { processAIQuery } = await import("./ai-query-handler");
-      const response = await processAIQuery(query, sources, studies);
+      const response = await processAIQuery(query, sources, studies, allowedIndustries);
       res.json(response);
     } catch (error: any) {
       console.error("AI query error:", error);
