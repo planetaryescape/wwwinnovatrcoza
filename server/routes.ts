@@ -5471,6 +5471,49 @@ Income: ${(incomes || []).join(", ") || "All"} · Region: ${(regions || []).join
     }
   });
 
+  // ─── AI Query endpoint ───────────────────────────────────────────────────
+  const aiQuerySchema = z.object({
+    query:    z.string().min(1).max(500),
+    sources:  z.enum(["trends", "research", "combined"]).default("combined"),
+    companyId: z.string().optional(),
+  });
+
+  app.post("/api/ai/query", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const parsed = aiQuerySchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid request", details: parsed.error.flatten() });
+      }
+
+      const { query, sources, companyId } = parsed.data;
+
+      // Fetch company research studies if needed
+      const studies: any[] = [];
+      if ((sources === "research" || sources === "combined") && (companyId || req.user?.companyId)) {
+        try {
+          const cId = companyId || req.user!.companyId!;
+          const rawStudies = await storage.getMemberStudies(cId);
+          for (const s of rawStudies.slice(0, 8)) {
+            studies.push({
+              title: s.title,
+              status: s.status,
+              type: s.studyType ?? undefined,
+              description: s.description ?? undefined,
+              scores: s.scores as Record<string, number> ?? undefined,
+            });
+          }
+        } catch { /* studies remain empty */ }
+      }
+
+      const { processAIQuery } = await import("./ai-query-handler");
+      const response = await processAIQuery(query, sources, studies);
+      res.json(response);
+    } catch (error: any) {
+      console.error("AI query error:", error);
+      res.status(500).json({ error: "Query processing failed", message: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

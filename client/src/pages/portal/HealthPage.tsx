@@ -1,4 +1,5 @@
 import { useState } from "react";
+import AIQueryPanel from "@/components/portal/AIQueryPanel";
 import { useLocation } from "wouter";
 import {
   X, Sparkles, Send, TrendingUp, TrendingDown, Activity,
@@ -238,30 +239,6 @@ function ScoreRow({ label, color, delta, deltaColor, points }: {
 export default function HealthPage() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
-  const [aiInput, setAiInput] = useState("");
-  const [chatMessages, setChatMessages] = useState<{ type: "system" | "user"; text: string; rec?: string }[]>([
-    {
-      type: "system",
-      text: "Your portfolio is showing strong idea traction at 82% but a widening commitment gap. The Difference pillar at 63% is the primary lever to address. Two clients show urgent gaps.",
-      rec: "→ Prioritise pricing narrative clarity and CTA sharpness in next round of creative.",
-    },
-  ]);
-
-  const initials = (name?: string) => {
-    if (!name) return "?";
-    const p = name.split(" ");
-    return p.length >= 2 ? (p[0][0] + p[1][0]).toUpperCase() : name[0].toUpperCase();
-  };
-
-  const handleSendAI = () => {
-    if (!aiInput.trim()) return;
-    setChatMessages(prev => [
-      ...prev,
-      { type: "user", text: aiInput },
-      { type: "system", text: "Based on your portfolio data, the commitment gap is the most urgent area to address. Focus on pricing narrative and purchase trigger clarity across your next round of concepts.", rec: "→ Commission a dedicated commitment-lift test on Rugani to arrest the decline." },
-    ]);
-    setAiInput("");
-  };
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: CREAM }}>
@@ -488,64 +465,19 @@ export default function HealthPage() {
           </div>
 
           {/* ── Right: AI Panel ── */}
-          <div className="w-80 min-w-[320px] flex flex-col overflow-hidden" style={{ background: "#fff", borderLeft: `1px solid ${N200}` }}>
-            <div className="px-4 py-3 flex-shrink-0" style={{ borderBottom: `1px solid ${N200}` }}>
-              <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: VDK }}>
-                <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: SUCCESS }}>
-                  <Sparkles className="w-3 h-3 text-white" />
-                </div>
-                Health AI
-              </div>
-              <div className="text-[11px] mt-0.5 flex items-center gap-1.5 font-semibold" style={{ color: SUCCESS }}>
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: SUCCESS }} />
-                5 studies · live portfolio
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-3 space-y-3">
-              {chatMessages.map((msg, i) => (
-                <div key={i} className={msg.type === "user" ? "ml-4" : ""}>
-                  <div className="text-[10px] mb-1 flex items-center gap-1.5" style={{ color: N500 }}>
-                    {msg.type === "system"
-                      ? <><div className="w-4 h-4 rounded-sm flex items-center justify-center" style={{ background: SUCCESS }}><Sparkles className="w-2.5 h-2.5 text-white" /></div> Health AI</>
-                      : <><div className="w-4 h-4 rounded-full flex items-center justify-center text-white text-[8px] font-bold" style={{ background: CORAL }}>{initials(user?.name)}</div> {user?.name}</>
-                    }
-                  </div>
-                  <div className="text-xs leading-relaxed p-3 rounded-xl" style={{ background: msg.type === "user" ? "#FAF3E8" : SUC_LT, border: `1px solid ${msg.type === "user" ? N200 : "rgba(42,158,92,0.2)"}` }}>
-                    <p style={{ color: VDK }}>{msg.text}</p>
-                    {msg.rec && (
-                      <div className="mt-2 pl-2 py-1.5 text-xs font-medium rounded-r" style={{ background: "#D1FAE5", borderLeft: `2px solid ${SUCCESS}`, color: SUCCESS }}>
-                        {msg.rec}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Quick queries */}
-            <div className="flex gap-1.5 px-3 py-2 flex-wrap flex-shrink-0" style={{ borderTop: `1px solid ${N200}`, background: "#FAFAF8" }}>
-              {["What's driving the commitment gap?", "Which study needs urgent attention?", "How do I improve the Difference pillar?"].map(q => (
-                <button key={q} onClick={() => setAiInput(q)} className="text-[11px] px-2.5 py-1 rounded-full whitespace-nowrap" style={{ background: "#fff", border: `1px solid ${N200}`, color: N500 }} data-testid={`health-query-${q.substring(0, 15)}`}>{q}</button>
-              ))}
-            </div>
-
-            <div className="p-3 flex gap-2 flex-shrink-0" style={{ borderTop: `1px solid ${N200}` }}>
-              <input
-                value={aiInput}
-                onChange={e => setAiInput(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && handleSendAI()}
-                className="flex-1 rounded-lg px-3 py-2 text-xs focus:outline-none"
-                style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
-                placeholder="Ask about your portfolio…"
-                data-testid="input-health-ai"
-                onFocus={e => (e.target.style.borderColor = SUCCESS)}
-                onBlur={e => (e.target.style.borderColor = N200)}
-              />
-              <button onClick={handleSendAI} className="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: SUCCESS }} data-testid="button-send-health-ai">
-                <Send className="w-3.5 h-3.5" />
-              </button>
-            </div>
+          <div className="w-80 min-w-[320px] flex flex-col overflow-hidden" style={{ borderLeft: `1px solid ${N200}` }}>
+            <AIQueryPanel
+              accentColor={SUCCESS}
+              label="Health AI"
+              suggestedPrompts={[
+                "What's driving the commitment gap?",
+                "Which study needs urgent attention?",
+                "How do I improve the Difference pillar?",
+                "Compare my brand pillars vs benchmark",
+              ]}
+              companyId={user?.companyId ?? undefined}
+              defaultSource="research"
+            />
           </div>
 
         </div>

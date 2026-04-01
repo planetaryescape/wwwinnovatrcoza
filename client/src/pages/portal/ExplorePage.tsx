@@ -1,10 +1,11 @@
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import {
-  X, Sparkles, MessageSquare, Send, ArrowRight, ChevronDown, Loader2, BookOpen, Lock, Zap,
+  X, MessageSquare, Send, ArrowRight, ChevronDown, Loader2, BookOpen, Lock, Zap,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
+import AIQueryPanel from "@/components/portal/AIQueryPanel";
 
 /* ── Design System tokens ─────────────────────────────── */
 const VDK      = "#1E1B3A";
@@ -126,8 +127,6 @@ export default function ExplorePage() {
   const [, setLocation] = useLocation();
   const { user }        = useAuth();
   const [activeTab, setActiveTab]           = useState<Tab>("signals");
-  const [aiInput, setAiInput]               = useState("");
-  const [chatMessages, setChatMessages]     = useState<any[]>(AI_MESSAGES);
   const [chatInput, setChatInput]           = useState("");
   const [showChat, setShowChat]             = useState(false);
 
@@ -144,16 +143,6 @@ export default function ExplorePage() {
     if (!name) return "?";
     const p = name.split(" ");
     return p.length >= 2 ? (p[0][0] + p[1][0]).toUpperCase() : name[0].toUpperCase();
-  };
-
-  const handleSendAI = () => {
-    if (!aiInput.trim()) return;
-    setChatMessages(prev => [
-      ...prev,
-      { type: "user", text: aiInput },
-      { type: "system", text: "I'm analysing that now. Based on your portfolio signals, here's what I see…", rec: "→ This is indicative — I'll update when I have more data." },
-    ]);
-    setAiInput("");
   };
 
   const togglePersona = (id: string) => {
@@ -544,80 +533,18 @@ export default function ExplorePage() {
 
           {/* Right: AI Panel */}
           <div className="w-80 min-w-[320px] flex flex-col overflow-hidden" style={{ background: "#fff", borderLeft: `1px solid ${N200}` }}>
-            <div className="px-4 py-3 flex-shrink-0" style={{ borderBottom: `1px solid ${N200}` }}>
-              <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: VDK }}>
-                <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: VIO }}>
-                  <Sparkles className="w-3 h-3 text-white" />
-                </div>
-                Explore AI
-              </div>
-              <div className="text-[11px] mt-0.5 flex items-center gap-1.5 font-semibold" style={{ color: VIO }}>
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: VIO }} />
-                12 live signals
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-3 space-y-3">
-              {chatMessages.map((msg, i) => (
-                <div key={i} className={msg.type === "user" ? "ml-4" : ""}>
-                  <div className="text-[10px] mb-1 flex items-center gap-1.5" style={{ color: N500 }}>
-                    {msg.type === "system" ? (
-                      <><div className="w-4 h-4 rounded-sm flex items-center justify-center" style={{ background: VIO }}><Sparkles className="w-2.5 h-2.5 text-white" /></div> Explore AI</>
-                    ) : (
-                      <><div className="w-4 h-4 rounded-full flex items-center justify-center text-white text-[8px] font-bold" style={{ background: CORAL }}>{initials(user?.name)}</div> {user?.name}</>
-                    )}
-                  </div>
-                  <div className="text-xs leading-relaxed p-3 rounded-xl" style={{
-                    background: msg.type === "user" ? "#FAF3E8" : "#F8F7FF",
-                    border: `1px solid ${msg.type === "user" ? N200 : "rgba(58,47,191,0.12)"}`,
-                  }}>
-                    <p style={{ color: VDK }}>{msg.text}</p>
-                    {msg.rec && (
-                      <div className="mt-2 pl-2 py-1.5 text-xs font-medium rounded-r" style={{ background: VIO_LT, borderLeft: `2px solid ${VIO}`, color: VIO }}>
-                        {msg.rec}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-1.5 px-3 py-2 flex-wrap flex-shrink-0" style={{ borderTop: `1px solid ${N200}`, background: "#FAFAF8" }}>
-              {AI_PROMPTS.map(p => (
-                <button
-                  key={p}
-                  onClick={() => setAiInput(p)}
-                  className="text-[11px] px-2.5 py-1 rounded-full whitespace-nowrap"
-                  style={{ background: "#fff", border: `1px solid ${N200}`, color: N500 }}
-                  data-testid={`ai-prompt-${p.substring(0, 20)}`}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-
-            <div className="p-3 flex gap-2 flex-shrink-0" style={{ borderTop: `1px solid ${N200}` }}>
-              <input
-                value={aiInput}
-                onChange={e => setAiInput(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && handleSendAI()}
-                className="flex-1 rounded-lg px-3 py-2 text-xs placeholder:text-muted-foreground focus:outline-none"
-                style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
-                placeholder="Ask about signals or trends…"
-                data-testid="input-ai-message"
-                onFocus={e => (e.target.style.borderColor = VIO)}
-                onBlur={e => (e.target.style.borderColor = N200)}
+            {/* AI Query Panel */}
+            <div className="flex-1 overflow-hidden flex flex-col" style={{ minHeight: 0 }}>
+              <AIQueryPanel
+                accentColor={VIO}
+                label="Explore AI"
+                suggestedPrompts={AI_PROMPTS}
+                companyId={user?.companyId ?? undefined}
+                defaultSource="combined"
               />
-              <button
-                onClick={handleSendAI}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0"
-                style={{ background: VIO }}
-                data-testid="button-send-ai"
-              >
-                <Send className="w-3.5 h-3.5" />
-              </button>
             </div>
 
+            {/* Team Chat collapsible */}
             <button
               onClick={() => setShowChat(!showChat)}
               className="px-4 py-2.5 flex items-center justify-between flex-shrink-0 transition-colors"

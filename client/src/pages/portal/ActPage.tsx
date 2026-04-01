@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import {
-  X, Sparkles, Send, MessageSquare, ChevronDown, ArrowRight, Lock,
+  X, MessageSquare, ChevronDown, ArrowRight, Lock,
   FlaskConical, Layers, Lightbulb, CheckCircle2, Gift, Brain, Palette,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import AIQueryPanel from "@/components/portal/AIQueryPanel";
 
 /* ── Design System tokens ─────────────────────────────── */
 const VDK      = "#1E1B3A";
@@ -211,11 +212,6 @@ export default function ActPage() {
   const [, setLocation]           = useLocation();
   const { user }                  = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("gaps");
-  const [aiInput, setAiInput]     = useState("");
-  const [chatMessages, setChatMessages] = useState<{ type: "user" | "system"; text: string; rec?: string }[]>([
-    { type: "user",   text: "What do I still need to test before launching the Energy Drink?" },
-    { type: "system", text: "Based on your strategic portfolio, here are the priority moves I'd recommend…", rec: "→ Let me know which area you'd like to sequence first." },
-  ]);
   const [chatInput, setChatInput] = useState("");
   const [showChat, setShowChat]   = useState(false);
   const [planningInput, setPlanningInput] = useState("");
@@ -225,22 +221,6 @@ export default function ActPage() {
     { role: "user", text: "What do I still need to test before launching the Energy Drink?" },
     { role: "ai",   text: PLANNING_AI_RESPONSE },
   ]);
-
-  const initials = (name?: string) => {
-    if (!name) return "?";
-    const p = name.split(" ");
-    return p.length >= 2 ? (p[0][0] + p[1][0]).toUpperCase() : name[0].toUpperCase();
-  };
-
-  const handleSendAI = () => {
-    if (!aiInput.trim()) return;
-    setChatMessages(prev => [
-      ...prev,
-      { type: "user", text: aiInput },
-      { type: "system", text: "Based on your strategic portfolio, here are the priority moves I'd recommend…", rec: "→ Let me know which area you'd like to sequence first." },
-    ]);
-    setAiInput("");
-  };
 
   const handleSendPlanning = () => {
     const msg = planningInput.trim();
@@ -376,57 +356,21 @@ export default function ActPage() {
                   </div>
                 </div>
 
-                {/* Gaps right panel: condensed Insights Query */}
+                {/* Gaps right panel: AI Query */}
                 <div className="w-80 min-w-[300px] flex-shrink-0">
-                  <div className="flex flex-col overflow-hidden" style={{ ...CARD, maxHeight: 480 }}>
-                    <div className="px-4 py-3 flex-shrink-0" style={{ borderBottom: `1px solid ${N200}` }}>
-                      <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: VDK }}>
-                        <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: ACT_COLOR }}>
-                          <Sparkles className="w-3 h-3 text-white" />
-                        </div>
-                        Insights Query
-                      </div>
-                      <div className="text-[11px] mt-0.5 flex items-center gap-1.5 font-semibold" style={{ color: ACT_COLOR }}>
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: ACT_COLOR }} />
-                        4 strategic gaps
-                      </div>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-3 space-y-3">
-                      {chatMessages.map((msg, i) => (
-                        <div key={i} className={msg.type === "user" ? "ml-4" : ""}>
-                          <div className="text-[10px] mb-1 flex items-center gap-1.5" style={{ color: N500 }}>
-                            {msg.type === "system"
-                              ? <><div className="w-4 h-4 rounded-sm flex items-center justify-center" style={{ background: ACT_COLOR }}><Sparkles className="w-2.5 h-2.5 text-white" /></div> Insights Query</>
-                              : <><div className="w-4 h-4 rounded-full flex items-center justify-center text-white text-[8px] font-bold" style={{ background: VIO }}>{initials(user?.name)}</div> {user?.name}</>
-                            }
-                          </div>
-                          <div className="text-xs leading-relaxed p-3 rounded-xl" style={{ background: msg.type === "user" ? "#FAF3E8" : "#FFF5F4", border: `1px solid ${msg.type === "user" ? N200 : "rgba(232,80,58,0.15)"}` }}>
-                            <p style={{ color: VDK, whiteSpace: "pre-line" }}>{msg.text}</p>
-                            {msg.rec && (
-                              <div className="mt-2 pl-2 py-1.5 text-xs font-medium rounded-r" style={{ background: CORAL_LT, borderLeft: `2px solid ${CORAL}`, color: CORAL }}>
-                                {msg.rec}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="p-3 flex gap-2 flex-shrink-0" style={{ borderTop: `1px solid ${N200}` }}>
-                      <input
-                        value={aiInput}
-                        onChange={e => setAiInput(e.target.value)}
-                        onKeyDown={e => e.key === "Enter" && handleSendAI()}
-                        className="flex-1 rounded-lg px-3 py-2 text-xs focus:outline-none"
-                        style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
-                        placeholder="Ask about gaps…"
-                        data-testid="input-ai-message"
-                        onFocus={e => (e.target.style.borderColor = CORAL)}
-                        onBlur={e => (e.target.style.borderColor = N200)}
-                      />
-                      <button onClick={handleSendAI} className="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: ACT_COLOR }} data-testid="button-send-ai">
-                        <Send className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                  <div className="flex flex-col overflow-hidden rounded-2xl" style={{ border: `1px solid ${N200}`, height: 480 }}>
+                    <AIQueryPanel
+                      accentColor={ACT_COLOR}
+                      label="Act AI"
+                      suggestedPrompts={[
+                        "What's the biggest strategic gap in my category?",
+                        "Which pillar should I address first?",
+                        "How do I close the commitment gap?",
+                        "Find trends on indulgence and snacking",
+                      ]}
+                      companyId={user?.companyId ?? undefined}
+                      defaultSource="combined"
+                    />
                   </div>
                 </div>
               </div>

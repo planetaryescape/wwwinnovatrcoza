@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
+import AIQueryPanel from "@/components/portal/AIQueryPanel";
 import {
   X, Sparkles, Send, MessageSquare, ChevronDown, ExternalLink,
   ArrowRight, Loader2, Upload, CheckCircle2, ChevronRight, FileText,
@@ -1072,162 +1073,71 @@ export default function TestPage() {
             style={{ background: "#fff", borderLeft: `1px solid ${N200}` }}
           >
             {activeTab === "assistant" ? (
-              /* ── Research Assistant Panel (Image 2 right) ── */
+              /* ── Research Assistant Panel ── */
               <div className="flex flex-col h-full">
-                <div className="px-5 py-4 flex-shrink-0" style={{ borderBottom: `1px solid ${N200}` }}>
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: TEST_COLOR }}>
-                      <Sparkles className="w-3 h-3 text-white" />
-                    </div>
-                    <div className="text-sm font-semibold" style={{ color: VDK }}>Research Assistant</div>
-                  </div>
-                  <div className="text-xs" style={{ color: N500 }}>Key takeaways &amp; strategic summary</div>
-                </div>
-
-                <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-                  {/* Key Takeout */}
+                {/* Static analysis summary */}
+                <div className="flex-shrink-0 px-5 py-4 space-y-3 overflow-y-auto" style={{ maxHeight: 280, borderBottom: `1px solid ${N200}` }}>
                   <div>
                     <div className="text-xs font-bold mb-1.5" style={{ color: VDK }}>Key Takeout</div>
                     <p className="text-xs leading-relaxed" style={{ color: N500 }}>{MOCK_ASSISTANT.keyTakeout}</p>
                   </div>
-
-                  {/* Watch Signal */}
                   <div className="rounded-xl p-3" style={{ background: AMBER_LT, border: `1px solid ${AMBER_DK}22` }}>
                     <div className="text-xs font-bold mb-1" style={{ color: AMBER_DK }}>Watch Signal</div>
                     <p className="text-xs leading-relaxed" style={{ color: N500 }}>{MOCK_ASSISTANT.watchSignal}</p>
                   </div>
-
-                  {/* Strategic Summary */}
                   <div>
                     <div className="text-xs font-bold mb-1.5" style={{ color: VDK }}>Strategic Summary</div>
                     <p className="text-xs leading-relaxed" style={{ color: N500 }}>{MOCK_ASSISTANT.strategicSummary}</p>
                   </div>
-
-                  {/* Dynamic chat messages */}
-                  {assistantMsgs.map((m, i) => (
-                    <div key={i} className={`text-xs p-3 rounded-xl leading-relaxed ${m.role === "user" ? "ml-2" : ""}`}
-                      style={{ background: m.role === "user" ? "#FAF3E8" : "#F0FDF4", border: `1px solid ${m.role === "user" ? N200 : "rgba(42,158,92,0.15)"}`, color: VDK }}>
-                      {m.text}
-                    </div>
-                  ))}
-
-                  {/* Insights Queries */}
-                  <div>
-                    <div className="text-xs font-bold mb-2" style={{ color: VDK }}>Insights Queries</div>
-                    <div className="space-y-1.5">
-                      {MOCK_ASSISTANT.queries.map(q => (
-                        <button key={q} onClick={() => setAssistantInput(q)} className="w-full text-left text-xs px-3 py-2.5 rounded-lg transition-colors" style={{ background: "#fff", border: `1px solid ${N200}`, color: N500 }} data-testid={`query-${q.substring(0, 20)}`}>
-                          {q}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
                 </div>
-
-                {/* Chat input */}
-                <div className="p-3 flex gap-2 flex-shrink-0" style={{ borderTop: `1px solid ${N200}` }}>
-                  <input
-                    value={assistantInput}
-                    onChange={e => setAssistantInput(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && handleSendAssistant()}
-                    className="flex-1 rounded-lg px-3 py-2 text-xs placeholder:text-muted-foreground focus:outline-none"
-                    style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
-                    placeholder="Ask about these results..."
-                    data-testid="input-assistant-message"
-                    onFocus={e => (e.target.style.borderColor = TEST_COLOR)}
-                    onBlur={e => (e.target.style.borderColor = N200)}
+                {/* AI Query — pulls from research + trends */}
+                <div className="flex-1 overflow-hidden">
+                  <AIQueryPanel
+                    accentColor={TEST_COLOR}
+                    label="Research AI"
+                    suggestedPrompts={MOCK_ASSISTANT.queries}
+                    companyId={user?.companyId ?? undefined}
+                    defaultSource="research"
                   />
-                  <button onClick={handleSendAssistant} className="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: TEST_COLOR }} data-testid="button-send-assistant">
-                    <Send className="w-3.5 h-3.5" />
-                  </button>
                 </div>
               </div>
             ) : (
               /* ── Normal Research AI Panel ── */
               <>
-                <div className="px-4 py-3 flex-shrink-0" style={{ borderBottom: `1px solid ${N200}` }}>
-                  <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: VDK }}>
-                    <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: TEST_COLOR }}>
-                      <Sparkles className="w-3 h-3 text-white" />
-                    </div>
-                    Research AI
-                  </div>
-                  <div className="text-[11px] mt-0.5 flex items-center gap-1.5 font-semibold" style={{ color: TEST_COLOR }}>
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: TEST_COLOR }} />
-                    {studies?.length ?? 0} studies indexed
-                  </div>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-3 space-y-3">
-                  {chatMessages.map((msg, i) => (
-                    <div key={i} className={msg.type === "user" ? "ml-4" : ""}>
-                      <div className="text-[10px] mb-1 flex items-center gap-1.5" style={{ color: N500 }}>
-                        {msg.type === "system"
-                          ? <><div className="w-4 h-4 rounded-sm flex items-center justify-center" style={{ background: TEST_COLOR }}><Sparkles className="w-2.5 h-2.5 text-white" /></div> Research AI</>
-                          : <><div className="w-4 h-4 rounded-full flex items-center justify-center text-white text-[8px] font-bold" style={{ background: CORAL }}>{initials(user?.name)}</div> {user?.name}</>
-                        }
-                      </div>
-                      <div className="text-xs leading-relaxed p-3 rounded-xl" style={{ background: msg.type === "user" ? "#FAF3E8" : "#F0FDF4", border: `1px solid ${msg.type === "user" ? N200 : "rgba(42,158,92,0.15)"}` }}>
-                        <p style={{ color: VDK, whiteSpace: "pre-line" }}>{msg.text}</p>
-                        {msg.rec && (
-                          <div className="mt-2 pl-2 py-1.5 text-xs font-medium rounded-r" style={{ background: SUC_LT, borderLeft: `2px solid ${TEST_COLOR}`, color: TEST_COLOR }}>
-                            {msg.rec}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex gap-1.5 px-3 py-2 flex-wrap flex-shrink-0" style={{ borderTop: `1px solid ${N200}`, background: "#FAFAF8" }}>
-                  {AI_PROMPTS.map(p => (
-                    <button key={p} onClick={() => setAiInput(p)} className="text-[11px] px-2.5 py-1 rounded-full whitespace-nowrap" style={{ background: "#fff", border: `1px solid ${N200}`, color: N500 }} data-testid={`ai-prompt-${p.substring(0, 20)}`}>{p}</button>
-                  ))}
-                </div>
-
-                <div className="p-3 flex gap-2 flex-shrink-0" style={{ borderTop: `1px solid ${N200}` }}>
-                  <input
-                    value={aiInput}
-                    onChange={e => setAiInput(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && handleSendAI()}
-                    className="flex-1 rounded-lg px-3 py-2 text-xs placeholder:text-muted-foreground focus:outline-none"
-                    style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
-                    placeholder="Ask about your studies…"
-                    data-testid="input-ai-message"
-                    onFocus={e => (e.target.style.borderColor = TEST_COLOR)}
-                    onBlur={e => (e.target.style.borderColor = N200)}
+                <div className="flex-1 overflow-hidden">
+                  <AIQueryPanel
+                    accentColor={TEST_COLOR}
+                    label="Research AI"
+                    suggestedPrompts={AI_PROMPTS}
+                    companyId={user?.companyId ?? undefined}
+                    defaultSource="combined"
                   />
-                  <button onClick={handleSendAI} className="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: TEST_COLOR }} data-testid="button-send-ai">
-                    <Send className="w-3.5 h-3.5" />
-                  </button>
                 </div>
-
-            <button
-              onClick={() => setShowChat(!showChat)}
-              className="px-4 py-2.5 flex items-center justify-between flex-shrink-0 transition-colors"
-              style={{ borderTop: `1px solid ${N200}`, background: "#FAFAF8" }}
-              data-testid="button-toggle-team-chat"
-            >
-              <span className="flex items-center gap-2 text-xs font-semibold" style={{ color: N500 }}>
-                <MessageSquare className="w-3.5 h-3.5" />
-                Team Chat
-                <span className="w-4 h-4 rounded-full text-white text-[9px] font-bold flex items-center justify-center" style={{ background: CORAL }}>1</span>
-              </span>
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showChat ? "rotate-180" : ""}`} style={{ color: N500 }} />
-            </button>
-
-            {showChat && (
-              <div className="flex-shrink-0" style={{ borderTop: `1px solid ${N200}`, background: "#fff" }}>
-                <div className="p-3 max-h-36 overflow-y-auto">
-                  <TCMsg initials="SW" author="Sarah W." time="09:12" color={VIO} text="The commitment drop is the main issue to address before we go to launch." />
-                </div>
-                <div className="px-3 pb-3 flex gap-2">
-                  <input value={chatInput} onChange={e => setChatInput(e.target.value)} className="flex-1 rounded-lg px-3 py-1.5 text-xs focus:outline-none" style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }} placeholder="Reply… use @ to tag" data-testid="input-team-chat" />
-                  <button className="w-7 h-7 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: TEST_COLOR }} data-testid="button-send-chat"><Send className="w-3 h-3" /></button>
-                </div>
-              </div>
-            )}
-            </>
+                <button
+                  onClick={() => setShowChat(!showChat)}
+                  className="px-4 py-2.5 flex items-center justify-between flex-shrink-0 transition-colors"
+                  style={{ borderTop: `1px solid ${N200}`, background: "#FAFAF8" }}
+                  data-testid="button-toggle-team-chat"
+                >
+                  <span className="flex items-center gap-2 text-xs font-semibold" style={{ color: N500 }}>
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    Team Chat
+                    <span className="w-4 h-4 rounded-full text-white text-[9px] font-bold flex items-center justify-center" style={{ background: CORAL }}>1</span>
+                  </span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showChat ? "rotate-180" : ""}`} style={{ color: N500 }} />
+                </button>
+                {showChat && (
+                  <div className="flex-shrink-0" style={{ borderTop: `1px solid ${N200}`, background: "#fff" }}>
+                    <div className="p-3 max-h-36 overflow-y-auto">
+                      <TCMsg initials="SW" author="Sarah W." time="09:12" color={VIO} text="The commitment drop is the main issue to address before we go to launch." />
+                    </div>
+                    <div className="px-3 pb-3 flex gap-2">
+                      <input value={chatInput} onChange={e => setChatInput(e.target.value)} className="flex-1 rounded-lg px-3 py-1.5 text-xs focus:outline-none" style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }} placeholder="Reply… use @ to tag" data-testid="input-team-chat" />
+                      <button className="w-7 h-7 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: TEST_COLOR }} data-testid="button-send-chat"><Send className="w-3 h-3" /></button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
