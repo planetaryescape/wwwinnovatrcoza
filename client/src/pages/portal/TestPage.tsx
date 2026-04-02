@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
@@ -10,6 +10,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { ClientReport } from "@shared/schema";
 
 /* ── Design System tokens ─────────────────────────────── */
 const VDK      = "#1E1B3A";
@@ -81,97 +82,149 @@ const AI_PROMPTS = [
   "Build me a brief for next steps",
 ];
 
-/* ── Mock study result cards (Upsiide format) ──────────── */
-const MOCK_STUDIES_DATA = [
-  {
-    id: "mock-1",
-    title: "Project Aurum — Home Loan Positioning",
-    company: "Discovery Bank",
-    studyTypeDetail: "Concept Testing",
-    studyType: "BASIC",
-    respondents: 300,
-    date: "20 Jan 2025",
-    status: "COMPLETED",
-    qaVerified: true,
-    metrics: [
-      { label: "IDEA",       val: 97, signal: "Strong",     up: true  },
-      { label: "INTEREST",   val: 67, signal: "Above norm", up: true  },
-      { label: "COMMITMENT", val: 54, signal: "Watch",      up: false },
-      { label: "MEANING",    val: 76, signal: null,         up: null  },
-      { label: "DIFFERENCE", val: 61, signal: null,         up: null  },
-      { label: "WORTH",      val: 69, signal: null,         up: null  },
-    ],
-    takeaways: [
-      { kind: "star",  text: "Concept resonates strongly — 97% idea score signals clear unmet need for fee-free home loans." },
-      { kind: "warn",  text: "Commitment gap of 43 pts (Idea 97% → Commit 54%) — pricing narrative needs strengthening to close the gap." },
-      { kind: "chart", text: "Difference pillar weakest at 61% — category-level parity risk; needs sharper RTB." },
-    ],
-    nextSteps: [
-      "Run a price-anchoring concept test to lift commitment from 54% toward 65%+.",
-      "Test 2–3 differentiation messages on the \"zero-fee\" angle with the 25–44 urban segment.",
-    ],
-  },
-  {
-    id: "mock-2",
-    title: "New Energy Drink — Concept A",
-    company: "RedBull SA",
-    studyTypeDetail: "TEST24 PRO",
-    studyType: "PRO",
-    respondents: 1200,
-    date: "15 Mar 2025",
-    status: "COMPLETED",
-    qaVerified: true,
-    metrics: [
-      { label: "IDEA",       val: 73, signal: "Above norm", up: true  },
-      { label: "INTEREST",   val: 72, signal: "Above norm", up: true  },
-      { label: "COMMITMENT", val: 61, signal: "Strong",     up: true  },
-      { label: "MEANING",    val: 68, signal: null,         up: null  },
-      { label: "DIFFERENCE", val: 59, signal: null,         up: null  },
-      { label: "WORTH",      val: 61, signal: null,         up: null  },
-    ],
-    takeaways: [
-      { kind: "star",  text: "Urban Males 25–34 at 84% purchase intent — your primary launch cohort. Dual-claim messaging is the key driver." },
-      { kind: "warn",  text: "Township segment at 52% intent — a R12–15 entry SKU could unlock volume without cannibalising the premium tier." },
-      { kind: "chart", text: "Dual energy + hydration claim outperforms category norms significantly as the primary purchase driver." },
-    ],
-    nextSteps: [
-      "Lead with dual-claim messaging in the R18–25 price band for the urban 25–34 core.",
-      "Consider a price-entry SKU to address the township gap before rollout.",
-    ],
-  },
-];
+/* ── Map a real ClientReport to the rich study card format ── */
+function mapReportToStudy(r: ClientReport, companyName?: string) {
+  const idea       = r.topIdeaIdeaScore   ?? 0;
+  const interest   = r.topIdeaInterest    ?? 0;
+  const commitment = r.topIdeaCommitment  ?? 0;
+  const lowIdea    = r.lowestIdeaIdeaScore ?? 0;
+  const lowInterest= r.lowestIdeaInterest  ?? 0;
+  const lowCommit  = r.lowestIdeaCommitment ?? 0;
 
-const MOCK_ASSISTANT = {
-  title:       "New Energy Drink Concept Test",
-  type:        "TEST24 BASIC",
-  respondents: "1 200",
-  metrics: [
-    { label: "Purchase Intent", valStr: "72%", sub: "+14pp vs norm",  color: "#3B82F6" },
-    { label: "Likability",      valStr: "4.1",  sub: "Out of 5",       color: "#2A9E5C" },
-    { label: "Uniqueness",      valStr: "68%",  sub: "",               color: "#B8911A" },
-    { label: "Value for Money", valStr: "61%",  sub: "Watch",          color: "#B8911A" },
-  ],
-  segments: [
-    { label: "Urban Male 25–34",   pct: 84, color: "#3B82F6" },
-    { label: "Urban Female 25–34", pct: 71, color: "#2A9E5C" },
-    { label: "Urban Male 18–24",   pct: 65, color: "#B8911A" },
-    { label: "Township 25–49",     pct: 52, color: "#E8503A" },
-  ],
-  drivers: [
-    { ok: true,  highlight: "#2A9E5C", title: "Dual energy + hydration claim",   sub: "Primary driver — outperforms category norms significantly" },
-    { ok: true,  highlight: "#3A2FBF", title: "Packaging design",                sub: "\"Looks premium but accessible\" — resonates strongly with 25–34" },
-    { ok: false, highlight: "#B8911A", title: "Value for money concern — 18–24", sub: "Intent 65% but value score 58% — 13pp below study average" },
-  ],
-  keyTakeout:       "Urban Males 25–34 at 84% purchase intent are your primary launch cohort. Lead with dual-claim messaging in the R18–25 price band.",
-  watchSignal:      "Township segment at 52% intent — a R12–15 entry SKU could unlock significant volume without cannibalising the premium tier.",
-  strategicSummary: "Concept is launch-ready for the urban 25–34 core. Prioritise packaging variants testing before rollout, and consider a price-entry SKU to address the township gap.",
-  queries: [
-    "What drove the township intent gap?",
-    "Compare commitment vs industry norms",
-    "Which segment to prioritise for launch?",
-    "What packaging variants should we test?",
-  ],
-};
+  const metricSignal = (val: number, label: string) => {
+    if (label === "COMMITMENT" && val < 60) return "Watch";
+    if (val >= 75) return "Above norm";
+    if (val >= 65) return "Strong";
+    return null;
+  };
+
+  const metrics = [
+    { label: "IDEA",        val: idea,        signal: metricSignal(idea, "IDEA"),        up: idea >= 65 },
+    { label: "INTEREST",    val: interest,    signal: metricSignal(interest, "INTEREST"),    up: interest >= 65 },
+    { label: "COMMITMENT",  val: commitment,  signal: metricSignal(commitment, "COMMITMENT"), up: commitment >= 60 },
+    ...(r.lowestIdeaLabel ? [
+      { label: "LOW IDEA",   val: lowIdea,    signal: null, up: null },
+      { label: "LOW INTST",  val: lowInterest, signal: null, up: null },
+      { label: "LOW CMMT",   val: lowCommit,  signal: null, up: null },
+    ] : []),
+  ];
+
+  const commitGap = interest - commitment;
+
+  const takeaways: { kind: "star" | "warn" | "chart"; text: string }[] = [];
+  if (r.topIdeaLabel && idea > 0) {
+    takeaways.push({ kind: "star",  text: `**${r.topIdeaLabel}** scored ${idea}% idea score — ${idea >= 75 ? "strong consumer resonance above category norms" : "concept shows promise; see next steps to improve"}.` });
+  }
+  if (interest > 0 && commitment > 0) {
+    takeaways.push(commitGap >= 10
+      ? { kind: "warn",  text: `Commitment gap of ${commitGap}pp (Interest ${interest}% → Commitment ${commitment}%) — purchase narrative needs strengthening to close the gap.` }
+      : { kind: "chart", text: `Strong commitment-to-interest alignment at ${commitment}% — the concept is purchase-ready for your primary launch segment.` }
+    );
+  }
+  if (r.lowestIdeaLabel && lowIdea > 0) {
+    takeaways.push({ kind: "warn", text: `**${r.lowestIdeaLabel}** scored ${lowIdea}% — lowest concept in this study. Review positioning before further investment.` });
+  }
+
+  const nextSteps: string[] = [];
+  if (idea >= 70) {
+    nextSteps.push("Progress the top concept to a packaging or messaging variant test before committing to production.");
+  } else {
+    nextSteps.push("Refine the top concept messaging — aim to push idea score above 70% before advancing to the next phase.");
+  }
+  if (commitGap >= 10) {
+    nextSteps.push(`Test 2–3 price or value messaging variants to close the commitment gap from ${commitment}% toward ${Math.min(commitment + 15, 85)}%+.`);
+  }
+  if (r.lowestIdeaLabel) {
+    nextSteps.push(`Review and retool the ${r.lowestIdeaLabel} concept — consider a new positioning angle or retire it from the pipeline.`);
+  }
+
+  const studyTypeRaw = (r.studyType || "").toUpperCase();
+  const isPro = studyTypeRaw.includes("PRO");
+
+  const dateStr = r.deliveredAt
+    ? new Date(r.deliveredAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+    : r.createdAt
+      ? new Date(r.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+      : "—";
+
+  return {
+    id: r.id,
+    title: r.title,
+    company: companyName ?? "—",
+    studyTypeDetail: r.studyType ?? (isPro ? "TEST24 PRO" : "TEST24 BASIC"),
+    studyType: isPro ? "PRO" : "BASIC",
+    respondents: null as number | null,
+    date: dateStr,
+    status: (r.status ?? "").toUpperCase(),
+    qaVerified: r.status === "Completed",
+    pdfUrl: r.pdfUrl ?? null,
+    metrics,
+    takeaways,
+    nextSteps,
+  };
+}
+
+/* ── Derive Research Assistant data from a ClientReport ── */
+function buildAssistantData(r: ClientReport) {
+  const idea       = r.topIdeaIdeaScore   ?? 0;
+  const interest   = r.topIdeaInterest    ?? 0;
+  const commitment = r.topIdeaCommitment  ?? 0;
+  const lowIdea    = r.lowestIdeaIdeaScore ?? 0;
+  const commitGap  = interest - commitment;
+
+  const ideaColor = idea >= 75 ? "#2A9E5C" : idea >= 60 ? "#B8911A" : "#E8503A";
+  const intColor  = interest >= 70 ? "#3B82F6" : "#B8911A";
+  const cmtColor  = commitment >= 60 ? "#2A9E5C" : "#E8503A";
+
+  const metrics = [
+    { label: "Idea Score",    valStr: `${idea}%`,       sub: idea >= 75 ? "Above norm" : idea >= 60 ? "At norm" : "Below norm", color: ideaColor },
+    { label: "Interest",      valStr: `${interest}%`,   sub: "",                                                                  color: intColor  },
+    { label: "Commitment",    valStr: `${commitment}%`, sub: commitGap >= 10 ? "Gap flagged" : "Strong",                          color: cmtColor  },
+    { label: "Lowest Concept",valStr: `${lowIdea}%`,    sub: "Watch",                                                             color: "#B8911A" },
+  ].filter(m => m.valStr !== "0%");
+
+  const drivers = [
+    r.topIdeaLabel && idea > 0 ? {
+      ok: true, highlight: "#2A9E5C",
+      title: r.topIdeaLabel,
+      sub: `Primary concept — ${idea}% idea score, ${interest}% interest rate`,
+    } : null,
+    interest > 0 && commitment > 0 ? {
+      ok: commitGap < 10,
+      highlight: commitGap < 10 ? "#3A2FBF" : "#B8911A",
+      title: "Commitment alignment",
+      sub: commitGap >= 10
+        ? `${commitGap}pp commitment gap (Interest ${interest}% → Commitment ${commitment}%) — purchase narrative needs work`
+        : `Strong alignment at ${commitment}% commitment — concept is purchase-ready`,
+    } : null,
+    r.lowestIdeaLabel && lowIdea > 0 ? {
+      ok: false, highlight: "#B8911A",
+      title: r.lowestIdeaLabel,
+      sub: `Lowest concept — ${lowIdea}% idea score. Review before next investment cycle.`,
+    } : null,
+  ].filter((d): d is NonNullable<typeof d> => d !== null);
+
+  return {
+    title: r.title,
+    type: r.studyType ?? "TEST24 BASIC",
+    metrics,
+    drivers,
+    keyTakeout: r.topIdeaLabel
+      ? `${r.topIdeaLabel} scored ${idea}% idea score and ${interest}% interest — ${idea >= 75 ? "strong performance above norms" : "promising but needs refinement before launch"}.`
+      : "Review the full study report for key findings.",
+    watchSignal: commitGap >= 10
+      ? `Commitment gap of ${commitGap}pp detected — a price-anchoring or messaging test is the recommended next step.`
+      : r.lowestIdeaLabel && lowIdea < 60
+        ? `${r.lowestIdeaLabel} (${lowIdea}% idea score) is the weakest concept — review positioning before further investment.`
+        : "No critical watch signals — all key metrics are tracking within acceptable ranges.",
+    queries: [
+      "What drove the commitment gap?",
+      "Which concept should I prioritise for launch?",
+      "What's the recommended next step from this study?",
+      "How do these results compare to category norms?",
+    ],
+  };
+}
 
 export default function TestPage() {
   const [, setLocation]           = useLocation();
@@ -205,10 +258,11 @@ export default function TestPage() {
   /* Research Assistant tab state */
   const [assistantInput, setAssistantInput]     = useState("");
   const [assistantMsgs, setAssistantMsgs]       = useState<{ role: "user" | "ai"; text: string }[]>([]);
-  const [selectedAssistStudy, setSelectedAssistStudy] = useState(MOCK_STUDIES_DATA[1].id);
+  const [selectedAssistStudy, setSelectedAssistStudy] = useState("");
 
-  const { data: studies, isLoading: isLoadingStudies } = useQuery<any[]>({
-    queryKey: ["/api/member/studies"],
+  /* Real client reports — scoped to this company by the server */
+  const { data: clientReports = [], isLoading: isLoadingStudies } = useQuery<ClientReport[]>({
+    queryKey: ["/api/member/client-reports"],
     enabled: !!user,
   });
 
@@ -216,6 +270,29 @@ export default function TestPage() {
     queryKey: ["/api/member/activity", user?.id],
     enabled: !!user,
   });
+
+  /* Map real ClientReports to rich study card format */
+  const mappedStudies = useMemo(
+    () => clientReports.map(r => mapReportToStudy(r, user?.name ?? undefined)),
+    [clientReports, user?.name],
+  );
+
+  /* Auto-select first study for Research Assistant when data loads */
+  useEffect(() => {
+    if (!selectedAssistStudy && clientReports.length > 0) {
+      setSelectedAssistStudy(clientReports[0].id);
+    }
+  }, [clientReports, selectedAssistStudy]);
+
+  /* Derive Research Assistant data from the currently selected study */
+  const selectedReport = useMemo(
+    () => clientReports.find(r => r.id === selectedAssistStudy) ?? null,
+    [clientReports, selectedAssistStudy],
+  );
+  const assistantData = useMemo(
+    () => selectedReport ? buildAssistantData(selectedReport) : null,
+    [selectedReport],
+  );
 
   const initials = (name?: string) => {
     if (!name) return "?";
@@ -839,12 +916,34 @@ export default function TestPage() {
                     <option>Analysing</option>
                   </select>
                   <span className="text-xs ml-auto" style={{ color: N400 }}>
-                    {MOCK_STUDIES_DATA.length + (studies?.length ?? 0)} studies
+                    {isLoadingStudies ? "—" : `${mappedStudies.length} ${mappedStudies.length === 1 ? "study" : "studies"}`}
                   </span>
                 </div>
 
-                {/* Rich mock study cards */}
-                {MOCK_STUDIES_DATA.map(study => {
+                {/* Loading skeleton */}
+                {isLoadingStudies && [1, 2].map(i => (
+                  <div key={i} style={{ ...CARD, marginBottom: 20, padding: 20 }}>
+                    <Skeleton className="h-5 w-2/3 mb-2" />
+                    <Skeleton className="h-3 w-1/3 mb-3" />
+                    <Skeleton className="h-3 w-full mb-1" />
+                    <Skeleton className="h-3 w-4/5" />
+                  </div>
+                ))}
+
+                {/* Empty state */}
+                {!isLoadingStudies && mappedStudies.length === 0 && (
+                  <div style={CARD} className="p-10 text-center">
+                    <BarChart2 className="w-10 h-10 mx-auto mb-3" style={{ color: N400 }} />
+                    <div className="text-sm font-semibold mb-1" style={{ color: VDK }}>No studies yet</div>
+                    <div className="text-xs mb-4" style={{ color: N500 }}>Launch your first brief to see study results here.</div>
+                    <button onClick={() => setActiveTab("brief")} className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg" style={{ background: SUCCESS, borderRadius: 8 }}>
+                      Launch a Brief
+                    </button>
+                  </div>
+                )}
+
+                {/* Real client study cards */}
+                {!isLoadingStudies && mappedStudies.map(study => {
                   const typeBadge = study.studyType === "PRO"
                     ? { label: "PRO",   bg: VIO_LT,  color: VIO    }
                     : { label: "BASIC", bg: CYAN_LT, color: CYAN_DK };
@@ -959,118 +1058,96 @@ export default function TestPage() {
                   );
                 })}
 
-                {/* Live API studies (simpler format if metrics unavailable) */}
-                {isLoadingStudies
-                  ? [1, 2].map(i => (
-                      <div key={i} style={{ ...CARD, marginBottom: 12, padding: 20 }}>
-                        <Skeleton className="h-4 w-1/2 mb-2" />
-                        <Skeleton className="h-3 w-1/3 mb-3" />
-                        <Skeleton className="h-3 w-3/4" />
-                      </div>
-                    ))
-                  : studies?.map((study: any) => {
-                      const statusBadge = getStatusBadge(study.status);
-                      const typeBadge   = getStudyTypeBadge(study.studyType);
-                      return (
-                        <div key={study.id} style={{ ...CARD, marginBottom: 12 }} className="overflow-hidden" data-testid={`study-card-api-${study.id}`}>
-                          <div className="flex items-start justify-between gap-3 px-5 py-4">
-                            <div>
-                              <div className="text-sm font-semibold mb-0.5" style={{ color: VDK }}>{study.title}</div>
-                              <div className="text-xs" style={{ color: N500 }}>{study.companyName}{study.createdAt ? ` · ${formatDate(study.createdAt)}` : ""}</div>
-                            </div>
-                            <div className="flex gap-1.5 flex-shrink-0">
-                              <span className="text-[10px] font-bold px-2 py-0.5" style={{ background: typeBadge.bg, color: typeBadge.color, borderRadius: 9999 }}>{typeBadge.label}</span>
-                              <span className="text-[10px] font-bold px-2 py-0.5" style={{ background: statusBadge.bg, color: statusBadge.color, borderRadius: 9999 }}>{statusBadge.label}</span>
-                            </div>
-                          </div>
-                          {study.description && (
-                            <div className="px-5 pb-3 text-xs" style={{ color: N500 }}>{study.description}</div>
-                          )}
-                          <div className="px-5 py-3 flex gap-2" style={{ borderTop: `1px solid ${N200}`, background: "#FAFAF8" }}>
-                            <button onClick={() => setLocation("/portal/act")} className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg" style={{ background: CORAL, borderRadius: 8 }}>Analyse in Act</button>
-                          </div>
-                        </div>
-                      );
-                    })
-                }
               </div>
             )}
 
             {/* ── RESEARCH ASSISTANT ── */}
             {activeTab === "assistant" && (
               <div>
+                {/* Empty state — no studies yet */}
+                {clientReports.length === 0 && !isLoadingStudies && (
+                  <div style={CARD} className="p-10 text-center">
+                    <BarChart2 className="w-10 h-10 mx-auto mb-3" style={{ color: N400 }} />
+                    <div className="text-sm font-semibold mb-1" style={{ color: VDK }}>No study data available</div>
+                    <div className="text-xs" style={{ color: N500 }}>Complete your first study to use the Research Assistant.</div>
+                  </div>
+                )}
+
                 {/* Study selector */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-[11px] font-bold tracking-widest uppercase" style={{ color: CORAL }}>Study Results</div>
-                  <select
-                    value={selectedAssistStudy}
-                    onChange={e => setSelectedAssistStudy(e.target.value)}
-                    className="rounded-lg px-3 py-1.5 text-xs focus:outline-none max-w-[220px] truncate"
-                    style={{ background: "#fff", border: `1px solid ${N200}`, color: VDK }}
-                    data-testid="select-assistant-study"
-                  >
-                    {MOCK_STUDIES_DATA.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
-                  </select>
-                </div>
-
-                {/* Study header bar */}
-                <div className="px-5 py-3 rounded-xl mb-4" style={{ background: VDK }}>
-                  <div className="text-[10px] font-bold tracking-widest uppercase text-white opacity-80">
-                    {MOCK_ASSISTANT.title} · {MOCK_ASSISTANT.type} · {MOCK_ASSISTANT.respondents} RESPONDENTS
-                  </div>
-                </div>
-
-                {/* 4 key metrics */}
-                <div className="grid grid-cols-4 gap-2 mb-4">
-                  {MOCK_ASSISTANT.metrics.map(m => (
-                    <div key={m.label} style={CARD} className="p-3 text-center">
-                      <div className="text-2xl font-bold font-mono leading-none mb-0.5" style={{ color: m.color }}>{m.valStr}</div>
-                      <div className="text-[9px] font-bold uppercase tracking-wide leading-tight mb-0.5" style={{ color: N500 }}>{m.label}</div>
-                      {m.sub && <div className="text-[9px] leading-tight" style={{ color: m.sub === "Watch" ? CORAL : N400 }}>{m.sub}</div>}
+                {clientReports.length > 0 && (
+                  <>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="text-[11px] font-bold tracking-widest uppercase" style={{ color: CORAL }}>Study Results</div>
+                      <select
+                        value={selectedAssistStudy}
+                        onChange={e => setSelectedAssistStudy(e.target.value)}
+                        className="rounded-lg px-3 py-1.5 text-xs focus:outline-none max-w-[220px] truncate"
+                        style={{ background: "#fff", border: `1px solid ${N200}`, color: VDK }}
+                        data-testid="select-assistant-study"
+                      >
+                        {clientReports.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
+                      </select>
                     </div>
-                  ))}
-                </div>
 
-                {/* Segment Breakdown */}
-                <div style={{ ...CARD, marginBottom: 16 }} className="p-5">
-                  <div className="text-sm font-semibold mb-0.5" style={{ color: VDK }}>Segment Breakdown</div>
-                  <div className="text-xs mb-4" style={{ color: N500 }}>Purchase intent by audience</div>
-                  <div className="space-y-3">
-                    {MOCK_ASSISTANT.segments.map(seg => (
-                      <div key={seg.label}>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-medium" style={{ color: VDK }}>{seg.label}</span>
-                          <span className="text-xs font-bold font-mono" style={{ color: seg.color }}>{seg.pct}%</span>
+                    {assistantData && (
+                      <>
+                        {/* Study header bar */}
+                        <div className="px-5 py-3 rounded-xl mb-4" style={{ background: VDK }}>
+                          <div className="text-[10px] font-bold tracking-widest uppercase text-white opacity-80">
+                            {assistantData.title} · {assistantData.type}
+                          </div>
                         </div>
-                        <div className="h-2 rounded-full overflow-hidden" style={{ background: "#F0EBE0" }}>
-                          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${seg.pct}%`, background: seg.color }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
 
-                {/* Key Drivers */}
-                <div style={CARD} className="p-5">
-                  <div className="text-sm font-semibold mb-0.5" style={{ color: VDK }}>Key Drivers</div>
-                  <div className="text-xs mb-4" style={{ color: N500 }}>What moved the needle</div>
-                  <div className="space-y-2">
-                    {MOCK_ASSISTANT.drivers.map((d, i) => (
-                      <div key={i} className="flex gap-3 items-start p-3 rounded-xl" style={{ background: "#FAFAF8", border: `1px solid ${N200}` }}>
-                        <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: d.highlight + "22" }}>
-                          {d.ok
-                            ? <CheckCircle2 className="w-4 h-4" style={{ color: d.highlight }} />
-                            : <AlertTriangle className="w-4 h-4" style={{ color: d.highlight }} />
-                          }
+                        {/* Key metrics */}
+                        <div className={`grid gap-2 mb-4`} style={{ gridTemplateColumns: `repeat(${Math.min(assistantData.metrics.length, 4)}, 1fr)` }}>
+                          {assistantData.metrics.map(m => (
+                            <div key={m.label} style={CARD} className="p-3 text-center">
+                              <div className="text-2xl font-bold font-mono leading-none mb-0.5" style={{ color: m.color }}>{m.valStr}</div>
+                              <div className="text-[9px] font-bold uppercase tracking-wide leading-tight mb-0.5" style={{ color: N500 }}>{m.label}</div>
+                              {m.sub && <div className="text-[9px] leading-tight" style={{ color: m.sub === "Watch" || m.sub === "Gap flagged" ? CORAL : N400 }}>{m.sub}</div>}
+                            </div>
+                          ))}
                         </div>
-                        <div>
-                          <div className="text-xs font-semibold" style={{ color: VDK }}>{d.title}</div>
-                          <div className="text-xs" style={{ color: N500 }}>{d.sub}</div>
+
+                        {/* Key Drivers */}
+                        {assistantData.drivers.length > 0 && (
+                          <div style={{ ...CARD, marginBottom: 16 }} className="p-5">
+                            <div className="text-sm font-semibold mb-0.5" style={{ color: VDK }}>Key Drivers</div>
+                            <div className="text-xs mb-4" style={{ color: N500 }}>What moved the needle in this study</div>
+                            <div className="space-y-2">
+                              {assistantData.drivers.map((d, i) => (
+                                <div key={i} className="flex gap-3 items-start p-3 rounded-xl" style={{ background: "#FAFAF8", border: `1px solid ${N200}` }}>
+                                  <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: d.highlight + "22" }}>
+                                    {d.ok
+                                      ? <CheckCircle2 className="w-4 h-4" style={{ color: d.highlight }} />
+                                      : <AlertTriangle className="w-4 h-4" style={{ color: d.highlight }} />
+                                    }
+                                  </div>
+                                  <div>
+                                    <div className="text-xs font-semibold" style={{ color: VDK }}>{d.title}</div>
+                                    <div className="text-xs" style={{ color: N500 }}>{d.sub}</div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Key takeout */}
+                        <div style={{ ...CARD, marginBottom: 16 }} className="p-5">
+                          <div className="text-[10px] font-bold tracking-widest uppercase mb-2" style={{ color: CORAL }}>Strategic Takeout</div>
+                          <p className="text-xs leading-relaxed mb-3" style={{ color: VDK }}>{assistantData.keyTakeout}</p>
+                          {assistantData.watchSignal && (
+                            <div className="flex gap-2 items-start p-2.5 rounded-lg" style={{ background: "#FDECEA", border: "1px solid rgba(232,80,58,0.15)" }}>
+                              <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: CORAL }} />
+                              <p className="text-xs leading-relaxed" style={{ color: CORAL }}>{assistantData.watchSignal}</p>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                      </>
+                    )}
+                  </>
+                )}
 
                 {/* Chat messages (if any sent from assistant panel) */}
                 {assistantMsgs.length > 0 && (
@@ -1094,27 +1171,34 @@ export default function TestPage() {
             {activeTab === "assistant" ? (
               /* ── Research Assistant Panel ── */
               <div className="flex flex-col h-full">
-                {/* Static analysis summary */}
-                <div className="flex-shrink-0 px-5 py-4 space-y-3 overflow-y-auto" style={{ maxHeight: 280, borderBottom: `1px solid ${N200}` }}>
-                  <div>
-                    <div className="text-xs font-bold mb-1.5" style={{ color: VDK }}>Key Takeout</div>
-                    <p className="text-xs leading-relaxed" style={{ color: N500 }}>{MOCK_ASSISTANT.keyTakeout}</p>
+                {/* Static analysis summary from real study */}
+                {assistantData ? (
+                  <div className="flex-shrink-0 px-5 py-4 space-y-3 overflow-y-auto" style={{ maxHeight: 280, borderBottom: `1px solid ${N200}` }}>
+                    <div>
+                      <div className="text-xs font-bold mb-1.5" style={{ color: VDK }}>Key Takeout</div>
+                      <p className="text-xs leading-relaxed" style={{ color: N500 }}>{assistantData.keyTakeout}</p>
+                    </div>
+                    <div className="rounded-xl p-3" style={{ background: AMBER_LT, border: `1px solid ${AMBER_DK}22` }}>
+                      <div className="text-xs font-bold mb-1" style={{ color: AMBER_DK }}>Watch Signal</div>
+                      <p className="text-xs leading-relaxed" style={{ color: N500 }}>{assistantData.watchSignal}</p>
+                    </div>
                   </div>
-                  <div className="rounded-xl p-3" style={{ background: AMBER_LT, border: `1px solid ${AMBER_DK}22` }}>
-                    <div className="text-xs font-bold mb-1" style={{ color: AMBER_DK }}>Watch Signal</div>
-                    <p className="text-xs leading-relaxed" style={{ color: N500 }}>{MOCK_ASSISTANT.watchSignal}</p>
+                ) : (
+                  <div className="flex-shrink-0 px-5 py-4" style={{ borderBottom: `1px solid ${N200}` }}>
+                    <p className="text-xs" style={{ color: N400 }}>Select a study to view key findings.</p>
                   </div>
-                  <div>
-                    <div className="text-xs font-bold mb-1.5" style={{ color: VDK }}>Strategic Summary</div>
-                    <p className="text-xs leading-relaxed" style={{ color: N500 }}>{MOCK_ASSISTANT.strategicSummary}</p>
-                  </div>
-                </div>
-                {/* AI Query — pulls from research + trends */}
+                )}
+                {/* AI Query — pulls from this client's research */}
                 <div className="flex-1 overflow-hidden">
                   <AIQueryPanel
                     accentColor={TEST_COLOR}
                     label="Research AI"
-                    suggestedPrompts={MOCK_ASSISTANT.queries}
+                    suggestedPrompts={assistantData?.queries ?? [
+                      "What drove the commitment gap?",
+                      "Which segment to prioritise?",
+                      "What are the recommended next steps?",
+                      "How do results compare to category norms?",
+                    ]}
                     defaultSource="research"
                   />
                 </div>

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useLocation } from "wouter";
 import {
   X, MessageSquare, Send, ArrowRight, ChevronDown, Loader2, BookOpen, Lock, Zap, Sparkles,
@@ -8,6 +8,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
 import type { SandboxRun } from "@shared/schema";
+import { useIndustryGroups } from "@/hooks/useIndustryGroups";
+import { filterByIndustry } from "@/lib/industry-groups";
+import { ALL_SIGNALS, ALL_MARKET_GAPS } from "@/lib/portal-content";
 
 /* ── Design System tokens ─────────────────────────────── */
 const VDK      = "#1E1B3A";
@@ -31,14 +34,6 @@ const CARD: React.CSSProperties = {
   boxShadow: "0 1px 4px rgba(58,47,191,.08)",
 };
 
-const SIGNALS = [
-  { id: 1, tag: "Trend",       tagBg: VIO_LT,  tagColor: VIO,      title: "Nootropic beverages up +41% search intent",          meta: "Urban 25–34 · Food & Bev · Detected overnight",     chip: { label: "High",   bg: "#FDECEA", color: CORAL } },
-  { id: 2, tag: "Opportunity", tagBg: VIO_LT,  tagColor: VIO,      title: "Township segment at 52% intent — entry SKU gap",     meta: "Energy Drink category · Township consumers",         chip: { label: "Medium", bg: AMBER_LT,  color: AMBER_DK } },
-  { id: 3, tag: "Trend",       tagBg: VIO_LT,  tagColor: VIO,      title: "Sustainable packaging premium +18% WTP",             meta: "Beauty & Personal Care · 25–44 urban",               chip: { label: "Watch",  bg: AMBER_LT,  color: AMBER_DK } },
-  { id: 4, tag: "New Report",  tagBg: VIO_LT,  tagColor: VIO,      title: "Functional Beverages 2025 — full category audit",    meta: "Innovatr Inside · GROWTH+ · 3 min read",             chip: { label: "New",    bg: VIO_LT,    color: VIO } },
-  { id: 5, tag: "Signal",      tagBg: SUC_LT,  tagColor: SUCCESS,  title: "Plant-based protein growing in Gauteng convenience", meta: "FMCG · Convenience retail · Q1 2025",               chip: { label: "Low",    bg: SUC_LT,    color: SUCCESS } },
-  { id: 6, tag: "Signal",      tagBg: SUC_LT,  tagColor: SUCCESS,  title: "Skincare ingredient transparency demand rising",      meta: "Beauty · 30–45 urban female · Digital",             chip: { label: "Watch",  bg: AMBER_LT,  color: AMBER_DK } },
-];
 
 const PERSONAS = [
   { id: "urban_pro",   label: "Urban Professionals",   sub: "25–34 · Gauteng" },
@@ -53,36 +48,6 @@ const RECENT_RUNS = [
   { id: "run-2", title: "Skincare Relaunch Pack B",  date: "22/03/2026", respondents: "800",   intent: 48 },
 ];
 
-const MARKET_GAPS = [
-  {
-    id: "gap-1",
-    useZap: true,
-    title: "Nootropic Beverages",
-    meta: "Food & Bev · Urban 25–34",
-    score: 94,
-    desc: "No dominant SA player in cognitive-performance beverages. Search intent up 41% YoY. First-mover window is open now.",
-    priority: "High Priority",
-    priorityColor: "#2A9E5C",
-    priorityBg: "#D1FAE5",
-    potential: "R85m+ potential",
-    barPct: 94,
-    concept: "A premium nootropic energy drink targeting urban professionals aged 25–34. Cognitive-performance claims with adaptogen ingredients, priced at R22 per 330ml can. No dominant SA player in this space.",
-  },
-  {
-    id: "gap-2",
-    useZap: false,
-    title: "Price-Entry Skincare",
-    meta: "Beauty · LSM 5–8",
-    score: 81,
-    desc: "Affordable skincare with credible efficacy claims — underserved in LSM 5–8. Current options are either too cheap or too premium.",
-    priority: "Medium Priority",
-    priorityColor: "#B8911A",
-    priorityBg: "#FEF6D6",
-    potential: "R45m+ potential",
-    barPct: 81,
-    concept: "An accessible skincare range targeting LSM 5–8 consumers, priced R49–R89. Dermatologist-tested efficacy claims with locally-relevant ingredients for SA skin types.",
-  },
-];
 
 const AI_MESSAGES = [
   {
@@ -132,6 +97,11 @@ export default function ExplorePage() {
   const [activeTab, setActiveTab]           = useState<Tab>("signals");
   const [chatInput, setChatInput]           = useState("");
   const [showChat, setShowChat]             = useState(false);
+
+  /* Industry personalisation */
+  const { industryGroups } = useIndustryGroups();
+  const signals    = useMemo(() => filterByIndustry(ALL_SIGNALS,      industryGroups), [industryGroups]);
+  const marketGaps = useMemo(() => filterByIndustry(ALL_MARKET_GAPS,  industryGroups), [industryGroups]);
 
   /* Sandbox state */
   const [sandboxIdea, setSandboxIdea]       = useState("");
@@ -259,7 +229,7 @@ export default function ExplorePage() {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: CORAL }}>
-                    12 Active Signals
+                    {signals.length} Active Signals
                   </span>
                   <div className="flex gap-2">
                     {["All", "Trends", "Opportunities", "Reports"].map((f, i) => (
@@ -277,7 +247,7 @@ export default function ExplorePage() {
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {SIGNALS.map(signal => (
+                  {signals.map(signal => (
                     <div key={signal.id} style={CARD} className="p-4 cursor-pointer hover:shadow-md transition-shadow" data-testid={`signal-card-${signal.id}`}>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5" style={{ background: signal.tagBg, color: signal.tagColor, borderRadius: 9999 }}>
@@ -339,7 +309,7 @@ export default function ExplorePage() {
                         <div className="text-xs" style={{ color: N500 }}>AI-identified white spaces — ranked by opportunity score</div>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {MARKET_GAPS.map(gap => (
+                        {marketGaps.map(gap => (
                           <div key={gap.id} style={CARD} className="p-4">
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex items-start gap-2.5">

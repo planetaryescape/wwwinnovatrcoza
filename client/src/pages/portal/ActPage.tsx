@@ -8,6 +8,12 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
 import type { ClientReport } from "@shared/schema";
+import { useIndustryGroups } from "@/hooks/useIndustryGroups";
+import { filterByIndustry } from "@/lib/industry-groups";
+import {
+  ALL_STRATEGIC_GAPS, ALL_NEXT_STEPS, ALL_RESEARCH_RECS,
+  ALL_PLANNING_PROMPTS, ALL_COVERAGE,
+} from "@/lib/portal-content";
 
 /* ── Design System tokens ─────────────────────────────── */
 const VDK      = "#1E1B3A";
@@ -35,142 +41,11 @@ const CARD: React.CSSProperties = {
 
 type Tab = "gaps" | "nextsteps" | "planning";
 
-/* ── Data ─────────────────────────────────────────────── */
-const GAPS = [
-  {
-    priority: 1,
-    title: "Commitment gap — Township segment",
-    chip: { label: "High Priority", bg: CORAL_LT, color: CORAL },
-    desc: "Energy Drink: 52% purchase intent in township vs 84% urban. Price friction at R22+ is the primary barrier. A R12–15 entry SKU could close 15pp of this gap and unlock meaningful volume.",
-    cta: "See Next Steps",
-    ctaAction: "nextsteps",
-    priorityStyle: { bg: CORAL_LT, color: CORAL },
-  },
-  {
-    priority: 2,
-    title: "Value perception lag — 18–24 cohort",
-    chip: { label: "Medium Priority", bg: AMBER_LT, color: AMBER_DK },
-    desc: "Purchase intent sits at 65%, but value-for-money scores at 58% — 13pp below the study average. Messaging must shift to emphasise accessible value, not aspirational positioning.",
-    cta: null,
-    ctaAction: null,
-    priorityStyle: { bg: AMBER_LT, color: AMBER_DK },
-  },
-  {
-    priority: 3,
-    title: "Nootropic whitespace — unclaimed territory",
-    chip: { label: "Opportunity", bg: VIO_LT, color: VIO },
-    desc: "Cognitive-performance beverages are up 41% in search intent among urban 25–34 professionals. No local brand has moved to own this space. First-mover window is open — and narrowing.",
-    cta: "Explore Trend",
-    ctaAction: "explore",
-    priorityStyle: { bg: VIO_LT, color: VIO },
-  },
-  {
-    priority: 4,
-    title: "Skincare — repositioning not landing in 35–49",
-    chip: { label: "Preliminary", bg: "#F3F4F6", color: "#6B7280" },
-    desc: "Preliminary data (67% field complete) shows the new brand story resonates in 25–34 but fails to convert the 35–49 segment. A dual-message strategy is recommended before full launch.",
-    cta: null,
-    ctaAction: null,
-    priorityStyle: { bg: AMBER_LT, color: AMBER_DK },
-  },
-];
-
-const NEXT_STEPS = [
-  {
-    num: 1,
-    title: "Test packaging variants — Energy Drink",
-    desc: "Concept scored 72% purchase intent. The next logical step is testing 3–4 packaging variants with the 25–34 urban cohort before committing to production. Design drives the \u2018premium but accessible\u2019 perception that's currently your top intent driver.",
-    cta: { label: "Launch Packaging Brief →", action: "test", primary: true },
-    locked: false,
-  },
-  {
-    num: 2,
-    title: "Sandbox — price-entry SKU for Township",
-    desc: "Before investing a full study, pressure-test a R12–15 entry SKU concept in the Sandbox. The 52% intent gap suggests the volume is there — use synthetic respondents to refine the concept before fielding.",
-    cta: { label: "Open Sandbox →", action: "explore", primary: false },
-    locked: false,
-  },
-  {
-    num: 3,
-    title: "Read the Nootropic Beverage trend report",
-    desc: "41% search intent growth with no dominant local player. Before your next product-cycle planning session, review the full trend data — understanding the category before building a brief will sharpen your methodology significantly.",
-    cta: { label: "Browse Trend Reports →", action: "explore", primary: false },
-    locked: false,
-  },
-  {
-    num: 4,
-    title: "Qual deep-dive — Skincare 35–49 segment",
-    desc: "Once the Pro study completes, run AI-moderated qual interviews with 20 respondents in the 35–49 group.",
-    cta: null,
-    locked: true,
-    lockedReason: "Unlocks when Skincare study completes",
-  },
-];
-
-const COVERAGE = [
-  { category: "Food & Beverage",     chip: { label: "Strong",      bg: SUC_LT,   color: SUCCESS  } },
-  { category: "Beauty & Personal Care", chip: { label: "In Progress", bg: AMBER_LT, color: AMBER_DK } },
-  { category: "Retail / FMCG",      chip: { label: "Gap",         bg: CORAL_LT, color: CORAL   } },
-];
-
-const PLANNING_PROMPTS = [
-  "Plan my next 6-month research cycle",
-  "Draft a brief for the Township SKU test",
-  "How do I frame the Skincare findings for my team?",
-  "What's my biggest commercial risk right now?",
-];
-
-const CONNECTED_STUDIES = [
-  { name: "Energy Drink Concept Test",  status: "Active",        statusColor: SUCCESS,  statusBg: SUC_LT   },
-  { name: "Plant-Based Snack Range",    status: "Active",        statusColor: SUCCESS,  statusBg: SUC_LT   },
-  { name: "Skincare Repositioning",     status: "Partial (67%)", statusColor: AMBER_DK, statusBg: AMBER_LT },
-];
-
-const RESEARCH_RECS = [
-  {
-    title: "Packaging Variants — Energy Drink",
-    method: "Test24 Basic",
-    methodColor: CYAN_DK,
-    methodBg: "#DFF6FC",
-    types: ["Concept", "Claims"],
-    desc: "Test 3–4 pack options with 25–34 urban cohort before committing to production. 1 Basic Credit.",
-    priority: "High",
-    priorityColor: CORAL,
-    priorityBg: CORAL_LT,
-  },
-  {
-    title: "Price-Entry SKU — Township",
-    method: "Sandbox",
-    methodColor: VIO,
-    methodBg: VIO_LT,
-    types: ["Pricing Testing"],
-    desc: "Model R12, R14, R16 price points with synthetic respondents. No credits — 30 minutes.",
-    priority: "High",
-    priorityColor: CORAL,
-    priorityBg: CORAL_LT,
-  },
-  {
-    title: "Skincare — 35–49 Repositioning",
-    method: "Test24 Pro",
-    methodColor: "#7C3AED",
-    methodBg: "#EDE9FE",
-    types: ["Positioning", "Brand Health"],
-    desc: "AI-moderated qual with 20 respondents in the 35–49 segment once current study completes.",
-    priority: "Medium",
-    priorityColor: AMBER_DK,
-    priorityBg: AMBER_LT,
-  },
-  {
-    title: "Channel Preference — Energy Drink",
-    method: "Test24 Basic",
-    methodColor: CYAN_DK,
-    methodBg: "#DFF6FC",
-    types: ["Campaign", "Ad"],
-    desc: "Convenience vs grocery vs online — reduce channel launch risk with a quick signal study.",
-    priority: "Low",
-    priorityColor: N500,
-    priorityBg: "#F5F0E8",
-  },
+/* ── Fallback connected studies (pre-real-data) ─────────── */
+const FALLBACK_CONNECTED_STUDIES = [
+  { name: "Energy Drink Concept Test",  status: "Active",  statusColor: SUCCESS,  statusBg: SUC_LT   },
+  { name: "Plant-Based Snack Range",    status: "Active",  statusColor: SUCCESS,  statusBg: SUC_LT   },
+  { name: "Skincare Repositioning",     status: "Active",  statusColor: AMBER_DK, statusBg: AMBER_LT },
 ];
 
 const CONSULT_OFFERS = [
@@ -219,6 +94,17 @@ export default function ActPage() {
   const [planningInput, setPlanningInput] = useState("");
   const [offerState, setOfferState] = useState<Record<string, "idle" | "accepted" | "declined">>({ strategy: "idle", design: "idle" });
 
+  /* ── Industry personalisation ── */
+  const { industryGroups } = useIndustryGroups();
+  const gaps          = useMemo(() => filterByIndustry(ALL_STRATEGIC_GAPS, industryGroups), [industryGroups]);
+  const nextSteps     = useMemo(() => filterByIndustry(ALL_NEXT_STEPS,     industryGroups), [industryGroups]);
+  const researchRecs  = useMemo(() => filterByIndustry(ALL_RESEARCH_RECS,  industryGroups), [industryGroups]);
+  const planningPrompts = useMemo(
+    () => filterByIndustry(ALL_PLANNING_PROMPTS, industryGroups).map(p => p.text),
+    [industryGroups],
+  );
+  const coverageItems = useMemo(() => filterByIndustry(ALL_COVERAGE, industryGroups), [industryGroups]);
+
   /* ── Real study data ── */
   const { data: clientReports = [] } = useQuery<ClientReport[]>({
     queryKey: ["/api/member/client-reports"],
@@ -232,7 +118,7 @@ export default function ActPage() {
   }, [clientReports]);
 
   const connectedStudies = useMemo(() => {
-    if (liveStudies.length === 0) return CONNECTED_STUDIES;
+    if (liveStudies.length === 0) return FALLBACK_CONNECTED_STUDIES;
     return liveStudies.map(r => {
       const isCompleted = r.status === "Completed";
       return {
@@ -354,14 +240,14 @@ export default function ActPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-4">
                     <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: CORAL }}>Strategic Gaps</span>
-                    <span className="text-sm" style={{ color: N500 }}>4 identified</span>
+                    <span className="text-sm" style={{ color: N500 }}>{gaps.length} identified</span>
                   </div>
                   <div style={{ ...CARD, overflow: "hidden", padding: 0, marginBottom: 20 }}>
-                    {GAPS.map((gap, i) => (
+                    {gaps.map((gap, i) => (
                       <div
-                        key={i}
+                        key={gap.id}
                         className="flex items-start gap-3 px-5 py-4"
-                        style={i < GAPS.length - 1 ? { borderBottom: `1px solid ${N200}` } : {}}
+                        style={i < gaps.length - 1 ? { borderBottom: `1px solid ${N200}` } : {}}
                         data-testid={`gap-item-${gap.priority}`}
                       >
                         <div
@@ -390,8 +276,8 @@ export default function ActPage() {
 
                   <div className="text-[11px] font-bold tracking-widest uppercase mb-3" style={{ color: CORAL }}>Research Coverage</div>
                   <div style={{ ...CARD, overflow: "hidden", padding: 0 }}>
-                    {COVERAGE.map((item, i) => (
-                      <div key={i} className="flex items-center justify-between px-5 py-3" style={i < COVERAGE.length - 1 ? { borderBottom: `1px solid ${N200}` } : {}}>
+                    {coverageItems.map((item, i) => (
+                      <div key={item.id} className="flex items-center justify-between px-5 py-3" style={i < coverageItems.length - 1 ? { borderBottom: `1px solid ${N200}` } : {}}>
                         <span className="text-sm font-medium" style={{ color: VDK }}>{item.category}</span>
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: item.chip.bg, color: item.chip.color }}>
                           {item.chip.label}
@@ -428,9 +314,9 @@ export default function ActPage() {
                 <div className="flex-1 min-w-0">
                   <div className="text-[11px] font-bold tracking-widest uppercase mb-4" style={{ color: CORAL }}>Next Moves</div>
                   <div className="space-y-3">
-                    {NEXT_STEPS.filter(s => !s.locked).map((step, i) => (
+                    {nextSteps.filter(s => !s.locked).map((step) => (
                       <div
-                        key={i}
+                        key={step.id}
                         className="rounded-xl px-5 py-4 relative"
                         style={{
                           background: "#fff",
@@ -468,9 +354,9 @@ export default function ActPage() {
                       </div>
                     ))}
                     {/* Locked steps */}
-                    {NEXT_STEPS.filter(s => s.locked).map((step, i) => (
+                    {nextSteps.filter(s => s.locked).map((step) => (
                       <div
-                        key={`locked-${i}`}
+                        key={step.id}
                         className="rounded-xl px-5 py-4 opacity-50"
                         style={{ background: "#fff", border: `1px solid ${N200}`, borderLeft: `4px solid ${N200}` }}
                       >
@@ -619,7 +505,7 @@ export default function ActPage() {
                   <div style={CARD} className="p-5">
                     <div className="text-sm font-semibold mb-3" style={{ color: VDK }}>Suggested Planning Prompts</div>
                     <div className="space-y-2">
-                      {PLANNING_PROMPTS.map(q => (
+                      {planningPrompts.map(q => (
                         <button
                           key={q}
                           onClick={() => { setPlanningInput(q); }}
@@ -658,8 +544,8 @@ export default function ActPage() {
                       <div className="text-sm font-semibold" style={{ color: VDK }}>Recommended Research</div>
                     </div>
                     <div className="space-y-3">
-                      {RESEARCH_RECS.map((rec, i) => (
-                        <div key={i} className="rounded-xl p-3" style={{ background: "#FAFAF8", border: `1px solid ${N200}` }} data-testid={`research-rec-${i}`}>
+                      {researchRecs.map((rec, i) => (
+                        <div key={rec.id} className="rounded-xl p-3" style={{ background: "#FAFAF8", border: `1px solid ${N200}` }} data-testid={`research-rec-${i}`}>
                           {/* Method + Priority row */}
                           <div className="flex items-center gap-1.5 mb-2 flex-wrap">
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: rec.methodBg, color: rec.methodColor }}>
