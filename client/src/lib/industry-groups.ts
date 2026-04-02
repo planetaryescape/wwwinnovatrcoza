@@ -10,14 +10,25 @@ export function resolveIndustryGroups(companyIndustry: string | null | undefined
 
   const rules: [RegExp | string, string[] | null][] = [
     [/bank|financ|fintech|insur/,                             ["cross-industry", "finance"]],
+    // Generic FMCG sees all sub-categories
     [/^fmcg$/,                                               ["cross-industry", "fmcg", "food", "beverage", "qsr", "retail"]],
-    [/^food$|food manufactur|food prod/,                     ["cross-industry", "fmcg", "food", "qsr", "health"]],
-    [/beverag|drink|wine|spirit|brew|alco/,                  ["cross-industry", "fmcg", "beverage", "qsr"]],
-    [/restaurant|qsr|quick service|hospitality|fast food|café|cafe/, ["cross-industry", "fmcg", "food", "beverage", "qsr", "retail"]],
-    [/beauty|cosmetic|personal care|skincare|hair/,          ["cross-industry", "beauty", "health", "retail"]],
-    [/health|wellness|pharma|medical|nutrition|fitness/,     ["cross-industry", "health", "food", "beauty"]],
-    [/retail|ecommerce|e-commerce|shop|supermarket|grocery/, ["cross-industry", "fmcg", "food", "beverage", "retail"]],
-    [/agri|farm|crop/,                                       ["cross-industry", "fmcg", "food"]],
+    // Food manufacturers see food signals only
+    [/^food$|food manufactur|food prod/,                     ["cross-industry", "food"]],
+    // Beverage / Drinks / Wine & Spirits — precise match, no fmcg bleed
+    [/beverag|drink|wine|spirit|brew|alco/,                  ["cross-industry", "beverage"]],
+    // QSR cares about food + beverage (they serve both) but not all FMCG
+    [/restaurant|qsr|quick service|hospitality|fast food|café|cafe/, ["cross-industry", "qsr", "food", "beverage"]],
+    // Beauty & Cosmetics — core beauty signals only
+    [/beauty|cosmetic|skincare|hair/,                        ["cross-industry", "beauty"]],
+    // Personal Care is beauty + health overlap
+    [/personal care/,                                        ["cross-industry", "beauty", "health"]],
+    // Health / Wellness / Pharma
+    [/health|wellness|pharma|medical|nutrition|fitness/,     ["cross-industry", "health", "beauty"]],
+    // Retail / E-commerce
+    [/retail|ecommerce|e-commerce|shop|supermarket|grocery/, ["cross-industry", "retail", "food", "beverage"]],
+    // Agriculture is food production
+    [/agri|farm|crop/,                                       ["cross-industry", "food"]],
+    // Market Research (Innovatr) — show everything
     [/market research|research|innovatr/,                    null],
     [/service|consult|agenc|pr |advertis/,                   ["cross-industry", "finance"]],
   ];

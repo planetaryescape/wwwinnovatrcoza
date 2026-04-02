@@ -918,17 +918,19 @@ export const ALL_PLANNING_PROMPTS: PlanningPrompt[] = [
 /* ────────────────────────────────────────────────────────── */
 
 export interface CoverageItem {
+  id: string;
   industries: string[];
   category: string;
   chip: { label: string; bg: string; color: string };
 }
 
 export const ALL_COVERAGE: CoverageItem[] = [
-  { industries: ["beverage", "fmcg"],          category: "Beverages & Functional Drinks", chip: { label: "Active", bg: SUC_LT, color: SUCCESS } },
-  { industries: ["food", "fmcg"],              category: "Food & Agriculture",             chip: { label: "Active", bg: SUC_LT, color: SUCCESS } },
-  { industries: ["qsr", "food"],               category: "QSR & Hospitality",              chip: { label: "Active", bg: SUC_LT, color: SUCCESS } },
-  { industries: ["beauty", "health", "retail"],category: "Beauty & Personal Care",         chip: { label: "Active", bg: SUC_LT, color: SUCCESS } },
-  { industries: ["finance"],                   category: "Finance & Banking",              chip: { label: "Active", bg: SUC_LT, color: SUCCESS } },
-  { industries: ["retail", "fmcg"],            category: "Retail & E-commerce",           chip: { label: "Active", bg: SUC_LT, color: SUCCESS } },
-  { industries: ["cross-industry"],            category: "Cross-Industry Trends",         chip: { label: "Live",   bg: VIO_LT, color: VIO } },
+  { id: "cov-bev",     industries: ["beverage"],                category: "Beverages & Functional Drinks", chip: { label: "Active", bg: SUC_LT, color: SUCCESS } },
+  { id: "cov-food",    industries: ["food"],                    category: "Food & Agriculture",             chip: { label: "Active", bg: SUC_LT, color: SUCCESS } },
+  { id: "cov-qsr",     industries: ["qsr"],                     category: "QSR & Hospitality",              chip: { label: "Active", bg: SUC_LT, color: SUCCESS } },
+  { id: "cov-beauty",  industries: ["beauty"],                  category: "Beauty & Personal Care",         chip: { label: "Active", bg: SUC_LT, color: SUCCESS } },
+  { id: "cov-health",  industries: ["health"],                  category: "Health & Wellness",              chip: { label: "Active", bg: SUC_LT, color: SUCCESS } },
+  { id: "cov-finance", industries: ["finance"],                 category: "Finance & Banking",              chip: { label: "Active", bg: SUC_LT, color: SUCCESS } },
+  { id: "cov-retail",  industries: ["retail"],                  category: "Retail & E-commerce",           chip: { label: "Active", bg: SUC_LT, color: SUCCESS } },
+  { id: "cov-cross",   industries: ["cross-industry"],          category: "Cross-Industry Trends",         chip: { label: "Live",   bg: VIO_LT, color: VIO } },
 ];
