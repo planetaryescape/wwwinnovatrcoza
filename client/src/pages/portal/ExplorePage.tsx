@@ -110,7 +110,7 @@ export default function ExplorePage() {
   const [sandboxResult, setSandboxResult]   = useState<{ interest: number; commitment: number; ideaScore: number } | null>(null);
   const runCountRef = useRef(0);
 
-  const { data: reports } = useQuery<any[]>({ queryKey: ["/api/reports"], enabled: !!user });
+  const { data: reports } = useQuery<any[]>({ queryKey: ["/api/member/reports"], enabled: !!user });
 
   /* Sandbox run history */
   const { data: sandboxHistory = [] } = useQuery<SandboxRun[]>({

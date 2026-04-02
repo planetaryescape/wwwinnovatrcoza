@@ -2240,16 +2240,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(allPublishedReports);
       }
       
+      // Resolve the user's industry groups for trend-report filtering
+      const { resolveIndustryGroups } = await import("./pdf-library");
+      const company = userCompanyId ? await storage.getCompany(userCompanyId) : null;
+      const industryGroups = resolveIndustryGroups(company?.industry ?? null);
+      
       // Filter reports based on access rules for regular users
       const filteredReports = reports.filter(r => {
         // Must be published and not archived
         if (r.status !== "published" || r.isArchived) return false;
         
-        // If report has no client restrictions, it's publicly accessible
-        if (!r.clientCompanyIds || r.clientCompanyIds.length === 0) return true;
+        // Client-specific reports: only show to the linked company
+        if (r.clientCompanyIds && r.clientCompanyIds.length > 0) {
+          return !!(userCompanyId && r.clientCompanyIds.includes(userCompanyId));
+        }
         
-        // For reports with clientCompanyIds, only show to users from those companies
-        return userCompanyId && r.clientCompanyIds.includes(userCompanyId);
+        // Public trend reports: filter by industry tag
+        // No tag → cross-industry, show to everyone
+        if (!r.industryTag) return true;
+        // No industry groups resolved (Innovatr staff) → see everything
+        if (!industryGroups) return true;
+        // Show only if the report's tag is in the user's industry groups
+        return industryGroups.includes(r.industryTag);
       });
       
       res.json(filteredReports);

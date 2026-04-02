@@ -476,7 +476,7 @@ export default function TrendsInsights() {
   const fetchReports = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/reports");
+      const res = await fetch("/api/member/reports");
       if (res.ok) {
         const data = await res.json();
         const formattedReports = data.map((r: any) => ({
