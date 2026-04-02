@@ -960,7 +960,7 @@ export default function TestPage() {
                           <div>
                             <div className="text-base font-semibold leading-snug" style={{ color: VDK }}>{study.title}</div>
                             <div className="text-xs mt-0.5" style={{ color: N500 }}>
-                              {study.company} · {study.studyTypeDetail} · {study.respondents.toLocaleString()} respondents · {study.date}
+                              {study.company} · {study.studyTypeDetail} · {study.respondents != null ? `${study.respondents.toLocaleString()} respondents` : "—"} · {study.date}
                             </div>
                           </div>
                         </div>
