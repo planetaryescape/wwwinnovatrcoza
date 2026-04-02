@@ -2244,6 +2244,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { resolveIndustryGroups } = await import("./pdf-library");
       const company = userCompanyId ? await storage.getCompany(userCompanyId) : null;
       const industryGroups = resolveIndustryGroups(company?.industry ?? null);
+
+      /**
+       * Maps a report's `industry` field to the set of audience tags whose members
+       * should see it. "cross-industry" means everyone can see it.
+       */
+      function resolveReportAudience(reportIndustry: string | null | undefined): string[] {
+        if (!reportIndustry) return ["cross-industry"];
+        const k = reportIndustry.toLowerCase().trim();
+        if (/bank|financ|fintech|insur/.test(k))           return ["finance"];
+        if (/^fmcg$/.test(k))                              return ["fmcg", "food", "beverage", "qsr", "retail"];
+        if (/^food$|food manufactur|food prod/.test(k))    return ["food", "beverage", "fmcg"];
+        if (/beverag|drink|wine|spirit|brew|alco/.test(k)) return ["beverage", "food", "fmcg"];
+        if (/beauty|cosmetic|skincare|hair/.test(k))       return ["beauty"];
+        if (/personal care/.test(k))                       return ["beauty", "health"];
+        if (/health|wellness|pharma|medical|nutrition|fitness/.test(k)) return ["health", "beauty"];
+        if (/retail|ecommerce|e-commerce|supermarket|grocery/.test(k)) return ["retail", "food", "beverage"];
+        if (/agri|farm|crop/.test(k))                      return ["food"];
+        if (/restaurant|qsr|quick service|fast food/.test(k)) return ["qsr", "food", "beverage"];
+        // Services, Inside, IRL, general / unrecognised → cross-industry (everyone)
+        return ["cross-industry"];
+      }
       
       // Filter reports based on access rules for regular users
       const filteredReports = reports.filter(r => {
@@ -2255,13 +2276,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return !!(userCompanyId && r.clientCompanyIds.includes(userCompanyId));
         }
         
-        // Public trend reports: filter by industry tag
-        // No tag → cross-industry, show to everyone
-        if (!r.industryTag) return true;
-        // No industry groups resolved (Innovatr staff) → see everything
+        // Public trend reports: filter by industry audience
+        const audience = resolveReportAudience(r.industry);
+        // "cross-industry" audience → show to everyone
+        if (audience.includes("cross-industry")) return true;
+        // Innovatr staff (null groups) → see everything
         if (!industryGroups) return true;
-        // Show only if the report's tag is in the user's industry groups
-        return industryGroups.includes(r.industryTag);
+        // Show only if user's groups overlap with the report's target audience
+        return audience.some(tag => industryGroups.includes(tag));
       });
       
       res.json(filteredReports);
