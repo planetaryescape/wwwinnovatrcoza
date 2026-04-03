@@ -349,7 +349,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
                 {isMobile && (
                   <button
                     className="mr-2 w-8 h-8 flex items-center justify-center rounded-md"
-                    style={{ color: "rgba(255,255,255,0.7)" }}
+                    style={{ color: "var(--pt-nav-btn-color)" }}
                     onClick={() => setMobileDrawerOpen(true)}
                     data-testid="button-mobile-menu"
                     aria-label="Open menu"

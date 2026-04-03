@@ -421,7 +421,7 @@ export default function HealthPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
 
                   {/* Strategic Takeaways */}
-                  <div className="rounded-2xl p-5" style={{ background: VDK }}>
+                  <div className="rounded-2xl p-5" style={{ background: "var(--ds-n900, #1E1B3A)" }}>
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
                         <Search className="w-4 h-4 text-white opacity-70" />
