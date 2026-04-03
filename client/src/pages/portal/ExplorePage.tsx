@@ -211,7 +211,7 @@ export default function ExplorePage() {
               className="flex-shrink-0 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap"
               style={{
                 color: activeTab === tab ? VDK : N500,
-                borderBottomColor: activeTab === tab ? EXPLORE_COLOR : "transparent",
+                borderBottomColor: activeTab === tab ? CORAL : "transparent",
                 background: "transparent",
               }}
             >
