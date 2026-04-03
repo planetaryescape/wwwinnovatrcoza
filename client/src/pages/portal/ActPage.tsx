@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
+import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
 import type { ClientReport } from "@shared/schema";
 import { useIndustryGroups } from "@/hooks/useIndustryGroups";
 import { filterByIndustry } from "@/lib/industry-groups";
@@ -178,7 +179,8 @@ export default function ActPage() {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: CREAM }}>
+    <div className="portal-root flex h-screen overflow-hidden" style={{ background: CREAM }}>
+      <MobilePortalNav />
       <div className="flex flex-col w-full h-full">
 
         {/* ── Phase topbar ── */}

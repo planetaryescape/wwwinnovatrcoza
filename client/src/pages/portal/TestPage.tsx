@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
+import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
 import {
   X, Sparkles, Send, MessageSquare, ChevronDown, ExternalLink,
   ArrowRight, Loader2, Upload, CheckCircle2, ChevronRight, FileText,
@@ -420,7 +421,8 @@ export default function TestPage() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: CREAM }}>
+    <div className="portal-root flex h-screen overflow-hidden" style={{ background: CREAM }}>
+      <MobilePortalNav />
       <div className="flex flex-col w-full h-full">
 
         {/* Phase topbar */}

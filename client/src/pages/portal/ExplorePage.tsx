@@ -11,6 +11,7 @@ import type { SandboxRun } from "@shared/schema";
 import { useIndustryGroups } from "@/hooks/useIndustryGroups";
 import { filterByIndustry } from "@/lib/industry-groups";
 import { ALL_SIGNALS, ALL_MARKET_GAPS } from "@/lib/portal-content";
+import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
 
 /* ── Design System tokens ─────────────────────────────── */
 const VDK      = "#1E1B3A";
@@ -166,7 +167,8 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: CREAM }}>
+    <div className="portal-root flex h-screen overflow-hidden" style={{ background: CREAM }}>
+      <MobilePortalNav />
       <div className="flex flex-col w-full h-full">
 
         {/* Phase topbar */}
