@@ -334,11 +334,11 @@
 /* ── Portal canvas utility classes ─────────────────────── */
 @layer utilities {
   .portal-canvas {
-    background: #FFFFFF;
+    background: var(--pt-canvas-bg, #FFFFFF);
   }
   .portal-card {
-    background: #FFFFFF;
-    border: 1px solid #EBEBEB;
+    background: var(--pt-card-bg, #FFFFFF);
+    border: 1px solid var(--pt-card-border, #EBEBEB);
     border-radius: 12px;
     box-shadow: var(--ds-sh-sm);
     transition: transform 0.18s ease, box-shadow 0.18s ease;
@@ -348,8 +348,8 @@
     box-shadow: var(--ds-sh-hover);
   }
   .portal-card-lg {
-    background: #FFFFFF;
-    border: 1px solid #EBEBEB;
+    background: var(--pt-card-bg, #FFFFFF);
+    border: 1px solid var(--pt-card-border, #EBEBEB);
     border-radius: 16px;
     box-shadow: var(--ds-sh-sm);
     transition: transform 0.18s ease, box-shadow 0.18s ease;
@@ -362,7 +362,7 @@
     position: sticky;
     top: 0;
     z-index: 50;
-    background: #FFFFFF;
+    background: var(--pt-tab-bar-bg, #FFFFFF);
     overflow-x: auto;
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;

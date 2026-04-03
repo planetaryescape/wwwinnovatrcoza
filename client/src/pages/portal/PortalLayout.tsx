@@ -179,7 +179,8 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
         </button>
         {isMobile && (
           <button
-            className="ml-auto w-7 h-7 flex items-center justify-center text-white"
+            className="ml-auto w-7 h-7 flex items-center justify-center"
+            style={{ color: "var(--pt-nav-btn-color)" }}
             onClick={() => setMobileDrawerOpen(false)}
             data-testid="button-close-drawer"
             aria-label="Close menu"
