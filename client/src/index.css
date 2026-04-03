@@ -254,12 +254,19 @@
   --pt-ai-prompts-bg:       #221E40;
   --pt-ai-input-bg:         #221E40;
   --pt-ai-user-bubble:      #5563E8;
+  --pt-ai-text-primary:     rgba(255,255,255,0.9);
+  --pt-ai-text-secondary:   rgba(255,255,255,0.55);
+  --pt-ai-border:           rgba(255,255,255,0.08);
   /* Sidebar nav items */
   --pt-sb-active-bg:        rgba(255,255,255,0.12);
   --pt-sb-hover-bg:         rgba(255,255,255,0.06);
   --pt-sb-item-color:       rgba(255,255,255,0.65);
   --pt-sb-item-active:      #ffffff;
   --pt-sb-section-color:    #8A88A8;
+  /* Sidebar logo/branding text */
+  --pt-logo-text-color:     #ffffff;
+  /* Mobile nav active color */
+  --pt-mobile-active:       #E8503A;
 }
 
 [data-portal-theme="light"] {
@@ -309,12 +316,19 @@
   --pt-ai-prompts-bg:       #F0F1FC;
   --pt-ai-input-bg:         #FFFFFF;
   --pt-ai-user-bubble:      #5563E8;
+  --pt-ai-text-primary:     #1E1B3A;
+  --pt-ai-text-secondary:   #5A5880;
+  --pt-ai-border:           #E0E2F5;
   /* Sidebar nav items */
   --pt-sb-active-bg:        rgba(85,99,232,0.12);
   --pt-sb-hover-bg:         rgba(85,99,232,0.06);
   --pt-sb-item-color:       #5A5880;
   --pt-sb-item-active:      #1E1B3A;
   --pt-sb-section-color:    #8A88A8;
+  /* Sidebar logo/branding text */
+  --pt-logo-text-color:     #1E1B3A;
+  /* Mobile nav active color */
+  --pt-mobile-active:       #5563E8;
 }
 
 /* ── Portal canvas utility classes ─────────────────────── */

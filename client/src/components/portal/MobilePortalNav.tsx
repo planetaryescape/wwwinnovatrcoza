@@ -3,8 +3,6 @@ import { LayoutDashboard, FlaskConical, BarChart2, Lightbulb, Building2 } from "
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePortalTheme } from "@/hooks/usePortalTheme";
 
-const CORAL  = "#E8503A";
-
 function MobileNavBtn({ icon, label, isActive, onClick, testId }: {
   icon: React.ReactNode; label: string; isActive: boolean; onClick: () => void; testId?: string;
 }) {
@@ -13,15 +11,15 @@ function MobileNavBtn({ icon, label, isActive, onClick, testId }: {
       onClick={onClick}
       data-testid={testId}
       className="flex flex-col items-center justify-center flex-1 gap-0.5 py-2 relative"
-      style={{ minHeight: "44px", color: isActive ? CORAL : "var(--pt-sb-item-color)" }}
+      style={{ minHeight: "44px", color: isActive ? "var(--pt-mobile-active)" : "var(--pt-sb-item-color)" }}
     >
       {isActive && (
         <span
           className="absolute top-0 left-1/2 -translate-x-1/2 rounded-b-full"
-          style={{ width: "24px", height: "2px", background: CORAL }}
+          style={{ width: "24px", height: "2px", background: "var(--pt-mobile-active)" }}
         />
       )}
-      <span style={{ color: isActive ? CORAL : "var(--pt-sb-item-color)" }}>{icon}</span>
+      <span style={{ color: isActive ? "var(--pt-mobile-active)" : "var(--pt-sb-item-color)" }}>{icon}</span>
       <span className="text-[10px] font-medium">{label}</span>
     </button>
   );

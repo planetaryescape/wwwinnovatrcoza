@@ -3,12 +3,12 @@ import { Sparkles, Send, BookOpen, FlaskConical, Layers, ChevronDown, ChevronUp,
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
-const VDK   = "#1E1B3A";
-const VIO   = "#3A2FBF";
+const VDK   = "var(--pt-ai-text-primary, #1E1B3A)";
+const VIO   = "var(--pt-step-active-bubble, #5563E8)";
 const CORAL = "#E8503A";
-const N200  = "#EBEBEB";
-const N400  = "#A89078";
-const N500  = "#8A7260";
+const N200  = "var(--pt-ai-border, #EBEBEB)";
+const N400  = "var(--pt-ai-text-secondary, #8A7260)";
+const N500  = "var(--pt-ai-text-secondary, #8A7260)";
 const CREAM = "#FFFFFF";
 
 const SERIES_COLOR: Record<string, string> = {

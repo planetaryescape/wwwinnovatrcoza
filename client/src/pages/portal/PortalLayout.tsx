@@ -174,7 +174,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
             I
           </div>
           {(!isTablet || isMobile) && (
-            <span className="font-serif text-base text-white tracking-wide truncate">Innovatr</span>
+            <span className="font-serif text-base tracking-wide truncate" style={{ color: "var(--pt-logo-text-color)" }}>Innovatr</span>
           )}
         </button>
         {isMobile && (
