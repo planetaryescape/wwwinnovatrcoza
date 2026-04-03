@@ -6,10 +6,10 @@ import { apiRequest } from "@/lib/queryClient";
 const VDK   = "#1E1B3A";
 const VIO   = "#3A2FBF";
 const CORAL = "#E8503A";
-const N200  = "#E2D5BF";
+const N200  = "#EBEBEB";
 const N400  = "#A89078";
 const N500  = "#8A7260";
-const CREAM = "#FAF3E8";
+const CREAM = "#FFFFFF";
 
 const SERIES_COLOR: Record<string, string> = {
   IRL: "#3A2FBF",
@@ -136,7 +136,7 @@ function AIResponseCard({ response }: { response: AIResponse }) {
 
       {/* Key findings */}
       {response.findings.length > 0 && (
-        <div className="rounded-md overflow-hidden" style={{ border: `1px solid ${N200}`, background: CREAM }}>
+        <div className="rounded-md overflow-hidden" style={{ border: `1px solid ${N200}`, background: "var(--pt-ai-body-bg)" }}>
           <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: `1px solid ${N200}` }}>
             <ListChecks className="w-3.5 h-3.5" style={{ color: VIO }} />
             <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: VDK }}>Key Findings</span>
@@ -166,7 +166,7 @@ function AIResponseCard({ response }: { response: AIResponse }) {
       {/* Source citations */}
       {response.citations.length > 0 && (
         <div className="rounded-md overflow-hidden" style={{ border: `1px solid ${N200}` }}>
-          <div className="flex items-center gap-2 px-3 py-2" style={{ background: CREAM, borderBottom: `1px solid ${N200}` }}>
+          <div className="flex items-center gap-2 px-3 py-2" style={{ background: "var(--pt-ai-source-bg)", borderBottom: `1px solid ${N200}` }}>
             <BookOpen className="w-3.5 h-3.5" style={{ color: CORAL }} />
             <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: VDK }}>Source Reports</span>
             <span className="ml-auto text-[10px]" style={{ color: N400 }}>{response.citations.length} matched</span>
@@ -267,7 +267,7 @@ export default function AIQueryPanel({
       </div>
 
       {/* Source selector */}
-      <div className="flex-shrink-0" style={{ background: "#F5EFE4", borderBottom: `1px solid ${N200}` }}>
+      <div className="flex-shrink-0" style={{ background: "var(--pt-ai-source-bg)", borderBottom: `1px solid ${N200}` }}>
         <button
           className="w-full flex items-center gap-2 px-3 py-2 text-left"
           onClick={() => setShowSources(o => !o)}
@@ -312,7 +312,7 @@ export default function AIQueryPanel({
       </div>
 
       {/* Chat area */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-3" style={{ background: CREAM }}>
+      <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-3" style={{ background: "var(--pt-ai-body-bg)" }}>
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
             <div
@@ -370,7 +370,7 @@ export default function AIQueryPanel({
       {suggestedPrompts.length > 0 && messages.length === 0 && (
         <div
           className="flex-shrink-0 px-3 py-2 flex flex-wrap gap-1.5"
-          style={{ background: "#F5EFE4", borderTop: `1px solid ${N200}` }}
+          style={{ background: "var(--pt-ai-prompts-bg)", borderTop: `1px solid ${N200}` }}
         >
           {suggestedPrompts.map((p, i) => (
             <button
@@ -389,7 +389,7 @@ export default function AIQueryPanel({
       {/* Input */}
       <div
         className="flex-shrink-0 flex items-center gap-2 px-3 py-2"
-        style={{ background: "#fff", borderTop: `1px solid ${N200}` }}
+        style={{ background: "var(--pt-ai-input-bg)", borderTop: `1px solid ${N200}` }}
       >
         <input
           className="flex-1 text-sm bg-transparent outline-none"

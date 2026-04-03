@@ -111,7 +111,7 @@ export default function Dashboard() {
 
   return (
     <PortalLayout>
-      <div className="flex-1 overflow-y-auto" style={{ background: CREAM }}>
+      <div className="flex-1 overflow-y-auto" style={{ background: "var(--pt-canvas-bg)" }}>
         <div className="p-6 space-y-5">
 
           {/* ── Hero card ── */}

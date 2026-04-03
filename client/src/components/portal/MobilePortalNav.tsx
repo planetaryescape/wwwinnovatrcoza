@@ -1,8 +1,8 @@
 import { useLocation } from "wouter";
 import { LayoutDashboard, FlaskConical, BarChart2, Lightbulb, Building2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePortalTheme } from "@/hooks/usePortalTheme";
 
-const VDK   = "#1E1B3A";
 const CORAL  = "#E8503A";
 
 function MobileNavBtn({ icon, label, isActive, onClick, testId }: {
@@ -13,7 +13,7 @@ function MobileNavBtn({ icon, label, isActive, onClick, testId }: {
       onClick={onClick}
       data-testid={testId}
       className="flex flex-col items-center justify-center flex-1 gap-0.5 py-2 relative"
-      style={{ minHeight: "44px", color: isActive ? CORAL : "rgba(255,255,255,0.45)" }}
+      style={{ minHeight: "44px", color: isActive ? CORAL : "var(--pt-sb-item-color)" }}
     >
       {isActive && (
         <span
@@ -21,7 +21,7 @@ function MobileNavBtn({ icon, label, isActive, onClick, testId }: {
           style={{ width: "24px", height: "2px", background: CORAL }}
         />
       )}
-      <span style={{ color: isActive ? CORAL : "rgba(255,255,255,0.45)" }}>{icon}</span>
+      <span style={{ color: isActive ? CORAL : "var(--pt-sb-item-color)" }}>{icon}</span>
       <span className="text-[10px] font-medium">{label}</span>
     </button>
   );
@@ -30,6 +30,7 @@ function MobileNavBtn({ icon, label, isActive, onClick, testId }: {
 export function MobilePortalNav() {
   const [location, setLocation] = useLocation();
   const isMobile = useIsMobile();
+  const { theme } = usePortalTheme();
 
   if (!isMobile) return null;
 
@@ -42,14 +43,15 @@ export function MobilePortalNav() {
   return (
     <nav
       className="flex items-center justify-around"
+      data-portal-theme={theme}
       style={{
         position: "fixed",
         left: 0,
         right: 0,
         bottom: 0,
         zIndex: 30,
-        background: VDK,
-        borderTop: "1px solid rgba(255,255,255,0.08)",
+        background: "var(--pt-sidebar-bg)",
+        borderTop: "1px solid var(--pt-sidebar-border)",
         height: "56px",
       }}
       data-testid="mobile-bottom-nav"

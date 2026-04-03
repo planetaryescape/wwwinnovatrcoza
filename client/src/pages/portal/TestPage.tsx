@@ -3,6 +3,8 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
 import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
+import { PhaseTopbar } from "@/components/portal/PhaseTopbar";
+import { usePortalTheme } from "@/hooks/usePortalTheme";
 import {
   X, Sparkles, Send, MessageSquare, ChevronDown, ExternalLink,
   ArrowRight, Loader2, Upload, CheckCircle2, ChevronRight, FileText,
@@ -231,6 +233,7 @@ export default function TestPage() {
   const [, setLocation]           = useLocation();
   const { user }                  = useAuth();
   const { toast }                 = useToast();
+  const { theme }                 = usePortalTheme();
   const [activeTab, setActiveTab] = useState<Tab>("studies");
   const [briefMode, setBriefMode] = useState<BriefMode>("choose");
   const [aiInput, setAiInput]     = useState("");
@@ -421,38 +424,12 @@ export default function TestPage() {
   };
 
   return (
-    <div className="portal-root flex h-screen overflow-hidden" style={{ background: CREAM }}>
+    <div className="portal-root flex h-screen overflow-hidden" data-portal-theme={theme} style={{ background: "var(--pt-canvas-bg)" }}>
       <MobilePortalNav />
       <div className="flex flex-col w-full h-full">
 
         {/* Phase topbar */}
-        <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1" style={{ background: "rgba(42,158,92,0.2)", color: "#86EFAC", border: "1px solid rgba(42,158,92,0.4)", borderRadius: 6 }}>
-              PHASE 02
-            </span>
-            <h1 className="font-serif text-xl text-white">Test</h1>
-            <span className="text-sm hidden sm:block" style={{ color: N400 }}>Put your ideas in front of real consumers.</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => { setActiveTab("brief"); setBriefMode("choose"); }}
-              data-testid="button-launch-brief"
-              className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg"
-              style={{ background: TEST_COLOR, borderRadius: 8 }}
-            >
-              Launch a Brief
-            </button>
-            <button
-              onClick={() => setLocation("/portal/dashboard")}
-              className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
-              style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}
-              data-testid="button-close-test"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
+        <PhaseTopbar currentPhase="test" />
 
         {/* Sub-tabs — sticky white bar */}
         <div className="flex flex-shrink-0 px-5 sticky-tab-bar border-b" style={{ borderColor: N200 }}>
@@ -476,7 +453,7 @@ export default function TestPage() {
         {/* Body */}
         <div className="flex flex-1 overflow-hidden">
           {/* Main */}
-          <div className="flex-1 overflow-y-auto p-6 pb-20 sm:pb-6" style={{ background: CREAM }}>
+          <div className="flex-1 overflow-y-auto p-6 pb-20 sm:pb-6" style={{ background: "var(--pt-canvas-bg)" }}>
 
             {/* ── LAUNCH A BRIEF ── */}
             {activeTab === "brief" && (

@@ -205,6 +205,116 @@
   --ds-phase-header: linear-gradient(135deg, #201B3C 0%, #2E2760 100%);
 }
 
+/* ── Portal theme tokens (dark mode = current navy look) ── */
+:root,
+[data-portal-theme="dark"] {
+  /* Topbar / sidebar backgrounds */
+  --pt-topbar-bg:           linear-gradient(135deg, #201B3C 0%, #2E2760 100%);
+  --pt-topbar-border:       rgba(255,255,255,0.07);
+  --pt-sidebar-bg:          #1E1B3A;
+  --pt-sidebar-border:      rgba(255,255,255,0.07);
+  /* Canvas / page surface */
+  --pt-canvas-bg:           #FFFFFF;
+  --pt-canvas-text:         #1E1B3A;
+  /* Card */
+  --pt-card-bg:             #FFFFFF;
+  --pt-card-border:         #EBEBEB;
+  /* Tab bar */
+  --pt-tab-bar-bg:          #FFFFFF;
+  /* Section text colors */
+  --pt-text-primary:        #1E1B3A;
+  --pt-text-secondary:      #8A7260;
+  --pt-text-tertiary:       #A89078;
+  --pt-divider:             #EBEBEB;
+  /* Phase topbar step pills */
+  --pt-step-active-bg:      rgba(85,99,232,0.18);
+  --pt-step-active-border:  rgba(85,99,232,0.35);
+  --pt-step-active-color:   #fff;
+  --pt-step-idle-color:     rgba(255,255,255,0.6);
+  --pt-step-bubble-border:  rgba(255,255,255,0.25);
+  --pt-step-bubble-idle-color: rgba(255,255,255,0.5);
+  /* Phase topbar nav buttons */
+  --pt-nav-btn-bg:          rgba(255,255,255,0.08);
+  --pt-nav-btn-border:      rgba(255,255,255,0.12);
+  --pt-nav-btn-color:       rgba(255,255,255,0.7);
+  --pt-nav-btn-disabled:    rgba(255,255,255,0.2);
+  /* Phase topbar title & close */
+  --pt-title-color:         #ffffff;
+  --pt-close-bg:            rgba(255,255,255,0.1);
+  --pt-close-color:         rgba(255,255,255,0.7);
+  /* Theme toggle button */
+  --pt-toggle-bg:           rgba(255,255,255,0.08);
+  --pt-toggle-border:       rgba(255,255,255,0.14);
+  --pt-toggle-color:        rgba(255,255,255,0.7);
+  /* AI panel */
+  --pt-ai-header-bg:        #1E1B3A;
+  --pt-ai-body-bg:          #FFFFFF;
+  --pt-ai-source-bg:        #F5EFE4;
+  --pt-ai-prompts-bg:       #F5EFE4;
+  --pt-ai-input-bg:         #FFFFFF;
+  --pt-ai-user-bubble:      #5563E8;
+  /* Sidebar nav items */
+  --pt-sb-active-bg:        rgba(255,255,255,0.12);
+  --pt-sb-hover-bg:         rgba(255,255,255,0.06);
+  --pt-sb-item-color:       rgba(255,255,255,0.65);
+  --pt-sb-item-active:      #ffffff;
+  --pt-sb-section-color:    #A89078;
+}
+
+[data-portal-theme="light"] {
+  /* Topbar / sidebar backgrounds */
+  --pt-topbar-bg:           #ffffff;
+  --pt-topbar-border:       #EBEBEB;
+  --pt-sidebar-bg:          #F4F5FF;
+  --pt-sidebar-border:      #E0E2F5;
+  /* Canvas / page surface */
+  --pt-canvas-bg:           #F8F9FE;
+  --pt-canvas-text:         #1E1B3A;
+  /* Card */
+  --pt-card-bg:             #FFFFFF;
+  --pt-card-border:         #E0E2F5;
+  /* Tab bar */
+  --pt-tab-bar-bg:          #FFFFFF;
+  /* Section text colors */
+  --pt-text-primary:        #1E1B3A;
+  --pt-text-secondary:      #5A5880;
+  --pt-text-tertiary:       #8A88A8;
+  --pt-divider:             #E0E2F5;
+  /* Phase topbar step pills */
+  --pt-step-active-bg:      rgba(85,99,232,0.12);
+  --pt-step-active-border:  rgba(85,99,232,0.30);
+  --pt-step-active-color:   #3A2FBF;
+  --pt-step-idle-color:     #8A88A8;
+  --pt-step-bubble-border:  #C8CAE8;
+  --pt-step-bubble-idle-color: #8A88A8;
+  /* Phase topbar nav buttons */
+  --pt-nav-btn-bg:          rgba(85,99,232,0.07);
+  --pt-nav-btn-border:      rgba(85,99,232,0.18);
+  --pt-nav-btn-color:       #5563E8;
+  --pt-nav-btn-disabled:    #C8CAE8;
+  /* Phase topbar title & close */
+  --pt-title-color:         #1E1B3A;
+  --pt-close-bg:            #F0F1FC;
+  --pt-close-color:         #5563E8;
+  /* Theme toggle button */
+  --pt-toggle-bg:           #F0F1FC;
+  --pt-toggle-border:       #D4D6F0;
+  --pt-toggle-color:        #5563E8;
+  /* AI panel */
+  --pt-ai-header-bg:        #1E1B3A;
+  --pt-ai-body-bg:          #F8F9FE;
+  --pt-ai-source-bg:        #F0F1FC;
+  --pt-ai-prompts-bg:       #F0F1FC;
+  --pt-ai-input-bg:         #FFFFFF;
+  --pt-ai-user-bubble:      #5563E8;
+  /* Sidebar nav items */
+  --pt-sb-active-bg:        rgba(85,99,232,0.12);
+  --pt-sb-hover-bg:         rgba(85,99,232,0.06);
+  --pt-sb-item-color:       #5A5880;
+  --pt-sb-item-active:      #1E1B3A;
+  --pt-sb-section-color:    #8A88A8;
+}
+
 /* ── Portal canvas utility classes ─────────────────────── */
 @layer utilities {
   .portal-canvas {

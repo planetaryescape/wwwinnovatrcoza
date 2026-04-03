@@ -28,6 +28,8 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
+import { PortalThemeToggle } from "@/components/portal/PortalThemeToggle";
+import { usePortalTheme } from "@/hooks/usePortalTheme";
 
 /* ── Innovatr Design System tokens ─────────────────────── */
 const VDK   = "#1E1B3A";
@@ -88,6 +90,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
     user, logout, isAuthenticated, isPaidMember, isAdmin,
     impersonation, exitImpersonation, isViewingAsCompany, viewingCompanyName,
   } = useAuth();
+  const { theme } = usePortalTheme();
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -153,11 +156,11 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
 
   /* Sidebar content — shared between desktop/tablet and mobile drawer */
   const SidebarInner = () => (
-    <div className="flex flex-col h-full" style={{ background: VDK }}>
+    <div className="flex flex-col h-full" style={{ background: "var(--pt-sidebar-bg)" }}>
       {/* Logo */}
       <div
         className="px-4 py-4 flex items-center gap-2.5 flex-shrink-0"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+        style={{ borderBottom: "1px solid var(--pt-sidebar-border)" }}
       >
         <button
           onClick={() => setLocation("/")}
@@ -190,7 +193,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
       {(!isTablet || isMobile) && (
         <div
           className="px-4 py-3 flex items-center gap-2.5 flex-shrink-0"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.04)" }}
+          style={{ borderBottom: "1px solid var(--pt-sidebar-border)", background: "rgba(128,128,128,0.05)" }}
         >
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0"
@@ -199,11 +202,11 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
             {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-white truncate" data-testid="text-member-name">
+            <div className="text-sm font-medium truncate" style={{ color: "var(--pt-sb-item-active)" }} data-testid="text-member-name">
               {user?.name}
             </div>
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-xs truncate" style={{ color: N400 }}>{user?.company || user?.email}</span>
+              <span className="text-xs truncate" style={{ color: "var(--pt-sb-section-color)" }}>{user?.company || user?.email}</span>
               <span
                 className="text-[9px] font-bold tracking-widest px-1.5 py-0.5 rounded-sm flex-shrink-0"
                 style={{ background: "rgba(232,80,58,0.18)", color: CORAL, border: `1px solid rgba(232,80,58,0.35)` }}
@@ -266,7 +269,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
       </nav>
 
       {/* Bottom */}
-      <div className="p-2 flex-shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+      <div className="p-2 flex-shrink-0" style={{ borderTop: "1px solid var(--pt-sidebar-border)" }}>
         <SbNavItem icon={<Settings className="w-4 h-4" />} label="Settings" isActive={location === "/portal/settings"} onClick={() => setLocation("/portal/settings")} testId="menu-item-settings" iconOnly={isTablet && !isMobile} tooltip="Settings" />
         <SbNavItem icon={<LogOut className="w-4 h-4" />}   label="Log out"  isActive={false}                          onClick={handleLogout}                          testId="button-sidebar-logout"  iconOnly={isTablet && !isMobile} tooltip="Log out"  />
       </div>
@@ -275,7 +278,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
 
   return (
     <SidebarProvider style={sidebarStyle as React.CSSProperties}>
-      <div className="portal-root flex h-screen w-full overflow-hidden" style={{ background: "#FFFFFF" }}>
+      <div className="portal-root flex h-screen w-full overflow-hidden" data-portal-theme={theme} style={{ background: "var(--pt-canvas-bg)" }}>
 
         {/* ── Desktop / Tablet Sidebar ────────────────────────── */}
         {!isMobile && (
@@ -283,7 +286,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
             className="flex-shrink-0 overflow-hidden"
             style={{
               width: isTablet ? "3rem" : "14.5rem",
-              borderRight: "1px solid rgba(255,255,255,0.07)",
+              borderRight: "1px solid var(--pt-sidebar-border)",
               transition: "width 0.2s ease",
             }}
           >
@@ -338,7 +341,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
           {showPhaseTopbar && (
             <header
               className="h-12 px-4 flex items-center justify-between flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+              style={{ background: "var(--pt-topbar-bg)", borderBottom: "1px solid var(--pt-topbar-border)" }}
             >
               <div className="flex items-center">
                 {/* Hamburger for mobile */}
@@ -368,18 +371,18 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
                   <button
                     onClick={() => setSearchOpen(true)}
                     className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs min-w-[160px]"
-                    style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", color: N400 }}
+                    style={{ background: "var(--pt-nav-btn-bg)", border: "1px solid var(--pt-nav-btn-border)", color: "var(--pt-text-tertiary)" }}
                     data-testid="input-search"
                   >
                     <Search className="w-3.5 h-3.5" />
                     <span>Search anything…</span>
-                    <kbd className="ml-auto rounded px-1 text-[10px] font-mono" style={{ background: "rgba(255,255,255,0.1)", color: N300, border: "1px solid rgba(255,255,255,0.12)" }}>⌘K</kbd>
+                    <kbd className="ml-auto rounded px-1 text-[10px] font-mono" style={{ background: "var(--pt-nav-btn-bg)", color: "var(--pt-text-tertiary)", border: "1px solid var(--pt-nav-btn-border)" }}>⌘K</kbd>
                   </button>
                 )}
                 {isMobile && (
                   <button
                     className="w-8 h-8 flex items-center justify-center rounded-md"
-                    style={{ color: "rgba(255,255,255,0.7)" }}
+                    style={{ color: "var(--pt-nav-btn-color)" }}
                     onClick={() => setSearchOpen(true)}
                     data-testid="input-search"
                     aria-label="Search"
@@ -387,6 +390,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
                     <Search className="w-4 h-4" />
                   </button>
                 )}
+                <PortalThemeToggle />
                 <div
                   className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold cursor-pointer flex-shrink-0"
                   style={{ background: CORAL }}
@@ -400,7 +404,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
 
           <main
             className="flex-1 overflow-auto"
-            style={{ background: "#FFFFFF", paddingBottom: isMobile ? "56px" : 0 }}
+            style={{ background: "var(--pt-canvas-bg)", paddingBottom: isMobile ? "56px" : 0 }}
           >
             {children}
           </main>
@@ -451,7 +455,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
 
 function SbSection({ label, top }: { label: string; top?: boolean }) {
   return (
-    <div className={`px-2 pb-1.5 text-[10px] font-bold tracking-widest uppercase ${top ? "pt-4" : "pt-1.5"}`} style={{ color: "#A89078" }}>
+    <div className={`px-2 pb-1.5 text-[10px] font-bold tracking-widest uppercase ${top ? "pt-4" : "pt-1.5"}`} style={{ color: "var(--pt-sb-section-color)" }}>
       {label}
     </div>
   );
@@ -469,23 +473,23 @@ function SbNavItem({ icon, label, isActive, onClick, testId, badge, iconOnly, to
       style={{
         gap: iconOnly ? "0" : "0.625rem",
         justifyContent: iconOnly ? "center" : "flex-start",
-        color: isActive ? "#ffffff" : "rgba(255,255,255,0.65)",
-        background: isActive ? "rgba(255,255,255,0.12)" : "transparent",
+        color: isActive ? "var(--pt-sb-item-active)" : "var(--pt-sb-item-color)",
+        background: isActive ? "var(--pt-sb-active-bg)" : "transparent",
         minHeight: "44px",
       }}
-      onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
+      onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "var(--pt-sb-hover-bg)"; }}
       onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
     >
       {isActive && !iconOnly && (
-        <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r" style={{ background: "#E8503A" }} />
+        <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r" style={{ background: CORAL }} />
       )}
-      <span style={{ color: isActive ? "#E8503A" : "rgba(255,255,255,0.55)", flexShrink: 0 }}>{icon}</span>
+      <span style={{ color: isActive ? CORAL : "var(--pt-sb-item-color)", flexShrink: 0 }}>{icon}</span>
       {!iconOnly && <span className="flex-1 text-left">{label}</span>}
       {!iconOnly && badge}
       {iconOnly && isActive && (
         <span
           className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
-          style={{ background: "#E8503A" }}
+          style={{ background: CORAL }}
         />
       )}
     </button>
@@ -505,12 +509,12 @@ function PhaseNavItem({ num, label, color, isActive, onClick, testId, locked, ic
       style={{
         gap: iconOnly ? "0" : "0.625rem",
         justifyContent: iconOnly ? "center" : "flex-start",
-        color: isActive ? "#ffffff" : locked ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.65)",
-        background: isActive ? "rgba(255,255,255,0.12)" : "transparent",
+        color: isActive ? "var(--pt-sb-item-active)" : locked ? "var(--pt-nav-btn-disabled)" : "var(--pt-sb-item-color)",
+        background: isActive ? "var(--pt-sb-active-bg)" : "transparent",
         cursor: locked ? "not-allowed" : "pointer",
         minHeight: "44px",
       }}
-      onMouseEnter={e => { if (!isActive && !locked) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
+      onMouseEnter={e => { if (!isActive && !locked) (e.currentTarget as HTMLElement).style.background = "var(--pt-sb-hover-bg)"; }}
       onMouseLeave={e => { if (!isActive && !locked) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
     >
       {isActive && !iconOnly && (
@@ -549,18 +553,18 @@ function PhaseTab({ num, label, color, isActive, onClick }: {
       onClick={onClick}
       className="flex items-center gap-1.5 px-3.5 h-12 text-sm font-medium transition-colors border-b-2"
       style={{
-        color: isActive ? "#ffffff" : "rgba(255,255,255,0.55)",
+        color: isActive ? "var(--pt-title-color)" : "var(--pt-step-idle-color)",
         borderBottomColor: isActive ? color : "transparent",
       }}
-      onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.85)"; }}
-      onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.55)"; }}
+      onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = "var(--pt-nav-btn-color)"; }}
+      onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = "var(--pt-step-idle-color)"; }}
     >
       <span
         className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[9px] font-bold"
         style={
           isActive
             ? { background: color, color: "#fff" }
-            : { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.45)" }
+            : { background: "var(--pt-step-active-bg)", color: "var(--pt-step-bubble-idle-color)" }
         }
       >
         {num}

@@ -8,6 +8,8 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
 import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
+import { PhaseTopbar } from "@/components/portal/PhaseTopbar";
+import { usePortalTheme } from "@/hooks/usePortalTheme";
 import type { ClientReport } from "@shared/schema";
 import { useIndustryGroups } from "@/hooks/useIndustryGroups";
 import { filterByIndustry } from "@/lib/industry-groups";
@@ -89,6 +91,7 @@ Want me to draft a brief for step 1 now?`;
 export default function ActPage() {
   const [, setLocation]           = useLocation();
   const { user }                  = useAuth();
+  const { theme }                 = usePortalTheme();
   const [activeTab, setActiveTab] = useState<Tab>("gaps");
   const [chatInput, setChatInput] = useState("");
   const [showChat, setShowChat]   = useState(false);
@@ -179,36 +182,15 @@ export default function ActPage() {
   ];
 
   return (
-    <div className="portal-root flex h-screen overflow-hidden" style={{ background: CREAM }}>
+    <div className="portal-root flex h-screen overflow-hidden" data-portal-theme={theme} style={{ background: "var(--pt-canvas-bg)" }}>
       <MobilePortalNav />
       <div className="flex flex-col w-full h-full">
 
         {/* ── Phase topbar ── */}
-        <div
-          className="flex items-center justify-between flex-shrink-0 px-5"
-          style={{ minHeight: 52, background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
-        >
-          <div className="flex items-center gap-3">
-            <span
-              className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1"
-              style={{ background: "rgba(232,80,58,0.2)", color: "#FCA5A5", border: "1px solid rgba(232,80,58,0.4)", borderRadius: 6 }}
-            >
-              PHASE 03
-            </span>
-            <h1 className="font-serif text-xl text-white">Act</h1>
-          </div>
-          <button
-            onClick={() => setLocation("/portal/dashboard")}
-            className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}
-            data-testid="button-close-act"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
+        <PhaseTopbar currentPhase="act" />
 
         {/* ── Main scrollable body ── */}
-        <div className="flex-1 overflow-y-auto pb-20 sm:pb-0" style={{ background: CREAM }}>
+        <div className="flex-1 overflow-y-auto pb-20 sm:pb-0" style={{ background: "var(--pt-canvas-bg)" }}>
 
             {/* In-page header */}
             <div className="px-6 pt-6 pb-2">
