@@ -12,7 +12,7 @@ import PortalLayout from "./PortalLayout";
 import type { Company } from "@shared/schema";
 
 /* ── Design tokens ──────────────────────────────────────── */
-const VDK        = "#1E1B3A";
+const VDK        = "var(--pt-text-primary, #1E1B3A)";
 const VIO        = "#3A2FBF";
 const VIO_LT     = "#EAE8FF";
 const CORAL      = "#E8503A";
@@ -21,9 +21,9 @@ const CYAN_DK    = "#1A8FAD";
 const CYAN_LT    = "#DFF6FC";
 const AMBER_DK   = "#B8911A";
 const AMBER_LT   = "#FEF6D6";
-const N200       = "#EBEBEB";
-const N400       = "#A89078";
-const N500       = "#8A7260";
+const N200       = "var(--pt-divider, #EBEBEB)";
+const N400       = "var(--pt-text-secondary, #A89078)";
+const N500       = "var(--pt-text-tertiary, #8A7260)";
 const SUCCESS    = "#2A9E5C";
 const SUCCESS_LT = "#D1FAE5";
 const CREAM      = "#FFFFFF";
@@ -33,8 +33,8 @@ const TEST_GRADIENT    = "linear-gradient(135deg, #D94A28 0%, #E8643A 50%, #EF8A
 const ACT_GRADIENT     = "linear-gradient(135deg, #1A7A45 0%, #2A9E5C 55%, #3DBF72 100%)";
 
 const CARD: React.CSSProperties = {
-  background: "#ffffff",
-  border: `1px solid #EBEBEB`,
+  background: "var(--pt-card-bg, #ffffff)",
+  border: `1px solid var(--pt-card-border, #EBEBEB)`,
   borderRadius: 12,
   boxShadow: "0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04)",
 };

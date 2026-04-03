@@ -14,11 +14,11 @@ import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
 import { usePortalTheme } from "@/hooks/usePortalTheme";
 
 /* ── Design System ───────────────────────────────────────── */
-const VDK      = "#1E1B3A";
+const VDK      = "var(--pt-text-primary, #1E1B3A)";
 const VIO      = "#3A2FBF";
-const N200     = "#E2D5BF";
-const N400     = "#A89078";
-const N500     = "#8A7260";
+const N200     = "var(--pt-divider, #E2D5BF)";
+const N400     = "var(--pt-text-secondary, #A89078)";
+const N500     = "var(--pt-text-tertiary, #8A7260)";
 const SUCCESS  = "#2A9E5C";
 const SUC_LT   = "#D1FAE5";
 const AMBER_DK = "#B8911A";
@@ -29,8 +29,8 @@ const CORAL_LT = "#FDECEA";
 const CREAM    = "var(--pt-canvas-bg)";
 
 const CARD: React.CSSProperties = {
-  background: "#ffffff",
-  border: `1px solid ${N200}`,
+  background: "var(--pt-card-bg, #ffffff)",
+  border: `1px solid var(--pt-card-border, #E2D5BF)`,
   borderRadius: 14,
   boxShadow: "0 1px 4px rgba(58,47,191,.06)",
 };

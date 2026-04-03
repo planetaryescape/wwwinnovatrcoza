@@ -16,13 +16,13 @@ import { PhaseTopbar } from "@/components/portal/PhaseTopbar";
 import { usePortalTheme } from "@/hooks/usePortalTheme";
 
 /* ── Design System tokens ─────────────────────────────── */
-const VDK      = "#1E1B3A";
+const VDK      = "var(--pt-text-primary, #1E1B3A)";
 const VIO      = "#3A2FBF";
 const VIO_LT   = "#EAE8FF";
 const CORAL    = "#E8503A";
-const N200     = "#EBEBEB";
-const N400     = "#A89078";
-const N500     = "#8A7260";
+const N200     = "var(--pt-divider, #EBEBEB)";
+const N400     = "var(--pt-text-secondary, #A89078)";
+const N500     = "var(--pt-text-tertiary, #8A7260)";
 const SUCCESS  = "#2A9E5C";
 const SUC_LT   = "#D1FAE5";
 const AMBER_DK = "#B8911A";
@@ -31,8 +31,8 @@ const CREAM    = "#FFFFFF";
 const EXPLORE_COLOR = VIO;
 
 const CARD: React.CSSProperties = {
-  background: "#ffffff",
-  border: `1px solid #EBEBEB`,
+  background: "var(--pt-card-bg, #ffffff)",
+  border: `1px solid var(--pt-card-border, #EBEBEB)`,
   borderRadius: 12,
   boxShadow: "0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04)",
 };
@@ -200,7 +200,7 @@ export default function ExplorePage() {
         />
 
         {/* Sub-tabs — sticky white bar */}
-        <div className="flex flex-shrink-0 px-5 sticky-tab-bar border-b" style={{ borderColor: N200 }}>
+        <div className="flex flex-shrink-0 px-5 sticky-tab-bar border-b" style={{ borderColor: "var(--pt-divider, #EBEBEB)" }}>
           {(["signals", "sandbox", "intelligence"] as Tab[]).map(tab => (
             <button
               key={tab}

@@ -204,6 +204,7 @@
   --ds-r-sm: 4px; --ds-r-md: 8px; --ds-r-lg: 12px;
   --ds-r-xl: 16px; --ds-r-full: 9999px;
   --ds-phase-header: linear-gradient(135deg, #201B3C 0%, #2E2760 100%);
+  --ds-phase-header-text: #ffffff;
 }
 
 /* ── Portal theme tokens (dark mode = current navy look) ── */
@@ -312,7 +313,7 @@
   --pt-toggle-color:        #5563E8;
   /* AI panel */
   --pt-ai-header-bg:        #1E1B3A;
-  --pt-ai-body-bg:          #F8F9FE;
+  --pt-ai-body-bg:          #FFFFFF;
   --pt-ai-source-bg:        #F0F1FC;
   --pt-ai-prompts-bg:       #F0F1FC;
   --pt-ai-input-bg:         #FFFFFF;
@@ -330,6 +331,9 @@
   --pt-logo-text-color:     #1E1B3A;
   /* Mobile nav active color */
   --pt-mobile-active:       #5563E8;
+  /* Dashboard hero - light mode: soft purple-blue gradient instead of heavy navy */
+  --ds-phase-header:        linear-gradient(135deg, #5563E8 0%, #3A2FBF 60%, #2A2090 100%);
+  --ds-phase-header-text:   #ffffff;
 }
 
 /* ── Portal canvas utility classes ─────────────────────── */
