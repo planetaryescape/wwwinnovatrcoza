@@ -1,0 +1,140 @@
+You are helping me improve the visual design of an existing SaaS analytics dashboard called Innovatr. 
+DO NOT change any data, content, logic, or functionality — only improve the visual styling and navigation UX.
+
+---
+
+## CURRENT VIBE (preserve and elevate this)
+
+The app already has a strong premium aesthetic:
+- Warm cream/off-white canvas (#F7F1E8)
+- Dark indigo/navy sidebar (#201B3C to #2A2448)
+- White cards with soft beige borders (#E7DCC8) and shallow drop shadows
+- Phase color coding: purple Explore, orange/coral Test, green Act
+- Pastel badge pills for status/priority
+- Modern sans-serif typography with strong weight hierarchy
+- Horizontal sub-tab bars per page section
+
+I want to KEEP this design language but make THREE specific improvements:
+
+---
+
+## CHANGE 1 — White Background
+
+Replace the warm cream canvas background (#F7F1E8) with clean white (#FFFFFF) across all content areas. 
+
+- The main `.content` / `.main` area background should be `#FFFFFF`  
+- Page sections (`.page`) background: `#FFFFFF`  
+- Card backgrounds stay white — only the canvas changes  
+- Adjust card borders slightly to `#EBEBEB` (from warm beige to neutral) since cards sit on white now  
+- Card shadows: `box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04)` — keep very subtle  
+- Section dividers: `#F0F0F0`  
+- Do NOT change the sidebar color — keep it dark navy  
+- Do NOT change the topbar or phase header strip — keep them as-is  
+
+---
+
+## CHANGE 2 — Persistent Visible Navigation (the biggest UX problem)
+
+Currently the left sidebar disappears on mobile and is hard to get back to. Also, when switching between pages/tabs, users lose their place. Fix this:
+
+### Desktop (≥ 1024px):
+- Sidebar stays permanently visible and expanded  
+- It should NEVER collapse by default; only collapse on explicit user toggle  
+- Active nav item: filled pill background `rgba(255,255,255,0.12)` with white text and left border accent `3px solid #F05A3A` (coral)  
+- Nav items: `font-size: 13px`, `padding: 10px 16px`, `border-radius: 8px`, `gap: 10px`  
+- Phase items (Explore, Test, Act) should have a small colored dot: `#7C6FFF` (explore), `#F05A3A` (test), `#2FA865` (act)  
+
+### Tablet (768px–1024px):
+- Sidebar collapses to icon-only mode (48px wide) — icons remain visible  
+- Hovering an icon shows a tooltip with the label  
+- No full disappearance  
+
+### Mobile (< 768px):
+- Sidebar hides off-screen but a FIXED bottom navigation bar always shows (never disappears):
+Home | Explore | Test | Act | Health
+
+Copy- Bottom nav: white background, `border-top: 1px solid #EBEBEB`, height `56px`, `padding-bottom: env(safe-area-inset-bottom)`  
+- Active bottom nav item: colored icon + label, `color: #F05A3A` with a 2px dot indicator above the icon  
+- The hamburger button in the topbar still opens the full sidebar as a slide-over drawer  
+- When drawer is open, show a semi-transparent backdrop (`rgba(0,0,0,0.4)`) — clicking it closes the sidebar  
+- Body scroll should lock when sidebar drawer is open on mobile  
+
+### Tab bars (sub-navigation inside each page):
+- Tab bars must NEVER disappear when scrolling — make them `position: sticky; top: 56px; z-index: 50; background: #fff;`  
+- Active tab: bold text + `2px solid #F05A3A` underline (coral) — NO background fill  
+- Inactive tabs: `color: #8A7F75`, `font-weight: 500`  
+- Tab bar: `overflow-x: auto; white-space: nowrap` on mobile so all tabs are reachable by horizontal scroll without wrapping  
+
+---
+
+## CHANGE 3 — Modern Glossy Card Elevation & Polish
+
+Upgrade the card and surface quality slightly without breaking the clean feel:
+
+### Cards:
+- Border radius: `16px` on large cards, `12px` on inline/compact cards  
+- Default border: `1px solid #EBEBEB`  
+- Default shadow: `0 1px 2px rgba(0,0,0,0.04), 0 6px 16px rgba(0,0,0,0.06)`  
+- On hover (desktop): `box-shadow: 0 4px 20px rgba(0,0,0,0.10); transform: translateY(-1px); transition: all 0.18s ease`  
+
+### Phase header strips (the dark navy band at top of each page):
+- Add a very subtle gradient: `background: linear-gradient(135deg, #201B3C 0%, #2E2760 100%)`  
+- Keep all existing text and badges inside — do not change content  
+
+### Score metric cards (Idea / Interest / Commitment big tiles):
+- Keep the colored fills but add: `background: linear-gradient(135deg, [base-color] 0%, [base-color-dark-10%] 100%)`  
+- Add `backdrop-filter: blur(0)` — NOT glass effect, just clean flat gradient  
+- White text stays as-is  
+
+### Priority badges:
+- High Priority: `background: #FEE2E2; color: #B91C1C; border: 1px solid #FCA5A5`  
+- Medium Priority: `background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A`  
+- Opportunity: `background: #EDE9FE; color: #5B21B6; border: 1px solid #C4B5FD`  
+- BASIC: `background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE`  
+- PRO: `background: #F0FDF4; color: #15803D; border: 1px solid #BBF7D0`  
+- Completed: `background: #F0FDF4; color: #15803D`  
+- QA Verified: `background: #ECFDF5; color: #065F46`  
+- Watch: `background: #FFFBEB; color: #B45309`  
+
+### Input fields and buttons:
+- All text inputs: `font-size: 16px !important` (prevents iOS zoom on focus)  
+- Primary button (coral): `background: #F05A3A; color: #fff; border-radius: 10px; padding: 10px 20px; font-weight: 600`  
+- Secondary/outline button: `border: 1.5px solid #E0D8CE; background: #fff; color: #2B2733; border-radius: 10px`  
+- Minimum touch target for all interactive elements on mobile: `min-height: 44px; min-width: 44px`  
+
+---
+
+## TYPOGRAPHY
+
+Keep existing font but tighten the hierarchy:
+- Page titles (h1): `font-size: clamp(22px, 3vw, 32px); font-weight: 700; color: #111827; letter-spacing: -0.02em`  
+- Section titles: `font-size: 15px; font-weight: 600; color: #1F2937`  
+- Card body / metadata: `font-size: 13px; color: #6B7280; line-height: 1.5`  
+- Badges/pills: `font-size: 11px; font-weight: 600; letter-spacing: 0.02em`  
+- Muted helper text: `color: #9CA3AF; font-size: 12px`  
+
+---
+
+## WHAT NOT TO CHANGE
+
+- Do not rename any navigation items  
+- Do not move, remove, or add any page sections  
+- Do not change any data, copy, percentages, or study names  
+- Do not change the sidebar dark navy color  
+- Do not change the AI panel content or position  
+- Do not alter any JavaScript logic — only CSS and HTML structure where needed for sticky tabs and bottom nav  
+- Keep all existing class names intact; add new classes where needed  
+
+---
+
+## OUTPUT FORMAT
+
+Apply all changes to the existing CSS and HTML. Do not rewrite the entire file. Make targeted edits:
+1. Update background/canvas colors  
+2. Update card styles  
+3. Update badge color definitions  
+4. Add/update mobile CSS media queries (< 768px, 768px–1024px)  
+5. Make tab bars sticky  
+6. Add bottom nav HTML + CSS for mobile  
+7. Add sidebar backdrop div + JS to toggle it  
+8. Ensure sidebar is permanently visible on desktop  
