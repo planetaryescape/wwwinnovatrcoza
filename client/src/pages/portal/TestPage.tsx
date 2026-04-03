@@ -950,7 +950,7 @@ export default function TestPage() {
                     : { label: "BASIC", bg: CYAN_LT, color: CYAN_DK };
 
                   return (
-                    <div key={study.id} style={{ ...CARD, marginBottom: 20 }} className="overflow-hidden" data-testid={`study-card-${study.id}`}>
+                    <div key={study.id} className="portal-card-lg overflow-hidden mb-5" data-testid={`study-card-${study.id}`}>
 
                       {/* Card header */}
                       <div className="flex items-start justify-between gap-3 px-5 py-4">

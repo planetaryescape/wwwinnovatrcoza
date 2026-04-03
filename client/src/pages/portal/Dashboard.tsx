@@ -369,7 +369,7 @@ function PhasePreviewCard({ num, title, subtitle, color, onOpen, items }: {
   items: { dotColor: string; text: string; sub?: string; chip?: { label: string; bg: string; color: string } }[];
 }) {
   return (
-    <div style={CARD} className="overflow-hidden">
+    <div className="portal-card-lg overflow-hidden">
       <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: `1px solid #EBEBEB`, background: "#FAFAFA" }}>
         <div className="flex items-center gap-2">
           <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold font-mono" style={{ border: `2px solid ${color}`, color }}>
@@ -442,7 +442,7 @@ function StudyCard({ study, onActClick }: { study: any; onActClick: () => void }
   })();
 
   return (
-    <div style={CARD} className="overflow-hidden flex flex-col" data-testid={`study-card-${study.id}`}>
+    <div className="portal-card-lg overflow-hidden flex flex-col" data-testid={`study-card-${study.id}`}>
       {/* Header */}
       <div className="p-4 flex items-start gap-3" style={{ borderBottom: `1px solid ${N200}` }}>
         <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: iconBg }}>

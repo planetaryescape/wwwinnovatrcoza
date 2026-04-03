@@ -278,7 +278,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
 
   return (
     <SidebarProvider style={sidebarStyle as React.CSSProperties}>
-      <div className="flex h-screen w-full overflow-hidden" style={{ background: "#FFFFFF" }}>
+      <div className="portal-root flex h-screen w-full overflow-hidden" style={{ background: "#FFFFFF" }}>
 
         {/* ── Desktop / Tablet Sidebar ────────────────────────── */}
         {!isMobile && (
@@ -538,7 +538,7 @@ function PhaseNavItem({ num, label, color, isActive, onClick, testId, locked, ic
       onMouseLeave={e => { if (!isActive && !locked) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
     >
       {isActive && !iconOnly && (
-        <span className="absolute left-0 top-1 bottom-1 w-0.5 rounded-r" style={{ background: color }} />
+        <span className="absolute left-0 top-1 bottom-1 w-0.5 rounded-r" style={{ background: "#E8503A" }} />
       )}
       {/* Colored dot indicator for active phase (icon-only mode) */}
       {isActive && iconOnly && (

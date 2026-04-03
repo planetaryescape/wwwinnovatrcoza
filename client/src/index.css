@@ -332,26 +332,26 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
-    font-size: 13px;
   }
 
-  /* ── Typography scale ──────────────────────────── */
-  h1 { font-size: clamp(22px, 3vw, 32px); }
+  /* ── Portal-scoped typography scale ─────────────────── */
+  .portal-root h1 { font-size: clamp(22px, 3vw, 32px); }
+  .portal-root { font-size: 13px; }
 
-  /* ── Prevent iOS input zoom (font-size must be 16px+) ── */
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  input[type="number"],
-  input[type="search"],
-  input[type="tel"],
-  input[type="url"],
-  textarea,
-  select {
+  /* ── Portal: prevent iOS input zoom (16px+) ────────── */
+  .portal-root input[type="text"],
+  .portal-root input[type="email"],
+  .portal-root input[type="password"],
+  .portal-root input[type="number"],
+  .portal-root input[type="search"],
+  .portal-root input[type="tel"],
+  .portal-root input[type="url"],
+  .portal-root textarea,
+  .portal-root select {
     font-size: 16px !important;
   }
 
-  /* ── Minimum 44px touch targets — portal mobile nav only ── */
+  /* ── Portal: 44px minimum touch targets ────────────── */
   .portal-touch-target {
     min-height: 44px;
   }
