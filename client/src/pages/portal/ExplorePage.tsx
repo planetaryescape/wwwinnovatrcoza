@@ -17,21 +17,21 @@ const VDK      = "#1E1B3A";
 const VIO      = "#3A2FBF";
 const VIO_LT   = "#EAE8FF";
 const CORAL    = "#E8503A";
-const N200     = "#E2D5BF";
+const N200     = "#EBEBEB";
 const N400     = "#A89078";
 const N500     = "#8A7260";
 const SUCCESS  = "#2A9E5C";
 const SUC_LT   = "#D1FAE5";
 const AMBER_DK = "#B8911A";
 const AMBER_LT = "#FEF6D6";
-const CREAM    = "#FAF3E8";
+const CREAM    = "#FFFFFF";
 const EXPLORE_COLOR = VIO;
 
 const CARD: React.CSSProperties = {
   background: "#ffffff",
-  border: `1px solid ${N200}`,
-  borderRadius: 14,
-  boxShadow: "0 1px 4px rgba(58,47,191,.08)",
+  border: `1px solid #EBEBEB`,
+  borderRadius: 12,
+  boxShadow: "0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04)",
 };
 
 
@@ -170,7 +170,7 @@ export default function ExplorePage() {
       <div className="flex flex-col w-full h-full">
 
         {/* Phase topbar */}
-        <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: VDK, borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
           <div className="flex items-center gap-3">
             <span
               className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1"
@@ -201,17 +201,18 @@ export default function ExplorePage() {
           </div>
         </div>
 
-        {/* Sub-tabs */}
-        <div className="flex flex-shrink-0 px-5" style={{ background: VDK, borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        {/* Sub-tabs — sticky white bar */}
+        <div className="flex flex-shrink-0 px-5 sticky-tab-bar border-b" style={{ borderColor: N200 }}>
           {(["signals", "sandbox", "intelligence"] as Tab[]).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               data-testid={`tab-explore-${tab}`}
-              className="px-4 py-3 text-sm font-medium transition-colors border-b-2"
+              className="px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px"
               style={{
-                color: activeTab === tab ? "#ffffff" : "rgba(255,255,255,0.5)",
+                color: activeTab === tab ? VDK : N500,
                 borderBottomColor: activeTab === tab ? EXPLORE_COLOR : "transparent",
+                background: "transparent",
               }}
             >
               {tab === "signals" ? "Market Signals" : tab === "sandbox" ? "Sandbox" : "Intelligence Library"}
@@ -364,7 +365,7 @@ export default function ExplorePage() {
                           <textarea
                             className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none resize-none"
                             rows={5}
-                            style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
+                            style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }}
                             placeholder="Describe the product, positioning, price point, and target consumer..."
                             value={sandboxIdea}
                             onChange={e => { setSandboxIdea(e.target.value); setSandboxResult(null); }}
@@ -546,7 +547,7 @@ export default function ExplorePage() {
             <button
               onClick={() => setShowChat(!showChat)}
               className="px-4 py-2.5 flex items-center justify-between flex-shrink-0 transition-colors"
-              style={{ borderTop: `1px solid ${N200}`, background: "#FAFAF8" }}
+              style={{ borderTop: `1px solid ${N200}`, background: "#F5F5F5" }}
               data-testid="button-toggle-team-chat"
             >
               <span className="flex items-center gap-2 text-xs font-semibold" style={{ color: N500 }}>
@@ -568,7 +569,7 @@ export default function ExplorePage() {
                     value={chatInput}
                     onChange={e => setChatInput(e.target.value)}
                     className="flex-1 rounded-lg px-3 py-1.5 text-xs focus:outline-none"
-                    style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
+                    style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }}
                     placeholder="Reply… use @ to tag"
                     data-testid="input-team-chat"
                   />
@@ -593,7 +594,7 @@ function TCMsg({ initials, author, time, color, text }: { initials: string; auth
         <span className="text-xs font-semibold" style={{ color: "#1E1B3A" }}>{author}</span>
         <span className="text-[10px]" style={{ color: "#8A7260" }}>{time}</span>
       </div>
-      <div className="ml-6 px-3 py-2 text-xs rounded-xl leading-snug" style={{ background: "#FAF3E8", border: `1px solid #E2D5BF`, color: "#8A7260" }}>
+      <div className="ml-6 px-3 py-2 text-xs rounded-xl leading-snug" style={{ background: "#F5F5F5", border: `1px solid #EBEBEB`, color: "#8A7260" }}>
         {text}
       </div>
     </div>

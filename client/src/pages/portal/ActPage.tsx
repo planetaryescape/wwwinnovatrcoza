@@ -21,7 +21,7 @@ const VIO      = "#3A2FBF";
 const VIO_LT   = "#EAE8FF";
 const CORAL    = "#E8503A";
 const CORAL_LT = "#FDECEA";
-const N200     = "#E2D5BF";
+const N200     = "#EBEBEB";
 const N400     = "#A89078";
 const N500     = "#8A7260";
 const SUCCESS  = "#2A9E5C";
@@ -29,14 +29,14 @@ const SUC_LT   = "#D1FAE5";
 const AMBER_DK = "#B8911A";
 const AMBER_LT = "#FEF6D6";
 const CYAN_DK  = "#1A8FAD";
-const CREAM    = "#FAF3E8";
+const CREAM    = "#FFFFFF";
 const ACT_COLOR = CORAL;
 
 const CARD: React.CSSProperties = {
   background: "#ffffff",
-  border: `1px solid ${N200}`,
-  borderRadius: 14,
-  boxShadow: "0 1px 4px rgba(58,47,191,.06)",
+  border: `1px solid #EBEBEB`,
+  borderRadius: 12,
+  boxShadow: "0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04)",
 };
 
 type Tab = "gaps" | "nextsteps" | "planning";
@@ -184,7 +184,7 @@ export default function ActPage() {
         {/* ── Phase topbar ── */}
         <div
           className="flex items-center justify-between flex-shrink-0 px-5"
-          style={{ minHeight: 52, background: VDK, borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+          style={{ minHeight: 52, background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
         >
           <div className="flex items-center gap-3">
             <span
@@ -207,16 +207,17 @@ export default function ActPage() {
 
         {/* ── Main scrollable body ── */}
         <div className="flex-1 overflow-y-auto" style={{ background: CREAM }}>
-          <div className="px-6 pt-6 pb-2">
 
             {/* In-page header */}
-            <div className="text-xs font-bold tracking-widest uppercase mb-1" style={{ color: N400 }}>
-              03 · ACT
+            <div className="px-6 pt-6 pb-2">
+              <div className="text-xs font-bold tracking-widest uppercase mb-1" style={{ color: N400 }}>
+                03 · ACT
+              </div>
+              <h2 className="text-3xl font-bold mb-4" style={{ color: VDK }}>Where to move next</h2>
             </div>
-            <h2 className="text-3xl font-bold mb-5" style={{ color: VDK }}>Where to move next</h2>
 
-            {/* In-page tabs */}
-            <div className="flex gap-0 mb-6 border-b" style={{ borderColor: N200 }}>
+            {/* In-page tabs — sticky */}
+            <div className="sticky-tab-bar flex gap-0 px-6 border-b" style={{ borderColor: N200 }}>
               {TABS.map(t => (
                 <button
                   key={t.key}
@@ -233,6 +234,8 @@ export default function ActPage() {
                 </button>
               ))}
             </div>
+
+            <div className="px-6 pt-5 pb-2">
 
             {/* ── GAPS TAB ── */}
             {activeTab === "gaps" && (
@@ -321,7 +324,7 @@ export default function ActPage() {
                         style={{
                           background: "#fff",
                           border: `1px solid ${N200}`,
-                          borderLeft: `4px solid ${step.cta?.primary ? CORAL : N200}`,
+                          borderTop: step.cta?.primary ? `3px solid ${CORAL}` : `1px solid ${N200}`,
                           opacity: step.locked ? 0.55 : 1,
                         }}
                         data-testid={`next-step-${step.num}`}
@@ -342,7 +345,7 @@ export default function ActPage() {
                                 className="text-xs font-semibold px-4 py-2 rounded-lg inline-flex items-center gap-1.5"
                                 style={step.cta.primary
                                   ? { background: CORAL, color: "#fff" }
-                                  : { background: "#F5F0E8", color: N500, border: `1px solid ${N200}` }
+                                  : { background: "#F5F5F5", color: N500, border: `1px solid ${N200}` }
                                 }
                                 data-testid={`step-cta-${step.num}`}
                               >
@@ -358,10 +361,10 @@ export default function ActPage() {
                       <div
                         key={step.id}
                         className="rounded-xl px-5 py-4 opacity-50"
-                        style={{ background: "#fff", border: `1px solid ${N200}`, borderLeft: `4px solid ${N200}` }}
+                        style={{ background: "#fff", border: `1px solid ${N200}` }}
                       >
                         <div className="flex items-start gap-4">
-                          <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 font-mono mt-0.5" style={{ background: "#F5F0E8", color: N400, border: `1px solid ${N200}` }}>
+                          <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 font-mono mt-0.5" style={{ background: "#F0F0F0", color: N400, border: `1px solid ${N200}` }}>
                             {step.num}
                           </div>
                           <div className="flex-1">
@@ -394,7 +397,7 @@ export default function ActPage() {
                       </div>
                     </div>
                     <div className="p-4">
-                      <div className="text-xs leading-relaxed p-4 rounded-xl mb-3" style={{ background: "#FAFAF8", border: `1px solid ${N200}`, color: VDK }}>
+                      <div className="text-xs leading-relaxed p-4 rounded-xl mb-3" style={{ background: "#F5F5F5", border: `1px solid ${N200}`, color: VDK }}>
                         I've sequenced your 4 next steps above in order of strategic momentum. Packaging variants should come first — concept scores are strong enough that the brand story is working. The Township SKU is your biggest volume unlock. Want me to help you draft a brief for any of these?
                       </div>
                       <div className="flex gap-2">
@@ -403,7 +406,7 @@ export default function ActPage() {
                           onChange={e => setPlanningInput(e.target.value)}
                           onKeyDown={e => { if (e.key === "Enter") { handleSendPlanning(); setActiveTab("planning"); } }}
                           className="flex-1 rounded-lg px-3 py-2 text-xs focus:outline-none"
-                          style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
+                          style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }}
                           placeholder="e.g. Help me write a brief for the packaging…"
                           data-testid="input-planning-mini"
                           onFocus={e => (e.target.style.borderColor = VIO)}
@@ -480,7 +483,7 @@ export default function ActPage() {
                         onChange={e => setPlanningInput(e.target.value)}
                         onKeyDown={e => e.key === "Enter" && handleSendPlanning()}
                         className="flex-1 rounded-xl px-4 py-2.5 text-sm focus:outline-none"
-                        style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
+                        style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }}
                         placeholder="e.g. Help me write a brief for the packaging variants test"
                         data-testid="input-planning-assistant"
                         onFocus={e => (e.target.style.borderColor = VIO)}
@@ -545,7 +548,7 @@ export default function ActPage() {
                     </div>
                     <div className="space-y-3">
                       {researchRecs.map((rec, i) => (
-                        <div key={rec.id} className="rounded-xl p-3" style={{ background: "#FAFAF8", border: `1px solid ${N200}` }} data-testid={`research-rec-${i}`}>
+                        <div key={rec.id} className="rounded-xl p-3" style={{ background: "#F5F5F5", border: `1px solid ${N200}` }} data-testid={`research-rec-${i}`}>
                           {/* Method + Priority row */}
                           <div className="flex items-center gap-1.5 mb-2 flex-wrap">
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: rec.methodBg, color: rec.methodColor }}>
@@ -596,7 +599,7 @@ export default function ActPage() {
                         const state = offerState[offer.id];
                         const { Icon } = offer;
                         return (
-                          <div key={offer.id} className="rounded-xl p-4" style={{ background: "#FAFAF8", border: `1px solid ${N200}` }} data-testid={`consult-offer-${offer.id}`}>
+                          <div key={offer.id} className="rounded-xl p-4" style={{ background: "#F5F5F5", border: `1px solid ${N200}` }} data-testid={`consult-offer-${offer.id}`}>
                             <div className="flex items-start gap-2.5 mb-2">
                               <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: VIO }}>
                                 <Icon className="w-3.5 h-3.5 text-white" />
@@ -636,7 +639,7 @@ export default function ActPage() {
                                 <button
                                   onClick={() => setOfferState(prev => ({ ...prev, [offer.id]: "declined" }))}
                                   className="flex-1 text-xs font-semibold py-2 rounded-lg"
-                                  style={{ background: "#F5F0E8", color: N500, border: `1px solid ${N200}` }}
+                                  style={{ background: "#F5F5F5", color: N500, border: `1px solid ${N200}` }}
                                   data-testid={`decline-offer-${offer.id}`}
                                 >
                                   Not now
@@ -666,7 +669,7 @@ export default function ActPage() {
                 <button
                   onClick={() => setShowChat(!showChat)}
                   className="w-full px-4 py-2.5 flex items-center justify-between"
-                  style={{ background: "#FAFAF8" }}
+                  style={{ background: "#F5F5F5" }}
                   data-testid="button-toggle-team-chat"
                 >
                   <span className="flex items-center gap-2 text-xs font-semibold" style={{ color: N500 }}>
@@ -684,7 +687,7 @@ export default function ActPage() {
                       <TCMsg initials="TM" author="Thabo M."  time="11:14" color={SUCCESS} text={`@${user?.name?.split(" ")[0] || "You"} can you review the nootropic brief before we commission?`} />
                     </div>
                     <div className="px-3 pb-3 flex gap-2">
-                      <input value={chatInput} onChange={e => setChatInput(e.target.value)} className="flex-1 rounded-lg px-3 py-1.5 text-xs focus:outline-none" style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }} placeholder="Reply… use @ to tag" data-testid="input-team-chat" />
+                      <input value={chatInput} onChange={e => setChatInput(e.target.value)} className="flex-1 rounded-lg px-3 py-1.5 text-xs focus:outline-none" style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }} placeholder="Reply… use @ to tag" data-testid="input-team-chat" />
                       <button className="w-7 h-7 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: CORAL }} data-testid="button-send-chat"><Send className="w-3 h-3" /></button>
                     </div>
                   </div>
@@ -706,7 +709,7 @@ function TCMsg({ initials, author, time, color, text }: { initials: string; auth
         <span className="text-xs font-semibold" style={{ color: VDK }}>{author}</span>
         <span className="text-[10px]" style={{ color: N500 }}>{time}</span>
       </div>
-      <div className="ml-6 px-3 py-2 text-xs rounded-xl leading-snug" style={{ background: "#FAF3E8", border: "1px solid #E2D5BF", color: N500 }}>{text}</div>
+      <div className="ml-6 px-3 py-2 text-xs rounded-xl leading-snug" style={{ background: "#F5F5F5", border: "1px solid #EBEBEB", color: N500 }}>{text}</div>
     </div>
   );
 }

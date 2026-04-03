@@ -21,12 +21,12 @@ const CYAN_DK    = "#1A8FAD";
 const CYAN_LT    = "#DFF6FC";
 const AMBER_DK   = "#B8911A";
 const AMBER_LT   = "#FEF6D6";
-const N200       = "#E2D5BF";
+const N200       = "#EBEBEB";
 const N400       = "#A89078";
 const N500       = "#8A7260";
 const SUCCESS    = "#2A9E5C";
 const SUCCESS_LT = "#D1FAE5";
-const CREAM      = "#FAF3E8";
+const CREAM      = "#FFFFFF";
 
 const EXPLORE_GRADIENT = "linear-gradient(135deg, #3A2FBF 0%, #5b50d9 55%, #7B70F0 100%)";
 const TEST_GRADIENT    = "linear-gradient(135deg, #D94A28 0%, #E8643A 50%, #EF8A4E 100%)";
@@ -34,9 +34,9 @@ const ACT_GRADIENT     = "linear-gradient(135deg, #1A7A45 0%, #2A9E5C 55%, #3DBF
 
 const CARD: React.CSSProperties = {
   background: "#ffffff",
-  border: `1px solid ${N200}`,
-  borderRadius: 14,
-  boxShadow: "0 1px 4px rgba(58,47,191,.06)",
+  border: `1px solid #EBEBEB`,
+  borderRadius: 12,
+  boxShadow: "0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04)",
 };
 
 /* ── Helpers ──────────────────────────────────────────────── */
@@ -364,14 +364,13 @@ function DonutStatCard({ num, label, sub, highlight, cta, color, onClick, testId
 }
 
 /* ── Phase Preview Card ───────────────────────────────────── */
-const N200_VAL = "#E2D5BF";
 function PhasePreviewCard({ num, title, subtitle, color, onOpen, items }: {
   num: string; title: string; subtitle: string; color: string; onOpen: () => void;
   items: { dotColor: string; text: string; sub?: string; chip?: { label: string; bg: string; color: string } }[];
 }) {
   return (
     <div style={CARD} className="overflow-hidden">
-      <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: `1px solid ${N200_VAL}`, background: "#FAFAF8" }}>
+      <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: `1px solid #EBEBEB`, background: "#FAFAFA" }}>
         <div className="flex items-center gap-2">
           <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold font-mono" style={{ border: `2px solid ${color}`, color }}>
             {num}
@@ -387,7 +386,7 @@ function PhasePreviewCard({ num, title, subtitle, color, onOpen, items }: {
       </div>
       <div className="p-3 space-y-1.5">
         {items.map((item, i) => (
-          <div key={i} className="flex items-start gap-2 px-3 py-2 rounded-lg" style={{ background: "#FAFAF8", border: `1px solid ${N200_VAL}` }}>
+          <div key={i} className="flex items-start gap-2 px-3 py-2 rounded-lg" style={{ background: "#F5F5F5", border: `1px solid #EBEBEB` }}>
             <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: item.dotColor }} />
             <div className="flex-1 min-w-0">
               <div className="text-xs leading-snug font-medium" style={{ color: VDK }}>{item.text}</div>

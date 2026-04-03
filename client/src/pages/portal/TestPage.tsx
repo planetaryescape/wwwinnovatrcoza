@@ -17,7 +17,7 @@ const VDK      = "#1E1B3A";
 const VIO      = "#3A2FBF";
 const VIO_LT   = "#EAE8FF";
 const CORAL    = "#E8503A";
-const N200     = "#E2D5BF";
+const N200     = "#EBEBEB";
 const N400     = "#A89078";
 const N500     = "#8A7260";
 const SUCCESS  = "#2A9E5C";
@@ -26,14 +26,14 @@ const AMBER_DK = "#B8911A";
 const AMBER_LT = "#FEF6D6";
 const CYAN_DK  = "#1A8FAD";
 const CYAN_LT  = "#DFF6FC";
-const CREAM    = "#FAF3E8";
+const CREAM    = "#FFFFFF";
 const TEST_COLOR = SUCCESS;
 
 const CARD: React.CSSProperties = {
   background: "#ffffff",
-  border: `1px solid ${N200}`,
-  borderRadius: 14,
-  boxShadow: "0 1px 4px rgba(58,47,191,.08)",
+  border: `1px solid #EBEBEB`,
+  borderRadius: 12,
+  boxShadow: "0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04)",
 };
 
 type Tab = "brief" | "studies" | "assistant";
@@ -424,7 +424,7 @@ export default function TestPage() {
       <div className="flex flex-col w-full h-full">
 
         {/* Phase topbar */}
-        <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: VDK, borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
           <div className="flex items-center gap-3">
             <span className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1" style={{ background: "rgba(42,158,92,0.2)", color: "#86EFAC", border: "1px solid rgba(42,158,92,0.4)", borderRadius: 6 }}>
               PHASE 02
@@ -452,17 +452,18 @@ export default function TestPage() {
           </div>
         </div>
 
-        {/* Sub-tabs */}
-        <div className="flex flex-shrink-0 px-5" style={{ background: VDK, borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        {/* Sub-tabs — sticky white bar */}
+        <div className="flex flex-shrink-0 px-5 sticky-tab-bar border-b" style={{ borderColor: N200 }}>
           {(["brief", "studies", "assistant"] as Tab[]).map(tab => (
             <button
               key={tab}
               onClick={() => { setActiveTab(tab); if (tab === "brief") setBriefMode("choose"); }}
               data-testid={`tab-test-${tab}`}
-              className="px-4 py-3 text-sm font-medium transition-colors border-b-2"
+              className="px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px"
               style={{
-                color: activeTab === tab ? "#ffffff" : "rgba(255,255,255,0.5)",
+                color: activeTab === tab ? VDK : N500,
                 borderBottomColor: activeTab === tab ? TEST_COLOR : "transparent",
+                background: "transparent",
               }}
             >
               {tab === "brief" ? "Launch a Brief" : tab === "studies" ? "Studies" : "Research Assistant"}
@@ -521,7 +522,7 @@ export default function TestPage() {
 
                 {briefMode === "standard" && (
                   <div style={{ ...CARD, maxWidth: 680 }}>
-                    <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${N200}`, background: "#FAFAF8" }}>
+                    <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${N200}`, background: "#F5F5F5" }}>
                       <div>
                         <div className="text-sm font-semibold" style={{ color: VDK }}>Research Brief</div>
                         <div className="text-xs" style={{ color: N500 }}>Complete the structured brief form to launch your study</div>
@@ -547,7 +548,7 @@ export default function TestPage() {
                         <label className="text-xs font-semibold mb-1.5 block" style={{ color: N500 }}>Brief / Project Name <span style={{ color: CORAL }}>*</span></label>
                         <input
                           className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none"
-                          style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
+                          style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }}
                           placeholder="e.g. Energy Drink Concept Test Q2 2026"
                           data-testid="input-brief-name"
                           onFocus={e => (e.target.style.borderColor = VIO)}
@@ -558,7 +559,7 @@ export default function TestPage() {
                         <label className="text-xs font-semibold mb-1.5 block" style={{ color: N500 }}>Research Objective <span style={{ color: CORAL }}>*</span></label>
                         <textarea
                           className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none resize-none"
-                          style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
+                          style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }}
                           rows={3}
                           placeholder="Be as specific as possible. This drives the entire survey structure."
                           data-testid="input-brief-objective"
@@ -605,7 +606,7 @@ export default function TestPage() {
                 {briefMode === "ai" && (
                   <div style={{ ...CARD, maxWidth: 680 }}>
                     {/* AI brief header */}
-                    <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${N200}`, background: "#FAFAF8" }}>
+                    <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${N200}`, background: "#F5F5F5" }}>
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: VIO }}>
                           <Sparkles className="w-3.5 h-3.5 text-white" />
@@ -620,7 +621,7 @@ export default function TestPage() {
 
                     {/* Step progress */}
                     {!briefSubmitted && (
-                      <div className="flex px-5 py-2 gap-1" style={{ borderBottom: `1px solid ${N200}`, background: "#FAFAF8" }}>
+                      <div className="flex px-5 py-2 gap-1" style={{ borderBottom: `1px solid ${N200}`, background: "#F5F5F5" }}>
                         {AI_STEPS.map((_, i) => (
                           <div
                             key={i}
@@ -639,7 +640,7 @@ export default function TestPage() {
                           <p className="text-sm mb-6" style={{ color: N500 }}>
                             A survey questionnaire has been generated from your brief and sent to hannah@innovatr.co.za for review and approval. You'll hear back within 24 hours.
                           </p>
-                          <div className="space-y-2 text-left rounded-xl p-4 mb-6" style={{ background: "#FAFAF8", border: `1px solid ${N200}` }}>
+                          <div className="space-y-2 text-left rounded-xl p-4 mb-6" style={{ background: "#F5F5F5", border: `1px solid ${N200}` }}>
                             <div className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: CORAL }}>Brief Summary</div>
                             {aiAnswers.concept && <div className="text-xs"><span className="font-semibold" style={{ color: VDK }}>Concept: </span><span style={{ color: N500 }}>{aiAnswers.concept}</span></div>}
                             {aiAnswers.objective && <div className="text-xs"><span className="font-semibold" style={{ color: VDK }}>Objective: </span><span style={{ color: N500 }}>{aiAnswers.objective}</span></div>}
@@ -668,7 +669,7 @@ export default function TestPage() {
                             <textarea
                               className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none resize-none"
                               rows={3}
-                              style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
+                              style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }}
                               placeholder="e.g. A premium energy drink with adaptogens, targeting health-conscious urban professionals aged 25–34"
                               value={aiCurrentInput}
                               onChange={e => setAiCurrentInput(e.target.value)}
@@ -683,7 +684,7 @@ export default function TestPage() {
                             <textarea
                               className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none resize-none"
                               rows={3}
-                              style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
+                              style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }}
                               placeholder="e.g. Determine whether the concept drives sufficient purchase intent to justify launch investment in Gauteng"
                               value={aiCurrentInput}
                               onChange={e => setAiCurrentInput(e.target.value)}
@@ -787,7 +788,7 @@ export default function TestPage() {
                                 <button
                                   onClick={() => fileInputRef.current?.click()}
                                   className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-lg"
-                                  style={{ border: `1.5px dashed ${N200}`, color: N500, background: "#FAFAF8" }}
+                                  style={{ border: `1.5px dashed ${N200}`, color: N500, background: "#F5F5F5" }}
                                   data-testid="button-upload-creative"
                                 >
                                   <Upload className="w-4 h-4" />
@@ -811,7 +812,7 @@ export default function TestPage() {
                             <textarea
                               className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none resize-none"
                               rows={3}
-                              style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }}
+                              style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }}
                               placeholder="e.g. Main competitors are Monster Energy and Red Bull. The product will retail at R22 per unit in Pick n Pay and Woolworths."
                               value={aiCurrentInput}
                               onChange={e => setAiCurrentInput(e.target.value)}
@@ -824,7 +825,7 @@ export default function TestPage() {
                           {/* Step 6: Review */}
                           {aiStep === 6 && (
                             <div className="space-y-3">
-                              <div className="rounded-xl p-4" style={{ background: "#FAFAF8", border: `1px solid ${N200}` }}>
+                              <div className="rounded-xl p-4" style={{ background: "#F5F5F5", border: `1px solid ${N200}` }}>
                                 <div className="text-xs font-bold uppercase tracking-wide mb-3" style={{ color: CORAL }}>Brief Summary</div>
                                 {[
                                   { label: "Concept",    value: aiAnswers.concept },
@@ -976,12 +977,17 @@ export default function TestPage() {
                       </div>
 
                       {/* Metrics grid */}
-                      <div className="grid grid-cols-3" style={{ borderTop: `1px solid ${N200}`, borderLeft: `1px solid ${N200}` }}>
+                      <div className="grid grid-cols-3" style={{ borderTop: `1px solid ${N200}` }}>
                         {study.metrics.map((m, i) => {
                           const mc = mColor(m.val, m.signal);
                           const sm = signalMeta(m.signal, m.val);
+                          const tileBg = mc === SUCCESS
+                            ? "linear-gradient(135deg, rgba(42,158,92,0.06) 0%, rgba(42,158,92,0.02) 100%)"
+                            : mc === AMBER_DK
+                            ? "linear-gradient(135deg, rgba(184,145,26,0.07) 0%, rgba(184,145,26,0.02) 100%)"
+                            : "linear-gradient(135deg, rgba(232,80,58,0.07) 0%, rgba(232,80,58,0.02) 100%)";
                           return (
-                            <div key={m.label} className="py-4 px-5 text-center" style={{ borderRight: `1px solid ${N200}`, borderBottom: i < 3 ? `1px solid ${N200}` : "none" }}>
+                            <div key={m.label} className="py-4 px-5 text-center" style={{ background: tileBg, borderRight: i < study.metrics.length - 1 ? `1px solid ${N200}` : "none", borderBottom: i < 3 ? `1px solid ${N200}` : "none" }}>
                               <div className="text-[28px] font-bold font-mono leading-none mb-0.5" style={{ color: mc }}>{m.val}%</div>
                               <div className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: N500 }}>{m.label}</div>
                               {sm && (
@@ -1021,7 +1027,7 @@ export default function TestPage() {
                       </div>
 
                       {/* Actions */}
-                      <div className="px-5 py-3 flex gap-2" style={{ borderTop: `1px solid ${N200}`, background: "#FAFAF8" }}>
+                      <div className="px-5 py-3 flex gap-2" style={{ borderTop: `1px solid ${N200}`, background: "#F5F5F5" }}>
                         <button
                           onClick={() => { setActiveTab("assistant"); setSelectedAssistStudy(study.id); }}
                           className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg flex items-center gap-1.5"
@@ -1116,7 +1122,7 @@ export default function TestPage() {
                             <div className="text-xs mb-4" style={{ color: N500 }}>What moved the needle in this study</div>
                             <div className="space-y-2">
                               {assistantData.drivers.map((d, i) => (
-                                <div key={i} className="flex gap-3 items-start p-3 rounded-xl" style={{ background: "#FAFAF8", border: `1px solid ${N200}` }}>
+                                <div key={i} className="flex gap-3 items-start p-3 rounded-xl" style={{ background: "#F5F5F5", border: `1px solid ${N200}` }}>
                                   <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: d.highlight + "22" }}>
                                     {d.ok
                                       ? <CheckCircle2 className="w-4 h-4" style={{ color: d.highlight }} />
@@ -1153,7 +1159,7 @@ export default function TestPage() {
                 {assistantMsgs.length > 0 && (
                   <div className="mt-4 space-y-2">
                     {assistantMsgs.map((m, i) => (
-                      <div key={i} className={`text-xs p-3 rounded-xl leading-relaxed ${m.role === "user" ? "ml-4" : ""}`} style={{ background: m.role === "user" ? "#FAF3E8" : "#F0FDF4", border: `1px solid ${m.role === "user" ? N200 : "rgba(42,158,92,0.15)"}`, color: VDK }}>
+                      <div key={i} className={`text-xs p-3 rounded-xl leading-relaxed ${m.role === "user" ? "ml-4" : ""}`} style={{ background: m.role === "user" ? "#EEF0FF" : "#F0FDF4", border: `1px solid ${m.role === "user" ? N200 : "rgba(42,158,92,0.15)"}`, color: VDK }}>
                         {m.text}
                       </div>
                     ))}
@@ -1217,7 +1223,7 @@ export default function TestPage() {
                 <button
                   onClick={() => setShowChat(!showChat)}
                   className="px-4 py-2.5 flex items-center justify-between flex-shrink-0 transition-colors"
-                  style={{ borderTop: `1px solid ${N200}`, background: "#FAFAF8" }}
+                  style={{ borderTop: `1px solid ${N200}`, background: "#F5F5F5" }}
                   data-testid="button-toggle-team-chat"
                 >
                   <span className="flex items-center gap-2 text-xs font-semibold" style={{ color: N500 }}>
@@ -1233,7 +1239,7 @@ export default function TestPage() {
                       <TCMsg initials="SW" author="Sarah W." time="09:12" color={VIO} text="The commitment drop is the main issue to address before we go to launch." />
                     </div>
                     <div className="px-3 pb-3 flex gap-2">
-                      <input value={chatInput} onChange={e => setChatInput(e.target.value)} className="flex-1 rounded-lg px-3 py-1.5 text-xs focus:outline-none" style={{ background: "#FAF3E8", border: `1.5px solid ${N200}`, color: VDK }} placeholder="Reply… use @ to tag" data-testid="input-team-chat" />
+                      <input value={chatInput} onChange={e => setChatInput(e.target.value)} className="flex-1 rounded-lg px-3 py-1.5 text-xs focus:outline-none" style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }} placeholder="Reply… use @ to tag" data-testid="input-team-chat" />
                       <button className="w-7 h-7 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: TEST_COLOR }} data-testid="button-send-chat"><Send className="w-3 h-3" /></button>
                     </div>
                   </div>
@@ -1255,7 +1261,7 @@ function TCMsg({ initials, author, time, color, text }: { initials: string; auth
         <span className="text-xs font-semibold" style={{ color: "#1E1B3A" }}>{author}</span>
         <span className="text-[10px]" style={{ color: "#8A7260" }}>{time}</span>
       </div>
-      <div className="ml-6 px-3 py-2 text-xs rounded-xl leading-snug" style={{ background: "#FAF3E8", border: "1px solid #E2D5BF", color: "#8A7260" }}>{text}</div>
+      <div className="ml-6 px-3 py-2 text-xs rounded-xl leading-snug" style={{ background: "#F5F5F5", border: "1px solid #EBEBEB", color: "#8A7260" }}>{text}</div>
     </div>
   );
 }

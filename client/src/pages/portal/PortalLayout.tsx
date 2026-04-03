@@ -118,7 +118,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
 
   return (
     <SidebarProvider style={sidebarStyle as React.CSSProperties}>
-      <div className="flex h-screen w-full overflow-hidden" style={{ background: "var(--ds-cream)" }}>
+      <div className="flex h-screen w-full overflow-hidden" style={{ background: "#FFFFFF" }}>
 
         {/* ── Sidebar ─────────────────────────────────────────── */}
         <Sidebar className="border-r-0">
@@ -238,11 +238,11 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
             </div>
           )}
 
-          {/* Phase topbar — dark violet-dk */}
+          {/* Phase topbar — gradient */}
           {showPhaseTopbar && (
             <header
               className="h-12 px-4 flex items-center justify-between flex-shrink-0"
-              style={{ background: VDK, borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+              style={{ background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
             >
               <div className="flex items-center">
                 <PhaseTab num="1" label="Explore" color={EXPLORE_COLOR} isActive={isExplore} onClick={() => setLocation("/portal/explore")} />
@@ -273,7 +273,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
             </header>
           )}
 
-          <main className="flex-1 overflow-auto" style={{ background: "var(--ds-cream)" }}>
+          <main className="flex-1 overflow-auto" style={{ background: "#FFFFFF" }}>
             {children}
           </main>
         </div>
