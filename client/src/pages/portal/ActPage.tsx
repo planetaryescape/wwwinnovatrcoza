@@ -386,7 +386,7 @@ export default function ActPage() {
 
                 {/* Right: Planning Assistant mini panel */}
                 <div className="w-80 min-w-[300px] flex-shrink-0">
-                  <div style={CARD} className="overflow-hidden">
+                  <div className="portal-card overflow-hidden">
                     <div className="px-4 py-3" style={{ borderBottom: `1px solid ${N200}` }}>
                       <div className="flex items-center gap-2.5 mb-0.5">
                         <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: VIO }}>
@@ -507,7 +507,7 @@ export default function ActPage() {
                 <div className="w-80 min-w-[300px] flex-shrink-0 space-y-4 overflow-y-auto" style={{ maxHeight: "calc(100vh - 200px)" }}>
 
                   {/* Suggested Prompts */}
-                  <div style={CARD} className="p-5">
+                  <div className="portal-card p-5">
                     <div className="text-sm font-semibold mb-3" style={{ color: VDK }}>Suggested Planning Prompts</div>
                     <div className="space-y-2">
                       {planningPrompts.map(q => (
@@ -525,7 +525,7 @@ export default function ActPage() {
                   </div>
 
                   {/* Connected Studies */}
-                  <div style={CARD} className="p-5">
+                  <div className="portal-card p-5">
                     <div className="text-sm font-semibold mb-3" style={{ color: VDK }}>Connected Studies</div>
                     <div className="space-y-0">
                       {connectedStudies.map((s, i) => (
@@ -543,7 +543,7 @@ export default function ActPage() {
                   </div>
 
                   {/* ── Recommended Research ── */}
-                  <div style={CARD} className="p-5">
+                  <div className="portal-card p-5">
                     <div className="flex items-center gap-2 mb-3">
                       <FlaskConical className="w-4 h-4" style={{ color: VIO }} />
                       <div className="text-sm font-semibold" style={{ color: VDK }}>Recommended Research</div>
@@ -667,7 +667,7 @@ export default function ActPage() {
           {/* Team Chat (bottom sticky only for non-planning tabs) */}
           {activeTab !== "planning" && (
             <div className="mx-6 mb-4 mt-2">
-              <div style={CARD} className="overflow-hidden">
+              <div className="portal-card overflow-hidden">
                 <button
                   onClick={() => setShowChat(!showChat)}
                   className="w-full px-4 py-2.5 flex items-center justify-between"

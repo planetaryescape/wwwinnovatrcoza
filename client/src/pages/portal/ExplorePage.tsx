@@ -251,7 +251,7 @@ export default function ExplorePage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {signals.map(signal => (
-                    <div key={signal.id} style={CARD} className="p-4 cursor-pointer hover:shadow-md transition-shadow" data-testid={`signal-card-${signal.id}`}>
+                    <div key={signal.id} className="portal-card p-4 cursor-pointer" data-testid={`signal-card-${signal.id}`}>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5" style={{ background: signal.tagBg, color: signal.tagColor, borderRadius: 9999 }}>
                           {signal.tag}

@@ -1,10 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarProvider,
-} from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
   Settings,
