@@ -187,7 +187,10 @@ export default function ActPage() {
       <div className="flex flex-col w-full h-full">
 
         {/* ── Phase topbar ── */}
-        <PhaseTopbar currentPhase="act" />
+        <PhaseTopbar
+          currentPhase="act"
+          description="Turn insights into strategy and execution plans"
+        />
 
         {/* ── Main scrollable body ── */}
         <div className="flex-1 overflow-y-auto pb-20 sm:pb-0" style={{ background: "var(--pt-canvas-bg)" }}>

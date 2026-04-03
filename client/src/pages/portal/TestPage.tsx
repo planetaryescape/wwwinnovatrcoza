@@ -429,7 +429,29 @@ export default function TestPage() {
       <div className="flex flex-col w-full h-full">
 
         {/* Phase topbar */}
-        <PhaseTopbar currentPhase="test" />
+        <PhaseTopbar
+          currentPhase="test"
+          description="Launch briefs and track consumer research studies"
+          primaryAction={
+            <button
+              onClick={() => { setActiveTab("brief"); setBriefMode("choose"); }}
+              data-testid="button-topbar-launch-brief"
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "5px 12px",
+                borderRadius: 6,
+                fontSize: 12, fontWeight: 600,
+                background: "var(--pt-step-active-bubble)",
+                color: "#fff",
+                border: "none",
+                cursor: "pointer",
+                flexShrink: 0,
+              }}
+            >
+              + Launch Brief
+            </button>
+          }
+        />
 
         {/* Sub-tabs — sticky white bar */}
         <div className="flex flex-shrink-0 px-5 sticky-tab-bar border-b" style={{ borderColor: N200 }}>

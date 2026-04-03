@@ -3,17 +3,19 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { PortalThemeToggle } from "./PortalThemeToggle";
 
 const PHASES = [
-  { num: "01", key: "explore", label: "Explore", path: "/portal/explore", color: "#5563E8" },
-  { num: "02", key: "test",    label: "Test",    path: "/portal/test",    color: "#2A9E5C" },
-  { num: "03", key: "act",     label: "Act",     path: "/portal/act",     color: "#E8503A" },
-  { num: "04", key: "health",  label: "Company", path: "/portal/health",  color: "#4EC9E8" },
+  { num: "01", key: "explore", label: "Explore", path: "/portal/explore" },
+  { num: "02", key: "test",    label: "Test",    path: "/portal/test"    },
+  { num: "03", key: "act",     label: "Act",     path: "/portal/act"     },
+  { num: "04", key: "health",  label: "Company", path: "/portal/health"  },
 ];
 
 interface PhaseTopbarProps {
   currentPhase: "explore" | "test" | "act" | "health";
+  description?: string;
+  primaryAction?: React.ReactNode;
 }
 
-export function PhaseTopbar({ currentPhase }: PhaseTopbarProps) {
+export function PhaseTopbar({ currentPhase, description, primaryAction }: PhaseTopbarProps) {
   const [, setLocation] = useLocation();
 
   const currentIdx = PHASES.findIndex(p => p.key === currentPhase);
@@ -54,7 +56,7 @@ export function PhaseTopbar({ currentPhase }: PhaseTopbarProps) {
 
         {/* Phase step pills */}
         <div className="flex items-center gap-1 overflow-x-auto no-scrollbar" style={{ minWidth: 0 }}>
-          {PHASES.map((phase, i) => {
+          {PHASES.map((phase) => {
             const isActive = phase.key === currentPhase;
             return (
               <button
@@ -111,10 +113,10 @@ export function PhaseTopbar({ currentPhase }: PhaseTopbarProps) {
         </button>
       </div>
 
-      {/* Right: phase label + theme toggle + close */}
-      <div className="flex items-center gap-2 flex-shrink-0">
+      {/* Right: phase label + optional description + optional CTA + theme toggle + close */}
+      <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
         <span
-          className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 hidden sm:inline-block"
+          className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 hidden sm:inline-block flex-shrink-0"
           style={{
             background: "var(--pt-step-active-bg)",
             color: "var(--pt-step-active-color)",
@@ -124,20 +126,33 @@ export function PhaseTopbar({ currentPhase }: PhaseTopbarProps) {
         >
           PHASE {active.num}
         </span>
-        <h1 className="font-serif text-base sm:text-lg" style={{ color: "var(--pt-title-color)" }}>
+        <h1 className="font-serif text-base sm:text-lg flex-shrink-0" style={{ color: "var(--pt-title-color)" }}>
           {active.label}
         </h1>
+        {description && (
+          <span
+            className="text-xs truncate hidden md:block"
+            style={{ color: "var(--pt-step-idle-color)", maxWidth: 200 }}
+            title={description}
+          >
+            {description}
+          </span>
+        )}
+        {primaryAction && (
+          <div className="flex-shrink-0 hidden sm:block">
+            {primaryAction}
+          </div>
+        )}
         <PortalThemeToggle />
         <button
           onClick={() => setLocation("/portal/dashboard")}
-          className="flex items-center justify-center rounded-full"
+          className="flex items-center justify-center rounded-full flex-shrink-0"
           style={{
             width: 30, height: 30,
             background: "var(--pt-close-bg)",
             color: "var(--pt-close-color)",
             border: "none",
             cursor: "pointer",
-            flexShrink: 0,
           }}
           data-testid="button-close-phase"
           aria-label="Back to dashboard"

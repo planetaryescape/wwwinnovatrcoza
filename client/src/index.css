@@ -227,10 +227,10 @@
   --pt-text-tertiary:       #A89078;
   --pt-divider:             #EBEBEB;
   /* Phase topbar step pills */
-  --pt-step-active-bg:      rgba(85,99,232,0.25);
-  --pt-step-active-border:  rgba(85,99,232,0.5);
+  --pt-step-active-bg:      rgba(232,80,58,0.18);
+  --pt-step-active-border:  rgba(232,80,58,0.4);
   --pt-step-active-color:   #ffffff;
-  --pt-step-active-bubble:  #5563E8;
+  --pt-step-active-bubble:  #E8503A;
   --pt-step-idle-color:     rgba(255,255,255,0.6);
   --pt-step-bubble-border:  rgba(255,255,255,0.25);
   --pt-step-bubble-idle-color: rgba(255,255,255,0.5);

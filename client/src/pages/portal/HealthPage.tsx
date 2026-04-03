@@ -275,7 +275,10 @@ export default function HealthPage() {
       <div className="flex flex-col w-full h-full">
 
         {/* ── Topbar ── */}
-        <PhaseTopbar currentPhase="health" />
+        <PhaseTopbar
+          currentPhase="health"
+          description="Track overall health across all studies"
+        />
 
         {/* ── Body ── */}
         <div className="flex flex-1 overflow-hidden">

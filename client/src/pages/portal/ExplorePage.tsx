@@ -175,7 +175,10 @@ export default function ExplorePage() {
       <div className="flex flex-col w-full h-full">
 
         {/* Phase topbar */}
-        <PhaseTopbar currentPhase="explore" />
+        <PhaseTopbar
+          currentPhase="explore"
+          description="Discover signals and validate ideas before testing"
+        />
 
         {/* Sub-tabs — sticky white bar */}
         <div className="flex flex-shrink-0 px-5 sticky-tab-bar border-b" style={{ borderColor: N200 }}>
