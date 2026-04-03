@@ -215,7 +215,7 @@
     border: 1px solid #EBEBEB;
     border-radius: 12px;
     box-shadow: var(--ds-sh-sm);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
   }
   .portal-card:hover {
     transform: translateY(-1px);
@@ -226,7 +226,7 @@
     border: 1px solid #EBEBEB;
     border-radius: 16px;
     box-shadow: var(--ds-sh-sm);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
   }
   .portal-card-lg:hover {
     transform: translateY(-1px);
@@ -237,6 +237,91 @@
     top: 0;
     z-index: 40;
     background: #FFFFFF;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ── Badge palette utilities ──────────────────────────── */
+  .badge-high {
+    background: rgba(232,80,58,0.10);
+    color: #E8503A;
+    border: 1px solid rgba(232,80,58,0.22);
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 9999px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+  .badge-medium {
+    background: rgba(184,145,26,0.10);
+    color: #B8911A;
+    border: 1px solid rgba(184,145,26,0.22);
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 9999px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+  .badge-opportunity {
+    background: rgba(58,47,191,0.08);
+    color: #3A2FBF;
+    border: 1px solid rgba(58,47,191,0.18);
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 9999px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+  .badge-basic {
+    background: rgba(42,158,92,0.08);
+    color: #2A9E5C;
+    border: 1px solid rgba(42,158,92,0.18);
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 9999px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+  .badge-pro {
+    background: rgba(78,201,232,0.10);
+    color: #1A8FAD;
+    border: 1px solid rgba(78,201,232,0.25);
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 9999px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+  .badge-completed {
+    background: rgba(42,158,92,0.10);
+    color: #2A9E5C;
+    border: 1px solid rgba(42,158,92,0.20);
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 9999px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+  .badge-watch {
+    background: rgba(184,145,26,0.08);
+    color: #B8911A;
+    border: 1px solid rgba(184,145,26,0.18);
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 9999px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+  .badge-qa {
+    background: rgba(58,47,191,0.08);
+    color: #3A2FBF;
+    border: 1px solid rgba(58,47,191,0.18);
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 9999px;
+    padding: 2px 8px;
+    white-space: nowrap;
   }
 }
 
@@ -247,6 +332,28 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    font-size: 13px;
+  }
+
+  /* ── Typography scale ──────────────────────────── */
+  h1 { font-size: clamp(22px, 3vw, 32px); }
+
+  /* ── Prevent iOS input zoom (font-size must be 16px+) ── */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  /* ── Minimum 44px touch targets — portal mobile nav only ── */
+  .portal-touch-target {
+    min-height: 44px;
   }
 }
 
