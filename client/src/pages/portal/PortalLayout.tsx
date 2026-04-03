@@ -147,8 +147,8 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
   const isHealth    = location.startsWith("/portal/health");
 
   const sidebarStyle = {
-    "--sidebar-width": isTablet ? "3.5rem" : "14.5rem",
-    "--sidebar-width-icon": "3.5rem",
+    "--sidebar-width": isTablet ? "3rem" : "14.5rem",
+    "--sidebar-width-icon": "3rem",
   };
 
   const tierLabel = getTierLabel(user, isAdmin, isPaidMember);
@@ -285,7 +285,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
           <aside
             className="flex-shrink-0 overflow-hidden"
             style={{
-              width: isTablet ? "3.5rem" : "14.5rem",
+              width: isTablet ? "3rem" : "14.5rem",
               borderRight: "1px solid rgba(255,255,255,0.07)",
               transition: "width 0.2s ease",
             }}
@@ -304,12 +304,11 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
           />
         )}
 
-        {/* ── Mobile drawer ──────────────────────────────────── */}
+        {/* ── Mobile drawer — full screen slide-over ─────────── */}
         {isMobile && (
           <aside
-            className="fixed left-0 top-0 bottom-0 z-50 overflow-hidden"
+            className="fixed inset-0 z-50 overflow-hidden"
             style={{
-              width: "16rem",
               transform: mobileDrawerOpen ? "translateX(0)" : "translateX(-100%)",
               transition: "transform 0.22s ease",
             }}
@@ -402,67 +401,39 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
             </header>
           )}
 
-          <main className="flex-1 overflow-auto" style={{ background: "#FFFFFF" }}>
+          <main
+            className="flex-1 overflow-auto"
+            style={{ background: "#FFFFFF", paddingBottom: isMobile ? "56px" : 0 }}
+          >
             {children}
           </main>
 
-          {/* ── Mobile bottom nav ──────────────────────────────── */}
-          {isMobile && (
-            <nav
-              className="flex-shrink-0 flex items-center justify-around"
-              style={{
-                background: VDK,
-                borderTop: "1px solid rgba(255,255,255,0.08)",
-                height: "56px",
-                position: "relative",
-                zIndex: 30,
-              }}
-              data-testid="mobile-bottom-nav"
-            >
-              <MobileNavBtn
-                icon={<LayoutDashboard className="w-5 h-5" />}
-                label="Home"
-                isActive={isDashboard}
-                onClick={() => setLocation("/portal/dashboard")}
-                color={CORAL}
-                testId="mobile-nav-dashboard"
-              />
-              <MobileNavBtn
-                icon={<FlaskConical className="w-5 h-5" />}
-                label="Explore"
-                isActive={isExplore}
-                onClick={() => setLocation("/portal/explore")}
-                color={EXPLORE_COLOR}
-                testId="mobile-nav-explore"
-              />
-              <MobileNavBtn
-                icon={<BarChart2 className="w-5 h-5" />}
-                label="Test"
-                isActive={isTest}
-                onClick={() => setLocation("/portal/test")}
-                color={TEST_COLOR}
-                testId="mobile-nav-test"
-              />
-              <MobileNavBtn
-                icon={<Lightbulb className="w-5 h-5" />}
-                label="Act"
-                isActive={isAct}
-                onClick={() => setLocation("/portal/act")}
-                color={ACT_COLOR}
-                testId="mobile-nav-act"
-              />
-              <MobileNavBtn
-                icon={<Building2 className="w-5 h-5" />}
-                label="Health"
-                isActive={isHealth}
-                onClick={() => setLocation("/portal/health")}
-                color={HEALTH_COLOR}
-                testId="mobile-nav-health"
-              />
-            </nav>
-          )}
         </div>
       </div>
+
+      {/* ── Mobile fixed bottom nav ─────────────────────────── */}
+      {isMobile && (
+        <nav
+          className="flex items-center justify-around"
+          style={{
+            position: "fixed",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 30,
+            background: VDK,
+            borderTop: "1px solid rgba(255,255,255,0.08)",
+            height: "56px",
+          }}
+          data-testid="mobile-bottom-nav"
+        >
+          <MobileNavBtn icon={<LayoutDashboard className="w-5 h-5" />} label="Home"    isActive={isDashboard} onClick={() => setLocation("/portal/dashboard")} testId="mobile-nav-dashboard" />
+          <MobileNavBtn icon={<FlaskConical   className="w-5 h-5" />} label="Explore"  isActive={isExplore}   onClick={() => setLocation("/portal/explore")}   testId="mobile-nav-explore"   />
+          <MobileNavBtn icon={<BarChart2      className="w-5 h-5" />} label="Test"     isActive={isTest}      onClick={() => setLocation("/portal/test")}      testId="mobile-nav-test"      />
+          <MobileNavBtn icon={<Lightbulb      className="w-5 h-5" />} label="Act"      isActive={isAct}       onClick={() => setLocation("/portal/act")}       testId="mobile-nav-act"       />
+          <MobileNavBtn icon={<Building2      className="w-5 h-5" />} label="Health"   isActive={isHealth}    onClick={() => setLocation("/portal/health")}    testId="mobile-nav-health"    />
+        </nav>
+      )}
 
       {/* ── Global ⌘K Search Dialog ──────────────────────── */}
       <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
@@ -623,17 +594,24 @@ function PhaseTab({ num, label, color, isActive, onClick }: {
   );
 }
 
-function MobileNavBtn({ icon, label, isActive, onClick, color, testId }: {
-  icon: React.ReactNode; label: string; isActive: boolean; onClick: () => void; color: string; testId?: string;
+function MobileNavBtn({ icon, label, isActive, onClick, testId }: {
+  icon: React.ReactNode; label: string; isActive: boolean; onClick: () => void; testId?: string;
 }) {
+  const CORAL_COLOR = "#E8503A";
   return (
     <button
       onClick={onClick}
       data-testid={testId}
-      className="flex flex-col items-center justify-center flex-1 gap-0.5 py-2"
-      style={{ minHeight: "44px", color: isActive ? color : "rgba(255,255,255,0.45)" }}
+      className="flex flex-col items-center justify-center flex-1 gap-0.5 py-2 relative"
+      style={{ minHeight: "44px", color: isActive ? CORAL_COLOR : "rgba(255,255,255,0.45)" }}
     >
-      <span style={{ color: isActive ? color : "rgba(255,255,255,0.45)" }}>{icon}</span>
+      {isActive && (
+        <span
+          className="absolute top-0 left-1/2 -translate-x-1/2 rounded-b-full"
+          style={{ width: "24px", height: "2px", background: CORAL_COLOR }}
+        />
+      )}
+      <span style={{ color: isActive ? CORAL_COLOR : "rgba(255,255,255,0.45)" }}>{icon}</span>
       <span className="text-[10px] font-medium">{label}</span>
     </button>
   );
