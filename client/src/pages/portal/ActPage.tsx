@@ -208,7 +208,7 @@ export default function ActPage() {
         </div>
 
         {/* ── Main scrollable body ── */}
-        <div className="flex-1 overflow-y-auto" style={{ background: CREAM }}>
+        <div className="flex-1 overflow-y-auto pb-20 sm:pb-0" style={{ background: CREAM }}>
 
             {/* In-page header */}
             <div className="px-6 pt-6 pb-2">

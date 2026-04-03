@@ -476,7 +476,7 @@ export default function TestPage() {
         {/* Body */}
         <div className="flex flex-1 overflow-hidden">
           {/* Main */}
-          <div className="flex-1 overflow-y-auto p-6" style={{ background: CREAM }}>
+          <div className="flex-1 overflow-y-auto p-6 pb-20 sm:pb-6" style={{ background: CREAM }}>
 
             {/* ── LAUNCH A BRIEF ── */}
             {activeTab === "brief" && (
