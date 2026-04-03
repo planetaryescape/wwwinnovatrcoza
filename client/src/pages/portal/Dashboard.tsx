@@ -456,13 +456,11 @@ function StudyCard({ study, onActClick }: { study: any; onActClick: () => void }
           </div>
         </div>
         <div className="flex flex-col items-end gap-1 flex-shrink-0">
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: typeBadge.bg, color: typeBadge.color }}>
+          <span className={typeBadge.label === "PRO" ? "badge-pro" : "badge-basic"}>
             {typeBadge.label}
           </span>
           {isComplete && (
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: SUCCESS_LT, color: SUCCESS }}>
-              Complete
-            </span>
+            <span className="badge-completed">Complete</span>
           )}
         </div>
       </div>
