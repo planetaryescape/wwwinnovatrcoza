@@ -481,15 +481,15 @@ function SbNavItem({ icon, label, isActive, onClick, testId, badge, iconOnly, to
       onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
     >
       {isActive && !iconOnly && (
-        <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r" style={{ background: CORAL }} />
+        <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r" style={{ background: "var(--pt-step-active-bubble)" }} />
       )}
-      <span style={{ color: isActive ? CORAL : "var(--pt-sb-item-color)", flexShrink: 0 }}>{icon}</span>
+      <span style={{ color: isActive ? "var(--pt-step-active-bubble)" : "var(--pt-sb-item-color)", flexShrink: 0 }}>{icon}</span>
       {!iconOnly && <span className="flex-1 text-left">{label}</span>}
       {!iconOnly && badge}
       {iconOnly && isActive && (
         <span
           className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
-          style={{ background: CORAL }}
+          style={{ background: "var(--pt-step-active-bubble)" }}
         />
       )}
     </button>
@@ -518,23 +518,23 @@ function PhaseNavItem({ num, label, color, isActive, onClick, testId, locked, ic
       onMouseLeave={e => { if (!isActive && !locked) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
     >
       {isActive && !iconOnly && (
-        <span className="absolute left-0 top-1 bottom-1 w-0.5 rounded-r" style={{ background: "#E8503A" }} />
+        <span className="absolute left-0 top-1 bottom-1 w-0.5 rounded-r" style={{ background: "var(--pt-step-active-bubble)" }} />
       )}
-      {/* Colored dot indicator for active phase (icon-only mode) */}
+      {/* Dot indicator for active phase (icon-only mode) */}
       {isActive && iconOnly && (
         <span
           className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
-          style={{ background: color }}
+          style={{ background: "var(--pt-step-active-bubble)" }}
         />
       )}
       <span
         className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
         style={
           isActive
-            ? { background: color, color: "#fff" }
+            ? { background: "var(--pt-step-active-bubble)", color: "#fff" }
             : locked
             ? { border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.3)" }
-            : { border: `1px solid ${color}40`, color }
+            : { border: "1px solid var(--pt-step-bubble-border)", color: "var(--pt-sb-item-color)" }
         }
       >
         {num}

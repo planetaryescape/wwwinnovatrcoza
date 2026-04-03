@@ -227,9 +227,10 @@
   --pt-text-tertiary:       #A89078;
   --pt-divider:             #EBEBEB;
   /* Phase topbar step pills */
-  --pt-step-active-bg:      rgba(85,99,232,0.18);
-  --pt-step-active-border:  rgba(85,99,232,0.35);
-  --pt-step-active-color:   #fff;
+  --pt-step-active-bg:      rgba(85,99,232,0.25);
+  --pt-step-active-border:  rgba(85,99,232,0.5);
+  --pt-step-active-color:   #ffffff;
+  --pt-step-active-bubble:  #5563E8;
   --pt-step-idle-color:     rgba(255,255,255,0.6);
   --pt-step-bubble-border:  rgba(255,255,255,0.25);
   --pt-step-bubble-idle-color: rgba(255,255,255,0.5);
@@ -247,18 +248,18 @@
   --pt-toggle-border:       rgba(255,255,255,0.14);
   --pt-toggle-color:        rgba(255,255,255,0.7);
   /* AI panel */
-  --pt-ai-header-bg:        #1E1B3A;
-  --pt-ai-body-bg:          #FFFFFF;
-  --pt-ai-source-bg:        #F5EFE4;
-  --pt-ai-prompts-bg:       #F5EFE4;
-  --pt-ai-input-bg:         #FFFFFF;
+  --pt-ai-header-bg:        #1A1730;
+  --pt-ai-body-bg:          #1A1730;
+  --pt-ai-source-bg:        #221E40;
+  --pt-ai-prompts-bg:       #221E40;
+  --pt-ai-input-bg:         #221E40;
   --pt-ai-user-bubble:      #5563E8;
   /* Sidebar nav items */
   --pt-sb-active-bg:        rgba(255,255,255,0.12);
   --pt-sb-hover-bg:         rgba(255,255,255,0.06);
   --pt-sb-item-color:       rgba(255,255,255,0.65);
   --pt-sb-item-active:      #ffffff;
-  --pt-sb-section-color:    #A89078;
+  --pt-sb-section-color:    #8A88A8;
 }
 
 [data-portal-theme="light"] {
@@ -283,7 +284,8 @@
   /* Phase topbar step pills */
   --pt-step-active-bg:      rgba(85,99,232,0.12);
   --pt-step-active-border:  rgba(85,99,232,0.30);
-  --pt-step-active-color:   #3A2FBF;
+  --pt-step-active-color:   #5563E8;
+  --pt-step-active-bubble:  #5563E8;
   --pt-step-idle-color:     #8A88A8;
   --pt-step-bubble-border:  #C8CAE8;
   --pt-step-bubble-idle-color: #8A88A8;

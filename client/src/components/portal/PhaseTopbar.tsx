@@ -77,7 +77,7 @@ export function PhaseTopbar({ currentPhase }: PhaseTopbarProps) {
                     width: 18, height: 18, borderRadius: 9999,
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 9, fontWeight: 700, flexShrink: 0,
-                    background: isActive ? phase.color : "transparent",
+                    background: isActive ? "var(--pt-step-active-bubble)" : "transparent",
                     border: isActive ? "none" : "1px solid var(--pt-step-bubble-border)",
                     color: isActive ? "#fff" : "var(--pt-step-bubble-idle-color)",
                   }}
@@ -116,9 +116,9 @@ export function PhaseTopbar({ currentPhase }: PhaseTopbarProps) {
         <span
           className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 hidden sm:inline-block"
           style={{
-            background: active.color + "22",
-            color: active.color,
-            border: `1px solid ${active.color}44`,
+            background: "var(--pt-step-active-bg)",
+            color: "var(--pt-step-active-color)",
+            border: "1px solid var(--pt-step-active-border)",
             borderRadius: 6,
           }}
         >

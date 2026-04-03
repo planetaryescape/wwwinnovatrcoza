@@ -334,7 +334,7 @@ export default function AIQueryPanel({
             {msg.role === "user" ? (
               <div
                 className="max-w-[85%] px-3 py-2 rounded-xl text-sm text-white"
-                style={{ background: accentColor }}
+                style={{ background: "var(--pt-ai-user-bubble, #5563E8)" }}
                 data-testid={`ai-user-message-${i}`}
               >
                 {msg.text}
