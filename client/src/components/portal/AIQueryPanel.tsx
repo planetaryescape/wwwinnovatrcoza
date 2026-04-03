@@ -74,7 +74,7 @@ function CitationCard({ c }: { c: AICitation }) {
   return (
     <div
       className="rounded-md overflow-hidden"
-      style={{ border: `1px solid ${N200}`, background: "#fff" }}
+      style={{ border: `1px solid ${N200}`, background: "var(--pt-ai-body-bg)" }}
     >
       <button
         className="w-full flex items-center gap-2 px-3 py-2 text-left"
@@ -125,7 +125,7 @@ function AIResponseCard({ response }: { response: AIResponse }) {
       {/* Summary */}
       <div
         className="rounded-md px-4 py-3"
-        style={{ background: `linear-gradient(135deg, ${VDK} 0%, #2D2660 100%)` }}
+        style={{ background: "linear-gradient(135deg, var(--pt-ai-header-bg) 0%, #2D2660 100%)" }}
       >
         <div className="flex items-center gap-1.5 mb-2">
           <Lightbulb className="w-3.5 h-3.5 text-amber-300" />
@@ -179,8 +179,8 @@ function AIResponseCard({ response }: { response: AIResponse }) {
 
       {/* Recommendations */}
       {response.recommendations.length > 0 && (
-        <div className="rounded-md overflow-hidden" style={{ border: `1px solid ${N200}`, background: "#fff" }}>
-          <div className="flex items-center gap-2 px-3 py-2" style={{ background: "#FFF8F0", borderBottom: `1px solid ${N200}` }}>
+        <div className="rounded-md overflow-hidden" style={{ border: `1px solid ${N200}`, background: "var(--pt-ai-body-bg)" }}>
+          <div className="flex items-center gap-2 px-3 py-2" style={{ background: "var(--pt-ai-source-bg)", borderBottom: `1px solid ${N200}` }}>
             <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: CORAL }}>Recommendations</span>
           </div>
           <div className="flex flex-col gap-2 p-3">
@@ -252,7 +252,7 @@ export default function AIQueryPanel({
       {/* Header */}
       <div
         className="flex items-center gap-2 px-3 py-2.5 flex-shrink-0"
-        style={{ background: VDK, borderBottom: `1px solid rgba(255,255,255,0.08)` }}
+        style={{ background: "var(--pt-ai-header-bg)", borderBottom: `1px solid var(--pt-ai-border)` }}
       >
         <div
           className="w-5 h-5 rounded-sm flex items-center justify-center flex-shrink-0"
@@ -357,7 +357,7 @@ export default function AIQueryPanel({
         ))}
 
         {query.isPending && (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl w-fit" style={{ background: "#fff", border: `1px solid ${N200}` }}>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl w-fit" style={{ background: "var(--pt-ai-source-bg)", border: `1px solid ${N200}` }}>
             <RefreshCw className="w-3.5 h-3.5 animate-spin" style={{ color: accentColor }} />
             <span className="text-xs" style={{ color: N500 }}>Analysing reports…</span>
           </div>
@@ -377,7 +377,7 @@ export default function AIQueryPanel({
               key={i}
               onClick={() => handleSend(p)}
               className="text-[11px] px-2.5 py-1 rounded-full whitespace-nowrap"
-              style={{ background: "#fff", border: `1px solid ${N200}`, color: N500 }}
+              style={{ background: "var(--pt-ai-source-bg)", border: `1px solid ${N200}`, color: N500 }}
               data-testid={`ai-prompt-${i}`}
             >
               {p}
