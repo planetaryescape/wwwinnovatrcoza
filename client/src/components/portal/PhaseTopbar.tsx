@@ -6,7 +6,7 @@ const PHASES = [
   { num: "01", key: "explore", label: "Explore", path: "/portal/explore" },
   { num: "02", key: "test",    label: "Test",    path: "/portal/test"    },
   { num: "03", key: "act",     label: "Act",     path: "/portal/act"     },
-  { num: "04", key: "health",  label: "Company", path: "/portal/health"  },
+  { num: "04", key: "health",  label: "Health",  path: "/portal/health"  },
 ];
 
 interface PhaseTopbarProps {
