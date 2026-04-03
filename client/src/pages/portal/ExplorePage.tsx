@@ -178,6 +178,25 @@ export default function ExplorePage() {
         <PhaseTopbar
           currentPhase="explore"
           description="Discover signals and validate ideas before testing"
+          primaryAction={
+            <button
+              onClick={() => setActiveTab("sandbox")}
+              data-testid="button-topbar-run-sandbox"
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "5px 12px",
+                borderRadius: 6,
+                fontSize: 12, fontWeight: 600,
+                background: "var(--pt-step-active-bubble)",
+                color: "#fff",
+                border: "none",
+                cursor: "pointer",
+                flexShrink: 0,
+              }}
+            >
+              + Run Sandbox
+            </button>
+          }
         />
 
         {/* Sub-tabs — sticky white bar */}

@@ -117,7 +117,7 @@ export default function Dashboard() {
           {/* ── Hero card ── */}
           <div
             className="rounded-2xl p-6 flex items-start justify-between gap-6 flex-wrap"
-            style={{ background: `linear-gradient(135deg, ${VDK} 0%, #2A2660 60%, #3A3575 100%)` }}
+            style={{ background: "var(--ds-phase-header, linear-gradient(135deg, #1E1B3A 0%, #2A2660 60%, #3A3575 100%))" }}
             data-testid="hero-card"
           >
             <div className="min-w-0">
