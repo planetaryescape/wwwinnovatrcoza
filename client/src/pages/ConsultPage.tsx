@@ -320,7 +320,7 @@ function HeroSection() {
             through expert strategy, design &amp; testing.
           </p>
           <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-            <a href="#lifecycle" style={{
+            <a href="#process" style={{
               fontFamily: '"DM Sans", sans-serif',
               fontSize: 14,
               fontWeight: 600,
@@ -344,7 +344,7 @@ function HeroSection() {
                 (e.currentTarget).style.boxShadow = "none";
               }}
             >
-              Explore Our Tools
+              Our Process
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                 <path d="M8 3v10M4 9l4 4 4-4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -546,7 +546,7 @@ function ProblemSolutionSection() {
 
 function ProcessSection() {
   return (
-    <section style={{
+    <section id="process" style={{
       background: BRAND.amber,
       padding: "80px 32px 100px",
     }}>
@@ -760,7 +760,7 @@ function CTASection() {
               <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </a>
-          <a href="mailto:richard@innovatr.co.za" style={{
+          <a href="/contact" style={{
             fontFamily: '"DM Sans", sans-serif',
             fontSize: 14,
             fontWeight: 500,

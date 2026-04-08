@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Zap, Target, TrendingUp, Rocket, User } from "lucide-react";
 import innovatrLogo from "@assets/Innovatr_logo-01_for_light_1774947393282.png";
 import { LoginDialog } from "@/components/LoginDialog";
-import { useAuth } from "@/contexts/AuthContext";
 import pricingHeroCoins from "@assets/statistics___graph,_chart,_analytics,_presentation,_dashboard,_1774885935393.png";
 import mascotStarter from "@assets/Starter_1774884250090.png";
 import mascotGrowth from "@assets/Growth_1774884250087.png";
@@ -950,6 +950,10 @@ function MembershipSection() {
 }
 
 function NewsletterSection() {
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
+  const [loginOpen, setLoginOpen] = useState(false);
+
   return (
     <section style={{ padding: "88px 0", background: "#fff", borderTop: `1px solid ${BRAND.dark}08` }}>
       <div style={{ maxWidth: 580, margin: "0 auto", textAlign: "center" as const, padding: "0 24px" }}>
@@ -970,25 +974,36 @@ function NewsletterSection() {
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" as const }}>
           <a
-            href="/portal/trends"
+            href="/portal/explore"
             style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 15, color: "#fff", background: BRAND.violet, border: "none", borderRadius: 8, padding: "13px 28px", cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}
           >
-            Subscribe Now
+            {isLoggedIn ? "View Trends" : "Subscribe Now"}
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
               <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </a>
-          <a
-            href="/?login=true"
-            style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 15, color: BRAND.dark, background: "transparent", border: `1.5px solid ${BRAND.dark}22`, borderRadius: 8, padding: "13px 28px", cursor: "pointer", textDecoration: "none" }}
-          >
-            Already a member? Log in
-          </a>
+          {isLoggedIn ? (
+            <a
+              href="/portal/explore"
+              style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 15, color: BRAND.dark, background: "transparent", border: `1.5px solid ${BRAND.dark}22`, borderRadius: 8, padding: "13px 28px", cursor: "pointer", textDecoration: "none" }}
+            >
+              Go to Portal
+            </a>
+          ) : (
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); setLoginOpen(true); }}
+              style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 15, color: BRAND.dark, background: "transparent", border: `1.5px solid ${BRAND.dark}22`, borderRadius: 8, padding: "13px 28px", cursor: "pointer", textDecoration: "none" }}
+            >
+              Already a member? Log in
+            </a>
+          )}
         </div>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: `${BRAND.dark}99`, margin: "22px 0 0", lineHeight: 1.6 }}>
           Create an account to subscribe. Full trends library access available with an Innovatr Membership.
         </p>
       </div>
+      <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} defaultSignup={false} />
     </section>
   );
 }

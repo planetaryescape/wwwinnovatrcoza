@@ -1435,7 +1435,7 @@ export default function ResearchTools() {
                 </svg>
               </a>
               <a
-                href="#tools"
+                href="#tools-section"
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 14,
@@ -1480,7 +1480,7 @@ export default function ResearchTools() {
         </div>
       </section>
 
-      <section style={{ padding: "56px 0 64px", borderTop: `1px solid ${BRAND.dark}0D` }}>
+      <section id="tools-section" style={{ padding: "56px 0 64px", borderTop: `1px solid ${BRAND.dark}0D` }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
           <div style={{ textAlign: "center" as const, marginBottom: 48 }}>
             <span
@@ -1657,7 +1657,7 @@ export default function ResearchTools() {
             </p>
             <div style={{ display: "flex", gap: 12 }}>
               <a
-                href="/consult"
+                href="/contact"
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 14,
@@ -1673,7 +1673,7 @@ export default function ResearchTools() {
                 Talk to Us
               </a>
               <a
-                href="/research"
+                href="/#pricing"
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 14,
