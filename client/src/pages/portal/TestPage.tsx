@@ -3,8 +3,6 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
 import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
-import { PhaseTopbar } from "@/components/portal/PhaseTopbar";
-import { usePortalTheme } from "@/hooks/usePortalTheme";
 import {
   X, Sparkles, Send, MessageSquare, ChevronDown, ExternalLink,
   ArrowRight, Loader2, Upload, CheckCircle2, ChevronRight, FileText,
@@ -16,13 +14,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { ClientReport } from "@shared/schema";
 
 /* ── Design System tokens ─────────────────────────────── */
-const VDK      = "var(--pt-text-primary, #1E1B3A)";
+const VDK      = "#1E1B3A";
 const VIO      = "#3A2FBF";
 const VIO_LT   = "#EAE8FF";
 const CORAL    = "#E8503A";
-const N200     = "var(--pt-divider, #EBEBEB)";
-const N400     = "var(--pt-text-secondary, #A89078)";
-const N500     = "var(--pt-text-tertiary, #8A7260)";
+const N200     = "#EBEBEB";
+const N400     = "#A89078";
+const N500     = "#8A7260";
 const SUCCESS  = "#2A9E5C";
 const SUC_LT   = "#D1FAE5";
 const AMBER_DK = "#B8911A";
@@ -33,8 +31,8 @@ const CREAM    = "#FFFFFF";
 const TEST_COLOR = SUCCESS;
 
 const CARD: React.CSSProperties = {
-  background: "var(--pt-card-bg, #ffffff)",
-  border: `1px solid var(--pt-card-border, #EBEBEB)`,
+  background: "#ffffff",
+  border: `1px solid #EBEBEB`,
   borderRadius: 12,
   boxShadow: "0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04)",
 };
@@ -233,7 +231,6 @@ export default function TestPage() {
   const [, setLocation]           = useLocation();
   const { user }                  = useAuth();
   const { toast }                 = useToast();
-  const { theme }                 = usePortalTheme();
   const [activeTab, setActiveTab] = useState<Tab>("studies");
   const [briefMode, setBriefMode] = useState<BriefMode>("choose");
   const [aiInput, setAiInput]     = useState("");
@@ -424,34 +421,38 @@ export default function TestPage() {
   };
 
   return (
-    <div className="portal-root flex h-screen overflow-hidden" data-portal-theme={theme} style={{ background: "var(--pt-canvas-bg)" }}>
+    <div className="portal-root flex h-screen overflow-hidden" style={{ background: CREAM }}>
       <MobilePortalNav />
       <div className="flex flex-col w-full h-full">
 
         {/* Phase topbar */}
-        <PhaseTopbar
-          currentPhase="test"
-          description="Launch briefs and track consumer research studies"
-          primaryAction={
+        <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1" style={{ background: "rgba(42,158,92,0.2)", color: "#86EFAC", border: "1px solid rgba(42,158,92,0.4)", borderRadius: 6 }}>
+              PHASE 02
+            </span>
+            <h1 className="font-serif text-xl text-white">Test</h1>
+            <span className="text-sm hidden sm:block" style={{ color: N400 }}>Put your ideas in front of real consumers.</span>
+          </div>
+          <div className="flex items-center gap-2">
             <button
               onClick={() => { setActiveTab("brief"); setBriefMode("choose"); }}
-              data-testid="button-topbar-launch-brief"
-              style={{
-                display: "flex", alignItems: "center", gap: 6,
-                padding: "5px 12px",
-                borderRadius: 6,
-                fontSize: 12, fontWeight: 600,
-                background: "var(--pt-step-active-bubble)",
-                color: "#fff",
-                border: "none",
-                cursor: "pointer",
-                flexShrink: 0,
-              }}
+              data-testid="button-launch-brief"
+              className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg"
+              style={{ background: TEST_COLOR, borderRadius: 8 }}
             >
-              + Launch Brief
+              Launch a Brief
             </button>
-          }
-        />
+            <button
+              onClick={() => setLocation("/portal/dashboard")}
+              className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+              style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}
+              data-testid="button-close-test"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
 
         {/* Sub-tabs — sticky white bar */}
         <div className="flex flex-shrink-0 px-5 sticky-tab-bar border-b" style={{ borderColor: N200 }}>
@@ -475,7 +476,7 @@ export default function TestPage() {
         {/* Body */}
         <div className="flex flex-1 overflow-hidden">
           {/* Main */}
-          <div className="flex-1 overflow-y-auto p-6 pb-20 sm:pb-6" style={{ background: "var(--pt-canvas-bg)" }}>
+          <div className="flex-1 overflow-y-auto p-6 pb-20 sm:pb-6" style={{ background: CREAM }}>
 
             {/* ── LAUNCH A BRIEF ── */}
             {activeTab === "brief" && (

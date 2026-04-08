@@ -12,17 +12,15 @@ import { useIndustryGroups } from "@/hooks/useIndustryGroups";
 import { filterByIndustry } from "@/lib/industry-groups";
 import { ALL_SIGNALS, ALL_MARKET_GAPS } from "@/lib/portal-content";
 import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
-import { PhaseTopbar } from "@/components/portal/PhaseTopbar";
-import { usePortalTheme } from "@/hooks/usePortalTheme";
 
 /* ── Design System tokens ─────────────────────────────── */
-const VDK      = "var(--pt-text-primary, #1E1B3A)";
+const VDK      = "#1E1B3A";
 const VIO      = "#3A2FBF";
 const VIO_LT   = "#EAE8FF";
 const CORAL    = "#E8503A";
-const N200     = "var(--pt-divider, #EBEBEB)";
-const N400     = "var(--pt-text-secondary, #A89078)";
-const N500     = "var(--pt-text-tertiary, #8A7260)";
+const N200     = "#EBEBEB";
+const N400     = "#A89078";
+const N500     = "#8A7260";
 const SUCCESS  = "#2A9E5C";
 const SUC_LT   = "#D1FAE5";
 const AMBER_DK = "#B8911A";
@@ -31,8 +29,8 @@ const CREAM    = "#FFFFFF";
 const EXPLORE_COLOR = VIO;
 
 const CARD: React.CSSProperties = {
-  background: "var(--pt-card-bg, #ffffff)",
-  border: `1px solid var(--pt-card-border, #EBEBEB)`,
+  background: "#ffffff",
+  border: `1px solid #EBEBEB`,
   borderRadius: 12,
   boxShadow: "0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04)",
 };
@@ -96,7 +94,6 @@ function BenchmarkBar({ value, benchmark, color }: { value: number; benchmark: n
 export default function ExplorePage() {
   const [, setLocation] = useLocation();
   const { user }        = useAuth();
-  const { theme }       = usePortalTheme();
   const queryClient     = useQueryClient();
   const [activeTab, setActiveTab]           = useState<Tab>("signals");
   const [chatInput, setChatInput]           = useState("");
@@ -170,37 +167,44 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="portal-root flex h-screen overflow-hidden" data-portal-theme={theme} style={{ background: "var(--pt-canvas-bg)" }}>
+    <div className="portal-root flex h-screen overflow-hidden" style={{ background: CREAM }}>
       <MobilePortalNav />
       <div className="flex flex-col w-full h-full">
 
         {/* Phase topbar */}
-        <PhaseTopbar
-          currentPhase="explore"
-          description="Discover signals and validate ideas before testing"
-          primaryAction={
-            <button
-              onClick={() => setActiveTab("sandbox")}
-              data-testid="button-topbar-run-sandbox"
-              style={{
-                display: "flex", alignItems: "center", gap: 6,
-                padding: "5px 12px",
-                borderRadius: 6,
-                fontSize: 12, fontWeight: 600,
-                background: "var(--pt-step-active-bubble)",
-                color: "#fff",
-                border: "none",
-                cursor: "pointer",
-                flexShrink: 0,
-              }}
+        <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+          <div className="flex items-center gap-3">
+            <span
+              className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1"
+              style={{ background: "rgba(58,47,191,0.3)", color: VIO_LT, border: `1px solid rgba(58,47,191,0.5)`, borderRadius: 6 }}
             >
-              + Run Sandbox
+              PHASE 01
+            </span>
+            <h1 className="font-serif text-xl text-white">Explore</h1>
+            <span className="text-sm hidden sm:block" style={{ color: N400 }}>Discover trends, signals &amp; market intelligence</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setLocation("/portal/test")}
+              data-testid="button-launch-brief"
+              className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg"
+              style={{ background: CORAL, borderRadius: 8 }}
+            >
+              Launch a Brief
             </button>
-          }
-        />
+            <button
+              onClick={() => setLocation("/portal/dashboard")}
+              className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+              style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}
+              data-testid="button-close-explore"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
 
         {/* Sub-tabs — sticky white bar */}
-        <div className="flex flex-shrink-0 px-5 sticky-tab-bar border-b" style={{ borderColor: "var(--pt-divider, #EBEBEB)" }}>
+        <div className="flex flex-shrink-0 px-5 sticky-tab-bar border-b" style={{ borderColor: N200 }}>
           {(["signals", "sandbox", "intelligence"] as Tab[]).map(tab => (
             <button
               key={tab}
@@ -221,7 +225,7 @@ export default function ExplorePage() {
         {/* Body */}
         <div className="flex flex-1 overflow-hidden">
           {/* Main content */}
-          <div className="flex-1 overflow-y-auto p-6 pb-20 sm:pb-6" style={{ background: "var(--pt-canvas-bg)" }}>
+          <div className="flex-1 overflow-y-auto p-6 pb-20 sm:pb-6" style={{ background: CREAM }}>
 
             {/* ── SIGNALS ── */}
             {activeTab === "signals" && (
