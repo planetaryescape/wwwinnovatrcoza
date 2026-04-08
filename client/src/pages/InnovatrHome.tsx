@@ -1599,29 +1599,11 @@ function Footer() {
           {/* Brand */}
           <div style={{ maxWidth: 280 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-              <span style={{
-                display: "inline-block",
-                width: 28,
-                height: 28,
-                background: BRAND.violet,
-                borderRadius: 6,
-                position: "relative",
-                overflow: "hidden",
-                flexShrink: 0,
-              }}>
-                <span style={{
-                  position: "absolute",
-                  bottom: 5,
-                  right: 5,
-                  width: 10,
-                  height: 10,
-                  background: BRAND.coral,
-                  borderRadius: "50%",
-                }} />
-              </span>
-              <span style={{ fontFamily: '"DM Serif Display", serif', fontSize: 20, fontWeight: 400, color: "#fff" }}>
-                Innovatr
-              </span>
+              <img
+                src="/Innovatr_logo-01.png"
+                alt="Innovatr"
+                style={{ height: 32, width: "auto", filter: "brightness(0) invert(1)" }}
+              />
             </div>
             <p style={{
               fontFamily: '"DM Sans", sans-serif',
@@ -1634,11 +1616,11 @@ function Footer() {
             </p>
             <div style={{ display: "flex", gap: 10 }}>
               {[
-                { label: "LinkedIn", path: "M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z M4 6a2 2 0 100-4 2 2 0 000 4z" },
-                { label: "Twitter", path: "M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" },
-                { label: "Instagram", path: "M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zM17.5 6.5h.01M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5z" },
+                { label: "Facebook", href: "https://web.facebook.com/innovatr1", path: "M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" },
+                { label: "LinkedIn", href: "https://www.linkedin.com/company/innovatr/", path: "M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z M4 6a2 2 0 100-4 2 2 0 000 4z" },
+                { label: "Instagram", href: "https://www.instagram.com/innovatr1/", path: "M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zM17.5 6.5h.01M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5z" },
               ].map((s) => (
-                <a key={s.label} href="#" style={{
+                <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" style={{
                   width: 36,
                   height: 36,
                   display: "flex",
