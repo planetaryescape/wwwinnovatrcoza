@@ -875,9 +875,45 @@ function CTASection() {
           </p>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: 12, flexShrink: 0 }}>
+        <div className="cta-btn-col" style={{ display: "flex", flexDirection: "column" as const, gap: 12, flexShrink: 0 }}>
           <a
-            href="#"
+            href="/contact"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 14,
+              fontWeight: 700,
+              color: "#fff",
+              background: BRAND.coral,
+              padding: "14px 36px",
+              borderRadius: 8,
+              textDecoration: "none",
+              cursor: "pointer",
+              whiteSpace: "nowrap" as const,
+              transition: "transform 0.18s, box-shadow 0.18s",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget).style.transform = "scale(1.03)";
+              (e.currentTarget).style.boxShadow = `0 8px 24px ${BRAND.coral}40`;
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget).style.transform = "scale(1)";
+              (e.currentTarget).style.boxShadow = "none";
+            }}
+            data-testid="button-cta-contact"
+          >
+            Get in Touch
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </a>
+          <a
+            href="https://calendly.com/richard-1220"
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -910,7 +946,7 @@ function CTASection() {
             </svg>
           </a>
           <a
-            href="/checkout/membership-entry"
+            href="/#membership"
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -1168,7 +1204,11 @@ function Footer() {
         </div>
       </div>
       <style>{`
-        @media (max-width: 768px) { .footer-top { flex-direction: column !important; gap: 32px !important; } }
+        @media (max-width: 768px) {
+          .footer-top { flex-direction: column !important; gap: 32px !important; }
+          .cta-btn-col { width: 100% !important; }
+          .cta-btn-col > a { width: 100% !important; box-sizing: border-box !important; }
+        }
       `}</style>
     </footer>
   );
