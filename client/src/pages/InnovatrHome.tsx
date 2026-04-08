@@ -1201,9 +1201,9 @@ function PricingSection() {
         </div>
 
         {/* Cards */}
-        <div style={{
+        <div className="ir-card-grid-2" style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
           gap: 24,
           maxWidth: 800,
           margin: "0 auto",

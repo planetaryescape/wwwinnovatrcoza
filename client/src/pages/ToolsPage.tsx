@@ -708,7 +708,7 @@ function ExpandedToolModal({ tool, onClose }: { tool: Tool; onClose: () => void 
             {tool.headlineTitle}
           </p>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
+          <div className="ir-card-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
             <div>
               <span
                 style={{
@@ -864,6 +864,7 @@ function SocialMediaSection() {
   return (
     <div style={{ padding: "0 32px" }}>
       <div
+        className="ir-two-col"
         style={{
           background: "#fff",
           borderRadius: 20,
@@ -986,7 +987,7 @@ function SocialMediaSection() {
               ))}
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 40, alignItems: "center" }}>
+            <div className="ir-two-col" style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 40, alignItems: "center" }}>
               <div
                 style={{
                   display: "flex",
@@ -1185,6 +1186,7 @@ function DashboardSection() {
         </div>
 
         <div
+          className="ir-two-col"
           style={{
             display: "grid",
             gridTemplateColumns: "260px 1fr",
@@ -1736,7 +1738,7 @@ export default function ResearchTools() {
               background: conic-gradient(from 0deg, ${BRAND.amber}cc, ${BRAND.cyan}cc, ${BRAND.coral}cc, ${BRAND.amber}cc, ${BRAND.amber}cc);
             }
           `}</style>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          <div className="ir-card-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             {[
               { num: "200+", label: "Studies Delivered", bg: BRAND.violet, numColor: "#fff",        labelColor: "rgba(255,255,255,0.65)", glowClass: "stat-glow-violet" },
               { num: "25+",  label: "Markets Covered",   bg: BRAND.coral,  numColor: "#fff",        labelColor: "rgba(255,255,255,0.65)", glowClass: "stat-glow-coral"  },
