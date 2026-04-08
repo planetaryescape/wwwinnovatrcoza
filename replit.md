@@ -73,6 +73,19 @@ Preferred communication style: Simple, everyday language.
 - **Development**: `npm run dev`.
 - **Production**: Vite builds client, esbuild builds server into `/dist`.
 
+### Public Website Redesign (6 Pages)
+- **Brand tokens**: Violet `#3A2FBF`, Coral `#E8503A`, Cyan `#4EC9E8`, Amber `#F5C842`, off-white `#F8F7F4`, dark `#0D0B1F`. DM Serif Display headings, DM Sans body.
+- **Shared components**: `InnovatrNavbar` (fixed glassmorphism nav with real auth via `useAuth()`, LoginDialog for Sign Up/Login, Calendly Book Demo) and `InnovatrFooter` (dark footer with production routes).
+- **Routes**:
+  - `/` → `InnovatrHome` (hero with animated personas, stats, pricing, membership)
+  - `/consult` → `ConsultPage` (WhatWeDo — the Innovatr Consult offering)
+  - `/research` → `ResearchPage` (PricingPage — membership tiers and research products)
+  - `/tools` → `ToolsPage` (ResearchTools — tool library with video demos)
+  - `/case-studies` → `CaseStudiesPage` (case study listing)
+  - `/contact` → `ContactPage` (contact form POSTing to `/api/contact`, with WhatsApp/email CTAs)
+- **Book Demo**: Opens `https://calendly.com/richard-1220` in a new tab (not a route).
+- **Auth buttons**: Login/Sign Up in navbar trigger `LoginDialog` modal.
+
 ### Feature Specifications
 - **Service Detail Pages**: Consistent design for Test24 services and consultation, with embedded videos and clear CTAs.
 - **Pricing Section**: Displays discounted rates for members.

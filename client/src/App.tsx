@@ -6,8 +6,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { useGtmPageTracking } from "@/hooks/use-gtm-page-tracking";
-import CinematicLanding from "@/pages/CinematicLanding";
-import Home from "@/pages/Home";
+import InnovatrHome from "@/pages/InnovatrHome";
+import WhatWeDo from "@/pages/ConsultPage";
+import PricingPage from "@/pages/ResearchPage";
+import ResearchTools from "@/pages/ToolsPage";
+import CaseStudies from "@/pages/CaseStudiesPage";
+import ContactUs from "@/pages/ContactPage";
 import Test24BasicPage from "@/pages/Test24BasicPage";
 import Test24ProPage from "@/pages/Test24ProPage";
 import ConsultPillarPage from "@/pages/ConsultPillarPage";
@@ -44,11 +48,15 @@ function Router() {
   useGtmPageTracking();
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={InnovatrHome} />
+      <Route path="/research" component={PricingPage} />
+      <Route path="/tools" component={ResearchTools} />
+      <Route path="/case-studies" component={CaseStudies} />
+      <Route path="/contact" component={ContactUs} />
       <Route path="/test24-basic" component={Test24BasicPage} />
       <Route path="/test24-pro" component={Test24ProPage} />
       <Route path="/innovatr-consult">{() => <Redirect to="/consult" />}</Route>
-      <Route path="/consult" component={CinematicLanding} />
+      <Route path="/consult" component={WhatWeDo} />
       <Route path="/consult/:pillarId" component={ConsultPillarPage} />
       <Route path="/case-study/:id" component={CaseStudyDetail} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />

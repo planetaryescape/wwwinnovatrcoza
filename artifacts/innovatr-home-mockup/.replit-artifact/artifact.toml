@@ -1,0 +1,59 @@
+kind = "design"
+      previewPath = "/"
+      title = "Innovatr Home Page Mockup"
+      version = "1.0.0"
+      id = "artifacts/innovatr-home-mockup"
+      router = "path"
+
+      [[integratedSkills]]
+      name = "mockup-sandbox"
+      version = "1.0.0"
+
+      [[services]]
+      name = "Component Preview Server"
+      paths = [ "/" ]
+      localPort = 19941
+
+      [services.development]
+      run = "npm run dev"
+
+      [services.env]
+      PORT = "19941"
+      BASE_PATH = "/"
+
+      [[canvas]]
+      componentPath = "InnovatrHome"
+      label = "Innovatr Home Page"
+      width = 1440
+      height = 900
+
+      [[canvas]]
+      componentPath = "WhatWeDo"
+      label = "What We Do Page"
+      width = 1440
+      height = 900
+
+      [[canvas]]
+      componentPath = "PricingPage"
+      label = "Pricing Page"
+      width = 1440
+      height = 900
+
+      [[canvas]]
+      componentPath = "ResearchTools"
+      label = "Research Tools Page"
+      width = 1440
+      height = 900
+
+      [[canvas]]
+      componentPath = "CaseStudies"
+      label = "Case Studies Page"
+      width = 1440
+      height = 900
+
+      [[canvas]]
+      componentPath = "ContactUs"
+      label = "Contact Us Page"
+      width = 1200
+      height = 900
+  

@@ -1,0 +1,321 @@
+import { useState, useEffect, useRef } from "react";
+import innovatrLogo from "@assets/Innovatr_logo-01_for_light_1774947393282.png";
+import { InnovatrNavbar } from "@/components/InnovatrNavbar";
+import { InnovatrFooter } from "@/components/InnovatrFooter";
+
+const BRAND = {
+  violet: "#3A2FBF",
+  coral: "#E8503A",
+  cyan: "#4EC9E8",
+  amber: "#F5C842",
+  offWhite: "#F8F7F4",
+  dark: "#0D0B1F",
+};
+
+
+
+const CLIENTS = [
+  "Discovery Bank", "Heineken", "Rain", "Mondelez", "Revlon",
+  "Tiger Brands", "DGB", "Netflorist", "ooba", "Nando's",
+  "BATA Shoes", "SUNPAC", "Clover", "Rugani Juice",
+  "Namibian Breweries", "Dairy Maid", "KWV",
+];
+
+const STATS = [
+  { value: "200+", label: "Studies", color: BRAND.violet },
+  { value: "25+",  label: "Markets", color: BRAND.coral },
+  { value: "44M+", label: "Panel",   color: BRAND.cyan },
+  { value: "10+",  label: "Industries", color: BRAND.amber },
+];
+
+const WHY_POINTS = [
+  {
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+      </svg>
+    ),
+    title: "Consumer intelligence that moves fast",
+    body: "Proprietary frameworks + live consumer panels = insight in days, not months. Speed without sacrifice.",
+    accent: BRAND.violet,
+  },
+  {
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+      </svg>
+    ),
+    title: "End-to-end from strategy to shelf",
+    body: "We don't hand you a report and disappear. We stay in the room through strategy, testing and launch.",
+    accent: BRAND.coral,
+  },
+  {
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+    ),
+    title: "Growth is the only metric that matters",
+    body: "Every engagement is designed to unlock real commercial growth — not just interesting findings.",
+    accent: BRAND.cyan,
+  },
+  {
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    ),
+    title: "A team that's been in your seat",
+    body: "Brand-side, agency-side — across global markets in Europe, the Middle East, and beyond. We understand the pressure.",
+    accent: BRAND.amber,
+  },
+];
+
+/* ─── Nav ─────────────────────────────────────────────────────────────── */
+
+/* ─── Client Ticker ────────────────────────────────────────────────────── */
+function ClientTicker() {
+  const trackRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    let x = 0;
+    let raf: number;
+    const step = () => {
+      x += 0.5;
+      if (x >= el.scrollWidth / 2) x = 0;
+      el.style.transform = `translateX(-${x}px)`;
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const repeated = [...CLIENTS, ...CLIENTS, ...CLIENTS];
+  return (
+    <div style={{ overflow: "hidden", position: "relative" as const, padding: "16px 0" }}>
+      <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 40, background: `linear-gradient(to right, #fff, transparent)`, zIndex: 2, pointerEvents: "none" }} />
+      <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 40, background: `linear-gradient(to left, #fff, transparent)`, zIndex: 2, pointerEvents: "none" }} />
+      <div ref={trackRef} style={{ display: "flex", alignItems: "center", whiteSpace: "nowrap" as const, willChange: "transform" }}>
+        {repeated.map((client, i) => (
+          <div key={i} style={{ display: "flex", alignItems: "center" }}>
+            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, color: `${BRAND.dark}99`, padding: "0 18px", letterSpacing: "0.02em" }}>{client}</span>
+            <span style={{ color: `${BRAND.coral}50`, fontSize: 7 }}>•</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Left column: Why Innovatr ─────────────────────────────────────────── */
+function WhySection() {
+  return (
+    <div style={{ display: "flex", flexDirection: "column" as const }}>
+      {/* Header */}
+      <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 42, color: BRAND.dark, margin: "0 0 16px", lineHeight: 1.1 }}>
+        The team behind<br />
+        <span style={{ color: BRAND.violet }}>200+ growth stories.</span>
+      </h2>
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: `${BRAND.dark}bb`, lineHeight: 1.8, margin: "0 0 32px", maxWidth: 460 }}>
+        Innovatr is the decision-making infrastructure for ambitious brands — combining strategy, real consumer insights, and the power of AI to deliver decisions that drive action. Not in weeks. In 24 hours.
+      </p>
+
+      {/* 4 Why Points */}
+      <div style={{ display: "flex", flexDirection: "column" as const, gap: 22, marginBottom: 36 }}>
+        {WHY_POINTS.map((point, i) => (
+          <div key={i} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+            <div style={{ width: 38, height: 38, borderRadius: 10, background: `${point.accent}14`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: point.accent }}>
+              {point.icon}
+            </div>
+            <div>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: BRAND.dark, margin: "0 0 3px", lineHeight: 1.3 }}>{point.title}</p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: `${BRAND.dark}aa`, margin: 0, lineHeight: 1.65 }}>{point.body}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* CTA */}
+      <a
+        href="https://calendly.com/richard-1220"
+        target="_blank"
+        rel="noopener noreferrer"
+        data-testid="button-book-demo"
+        style={{ display: "inline-flex", alignItems: "center", gap: 10, fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: BRAND.dark, background: BRAND.amber, padding: "13px 26px", borderRadius: 10, textDecoration: "none", cursor: "pointer", alignSelf: "flex-start" }}
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        Book a 30-min intro call
+      </a>
+    </div>
+  );
+}
+
+/* ─── Right column: Contact Form ─────────────────────────────────────────── */
+function ContactForm() {
+  const [form, setForm] = useState({ name: "", company: "", email: "", message: "" });
+  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name || !form.email || !form.message) return;
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const messageBody = form.company
+        ? `Company: ${form.company}\n\n${form.message}`
+        : form.message;
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: form.name, email: form.email, message: messageBody }),
+      });
+      if (!res.ok) throw new Error("Failed to send");
+      setSubmitted(true);
+      setForm({ name: "", company: "", email: "", message: "" });
+      setTimeout(() => setSubmitted(false), 6000);
+    } catch {
+      setError("Something went wrong. Please try again or email us directly.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const fieldStyle: React.CSSProperties = {
+    width: "100%",
+    fontFamily: "'DM Sans', sans-serif",
+    fontSize: 14,
+    color: BRAND.dark,
+    background: BRAND.offWhite,
+    border: `1.5px solid ${BRAND.dark}10`,
+    borderRadius: 8,
+    padding: "11px 14px",
+    outline: "none",
+    boxSizing: "border-box",
+  };
+
+  const labelStyle: React.CSSProperties = {
+    fontFamily: "'DM Sans', sans-serif",
+    fontSize: 11,
+    fontWeight: 700,
+    color: `${BRAND.dark}bb`,
+    display: "block",
+    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: "0.09em",
+  };
+
+  return (
+    <div style={{ background: "#fff", borderRadius: 20, border: `1px solid ${BRAND.dark}08`, padding: "44px 40px" }}>
+      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.14em", color: BRAND.coral, display: "block", marginBottom: 10 }}>
+        Send a message
+      </span>
+      <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, color: BRAND.dark, margin: "0 0 32px", lineHeight: 1.15 }}>
+        Tell us what you're working on
+      </h2>
+
+      {submitted ? (
+        <div style={{ background: `${BRAND.cyan}12`, border: `1px solid ${BRAND.cyan}30`, borderRadius: 12, padding: "36px 24px", textAlign: "center" as const }}>
+          <div style={{ width: 48, height: 48, borderRadius: "50%", background: `${BRAND.cyan}20`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={BRAND.cyan} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <p style={{ fontFamily: "'DM Serif Display', serif", fontSize: 22, color: BRAND.dark, margin: "0 0 8px" }}>Message received</p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: `${BRAND.dark}aa`, margin: 0 }}>We'll be in touch within one business day.</p>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <div className="ir-card-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+            <div>
+              <label style={labelStyle}>Your name</label>
+              <input data-testid="input-name" type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Hannah Smith" style={fieldStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Company</label>
+              <input data-testid="input-company" type="text" value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} placeholder="Your company" style={fieldStyle} />
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 14 }}>
+            <label style={labelStyle}>Email address</label>
+            <input data-testid="input-email" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="you@company.com" style={fieldStyle} />
+          </div>
+
+          <div style={{ marginBottom: 28 }}>
+            <label style={labelStyle}>What are you working on?</label>
+            <textarea
+              data-testid="input-message"
+              value={form.message}
+              onChange={e => setForm({ ...form, message: e.target.value })}
+              placeholder="Tell us about your innovation challenge, the question you're trying to answer, or the opportunity you're chasing..."
+              rows={5}
+              style={{ ...fieldStyle, resize: "vertical" as const, lineHeight: 1.6 }}
+            />
+          </div>
+
+          {error && (
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: BRAND.coral, marginBottom: 12 }}>{error}</p>
+          )}
+          <button data-testid="button-submit-contact" type="submit" disabled={isSubmitting} style={{ width: "100%", fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 700, color: "#fff", background: isSubmitting ? `${BRAND.violet}99` : BRAND.violet, border: "none", borderRadius: 10, padding: "15px 0", cursor: isSubmitting ? "not-allowed" : "pointer" }}>
+            {isSubmitting ? "Sending…" : "Send Message"}
+          </button>
+        </form>
+      )}
+
+      {/* Contact details */}
+      <div style={{ marginTop: 28, paddingTop: 28, borderTop: `1px solid ${BRAND.dark}08`, display: "flex", gap: 16 }}>
+        <a href="mailto:richard@innovatr.co.za" data-testid="link-email" style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, textDecoration: "none" }}>
+          <div style={{ width: 36, height: 36, borderRadius: 9, background: `${BRAND.violet}12`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={BRAND.violet} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <div>
+            <p style={{ margin: 0, fontSize: 10, color: `${BRAND.dark}99`, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.08em", fontFamily: "'DM Sans', sans-serif" }}>Email</p>
+            <p style={{ margin: 0, fontWeight: 600, color: BRAND.violet, fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>richard@innovatr.co.za</p>
+          </div>
+        </a>
+
+        <a href="https://wa.me/27823012433" data-testid="link-whatsapp" target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, textDecoration: "none" }}>
+          <div style={{ width: 36, height: 36, borderRadius: 9, background: "#25D36615", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#25D366">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+            </svg>
+          </div>
+          <div>
+            <p style={{ margin: 0, fontSize: 10, color: `${BRAND.dark}99`, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.08em", fontFamily: "'DM Sans', sans-serif" }}>WhatsApp</p>
+            <p style={{ margin: 0, fontWeight: 600, color: "#25D366", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>+27 (82) 301-2433</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Footer ──────────────────────────────────────────────────────────── */
+
+/* ─── Page ──────────────────────────────────────────────────────────────── */
+export default function ContactUs() {
+  return (
+    <div style={{ fontFamily: "'DM Sans', sans-serif", background: BRAND.offWhite, minHeight: "100vh" }}>
+      <InnovatrNavbar />
+
+      <div className="ir-contact-outer" style={{ width: "100%", padding: "116px 60px 88px", boxSizing: "border-box" as const }}>
+        <div className="ir-two-col" style={{ display: "flex", flexDirection: "row" as const, gap: 60, alignItems: "flex-start" }}>
+          <div style={{ flex: "1 1 0", minWidth: 0 }}>
+            <WhySection />
+          </div>
+          <div style={{ flex: "1 1 0", minWidth: 0 }}>
+            <ContactForm />
+          </div>
+        </div>
+      </div>
+
+      <InnovatrFooter />
+    </div>
+  );
+}

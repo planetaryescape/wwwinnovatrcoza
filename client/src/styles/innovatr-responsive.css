@@ -1,0 +1,119 @@
+/* ============================================================
+   Innovatr Responsive Utilities
+   Breakpoints: 900px for hero grids, 768px for all layouts
+   ============================================================ */
+
+/* ===== HERO SECTIONS: two-column → single column at 900px ===== */
+@media (max-width: 900px) {
+  .ir-hero-grid {
+    flex-direction: column !important;
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+  .ir-hero-grid > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+}
+
+/* ===== ALL OTHER LAYOUTS at 768px ===== */
+@media (max-width: 768px) {
+
+  /* --- Section padding --- */
+  .ir-section {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    padding-top: 56px !important;
+    padding-bottom: 56px !important;
+  }
+
+  /* --- Two-column flex / grid → single column --- */
+  .ir-two-col {
+    flex-direction: column !important;
+    grid-template-columns: 1fr !important;
+    gap: 28px !important;
+  }
+  .ir-two-col > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 auto !important;
+    position: relative !important;
+    top: auto !important;
+    min-width: 0 !important;
+  }
+
+  /* --- Three-column card grid → single column --- */
+  .ir-card-grid-3 {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  /* --- Two-column card grid → single column --- */
+  .ir-card-grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  /* --- Four-column tool grid → two columns --- */
+  .ir-tool-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px !important;
+  }
+
+  /* --- Case study card: alternating two-column → single column --- */
+  .ir-case-card {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+    padding-top: 32px !important;
+    padding-bottom: 32px !important;
+  }
+  .ir-case-card > [style*="order"] {
+    order: unset !important;
+  }
+
+  /* --- Hide decorative visuals on mobile --- */
+  .ir-hide-mobile {
+    display: none !important;
+  }
+
+  /* --- Contact page outer container --- */
+  .ir-contact-outer {
+    padding: 100px 20px 60px !important;
+  }
+
+  /* --- Hero grid child override at 768px too --- */
+  .ir-hero-grid > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+}
+
+/* --- Inner container horizontal padding --- */
+@media (max-width: 768px) {
+  .ir-container {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  /* Tool card detail: 2-col → single on narrow modal */
+  .ir-tool-detail-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+}
+
+/* ===== Very small screens (< 480px) ===== */
+@media (max-width: 480px) {
+  .ir-tool-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ir-section {
+    padding-top: 40px !important;
+    padding-bottom: 40px !important;
+  }
+}
