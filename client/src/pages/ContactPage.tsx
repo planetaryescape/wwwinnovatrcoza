@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
+import { User } from "lucide-react";
 import { LoginDialog } from "@/components/LoginDialog";
+import { useAuth } from "@/contexts/AuthContext";
 import innovatrLogo from "@assets/Innovatr_logo-01_for_light_1774947393282.png";
 
 const BRAND = {
@@ -95,6 +97,9 @@ function Navbar() {
   const [loginOpen, setLoginOpen] = useState(false);
   const [loginDefaultSignup, setLoginDefaultSignup] = useState(false);
   const openSignup = () => { setLoginDefaultSignup(true); setLoginOpen(true); };
+  const openLogin = () => { setLoginDefaultSignup(false); setLoginOpen(true); };
+  const { user, isAuthenticated } = useAuth();
+  const initials = user?.name ? user.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() : "";
 
   return (
     <>
@@ -149,25 +154,22 @@ function Navbar() {
             </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: 10 }} className="desktop-nav">
-              <a
-                href="/portal"
-                style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 14, fontWeight: 500, color: BRAND.violet, background: "transparent", border: `1.5px solid ${BRAND.violet}`, borderRadius: 8, padding: "8px 20px", cursor: "pointer", transition: "all 0.2s", letterSpacing: "0.01em", textDecoration: "none" }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = `${BRAND.violet}10`; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
-                onClick={(e) => { e.preventDefault(); openSignup(); }}
-              >
-                Sign Up
-              </a>
-              <a
-                href="https://calendly.com/richard-1220"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 14, fontWeight: 600, color: "#fff", background: BRAND.coral, border: "none", borderRadius: 8, padding: "8px 22px", cursor: "pointer", transition: "transform 0.18s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.18s", letterSpacing: "0.01em", textDecoration: "none" }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.03)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = `0 8px 24px ${BRAND.coral}55`; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "none"; }}
-              >
-                Book Demo
-              </a>
+              {isAuthenticated ? (
+                <a href="/portal/dashboard" data-testid="link-portal-dashboard" style={{
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  width: 38, height: 38, borderRadius: "50%",
+                  background: BRAND.violet, color: "#fff",
+                  fontFamily: '"DM Sans", sans-serif', fontSize: 14, fontWeight: 600,
+                  textDecoration: "none", cursor: "pointer", letterSpacing: "0.02em",
+                }}>
+                  {initials || <User size={18} />}
+                </a>
+              ) : (
+                <>
+                  <button data-testid="button-login" onClick={openLogin} style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 14, fontWeight: 500, color: BRAND.dark, background: "transparent", border: "none", padding: "8px 16px", cursor: "pointer", transition: "color 0.2s", letterSpacing: "0.01em" }}>Login</button>
+                  <button data-testid="button-signup" onClick={openSignup} style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 14, fontWeight: 600, color: "#fff", background: BRAND.coral, border: "none", borderRadius: 8, padding: "8px 22px", cursor: "pointer", transition: "transform 0.18s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.18s", letterSpacing: "0.01em" }}>Sign Up</button>
+                </>
+              )}
             </div>
 
             <button
@@ -211,8 +213,14 @@ function Navbar() {
                 </a>
               ))}
               <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-                <a href="/portal" onClick={(e) => { e.preventDefault(); openSignup(); setMobileOpen(false); }} style={{ flex: 1, fontFamily: '"DM Sans"', fontWeight: 500, fontSize: 14, color: BRAND.violet, background: "transparent", border: `1.5px solid ${BRAND.violet}`, borderRadius: 8, padding: "9px 16px", cursor: "pointer", textDecoration: "none", textAlign: "center" }}>Sign Up</a>
-                <a href="https://calendly.com/richard-1220" target="_blank" rel="noopener noreferrer" style={{ flex: 1, fontFamily: '"DM Sans"', fontWeight: 600, fontSize: 14, color: "#fff", background: BRAND.coral, border: "none", borderRadius: 8, padding: "9px 16px", cursor: "pointer", textDecoration: "none", textAlign: "center" }}>Book Demo</a>
+                {isAuthenticated ? (
+                  <a href="/portal/dashboard" data-testid="link-mobile-portal" onClick={() => setMobileOpen(false)} style={{ flex: 1, fontFamily: '"DM Sans"', fontWeight: 600, fontSize: 14, color: "#fff", background: BRAND.violet, border: "none", borderRadius: 8, padding: "9px 16px", cursor: "pointer", textDecoration: "none", textAlign: "center" }}>Go to Portal</a>
+                ) : (
+                  <>
+                    <button data-testid="button-mobile-login" onClick={() => { openLogin(); setMobileOpen(false); }} style={{ flex: 1, fontFamily: '"DM Sans"', fontWeight: 500, fontSize: 14, color: BRAND.violet, background: "transparent", border: `1.5px solid ${BRAND.violet}`, borderRadius: 8, padding: "9px 16px", cursor: "pointer", textAlign: "center" }}>Login</button>
+                    <button data-testid="button-mobile-signup" onClick={() => { openSignup(); setMobileOpen(false); }} style={{ flex: 1, fontFamily: '"DM Sans"', fontWeight: 600, fontSize: 14, color: "#fff", background: BRAND.coral, border: "none", borderRadius: 8, padding: "9px 16px", cursor: "pointer", textAlign: "center" }}>Sign Up</button>
+                  </>
+                )}
               </div>
             </div>
           )}
