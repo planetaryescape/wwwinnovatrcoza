@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { LoginDialog } from "@/components/LoginDialog";
 import { Timer, ClipboardCheck, BrainCircuit, Globe } from "lucide-react";
 import innovatrLogo from "@assets/Innovatr_logo-01_for_light_1774947393282.png";
 import mascotBasic from "@assets/Basic_1774944576263.png";
@@ -89,9 +90,13 @@ function useCountUp(target: number, duration = 2000, active = false) {
 function Navbar() {
   const scrolled = useScrolled();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [loginDefaultSignup, setLoginDefaultSignup] = useState(false);
+  const openSignup = () => { setLoginDefaultSignup(true); setLoginOpen(true); };
 
   return (
+    <>
+    <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} defaultSignup={loginDefaultSignup} />
     <nav
       style={{
         position: "fixed",
@@ -162,11 +167,11 @@ function Navbar() {
             }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = `${BRAND.violet}10`; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
-              onClick={(e) => { e.preventDefault(); setIsLoggedIn(!isLoggedIn); }}
+              onClick={(e) => { e.preventDefault(); openSignup(); }}
             >
-              {isLoggedIn ? "Login" : "Sign Up"}
+              Sign Up
             </a>
-            <a href="/book-demo" style={{
+            <a href="https://calendly.com/richard-1220" target="_blank" rel="noopener noreferrer" style={{
               fontFamily: '"DM Sans", sans-serif',
               fontSize: 14,
               fontWeight: 600,
@@ -237,8 +242,8 @@ function Navbar() {
               </a>
             ))}
             <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-              <a href="/portal" onClick={(e) => { e.preventDefault(); setIsLoggedIn(!isLoggedIn); }} style={{ flex: 1, fontFamily: '"DM Sans"', fontWeight: 500, fontSize: 14, color: BRAND.violet, background: "transparent", border: `1.5px solid ${BRAND.violet}`, borderRadius: 8, padding: "9px 16px", cursor: "pointer", textDecoration: "none", textAlign: "center" }}>{isLoggedIn ? "Login" : "Sign Up"}</a>
-              <a href="/book-demo" style={{ flex: 1, fontFamily: '"DM Sans"', fontWeight: 600, fontSize: 14, color: "#fff", background: BRAND.coral, border: "none", borderRadius: 8, padding: "9px 16px", cursor: "pointer", textDecoration: "none", textAlign: "center" }}>Book Demo</a>
+              <a href="/portal" onClick={(e) => { e.preventDefault(); openSignup(); setMobileOpen(false); }} style={{ flex: 1, fontFamily: '"DM Sans"', fontWeight: 500, fontSize: 14, color: BRAND.violet, background: "transparent", border: `1.5px solid ${BRAND.violet}`, borderRadius: 8, padding: "9px 16px", cursor: "pointer", textDecoration: "none", textAlign: "center" }}>Sign Up</a>
+              <a href="https://calendly.com/richard-1220" target="_blank" rel="noopener noreferrer" style={{ flex: 1, fontFamily: '"DM Sans"', fontWeight: 600, fontSize: 14, color: "#fff", background: BRAND.coral, border: "none", borderRadius: 8, padding: "9px 16px", cursor: "pointer", textDecoration: "none", textAlign: "center" }}>Book Demo</a>
             </div>
           </div>
         )}
@@ -251,6 +256,7 @@ function Navbar() {
         }
       `}</style>
     </nav>
+    </>
   );
 }
 
@@ -912,7 +918,7 @@ function InsightsSection() {
       background: `linear-gradient(180deg, ${BRAND.offWhite} 0%, #F0EFE9 100%)`,
       padding: "100px 32px",
     }}>
-      <div style={{
+      <div className="ir-two-col" style={{
         maxWidth: 1100,
         margin: "0 auto",
         display: "flex",
@@ -965,7 +971,7 @@ function InsightsSection() {
         </div>
 
         {/* Right — 2x2 grid of light cards */}
-        <div style={{
+        <div className="ir-card-grid-2" style={{
           flex: 1,
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
@@ -1456,7 +1462,7 @@ function HomeMembershipSection() {
             Scale your research. Save up to 50%.
           </p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+        <div className="ir-card-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
           {homeMembershipPlans.map((plan, index) => (
             <div
               key={plan.name}

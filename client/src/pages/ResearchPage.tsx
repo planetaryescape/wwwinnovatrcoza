@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Zap, Target, TrendingUp, Rocket } from "lucide-react";
 import innovatrLogo from "@assets/Innovatr_logo-01_for_light_1774947393282.png";
+import { LoginDialog } from "@/components/LoginDialog";
 import pricingHeroCoins from "@assets/statistics___graph,_chart,_analytics,_presentation,_dashboard,_1774885935393.png";
 import mascotStarter from "@assets/Starter_1774884250090.png";
 import mascotGrowth from "@assets/Growth_1774884250087.png";
@@ -150,112 +151,178 @@ const membershipPlans = [
   },
 ];
 
-function Navbar() {
+function useScrolled(threshold = 40) {
   const [scrolled, setScrolled] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > threshold);
+    window.addEventListener("scroll", handler, { passive: true });
+    return () => window.removeEventListener("scroll", handler);
+  }, [threshold]);
+  return scrolled;
+}
 
-  if (typeof window !== "undefined") {
-    window.addEventListener("scroll", () => setScrolled(window.scrollY > 40), { passive: true });
-  }
+function Navbar() {
+  const scrolled = useScrolled();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [loginDefaultSignup, setLoginDefaultSignup] = useState(false);
+  const openSignup = () => { setLoginDefaultSignup(true); setLoginOpen(true); };
 
   return (
-    <nav
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 1000,
-        transition: "background 0.35s ease, box-shadow 0.35s ease, border-bottom 0.35s ease",
-        background: scrolled ? "rgba(248,247,244,0.92)" : "rgba(248,247,244,0.6)",
-        backdropFilter: "blur(20px)",
-        borderBottom: scrolled ? `1px solid ${BRAND.violet}18` : `1px solid ${BRAND.violet}08`,
-        boxShadow: scrolled ? "0 2px 32px rgba(58,47,191,0.07)" : "none",
-      }}
-    >
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 32px" }}>
-        <div style={{ display: "flex", alignItems: "center", height: 72, gap: 16 }}>
-          <a href="/" style={{ textDecoration: "none", marginRight: "auto", display: "flex", alignItems: "center" }}>
-            <img src={innovatrLogo} alt="Innovatr" style={{ height: 38, width: "auto", display: "block" }} />
-          </a>
+    <>
+      <nav
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          transition: "background 0.35s ease, box-shadow 0.35s ease, border-bottom 0.35s ease",
+          background: scrolled ? "rgba(248,247,244,0.92)" : "rgba(248,247,244,0.6)",
+          backdropFilter: "blur(20px)",
+          borderBottom: scrolled ? `1px solid ${BRAND.violet}18` : `1px solid ${BRAND.violet}08`,
+          boxShadow: scrolled ? "0 2px 32px rgba(58,47,191,0.07)" : "none",
+        }}
+      >
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 32px" }}>
+          <div style={{ display: "flex", alignItems: "center", height: 72, gap: 16 }}>
+            <a href="/" style={{ textDecoration: "none", marginRight: "auto", display: "flex", alignItems: "center" }}>
+              <img src={innovatrLogo} alt="Innovatr" style={{ height: 38, width: "auto", display: "block" }} />
+            </a>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                style={{
-                  fontFamily: '"DM Sans", sans-serif',
-                  fontSize: 14,
-                  fontWeight: link.label === "Research" ? 600 : 500,
-                  color: link.label === "Research" ? BRAND.coral : BRAND.dark,
-                  textDecoration: "none",
-                  padding: "6px 12px",
-                  borderRadius: 6,
-                  transition: "color 0.2s, background 0.2s",
-                }}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }} className="desktop-nav">
+              {NAV_LINKS.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  style={{
+                    fontFamily: '"DM Sans", sans-serif',
+                    fontSize: 14,
+                    fontWeight: link.label === "Research" ? 600 : 500,
+                    color: link.label === "Research" ? BRAND.coral : BRAND.dark,
+                    textDecoration: "none",
+                    padding: "6px 12px",
+                    borderRadius: 6,
+                    transition: "color 0.2s, background 0.2s",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.target as HTMLElement).style.color = BRAND.coral;
+                    (e.target as HTMLElement).style.background = `${BRAND.coral}12`;
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.target as HTMLElement).style.color = link.label === "Research" ? BRAND.coral : BRAND.dark;
+                    (e.target as HTMLElement).style.background = "transparent";
+                  }}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }} className="desktop-nav">
+              <a href="/portal" style={{
+                fontFamily: '"DM Sans", sans-serif',
+                fontSize: 14,
+                fontWeight: 500,
+                color: BRAND.violet,
+                background: "transparent",
+                border: `1.5px solid ${BRAND.violet}`,
+                borderRadius: 8,
+                padding: "8px 20px",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                textDecoration: "none",
+              }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = `${BRAND.violet}10`; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
+                onClick={(e) => { e.preventDefault(); openSignup(); }}
+              >
+                Sign Up
+              </a>
+              <a href="https://calendly.com/richard-1220" target="_blank" rel="noopener noreferrer" style={{
+                fontFamily: '"DM Sans", sans-serif',
+                fontSize: 14,
+                fontWeight: 600,
+                color: "#fff",
+                background: BRAND.coral,
+                border: "none",
+                borderRadius: 8,
+                padding: "8px 22px",
+                cursor: "pointer",
+                transition: "transform 0.18s, box-shadow 0.18s",
+                textDecoration: "none",
+              }}
                 onMouseEnter={(e) => {
-                  (e.target as HTMLElement).style.color = BRAND.coral;
-                  (e.target as HTMLElement).style.background = `${BRAND.coral}12`;
+                  (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.03)";
+                  (e.currentTarget as HTMLAnchorElement).style.boxShadow = `0 8px 24px ${BRAND.coral}55`;
                 }}
                 onMouseLeave={(e) => {
-                  (e.target as HTMLElement).style.color = link.label === "Research" ? BRAND.coral : BRAND.dark;
-                  (e.target as HTMLElement).style.background = "transparent";
+                  (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
+                  (e.currentTarget as HTMLAnchorElement).style.boxShadow = "none";
                 }}
               >
-                {link.label}
+                Book Demo
               </a>
-            ))}
+            </div>
+
+            <button
+              className="mobile-menu-btn"
+              style={{ display: "none", background: "none", border: "none", cursor: "pointer", padding: 8 }}
+              onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label="Toggle menu"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={BRAND.dark} strokeWidth="2">
+                {mobileOpen ? (
+                  <path d="M18 6L6 18M6 6l12 12" />
+                ) : (
+                  <><path d="M3 6h18M3 12h18M3 18h18" /></>
+                )}
+              </svg>
+            </button>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <a href="/portal" style={{
-              fontFamily: '"DM Sans", sans-serif',
-              fontSize: 14,
-              fontWeight: 500,
-              color: BRAND.violet,
-              background: "transparent",
-              border: `1.5px solid ${BRAND.violet}`,
-              borderRadius: 8,
-              padding: "8px 20px",
-              cursor: "pointer",
-              transition: "all 0.2s",
-              textDecoration: "none",
-            }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = `${BRAND.violet}10`; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
-              onClick={(e) => { e.preventDefault(); setIsLoggedIn(!isLoggedIn); }}
-            >
-              {isLoggedIn ? "Login" : "Sign Up"}
-            </a>
-            <a href="/book-demo" style={{
-              fontFamily: '"DM Sans", sans-serif',
-              fontSize: 14,
-              fontWeight: 600,
-              color: "#fff",
-              background: BRAND.coral,
-              border: "none",
-              borderRadius: 8,
-              padding: "8px 22px",
-              cursor: "pointer",
-              transition: "transform 0.18s, box-shadow 0.18s",
-              textDecoration: "none",
-            }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.03)";
-                (e.currentTarget as HTMLAnchorElement).style.boxShadow = `0 8px 24px ${BRAND.coral}55`;
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
-                (e.currentTarget as HTMLAnchorElement).style.boxShadow = "none";
-              }}
-            >
-              Book Demo
-            </a>
-          </div>
+          {mobileOpen && (
+            <div style={{
+              background: "rgba(248,247,244,0.97)",
+              backdropFilter: "blur(20px)",
+              borderRadius: 12,
+              padding: 20,
+              marginBottom: 12,
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+            }}>
+              {NAV_LINKS.map((link) => (
+                <a key={link.label} href={link.href} style={{
+                  fontFamily: '"DM Sans", sans-serif',
+                  fontSize: 15,
+                  fontWeight: 500,
+                  color: BRAND.dark,
+                  textDecoration: "none",
+                  padding: "10px 12px",
+                  borderRadius: 8,
+                }}>
+                  {link.label}
+                </a>
+              ))}
+              <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
+                <a href="/portal" onClick={(e) => { e.preventDefault(); openSignup(); setMobileOpen(false); }} style={{ flex: 1, fontFamily: '"DM Sans"', fontWeight: 500, fontSize: 14, color: BRAND.violet, background: "transparent", border: `1.5px solid ${BRAND.violet}`, borderRadius: 8, padding: "9px 16px", cursor: "pointer", textDecoration: "none", textAlign: "center" }}>Sign Up</a>
+                <a href="https://calendly.com/richard-1220" target="_blank" rel="noopener noreferrer" style={{ flex: 1, fontFamily: '"DM Sans"', fontWeight: 600, fontSize: 14, color: "#fff", background: BRAND.coral, border: "none", borderRadius: 8, padding: "9px 16px", cursor: "pointer", textDecoration: "none", textAlign: "center" }}>Book Demo</a>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
-    </nav>
+
+        <style>{`
+          @media (max-width: 768px) {
+            .desktop-nav { display: none !important; }
+            .mobile-menu-btn { display: block !important; }
+          }
+        `}</style>
+      </nav>
+
+      <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} defaultSignup={loginDefaultSignup} />
+    </>
   );
 }
 
@@ -388,7 +455,7 @@ function OfferingsSection() {
       borderTop: `1px solid ${BRAND.dark}0D`,
       padding: "100px 32px",
     }}>
-      <div style={{
+      <div className="ir-two-col" style={{
         maxWidth: 1100,
         margin: "0 auto",
         display: "flex",
@@ -451,7 +518,7 @@ function OfferingsSection() {
           </a>
         </div>
 
-        <div style={{
+        <div className="ir-card-grid-2" style={{
           flex: 1,
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
@@ -664,7 +731,7 @@ function MembershipSection() {
           </p>
         </div>
 
-        <div style={{
+        <div className="ir-card-grid-3" style={{
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
           gap: 20,
