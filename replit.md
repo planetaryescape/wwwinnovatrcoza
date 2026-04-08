@@ -75,16 +75,21 @@ Preferred communication style: Simple, everyday language.
 
 ### Public Website Redesign (6 Pages)
 - **Brand tokens**: Violet `#3A2FBF`, Coral `#E8503A`, Cyan `#4EC9E8`, Amber `#F5C842`, off-white `#F8F7F4`, dark `#0D0B1F`. DM Serif Display headings, DM Sans body.
-- **Shared components**: `InnovatrNavbar` (fixed glassmorphism nav with real auth via `useAuth()`, LoginDialog for Sign Up/Login, Calendly Book Demo) and `InnovatrFooter` (dark footer with production routes).
+- **Navbar (all 6 pages)**: Fixed glassmorphism nav. Auth-aware: logged out shows Login + Sign Up buttons (trigger `LoginDialog`); logged in shows circular avatar (initials or User icon) → `/portal/dashboard`. No "Book Demo" button. Mobile hamburger menu with same auth logic.
+- **Footer (all 6 pages)**: Dark background `#1E1B3A`, actual Innovatr logo image (`/Innovatr_logo-01.png` with `brightness(0)invert(1)` filter). Social links: Facebook (`facebook.com/innovatr1`), LinkedIn (`linkedin.com/company/innovatr/`), Instagram (`instagram.com/innovatr1/`). No Twitter.
 - **Routes**:
-  - `/` → `InnovatrHome` (hero with animated personas, stats, pricing, membership)
-  - `/consult` → `ConsultPage` (WhatWeDo — the Innovatr Consult offering)
-  - `/research` → `ResearchPage` (PricingPage — membership tiers and research products)
-  - `/tools` → `ToolsPage` (ResearchTools — tool library with video demos)
-  - `/case-studies` → `CaseStudiesPage` (case study listing)
+  - `/` → `InnovatrHome` (hero with animated personas, stats, `id="pricing"` section, `id="membership"` section)
+  - `/consult` → `ConsultPage` (consulting offering, `id="process"` section for anchor linking)
+  - `/research` → `ResearchPage` (membership tiers and research products, auth-aware Subscribe/View Trends)
+  - `/tools` → `ToolsPage` (tool library with video demos, `id="tools-section"` for anchor linking)
+  - `/case-studies` → `CaseStudiesPage` (case study listing, CTAs wired to /contact and Calendly)
+  - `/case-studies/:slug` → `CaseStudyDetail` (redesigned to match brand, breadcrumbs: Home > Case Studies > [Client], "Back to Case Studies" → /case-studies)
   - `/contact` → `ContactPage` (contact form POSTing to `/api/contact`, with WhatsApp/email CTAs)
-- **Book Demo**: Opens `https://calendly.com/richard-1220` in a new tab (not a route).
-- **Auth buttons**: Login/Sign Up in navbar trigger `LoginDialog` modal.
+- **Anchor sections**: `/#pricing` (Don't Guess. Test. section), `/#membership` (Join the Club & Save section), `/consult#process`, `/tools#tools-section`
+- **Checkout back-links**: "Back to Pricing" → `/#pricing`; "Back to Membership Plans" → `/#membership`
+- **Auth-aware buttons**: "Subscribe Now" → "View Trends" (logged in) on Home + Research pages. "Already a member?" → LoginDialog (logged out) or portal link (logged in).
+- **Book a Consult/Demo**: Opens `https://calendly.com/richard-1220` in new tab.
+- **LoginDialog z-index**: DialogOverlay `z-[1100]`, DialogContent `z-[1200]` (above fixed navbar at z-1000).
 
 ### Feature Specifications
 - **Service Detail Pages**: Consistent design for Test24 services and consultation, with embedded videos and clear CTAs.
