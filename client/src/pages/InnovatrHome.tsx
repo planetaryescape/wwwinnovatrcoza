@@ -11,8 +11,6 @@ import personaJK from "@assets/personas/persona_jk.png";
 import personaNP from "@assets/personas/persona_np.png";
 import personaDR from "@assets/personas/persona_dr.png";
 import personaLW from "@assets/personas/persona_lw.png";
-import { InnovatrNavbar } from "@/components/InnovatrNavbar";
-import { InnovatrFooter } from "@/components/InnovatrFooter";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -42,6 +40,14 @@ const CLIENTS = [
   "KWV",
 ];
 
+const NAV_LINKS = [
+  { label: "Home", href: "/" },
+  { label: "Consult", href: "/consult" },
+  { label: "Research", href: "/research" },
+  { label: "Our Tools", href: "/tools" },
+  { label: "Case Studies", href: "/case-studies" },
+  { label: "Contact", href: "/contact" },
+];
 
 const STATS = [
   { number: "200+", label: "Studies Delivered" },
@@ -50,8 +56,203 @@ const STATS = [
   { number: "10+", label: "Industries" },
 ];
 
+function useScrolled(threshold = 40) {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > threshold);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [threshold]);
+  return scrolled;
+}
 
+function useCountUp(target: number, duration = 2000, active = false) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!active) return;
+    let start = 0;
+    const step = target / (duration / 16);
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= target) {
+        setCount(target);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(start));
+      }
+    }, 16);
+    return () => clearInterval(timer);
+  }, [target, duration, active]);
+  return count;
+}
 
+function Navbar() {
+  const scrolled = useScrolled();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  return (
+    <nav
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        transition: "background 0.35s ease, backdrop-filter 0.35s ease, box-shadow 0.35s ease, border-bottom 0.35s ease",
+        background: scrolled ? "rgba(248,247,244,0.92)" : "rgba(248,247,244,0.6)",
+        backdropFilter: "blur(20px)",
+        borderBottom: scrolled ? `1px solid ${BRAND.violet}18` : `1px solid ${BRAND.violet}08`,
+        boxShadow: scrolled ? "0 2px 32px rgba(58,47,191,0.07)" : "none",
+      }}
+    >
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 32px" }}>
+        <div style={{ display: "flex", alignItems: "center", height: 72, gap: 16 }}>
+          {/* Logo */}
+          <a href="/" style={{ textDecoration: "none", marginRight: "auto", display: "flex", alignItems: "center" }}>
+            <img src={innovatrLogo} alt="Innovatr" style={{ height: 38, width: "auto", display: "block" }} />
+          </a>
+
+          {/* Desktop Nav */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }} className="desktop-nav">
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                style={{
+                  fontFamily: '"DM Sans", sans-serif',
+                  fontSize: 14,
+                  fontWeight: 500,
+                  color: BRAND.dark,
+                  textDecoration: "none",
+                  padding: "6px 12px",
+                  borderRadius: 6,
+                  transition: "color 0.2s, background 0.2s",
+                  letterSpacing: "0.01em",
+                }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.color = BRAND.coral;
+                  (e.target as HTMLElement).style.background = `${BRAND.coral}12`;
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.color = BRAND.dark;
+                  (e.target as HTMLElement).style.background = "transparent";
+                }}
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+
+          {/* CTAs */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }} className="desktop-nav">
+            <a href="/portal" style={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: 14,
+              fontWeight: 500,
+              color: BRAND.violet,
+              background: "transparent",
+              border: `1.5px solid ${BRAND.violet}`,
+              borderRadius: 8,
+              padding: "8px 20px",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              letterSpacing: "0.01em",
+              textDecoration: "none",
+            }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = `${BRAND.violet}10`; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
+              onClick={(e) => { e.preventDefault(); setIsLoggedIn(!isLoggedIn); }}
+            >
+              {isLoggedIn ? "Login" : "Sign Up"}
+            </a>
+            <a href="/book-demo" style={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: 14,
+              fontWeight: 600,
+              color: "#fff",
+              background: BRAND.coral,
+              border: "none",
+              borderRadius: 8,
+              padding: "8px 22px",
+              cursor: "pointer",
+              transition: "transform 0.18s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.18s",
+              letterSpacing: "0.01em",
+              textDecoration: "none",
+            }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.03)";
+                (e.currentTarget as HTMLAnchorElement).style.boxShadow = `0 8px 24px ${BRAND.coral}55`;
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
+                (e.currentTarget as HTMLAnchorElement).style.boxShadow = "none";
+              }}
+            >
+              Book Demo
+            </a>
+          </div>
+
+          {/* Mobile Hamburger */}
+          <button
+            style={{ display: "none", background: "none", border: "none", cursor: "pointer", padding: 8 }}
+            className="mobile-menu-btn"
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={BRAND.dark} strokeWidth="2">
+              {mobileOpen ? (
+                <path d="M18 6L6 18M6 6l12 12" />
+              ) : (
+                <>
+                  <path d="M3 6h18M3 12h18M3 18h18" />
+                </>
+              )}
+            </svg>
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileOpen && (
+          <div style={{
+            background: "rgba(248,247,244,0.97)",
+            backdropFilter: "blur(20px)",
+            borderRadius: 12,
+            padding: 20,
+            marginBottom: 12,
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+          }}>
+            {NAV_LINKS.map((link) => (
+              <a key={link.label} href={link.href} style={{
+                fontFamily: '"DM Sans", sans-serif',
+                fontSize: 15,
+                fontWeight: 500,
+                color: BRAND.dark,
+                textDecoration: "none",
+                padding: "10px 12px",
+                borderRadius: 8,
+              }}>
+                {link.label}
+              </a>
+            ))}
+            <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
+              <a href="/portal" onClick={(e) => { e.preventDefault(); setIsLoggedIn(!isLoggedIn); }} style={{ flex: 1, fontFamily: '"DM Sans"', fontWeight: 500, fontSize: 14, color: BRAND.violet, background: "transparent", border: `1.5px solid ${BRAND.violet}`, borderRadius: 8, padding: "9px 16px", cursor: "pointer", textDecoration: "none", textAlign: "center" }}>{isLoggedIn ? "Login" : "Sign Up"}</a>
+              <a href="/book-demo" style={{ flex: 1, fontFamily: '"DM Sans"', fontWeight: 600, fontSize: 14, color: "#fff", background: BRAND.coral, border: "none", borderRadius: 8, padding: "9px 16px", cursor: "pointer", textDecoration: "none", textAlign: "center" }}>Book Demo</a>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .desktop-nav { display: none !important; }
+          .mobile-menu-btn { display: block !important; }
+        }
+      `}</style>
+    </nav>
+  );
+}
 
 function Avatar({ initials, color, size = 44, style: extraStyle }: { initials: string; color: string; size?: number; style?: React.CSSProperties }) {
   return (
@@ -466,7 +667,7 @@ function HeroSection({ onPlayVideo }: { onPlayVideo: () => void }) {
         </div>
 
         {/* Right visual — floating testimonial bubbles */}
-        <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", maxWidth: 520, minHeight: 480 }} className="hero-visual">
+        <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", maxWidth: 520, minHeight: 480 }} className="hero-visual ir-hide-mobile">
           <SocialProofVisual />
         </div>
       </div>
@@ -707,11 +908,11 @@ function InsightsSection() {
   ];
 
   return (
-    <section id="services" className="ir-section" style={{
+    <section id="services" style={{
       background: `linear-gradient(180deg, ${BRAND.offWhite} 0%, #F0EFE9 100%)`,
       padding: "100px 32px",
     }}>
-      <div className="ir-two-col" style={{
+      <div style={{
         maxWidth: 1100,
         margin: "0 auto",
         display: "flex",
@@ -764,7 +965,7 @@ function InsightsSection() {
         </div>
 
         {/* Right — 2x2 grid of light cards */}
-        <div className="ir-card-grid-2" style={{
+        <div style={{
           flex: 1,
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
@@ -1242,7 +1443,7 @@ const homeMembershipPlans = [
 
 function HomeMembershipSection() {
   return (
-    <section className="ir-section" style={{ background: BRAND.coral, padding: "60px 32px", position: "relative", overflow: "hidden" }}>
+    <section style={{ background: BRAND.coral, padding: "60px 32px", position: "relative", overflow: "hidden" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.85)", letterSpacing: "0.14em", textTransform: "uppercase" as const, display: "block", marginBottom: 8 }}>
@@ -1255,7 +1456,7 @@ function HomeMembershipSection() {
             Scale your research. Save up to 50%.
           </p>
         </div>
-        <div className="ir-card-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
           {homeMembershipPlans.map((plan, index) => (
             <div
               key={plan.name}
@@ -1344,12 +1545,250 @@ function NewsletterSection() {
   );
 }
 
+function Footer() {
+  return (
+    <footer style={{
+      background: BRAND.dark,
+      color: "#fff",
+      padding: "36px 32px 24px",
+    }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+        {/* Brand + tagline row */}
+        <div style={{
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: 32,
+          paddingBottom: 24,
+          flexWrap: "wrap",
+        }} className="footer-top">
+          {/* Brand */}
+          <div style={{ maxWidth: 280 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <span style={{
+                display: "inline-block",
+                width: 28,
+                height: 28,
+                background: BRAND.violet,
+                borderRadius: 6,
+                position: "relative",
+                overflow: "hidden",
+                flexShrink: 0,
+              }}>
+                <span style={{
+                  position: "absolute",
+                  bottom: 5,
+                  right: 5,
+                  width: 10,
+                  height: 10,
+                  background: BRAND.coral,
+                  borderRadius: "50%",
+                }} />
+              </span>
+              <span style={{ fontFamily: '"DM Serif Display", serif', fontSize: 20, fontWeight: 400, color: "#fff" }}>
+                Innovatr
+              </span>
+            </div>
+            <p style={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: 14,
+              color: "rgba(255,255,255,0.5)",
+              lineHeight: 1.7,
+              margin: "0 0 22px",
+            }}>
+              Smart research in 24 hours. Built for brands that can't afford to guess.
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              {[
+                { label: "LinkedIn", path: "M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z M4 6a2 2 0 100-4 2 2 0 000 4z" },
+                { label: "Twitter", path: "M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" },
+                { label: "Instagram", path: "M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zM17.5 6.5h.01M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5z" },
+              ].map((s) => (
+                <a key={s.label} href="#" style={{
+                  width: 36,
+                  height: 36,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 8,
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  transition: "background 0.18s",
+                  textDecoration: "none",
+                }}
+                  onMouseEnter={(e) => { (e.currentTarget).style.background = `${BRAND.violet}50`; }}
+                  onMouseLeave={(e) => { (e.currentTarget).style.background = "rgba(255,255,255,0.06)"; }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d={s.path} />
+                  </svg>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Nav links — mirroring top navigation exactly */}
+          <div>
+            <div style={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: 11,
+              fontWeight: 700,
+              color: "rgba(255,255,255,0.3)",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              marginBottom: 18,
+            }}>
+              Navigation
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {NAV_LINKS.map((link) => (
+                <a key={link.label} href={link.href} style={{
+                  fontFamily: '"DM Sans", sans-serif',
+                  fontSize: 14,
+                  fontWeight: 400,
+                  color: "rgba(255,255,255,0.55)",
+                  textDecoration: "none",
+                  transition: "color 0.15s",
+                }}
+                  onMouseEnter={(e) => { (e.currentTarget).style.color = "#fff"; }}
+                  onMouseLeave={(e) => { (e.currentTarget).style.color = "rgba(255,255,255,0.55)"; }}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Services links */}
+          <div>
+            <div style={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: 11,
+              fontWeight: 700,
+              color: "rgba(255,255,255,0.3)",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              marginBottom: 18,
+            }}>
+              Offerings
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {[
+                { label: "Test24 Basic", href: "/test24-basic" },
+                { label: "Test24 Pro", href: "/test24-pro" },
+                { label: "Intelligence", href: "/portal/trends" },
+                { label: "Consult", href: "/consult" },
+              ].map((link) => (
+                <a key={link.label} href={link.href} style={{
+                  fontFamily: '"DM Sans", sans-serif',
+                  fontSize: 14,
+                  fontWeight: 400,
+                  color: "rgba(255,255,255,0.55)",
+                  textDecoration: "none",
+                  transition: "color 0.15s",
+                }}
+                  onMouseEnter={(e) => { (e.currentTarget).style.color = "#fff"; }}
+                  onMouseLeave={(e) => { (e.currentTarget).style.color = "rgba(255,255,255,0.55)"; }}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Legal links */}
+          <div>
+            <div style={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: 11,
+              fontWeight: 700,
+              color: "rgba(255,255,255,0.3)",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              marginBottom: 18,
+            }}>
+              Legal
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {[
+                { label: "Privacy Policy", href: "/privacy-policy" },
+                { label: "Terms of Use", href: "#" },
+                { label: "Cookie Policy", href: "#" },
+              ].map((link) => (
+                <a key={link.label} href={link.href} style={{
+                  fontFamily: '"DM Sans", sans-serif',
+                  fontSize: 14,
+                  fontWeight: 400,
+                  color: "rgba(255,255,255,0.55)",
+                  textDecoration: "none",
+                  transition: "color 0.15s",
+                }}
+                  onMouseEnter={(e) => { (e.currentTarget).style.color = "#fff"; }}
+                  onMouseLeave={(e) => { (e.currentTarget).style.color = "rgba(255,255,255,0.55)"; }}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ borderBottom: `1px solid rgba(255,255,255,0.08)`, marginBottom: 28 }} />
+
+        {/* Bottom bar */}
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingTop: 28,
+          flexWrap: "wrap",
+          gap: 12,
+        }}>
+          <span style={{
+            fontFamily: '"DM Sans", sans-serif',
+            fontSize: 13,
+            color: "rgba(255,255,255,0.3)",
+          }}>
+            © 2026 Innovatr. All rights reserved.
+          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{
+              width: 8,
+              height: 8,
+              background: "#22c55e",
+              borderRadius: "50%",
+              display: "inline-block",
+              boxShadow: "0 0 0 3px rgba(34,197,94,0.2)",
+            }} />
+            <span style={{
+              fontFamily: '"DM Sans", monospace',
+              fontSize: 12,
+              color: "rgba(255,255,255,0.3)",
+              letterSpacing: "0.06em",
+            }}>
+              System Operational
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .footer-top {
+            flex-direction: column !important;
+            gap: 32px !important;
+          }
+        }
+      `}</style>
+    </footer>
+  );
+}
 
 export default function InnovatrHome() {
   const [videoOpen, setVideoOpen] = useState(false);
   return (
     <div style={{ fontFamily: '"DM Sans", sans-serif', background: BRAND.offWhite }}>
-      <InnovatrNavbar />
+      <Navbar />
       <section id="home"><HeroSection onPlayVideo={() => setVideoOpen(true)} /></section>
       {videoOpen && (
         <div
@@ -1414,7 +1853,7 @@ export default function InnovatrHome() {
       <section id="contact" style={{ display: "none" }} />
       <HomeMembershipSection />
       <NewsletterSection />
-      <InnovatrFooter />
+      <Footer />
     </div>
   );
 }
