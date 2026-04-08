@@ -115,7 +115,7 @@ export default function CheckoutProMembers() {
         <Button
           variant="ghost"
           className="mb-8"
-          onClick={() => setLocation("/")}
+          onClick={() => setLocation("/#pricing")}
           data-testid="button-back"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />

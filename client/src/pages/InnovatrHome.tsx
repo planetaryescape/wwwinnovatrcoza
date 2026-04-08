@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { LoginDialog } from "@/components/LoginDialog";
+import { useAuth } from "@/contexts/AuthContext";
 import { Timer, ClipboardCheck, BrainCircuit, Globe } from "lucide-react";
 import innovatrLogo from "@assets/Innovatr_logo-01_for_light_1774947393282.png";
 import mascotBasic from "@assets/Basic_1774944576263.png";
@@ -550,7 +551,7 @@ function HeroSection({ onPlayVideo }: { onPlayVideo: () => void }) {
           <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
             <div className="hero-btn-wrap">
               <div className="hero-btn-glow hero-btn-glow-research" />
-              <a href="/tools" className="hero-btn-inner" style={{ background: BRAND.violet }}>
+              <a href="/research" className="hero-btn-inner" style={{ background: BRAND.violet }}>
                 Explore Research
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
                   <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -1449,7 +1450,7 @@ const homeMembershipPlans = [
 
 function HomeMembershipSection() {
   return (
-    <section style={{ background: BRAND.coral, padding: "60px 32px", position: "relative", overflow: "hidden" }}>
+    <section id="membership" style={{ background: BRAND.coral, padding: "60px 32px", position: "relative", overflow: "hidden" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.85)", letterSpacing: "0.14em", textTransform: "uppercase" as const, display: "block", marginBottom: 8 }}>
@@ -1517,37 +1518,64 @@ function HomeMembershipSection() {
 }
 
 function NewsletterSection() {
+  const { user } = useAuth();
+  const [loginOpen, setLoginOpen] = useState(false);
+
   return (
-    <section style={{ padding: "48px 0", background: "#fff", borderTop: `1px solid ${BRAND.dark}08` }}>
-      <div style={{ maxWidth: 580, margin: "0 auto", textAlign: "center" as const, padding: "0 24px" }}>
-        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.14em", color: BRAND.coral }}>
-          Subscribe to Trends and Insights
-        </span>
-        <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, color: BRAND.dark, margin: "10px 0 12px", lineHeight: 1.2 }}>
-          Your competitors are already reading it.
-        </h2>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: `${BRAND.dark}cc`, margin: "0 0 20px", lineHeight: 1.65 }}>
-          Bi-weekly Pulse Insights — <strong style={{ fontWeight: 600, color: BRAND.dark }}>free</strong>. Market shifts, category trends, and launch intelligence straight to your inbox.
-        </p>
-        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" as const }}>
-          <a
-            href="/portal/trends"
-            style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, color: "#fff", background: BRAND.violet, border: "none", borderRadius: 8, padding: "11px 24px", cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}
-          >
-            Subscribe Now
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-              <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </a>
-          <a
-            href="/?login=true"
-            style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 14, color: BRAND.dark, background: "transparent", border: `1.5px solid ${BRAND.dark}22`, borderRadius: 8, padding: "11px 24px", cursor: "pointer", textDecoration: "none" }}
-          >
-            Already a member? Log in
-          </a>
+    <>
+      <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} defaultSignup={false} />
+      <section style={{ padding: "48px 0", background: "#fff", borderTop: `1px solid ${BRAND.dark}08` }}>
+        <div style={{ maxWidth: 580, margin: "0 auto", textAlign: "center" as const, padding: "0 24px" }}>
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.14em", color: BRAND.coral }}>
+            Subscribe to Trends and Insights
+          </span>
+          <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, color: BRAND.dark, margin: "10px 0 12px", lineHeight: 1.2 }}>
+            Your competitors are already reading it.
+          </h2>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: `${BRAND.dark}cc`, margin: "0 0 20px", lineHeight: 1.65 }}>
+            Bi-weekly Pulse Insights — <strong style={{ fontWeight: 600, color: BRAND.dark }}>free</strong>. Market shifts, category trends, and launch intelligence straight to your inbox.
+          </p>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" as const }}>
+            {user ? (
+              <a
+                href="/portal/explore"
+                style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, color: "#fff", background: BRAND.violet, border: "none", borderRadius: 8, padding: "11px 24px", cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}
+              >
+                View Trends
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </a>
+            ) : (
+              <a
+                href="/portal/trends"
+                style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, color: "#fff", background: BRAND.violet, border: "none", borderRadius: 8, padding: "11px 24px", cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}
+              >
+                Subscribe Now
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </a>
+            )}
+            {user ? (
+              <a
+                href="/portal/dashboard"
+                style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 14, color: BRAND.dark, background: "transparent", border: `1.5px solid ${BRAND.dark}22`, borderRadius: 8, padding: "11px 24px", cursor: "pointer", textDecoration: "none" }}
+              >
+                Go to Portal
+              </a>
+            ) : (
+              <button
+                onClick={() => setLoginOpen(true)}
+                style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 14, color: BRAND.dark, background: "transparent", border: `1.5px solid ${BRAND.dark}22`, borderRadius: 8, padding: "11px 24px", cursor: "pointer" }}
+              >
+                Already a member? Log in
+              </button>
+            )}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }
 
