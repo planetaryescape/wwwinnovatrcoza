@@ -12,6 +12,7 @@ import { useIndustryGroups } from "@/hooks/useIndustryGroups";
 import { filterByIndustry } from "@/lib/industry-groups";
 import { ALL_SIGNALS, ALL_MARKET_GAPS } from "@/lib/portal-content";
 import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /* ── Design System tokens ─────────────────────────────── */
 const VDK      = "#1E1B3A";
@@ -93,6 +94,7 @@ function BenchmarkBar({ value, benchmark, color }: { value: number; benchmark: n
 
 export default function ExplorePage() {
   const [, setLocation] = useLocation();
+  const isMobile = useIsMobile();
   const { user }        = useAuth();
   const queryClient     = useQueryClient();
   const [activeTab, setActiveTab]           = useState<Tab>("signals");
@@ -533,55 +535,57 @@ export default function ExplorePage() {
             )}
           </div>
 
-          {/* Right: AI Panel */}
-          <div className="w-80 min-w-[320px] flex flex-col overflow-hidden" style={{ background: "#fff", borderLeft: `1px solid ${N200}` }}>
-            {/* AI Query Panel */}
-            <div className="flex-1 overflow-hidden flex flex-col" style={{ minHeight: 0 }}>
-              <AIQueryPanel
-                accentColor={VIO}
-                label="Explore AI"
-                suggestedPrompts={AI_PROMPTS}
-                defaultSource="combined"
-              />
-            </div>
-
-            {/* Team Chat collapsible */}
-            <button
-              onClick={() => setShowChat(!showChat)}
-              className="px-4 py-2.5 flex items-center justify-between flex-shrink-0 transition-colors"
-              style={{ borderTop: `1px solid ${N200}`, background: "#F5F5F5" }}
-              data-testid="button-toggle-team-chat"
-            >
-              <span className="flex items-center gap-2 text-xs font-semibold" style={{ color: N500 }}>
-                <MessageSquare className="w-3.5 h-3.5" />
-                Team Chat
-                <span className="w-4 h-4 rounded-full text-white text-[9px] font-bold flex items-center justify-center" style={{ background: CORAL }}>2</span>
-              </span>
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showChat ? "rotate-180" : ""}`} style={{ color: N500 }} />
-            </button>
-
-            {showChat && (
-              <div className="flex-shrink-0" style={{ borderTop: `1px solid ${N200}`, background: "#fff" }}>
-                <div className="p-3 max-h-40 overflow-y-auto space-y-3">
-                  <TCMsg initials="SW" author="Sarah W." time="10:34" color={VIO}  text="These nootropic signals are interesting — should we brief a sandbox run?" />
-                  <TCMsg initials="JS" author="James S." time="10:41" color={CORAL} text={`@${user?.name?.split(" ")[0] || "You"} — let's validate the township SKU gap first, higher priority.`} />
-                </div>
-                <div className="px-3 pb-3 flex gap-2">
-                  <input
-                    value={chatInput}
-                    onChange={e => setChatInput(e.target.value)}
-                    className="flex-1 rounded-lg px-3 py-1.5 text-xs focus:outline-none"
-                    style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }}
-                    placeholder="Reply… use @ to tag"
-                    data-testid="input-team-chat"
-                  />
-                  <button className="w-7 h-7 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: VIO }} data-testid="button-send-chat">
-                    <Send className="w-3 h-3" />
-                  </button>
-                </div>
+          {/* Right: AI Panel — hidden on mobile */}
+          {!isMobile && (
+            <div className="w-80 min-w-[320px] flex flex-col overflow-hidden" style={{ background: "#fff", borderLeft: `1px solid ${N200}` }}>
+              {/* AI Query Panel */}
+              <div className="flex-1 overflow-hidden flex flex-col" style={{ minHeight: 0 }}>
+                <AIQueryPanel
+                  accentColor={VIO}
+                  label="Explore AI"
+                  suggestedPrompts={AI_PROMPTS}
+                  defaultSource="combined"
+                />
               </div>
-            )}
-          </div>
+
+              {/* Team Chat collapsible */}
+              <button
+                onClick={() => setShowChat(!showChat)}
+                className="px-4 py-2.5 flex items-center justify-between flex-shrink-0 transition-colors"
+                style={{ borderTop: `1px solid ${N200}`, background: "#F5F5F5" }}
+                data-testid="button-toggle-team-chat"
+              >
+                <span className="flex items-center gap-2 text-xs font-semibold" style={{ color: N500 }}>
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  Team Chat
+                  <span className="w-4 h-4 rounded-full text-white text-[9px] font-bold flex items-center justify-center" style={{ background: CORAL }}>2</span>
+                </span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showChat ? "rotate-180" : ""}`} style={{ color: N500 }} />
+              </button>
+
+              {showChat && (
+                <div className="flex-shrink-0" style={{ borderTop: `1px solid ${N200}`, background: "#fff" }}>
+                  <div className="p-3 max-h-40 overflow-y-auto space-y-3">
+                    <TCMsg initials="SW" author="Sarah W." time="10:34" color={VIO}  text="These nootropic signals are interesting — should we brief a sandbox run?" />
+                    <TCMsg initials="JS" author="James S." time="10:41" color={CORAL} text={`@${user?.name?.split(" ")[0] || "You"} — let's validate the township SKU gap first, higher priority.`} />
+                  </div>
+                  <div className="px-3 pb-3 flex gap-2">
+                    <input
+                      value={chatInput}
+                      onChange={e => setChatInput(e.target.value)}
+                      className="flex-1 rounded-lg px-3 py-1.5 text-xs focus:outline-none"
+                      style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }}
+                      placeholder="Reply… use @ to tag"
+                      data-testid="input-team-chat"
+                    />
+                    <button className="w-7 h-7 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: VIO }} data-testid="button-send-chat">
+                      <Send className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

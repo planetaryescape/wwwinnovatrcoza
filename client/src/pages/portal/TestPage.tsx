@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
 import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   X, Sparkles, Send, MessageSquare, ChevronDown, ExternalLink,
   ArrowRight, Loader2, Upload, CheckCircle2, ChevronRight, FileText,
@@ -229,6 +230,7 @@ function buildAssistantData(r: ClientReport) {
 
 export default function TestPage() {
   const [, setLocation]           = useLocation();
+  const isMobile = useIsMobile();
   const { user }                  = useAuth();
   const { toast }                 = useToast();
   const [activeTab, setActiveTab] = useState<Tab>("studies");
@@ -1171,7 +1173,8 @@ export default function TestPage() {
             )}
           </div>
 
-          {/* Right: AI Panel */}
+          {/* Right: AI Panel — hidden on mobile */}
+          {!isMobile && (
           <div
             className={`flex flex-col overflow-hidden flex-shrink-0 ${activeTab === "assistant" ? "w-[340px] min-w-[340px]" : "w-80 min-w-[320px]"}`}
             style={{ background: "#fff", borderLeft: `1px solid ${N200}` }}
@@ -1249,6 +1252,7 @@ export default function TestPage() {
               </>
             )}
           </div>
+          )}
         </div>
       </div>
     </div>

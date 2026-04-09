@@ -8,6 +8,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
 import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { ClientReport } from "@shared/schema";
 import { useIndustryGroups } from "@/hooks/useIndustryGroups";
 import { filterByIndustry } from "@/lib/industry-groups";
@@ -88,6 +89,7 @@ Want me to draft a brief for step 1 now?`;
 
 export default function ActPage() {
   const [, setLocation]           = useLocation();
+  const isMobile = useIsMobile();
   const { user }                  = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("gaps");
   const [chatInput, setChatInput] = useState("");
@@ -241,7 +243,7 @@ export default function ActPage() {
 
             {/* ── GAPS TAB ── */}
             {activeTab === "gaps" && (
-              <div className="flex gap-5">
+              <div className="flex flex-col lg:flex-row gap-5">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-4">
                     <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: CORAL }}>Strategic Gaps</span>
@@ -292,7 +294,8 @@ export default function ActPage() {
                   </div>
                 </div>
 
-                {/* Gaps right panel: AI Query */}
+                {/* Gaps right panel: AI Query — hidden on mobile */}
+                {!isMobile && (
                 <div className="w-80 min-w-[300px] flex-shrink-0">
                   <div className="flex flex-col overflow-hidden rounded-2xl" style={{ border: `1px solid ${N200}`, height: 480 }}>
                     <AIQueryPanel
@@ -308,12 +311,13 @@ export default function ActPage() {
                     />
                   </div>
                 </div>
+                )}
               </div>
             )}
 
             {/* ── NEXT STEPS TAB ── */}
             {activeTab === "nextsteps" && (
-              <div className="flex gap-5">
+              <div className="flex flex-col lg:flex-row gap-5">
 
                 {/* Left: step cards */}
                 <div className="flex-1 min-w-0">
@@ -384,7 +388,8 @@ export default function ActPage() {
                   </div>
                 </div>
 
-                {/* Right: Planning Assistant mini panel */}
+                {/* Right: Planning Assistant mini panel — hidden on mobile */}
+                {!isMobile && (
                 <div className="w-80 min-w-[300px] flex-shrink-0">
                   <div className="portal-card overflow-hidden">
                     <div className="px-4 py-3" style={{ borderBottom: `1px solid ${N200}` }}>
@@ -426,12 +431,13 @@ export default function ActPage() {
                     </div>
                   </div>
                 </div>
+                )}
               </div>
             )}
 
             {/* ── PLANNING ASSISTANT TAB ── */}
             {activeTab === "planning" && (
-              <div className="flex gap-5">
+              <div className="flex flex-col lg:flex-row gap-5">
 
                 {/* Left: full chat panel */}
                 <div className="flex-1 min-w-0">
@@ -503,7 +509,8 @@ export default function ActPage() {
                   </div>
                 </div>
 
-                {/* Right: full scrollable panel */}
+                {/* Right: full scrollable panel — hidden on mobile */}
+                {!isMobile && (
                 <div className="w-80 min-w-[300px] flex-shrink-0 space-y-4 overflow-y-auto" style={{ maxHeight: "calc(100vh - 200px)" }}>
 
                   {/* Suggested Prompts */}
@@ -659,6 +666,7 @@ export default function ActPage() {
                   </div>
 
                 </div>
+                )}
               </div>
             )}
 

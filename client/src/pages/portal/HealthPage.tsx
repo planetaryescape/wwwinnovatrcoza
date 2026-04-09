@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import type { ClientReport } from "@shared/schema";
+import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /* ── Design System ───────────────────────────────────────── */
 const VDK      = "#1E1B3A";
@@ -114,6 +116,7 @@ function EmptyState() {
 
 export default function HealthPage() {
   const [, setLocation] = useLocation();
+  const isMobile = useIsMobile();
   const { user } = useAuth();
 
   const { data: rawReports = [], isLoading } = useQuery<ClientReport[]>({
@@ -267,6 +270,7 @@ export default function HealthPage() {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: CREAM }}>
+      <MobilePortalNav />
       <div className="flex flex-col w-full h-full">
 
         {/* ── Topbar ── */}
@@ -292,7 +296,7 @@ export default function HealthPage() {
         <div className="flex flex-1 overflow-hidden">
 
           {/* ── Main content ── */}
-          <div className="flex-1 overflow-y-auto p-6" style={{ background: CREAM }}>
+          <div className="flex-1 overflow-y-auto p-6 pb-20 sm:pb-6" style={{ background: CREAM }}>
 
             {/* Page header */}
             <div className="flex items-start justify-between mb-6 flex-wrap gap-3">
@@ -516,20 +520,22 @@ export default function HealthPage() {
 
           </div>
 
-          {/* ── Right: AI Panel ── */}
-          <div className="w-80 min-w-[320px] flex flex-col overflow-hidden" style={{ borderLeft: `1px solid ${N200}` }}>
-            <AIQueryPanel
-              accentColor={SUCCESS}
-              label="Health AI"
-              suggestedPrompts={[
-                "What's driving the commitment gap?",
-                "Which study needs urgent attention?",
-                "How do I improve the Difference pillar?",
-                "Compare my brand pillars vs benchmark",
-              ]}
-              defaultSource="research"
-            />
-          </div>
+          {/* ── Right: AI Panel — hidden on mobile ── */}
+          {!isMobile && (
+            <div className="w-80 min-w-[320px] flex flex-col overflow-hidden" style={{ borderLeft: `1px solid ${N200}` }}>
+              <AIQueryPanel
+                accentColor={SUCCESS}
+                label="Health AI"
+                suggestedPrompts={[
+                  "What's driving the commitment gap?",
+                  "Which study needs urgent attention?",
+                  "How do I improve the Difference pillar?",
+                  "Compare my brand pillars vs benchmark",
+                ]}
+                defaultSource="research"
+              />
+            </div>
+          )}
 
         </div>
       </div>

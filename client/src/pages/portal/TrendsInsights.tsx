@@ -1025,7 +1025,7 @@ export default function TrendsInsights() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-2">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="req-name">Your name</Label>
                 <Input
