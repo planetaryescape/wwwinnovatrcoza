@@ -85,7 +85,7 @@ function useBreakpoint() {
 export default function PortalLayout({ children, showPhaseTopbar = true }: PortalLayoutProps) {
   const [location, setLocation] = useLocation();
   const {
-    user, logout, isAuthenticated, isPaidMember, isAdmin,
+    user, logout, isAuthenticated, isLoading, isPaidMember, isAdmin,
     impersonation, exitImpersonation, isViewingAsCompany, viewingCompanyName,
   } = useAuth();
 
@@ -104,8 +104,8 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
   });
 
   useEffect(() => {
-    if (!isAuthenticated) setLocation("/");
-  }, [isAuthenticated, setLocation]);
+    if (!isAuthenticated && !isLoading) setLocation("/");
+  }, [isAuthenticated, isLoading, setLocation]);
 
   /* Cmd+K / Ctrl+K listener */
   const handleKeyDown = useCallback((e: KeyboardEvent) => {

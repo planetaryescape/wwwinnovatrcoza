@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoginDialog } from "@/components/LoginDialog";
 import { LayoutDashboard, LogOut, User } from "lucide-react";
@@ -41,6 +42,7 @@ export default function PublicNavbar({ activePage }: PublicNavbarProps) {
   const [loginDefaultSignup, setLoginDefaultSignup] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [, navigate] = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
 
   const openSignup = () => { setLoginDefaultSignup(true); setLoginOpen(true); };
@@ -210,14 +212,14 @@ export default function PublicNavbar({ activePage }: PublicNavbarProps) {
                         </div>
                       </div>
 
-                      <a
-                        href="/portal/dashboard"
+                      <button
                         data-testid="menu-item-portal"
-                        onClick={() => setDropdownOpen(false)}
+                        onClick={() => { setDropdownOpen(false); navigate("/portal/dashboard"); }}
                         style={{
                           display: "flex",
                           alignItems: "center",
                           gap: 10,
+                          width: "100%",
                           padding: "11px 16px",
                           fontFamily: '"DM Sans"',
                           fontSize: 14,
@@ -227,13 +229,17 @@ export default function PublicNavbar({ activePage }: PublicNavbarProps) {
                           transition: "background 0.15s",
                           borderBottom: "1px solid #F0EEF8",
                           background: "transparent",
+                          border: "none",
+                          borderRadius: 0,
+                          cursor: "pointer",
+                          textAlign: "left",
                         }}
                         onMouseEnter={(e) => (e.currentTarget.style.background = "#F5F5FB")}
                         onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                       >
                         <LayoutDashboard size={15} style={{ color: BRAND.violet, flexShrink: 0 }} />
                         Go to Portal
-                      </a>
+                      </button>
 
                       <button
                         data-testid="menu-item-logout"
@@ -383,10 +389,9 @@ export default function PublicNavbar({ activePage }: PublicNavbarProps) {
                       </div>
                     </div>
                     <div style={{ display: "flex", gap: 10 }}>
-                      <a
-                        href="/portal/dashboard"
+                      <button
                         data-testid="link-mobile-portal"
-                        onClick={() => setMobileOpen(false)}
+                        onClick={() => { setMobileOpen(false); navigate("/portal/dashboard"); }}
                         style={{
                           flex: 1,
                           fontFamily: '"DM Sans"',
@@ -398,12 +403,11 @@ export default function PublicNavbar({ activePage }: PublicNavbarProps) {
                           borderRadius: 8,
                           padding: "9px 16px",
                           cursor: "pointer",
-                          textDecoration: "none",
                           textAlign: "center",
                         }}
                       >
                         Go to Portal
-                      </a>
+                      </button>
                       <button
                         data-testid="mobile-button-logout"
                         onClick={() => { handleLogout(); setMobileOpen(false); }}
