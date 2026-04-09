@@ -4,6 +4,7 @@ import { ArrowLeft, Users, Clock, CheckCircle2, Zap, Target, Download } from "lu
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function Test24BasicPage() {
   const [, setLocation] = useLocation();
@@ -11,6 +12,22 @@ export default function Test24BasicPage() {
   const backLabel = ref === 'home-pricing' ? 'Back to Pricing' : ref === 'home-membership' || ref === 'research-membership' ? 'Back to Memberships' : 'Back to Our Offering';
   const backHref = ref === 'home-pricing' ? '/#pricing' : ref === 'home-membership' ? '/#membership' : ref === 'research-membership' ? '/research#membership' : '/research#our-offering';
   const { formatPrice } = useCurrency();
+
+  useSEO({
+    title: "Test24 Basic — 24-Hour Consumer Research",
+    description: "Run a 24-hour consumer research test with real South Africans. Test24 Basic delivers brand recall, purchase intent, and message reaction — results by tomorrow.",
+    canonicalUrl: "https://www.innovatr.co.za/test24-basic",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "Test24 Basic",
+      "description": "A 24-hour consumer research report covering brand recall, purchase intent, and emotional reaction — ideal for campaign and product testing in South Africa.",
+      "provider": { "@type": "Organization", "name": "Innovatr", "url": "https://www.innovatr.co.za" },
+      "serviceType": "Consumer Research",
+      "areaServed": { "@type": "Country", "name": "South Africa" },
+      "url": "https://www.innovatr.co.za/test24-basic",
+    } as Record<string, unknown>,
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);

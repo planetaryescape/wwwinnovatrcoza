@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
@@ -197,6 +198,21 @@ export default function ConsultPillarPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pillarId]);
+
+  useSEO({
+    title: data ? `${data.title} — Brand Consulting` : "Brand Consulting",
+    description: data?.purpose ?? "Strategic brand consulting from Innovatr, grounded in real consumer data and 24-hour research.",
+    canonicalUrl: `https://www.innovatr.co.za/consult/${pillarId}`,
+    jsonLd: data ? {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.innovatr.co.za" },
+        { "@type": "ListItem", "position": 2, "name": "Consult", "item": "https://www.innovatr.co.za/consult" },
+        { "@type": "ListItem", "position": 3, "name": data.title, "item": `https://www.innovatr.co.za/consult/${pillarId}` },
+      ],
+    } as Record<string, unknown> : undefined,
+  });
 
   if (!data) {
     return (

@@ -8,6 +8,7 @@ import heroFunnel from "@assets/data_management___funnel,_search,_result,_shapes
 import mascotProblem from "@assets/The_Problem_1774943930461.png";
 import mascotSolution from "@assets/The_Solution_1774943930463.png";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
+import { useSEO } from "@/hooks/use-seo";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -691,6 +692,11 @@ function Footer() {
 }
 
 export default function WhatWeDo() {
+  useSEO({
+    title: "Strategic Brand Consulting",
+    description: "Innovatr consulting helps brands find focus, develop opportunities, optimise offerings, and track what's working — grounded in real consumer data.",
+    canonicalUrl: "https://www.innovatr.co.za/consult",
+  });
   return (
     <div style={{ minHeight: "100vh", background: BRAND.offWhite }}>
       <PublicNavbar activePage="Consult" />

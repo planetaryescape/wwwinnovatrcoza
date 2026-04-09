@@ -3,12 +3,29 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Building2, Rocket, CheckCircle2, Target, Download } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function Test24ProPage() {
   const [, setLocation] = useLocation();
   const ref = new URLSearchParams(window.location.search).get('ref');
   const backLabel = ref === 'home-pricing' ? 'Back to Pricing' : ref === 'home-membership' || ref === 'research-membership' ? 'Back to Memberships' : 'Back to Our Offering';
   const backHref = ref === 'home-pricing' ? '/#pricing' : ref === 'home-membership' ? '/#membership' : ref === 'research-membership' ? '/research#membership' : '/research#our-offering';
+
+  useSEO({
+    title: "Test24 Pro — Advanced Consumer Research",
+    description: "Get deeper consumer intelligence with Test24 Pro. Audience segmentation, competitor benchmarking, and strategic recommendations — all in 24 hours.",
+    canonicalUrl: "https://www.innovatr.co.za/test24-pro",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "Test24 Pro",
+      "description": "Advanced 24-hour consumer research with audience segmentation, competitor benchmarking, and strategic recommendations — delivered overnight in South Africa.",
+      "provider": { "@type": "Organization", "name": "Innovatr", "url": "https://www.innovatr.co.za" },
+      "serviceType": "Consumer Research",
+      "areaServed": { "@type": "Country", "name": "South Africa" },
+      "url": "https://www.innovatr.co.za/test24-pro",
+    } as Record<string, unknown>,
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);

@@ -5,6 +5,7 @@ import { LoginDialog } from "@/components/LoginDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import innovatrLogo from "@assets/Innovatr_logo-01_for_light_1774947393282.png";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
+import { useSEO } from "@/hooks/use-seo";
 import videoInterest from "@assets/Interest_1774882359570.webm";
 import videoCommitment from "@assets/Commitment_1774882359568.webm";
 import videoEmoji from "@assets/EMOJI_1774882359569.webm";
@@ -1207,6 +1208,12 @@ function Footer() {
 
 export default function ResearchTools() {
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
+
+  useSEO({
+    title: "Consumer Research Tools",
+    description: "Explore Innovatr's proprietary research tools — emoji testing, interest tracking, heatmaps, market simulation, and idea mapping — all in one platform.",
+    canonicalUrl: "https://www.innovatr.co.za/tools",
+  });
 
   return (
     <div style={{ background: BRAND.offWhite, minHeight: "100vh", fontFamily: "'DM Sans', sans-serif" }}>

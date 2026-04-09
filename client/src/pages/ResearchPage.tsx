@@ -9,6 +9,7 @@ import mascotStarter from "@assets/Starter_1774884250090.png";
 import mascotGrowth from "@assets/Growth_1774884250087.png";
 import mascotScale from "@assets/Scale_1774884250090.png";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
+import { useSEO } from "@/hooks/use-seo";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -907,6 +908,22 @@ function Footer() {
 }
 
 export default function PricingPage() {
+  useSEO({
+    title: "Research Plans & Pricing",
+    description: "Compare Test24 Basic and Pro research reports, or join a membership for ongoing intelligence. Affordable consumer research starting from a single 24-hour test.",
+    canonicalUrl: "https://www.innovatr.co.za/research",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "Innovatr Research",
+      "description": "24-hour consumer research reports for South African brands. Test24 Basic and Pro plans, plus Intelligence membership for ongoing insights.",
+      "provider": { "@type": "Organization", "name": "Innovatr", "url": "https://www.innovatr.co.za" },
+      "serviceType": "Consumer Research",
+      "areaServed": { "@type": "Country", "name": "South Africa" },
+      "url": "https://www.innovatr.co.za/research",
+    } as Record<string, unknown>,
+  });
+
   useEffect(() => {
     const hash = window.location.hash;
     if (!hash) return;

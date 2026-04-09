@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import PublicNavbar from "@/components/PublicNavbar";
 import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -84,6 +85,21 @@ export default function CaseStudyDetail() {
       return res.json();
     },
     retry: false,
+  });
+
+  useSEO({
+    title: caseStudy ? `${caseStudy.client} Case Study` : "Case Study",
+    description: caseStudy?.problemShort ?? "Real-world consumer research case studies from Innovatr, showing how brands in South Africa unlock growth through data.",
+    canonicalUrl: `https://www.innovatr.co.za/case-study/${slug}`,
+    jsonLd: caseStudy ? {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.innovatr.co.za" },
+        { "@type": "ListItem", "position": 2, "name": "Case Studies", "item": "https://www.innovatr.co.za/case-studies" },
+        { "@type": "ListItem", "position": 3, "name": caseStudy.client, "item": `https://www.innovatr.co.za/case-study/${slug}` },
+      ],
+    } as Record<string, unknown> : undefined,
   });
 
   if (isLoading) {

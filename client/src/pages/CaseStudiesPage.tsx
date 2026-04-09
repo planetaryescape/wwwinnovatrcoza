@@ -10,6 +10,7 @@ import namibianImg from "@assets/case-study-namibian.png";
 import discoveryImg from "@assets/case-study-discovery.png";
 import rainImg from "@assets/case-study-rain.png";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
+import { useSEO } from "@/hooks/use-seo";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -1069,6 +1070,11 @@ function Footer() {
 }
 
 export default function CaseStudies() {
+  useSEO({
+    title: "Client Case Studies",
+    description: "See how Innovatr helped DGB, Namibian Breweries, Rain, and Discovery Bank unlock growth through fast, data-driven consumer research.",
+    canonicalUrl: "https://www.innovatr.co.za/case-studies",
+  });
   return (
     <div style={{ fontFamily: "'DM Sans', sans-serif", background: BRAND.offWhite }}>
       <PublicNavbar activePage="Case Studies" />

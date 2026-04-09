@@ -5,6 +5,7 @@ import { LoginDialog } from "@/components/LoginDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import innovatrLogo from "@assets/Innovatr_logo-01_for_light_1774947393282.png";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
+import { useSEO } from "@/hooks/use-seo";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -406,6 +407,11 @@ function Footer() {
 
 /* ─── Page ──────────────────────────────────────────────────────────────── */
 export default function ContactUs() {
+  useSEO({
+    title: "Contact Us",
+    description: "Get in touch with Innovatr. Ask about research packages, membership, or consulting — we'll help you find the right approach for your brand.",
+    canonicalUrl: "https://www.innovatr.co.za/contact",
+  });
   return (
     <div style={{ fontFamily: "'DM Sans', sans-serif", background: BRAND.offWhite, minHeight: "100vh" }}>
       <PublicNavbar activePage="Contact" />
