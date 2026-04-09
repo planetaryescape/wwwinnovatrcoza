@@ -1385,14 +1385,7 @@ function NewsletterSection() {
                 </svg>
               </a>
             )}
-            {user ? (
-              <a
-                href="/portal/dashboard"
-                style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 14, color: BRAND.dark, background: "transparent", border: `1.5px solid ${BRAND.dark}22`, borderRadius: 8, padding: "11px 24px", cursor: "pointer", textDecoration: "none" }}
-              >
-                Go to Portal
-              </a>
-            ) : (
+            {!user && (
               <button
                 onClick={() => setLoginOpen(true)}
                 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 14, color: BRAND.dark, background: "transparent", border: `1.5px solid ${BRAND.dark}22`, borderRadius: 8, padding: "11px 24px", cursor: "pointer" }}

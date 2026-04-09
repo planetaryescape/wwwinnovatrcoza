@@ -800,14 +800,7 @@ function NewsletterSection() {
               <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </a>
-          {isLoggedIn ? (
-            <a
-              href="/portal/explore"
-              style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 15, color: BRAND.dark, background: "transparent", border: `1.5px solid ${BRAND.dark}22`, borderRadius: 8, padding: "13px 28px", cursor: "pointer", textDecoration: "none" }}
-            >
-              Go to Portal
-            </a>
-          ) : (
+          {!isLoggedIn && (
             <a
               href="#"
               onClick={(e) => { e.preventDefault(); setLoginOpen(true); }}
