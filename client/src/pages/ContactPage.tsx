@@ -175,11 +175,28 @@ function WhySection() {
 function ContactForm() {
   const [form, setForm] = useState({ name: "", company: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 4000);
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send message");
+      setSubmitted(true);
+      setForm({ name: "", company: "", email: "", message: "" });
+    } catch (err: any) {
+      setError(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fieldStyle: React.CSSProperties = {
@@ -253,8 +270,18 @@ function ContactForm() {
             />
           </div>
 
-          <button data-testid="button-submit-contact" type="submit" style={{ width: "100%", fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 700, color: "#fff", background: BRAND.violet, border: "none", borderRadius: 10, padding: "15px 0", cursor: "pointer" }}>
-            Send Message
+          {error && (
+            <div style={{ marginBottom: 16, padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#dc2626" }}>
+              {error}
+            </div>
+          )}
+          <button
+            data-testid="button-submit-contact"
+            type="submit"
+            disabled={loading}
+            style={{ width: "100%", fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 700, color: "#fff", background: loading ? `${BRAND.violet}99` : BRAND.violet, border: "none", borderRadius: 10, padding: "15px 0", cursor: loading ? "not-allowed" : "pointer", transition: "background 0.2s" }}
+          >
+            {loading ? "Sending…" : "Send Message"}
           </button>
         </form>
       )}
