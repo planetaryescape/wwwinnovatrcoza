@@ -109,6 +109,11 @@ Preferred communication style: Simple, everyday language.
 - **API Security**: Strict access control with `requireAuth` and `requireAdmin` middleware, data redaction, and ownership verification.
 - **Report Management System**: Full admin control over reports with PDF/PPTX upload (20MB limit), cover images, thumbnails, external dashboard links, and access level gating. Public reports endpoint excludes client-specific reports; authenticated member endpoint allows access to user's company client reports. Reports support multiple content types, categories, and tags.
 
+## Infrastructure Notes
+- **Dev preview port**: Main app runs on port 5000 (Express + Vite middleware). The `.replit` file maps `localPort = 5000 → externalPort = 80` as the sole active mapping.
+- **Stale port entries**: `.replit` contains three extra port entries (19941→3001, 19942→3002, 19943→4200) left over from the canvas mockup system. These are inert — no process listens on those ports since `artifacts/innovatr-home-mockup/` was deleted. They should be removed when Replit allows `.replit` edits.
+- **Canvas artifacts**: The `artifacts/innovatr-home-mockup/` directory was deleted (Task #24). It contained a Component Preview Server that competed with the main app for the external URL routing. Do not recreate it.
+
 ## External Dependencies
 - **Email Service**: Resend (for transactional emails, specifically admin order notifications).
 - **Payment Processing**: PayFast, Zapper, Apple Pay (South African gateways), and Stripe (prepared for international payments).
