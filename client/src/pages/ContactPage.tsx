@@ -4,6 +4,7 @@ import { User } from "lucide-react";
 import { LoginDialog } from "@/components/LoginDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import innovatrLogo from "@assets/Innovatr_logo-01_for_light_1774947393282.png";
+import { InnovatrFooter } from "@/components/InnovatrFooter";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -420,7 +421,7 @@ export default function ContactUs() {
         </div>
       </div>
 
-      <Footer />
+      <InnovatrFooter />
     </div>
   );
 }

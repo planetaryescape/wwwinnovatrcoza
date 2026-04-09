@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import heroFunnel from "@assets/data_management___funnel,_search,_result,_shapes,_produce,_pro_1774886183451.png";
 import mascotProblem from "@assets/The_Problem_1774943930461.png";
 import mascotSolution from "@assets/The_Solution_1774943930463.png";
+import { InnovatrFooter } from "@/components/InnovatrFooter";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -697,7 +698,7 @@ export default function WhatWeDo() {
       <ProblemSolutionSection />
       <ProcessSection />
       <CTASection />
-      <Footer />
+      <InnovatrFooter />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import dgbImg from "@assets/case-study-dgb.png";
 import namibianImg from "@assets/case-study-namibian.png";
 import discoveryImg from "@assets/case-study-discovery.png";
 import rainImg from "@assets/case-study-rain.png";
+import { InnovatrFooter } from "@/components/InnovatrFooter";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -1073,7 +1074,7 @@ export default function CaseStudies() {
       <PublicNavbar activePage="Case Studies" />
       <CaseStudiesBody />
       <CTASection />
-      <Footer />
+      <InnovatrFooter />
     </div>
   );
 }

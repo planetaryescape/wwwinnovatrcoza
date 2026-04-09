@@ -4,6 +4,7 @@ import { User } from "lucide-react";
 import { LoginDialog } from "@/components/LoginDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import innovatrLogo from "@assets/Innovatr_logo-01_for_light_1774947393282.png";
+import { InnovatrFooter } from "@/components/InnovatrFooter";
 import videoInterest from "@assets/Interest_1774882359570.webm";
 import videoCommitment from "@assets/Commitment_1774882359568.webm";
 import videoEmoji from "@assets/EMOJI_1774882359569.webm";
@@ -1620,7 +1621,7 @@ export default function ResearchTools() {
         </div>
       </section>
 
-      <Footer />
+      <InnovatrFooter />
 
       {selectedTool && (
         <ExpandedToolModal

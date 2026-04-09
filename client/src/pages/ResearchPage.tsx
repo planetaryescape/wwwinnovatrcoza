@@ -8,6 +8,7 @@ import pricingHeroCoins from "@assets/statistics___graph,_chart,_analytics,_pres
 import mascotStarter from "@assets/Starter_1774884250090.png";
 import mascotGrowth from "@assets/Growth_1774884250087.png";
 import mascotScale from "@assets/Scale_1774884250090.png";
+import { InnovatrFooter } from "@/components/InnovatrFooter";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -922,7 +923,7 @@ export default function PricingPage() {
       <OfferingsSection />
       <MembershipSection />
       <NewsletterSection />
-      <Footer />
+      <InnovatrFooter />
     </div>
   );
 }
