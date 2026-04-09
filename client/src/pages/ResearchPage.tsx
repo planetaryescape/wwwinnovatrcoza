@@ -906,6 +906,15 @@ function Footer() {
 }
 
 export default function PricingPage() {
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!hash) return;
+    const el = document.querySelector(hash);
+    if (el) {
+      setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+    }
+  }, []);
+
   return (
     <div style={{ minHeight: "100vh", background: BRAND.offWhite }}>
       <PublicNavbar activePage="Research" />
