@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import ThemeToggle from "./ThemeToggle";
@@ -7,6 +7,7 @@ import { CurrencyToggle } from "./CurrencyToggle";
 import { LoginDialog } from "./LoginDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,6 +65,16 @@ export default function Navigation() {
       default:
         return "outline";
     }
+  };
+
+  const getInitials = (name?: string) => {
+    if (!name) return "?";
+    return name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase();
+  };
+
+  const getFirstName = (name?: string) => {
+    if (!name) return "";
+    return name.split(" ")[0];
   };
 
   return (
@@ -138,12 +149,18 @@ export default function Navigation() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button 
-                      variant="outline" 
+                      variant="ghost"
                       data-testid="button-user-menu"
-                      className={`gap-2 ${!isScrolled ? 'border-white/30 text-white hover:bg-white/10' : ''}`}
+                      className={`gap-2 px-2 ${!isScrolled ? 'text-white hover:bg-white/10' : ''}`}
                     >
-                      <User className="h-4 w-4" />
-                      <span>{user?.name}</span>
+                      <Avatar className="h-8 w-8 flex-shrink-0">
+                        <AvatarFallback className={`text-xs font-semibold ${!isScrolled ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary'}`}>
+                          {getInitials(user?.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm hidden lg:inline">
+                        Welcome, <span className="font-semibold">{getFirstName(user?.name)}</span>
+                      </span>
                       {user?.isAdmin ? (
                         <Badge 
                           className="ml-1 text-xs bg-primary text-primary-foreground"
@@ -163,10 +180,15 @@ export default function Navigation() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56" data-testid="menu-user-dropdown">
-                    <DropdownMenuLabel data-testid="text-user-email">{user?.email}</DropdownMenuLabel>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-xs text-muted-foreground">Signed in as</span>
+                        <span className="font-medium truncate" data-testid="text-user-email">{user?.email}</span>
+                      </div>
+                    </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
-                      onClick={() => setLocation("/portal")}
+                      onClick={() => setLocation("/portal/dashboard")}
                       data-testid="menu-item-portal"
                     >
                       <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -176,6 +198,7 @@ export default function Navigation() {
                     <DropdownMenuItem 
                       onClick={handleLogout}
                       data-testid="menu-item-logout"
+                      className="text-destructive focus:text-destructive"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Logout
@@ -264,13 +287,21 @@ export default function Navigation() {
               {isAuthenticated ? (
                 <>
                   <div className="pt-3 border-t">
-                    <div className="text-sm text-muted-foreground mb-2" data-testid="mobile-text-user">
-                      {user?.email}
+                    <div className="flex items-center gap-3 mb-3">
+                      <Avatar className="h-9 w-9 flex-shrink-0">
+                        <AvatarFallback className="text-xs font-semibold bg-primary/10 text-primary">
+                          {getInitials(user?.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium truncate">Welcome, {getFirstName(user?.name)}</div>
+                        <div className="text-xs text-muted-foreground truncate" data-testid="mobile-text-user">{user?.email}</div>
+                      </div>
                     </div>
                     <Button 
                       className="w-full mb-2"
                       onClick={() => {
-                        setLocation("/portal");
+                        setLocation("/portal/dashboard");
                         setIsMobileMenuOpen(false);
                       }}
                       data-testid="mobile-button-portal"
