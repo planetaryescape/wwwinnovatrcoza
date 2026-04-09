@@ -947,7 +947,7 @@ function CTASection() {
             </svg>
           </a>
           <a
-            href="/#membership"
+            href="/research#membership"
             style={{
               display: "inline-flex",
               alignItems: "center",
