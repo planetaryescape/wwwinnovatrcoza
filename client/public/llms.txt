@@ -1,0 +1,53 @@
+# Innovatr
+
+> Smart consumer research in 24 hours. Built for brands that can't afford to guess.
+
+Innovatr is a South African consumer research company that delivers fast, affordable, and reliable consumer insights for brands. Using digital-native research methodologies, we provide actionable data in 24 hours through our Test24 platform, ongoing market intelligence through Innovatr Intelligence membership, and strategic brand consulting through our Consult service.
+
+## Pages
+
+- [Home](https://www.innovatr.co.za/): Main marketing page introducing Innovatr's research services, offerings, pricing plans, and membership options.
+- [Research & Pricing](https://www.innovatr.co.za/research): Detailed breakdown of Test24 Basic and Test24 Pro research products, and Starter, Growth, and Scale membership tiers.
+- [Our Tools](https://www.innovatr.co.za/tools): Overview of Innovatr's proprietary research tools — Emoji Testing, Interest Tracking, Commitment Indicators, Heatmapping, Market Simulator, and Idea Mapping.
+- [Case Studies](https://www.innovatr.co.za/case-studies): Real-world Innovatr research examples for brands including DGB, Namibian Breweries, Rain, and Discovery.
+- [Consult](https://www.innovatr.co.za/consult): Innovatr's strategic consulting service, structured around four pillars of brand strategy.
+- [Contact](https://www.innovatr.co.za/contact): Contact form and company contact details for Innovatr.
+- [Test24 Basic](https://www.innovatr.co.za/test24-basic): Product page for the Test24 Basic single consumer research report.
+- [Test24 Pro](https://www.innovatr.co.za/test24-pro): Product page for the Test24 Pro advanced consumer research report with deeper segmentation.
+
+## Consult Pillars
+
+- [Where to Focus](https://www.innovatr.co.za/consult/where-to-focus): Identifying the right consumer segments and market opportunities for your brand.
+- [How to Play](https://www.innovatr.co.za/consult/how-to-play): Defining the brand positioning and value proposition strategy.
+- [How to Win](https://www.innovatr.co.za/consult/how-to-win): Execution strategies for growth — channel, communication, and activation.
+- [What's Working](https://www.innovatr.co.za/consult/whats-working): Measuring and optimising existing brand and marketing activity.
+
+## Case Studies
+
+- [DGB](https://www.innovatr.co.za/case-study/dgb): Consumer research for DGB, one of South Africa's leading wine and spirits producers.
+- [Namibian Breweries](https://www.innovatr.co.za/case-study/namibian-breweries): Insights research for Namibian Breweries, exploring brand equity and consumer perception.
+- [Rain](https://www.innovatr.co.za/case-study/rain): Consumer research for Rain, South Africa's data-only mobile network.
+- [Discovery](https://www.innovatr.co.za/case-study/discovery): Research project for Discovery, one of South Africa's largest financial services groups.
+
+## About Innovatr
+
+Innovatr (Pty) Ltd is a consumer research company based in South Africa, founded to make rigorous consumer research fast, accessible, and affordable for brands of all sizes.
+
+**Core Products:**
+- **Test24 Basic**: A 24-hour consumer research report covering brand recall, purchase intent, emotional reaction, and message cut-through — ideal for campaign and product testing.
+- **Test24 Pro**: An advanced 24-hour research report with deeper audience segmentation, competitor benchmarking, and strategic recommendations.
+- **Innovatr Intelligence**: An ongoing intelligence membership providing monthly trend reports, sector-specific consumer insights, and access to the Innovatr member portal.
+- **Consult**: Strategic brand consulting structured around four pillars — Where to Focus, How to Play, How to Win, and What's Working.
+
+**Research Methodology:** Innovatr uses a panel of digitally engaged South African consumers to deliver 24-hour turnaround research. Tools include emoji-based emotional response testing, interest and commitment tracking, heatmapping, market simulation, and idea mapping.
+
+**Contact:**
+- Email: richard@innovatr.co.za
+- WhatsApp: +27 82 301 2433
+- Website: https://www.innovatr.co.za
+- LinkedIn: https://www.linkedin.com/company/innovatr/
+- Instagram: https://www.instagram.com/innovatr1/
+- Facebook: https://web.facebook.com/innovatr1
+
+**Location:** South Africa
+**Legal:** Innovatr (Pty) Ltd, registered in South Africa

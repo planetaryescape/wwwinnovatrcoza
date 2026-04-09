@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Keep portal, checkout, payment, and admin pages private
+Disallow: /portal/
+Disallow: /checkout/
+Disallow: /payment/
+Disallow: /claim-coupon
+Disallow: /reset-password
+
+Sitemap: https://www.innovatr.co.za/sitemap.xml
