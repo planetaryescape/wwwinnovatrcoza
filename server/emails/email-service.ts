@@ -1102,6 +1102,7 @@ export async function sendContactFormMessage(contactData: {
       html,
       text,
       replyTo: contactData.email,
+      cc: ["richard@innovatr.co.za", "alroy@innovatr.co.za"],
     });
     
     return response;
