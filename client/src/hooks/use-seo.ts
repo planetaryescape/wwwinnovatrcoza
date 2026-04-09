@@ -76,6 +76,7 @@ export function useSEO({ title, description, canonicalUrl, ogImage, jsonLd }: SE
       upsertMeta('meta[property="og:url"]', "property", "og:url", DEFAULT_URL);
       upsertMeta('meta[name="twitter:title"]', "name", "twitter:title", DEFAULT_TITLE);
       upsertMeta('meta[name="twitter:description"]', "name", "twitter:description", DEFAULT_OG_DESC);
+      upsertCanonical(DEFAULT_URL);
       const script = document.getElementById(SCRIPT_ID);
       if (script) script.remove();
     };
