@@ -88,6 +88,15 @@
     display: flex !important;
   }
 
+  /* --- Stats row: keep all four on one line --- */
+  .ir-stats-row {
+    flex-wrap: nowrap !important;
+  }
+  .ir-stats-row > div > div:first-child {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
   /* --- Hero images on mobile: constrain height, center --- */
   .ir-hero-img-wrap img {
     max-height: 220px !important;

@@ -449,7 +449,7 @@ function HeroSection({ onPlayVideo }: { onPlayVideo: () => void }) {
           </div>
 
           {/* Stats row */}
-          <div style={{
+          <div className="ir-stats-row" style={{
             display: "flex",
             gap: 0,
             marginTop: 44,
@@ -501,7 +501,7 @@ function HeroSection({ onPlayVideo }: { onPlayVideo: () => void }) {
           </div>
 
           {/* Mobile-only hero image */}
-          <div className="ir-show-mobile" style={{ justifyContent: "center", marginTop: 32 }}>
+          <div className="ir-show-mobile" style={{ justifyContent: "center", marginTop: 8 }}>
             <img
               src={binocularsImg}
               alt="Discover consumer insight"
