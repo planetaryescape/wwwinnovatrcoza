@@ -1,4 +1,4 @@
-import { Switch, Route, Redirect } from "wouter";
+import { Switch, Route, Redirect, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { useGtmPageTracking } from "@/hooks/use-gtm-page-tracking";
+import { AnimatePresence, motion } from "framer-motion";
 import InnovatrHome from "@/pages/InnovatrHome";
 import WhatWeDo from "@/pages/ConsultPage";
 import PricingPage from "@/pages/ResearchPage";
@@ -46,52 +47,63 @@ import NotFound from "@/pages/not-found";
 
 function Router() {
   useGtmPageTracking();
+  const [location] = useLocation();
   return (
-    <Switch>
-      <Route path="/" component={InnovatrHome} />
-      <Route path="/research" component={PricingPage} />
-      <Route path="/tools" component={ResearchTools} />
-      <Route path="/case-studies" component={CaseStudies} />
-      <Route path="/contact" component={ContactUs} />
-      <Route path="/test24-basic" component={Test24BasicPage} />
-      <Route path="/test24-pro" component={Test24ProPage} />
-      <Route path="/innovatr-consult">{() => <Redirect to="/consult" />}</Route>
-      <Route path="/consult" component={WhatWeDo} />
-      <Route path="/consult/:pillarId" component={ConsultPillarPage} />
-      <Route path="/case-study/:id" component={CaseStudyDetail} />
-      <Route path="/privacy-policy" component={PrivacyPolicy} />
-      <Route path="/innovatr-intelligence">{() => <Redirect to="/#membership" />}</Route>
-      <Route path="/checkout/basic-payg" component={CheckoutBasicPAYG} />
-      <Route path="/checkout/pro-payg" component={CheckoutProPAYG} />
-      <Route path="/checkout/basic-members" component={CheckoutBasicMembers} />
-      <Route path="/checkout/pro-members" component={CheckoutProMembers} />
-      <Route path="/checkout/membership-entry" component={CheckoutMembershipEntry} />
-      <Route path="/checkout/membership-gold" component={CheckoutMembershipGold} />
-      <Route path="/checkout/membership-growth" component={CheckoutMembershipGold} />
-      <Route path="/checkout/membership-platinum" component={CheckoutMembershipPlatinum} />
-      <Route path="/checkout/membership-scale" component={CheckoutMembershipPlatinum} />
-      <Route path="/checkout" component={CheckoutPage} />
-      <Route path="/payment/return" component={PaymentReturn} />
-      <Route path="/payment/cancel" component={PaymentReturn} />
-      <Route path="/portal" component={Dashboard} />
-      <Route path="/portal/dashboard" component={Dashboard} />
-      <Route path="/portal/trends" component={TrendsInsights} />
-      <Route path="/portal/insights/:slug" component={InsightDetail} />
-      <Route path="/portal/launch" component={LaunchBrief} />
-      <Route path="/portal/credits" component={CreditsAndBilling} />
-      <Route path="/portal/explore" component={ExplorePage} />
-      <Route path="/portal/test" component={TestPage} />
-      <Route path="/portal/act" component={ActPage} />
-      <Route path="/portal/health" component={HealthPage} />
-      <Route path="/portal/research" component={PastResearch} />
-      <Route path="/portal/deals" component={MemberDeals} />
-      <Route path="/portal/admin" component={AdminPortal} />
-      <Route path="/portal/admin/companies/:companyId" component={AdminCompanyDetail} />
-      <Route path="/portal/settings" component={Settings} />
-      <Route path="/claim-coupon" component={CouponSignup} />
-      <Route path="/reset-password" component={ResetPassword} />
-      <Route component={NotFound} />
-    </Switch>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -6 }}
+        transition={{ duration: 0.22, ease: "easeInOut" }}
+      >
+        <Switch>
+          <Route path="/" component={InnovatrHome} />
+          <Route path="/research" component={PricingPage} />
+          <Route path="/tools" component={ResearchTools} />
+          <Route path="/case-studies" component={CaseStudies} />
+          <Route path="/contact" component={ContactUs} />
+          <Route path="/test24-basic" component={Test24BasicPage} />
+          <Route path="/test24-pro" component={Test24ProPage} />
+          <Route path="/innovatr-consult">{() => <Redirect to="/consult" />}</Route>
+          <Route path="/consult" component={WhatWeDo} />
+          <Route path="/consult/:pillarId" component={ConsultPillarPage} />
+          <Route path="/case-study/:id" component={CaseStudyDetail} />
+          <Route path="/privacy-policy" component={PrivacyPolicy} />
+          <Route path="/innovatr-intelligence">{() => <Redirect to="/#membership" />}</Route>
+          <Route path="/checkout/basic-payg" component={CheckoutBasicPAYG} />
+          <Route path="/checkout/pro-payg" component={CheckoutProPAYG} />
+          <Route path="/checkout/basic-members" component={CheckoutBasicMembers} />
+          <Route path="/checkout/pro-members" component={CheckoutProMembers} />
+          <Route path="/checkout/membership-entry" component={CheckoutMembershipEntry} />
+          <Route path="/checkout/membership-gold" component={CheckoutMembershipGold} />
+          <Route path="/checkout/membership-growth" component={CheckoutMembershipGold} />
+          <Route path="/checkout/membership-platinum" component={CheckoutMembershipPlatinum} />
+          <Route path="/checkout/membership-scale" component={CheckoutMembershipPlatinum} />
+          <Route path="/checkout" component={CheckoutPage} />
+          <Route path="/payment/return" component={PaymentReturn} />
+          <Route path="/payment/cancel" component={PaymentReturn} />
+          <Route path="/portal" component={Dashboard} />
+          <Route path="/portal/dashboard" component={Dashboard} />
+          <Route path="/portal/trends" component={TrendsInsights} />
+          <Route path="/portal/insights/:slug" component={InsightDetail} />
+          <Route path="/portal/launch" component={LaunchBrief} />
+          <Route path="/portal/credits" component={CreditsAndBilling} />
+          <Route path="/portal/explore" component={ExplorePage} />
+          <Route path="/portal/test" component={TestPage} />
+          <Route path="/portal/act" component={ActPage} />
+          <Route path="/portal/health" component={HealthPage} />
+          <Route path="/portal/research" component={PastResearch} />
+          <Route path="/portal/deals" component={MemberDeals} />
+          <Route path="/portal/admin" component={AdminPortal} />
+          <Route path="/portal/admin/companies/:companyId" component={AdminCompanyDetail} />
+          <Route path="/portal/settings" component={Settings} />
+          <Route path="/claim-coupon" component={CouponSignup} />
+          <Route path="/reset-password" component={ResetPassword} />
+          <Route component={NotFound} />
+        </Switch>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
