@@ -46,11 +46,11 @@ export default function CheckoutMembershipEntry() {
         <Button
           variant="ghost"
           className="mb-8"
-          onClick={() => setLocation("/#membership")}
+          onClick={() => setLocation("/research#membership")}
           data-testid="button-back"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Membership Plans
+          Back to Memberships
         </Button>
 
         <div className="grid lg:grid-cols-3 gap-8">

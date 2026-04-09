@@ -17,11 +17,11 @@ export default function Test24ProPage() {
         <Button
           variant="ghost"
           className="mb-8"
-          onClick={() => setLocation("/")}
+          onClick={() => setLocation("/research#our-offering")}
           data-testid="button-back"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
+          Back to Our Offering
         </Button>
 
         <div className="mb-12">

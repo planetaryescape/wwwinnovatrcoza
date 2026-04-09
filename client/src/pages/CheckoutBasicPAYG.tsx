@@ -122,11 +122,11 @@ export default function CheckoutBasicPAYG() {
         <Button
           variant="ghost"
           className="mb-8"
-          onClick={() => setLocation("/#pricing")}
+          onClick={() => setLocation("/research#our-offering")}
           data-testid="button-back"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Pricing
+          Back to Our Offering
         </Button>
 
         <div className="grid lg:grid-cols-3 gap-8">

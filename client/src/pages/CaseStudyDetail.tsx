@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoginDialog } from "@/components/LoginDialog";
 import innovatrLogo from "@assets/Innovatr_logo-01_for_light_1774947393282.png";
-import { ArrowLeft, Target, Lightbulb, Rocket, Clock, Award, TrendingUp, ChevronRight, User } from "lucide-react";
+import { ArrowLeft, Target, Lightbulb, Rocket, Clock, Award, TrendingUp, User } from "lucide-react";
 import cookingGif from "@assets/RafaelVarona_Playbook_Cooking_Animation_1768339161246.gif";
 import airplanesGif from "@assets/rafael-varona-airplanes_1768339161246.gif";
 import penGif from "@assets/RafaelVarona_Playbook_Pen_1768339161246.gif";
@@ -67,51 +67,6 @@ const phases = [
   { id: "execution", label: "Execution & Scale", icon: Rocket, color: "#4EC9E8" },
 ];
 
-function Breadcrumb({ clientName }: { clientName: string }) {
-  return (
-    <nav
-      aria-label="Breadcrumb"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: 6,
-        padding: "16px 0 0",
-        fontFamily: '"DM Sans", sans-serif',
-        fontSize: 13,
-        color: `rgba(30,27,58,0.45)`,
-      }}
-    >
-      <a
-        href="/"
-        style={{
-          color: `rgba(30,27,58,0.45)`,
-          textDecoration: "none",
-          transition: "color 0.2s",
-        }}
-        onMouseEnter={(e) => { (e.target as HTMLElement).style.color = BRAND.violet; }}
-        onMouseLeave={(e) => { (e.target as HTMLElement).style.color = `rgba(30,27,58,0.45)`; }}
-      >
-        Home
-      </a>
-      <ChevronRight size={12} style={{ color: `rgba(30,27,58,0.3)`, flexShrink: 0 }} />
-      <a
-        href="/case-studies"
-        style={{
-          color: `rgba(30,27,58,0.45)`,
-          textDecoration: "none",
-          transition: "color 0.2s",
-        }}
-        onMouseEnter={(e) => { (e.target as HTMLElement).style.color = BRAND.violet; }}
-        onMouseLeave={(e) => { (e.target as HTMLElement).style.color = `rgba(30,27,58,0.45)`; }}
-      >
-        Case Studies
-      </a>
-      <ChevronRight size={12} style={{ color: `rgba(30,27,58,0.3)`, flexShrink: 0 }} />
-      <span style={{ color: `rgba(30,27,58,0.65)`, fontWeight: 500 }}>{clientName}</span>
-    </nav>
-  );
-}
 
 export default function CaseStudyDetail() {
   const params = useParams<{ id: string }>();
@@ -191,10 +146,6 @@ export default function CaseStudyDetail() {
 
       {/* Main Content */}
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
-        <div style={{ paddingTop: 88 }}>
-          <Breadcrumb clientName={caseStudy.client} />
-        </div>
-
         {/* Back Link */}
         <div style={{ paddingTop: 24, paddingBottom: 8 }}>
           <a
