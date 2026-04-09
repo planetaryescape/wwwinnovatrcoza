@@ -904,7 +904,7 @@ function PricingSection() {
           "Pay only when you test",
         ],
         accent: BRAND.cyan,
-        href: "/checkout/basic-payg",
+        href: "/checkout/basic-payg?ref=home-pricing",
         mascot: mascotBasic,
       },
       {
@@ -920,7 +920,7 @@ function PricingSection() {
           "Enterprise-grade insights",
         ],
         accent: BRAND.coral,
-        href: "/checkout/pro-payg",
+        href: "/checkout/pro-payg?ref=home-pricing",
         popular: true,
         mascot: mascotMember,
       },
@@ -940,7 +940,7 @@ function PricingSection() {
           "Priority member support",
         ],
         accent: BRAND.cyan,
-        href: "/checkout/basic-members",
+        href: "/checkout/basic-members?ref=home-pricing",
         mascot: mascotBasic,
       },
       {
@@ -957,7 +957,7 @@ function PricingSection() {
           "Enterprise-grade insights",
         ],
         accent: BRAND.coral,
-        href: "/checkout/pro-members",
+        href: "/checkout/pro-members?ref=home-pricing",
         popular: true,
         mascot: mascotMember,
       },
@@ -1228,7 +1228,7 @@ const homeMembershipPlans = [
     badge: null as string | null,
     accent: BRAND.coral,
     mascot: mascotStarter,
-    href: "/checkout/membership-entry",
+    href: "/checkout/membership-entry?ref=home-membership",
     features: [
       "Trends Report Access",
       "Discounted Research",
@@ -1248,7 +1248,7 @@ const homeMembershipPlans = [
     badge: "Most Popular" as string | null,
     accent: BRAND.violet,
     mascot: mascotGrowth,
-    href: "/checkout/membership-growth",
+    href: "/checkout/membership-growth?ref=home-membership",
     features: [
       "Everything in Starter",
       "x10 Test24 Basic ideas / year",
@@ -1266,7 +1266,7 @@ const homeMembershipPlans = [
     badge: "Best Value" as string | null,
     accent: BRAND.violet,
     mascot: mascotScale,
-    href: "/checkout/membership-scale",
+    href: "/checkout/membership-scale?ref=home-membership",
     features: [
       "Everything in Starter",
       "x15 Test24 Basic ideas / year",
@@ -1623,6 +1623,16 @@ function Footer() {
 
 export default function InnovatrHome() {
   const [videoOpen, setVideoOpen] = useState(false);
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!hash) return;
+    const el = document.querySelector(hash);
+    if (el) {
+      setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+    }
+  }, []);
+
   return (
     <div style={{ fontFamily: '"DM Sans", sans-serif', background: BRAND.offWhite }}>
       <PublicNavbar activePage="Home" />

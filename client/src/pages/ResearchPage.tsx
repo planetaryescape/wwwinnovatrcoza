@@ -43,7 +43,7 @@ const offerings = [
       "24hr turnaround",
     ],
     cta: "Learn More",
-    href: "/test24-basic",
+    href: "/test24-basic?ref=research",
     Icon: Zap,
   },
   {
@@ -59,7 +59,7 @@ const offerings = [
       "Quant + AI Qual",
     ],
     cta: "Learn More",
-    href: "/test24-pro",
+    href: "/test24-pro?ref=research",
     Icon: Target,
   },
   {

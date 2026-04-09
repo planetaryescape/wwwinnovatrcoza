@@ -6,6 +6,9 @@ import { useEffect } from "react";
 
 export default function Test24ProPage() {
   const [, setLocation] = useLocation();
+  const ref = new URLSearchParams(window.location.search).get('ref');
+  const backLabel = ref === 'home-pricing' ? 'Back to Pricing' : ref === 'home-membership' ? 'Back to Memberships' : 'Back to Our Offering';
+  const backHref = ref === 'home-pricing' ? '/#pricing' : ref === 'home-membership' ? '/#membership' : '/research#our-offering';
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -17,11 +20,11 @@ export default function Test24ProPage() {
         <Button
           variant="ghost"
           className="mb-8"
-          onClick={() => setLocation("/research#our-offering")}
+          onClick={() => setLocation(backHref)}
           data-testid="button-back"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Our Offering
+          {backLabel}
         </Button>
 
         <div className="mb-12">
