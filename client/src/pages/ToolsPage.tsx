@@ -1526,7 +1526,7 @@ export default function ResearchTools() {
                 Talk to Us
               </a>
               <a
-                href="/#pricing"
+                href="/research#our-offering"
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 14,

@@ -292,7 +292,7 @@ function OfferingsSection() {
       borderTop: `1px solid ${BRAND.dark}0D`,
       padding: "100px 32px",
     }}>
-      <div className="ir-two-col" style={{
+      <div id="our-offering" className="ir-two-col" style={{
         maxWidth: 1100,
         margin: "0 auto",
         display: "flex",
