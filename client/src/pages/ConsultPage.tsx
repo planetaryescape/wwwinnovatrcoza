@@ -189,7 +189,7 @@ function HeroSection() {
           </div>
         </div>
 
-        <div className="ir-hide-mobile" style={{
+        <div className="ir-hero-img-wrap" style={{
           flex: "0 0 460px",
           display: "flex",
           alignItems: "center",

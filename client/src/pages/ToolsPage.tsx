@@ -1313,7 +1313,7 @@ export default function ResearchTools() {
           </div>
 
           {/* Right column — illustration */}
-          <div className="ir-hide-mobile" style={{
+          <div className="ir-hero-img-wrap" style={{
             flex: "0 0 420px",
             display: "flex",
             alignItems: "center",

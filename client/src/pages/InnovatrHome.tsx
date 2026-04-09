@@ -6,6 +6,7 @@ import { Timer, ClipboardCheck, BrainCircuit, Globe, User } from "lucide-react";
 import innovatrLogo from "@assets/Innovatr_logo-01_for_light_1774947393282.png";
 import mascotBasic from "@assets/Basic_1774944576263.png";
 import mascotMember from "@assets/Member_1774944576265.png";
+import binocularsImg from "@assets/search___find,_binoculars,_man,_people,_explore,_discover,_los_1775746963830.png";
 import mascotStarter from "@assets/Starter_1774884250090.png";
 import mascotGrowth from "@assets/Growth_1774884250087.png";
 import mascotScale from "@assets/Scale_1774884250090.png";
@@ -497,6 +498,15 @@ function HeroSection({ onPlayVideo }: { onPlayVideo: () => void }) {
                 )}
               </div>
             ))}
+          </div>
+
+          {/* Mobile-only hero image */}
+          <div className="ir-show-mobile" style={{ justifyContent: "center", marginTop: 32 }}>
+            <img
+              src={binocularsImg}
+              alt="Discover consumer insight"
+              style={{ height: 200, width: "auto", display: "block" }}
+            />
           </div>
 
         </div>

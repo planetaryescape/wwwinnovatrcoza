@@ -694,7 +694,7 @@ function HeroSection() {
             </div>
           </div>
 
-          <div className="ir-hide-mobile" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div className="ir-hero-img-wrap" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <img
               src={foldersImg}
               alt="Consumer research data organised and ready"

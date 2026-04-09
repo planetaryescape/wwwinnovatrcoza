@@ -3,6 +3,11 @@
    Breakpoints: 900px for hero grids, 768px for all layouts
    ============================================================ */
 
+/* Hidden on desktop, shown on mobile via .ir-show-mobile */
+.ir-show-mobile {
+  display: none !important;
+}
+
 /* ===== HERO SECTIONS: two-column → single column at 900px ===== */
 @media (max-width: 900px) {
   .ir-hero-grid {
@@ -76,6 +81,20 @@
   /* --- Hide decorative visuals on mobile --- */
   .ir-hide-mobile {
     display: none !important;
+  }
+
+  /* --- Show only on mobile (hidden on desktop) --- */
+  .ir-show-mobile {
+    display: flex !important;
+  }
+
+  /* --- Hero images on mobile: constrain height, center --- */
+  .ir-hero-img-wrap img {
+    max-height: 220px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    display: block !important;
   }
 
   /* --- Contact page outer container --- */
