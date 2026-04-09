@@ -153,8 +153,8 @@ export function InnovatrFooter() {
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {[
                 { label: "Privacy Policy", href: "/privacy-policy" },
-                { label: "Terms of Use", href: "#" },
-                { label: "Cookie Policy", href: "#" },
+                { label: "Terms of Use", href: "/terms-of-use" },
+                { label: "Cookie Policy", href: "/cookie-policy" },
               ].map((link) => (
                 <a key={link.label} href={link.href} style={{
                   fontFamily: '"DM Sans", sans-serif',

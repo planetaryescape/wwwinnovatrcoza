@@ -43,6 +43,8 @@ import CouponSignup from "@/pages/CouponSignup";
 import ResetPassword from "@/pages/ResetPassword";
 import CaseStudyDetail from "@/pages/CaseStudyDetail";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import TermsOfUse from "@/pages/TermsOfUse";
+import CookiePolicy from "@/pages/CookiePolicy";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -70,6 +72,8 @@ function Router() {
           <Route path="/consult/:pillarId" component={ConsultPillarPage} />
           <Route path="/case-study/:id" component={CaseStudyDetail} />
           <Route path="/privacy-policy" component={PrivacyPolicy} />
+          <Route path="/terms-of-use" component={TermsOfUse} />
+          <Route path="/cookie-policy" component={CookiePolicy} />
           <Route path="/innovatr-intelligence">{() => <Redirect to="/#membership" />}</Route>
           <Route path="/checkout/basic-payg" component={CheckoutBasicPAYG} />
           <Route path="/checkout/pro-payg" component={CheckoutProPAYG} />
