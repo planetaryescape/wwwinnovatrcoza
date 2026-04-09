@@ -166,7 +166,7 @@ function HeroSection() {
                 <path d="M8 3v10M4 9l4 4 4-4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </a>
-            <a href="#" style={{
+            <a href="https://calendly.com/richard-1220" target="_blank" rel="noopener noreferrer" style={{
               fontFamily: '"DM Sans", sans-serif',
               fontSize: 14,
               fontWeight: 500,
@@ -548,7 +548,7 @@ function CTASection() {
         </p>
 
         <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" as const }}>
-          <a href="#" style={{
+          <a href="https://calendly.com/richard-1220" target="_blank" rel="noopener noreferrer" style={{
             fontFamily: '"DM Sans", sans-serif',
             fontSize: 14,
             fontWeight: 600,
