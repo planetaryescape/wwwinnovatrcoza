@@ -7,8 +7,8 @@ import { useEffect } from "react";
 export default function Test24ProPage() {
   const [, setLocation] = useLocation();
   const ref = new URLSearchParams(window.location.search).get('ref');
-  const backLabel = ref === 'home-pricing' ? 'Back to Pricing' : ref === 'home-membership' ? 'Back to Memberships' : 'Back to Our Offering';
-  const backHref = ref === 'home-pricing' ? '/#pricing' : ref === 'home-membership' ? '/#membership' : '/research#our-offering';
+  const backLabel = ref === 'home-pricing' ? 'Back to Pricing' : ref === 'home-membership' || ref === 'research-membership' ? 'Back to Memberships' : 'Back to Our Offering';
+  const backHref = ref === 'home-pricing' ? '/#pricing' : ref === 'home-membership' ? '/#membership' : ref === 'research-membership' ? '/research#membership' : '/research#our-offering';
 
   useEffect(() => {
     window.scrollTo(0, 0);

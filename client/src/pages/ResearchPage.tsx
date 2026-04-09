@@ -112,7 +112,7 @@ const membershipPlans = [
       "Test24 Basic: R5,000 per concept",
       "Test24 Pro: R45,000 per survey",
     ],
-    href: "/checkout/membership-entry",
+    href: "/checkout/membership-entry?ref=research-membership",
   },
   {
     name: "Growth",
@@ -130,7 +130,7 @@ const membershipPlans = [
       "x10 Test24 Basic ideas / year",
       "x2 Test24 Pro Studies / year",
     ],
-    href: "/checkout/membership-growth",
+    href: "/checkout/membership-growth?ref=research-membership",
   },
   {
     name: "Scale",
@@ -149,7 +149,7 @@ const membershipPlans = [
       "x3 Test24 Pro Studies / year",
       "Dedicated Insights Support",
     ],
-    href: "/checkout/membership-scale",
+    href: "/checkout/membership-scale?ref=research-membership",
   },
 ];
 

@@ -17,8 +17,8 @@ const starterFeaturesBase = [
 export default function CheckoutMembershipEntry() {
   const [, setLocation] = useLocation();
   const ref = new URLSearchParams(window.location.search).get('ref');
-  const backLabel = ref === 'home-pricing' ? 'Back to Pricing' : ref === 'home-membership' ? 'Back to Memberships' : 'Back to Our Offering';
-  const backHref = ref === 'home-pricing' ? '/#pricing' : ref === 'home-membership' ? '/#membership' : '/research#our-offering';
+  const backLabel = ref === 'home-pricing' ? 'Back to Pricing' : ref === 'home-membership' || ref === 'research-membership' ? 'Back to Memberships' : 'Back to Our Offering';
+  const backHref = ref === 'home-pricing' ? '/#pricing' : ref === 'home-membership' ? '/#membership' : ref === 'research-membership' ? '/research#membership' : '/research#our-offering';
   const [paymentType, setPaymentType] = useState<"monthly" | "annual">("annual");
   const [showOrderForm, setShowOrderForm] = useState(false);
   const { formatPrice } = useCurrency();
