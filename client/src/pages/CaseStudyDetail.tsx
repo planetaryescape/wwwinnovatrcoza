@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import PublicNavbar from "@/components/PublicNavbar";
 import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -65,155 +66,6 @@ const phases = [
   { id: "innovation", label: "Innovation & Testing", icon: Lightbulb, color: BRAND.coral },
   { id: "execution", label: "Execution & Scale", icon: Rocket, color: "#4EC9E8" },
 ];
-
-function Navbar({ clientName }: { clientName?: string }) {
-  const scrolled = useScrolled();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [loginDefaultSignup, setLoginDefaultSignup] = useState(false);
-  const { user, isAuthenticated } = useAuth();
-  const initials = user?.name ? user.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() : "";
-
-  const openSignup = () => { setLoginDefaultSignup(true); setLoginOpen(true); };
-  const openLogin = () => { setLoginDefaultSignup(false); setLoginOpen(true); };
-
-  return (
-    <>
-      <nav
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
-          transition: "background 0.35s ease, backdrop-filter 0.35s ease, box-shadow 0.35s ease, border-bottom 0.35s ease",
-          background: scrolled ? "rgba(248,247,244,0.92)" : "rgba(248,247,244,0.6)",
-          backdropFilter: "blur(20px)",
-          borderBottom: scrolled ? `1px solid ${BRAND.violet}18` : `1px solid ${BRAND.violet}08`,
-          boxShadow: scrolled ? "0 2px 32px rgba(58,47,191,0.07)" : "none",
-        }}
-      >
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 32px" }}>
-          <div style={{ display: "flex", alignItems: "center", height: 72, gap: 16 }}>
-            <a href="/" style={{ textDecoration: "none", marginRight: "auto", display: "flex", alignItems: "center" }}>
-              <img src={innovatrLogo} alt="Innovatr" style={{ height: 38, width: "auto", display: "block" }} />
-            </a>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }} className="desktop-nav">
-              {NAV_LINKS.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  style={{
-                    fontFamily: '"DM Sans", sans-serif',
-                    fontSize: 14,
-                    fontWeight: link.label === "Case Studies" ? 600 : 500,
-                    color: link.label === "Case Studies" ? BRAND.coral : BRAND.dark,
-                    textDecoration: "none",
-                    padding: "6px 12px",
-                    borderRadius: 6,
-                    transition: "color 0.2s, background 0.2s",
-                    letterSpacing: "0.01em",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.target as HTMLElement).style.color = BRAND.coral;
-                    (e.target as HTMLElement).style.background = `${BRAND.coral}12`;
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.target as HTMLElement).style.color = link.label === "Case Studies" ? BRAND.coral : BRAND.dark;
-                    (e.target as HTMLElement).style.background = "transparent";
-                  }}
-                >
-                  {link.label}
-                </a>
-              ))}
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }} className="desktop-nav">
-              {isAuthenticated ? (
-                <a href="/portal/dashboard" data-testid="link-portal-dashboard" style={{
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  width: 38, height: 38, borderRadius: "50%",
-                  background: BRAND.violet, color: "#fff",
-                  fontFamily: '"DM Sans", sans-serif', fontSize: 14, fontWeight: 600,
-                  textDecoration: "none", cursor: "pointer", letterSpacing: "0.02em",
-                }}>
-                  {initials || <User size={18} />}
-                </a>
-              ) : (
-                <>
-                  <button data-testid="button-login" onClick={openLogin} style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 14, fontWeight: 500, color: BRAND.dark, background: "transparent", border: "none", padding: "8px 16px", cursor: "pointer", transition: "color 0.2s", letterSpacing: "0.01em" }}>Login</button>
-                  <button data-testid="button-signup" onClick={openSignup} style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 14, fontWeight: 600, color: "#fff", background: BRAND.coral, border: "none", borderRadius: 8, padding: "8px 22px", cursor: "pointer", transition: "transform 0.18s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.18s", letterSpacing: "0.01em" }}>Sign Up</button>
-                </>
-              )}
-            </div>
-
-            <button
-              className="mobile-menu-btn"
-              style={{ display: "none", background: "none", border: "none", cursor: "pointer", padding: 8 }}
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Toggle menu"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={BRAND.dark} strokeWidth="2">
-                {mobileOpen ? (
-                  <path d="M18 6L6 18M6 6l12 12" />
-                ) : (
-                  <><path d="M3 6h18M3 12h18M3 18h18" /></>
-                )}
-              </svg>
-            </button>
-          </div>
-
-          {mobileOpen && (
-            <div style={{
-              background: "rgba(248,247,244,0.97)",
-              backdropFilter: "blur(20px)",
-              borderRadius: 12,
-              padding: 20,
-              marginBottom: 12,
-              display: "flex",
-              flexDirection: "column",
-              gap: 4,
-            }}>
-              {NAV_LINKS.map((link) => (
-                <a key={link.label} href={link.href} style={{
-                  fontFamily: '"DM Sans", sans-serif',
-                  fontSize: 15,
-                  fontWeight: 500,
-                  color: BRAND.dark,
-                  textDecoration: "none",
-                  padding: "10px 12px",
-                  borderRadius: 8,
-                }}>
-                  {link.label}
-                </a>
-              ))}
-              <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-                {isAuthenticated ? (
-                  <a href="/portal/dashboard" data-testid="link-mobile-portal" onClick={() => setMobileOpen(false)} style={{ flex: 1, fontFamily: '"DM Sans"', fontWeight: 600, fontSize: 14, color: "#fff", background: BRAND.violet, border: "none", borderRadius: 8, padding: "9px 16px", cursor: "pointer", textDecoration: "none", textAlign: "center" }}>Go to Portal</a>
-                ) : (
-                  <>
-                    <button data-testid="button-mobile-login" onClick={() => { openLogin(); setMobileOpen(false); }} style={{ flex: 1, fontFamily: '"DM Sans"', fontWeight: 500, fontSize: 14, color: BRAND.violet, background: "transparent", border: `1.5px solid ${BRAND.violet}`, borderRadius: 8, padding: "9px 16px", cursor: "pointer", textAlign: "center" }}>Login</button>
-                    <button data-testid="button-mobile-signup" onClick={() => { openSignup(); setMobileOpen(false); }} style={{ flex: 1, fontFamily: '"DM Sans"', fontWeight: 600, fontSize: 14, color: "#fff", background: BRAND.coral, border: "none", borderRadius: 8, padding: "9px 16px", cursor: "pointer", textAlign: "center" }}>Sign Up</button>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <style>{`
-          @media (max-width: 768px) {
-            .desktop-nav { display: none !important; }
-            .mobile-menu-btn { display: block !important; }
-          }
-        `}</style>
-      </nav>
-
-      <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} defaultSignup={loginDefaultSignup} />
-    </>
-  );
-}
 
 function Breadcrumb({ clientName }: { clientName: string }) {
   return (
@@ -282,7 +134,7 @@ export default function CaseStudyDetail() {
   if (isLoading) {
     return (
       <div style={{ minHeight: "100vh", background: BRAND.offWhite }}>
-        <Navbar />
+        <PublicNavbar activePage="Case Studies" />
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "120px 32px 48px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48 }}>
             <div style={{ aspectRatio: "1", background: `${BRAND.dark}08`, borderRadius: 16 }} />
@@ -301,7 +153,7 @@ export default function CaseStudyDetail() {
   if (isError || !caseStudy) {
     return (
       <div style={{ minHeight: "100vh", background: BRAND.offWhite, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <Navbar />
+        <PublicNavbar activePage="Case Studies" />
         <div style={{ textAlign: "center" }}>
           <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, color: BRAND.dark, marginBottom: 16 }}>
             Case Study Not Found
@@ -335,7 +187,7 @@ export default function CaseStudyDetail() {
 
   return (
     <div style={{ minHeight: "100vh", background: BRAND.offWhite, fontFamily: '"DM Sans", sans-serif' }}>
-      <Navbar clientName={caseStudy.client} />
+      <PublicNavbar activePage="Case Studies" />
 
       {/* Main Content */}
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
