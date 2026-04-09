@@ -147,7 +147,7 @@ export default function CaseStudyDetail() {
       {/* Main Content */}
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
         {/* Back Link */}
-        <div style={{ paddingTop: 24, paddingBottom: 8 }}>
+        <div style={{ paddingTop: 96, paddingBottom: 8 }}>
           <a
             href="/case-studies"
             data-testid="button-back"
