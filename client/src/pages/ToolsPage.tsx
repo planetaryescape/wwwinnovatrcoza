@@ -640,7 +640,7 @@ function ExpandedToolModal({ tool, onClose }: { tool: Tool; onClose: () => void 
             }}
           >
             <a
-              href="/test24-basic"
+              href="/research"
               style={{
                 fontFamily: "'DM Sans', sans-serif",
                 fontSize: 14,
