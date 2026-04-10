@@ -1087,8 +1087,6 @@ export async function sendContactFormMessage(contactData: {
   message: string;
 }) {
   try {
-    const adminEmails = getAdminEmails();
-    
     const { subject, html, text } = renderEmailTemplate("ADMIN_CONTACT_FORM", {
       customerName: contactData.name,
       customerEmail: contactData.email,
@@ -1097,12 +1095,12 @@ export async function sendContactFormMessage(contactData: {
     });
     
     const response = await sendEmail({
-      to: adminEmails,
+      to: ["richard@innovatr.co.za", "hannah@innovatr.co.za"],
       subject,
       html,
       text,
       replyTo: contactData.email,
-      cc: ["richard@innovatr.co.za", "alroy@innovatr.co.za"],
+      cc: ["alroy@innovatr.co.za"],
     });
     
     return response;
