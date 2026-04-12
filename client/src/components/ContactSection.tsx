@@ -90,69 +90,18 @@ export default function ContactSection() {
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto relative z-10">
           <Card>
             <CardHeader>
-              <div className="w-12 h-12 mb-4 rounded-md bg-primary/10 flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-primary" />
+              <div className="w-12 h-12 mb-4 rounded-md bg-muted flex items-center justify-center">
+                <MessageSquare className="w-6 h-6 text-muted-foreground" />
               </div>
               <CardTitle className="font-serif">Send us a message</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Name <span className="text-destructive">*</span></Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Your name"
-                    data-testid="input-name"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="your@email.com"
-                    data-testid="input-email"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="message">Message <span className="text-destructive">*</span></Label>
-                  <Textarea
-                    id="message"
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    placeholder="Tell us about your innovation challenge"
-                    rows={4}
-                    data-testid="input-message"
-                    required
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  data-testid="button-submit-contact"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Sending...
-                    </>
-                  ) : isSubmitted ? (
-                    <>
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Sent!
-                    </>
-                  ) : (
-                    "Send Message"
-                  )}
-                </Button>
-              </form>
+              <div className="flex flex-col items-center justify-center text-center py-8 gap-3">
+                <p className="font-semibold text-foreground">Contact form unavailable</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Our online form is currently paused. Reach us directly using the options on the right.
+                </p>
+              </div>
             </CardContent>
           </Card>
 

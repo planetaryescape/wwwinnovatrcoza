@@ -724,7 +724,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/contact", async (req, res) => {
+  app.post("/api/contact", async (_req, res) => {
+    return res.status(503).json({ error: "Contact form is currently unavailable." });
     try {
       const { z } = await import("zod");
       

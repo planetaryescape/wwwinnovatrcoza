@@ -234,59 +234,20 @@ function ContactForm() {
         Tell us what you're working on
       </h2>
 
-      {submitted ? (
-        <div style={{ background: `${BRAND.cyan}12`, border: `1px solid ${BRAND.cyan}30`, borderRadius: 12, padding: "36px 24px", textAlign: "center" as const }}>
-          <div style={{ width: 48, height: 48, borderRadius: "50%", background: `${BRAND.cyan}20`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={BRAND.cyan} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <p style={{ fontFamily: "'DM Serif Display', serif", fontSize: 22, color: BRAND.dark, margin: "0 0 8px" }}>Message received</p>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: `${BRAND.dark}aa`, margin: 0 }}>We'll be in touch within one business day.</p>
+      <div style={{ background: `${BRAND.dark}04`, border: `1px solid ${BRAND.dark}08`, borderRadius: 12, padding: "32px 24px", textAlign: "center" as const }}>
+        <div style={{ width: 44, height: 44, borderRadius: "50%", background: `${BRAND.dark}08`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={`${BRAND.dark}60`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
         </div>
-      ) : (
-        <form onSubmit={handleSubmit}>
-          <div className="ir-card-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
-            <div>
-              <label style={labelStyle}>Your name</label>
-              <input data-testid="input-name" type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Hannah Smith" style={fieldStyle} />
-            </div>
-            <div>
-              <label style={labelStyle}>Company</label>
-              <input data-testid="input-company" type="text" value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} placeholder="Your company" style={fieldStyle} />
-            </div>
-          </div>
-
-          <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>Email address</label>
-            <input data-testid="input-email" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="you@company.com" style={fieldStyle} />
-          </div>
-
-          <div style={{ marginBottom: 28 }}>
-            <label style={labelStyle}>What are you working on?</label>
-            <textarea
-              data-testid="input-message"
-              value={form.message}
-              onChange={e => setForm({ ...form, message: e.target.value })}
-              placeholder="Tell us about your innovation challenge, the question you're trying to answer, or the opportunity you're chasing..."
-              rows={5}
-              style={{ ...fieldStyle, resize: "vertical" as const, lineHeight: 1.6 }}
-            />
-          </div>
-
-          {error && (
-            <div style={{ marginBottom: 16, padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#dc2626" }}>
-              {error}
-            </div>
-          )}
-          <button
-            data-testid="button-submit-contact"
-            type="submit"
-            disabled={loading}
-            style={{ width: "100%", fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 700, color: "#fff", background: loading ? `${BRAND.violet}99` : BRAND.violet, border: "none", borderRadius: 10, padding: "15px 0", cursor: loading ? "not-allowed" : "pointer", transition: "background 0.2s" }}
-          >
-            {loading ? "Sending…" : "Send Message"}
-          </button>
-        </form>
-      )}
+        <p style={{ fontFamily: "'DM Serif Display', serif", fontSize: 20, color: BRAND.dark, margin: "0 0 8px" }}>
+          Contact form unavailable
+        </p>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: `${BRAND.dark}88`, margin: "0 0 20px", lineHeight: 1.6 }}>
+          Our online form is currently paused. Reach us directly using the options below.
+        </p>
+      </div>
 
       {/* Contact details */}
       <div style={{ marginTop: 28, paddingTop: 28, borderTop: `1px solid ${BRAND.dark}08`, display: "flex", gap: 16 }}>
