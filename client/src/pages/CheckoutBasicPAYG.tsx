@@ -6,6 +6,8 @@ import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import OrderFormDialog from "@/components/OrderFormDialog";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import PublicNavbar from "@/components/PublicNavbar";
+import { InnovatrFooter } from "@/components/InnovatrFooter";
 
 const BASE_PRICE_PER_CREDIT = 10000;
 
@@ -121,7 +123,17 @@ export default function CheckoutBasicPAYG() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <PublicNavbar />
+      <style>{`
+        @keyframes checkout-glow-spin {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to   { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        .checkout-cta-wrap { position: relative; border-radius: 14px; overflow: hidden; cursor: pointer; }
+        .checkout-cta-glow { position: absolute; width: 220%; aspect-ratio: 1; top: 50%; left: 50%; border-radius: 50%; filter: blur(14px); background: conic-gradient(from 0deg, #3A2FBF, #E8503A, #4EC9E8, #3A2FBF); animation: checkout-glow-spin 5s linear infinite; pointer-events: none; opacity: 0.7; }
+        .checkout-cta-wrap:hover .checkout-cta-glow { opacity: 1; animation-duration: 2.5s; }
+      `}</style>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12">
         <Button
           variant="ghost"
           className="mb-8"
@@ -315,7 +327,7 @@ export default function CheckoutBasicPAYG() {
           </div>
 
           <div className="lg:col-span-1">
-            <Card className="sticky top-4 border-primary">
+            <Card className="sticky top-24 border-primary">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <ShoppingCart className="w-5 h-5" />
@@ -356,15 +368,12 @@ export default function CheckoutBasicPAYG() {
                   </div>
                 </div>
 
-                <Button
-                  className="w-full"
-                  size="lg"
-                  onClick={handleCheckout}
-                  disabled={isCustomSelected && customCredits < 1}
-                  data-testid="button-proceed-checkout"
-                >
-                  Proceed to Payment
-                </Button>
+                <div className="checkout-cta-wrap" onClick={() => { if (!(isCustomSelected && customCredits < 1)) handleCheckout(); }} data-testid="button-proceed-checkout">
+                  <div className="checkout-cta-glow" />
+                  <Button className="w-full relative z-10" size="lg" disabled={isCustomSelected && customCredits < 1}>
+                    Proceed to Payment
+                  </Button>
+                </div>
 
                 <div className="text-center pt-4 border-t">
                   <p className="text-xs text-muted-foreground">
@@ -382,6 +391,7 @@ export default function CheckoutBasicPAYG() {
           </div>
         </div>
       </div>
+      <InnovatrFooter />
       <OrderFormDialog
         open={showOrderForm}
         onOpenChange={setShowOrderForm}

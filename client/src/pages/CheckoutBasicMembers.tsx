@@ -76,6 +76,32 @@ const responsiveStyles = `
     .checkout-grid { grid-template-columns: 1fr !important; }
     .checkout-features-grid { grid-template-columns: 1fr !important; }
   }
+  @keyframes checkout-glow-spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+  .checkout-cta-wrap {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .checkout-cta-glow {
+    position: absolute;
+    width: 220%;
+    aspect-ratio: 1;
+    top: 50%; left: 50%;
+    border-radius: 50%;
+    filter: blur(14px);
+    background: conic-gradient(from 0deg, #3A2FBF, #E8503A, #4EC9E8, #3A2FBF);
+    animation: checkout-glow-spin 5s linear infinite;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  .checkout-cta-wrap:hover .checkout-cta-glow {
+    opacity: 1;
+    animation-duration: 2.5s;
+  }
 `;
 
 export default function CheckoutBasicMembers() {
@@ -167,7 +193,7 @@ export default function CheckoutBasicMembers() {
       <style>{responsiveStyles}</style>
       <PublicNavbar />
 
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "48px 24px 80px" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "120px 24px 80px" }}>
         {/* Back link */}
         <button
           onClick={() => setLocation(backHref)}
@@ -723,34 +749,28 @@ export default function CheckoutBasicMembers() {
               </div>
 
               {/* CTA */}
-              <button
-                onClick={handleCheckout}
-                data-testid="button-proceed-checkout"
-                style={{
+              <div className="checkout-cta-wrap" onClick={handleCheckout} data-testid="button-proceed-checkout">
+                <div className="checkout-cta-glow" />
+                <div style={{
+                  position: "relative",
+                  zIndex: 1,
                   width: "100%",
                   padding: "15px 20px",
                   background: BRAND.coral,
-                  border: "none",
                   borderRadius: 12,
                   color: "#fff",
                   fontWeight: 700,
                   fontSize: 16,
-                  cursor: "pointer",
                   fontFamily: "inherit",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 8,
-                  transition: "opacity 0.2s, transform 0.1s",
-                }}
-                onMouseEnter={(e) => { (e.currentTarget).style.opacity = "0.9"; }}
-                onMouseLeave={(e) => { (e.currentTarget).style.opacity = "1"; }}
-                onMouseDown={(e) => { (e.currentTarget).style.transform = "scale(0.98)"; }}
-                onMouseUp={(e) => { (e.currentTarget).style.transform = "scale(1)"; }}
-              >
-                <ShoppingCart size={17} />
-                Proceed to Payment
-              </button>
+                }}>
+                  <ShoppingCart size={17} />
+                  Proceed to Payment
+                </div>
+              </div>
 
               {/* Trust signals */}
               <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 8 }}>
