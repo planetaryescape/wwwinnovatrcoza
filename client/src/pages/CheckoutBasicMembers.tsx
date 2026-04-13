@@ -17,13 +17,15 @@ import { useSEO } from "@/hooks/use-seo";
 
 const BRAND = {
   violet: "#3A2FBF",
-  violetLight: "#5448D8",
   coral: "#E8503A",
-  cyan: "#4EC9E8",
   offWhite: "#F8F7F4",
   dark: "#0D0B1F",
-  darkMid: "#1A1535",
-  darkCard: "#12102A",
+  cardBg: "#FFFFFF",
+  border: "#E5E3DE",
+  borderLight: "#EDEBE7",
+  textPrimary: "#0D0B1F",
+  textSecondary: "#4A4862",
+  textTertiary: "#8A879A",
 };
 
 const MEMBER_PRICE_PER_CREDIT = 5000;
@@ -66,6 +68,13 @@ const featuresBase = [
   "{memberRate} per concept member rate",
   "Priority support",
 ];
+
+const responsiveStyles = `
+  @media (max-width: 860px) {
+    .checkout-grid { grid-template-columns: 1fr !important; }
+    .checkout-features-grid { grid-template-columns: 1fr !important; }
+  }
+`;
 
 export default function CheckoutBasicMembers() {
   const [, setLocation] = useLocation();
@@ -152,7 +161,8 @@ export default function CheckoutBasicMembers() {
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: BRAND.dark, color: BRAND.offWhite, fontFamily: '"DM Sans", sans-serif' }}>
+    <div style={{ minHeight: "100vh", background: BRAND.offWhite, color: BRAND.textPrimary, fontFamily: '"DM Sans", sans-serif' }}>
+      <style>{responsiveStyles}</style>
       <PublicNavbar />
 
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "48px 24px 80px" }}>
@@ -166,7 +176,7 @@ export default function CheckoutBasicMembers() {
             gap: 8,
             background: "none",
             border: "none",
-            color: `${BRAND.offWhite}99`,
+            color: BRAND.textTertiary,
             cursor: "pointer",
             fontSize: 14,
             fontFamily: "inherit",
@@ -174,8 +184,8 @@ export default function CheckoutBasicMembers() {
             padding: "4px 0",
             transition: "color 0.2s",
           }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = BRAND.offWhite; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = `${BRAND.offWhite}99`; }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = BRAND.textPrimary; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = BRAND.textTertiary; }}
         >
           <ArrowLeft size={16} />
           {backLabel}
@@ -187,7 +197,7 @@ export default function CheckoutBasicMembers() {
             width: 52,
             height: 52,
             borderRadius: 12,
-            background: `${BRAND.coral}22`,
+            background: `${BRAND.coral}14`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -196,10 +206,10 @@ export default function CheckoutBasicMembers() {
             <Zap size={26} color={BRAND.coral} />
           </div>
           <div>
-            <h1 style={{ fontSize: 36, fontWeight: 700, margin: 0, color: BRAND.offWhite, fontFamily: '"Playfair Display", serif' }}>
+            <h1 style={{ fontSize: 36, fontWeight: 700, margin: 0, color: BRAND.dark, fontFamily: '"Playfair Display", serif' }}>
               Test24 Basic
             </h1>
-            <p style={{ fontSize: 14, color: `${BRAND.offWhite}88`, margin: 0, marginTop: 2 }}>
+            <p style={{ fontSize: 14, color: BRAND.textSecondary, margin: 0, marginTop: 2 }}>
               24-hour consumer research — fast, affordable, actionable
             </p>
           </div>
@@ -211,14 +221,14 @@ export default function CheckoutBasicMembers() {
             display: "inline-flex",
             alignItems: "center",
             gap: 8,
-            background: `${BRAND.cyan}18`,
-            border: `1px solid ${BRAND.cyan}40`,
+            background: `${BRAND.violet}10`,
+            border: `1px solid ${BRAND.violet}30`,
             borderRadius: 100,
             padding: "6px 14px",
             marginBottom: 36,
           }}>
-            <Crown size={14} color={BRAND.cyan} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: BRAND.cyan }}>
+            <Crown size={14} color={BRAND.violet} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: BRAND.violet }}>
               {getTierLabel(membershipTier)} Member — Member Pricing Applied
             </span>
           </div>
@@ -227,55 +237,56 @@ export default function CheckoutBasicMembers() {
             display: "inline-flex",
             alignItems: "center",
             gap: 8,
-            background: `${BRAND.violet}22`,
-            border: `1px solid ${BRAND.violet}50`,
+            background: `${BRAND.violet}0C`,
+            border: `1px solid ${BRAND.violet}25`,
             borderRadius: 100,
             padding: "6px 14px",
             marginBottom: 36,
           }}>
-            <Star size={14} color={BRAND.violetLight} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: BRAND.violetLight }}>
+            <Star size={14} color={BRAND.violet} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: BRAND.violet }}>
               Member Pricing Available — Save {formatPrice(REGULAR_PRICE_PER_CREDIT - MEMBER_PRICE_PER_CREDIT)} per credit
             </span>
           </div>
         )}
 
         {/* Main layout */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: 32, alignItems: "start" }}>
+        <div className="checkout-grid" style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: 32, alignItems: "start" }}>
           {/* Left column */}
           <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
 
             {/* Membership status card */}
             <div style={{
-              background: BRAND.darkCard,
-              border: `1px solid ${BRAND.violet}40`,
+              background: BRAND.cardBg,
+              border: `1px solid ${BRAND.border}`,
               borderRadius: 16,
               padding: 28,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
             }}>
-              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: BRAND.offWhite }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: BRAND.dark }}>
                 {hasActiveEntryMembership ? "Your Membership" : "Entry Plan Membership"}
               </h2>
 
               {hasActiveEntryMembership ? (
                 <div style={{
-                  background: `${BRAND.cyan}12`,
-                  border: `1px solid ${BRAND.cyan}30`,
+                  background: `${BRAND.violet}08`,
+                  border: `1px solid ${BRAND.violet}22`,
                   borderRadius: 12,
                   padding: 16,
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                    <Check size={16} color={BRAND.cyan} />
-                    <span style={{ fontWeight: 600, color: BRAND.cyan, fontSize: 14 }}>
+                    <Check size={16} color={BRAND.violet} />
+                    <span style={{ fontWeight: 600, color: BRAND.violet, fontSize: 14 }}>
                       Active {getTierLabel(membershipTier)} Membership
                     </span>
                   </div>
-                  <p style={{ fontSize: 13, color: `${BRAND.offWhite}80`, margin: 0 }}>
+                  <p style={{ fontSize: 13, color: BRAND.textSecondary, margin: 0 }}>
                     Your membership is active — {formatPrice(MEMBER_PRICE_PER_CREDIT)} member rate applied to all credits below.
                   </p>
                 </div>
               ) : isLoggedIn ? (
                 <>
-                  <p style={{ fontSize: 14, color: `${BRAND.offWhite}88`, marginBottom: 16 }}>
+                  <p style={{ fontSize: 14, color: BRAND.textSecondary, marginBottom: 16 }}>
                     Add an Entry Membership to unlock member pricing and save on every credit.
                   </p>
 
@@ -284,12 +295,12 @@ export default function CheckoutBasicMembers() {
                     onClick={() => setAddMembership(true)}
                     data-testid="radio-add-membership"
                     style={{
-                      border: `2px solid ${addMembership ? BRAND.violet : `${BRAND.offWhite}20`}`,
+                      border: `2px solid ${addMembership ? BRAND.violet : BRAND.border}`,
                       borderRadius: 12,
                       padding: 20,
                       cursor: "pointer",
                       marginBottom: 12,
-                      background: addMembership ? `${BRAND.violet}14` : "transparent",
+                      background: addMembership ? `${BRAND.violet}08` : BRAND.cardBg,
                       transition: "all 0.2s",
                     }}
                   >
@@ -298,7 +309,7 @@ export default function CheckoutBasicMembers() {
                         width: 20,
                         height: 20,
                         borderRadius: "50%",
-                        border: `2px solid ${addMembership ? BRAND.violet : `${BRAND.offWhite}50`}`,
+                        border: `2px solid ${addMembership ? BRAND.violet : BRAND.textTertiary}`,
                         background: addMembership ? BRAND.violet : "transparent",
                         display: "flex",
                         alignItems: "center",
@@ -310,14 +321,14 @@ export default function CheckoutBasicMembers() {
                         {addMembership && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#fff" }} />}
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700, fontSize: 15, color: BRAND.offWhite, marginBottom: 4 }}>
+                        <div style={{ fontWeight: 700, fontSize: 15, color: BRAND.dark, marginBottom: 4 }}>
                           Add Entry Membership + unlock member pricing
                         </div>
-                        <div style={{ fontSize: 13, color: `${BRAND.offWhite}70`, marginBottom: 12 }}>
+                        <div style={{ fontSize: 13, color: BRAND.textTertiary, marginBottom: 12 }}>
                           One annual fee. Member pricing on all Test24 credits.
                         </div>
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-                          <span style={{ fontSize: 18, fontWeight: 800, color: BRAND.violetLight }}>
+                          <span style={{ fontSize: 18, fontWeight: 800, color: BRAND.violet }}>
                             {formatPrice(ENTRY_PLAN_COST)}/year
                           </span>
                           <span style={{ fontSize: 12, color: BRAND.coral, fontWeight: 600 }}>
@@ -333,11 +344,11 @@ export default function CheckoutBasicMembers() {
                     onClick={() => setAddMembership(false)}
                     data-testid="radio-without-membership"
                     style={{
-                      border: `2px solid ${!addMembership ? BRAND.violet : `${BRAND.offWhite}20`}`,
+                      border: `2px solid ${!addMembership ? BRAND.violet : BRAND.border}`,
                       borderRadius: 12,
                       padding: 20,
                       cursor: "pointer",
-                      background: !addMembership ? `${BRAND.violet}14` : "transparent",
+                      background: !addMembership ? `${BRAND.violet}08` : BRAND.cardBg,
                       transition: "all 0.2s",
                     }}
                   >
@@ -346,7 +357,7 @@ export default function CheckoutBasicMembers() {
                         width: 20,
                         height: 20,
                         borderRadius: "50%",
-                        border: `2px solid ${!addMembership ? BRAND.violet : `${BRAND.offWhite}50`}`,
+                        border: `2px solid ${!addMembership ? BRAND.violet : BRAND.textTertiary}`,
                         background: !addMembership ? BRAND.violet : "transparent",
                         display: "flex",
                         alignItems: "center",
@@ -358,10 +369,10 @@ export default function CheckoutBasicMembers() {
                         {!addMembership && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#fff" }} />}
                       </div>
                       <div>
-                        <div style={{ fontWeight: 700, fontSize: 15, color: BRAND.offWhite, marginBottom: 4 }}>
+                        <div style={{ fontWeight: 700, fontSize: 15, color: BRAND.dark, marginBottom: 4 }}>
                           Continue without membership
                         </div>
-                        <div style={{ fontSize: 13, color: `${BRAND.offWhite}70` }}>
+                        <div style={{ fontSize: 13, color: BRAND.textTertiary }}>
                           Pay the standard rate for credits only.
                         </div>
                       </div>
@@ -370,8 +381,8 @@ export default function CheckoutBasicMembers() {
 
                   {addMembership && (
                     <div style={{
-                      background: `${BRAND.coral}12`,
-                      border: `1px solid ${BRAND.coral}30`,
+                      background: `${BRAND.coral}0A`,
+                      border: `1px solid ${BRAND.coral}25`,
                       borderRadius: 12,
                       padding: 14,
                       marginTop: 16,
@@ -384,7 +395,7 @@ export default function CheckoutBasicMembers() {
                         <div style={{ fontWeight: 600, fontSize: 13, color: BRAND.coral, marginBottom: 2 }}>
                           Entry Membership added
                         </div>
-                        <div style={{ fontSize: 12, color: `${BRAND.offWhite}70` }}>
+                        <div style={{ fontSize: 12, color: BRAND.textSecondary }}>
                           Member pricing will apply to this order and all future Test24 credits for 12 months.
                         </div>
                       </div>
@@ -394,8 +405,8 @@ export default function CheckoutBasicMembers() {
               ) : (
                 <>
                   <div style={{
-                    background: `${BRAND.offWhite}08`,
-                    border: `1px solid ${BRAND.offWhite}15`,
+                    background: `${BRAND.violet}06`,
+                    border: `1px solid ${BRAND.violet}18`,
                     borderRadius: 12,
                     padding: 16,
                     display: "flex",
@@ -403,12 +414,12 @@ export default function CheckoutBasicMembers() {
                     gap: 12,
                     marginBottom: 16,
                   }}>
-                    <LogIn size={18} color={`${BRAND.offWhite}60`} style={{ flexShrink: 0, marginTop: 1 }} />
+                    <LogIn size={18} color={BRAND.textTertiary} style={{ flexShrink: 0, marginTop: 1 }} />
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: 14, color: BRAND.offWhite, marginBottom: 4 }}>
+                      <div style={{ fontWeight: 600, fontSize: 14, color: BRAND.dark, marginBottom: 4 }}>
                         Log in to unlock member pricing
                       </div>
-                      <div style={{ fontSize: 13, color: `${BRAND.offWhite}70` }}>
+                      <div style={{ fontSize: 13, color: BRAND.textSecondary }}>
                         Members save {formatPrice(REGULAR_PRICE_PER_CREDIT - MEMBER_PRICE_PER_CREDIT)} per Test24 Basic credit.
                       </div>
                     </div>
@@ -422,7 +433,7 @@ export default function CheckoutBasicMembers() {
                       background: "transparent",
                       border: `1.5px solid ${BRAND.violet}`,
                       borderRadius: 10,
-                      color: BRAND.violetLight,
+                      color: BRAND.violet,
                       fontWeight: 600,
                       fontSize: 14,
                       cursor: "pointer",
@@ -433,7 +444,7 @@ export default function CheckoutBasicMembers() {
                       gap: 8,
                       transition: "background 0.2s",
                     }}
-                    onMouseEnter={(e) => { (e.currentTarget).style.background = `${BRAND.violet}18`; }}
+                    onMouseEnter={(e) => { (e.currentTarget).style.background = `${BRAND.violet}0A`; }}
                     onMouseLeave={(e) => { (e.currentTarget).style.background = "transparent"; }}
                   >
                     <LogIn size={15} />
@@ -445,18 +456,18 @@ export default function CheckoutBasicMembers() {
 
             {/* Credit package selector */}
             <div style={{
-              background: BRAND.darkCard,
-              border: `1px solid ${BRAND.offWhite}12`,
+              background: BRAND.cardBg,
+              border: `1px solid ${BRAND.border}`,
               borderRadius: 16,
               padding: 28,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
             }}>
-              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: BRAND.offWhite }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: BRAND.dark }}>
                 Choose Your Credit Package
               </h2>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {creditPackages.map((pkg) => {
                   const isSelected = selectedPackage === pkg.id;
-                  const displayPrice = effectiveIsMember ? pkg.memberPrice : pkg.regularPrice;
                   const pricePerCredit = effectiveIsMember ? MEMBER_PRICE_PER_CREDIT : REGULAR_PRICE_PER_CREDIT;
                   return (
                     <div
@@ -465,11 +476,11 @@ export default function CheckoutBasicMembers() {
                       data-testid={`package-${pkg.id}`}
                       style={{
                         position: "relative",
-                        border: `2px solid ${isSelected ? BRAND.coral : `${BRAND.offWhite}18`}`,
+                        border: `2px solid ${isSelected ? BRAND.coral : BRAND.borderLight}`,
                         borderRadius: 14,
                         padding: "20px 24px",
                         cursor: "pointer",
-                        background: isSelected ? `${BRAND.coral}0D` : "transparent",
+                        background: isSelected ? `${BRAND.coral}08` : BRAND.cardBg,
                         transition: "all 0.2s",
                       }}
                     >
@@ -496,7 +507,7 @@ export default function CheckoutBasicMembers() {
                             width: 22,
                             height: 22,
                             borderRadius: "50%",
-                            border: `2px solid ${isSelected ? BRAND.coral : `${BRAND.offWhite}50`}`,
+                            border: `2px solid ${isSelected ? BRAND.coral : BRAND.textTertiary}`,
                             background: isSelected ? BRAND.coral : "transparent",
                             display: "flex",
                             alignItems: "center",
@@ -507,14 +518,14 @@ export default function CheckoutBasicMembers() {
                             {isSelected && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#fff" }} />}
                           </div>
                           <div>
-                            <div style={{ fontWeight: 700, fontSize: 17, color: BRAND.offWhite, marginBottom: 2 }}>
+                            <div style={{ fontWeight: 700, fontSize: 17, color: BRAND.dark, marginBottom: 2 }}>
                               {pkg.credits}x Idea Credit{pkg.credits > 1 ? "s" : ""}
                             </div>
-                            <div style={{ fontSize: 13, color: `${BRAND.offWhite}70` }}>
+                            <div style={{ fontSize: 13, color: BRAND.textTertiary }}>
                               {pkg.description}
                             </div>
                             {effectiveIsMember && (
-                              <div style={{ fontSize: 12, color: BRAND.cyan, fontWeight: 600, marginTop: 4 }}>
+                              <div style={{ fontSize: 12, color: BRAND.violet, fontWeight: 600, marginTop: 4 }}>
                                 Member Pricing
                               </div>
                             )}
@@ -525,27 +536,27 @@ export default function CheckoutBasicMembers() {
                           {effectiveIsMember ? (
                             <>
                               <div style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}>
-                                <Star size={13} color={BRAND.cyan} fill={BRAND.cyan} />
-                                <span style={{ fontSize: 22, fontWeight: 800, color: BRAND.offWhite }}>
+                                <Star size={13} color={BRAND.violet} fill={BRAND.violet} />
+                                <span style={{ fontSize: 22, fontWeight: 800, color: BRAND.dark }}>
                                   {formatPrice(pkg.memberPrice)}
                                 </span>
                               </div>
-                              <div style={{ fontSize: 12, color: `${BRAND.offWhite}50`, textDecoration: "line-through", marginTop: 2 }}>
+                              <div style={{ fontSize: 12, color: BRAND.textTertiary, textDecoration: "line-through", marginTop: 2 }}>
                                 {formatPrice(pkg.regularPrice)}
                               </div>
-                              <div style={{ fontSize: 12, color: BRAND.cyan, fontWeight: 600, marginTop: 2 }}>
+                              <div style={{ fontSize: 12, color: BRAND.coral, fontWeight: 600, marginTop: 2 }}>
                                 Save {formatPrice(pkg.regularPrice - pkg.memberPrice)}
                               </div>
                             </>
                           ) : (
                             <>
-                              <div style={{ fontSize: 22, fontWeight: 800, color: BRAND.offWhite }}>
+                              <div style={{ fontSize: 22, fontWeight: 800, color: BRAND.dark }}>
                                 {formatPrice(pkg.regularPrice)}
                               </div>
-                              <div style={{ fontSize: 12, color: `${BRAND.offWhite}60`, marginTop: 2 }}>
+                              <div style={{ fontSize: 12, color: BRAND.textTertiary, marginTop: 2 }}>
                                 {formatPrice(pricePerCredit)} per credit
                               </div>
-                              <div style={{ fontSize: 12, color: BRAND.violetLight, fontWeight: 600, marginTop: 2 }}>
+                              <div style={{ fontSize: 12, color: BRAND.violet, fontWeight: 600, marginTop: 2 }}>
                                 {formatPrice(pkg.memberPrice)} for members
                               </div>
                             </>
@@ -560,19 +571,20 @@ export default function CheckoutBasicMembers() {
 
             {/* What's included */}
             <div style={{
-              background: BRAND.darkCard,
-              border: `1px solid ${BRAND.offWhite}12`,
+              background: BRAND.cardBg,
+              border: `1px solid ${BRAND.border}`,
               borderRadius: 16,
               padding: 28,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
             }}>
-              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: BRAND.offWhite }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: BRAND.dark }}>
                 What's Included
               </h2>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 24px" }}>
+              <div className="checkout-features-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 24px" }}>
                 {features.map((feature, index) => (
                   <div key={index} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
                     <Check size={15} color={BRAND.coral} style={{ flexShrink: 0, marginTop: 2 }} />
-                    <span style={{ fontSize: 14, color: `${BRAND.offWhite}CC`, lineHeight: 1.5 }}>{feature}</span>
+                    <span style={{ fontSize: 14, color: BRAND.textSecondary, lineHeight: 1.5 }}>{feature}</span>
                   </div>
                 ))}
               </div>
@@ -582,14 +594,15 @@ export default function CheckoutBasicMembers() {
           {/* Right column — Order summary */}
           <div style={{ position: "sticky", top: 24 }}>
             <div style={{
-              background: BRAND.darkCard,
-              border: `1px solid ${BRAND.coral}40`,
+              background: BRAND.cardBg,
+              border: `1px solid ${BRAND.border}`,
               borderRadius: 16,
               padding: 28,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
                 <ShoppingCart size={18} color={BRAND.coral} />
-                <h2 style={{ fontSize: 17, fontWeight: 700, color: BRAND.offWhite, margin: 0 }}>
+                <h2 style={{ fontSize: 17, fontWeight: 700, color: BRAND.dark, margin: 0 }}>
                   Order Summary
                 </h2>
               </div>
@@ -598,70 +611,70 @@ export default function CheckoutBasicMembers() {
               <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
                 {hasActiveEntryMembership ? (
                   <div style={{
-                    background: `${BRAND.cyan}10`,
-                    border: `1px solid ${BRAND.cyan}25`,
+                    background: `${BRAND.violet}08`,
+                    border: `1px solid ${BRAND.violet}20`,
                     borderRadius: 10,
                     padding: "12px 14px",
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                      <Check size={13} color={BRAND.cyan} />
-                      <span style={{ fontWeight: 600, fontSize: 13, color: BRAND.cyan }}>
+                      <Check size={13} color={BRAND.violet} />
+                      <span style={{ fontWeight: 600, fontSize: 13, color: BRAND.violet }}>
                         Active {getTierLabel(membershipTier)} Membership
                       </span>
                     </div>
-                    <div style={{ fontSize: 12, color: `${BRAND.offWhite}60` }}>
+                    <div style={{ fontSize: 12, color: BRAND.textSecondary }}>
                       {formatPrice(MEMBER_PRICE_PER_CREDIT)} per credit member rate
                     </div>
                   </div>
                 ) : addMembership ? (
                   <div style={{
-                    background: `${BRAND.violet}14`,
-                    border: `1px solid ${BRAND.violet}35`,
+                    background: `${BRAND.violet}08`,
+                    border: `1px solid ${BRAND.violet}20`,
                     borderRadius: 10,
                     padding: "12px 14px",
                   }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-                      <span style={{ fontWeight: 600, fontSize: 13, color: BRAND.offWhite }}>
+                      <span style={{ fontWeight: 600, fontSize: 13, color: BRAND.dark }}>
                         Entry Membership
                       </span>
-                      <span style={{ fontWeight: 700, fontSize: 14, color: BRAND.violetLight }}>
+                      <span style={{ fontWeight: 700, fontSize: 14, color: BRAND.violet }}>
                         {formatPrice(ENTRY_PLAN_COST)}
                       </span>
                     </div>
-                    <div style={{ fontSize: 12, color: `${BRAND.offWhite}60` }}>
+                    <div style={{ fontSize: 12, color: BRAND.textSecondary }}>
                       Annual plan — 12 months
                     </div>
                   </div>
                 ) : null}
 
                 <div style={{
-                  background: `${BRAND.offWhite}07`,
-                  border: `1px solid ${BRAND.offWhite}12`,
+                  background: `${BRAND.offWhite}`,
+                  border: `1px solid ${BRAND.borderLight}`,
                   borderRadius: 10,
                   padding: "12px 14px",
                 }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-                    <span style={{ fontWeight: 600, fontSize: 13, color: BRAND.offWhite }}>
+                    <span style={{ fontWeight: 600, fontSize: 13, color: BRAND.dark }}>
                       {selectedPkg?.credits}x Test24 Basic Credits
                     </span>
-                    <span style={{ fontWeight: 700, fontSize: 14, color: BRAND.offWhite }}>
+                    <span style={{ fontWeight: 700, fontSize: 14, color: BRAND.dark }}>
                       {formatPrice(creditsCost)}
                     </span>
                   </div>
                   {effectiveIsMember ? (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <Star size={11} color={BRAND.cyan} fill={BRAND.cyan} />
-                      <span style={{ fontSize: 12, color: BRAND.cyan, fontWeight: 600 }}>Member Rate Applied</span>
+                      <Star size={11} color={BRAND.violet} fill={BRAND.violet} />
+                      <span style={{ fontSize: 12, color: BRAND.violet, fontWeight: 600 }}>Member Rate Applied</span>
                     </div>
                   ) : (
-                    <div style={{ fontSize: 12, color: `${BRAND.offWhite}60` }}>Standard Rate</div>
+                    <div style={{ fontSize: 12, color: BRAND.textSecondary }}>Standard Rate</div>
                   )}
                 </div>
               </div>
 
               {/* Totals */}
               <div style={{
-                borderTop: `1px solid ${BRAND.offWhite}15`,
+                borderTop: `1px solid ${BRAND.borderLight}`,
                 paddingTop: 16,
                 display: "flex",
                 flexDirection: "column",
@@ -670,13 +683,13 @@ export default function CheckoutBasicMembers() {
               }}>
                 {entryPlanCost > 0 && (
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-                    <span style={{ color: `${BRAND.offWhite}70` }}>Entry Plan (12 months)</span>
-                    <span style={{ color: BRAND.offWhite }}>{formatPrice(entryPlanCost)}</span>
+                    <span style={{ color: BRAND.textSecondary }}>Entry Plan (12 months)</span>
+                    <span style={{ color: BRAND.dark }}>{formatPrice(entryPlanCost)}</span>
                   </div>
                 )}
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-                  <span style={{ color: `${BRAND.offWhite}70` }}>Credits Package</span>
-                  <span style={{ color: BRAND.offWhite }}>{formatPrice(creditsCost)}</span>
+                  <span style={{ color: BRAND.textSecondary }}>Credits Package</span>
+                  <span style={{ color: BRAND.dark }}>{formatPrice(creditsCost)}</span>
                 </div>
                 {effectiveIsMember && !hasActiveEntryMembership && (
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
@@ -688,11 +701,11 @@ export default function CheckoutBasicMembers() {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  borderTop: `1px solid ${BRAND.offWhite}15`,
+                  borderTop: `1px solid ${BRAND.borderLight}`,
                   paddingTop: 12,
                   marginTop: 4,
                 }}>
-                  <span style={{ fontSize: 16, fontWeight: 700, color: BRAND.offWhite }}>Total</span>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: BRAND.dark }}>Total</span>
                   <span
                     data-testid="text-grand-total"
                     style={{ fontSize: 22, fontWeight: 800, color: BRAND.coral }}
@@ -701,7 +714,7 @@ export default function CheckoutBasicMembers() {
                   </span>
                 </div>
                 {hasActiveEntryMembership && (
-                  <div style={{ textAlign: "center", fontSize: 12, color: BRAND.cyan, fontWeight: 600, marginTop: 4 }}>
+                  <div style={{ textAlign: "center", fontSize: 12, color: BRAND.violet, fontWeight: 600, marginTop: 4 }}>
                     No Entry Plan fee — you're already a member!
                   </div>
                 )}
@@ -740,16 +753,16 @@ export default function CheckoutBasicMembers() {
               {/* Trust signals */}
               <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 8 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <Shield size={13} color={`${BRAND.offWhite}50`} />
-                  <span style={{ fontSize: 12, color: `${BRAND.offWhite}55` }}>Secure payment processing</span>
+                  <Shield size={13} color={BRAND.textSecondary} />
+                  <span style={{ fontSize: 12, color: BRAND.textSecondary }}>Secure payment processing</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <Clock size={13} color={`${BRAND.offWhite}50`} />
-                  <span style={{ fontSize: 12, color: `${BRAND.offWhite}55` }}>Credits never expire</span>
+                  <Clock size={13} color={BRAND.textSecondary} />
+                  <span style={{ fontSize: 12, color: BRAND.textSecondary }}>Credits never expire</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <Check size={13} color={`${BRAND.offWhite}50`} />
-                  <span style={{ fontSize: 12, color: `${BRAND.offWhite}55` }}>All prices include VAT where applicable</span>
+                  <Check size={13} color={BRAND.textSecondary} />
+                  <span style={{ fontSize: 12, color: BRAND.textSecondary }}>All prices include VAT where applicable</span>
                 </div>
               </div>
             </div>
