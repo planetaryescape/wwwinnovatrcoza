@@ -744,7 +744,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         body: `secret=${encodeURIComponent(secretKey)}&response=${encodeURIComponent(recaptchaToken)}`,
       });
       const verifyData = await verifyResponse.json() as { success: boolean; score: number; action: string };
-      if (!verifyData.success || verifyData.score < 0.5) {
+      if (!verifyData.success || verifyData.score < 0.5 || verifyData.action !== "contact") {
         return res.status(400).json({ error: "reCAPTCHA verification failed. Please try again." });
       }
 
