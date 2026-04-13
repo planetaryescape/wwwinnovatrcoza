@@ -64,7 +64,7 @@ function Router() {
           <Route path="/research" component={PricingPage} />
           <Route path="/tools" component={ResearchTools} />
           <Route path="/case-studies" component={CaseStudies} />
-          <Route path="/contact">{() => <Redirect to="/" />}</Route>
+          <Route path="/contact" component={ContactUs} />
           <Route path="/test24-basic" component={Test24BasicPage} />
           <Route path="/test24-pro" component={Test24ProPage} />
           <Route path="/innovatr-consult">{() => <Redirect to="/consult" />}</Route>

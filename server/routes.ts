@@ -724,16 +724,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/contact", async (_req, res) => {
-    return res.status(503).json({ error: "Contact form is currently unavailable." });
+  app.post("/api/contact", async (req, res) => {
     try {
       const { z } = await import("zod");
-      
+
+      // reCAPTCHA v3 verification
+      const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+      if (!secretKey) {
+        console.error("RECAPTCHA_SECRET_KEY not configured");
+        return res.status(500).json({ error: "Server configuration error." });
+      }
+      const recaptchaToken = req.body.recaptchaToken;
+      if (!recaptchaToken) {
+        return res.status(400).json({ error: "reCAPTCHA verification required." });
+      }
+      const verifyResponse = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `secret=${encodeURIComponent(secretKey)}&response=${encodeURIComponent(recaptchaToken)}`,
+      });
+      const verifyData = await verifyResponse.json() as { success: boolean; score: number; action: string };
+      if (!verifyData.success || verifyData.score < 0.5) {
+        return res.status(400).json({ error: "reCAPTCHA verification failed. Please try again." });
+      }
+
       const contactSchema = z.object({
         name: z.string().min(1, "Name is required").max(100, "Name is too long"),
         email: z.string().email("Please provide a valid email address"),
         company: z.string().max(100, "Company name is too long").optional(),
         message: z.string().min(10, "Message must be at least 10 characters").max(5000, "Message is too long"),
+        recaptchaToken: z.string().optional(),
       });
 
       const validated = contactSchema.parse(req.body);
@@ -744,7 +764,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         company: validated.company || "",
         message: validated.message,
       });
-      
+
       res.status(200).json({ success: true, message: "Message sent successfully" });
     } catch (error: any) {
       console.error("Contact form error:", error);

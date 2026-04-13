@@ -18,6 +18,7 @@ const NAV_LINKS = [
   { label: "Research", href: "/research" },
   { label: "Our Tools", href: "/tools" },
   { label: "Case Studies", href: "/case-studies" },
+  { label: "Contact", href: "/contact" },
 ];
 
 function useScrolled(threshold = 40) {
