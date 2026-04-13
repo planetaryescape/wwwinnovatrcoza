@@ -18,6 +18,8 @@ import { useSEO } from "@/hooks/use-seo";
 const BRAND = {
   violet: "#3A2FBF",
   coral: "#E8503A",
+  cyan: "#4EC9E8",
+  cyanDark: "#2596BE",
   offWhite: "#F8F7F4",
   dark: "#0D0B1F",
   cardBg: "#FFFFFF",
@@ -221,14 +223,14 @@ export default function CheckoutBasicMembers() {
             display: "inline-flex",
             alignItems: "center",
             gap: 8,
-            background: `${BRAND.violet}10`,
-            border: `1px solid ${BRAND.violet}30`,
+            background: `${BRAND.cyan}14`,
+            border: `1px solid ${BRAND.cyan}40`,
             borderRadius: 100,
             padding: "6px 14px",
             marginBottom: 36,
           }}>
-            <Crown size={14} color={BRAND.violet} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: BRAND.violet }}>
+            <Crown size={14} color={BRAND.cyanDark} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: BRAND.cyanDark }}>
               {getTierLabel(membershipTier)} Member — Member Pricing Applied
             </span>
           </div>
@@ -269,14 +271,14 @@ export default function CheckoutBasicMembers() {
 
               {hasActiveEntryMembership ? (
                 <div style={{
-                  background: `${BRAND.violet}08`,
-                  border: `1px solid ${BRAND.violet}22`,
+                  background: `${BRAND.cyan}10`,
+                  border: `1px solid ${BRAND.cyan}30`,
                   borderRadius: 12,
                   padding: 16,
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                    <Check size={16} color={BRAND.violet} />
-                    <span style={{ fontWeight: 600, color: BRAND.violet, fontSize: 14 }}>
+                    <Check size={16} color={BRAND.cyanDark} />
+                    <span style={{ fontWeight: 600, color: BRAND.cyanDark, fontSize: 14 }}>
                       Active {getTierLabel(membershipTier)} Membership
                     </span>
                   </div>
@@ -525,7 +527,7 @@ export default function CheckoutBasicMembers() {
                               {pkg.description}
                             </div>
                             {effectiveIsMember && (
-                              <div style={{ fontSize: 12, color: BRAND.violet, fontWeight: 600, marginTop: 4 }}>
+                              <div style={{ fontSize: 12, color: hasActiveEntryMembership ? BRAND.cyanDark : BRAND.violet, fontWeight: 600, marginTop: 4 }}>
                                 Member Pricing
                               </div>
                             )}
@@ -536,7 +538,7 @@ export default function CheckoutBasicMembers() {
                           {effectiveIsMember ? (
                             <>
                               <div style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}>
-                                <Star size={13} color={BRAND.violet} fill={BRAND.violet} />
+                                <Star size={13} color={hasActiveEntryMembership ? BRAND.cyanDark : BRAND.violet} fill={hasActiveEntryMembership ? BRAND.cyanDark : BRAND.violet} />
                                 <span style={{ fontSize: 22, fontWeight: 800, color: BRAND.dark }}>
                                   {formatPrice(pkg.memberPrice)}
                                 </span>
@@ -611,14 +613,14 @@ export default function CheckoutBasicMembers() {
               <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
                 {hasActiveEntryMembership ? (
                   <div style={{
-                    background: `${BRAND.violet}08`,
-                    border: `1px solid ${BRAND.violet}20`,
+                    background: `${BRAND.cyan}10`,
+                    border: `1px solid ${BRAND.cyan}30`,
                     borderRadius: 10,
                     padding: "12px 14px",
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                      <Check size={13} color={BRAND.violet} />
-                      <span style={{ fontWeight: 600, fontSize: 13, color: BRAND.violet }}>
+                      <Check size={13} color={BRAND.cyanDark} />
+                      <span style={{ fontWeight: 600, fontSize: 13, color: BRAND.cyanDark }}>
                         Active {getTierLabel(membershipTier)} Membership
                       </span>
                     </div>
@@ -663,8 +665,8 @@ export default function CheckoutBasicMembers() {
                   </div>
                   {effectiveIsMember ? (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <Star size={11} color={BRAND.violet} fill={BRAND.violet} />
-                      <span style={{ fontSize: 12, color: BRAND.violet, fontWeight: 600 }}>Member Rate Applied</span>
+                      <Star size={11} color={hasActiveEntryMembership ? BRAND.cyanDark : BRAND.violet} fill={hasActiveEntryMembership ? BRAND.cyanDark : BRAND.violet} />
+                      <span style={{ fontSize: 12, color: hasActiveEntryMembership ? BRAND.cyanDark : BRAND.violet, fontWeight: 600 }}>Member Rate Applied</span>
                     </div>
                   ) : (
                     <div style={{ fontSize: 12, color: BRAND.textSecondary }}>Standard Rate</div>
@@ -714,7 +716,7 @@ export default function CheckoutBasicMembers() {
                   </span>
                 </div>
                 {hasActiveEntryMembership && (
-                  <div style={{ textAlign: "center", fontSize: 12, color: BRAND.violet, fontWeight: 600, marginTop: 4 }}>
+                  <div style={{ textAlign: "center", fontSize: 12, color: BRAND.cyanDark, fontWeight: 600, marginTop: 4 }}>
                     No Entry Plan fee — you're already a member!
                   </div>
                 )}
