@@ -749,7 +749,12 @@ export default function CheckoutBasicMembers() {
               </div>
 
               {/* CTA */}
-              <div className="checkout-cta-wrap" onClick={handleCheckout} data-testid="button-proceed-checkout">
+              <button
+                className="checkout-cta-wrap"
+                onClick={handleCheckout}
+                data-testid="button-proceed-checkout"
+                style={{ width: "100%", border: "none", background: "none", padding: 0, fontFamily: "inherit", cursor: "pointer" }}
+              >
                 <div className="checkout-cta-glow" />
                 <div style={{
                   position: "relative",
@@ -770,7 +775,7 @@ export default function CheckoutBasicMembers() {
                   <ShoppingCart size={17} />
                   Proceed to Payment
                 </div>
-              </div>
+              </button>
 
               {/* Trust signals */}
               <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 8 }}>

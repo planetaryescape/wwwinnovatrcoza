@@ -1,14 +1,24 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowLeft, Check, Rocket, ShoppingCart, Users } from "lucide-react";
+import { ArrowLeft, Check, Rocket, ShoppingCart, Users, Shield } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useMemo, useEffect } from "react";
 import OrderFormDialog from "@/components/OrderFormDialog";
 import PublicNavbar from "@/components/PublicNavbar";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
+
+const BRAND = {
+  violet: "#3A2FBF",
+  coral: "#E8503A",
+  cyan: "#4EC9E8",
+  cyanDark: "#2596BE",
+  offWhite: "#F8F7F4",
+  dark: "#0D0B1F",
+  cardBg: "#FFFFFF",
+  border: "#E5E3DE",
+  borderLight: "#EDEBE7",
+  textPrimary: "#0D0B1F",
+  textSecondary: "#4A4862",
+  textTertiary: "#8A879A",
+};
 
 const reachPricing = [
   { reach: 100, price: 50000, rate: 500, label: "100 Consumers" },
@@ -24,6 +34,30 @@ const features = [
   "Robust Report with unlimited Filtering",
   "Strategic Recommendations from AI + Human Experts",
 ];
+
+const responsiveStyles = `
+  @media (max-width: 860px) {
+    .checkout-grid { grid-template-columns: 1fr !important; }
+    .checkout-features-grid { grid-template-columns: 1fr !important; }
+  }
+  @keyframes checkout-glow-spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+  .checkout-cta-wrap {
+    position: relative; border-radius: 14px; overflow: hidden; cursor: pointer;
+  }
+  .checkout-cta-glow {
+    position: absolute; width: 220%; aspect-ratio: 1;
+    top: 50%; left: 50%; border-radius: 50%; filter: blur(14px);
+    background: conic-gradient(from 0deg, #3A2FBF, #E8503A, #4EC9E8, #3A2FBF);
+    animation: checkout-glow-spin 5s linear infinite;
+    pointer-events: none; opacity: 0.7;
+  }
+  .checkout-cta-wrap:hover .checkout-cta-glow {
+    opacity: 1; animation-duration: 2.5s;
+  }
+`;
 
 export default function CheckoutProPAYG() {
   const [, setLocation] = useLocation();
@@ -73,255 +107,314 @@ export default function CheckoutProPAYG() {
   }, [pricePerStudy, selectedReach]);
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div style={{ minHeight: "100vh", background: BRAND.offWhite, color: BRAND.textPrimary, fontFamily: '"DM Sans", sans-serif' }}>
+      <style>{responsiveStyles}</style>
       <PublicNavbar />
-      <style>{`
-        @keyframes checkout-glow-spin {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to   { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-        .checkout-cta-wrap { position: relative; border-radius: 14px; overflow: hidden; cursor: pointer; }
-        .checkout-cta-glow { position: absolute; width: 220%; aspect-ratio: 1; top: 50%; left: 50%; border-radius: 50%; filter: blur(14px); background: conic-gradient(from 0deg, #3A2FBF, #E8503A, #4EC9E8, #3A2FBF); animation: checkout-glow-spin 5s linear infinite; pointer-events: none; opacity: 0.7; }
-        .checkout-cta-wrap:hover .checkout-cta-glow { opacity: 1; animation-duration: 2.5s; }
-      `}</style>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12">
-        <Button
-          variant="ghost"
-          className="mb-8"
+
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "120px 24px 80px" }}>
+        <button
           onClick={() => setLocation(backHref)}
           data-testid="button-back"
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: "none", border: "none", color: BRAND.textTertiary,
+            cursor: "pointer", fontSize: 14, fontFamily: "inherit",
+            marginBottom: 40, padding: "4px 0", transition: "color 0.2s",
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = BRAND.textPrimary; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = BRAND.textTertiary; }}
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <ArrowLeft size={16} />
           {backLabel}
-        </Button>
+        </button>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <div className="mb-8">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-md bg-primary/20 flex items-center justify-center">
-                  <Rocket className="w-6 h-6 text-primary" />
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 12 }}>
+          <div style={{
+            width: 52, height: 52, borderRadius: 12,
+            background: `${BRAND.violet}14`,
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+          }}>
+            <Rocket size={26} color={BRAND.violet} />
+          </div>
+          <div>
+            <h1 style={{ fontSize: 36, fontWeight: 700, margin: 0, color: BRAND.dark, fontFamily: '"Playfair Display", serif' }}>
+              Test24 Pro
+            </h1>
+            <p style={{ fontSize: 14, color: BRAND.textSecondary, margin: 0, marginTop: 2 }}>
+              Pay As You Go — no membership required
+            </p>
+          </div>
+        </div>
+
+        <p style={{ fontSize: 16, color: BRAND.textSecondary, marginBottom: 36 }}>
+          Enterprise Level, Quant & Qual Testing in 24hrs
+        </p>
+
+        <div className="checkout-grid" style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: 32, alignItems: "start" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+
+            <div style={{
+              background: BRAND.cardBg, border: `1px solid ${BRAND.border}`,
+              borderRadius: 16, padding: 28, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: BRAND.dark }}>
+                Configure Your Study
+              </h2>
+
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: BRAND.dark }}>Number of Studies</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: BRAND.violet }}>
+                    10% discount for 3 or more
+                  </span>
                 </div>
-                <div>
-                  <h1 className="text-4xl font-serif font-bold">Test24 Pro</h1>
-                  <p className="text-muted-foreground">Pay As You Go</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={quantity <= 1}
+                    data-testid="button-decrease-quantity"
+                    style={{
+                      width: 40, height: 40, borderRadius: 10,
+                      border: `1px solid ${BRAND.border}`, background: BRAND.cardBg,
+                      cursor: quantity <= 1 ? "not-allowed" : "pointer",
+                      fontSize: 18, fontWeight: 600, color: BRAND.dark,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontFamily: "inherit", opacity: quantity <= 1 ? 0.4 : 1,
+                    }}
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    min="1"
+                    value={quantity}
+                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                    data-testid="input-quantity"
+                    style={{
+                      width: 70, padding: "8px 12px", borderRadius: 8,
+                      border: `1px solid ${BRAND.border}`, fontFamily: "inherit",
+                      fontSize: 16, fontWeight: 600, color: BRAND.dark,
+                      background: BRAND.offWhite, outline: "none", textAlign: "center",
+                    }}
+                  />
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    data-testid="button-increase-quantity"
+                    style={{
+                      width: 40, height: 40, borderRadius: 10,
+                      border: `1px solid ${BRAND.border}`, background: BRAND.cardBg,
+                      cursor: "pointer", fontSize: 18, fontWeight: 600, color: BRAND.dark,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    +
+                  </button>
                 </div>
               </div>
-              <p className="text-lg">
-                Enterprise Level, Quant & Qual Testing in 24hrs
-              </p>
-            </div>
 
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="text-xl">Configure Your Study</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <Label htmlFor="quantity">Number of Studies</Label>
-                      <span className="text-sm text-primary font-medium">
-                        10% discount for 3 or more
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        disabled={quantity <= 1}
-                        data-testid="button-decrease-quantity"
+              <div style={{ marginBottom: 24 }}>
+                <span style={{ fontSize: 14, fontWeight: 600, color: BRAND.dark, display: "block", marginBottom: 12 }}>
+                  Reach per Survey
+                </span>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {reachPricing.map((tier) => {
+                    const isSelected = selectedReach === tier.reach;
+                    return (
+                      <div
+                        key={tier.reach}
+                        onClick={() => setSelectedReach(tier.reach)}
+                        data-testid={`radio-reach-${tier.reach}`}
+                        style={{
+                          border: `2px solid ${isSelected ? BRAND.coral : BRAND.borderLight}`,
+                          borderRadius: 14, padding: "16px 20px", cursor: "pointer",
+                          background: isSelected ? `${BRAND.coral}08` : BRAND.cardBg,
+                          transition: "all 0.2s",
+                        }}
                       >
-                        -
-                      </Button>
-                      <Input
-                        id="quantity"
-                        type="number"
-                        min="1"
-                        value={quantity}
-                        onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-24 text-center"
-                        data-testid="input-quantity"
-                      />
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setQuantity(quantity + 1)}
-                        data-testid="button-increase-quantity"
-                      >
-                        +
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label>Reach per Survey</Label>
-                    <RadioGroup
-                      value={selectedReach.toString()}
-                      onValueChange={(value) => setSelectedReach(parseInt(value))}
-                      className="mt-3 space-y-3"
-                    >
-                      {reachPricing.map((tier) => (
-                        <div
-                          key={tier.reach}
-                          className={`relative border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                            selectedReach === tier.reach
-                              ? "border-primary bg-primary/5"
-                              : "border-border hover-elevate"
-                          }`}
-                          onClick={() => setSelectedReach(tier.reach)}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <RadioGroupItem
-                                value={tier.reach.toString()}
-                                id={`reach-${tier.reach}`}
-                                data-testid={`radio-reach-${tier.reach}`}
-                              />
-                              <div>
-                                <Label
-                                  htmlFor={`reach-${tier.reach}`}
-                                  className="cursor-pointer font-semibold"
-                                >
-                                  {tier.label}
-                                </Label>
-                                <p className="text-sm text-muted-foreground mt-0.5">
-                                  R{tier.rate} per consumer
-                                </p>
-                              </div>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                            <div style={{
+                              width: 20, height: 20, borderRadius: "50%",
+                              border: `2px solid ${isSelected ? BRAND.coral : BRAND.textTertiary}`,
+                              background: isSelected ? BRAND.coral : "transparent",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              flexShrink: 0, transition: "all 0.2s",
+                            }}>
+                              {isSelected && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#fff" }} />}
                             </div>
-                            <div className="text-right">
-                              <div className="text-xl font-bold text-primary">
-                                {formatPrice(tier.price)}
+                            <div>
+                              <div style={{ fontWeight: 700, fontSize: 15, color: BRAND.dark }}>{tier.label}</div>
+                              <div style={{ fontSize: 13, color: BRAND.textTertiary, marginTop: 2 }}>
+                                R{tier.rate} per consumer
                               </div>
-                              <div className="text-xs text-muted-foreground">per survey</div>
                             </div>
                           </div>
+                          <div style={{ textAlign: "right" }}>
+                            <div style={{ fontSize: 20, fontWeight: 800, color: BRAND.dark }}>
+                              {formatPrice(tier.price)}
+                            </div>
+                            <div style={{ fontSize: 12, color: BRAND.textTertiary }}>per survey</div>
+                          </div>
                         </div>
-                      ))}
-                    </RadioGroup>
-                  </div>
-
-                  <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Users className="w-5 h-5 text-accent" />
-                      <p className="font-semibold text-accent">Total Consumers Reached</p>
-                    </div>
-                    <p className="text-3xl font-bold" data-testid="text-total-consumers">
-                      {totalConsumers.toLocaleString()}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {quantity} {quantity === 1 ? "study" : "studies"} × {selectedReach} consumers
-                    </p>
-                  </div>
-
-                  {hasDiscount && (
-                    <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                      <p className="text-sm font-medium text-primary">
-                        Volume Discount Applied: 10% off for 3+ studies
-                      </p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        You're saving {formatPrice(discountAmount)}
-                      </p>
-                    </div>
-                  )}
+                      </div>
+                    );
+                  })}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">What's Included</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {features.map((feature, index) => (
-                    <div key={index} className="flex gap-3">
-                      <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
-                    </div>
-                  ))}
+              <div style={{
+                background: `${BRAND.cyan}10`, border: `1px solid ${BRAND.cyan}30`,
+                borderRadius: 12, padding: 16,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                  <Users size={16} color={BRAND.cyanDark} />
+                  <span style={{ fontWeight: 700, fontSize: 14, color: BRAND.cyanDark }}>Total Consumers Reached</span>
                 </div>
-              </CardContent>
-            </Card>
+                <div data-testid="text-total-consumers" style={{ fontSize: 28, fontWeight: 800, color: BRAND.dark }}>
+                  {totalConsumers.toLocaleString()}
+                </div>
+                <div style={{ fontSize: 13, color: BRAND.textSecondary, marginTop: 4 }}>
+                  {quantity} {quantity === 1 ? "study" : "studies"} × {selectedReach} consumers
+                </div>
+              </div>
+
+              {hasDiscount && (
+                <div style={{
+                  background: `${BRAND.violet}0A`, border: `1px solid ${BRAND.violet}20`,
+                  borderRadius: 12, padding: 16, marginTop: 16,
+                }}>
+                  <div style={{ fontWeight: 600, fontSize: 14, color: BRAND.violet }}>
+                    Volume Discount Applied: 10% off for 3+ studies
+                  </div>
+                  <div style={{ fontSize: 13, color: BRAND.textSecondary, marginTop: 4 }}>
+                    You're saving {formatPrice(discountAmount)}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div style={{
+              background: BRAND.cardBg, border: `1px solid ${BRAND.border}`,
+              borderRadius: 16, padding: 28, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: BRAND.dark }}>
+                What's Included
+              </h2>
+              <div className="checkout-features-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 24px" }}>
+                {features.map((feature, index) => (
+                  <div key={index} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                    <Check size={15} color={BRAND.coral} style={{ flexShrink: 0, marginTop: 2 }} />
+                    <span style={{ fontSize: 14, color: BRAND.textSecondary, lineHeight: 1.5 }}>{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="lg:col-span-1">
-            <Card className="sticky top-24 border-primary">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShoppingCart className="w-5 h-5" />
+          <div style={{ position: "sticky", top: 24 }}>
+            <div style={{
+              background: BRAND.cardBg, border: `1px solid ${BRAND.border}`,
+              borderRadius: 16, padding: 28, boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
+                <ShoppingCart size={18} color={BRAND.coral} />
+                <h2 style={{ fontSize: 17, fontWeight: 700, color: BRAND.dark, margin: 0 }}>
                   Order Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h3 className="font-semibold mb-2">Selected Configuration</h3>
-                  <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Studies</span>
-                      <span className="font-medium" data-testid="text-studies-count">{quantity}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Reach per Survey</span>
-                      <span className="font-medium" data-testid="text-reach-per-study">{selectedReach}</span>
-                    </div>
-                    <div className="flex justify-between text-sm border-t pt-2">
-                      <span className="text-muted-foreground">Total Consumers</span>
-                      <span className="font-bold text-accent" data-testid="text-summary-total-consumers">
-                        {totalConsumers.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                </h2>
+              </div>
 
-                <div className="space-y-2 pt-4 border-t">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {formatPrice(pricePerStudy)} × {quantity}
-                    </span>
-                    <span data-testid="text-subtotal">{formatPrice(subtotal)}</span>
-                  </div>
-                  {hasDiscount && (
-                    <div className="flex justify-between text-sm text-primary">
-                      <span>Volume Discount (10%)</span>
-                      <span data-testid="text-discount">-{formatPrice(discountAmount)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                    <span>Total</span>
-                    <span className="text-primary" data-testid="text-final-total">
-                      {formatPrice(finalTotal)}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground text-center pt-2">
-                    {formatPrice(Math.round(finalTotal / totalConsumers))} per consumer
-                  </p>
-                  <p className="text-xs text-muted-foreground text-center">
-                    All prices include VAT where applicable
-                  </p>
+              <div style={{ marginBottom: 8 }}>
+                <span style={{ fontWeight: 600, fontSize: 13, color: BRAND.dark }}>Selected Configuration</span>
+              </div>
+              <div style={{
+                background: BRAND.offWhite, border: `1px solid ${BRAND.borderLight}`,
+                borderRadius: 10, padding: "12px 14px", marginBottom: 20,
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
+                  <span style={{ color: BRAND.textSecondary }}>Studies</span>
+                  <span data-testid="text-studies-count" style={{ fontWeight: 600, color: BRAND.dark }}>{quantity}</span>
                 </div>
-
-                <div className="checkout-cta-wrap" onClick={handleCheckout} data-testid="button-proceed-checkout">
-                  <div className="checkout-cta-glow" />
-                  <Button className="w-full relative z-10" size="lg">
-                    Proceed to Payment
-                  </Button>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
+                  <span style={{ color: BRAND.textSecondary }}>Reach per Survey</span>
+                  <span data-testid="text-reach-per-study" style={{ fontWeight: 600, color: BRAND.dark }}>{selectedReach}</span>
                 </div>
+                <div style={{
+                  display: "flex", justifyContent: "space-between", fontSize: 13,
+                  borderTop: `1px solid ${BRAND.borderLight}`, paddingTop: 8, marginTop: 4,
+                }}>
+                  <span style={{ color: BRAND.textSecondary }}>Total Consumers</span>
+                  <span data-testid="text-summary-total-consumers" style={{ fontWeight: 700, color: BRAND.cyanDark }}>
+                    {totalConsumers.toLocaleString()}
+                  </span>
+                </div>
+              </div>
 
-                <div className="text-center pt-4 border-t">
-                  <p className="text-xs text-muted-foreground">
-                    Secure payment processing
-                  </p>
-                  {quantity < 3 && (
-                    <p className="text-xs text-accent mt-1 font-medium">
+              <div style={{
+                borderTop: `1px solid ${BRAND.borderLight}`, paddingTop: 16,
+                display: "flex", flexDirection: "column", gap: 8, marginBottom: 20,
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
+                  <span style={{ color: BRAND.textSecondary }}>
+                    {formatPrice(pricePerStudy)} × {quantity}
+                  </span>
+                  <span data-testid="text-subtotal" style={{ color: BRAND.dark }}>{formatPrice(subtotal)}</span>
+                </div>
+                {hasDiscount && (
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
+                    <span style={{ color: BRAND.coral }}>Volume Discount (10%)</span>
+                    <span data-testid="text-discount" style={{ color: BRAND.coral }}>-{formatPrice(discountAmount)}</span>
+                  </div>
+                )}
+                <div style={{
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  borderTop: `1px solid ${BRAND.borderLight}`, paddingTop: 12, marginTop: 4,
+                }}>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: BRAND.dark }}>Total</span>
+                  <span data-testid="text-final-total" style={{ fontSize: 22, fontWeight: 800, color: BRAND.coral }}>
+                    {formatPrice(finalTotal)}
+                  </span>
+                </div>
+                <div style={{ textAlign: "center", fontSize: 12, color: BRAND.textSecondary, marginTop: 4 }}>
+                  {formatPrice(Math.round(finalTotal / totalConsumers))} per consumer
+                </div>
+                <div style={{ textAlign: "center", fontSize: 12, color: BRAND.textSecondary }}>
+                  All prices include VAT where applicable
+                </div>
+              </div>
+
+              <button
+                className="checkout-cta-wrap"
+                onClick={handleCheckout}
+                data-testid="button-proceed-checkout"
+                style={{ width: "100%", border: "none", background: "none", padding: 0, fontFamily: "inherit", cursor: "pointer" }}
+              >
+                <div className="checkout-cta-glow" />
+                <div style={{
+                  position: "relative", zIndex: 1, width: "100%",
+                  padding: "15px 20px", background: BRAND.coral, borderRadius: 12,
+                  color: "#fff", fontWeight: 700, fontSize: 16, fontFamily: "inherit",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                }}>
+                  <ShoppingCart size={17} />
+                  Proceed to Payment
+                </div>
+              </button>
+
+              <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <Shield size={13} color={BRAND.textSecondary} />
+                  <span style={{ fontSize: 12, color: BRAND.textSecondary }}>Secure payment processing</span>
+                </div>
+                {quantity < 3 && (
+                  <div style={{ textAlign: "center", marginTop: 4 }}>
+                    <span style={{ fontSize: 12, color: BRAND.coral, fontWeight: 600 }}>
                       Add {3 - quantity} more {3 - quantity === 1 ? "study" : "studies"} for 10% off
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -1,12 +1,50 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Check, Crown, ShoppingCart, Star } from "lucide-react";
+import { ArrowLeft, Check, Crown, ShoppingCart, Star, Shield } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import OrderFormDialog from "@/components/OrderFormDialog";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import PublicNavbar from "@/components/PublicNavbar";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
+
+const BRAND = {
+  violet: "#3A2FBF",
+  coral: "#E8503A",
+  cyan: "#4EC9E8",
+  cyanDark: "#2596BE",
+  offWhite: "#F8F7F4",
+  dark: "#0D0B1F",
+  cardBg: "#FFFFFF",
+  border: "#E5E3DE",
+  borderLight: "#EDEBE7",
+  textPrimary: "#0D0B1F",
+  textSecondary: "#4A4862",
+  textTertiary: "#8A879A",
+};
+
+const responsiveStyles = `
+  @media (max-width: 860px) {
+    .checkout-grid { grid-template-columns: 1fr !important; }
+    .checkout-features-grid { grid-template-columns: 1fr !important; }
+    .checkout-tier-grid { grid-template-columns: 1fr !important; }
+  }
+  @keyframes checkout-glow-spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+  .checkout-cta-wrap {
+    position: relative; border-radius: 14px; overflow: hidden; cursor: pointer;
+  }
+  .checkout-cta-glow {
+    position: absolute; width: 220%; aspect-ratio: 1;
+    top: 50%; left: 50%; border-radius: 50%; filter: blur(14px);
+    background: conic-gradient(from 0deg, #3A2FBF, #E8503A, #4EC9E8, #3A2FBF);
+    animation: checkout-glow-spin 5s linear infinite;
+    pointer-events: none; opacity: 0.7;
+  }
+  .checkout-cta-wrap:hover .checkout-cta-glow {
+    opacity: 1; animation-duration: 2.5s;
+  }
+`;
 
 export default function CheckoutMembershipGold() {
   const [, setLocation] = useLocation();
@@ -42,186 +80,239 @@ export default function CheckoutMembershipGold() {
   ];
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div style={{ minHeight: "100vh", background: BRAND.offWhite, color: BRAND.textPrimary, fontFamily: '"DM Sans", sans-serif' }}>
+      <style>{responsiveStyles}</style>
       <PublicNavbar />
-      <style>{`
-        @keyframes checkout-glow-spin {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to   { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-        .checkout-cta-wrap { position: relative; border-radius: 14px; overflow: hidden; cursor: pointer; }
-        .checkout-cta-glow { position: absolute; width: 220%; aspect-ratio: 1; top: 50%; left: 50%; border-radius: 50%; filter: blur(14px); background: conic-gradient(from 0deg, #3A2FBF, #E8503A, #4EC9E8, #3A2FBF); animation: checkout-glow-spin 5s linear infinite; pointer-events: none; opacity: 0.7; }
-        .checkout-cta-wrap:hover .checkout-cta-glow { opacity: 1; animation-duration: 2.5s; }
-      `}</style>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12">
-        <Button
-          variant="ghost"
-          className="mb-8"
+
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "120px 24px 80px" }}>
+        <button
           onClick={() => setLocation(backHref)}
           data-testid="button-back"
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: "none", border: "none", color: BRAND.textTertiary,
+            cursor: "pointer", fontSize: 14, fontFamily: "inherit",
+            marginBottom: 40, padding: "4px 0", transition: "color 0.2s",
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = BRAND.textPrimary; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = BRAND.textTertiary; }}
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <ArrowLeft size={16} />
           {backLabel}
-        </Button>
+        </button>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <div className="mb-8">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-md bg-primary/20 flex items-center justify-center">
-                  <Crown className="w-6 h-6 text-primary" />
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 12 }}>
+          <div style={{
+            width: 52, height: 52, borderRadius: 12,
+            background: `${BRAND.violet}14`,
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+          }}>
+            <Crown size={26} color={BRAND.violet} />
+          </div>
+          <div>
+            <h1 style={{ fontSize: 36, fontWeight: 700, margin: 0, color: BRAND.dark, fontFamily: '"Playfair Display", serif' }}>
+              Growth Membership
+            </h1>
+            <div style={{
+              display: "inline-flex", alignItems: "center",
+              background: BRAND.coral, color: "#fff",
+              fontSize: 11, fontWeight: 700, letterSpacing: "0.08em",
+              padding: "4px 12px", borderRadius: 100, marginTop: 6,
+            }}>
+              MOST POPULAR
+            </div>
+          </div>
+        </div>
+
+        <p style={{ fontSize: 16, color: BRAND.textSecondary, marginBottom: 36 }}>
+          For growing businesses ready to scale their innovation testing
+        </p>
+
+        <div className="checkout-grid" style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: 32, alignItems: "start" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+
+            <div style={{
+              background: BRAND.cardBg, border: `1px solid ${BRAND.border}`,
+              borderRadius: 16, padding: 28, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: BRAND.dark }}>
+                Plan Includes
+              </h2>
+
+              <div style={{
+                background: `${BRAND.violet}0A`, border: `1px solid ${BRAND.violet}20`,
+                borderRadius: 12, padding: 16, marginBottom: 20,
+              }}>
+                <h3 style={{ fontWeight: 700, fontSize: 15, color: BRAND.dark, marginBottom: 6 }}>
+                  Starter Membership Required
+                </h3>
+                <p style={{ fontSize: 13, color: BRAND.textSecondary, margin: 0 }}>
+                  Growth membership includes Starter benefits plus additional credits and features
+                </p>
+              </div>
+
+              <div className="checkout-tier-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+                <div style={{
+                  border: `1px solid ${BRAND.border}`, borderRadius: 12, padding: 16,
+                  background: `${BRAND.violet}06`,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                    <Star size={15} color={BRAND.violet} />
+                    <h4 style={{ fontWeight: 700, fontSize: 14, color: BRAND.dark, margin: 0 }}>Starter Base</h4>
+                  </div>
+                  <div style={{ fontSize: 13, color: BRAND.textSecondary, lineHeight: 1.8 }}>
+                    <div>· Discounted research rates</div>
+                    <div>· Private dashboard</div>
+                    <div>· Trends reports</div>
+                  </div>
                 </div>
-                <div>
-                  <h1 className="text-4xl font-serif font-bold">Growth Membership</h1>
-                  <div className="flex items-center gap-2">
-                    <span className="bg-accent text-accent-foreground px-3 py-1 rounded-full text-xs font-bold">
-                      MOST POPULAR
-                    </span>
+                <div style={{
+                  border: `1px solid ${BRAND.border}`, borderRadius: 12, padding: 16,
+                  background: `${BRAND.violet}06`,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                    <Crown size={15} color={BRAND.violet} />
+                    <h4 style={{ fontWeight: 700, fontSize: 14, color: BRAND.dark, margin: 0 }}>Growth Upgrade</h4>
+                  </div>
+                  <div style={{ fontSize: 13, color: BRAND.textSecondary, lineHeight: 1.8 }}>
+                    <div>· 10 Basic credits included</div>
+                    <div>· 2 Pro studies included</div>
+                    <div>· ~{formatShortPrice(totalValueZAR)} total value</div>
                   </div>
                 </div>
               </div>
-              <p className="text-lg">
-                For growing businesses ready to scale their innovation testing
-              </p>
+
+              <div style={{
+                background: `${BRAND.coral}0A`, border: `1px solid ${BRAND.coral}20`,
+                borderRadius: 12, padding: 16,
+              }}>
+                <h3 style={{ fontWeight: 700, fontSize: 14, color: BRAND.coral, marginBottom: 8 }}>
+                  Included Credits
+                </h3>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  <span style={{ fontSize: 14, color: BRAND.textSecondary }}>10x Test24 Basic ideas</span>
+                  <span style={{ fontWeight: 700, fontSize: 14, color: BRAND.dark }}>~{formatPrice(basicValueZAR)} value</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 14, color: BRAND.textSecondary }}>2x Test24 Pro studies</span>
+                  <span style={{ fontWeight: 700, fontSize: 14, color: BRAND.dark }}>~{formatPrice(proValueZAR)} value</span>
+                </div>
+              </div>
             </div>
 
-            <Card className="mb-6 border-primary">
-              <CardHeader>
-                <CardTitle className="text-xl">Plan Includes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                    <h3 className="font-semibold mb-2">Starter Membership Required</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Growth membership includes Starter benefits plus additional credits and features
-                    </p>
+            <div style={{
+              background: BRAND.cardBg, border: `1px solid ${BRAND.border}`,
+              borderRadius: 16, padding: 28, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: BRAND.dark }}>
+                All Growth Features
+              </h2>
+              <div className="checkout-features-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 24px" }}>
+                {growthFeatures.map((feature, index) => (
+                  <div key={index} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                    <Check size={15} color={BRAND.coral} style={{ flexShrink: 0, marginTop: 2 }} />
+                    <span style={{ fontSize: 14, color: BRAND.textSecondary, lineHeight: 1.5 }}>{feature}</span>
                   </div>
-
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="border rounded-lg p-4 bg-accent/5">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Star className="w-4 h-4 text-accent" />
-                        <h4 className="font-semibold">Starter Base</h4>
-                      </div>
-                      <ul className="space-y-1 text-sm text-muted-foreground">
-                        <li>• Discounted research rates</li>
-                        <li>• Private dashboard</li>
-                        <li>• Trends reports</li>
-                      </ul>
-                    </div>
-                    <div className="border rounded-lg p-4 bg-primary/5">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Crown className="w-4 h-4 text-primary" />
-                        <h4 className="font-semibold">Growth Upgrade</h4>
-                      </div>
-                      <ul className="space-y-1 text-sm text-muted-foreground">
-                        <li>• 10 Basic credits included</li>
-                        <li>• 2 Pro studies included</li>
-                        <li>• ~{formatShortPrice(totalValueZAR)} total value</li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
-                    <h3 className="font-semibold text-accent mb-1">Included Credits</h3>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-sm">10x Test24 Basic ideas</span>
-                      <span className="font-semibold">~{formatPrice(basicValueZAR)} value</span>
-                    </div>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-sm">2x Test24 Pro studies</span>
-                      <span className="font-semibold">~{formatPrice(proValueZAR)} value</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">All Growth Features</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {growthFeatures.map((feature, index) => (
-                    <div key={index} className="flex gap-3">
-                      <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="lg:col-span-1">
-            <Card className="sticky top-24 border-primary">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShoppingCart className="w-5 h-5" />
+          <div style={{ position: "sticky", top: 24 }}>
+            <div style={{
+              background: BRAND.cardBg, border: `1px solid ${BRAND.border}`,
+              borderRadius: 16, padding: 28, boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
+                <ShoppingCart size={18} color={BRAND.coral} />
+                <h2 style={{ fontSize: 17, fontWeight: 700, color: BRAND.dark, margin: 0 }}>
                   Order Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h3 className="font-semibold mb-2">Selected Plan</h3>
-                  <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Crown className="w-4 h-4 text-primary" />
-                      <p className="font-medium">Growth Membership</p>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Includes Starter + Growth upgrade
-                    </p>
-                  </div>
-                </div>
+                </h2>
+              </div>
 
-                <div className="space-y-2 pt-4 border-t">
-                  <div className="text-xs text-muted-foreground mb-2 font-medium">
-                    MEMBERSHIP BREAKDOWN
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Starter Membership Base</span>
-                    <span className="font-semibold" data-testid="text-entry-price">{formatPrice(entryPriceZAR)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Growth Tier Upgrade</span>
-                    <span className="font-semibold" data-testid="text-gold-upgrade">{formatPrice(growthUpgradeZAR)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm text-accent font-medium pt-2 border-t">
-                    <span>Total Package Value</span>
-                    <span data-testid="text-total-value">{formatPrice(totalValueZAR)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm text-primary">
-                    <span>Your Savings</span>
-                    <span data-testid="text-savings">{formatPrice(savingsZAR)}</span>
-                  </div>
-                  <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                    <span>Total Due Today</span>
-                    <span className="text-primary" data-testid="text-total">
-                      {formatPrice(totalPriceZAR)}
-                    </span>
-                  </div>
+              <div style={{ marginBottom: 8 }}>
+                <span style={{ fontWeight: 600, fontSize: 13, color: BRAND.dark }}>Selected Plan</span>
+              </div>
+              <div style={{
+                background: BRAND.offWhite, border: `1px solid ${BRAND.borderLight}`,
+                borderRadius: 10, padding: "12px 14px", marginBottom: 20,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                  <Crown size={14} color={BRAND.violet} />
+                  <span style={{ fontWeight: 600, fontSize: 13, color: BRAND.dark }}>Growth Membership</span>
                 </div>
-
-                <div className="checkout-cta-wrap" onClick={handleCheckout} data-testid="button-proceed-checkout">
-                  <div className="checkout-cta-glow" />
-                  <Button className="w-full relative z-10" size="lg">
-                    Proceed to Payment
-                  </Button>
+                <div style={{ fontSize: 12, color: BRAND.textSecondary }}>
+                  Includes Starter + Growth upgrade
                 </div>
+              </div>
 
-                <div className="text-center pt-4 border-t space-y-2">
-                  <p className="text-xs text-muted-foreground">
-                    Billed annually • Renews automatically
-                  </p>
-                  <p className="text-xs text-primary font-medium">
+              <div style={{
+                borderTop: `1px solid ${BRAND.borderLight}`, paddingTop: 16,
+                display: "flex", flexDirection: "column", gap: 8, marginBottom: 20,
+              }}>
+                <div style={{ fontSize: 11, color: BRAND.textTertiary, fontWeight: 700, letterSpacing: "0.08em", marginBottom: 4 }}>
+                  MEMBERSHIP BREAKDOWN
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
+                  <span style={{ color: BRAND.textSecondary }}>Starter Membership Base</span>
+                  <span data-testid="text-entry-price" style={{ fontWeight: 600, color: BRAND.dark }}>{formatPrice(entryPriceZAR)}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
+                  <span style={{ color: BRAND.textSecondary }}>Growth Tier Upgrade</span>
+                  <span data-testid="text-gold-upgrade" style={{ fontWeight: 600, color: BRAND.dark }}>{formatPrice(growthUpgradeZAR)}</span>
+                </div>
+                <div style={{
+                  display: "flex", justifyContent: "space-between", fontSize: 14,
+                  borderTop: `1px solid ${BRAND.borderLight}`, paddingTop: 8, marginTop: 4,
+                }}>
+                  <span style={{ color: BRAND.violet, fontWeight: 600 }}>Total Package Value</span>
+                  <span data-testid="text-total-value" style={{ color: BRAND.violet, fontWeight: 600 }}>{formatPrice(totalValueZAR)}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
+                  <span style={{ color: BRAND.coral }}>Your Savings</span>
+                  <span data-testid="text-savings" style={{ color: BRAND.coral }}>{formatPrice(savingsZAR)}</span>
+                </div>
+                <div style={{
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  borderTop: `1px solid ${BRAND.borderLight}`, paddingTop: 12, marginTop: 4,
+                }}>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: BRAND.dark }}>Total Due Today</span>
+                  <span data-testid="text-total" style={{ fontSize: 22, fontWeight: 800, color: BRAND.coral }}>
+                    {formatPrice(totalPriceZAR)}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                className="checkout-cta-wrap"
+                onClick={handleCheckout}
+                data-testid="button-proceed-checkout"
+                style={{ width: "100%", border: "none", background: "none", padding: 0, fontFamily: "inherit", cursor: "pointer" }}
+              >
+                <div className="checkout-cta-glow" />
+                <div style={{
+                  position: "relative", zIndex: 1, width: "100%",
+                  padding: "15px 20px", background: BRAND.coral, borderRadius: 12,
+                  color: "#fff", fontWeight: 700, fontSize: 16, fontFamily: "inherit",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                }}>
+                  <ShoppingCart size={17} />
+                  Proceed to Payment
+                </div>
+              </button>
+
+              <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <Shield size={13} color={BRAND.textSecondary} />
+                  <span style={{ fontSize: 12, color: BRAND.textSecondary }}>Billed annually · Renews automatically</span>
+                </div>
+                <div style={{ textAlign: "center", marginTop: 4 }}>
+                  <span style={{ fontSize: 12, color: BRAND.coral, fontWeight: 600 }}>
                     Best for scaling businesses
-                  </p>
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -1,24 +1,26 @@
-// Test24 Pro public checkout
-// - Detects if the logged in user has an active Entry Membership
-// - Applies member Test24 Pro pricing automatically for existing members
-// - For non members, allows adding Entry Membership to unlock member pricing on this and future Pro studies
-// - Anonymous visitors see standard pricing with a prompt to log in for member pricing
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Check, Rocket, ShoppingCart, Star, Users, AlertCircle, Info, LogIn, Crown } from "lucide-react";
+import { ArrowLeft, Check, Rocket, ShoppingCart, Star, Users, LogIn, Crown, Shield, Clock } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useEffect, useMemo } from "react";
-import { Link } from "wouter";
 import OrderFormDialog from "@/components/OrderFormDialog";
 import { LoginDialog } from "@/components/LoginDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import PublicNavbar from "@/components/PublicNavbar";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
+
+const BRAND = {
+  violet: "#3A2FBF",
+  coral: "#E8503A",
+  cyan: "#4EC9E8",
+  cyanDark: "#2596BE",
+  offWhite: "#F8F7F4",
+  dark: "#0D0B1F",
+  cardBg: "#FFFFFF",
+  border: "#E5E3DE",
+  borderLight: "#EDEBE7",
+  textPrimary: "#0D0B1F",
+  textSecondary: "#4A4862",
+  textTertiary: "#8A879A",
+};
 
 const reachPricing = [
   { reach: 100, memberPrice: 45000, regularPrice: 50000, memberRate: 450, regularRate: 500, label: "100 Consumers" },
@@ -39,13 +41,37 @@ const features = [
   "Priority member support",
 ];
 
+const responsiveStyles = `
+  @media (max-width: 860px) {
+    .checkout-grid { grid-template-columns: 1fr !important; }
+    .checkout-features-grid { grid-template-columns: 1fr !important; }
+  }
+  @keyframes checkout-glow-spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+  .checkout-cta-wrap {
+    position: relative; border-radius: 14px; overflow: hidden; cursor: pointer;
+  }
+  .checkout-cta-glow {
+    position: absolute; width: 220%; aspect-ratio: 1;
+    top: 50%; left: 50%; border-radius: 50%; filter: blur(14px);
+    background: conic-gradient(from 0deg, #3A2FBF, #E8503A, #4EC9E8, #3A2FBF);
+    animation: checkout-glow-spin 5s linear infinite;
+    pointer-events: none; opacity: 0.7;
+  }
+  .checkout-cta-wrap:hover .checkout-cta-glow {
+    opacity: 1; animation-duration: 2.5s;
+  }
+`;
+
 export default function CheckoutProMembers() {
   const [, setLocation] = useLocation();
   const ref = new URLSearchParams(window.location.search).get('ref');
   const backLabel = ref === 'home-pricing' ? 'Back to Pricing' : ref === 'home-membership' || ref === 'research-membership' ? 'Back to Memberships' : 'Back to Our Offering';
   const backHref = ref === 'home-pricing' ? '/#pricing' : ref === 'home-membership' ? '/#membership' : ref === 'research-membership' ? '/research#membership' : '/research#our-offering';
   const { user, isAuthenticated, isMember, membershipTier } = useAuth();
-  
+
   const [quantity, setQuantity] = useState(1);
   const [selectedReach, setSelectedReach] = useState(100);
   const [addMembership, setAddMembership] = useState(false);
@@ -115,556 +141,675 @@ export default function CheckoutProMembers() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div style={{ minHeight: "100vh", background: BRAND.offWhite, color: BRAND.textPrimary, fontFamily: '"DM Sans", sans-serif' }}>
+      <style>{responsiveStyles}</style>
       <PublicNavbar />
-      <style>{`
-        @keyframes checkout-glow-spin {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to   { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-        .checkout-cta-wrap { position: relative; border-radius: 14px; overflow: hidden; cursor: pointer; }
-        .checkout-cta-glow { position: absolute; width: 220%; aspect-ratio: 1; top: 50%; left: 50%; border-radius: 50%; filter: blur(14px); background: conic-gradient(from 0deg, #3A2FBF, #E8503A, #4EC9E8, #3A2FBF); animation: checkout-glow-spin 5s linear infinite; pointer-events: none; opacity: 0.7; }
-        .checkout-cta-wrap:hover .checkout-cta-glow { opacity: 1; animation-duration: 2.5s; }
-      `}</style>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12">
-        <Button
-          variant="ghost"
-          className="mb-8"
+
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "120px 24px 80px" }}>
+        <button
           onClick={() => setLocation(backHref)}
           data-testid="button-back"
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: "none", border: "none", color: BRAND.textTertiary,
+            cursor: "pointer", fontSize: 14, fontFamily: "inherit",
+            marginBottom: 40, padding: "4px 0", transition: "color 0.2s",
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = BRAND.textPrimary; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = BRAND.textTertiary; }}
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <ArrowLeft size={16} />
           {backLabel}
-        </Button>
+        </button>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <div className="mb-8">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-md bg-primary/20 flex items-center justify-center">
-                  <Rocket className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-4xl font-serif font-bold">Test24 Pro</h1>
-                  {hasActiveEntryMembership ? (
-                    <div className="flex items-center gap-2">
-                      <Crown className="w-4 h-4 text-accent" />
-                      <p className="text-accent font-semibold">Member Pricing Applied</p>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 12 }}>
+          <div style={{
+            width: 52, height: 52, borderRadius: 12,
+            background: `${BRAND.violet}14`,
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+          }}>
+            <Rocket size={26} color={BRAND.violet} />
+          </div>
+          <div>
+            <h1 style={{ fontSize: 36, fontWeight: 700, margin: 0, color: BRAND.dark, fontFamily: '"Playfair Display", serif' }}>
+              Test24 Pro
+            </h1>
+            {hasActiveEntryMembership ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+                <Crown size={15} color={BRAND.cyanDark} />
+                <span style={{ fontSize: 14, fontWeight: 600, color: BRAND.cyanDark }}>Member Pricing Applied</span>
+              </div>
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+                <Star size={15} color={BRAND.violet} fill={BRAND.violet} />
+                <span style={{ fontSize: 14, fontWeight: 600, color: BRAND.violet }}>Member Pricing Available</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <p style={{ fontSize: 16, color: BRAND.textSecondary, marginBottom: 20 }}>
+          Enterprise Level, Quant & Qual Testing in 24hrs
+        </p>
+
+        {hasActiveEntryMembership ? (
+          <div style={{
+            background: `${BRAND.cyan}10`, border: `1px solid ${BRAND.cyan}30`,
+            borderRadius: 12, padding: 16, marginBottom: 36,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+              <Check size={16} color={BRAND.cyanDark} />
+              <span style={{ fontWeight: 600, fontSize: 14, color: BRAND.cyanDark }}>Member pricing applied</span>
+            </div>
+            <p style={{ fontSize: 13, color: BRAND.textSecondary, margin: 0 }}>
+              You already have an active {getTierLabel(membershipTier)} Membership. Your Test24 Pro price includes the member discount.
+            </p>
+          </div>
+        ) : isLoggedIn ? (
+          <div style={{
+            background: `${BRAND.violet}0A`, border: `1px solid ${BRAND.violet}20`,
+            borderRadius: 12, padding: 16, marginBottom: 36,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+              <Star size={16} color={BRAND.violet} fill={BRAND.violet} />
+              <span style={{ fontWeight: 600, fontSize: 14, color: BRAND.violet }}>Save with member pricing</span>
+            </div>
+            <p style={{ fontSize: 13, color: BRAND.textSecondary, margin: 0 }}>
+              Become a member today and save {formatPrice(regularPricePerStudy - memberPricePerStudy)} on every Test24 Pro study.
+            </p>
+          </div>
+        ) : (
+          <div style={{
+            background: BRAND.cardBg, border: `1px solid ${BRAND.border}`,
+            borderRadius: 12, padding: 16, marginBottom: 36,
+          }}>
+            <p style={{ fontSize: 14, fontWeight: 500, color: BRAND.textSecondary, margin: 0 }}>
+              Members save {formatPrice(regularPricePerStudy - memberPricePerStudy)} per Test24 Pro study
+            </p>
+          </div>
+        )}
+
+        <div className="checkout-grid" style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: 32, alignItems: "start" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+
+            <div style={{
+              background: BRAND.cardBg, border: `2px solid ${BRAND.violet}30`,
+              borderRadius: 16, padding: 28, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: BRAND.dark, display: "flex", alignItems: "center", gap: 10 }}>
+                {hasActiveEntryMembership ? "Membership Status" : "Entry Plan Membership"}
+              </h2>
+
+              {hasActiveEntryMembership ? (
+                <>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                    <span style={{
+                      display: "inline-flex", alignItems: "center", gap: 6,
+                      background: `${BRAND.cyan}18`, color: BRAND.cyanDark,
+                      fontSize: 12, fontWeight: 700, padding: "5px 12px", borderRadius: 100,
+                    }}>
+                      <Check size={12} /> Status: Active member
+                    </span>
+                    <span style={{
+                      display: "inline-flex", alignItems: "center",
+                      border: `1px solid ${BRAND.border}`, color: BRAND.textSecondary,
+                      fontSize: 12, fontWeight: 600, padding: "5px 12px", borderRadius: 100,
+                    }}>
+                      {getTierLabel(membershipTier)}
+                    </span>
+                  </div>
+                  <div style={{
+                    background: `${BRAND.cyan}10`, border: `1px solid ${BRAND.cyan}30`,
+                    borderRadius: 10, padding: "12px 14px",
+                  }}>
+                    <p style={{ fontSize: 13, color: BRAND.textSecondary, margin: 0 }}>
+                      Your {getTierLabel(membershipTier)} Membership is active, so you qualify for member pricing on all Test24 Pro studies.
+                    </p>
+                    <p style={{ fontSize: 12, color: BRAND.textTertiary, margin: 0, marginTop: 6 }}>
+                      You will only be billed for the Test24 Pro study shown in your order summary.
+                    </p>
+                  </div>
+                </>
+              ) : isLoggedIn ? (
+                <>
+                  <p style={{ fontSize: 14, color: BRAND.textSecondary, marginBottom: 16 }}>
+                    To access member pricing on Test24 Pro studies, you need an active Entry Membership plan.
+                  </p>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    <div
+                      onClick={() => setAddMembership(true)}
+                      data-testid="radio-add-membership"
+                      style={{
+                        border: `2px solid ${addMembership ? BRAND.violet : BRAND.borderLight}`,
+                        borderRadius: 14, padding: "18px 22px", cursor: "pointer",
+                        background: addMembership ? `${BRAND.violet}08` : BRAND.cardBg,
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+                        <div style={{
+                          width: 22, height: 22, borderRadius: "50%", marginTop: 2,
+                          border: `2px solid ${addMembership ? BRAND.violet : BRAND.textTertiary}`,
+                          background: addMembership ? BRAND.violet : "transparent",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          flexShrink: 0, transition: "all 0.2s",
+                        }}>
+                          {addMembership && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#fff" }} />}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 700, fontSize: 15, color: BRAND.dark, marginBottom: 4 }}>
+                            Add Entry Membership and unlock member pricing
+                          </div>
+                          <div style={{ fontSize: 13, color: BRAND.textTertiary, marginBottom: 10 }}>
+                            One annual fee. Member pricing on all Test24 Pro studies.
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <span style={{ fontSize: 18, fontWeight: 700, color: BRAND.violet }}>
+                              {formatPrice(ENTRY_PLAN_COST)}/year
+                            </span>
+                            <span style={{ fontSize: 12, fontWeight: 600, color: BRAND.cyanDark }}>
+                              Save {formatPrice(memberSavings)} on this order
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Star className="w-4 h-4 text-accent fill-accent" />
-                      <p className="text-accent font-semibold">Member Pricing Available</p>
+
+                    <div
+                      onClick={() => setAddMembership(false)}
+                      data-testid="radio-without-membership"
+                      style={{
+                        border: `2px solid ${!addMembership ? BRAND.violet : BRAND.borderLight}`,
+                        borderRadius: 14, padding: "18px 22px", cursor: "pointer",
+                        background: !addMembership ? `${BRAND.violet}08` : BRAND.cardBg,
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+                        <div style={{
+                          width: 22, height: 22, borderRadius: "50%", marginTop: 2,
+                          border: `2px solid ${!addMembership ? BRAND.violet : BRAND.textTertiary}`,
+                          background: !addMembership ? BRAND.violet : "transparent",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          flexShrink: 0, transition: "all 0.2s",
+                        }}>
+                          {!addMembership && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#fff" }} />}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 700, fontSize: 15, color: BRAND.dark, marginBottom: 4 }}>
+                            Continue without membership
+                          </div>
+                          <div style={{ fontSize: 13, color: BRAND.textTertiary }}>
+                            Pay the standard Test24 Pro rate for this study only.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {addMembership && (
+                    <div style={{
+                      background: `${BRAND.cyan}10`, border: `1px solid ${BRAND.cyan}30`,
+                      borderRadius: 10, padding: "12px 14px", marginTop: 16,
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                        <Check size={14} color={BRAND.cyanDark} />
+                        <span style={{ fontWeight: 600, fontSize: 13, color: BRAND.cyanDark }}>Entry Membership added</span>
+                      </div>
+                      <p style={{ fontSize: 12, color: BRAND.textSecondary, margin: 0 }}>
+                        Member pricing will apply to this study and all future Test24 Pro studies for 12 months.
+                      </p>
                     </div>
                   )}
+                </>
+              ) : (
+                <>
+                  <div style={{
+                    background: BRAND.offWhite, borderRadius: 10,
+                    padding: "14px 16px", display: "flex", alignItems: "center", gap: 12,
+                    marginBottom: 16,
+                  }}>
+                    <LogIn size={18} color={BRAND.textTertiary} style={{ flexShrink: 0 }} />
+                    <div>
+                      <p style={{ fontSize: 14, fontWeight: 500, color: BRAND.dark, margin: 0, marginBottom: 4 }}>
+                        Log in or create an account to unlock member pricing on Test24 Pro.
+                      </p>
+                      <p style={{ fontSize: 12, color: BRAND.textTertiary, margin: 0 }}>
+                        Members save {formatPrice(regularPricePerStudy - memberPricePerStudy)} per Test24 Pro study.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowLoginDialog(true)}
+                    data-testid="button-login-member-pricing"
+                    style={{
+                      width: "100%", padding: "12px 20px", borderRadius: 10,
+                      border: `1.5px solid ${BRAND.violet}`, background: "transparent",
+                      color: BRAND.violet, fontWeight: 600, fontSize: 14,
+                      fontFamily: "inherit", cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                      transition: "all 0.2s",
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = `${BRAND.violet}0A`; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+                  >
+                    <LogIn size={15} />
+                    Log in for member pricing
+                  </button>
+                </>
+              )}
+            </div>
+
+            <div style={{
+              background: BRAND.cardBg, border: `1px solid ${BRAND.border}`,
+              borderRadius: 16, padding: 28, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: BRAND.dark }}>
+                Configure Your Study
+              </h2>
+
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: BRAND.dark }}>Number of Studies</span>
+                  {hasVolumeDiscount && (
+                    <span style={{ fontSize: 13, fontWeight: 600, color: BRAND.coral }}>
+                      10% volume discount applied!
+                    </span>
+                  )}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={quantity <= 1}
+                    data-testid="button-decrease-quantity"
+                    style={{
+                      width: 40, height: 40, borderRadius: 10,
+                      border: `1px solid ${BRAND.border}`, background: BRAND.cardBg,
+                      cursor: quantity <= 1 ? "not-allowed" : "pointer",
+                      fontSize: 18, fontWeight: 600, color: BRAND.dark,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontFamily: "inherit", opacity: quantity <= 1 ? 0.4 : 1,
+                    }}
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    min="1"
+                    value={quantity}
+                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                    data-testid="input-quantity"
+                    style={{
+                      width: 70, padding: "8px 12px", borderRadius: 8,
+                      border: `1px solid ${BRAND.border}`, fontFamily: "inherit",
+                      fontSize: 16, fontWeight: 600, color: BRAND.dark,
+                      background: BRAND.offWhite, outline: "none", textAlign: "center",
+                    }}
+                  />
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    data-testid="button-increase-quantity"
+                    style={{
+                      width: 40, height: 40, borderRadius: 10,
+                      border: `1px solid ${BRAND.border}`, background: BRAND.cardBg,
+                      cursor: "pointer", fontSize: 18, fontWeight: 600, color: BRAND.dark,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    +
+                  </button>
                 </div>
               </div>
-              <p className="text-lg mb-4">
-                Enterprise Level, Quant & Qual Testing in 24hrs
-              </p>
-              
-              {hasActiveEntryMembership ? (
-                <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Check className="w-5 h-5 text-accent" />
-                    <p className="font-semibold text-accent">Member pricing applied</p>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    You already have an active {getTierLabel(membershipTier)} Membership. Your Test24 Pro price includes the member discount.
-                  </p>
+
+              <div style={{ marginBottom: 24 }}>
+                <span style={{ fontSize: 14, fontWeight: 600, color: BRAND.dark, display: "block", marginBottom: 12 }}>
+                  Reach per Survey
+                </span>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {reachPricing.map((tier) => {
+                    const isSelected = selectedReach === tier.reach;
+                    const displayRate = effectiveIsMember ? tier.memberRate : tier.regularRate;
+                    return (
+                      <div
+                        key={tier.reach}
+                        onClick={() => setSelectedReach(tier.reach)}
+                        data-testid={`radio-reach-${tier.reach}`}
+                        style={{
+                          border: `2px solid ${isSelected ? BRAND.coral : BRAND.borderLight}`,
+                          borderRadius: 14, padding: "16px 20px", cursor: "pointer",
+                          background: isSelected ? `${BRAND.coral}08` : BRAND.cardBg,
+                          transition: "all 0.2s",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                            <div style={{
+                              width: 20, height: 20, borderRadius: "50%",
+                              border: `2px solid ${isSelected ? BRAND.coral : BRAND.textTertiary}`,
+                              background: isSelected ? BRAND.coral : "transparent",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              flexShrink: 0, transition: "all 0.2s",
+                            }}>
+                              {isSelected && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#fff" }} />}
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: 700, fontSize: 15, color: BRAND.dark }}>{tier.label}</div>
+                              <div style={{ fontSize: 13, color: BRAND.textTertiary, marginTop: 2 }}>
+                                R{displayRate} per consumer
+                              </div>
+                            </div>
+                          </div>
+                          <div style={{ textAlign: "right" }}>
+                            {effectiveIsMember ? (
+                              <>
+                                <div style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}>
+                                  <Star size={13} color={hasActiveEntryMembership ? BRAND.cyanDark : BRAND.violet} fill={hasActiveEntryMembership ? BRAND.cyanDark : BRAND.violet} />
+                                  <span style={{ fontSize: 20, fontWeight: 800, color: BRAND.dark }}>
+                                    {formatPrice(tier.memberPrice)}
+                                  </span>
+                                </div>
+                                <div style={{ fontSize: 12, color: BRAND.textTertiary, textDecoration: "line-through", marginTop: 2 }}>
+                                  {formatPrice(tier.regularPrice)}
+                                </div>
+                                <div style={{ fontSize: 12, color: BRAND.coral, fontWeight: 600, marginTop: 2 }}>
+                                  Save {formatPrice(tier.regularPrice - tier.memberPrice)}
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <div style={{ fontSize: 20, fontWeight: 800, color: BRAND.dark }}>
+                                  {formatPrice(tier.regularPrice)}
+                                </div>
+                                <div style={{ fontSize: 12, color: BRAND.textTertiary, marginTop: 2 }}>per survey</div>
+                                <div style={{ fontSize: 12, color: BRAND.violet, fontWeight: 600, marginTop: 2 }}>
+                                  {formatPrice(tier.memberPrice)} for members
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              ) : isLoggedIn ? (
-                <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Star className="w-5 h-5 text-primary fill-primary" />
-                    <p className="font-semibold text-primary">Save with member pricing</p>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Become a member today and save {formatPrice(regularPricePerStudy - memberPricePerStudy)} on every Test24 Pro study.
-                  </p>
+              </div>
+
+              <div style={{
+                background: `${BRAND.cyan}10`, border: `1px solid ${BRAND.cyan}30`,
+                borderRadius: 12, padding: 16,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                  <Users size={16} color={BRAND.cyanDark} />
+                  <span style={{ fontWeight: 700, fontSize: 14, color: BRAND.cyanDark }}>Total Consumers Reached</span>
                 </div>
-              ) : (
-                <div className="bg-muted/50 border rounded-lg p-4">
-                  <p className="text-sm font-medium">
-                    Members save {formatPrice(regularPricePerStudy - memberPricePerStudy)} per Test24 Pro study
+                <div data-testid="text-total-consumers" style={{ fontSize: 28, fontWeight: 800, color: BRAND.dark }}>
+                  {totalConsumers.toLocaleString()}
+                </div>
+                <div style={{ fontSize: 13, color: BRAND.textSecondary, marginTop: 4 }}>
+                  {quantity} {quantity === 1 ? "study" : "studies"} × {selectedReach} consumers
+                </div>
+              </div>
+
+              {hasVolumeDiscount && (
+                <div style={{
+                  background: `${BRAND.violet}0A`, border: `1px solid ${BRAND.violet}20`,
+                  borderRadius: 12, padding: 16, marginTop: 16,
+                }}>
+                  <div style={{ fontWeight: 600, fontSize: 14, color: BRAND.violet }}>
+                    Volume Discount Applied: 10% off for 3+ studies
+                  </div>
+                  <div style={{ fontSize: 13, color: BRAND.textSecondary, marginTop: 4 }}>
+                    Additional savings: {formatPrice(volumeDiscountAmount)}
+                  </div>
+                </div>
+              )}
+
+              {effectiveIsMember && memberSavings > 0 && (
+                <div style={{
+                  background: `${BRAND.cyan}10`, border: `1px solid ${BRAND.cyan}30`,
+                  borderRadius: 12, padding: 16, marginTop: 16,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                    <Star size={14} color={hasActiveEntryMembership ? BRAND.cyanDark : BRAND.violet} fill={hasActiveEntryMembership ? BRAND.cyanDark : BRAND.violet} />
+                    <span style={{ fontWeight: 600, fontSize: 14, color: hasActiveEntryMembership ? BRAND.cyanDark : BRAND.violet }}>
+                      Member Savings: {formatPrice(memberSavings)}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 13, color: BRAND.textSecondary, margin: 0 }}>
+                    You're saving 10% compared to standard pricing
                   </p>
                 </div>
               )}
             </div>
 
-            <Card className="mb-6 border-primary">
-              <CardHeader className="bg-primary/5">
-                <CardTitle className="text-xl flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 text-primary" />
-                  {hasActiveEntryMembership ? "Membership Status" : "Entry Plan Membership"}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  {hasActiveEntryMembership ? (
-                    <>
-                      <div className="flex items-center gap-3">
-                        <Badge className="bg-accent text-accent-foreground">
-                          <Check className="w-3 h-3 mr-1" />
-                          Status: Active member
-                        </Badge>
-                        <Badge variant="outline">{getTierLabel(membershipTier)}</Badge>
-                      </div>
-                      <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
-                        <p className="text-sm">
-                          Your {getTierLabel(membershipTier)} Membership is active, so you qualify for member pricing on all Test24 Pro studies.
-                        </p>
-                        <p className="text-sm text-muted-foreground mt-2">
-                          You will only be billed for the Test24 Pro study shown in your order summary.
-                        </p>
-                      </div>
-                    </>
-                  ) : isLoggedIn ? (
-                    <>
-                      <p className="text-sm">
-                        To access member pricing on Test24 Pro studies, you need an active Entry Membership plan.
-                      </p>
-                      
-                      <RadioGroup
-                        value={addMembership ? "add" : "without"}
-                        onValueChange={(value) => setAddMembership(value === "add")}
-                        className="space-y-3"
-                      >
-                        <div
-                          className={`relative border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                            addMembership
-                              ? "border-primary bg-primary/5"
-                              : "border-border hover-elevate"
-                          }`}
-                          onClick={() => setAddMembership(true)}
-                        >
-                          <div className="flex items-start gap-3">
-                            <RadioGroupItem
-                              value="add"
-                              id="add-membership"
-                              className="mt-1"
-                              data-testid="radio-add-membership"
-                            />
-                            <div className="flex-1">
-                              <Label htmlFor="add-membership" className="cursor-pointer font-semibold text-base">
-                                Add Entry Membership and unlock member pricing
-                              </Label>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                One annual fee. Member pricing on all Test24 Pro studies.
-                              </p>
-                              <div className="mt-3 flex items-center justify-between">
-                                <div className="text-lg font-bold text-primary">{formatPrice(ENTRY_PLAN_COST)}/year</div>
-                                <div className="text-xs text-accent font-medium">
-                                  Save {formatPrice(memberSavings)} on this order
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div
-                          className={`relative border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                            !addMembership
-                              ? "border-primary bg-primary/5"
-                              : "border-border hover-elevate"
-                          }`}
-                          onClick={() => setAddMembership(false)}
-                        >
-                          <div className="flex items-start gap-3">
-                            <RadioGroupItem
-                              value="without"
-                              id="without-membership"
-                              className="mt-1"
-                              data-testid="radio-without-membership"
-                            />
-                            <div className="flex-1">
-                              <Label htmlFor="without-membership" className="cursor-pointer font-semibold text-base">
-                                Continue without membership
-                              </Label>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                Pay the standard Test24 Pro rate for this study only.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </RadioGroup>
-
-                      {addMembership && (
-                        <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 mt-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Check className="w-4 h-4 text-accent" />
-                            <p className="font-medium text-accent">Entry Membership added</p>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            Member pricing will apply to this study and all future Test24 Pro studies for 12 months.
-                          </p>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-2 p-4 bg-muted/50 rounded-lg">
-                        <LogIn className="w-5 h-5 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm font-medium">
-                            Log in or create an account to unlock member pricing on Test24 Pro.
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Members save {formatPrice(regularPricePerStudy - memberPricePerStudy)} per Test24 Pro study.
-                          </p>
-                        </div>
-                      </div>
-                      <Button 
-                        variant="outline" 
-                        className="w-full"
-                        onClick={() => setShowLoginDialog(true)}
-                        data-testid="button-login-member-pricing"
-                      >
-                        <LogIn className="w-4 h-4 mr-2" />
-                        Log in for member pricing
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="text-xl">Configure Your Study</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <Label htmlFor="quantity">Number of Studies</Label>
-                      {hasVolumeDiscount && (
-                        <span className="text-sm text-primary font-medium">
-                          10% volume discount applied!
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        disabled={quantity <= 1}
-                        data-testid="button-decrease-quantity"
-                      >
-                        -
-                      </Button>
-                      <Input
-                        id="quantity"
-                        type="number"
-                        min="1"
-                        value={quantity}
-                        onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-24 text-center"
-                        data-testid="input-quantity"
-                      />
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setQuantity(quantity + 1)}
-                        data-testid="button-increase-quantity"
-                      >
-                        +
-                      </Button>
-                    </div>
+            <div style={{
+              background: BRAND.cardBg, border: `1px solid ${BRAND.border}`,
+              borderRadius: 16, padding: 28, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: BRAND.dark }}>
+                What's Included
+              </h2>
+              <div className="checkout-features-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 24px" }}>
+                {features.map((feature, index) => (
+                  <div key={index} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                    <Check size={15} color={BRAND.coral} style={{ flexShrink: 0, marginTop: 2 }} />
+                    <span style={{ fontSize: 14, color: BRAND.textSecondary, lineHeight: 1.5 }}>{feature}</span>
                   </div>
-
-                  <div>
-                    <Label>Reach per Survey</Label>
-                    <RadioGroup
-                      value={selectedReach.toString()}
-                      onValueChange={(value) => setSelectedReach(parseInt(value))}
-                      className="mt-3 space-y-3"
-                    >
-                      {reachPricing.map((tier) => {
-                        const displayRate = effectiveIsMember ? tier.memberRate : tier.regularRate;
-                        return (
-                          <div
-                            key={tier.reach}
-                            className={`relative border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                              selectedReach === tier.reach
-                                ? "border-primary bg-primary/5"
-                                : "border-border hover-elevate"
-                            }`}
-                            onClick={() => setSelectedReach(tier.reach)}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <RadioGroupItem
-                                  value={tier.reach.toString()}
-                                  id={`reach-${tier.reach}`}
-                                  data-testid={`radio-reach-${tier.reach}`}
-                                />
-                                <div>
-                                  <Label
-                                    htmlFor={`reach-${tier.reach}`}
-                                    className="cursor-pointer font-semibold"
-                                  >
-                                    {tier.label}
-                                  </Label>
-                                  <p className="text-sm text-muted-foreground mt-0.5">
-                                    R{displayRate} per consumer
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                {effectiveIsMember ? (
-                                  <>
-                                    <div className="flex items-center gap-2">
-                                      <Star className="w-4 h-4 text-accent fill-accent" />
-                                      <div className="text-xl font-bold text-primary">
-                                        {formatPrice(tier.memberPrice)}
-                                      </div>
-                                    </div>
-                                    <div className="text-xs text-muted-foreground line-through">
-                                      {formatPrice(tier.regularPrice)}
-                                    </div>
-                                    <div className="text-xs text-accent font-medium">
-                                      Save {formatPrice(tier.regularPrice - tier.memberPrice)}
-                                    </div>
-                                  </>
-                                ) : (
-                                  <>
-                                    <div className="text-xl font-bold text-primary">
-                                      {formatPrice(tier.regularPrice)}
-                                    </div>
-                                    <div className="text-xs text-muted-foreground">per survey</div>
-                                    <div className="text-xs text-accent font-medium">
-                                      {formatPrice(tier.memberPrice)} for members
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </RadioGroup>
-                  </div>
-
-                  <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Users className="w-5 h-5 text-accent" />
-                      <p className="font-semibold text-accent">Total Consumers Reached</p>
-                    </div>
-                    <p className="text-3xl font-bold" data-testid="text-total-consumers">
-                      {totalConsumers.toLocaleString()}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {quantity} {quantity === 1 ? "study" : "studies"} × {selectedReach} consumers
-                    </p>
-                  </div>
-
-                  {hasVolumeDiscount && (
-                    <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                      <p className="text-sm font-medium text-primary">
-                        Volume Discount Applied: 10% off for 3+ studies
-                      </p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Additional savings: {formatPrice(volumeDiscountAmount)}
-                      </p>
-                    </div>
-                  )}
-
-                  {effectiveIsMember && memberSavings > 0 && (
-                    <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Star className="w-4 h-4 text-accent fill-accent" />
-                        <p className="text-sm font-medium text-accent">
-                          Member Savings: {formatPrice(memberSavings)}
-                        </p>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        You're saving 10% compared to standard pricing
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">What's Included</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {features.map((feature, index) => (
-                    <div key={index} className="flex gap-3">
-                      <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="lg:col-span-1">
-            <Card className="sticky top-24 border-accent">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShoppingCart className="w-5 h-5" />
+          <div style={{ position: "sticky", top: 24 }}>
+            <div style={{
+              background: BRAND.cardBg, border: `1px solid ${BRAND.border}`,
+              borderRadius: 16, padding: 28, boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
+                <ShoppingCart size={18} color={BRAND.coral} />
+                <h2 style={{ fontSize: 17, fontWeight: 700, color: BRAND.dark, margin: 0 }}>
                   Order Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h3 className="font-semibold mb-3">Your Order</h3>
-                  
-                  <div className="space-y-3">
-                    {hasActiveEntryMembership && (
-                      <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Check className="w-4 h-4 text-accent" />
-                          <p className="font-semibold text-accent">Active {getTierLabel(membershipTier)} Membership</p>
-                        </div>
-                        <p className="text-xs text-muted-foreground">Member discount applied to all studies</p>
-                      </div>
-                    )}
+                </h2>
+              </div>
 
-                    {!hasActiveEntryMembership && addMembership && (
-                      <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-1">
-                          <p className="font-semibold">Entry Membership</p>
-                          <p className="font-bold text-primary">{formatPrice(ENTRY_PLAN_COST)}</p>
-                        </div>
-                        <p className="text-xs text-muted-foreground">Annual plan - One-time fee for 12 months</p>
-                      </div>
-                    )}
-
-                    <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <p className="font-medium">Test24 Pro Studies</p>
-                        <p className="font-bold">{formatPrice(studiesTotal)}</p>
-                      </div>
-                      <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>Studies</span>
-                        <span className="font-medium" data-testid="text-studies-count">{quantity}</span>
-                      </div>
-                      <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>Reach per Survey</span>
-                        <span className="font-medium" data-testid="text-reach-per-study">{selectedReach}</span>
-                      </div>
-                      <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>Price per Survey</span>
-                        <span className="font-medium">{formatPrice(pricePerStudy)}</span>
-                      </div>
-                      <div className="flex justify-between text-sm border-t pt-2">
-                        <span className="text-muted-foreground">Total Consumers</span>
-                        <span className="font-bold text-accent" data-testid="text-summary-total-consumers">
-                          {totalConsumers.toLocaleString()}
-                        </span>
-                      </div>
-                      
-                      {effectiveIsMember && (
-                        <div className="flex items-center gap-1 mt-2 pt-2 border-t">
-                          <Star className="w-3 h-3 text-accent fill-accent" />
-                          <p className="text-xs text-accent font-medium">Member discount applied</p>
-                        </div>
-                      )}
-
-                      {!effectiveIsMember && isLoggedIn && (
-                        <div className="mt-2 pt-2 border-t">
-                          <p className="text-xs text-muted-foreground">
-                            You are paying the standard Test24 Pro rate. Add an Entry Membership to unlock member pricing.
-                          </p>
-                        </div>
-                      )}
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
+                {hasActiveEntryMembership && (
+                  <div style={{
+                    background: `${BRAND.cyan}10`, border: `1px solid ${BRAND.cyan}30`,
+                    borderRadius: 10, padding: "12px 14px",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                      <Check size={13} color={BRAND.cyanDark} />
+                      <span style={{ fontWeight: 600, fontSize: 13, color: BRAND.cyanDark }}>
+                        Active {getTierLabel(membershipTier)} Membership
+                      </span>
                     </div>
-
-                    {effectiveIsMember && (
-                      <div className="text-sm p-3 bg-muted/30 rounded-lg">
-                        <div className="flex justify-between text-muted-foreground">
-                          <span>Standard rate</span>
-                          <span className="line-through">{formatPrice(regularPricePerStudy)} per survey</span>
-                        </div>
-                        <div className="flex justify-between font-medium text-accent">
-                          <span>Member rate</span>
-                          <span>{formatPrice(memberPricePerStudy)} per survey</span>
-                        </div>
-                      </div>
-                    )}
+                    <div style={{ fontSize: 12, color: BRAND.textSecondary }}>
+                      Member discount applied to all studies
+                    </div>
                   </div>
-                </div>
+                )}
 
-                <div className="space-y-2 pt-4 border-t">
-                  {!hasActiveEntryMembership && addMembership && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Entry Plan (12 months)</span>
-                      <span>{formatPrice(ENTRY_PLAN_COST)}</span>
+                {!hasActiveEntryMembership && addMembership && (
+                  <div style={{
+                    background: `${BRAND.violet}08`, border: `1px solid ${BRAND.violet}20`,
+                    borderRadius: 10, padding: "12px 14px",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+                      <span style={{ fontWeight: 600, fontSize: 13, color: BRAND.dark }}>Entry Membership</span>
+                      <span style={{ fontWeight: 700, fontSize: 14, color: BRAND.violet }}>{formatPrice(ENTRY_PLAN_COST)}</span>
                     </div>
-                  )}
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Pro Studies ({quantity}x)</span>
-                    <span data-testid="text-subtotal">{formatPrice(studiesTotal)}</span>
+                    <div style={{ fontSize: 12, color: BRAND.textSecondary }}>
+                      Annual plan — One-time fee for 12 months
+                    </div>
                   </div>
-                  {hasVolumeDiscount && (
-                    <div className="flex justify-between text-sm text-primary">
-                      <span>Volume Discount (10%)</span>
-                      <span>-{formatPrice(volumeDiscountAmount)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                    <span>Total</span>
-                    <span className="text-primary" data-testid="text-grand-total">
-                      {formatPrice(grandTotal)}
+                )}
+
+                <div style={{
+                  background: BRAND.offWhite, border: `1px solid ${BRAND.borderLight}`,
+                  borderRadius: 10, padding: "12px 14px",
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span style={{ fontWeight: 600, fontSize: 13, color: BRAND.dark }}>Test24 Pro Studies</span>
+                    <span style={{ fontWeight: 700, fontSize: 14, color: BRAND.dark }}>{formatPrice(studiesTotal)}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: BRAND.textSecondary, marginBottom: 4 }}>
+                    <span>Studies</span>
+                    <span data-testid="text-studies-count" style={{ fontWeight: 600 }}>{quantity}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: BRAND.textSecondary, marginBottom: 4 }}>
+                    <span>Reach per Survey</span>
+                    <span data-testid="text-reach-per-study" style={{ fontWeight: 600 }}>{selectedReach}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: BRAND.textSecondary, marginBottom: 4 }}>
+                    <span>Price per Survey</span>
+                    <span style={{ fontWeight: 600 }}>{formatPrice(pricePerStudy)}</span>
+                  </div>
+                  <div style={{
+                    display: "flex", justifyContent: "space-between", fontSize: 12,
+                    borderTop: `1px solid ${BRAND.borderLight}`, paddingTop: 8, marginTop: 4,
+                  }}>
+                    <span style={{ color: BRAND.textSecondary }}>Total Consumers</span>
+                    <span data-testid="text-summary-total-consumers" style={{ fontWeight: 700, color: BRAND.cyanDark }}>
+                      {totalConsumers.toLocaleString()}
                     </span>
                   </div>
-                  {hasActiveEntryMembership && (
-                    <p className="text-xs text-accent text-center pt-2 font-medium">
-                      No Entry Plan fee - You're already a member!
-                    </p>
-                  )}
-                  {!hasActiveEntryMembership && addMembership && (
-                    <p className="text-xs text-accent text-center pt-2 font-medium">
-                      Entry Membership added. Member pricing will apply.
-                    </p>
-                  )}
-                  {!effectiveIsMember && (
-                    <p className="text-xs text-muted-foreground text-center pt-2">
-                      {formatPrice(Math.round(grandTotal / totalConsumers))} per consumer (all studies combined)
-                    </p>
-                  )}
-                </div>
 
-                <div className="checkout-cta-wrap" onClick={handleCheckout} data-testid="button-proceed-checkout">
-                  <div className="checkout-cta-glow" />
-                  <Button className="w-full relative z-10" size="lg">
-                    Proceed to Payment
-                  </Button>
-                </div>
-
-                <div className="text-center pt-4 border-t">
-                  <p className="text-xs text-muted-foreground">
-                    Secure payment processing
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    All prices include VAT where applicable
-                  </p>
-                  {quantity < 3 && (
-                    <p className="text-xs text-primary mt-1 font-medium">
-                      Add {3 - quantity} more {3 - quantity === 1 ? "study" : "studies"} for 10% volume discount
-                    </p>
-                  )}
                   {effectiveIsMember && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Exclusive member benefits included
-                    </p>
+                    <div style={{
+                      display: "flex", alignItems: "center", gap: 5,
+                      marginTop: 8, paddingTop: 8,
+                      borderTop: `1px solid ${BRAND.borderLight}`,
+                    }}>
+                      <Star size={11} color={hasActiveEntryMembership ? BRAND.cyanDark : BRAND.violet} fill={hasActiveEntryMembership ? BRAND.cyanDark : BRAND.violet} />
+                      <span style={{ fontSize: 12, color: hasActiveEntryMembership ? BRAND.cyanDark : BRAND.violet, fontWeight: 600 }}>
+                        Member discount applied
+                      </span>
+                    </div>
                   )}
-                  {!effectiveIsMember && !isLoggedIn && (
-                    <p className="text-xs text-accent mt-1 font-medium">
-                      Log in to access member pricing
-                    </p>
+
+                  {!effectiveIsMember && isLoggedIn && (
+                    <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${BRAND.borderLight}` }}>
+                      <p style={{ fontSize: 12, color: BRAND.textTertiary, margin: 0 }}>
+                        You are paying the standard Test24 Pro rate. Add an Entry Membership to unlock member pricing.
+                      </p>
+                    </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+
+                {effectiveIsMember && (
+                  <div style={{
+                    background: BRAND.offWhite, borderRadius: 10,
+                    padding: "10px 14px",
+                  }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: BRAND.textTertiary, marginBottom: 4 }}>
+                      <span>Standard rate</span>
+                      <span style={{ textDecoration: "line-through" }}>{formatPrice(regularPricePerStudy)} per survey</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 600, color: hasActiveEntryMembership ? BRAND.cyanDark : BRAND.violet }}>
+                      <span>Member rate</span>
+                      <span>{formatPrice(memberPricePerStudy)} per survey</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div style={{
+                borderTop: `1px solid ${BRAND.borderLight}`, paddingTop: 16,
+                display: "flex", flexDirection: "column", gap: 8, marginBottom: 20,
+              }}>
+                {!hasActiveEntryMembership && addMembership && (
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
+                    <span style={{ color: BRAND.textSecondary }}>Entry Plan (12 months)</span>
+                    <span style={{ color: BRAND.dark }}>{formatPrice(ENTRY_PLAN_COST)}</span>
+                  </div>
+                )}
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
+                  <span style={{ color: BRAND.textSecondary }}>Pro Studies ({quantity}x)</span>
+                  <span data-testid="text-subtotal" style={{ color: BRAND.dark }}>{formatPrice(studiesTotal)}</span>
+                </div>
+                {hasVolumeDiscount && (
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
+                    <span style={{ color: BRAND.coral }}>Volume Discount (10%)</span>
+                    <span style={{ color: BRAND.coral }}>-{formatPrice(volumeDiscountAmount)}</span>
+                  </div>
+                )}
+                <div style={{
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  borderTop: `1px solid ${BRAND.borderLight}`, paddingTop: 12, marginTop: 4,
+                }}>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: BRAND.dark }}>Total</span>
+                  <span data-testid="text-grand-total" style={{ fontSize: 22, fontWeight: 800, color: BRAND.coral }}>
+                    {formatPrice(grandTotal)}
+                  </span>
+                </div>
+                {hasActiveEntryMembership && (
+                  <div style={{ textAlign: "center", fontSize: 12, color: BRAND.cyanDark, fontWeight: 600, marginTop: 4 }}>
+                    No Entry Plan fee — you're already a member!
+                  </div>
+                )}
+                {!hasActiveEntryMembership && addMembership && (
+                  <div style={{ textAlign: "center", fontSize: 12, color: BRAND.violet, fontWeight: 600, marginTop: 4 }}>
+                    Entry Membership added. Member pricing will apply.
+                  </div>
+                )}
+                {!effectiveIsMember && (
+                  <div style={{ textAlign: "center", fontSize: 12, color: BRAND.textSecondary, marginTop: 4 }}>
+                    {formatPrice(Math.round(grandTotal / totalConsumers))} per consumer (all studies combined)
+                  </div>
+                )}
+              </div>
+
+              <button
+                className="checkout-cta-wrap"
+                onClick={handleCheckout}
+                data-testid="button-proceed-checkout"
+                style={{ width: "100%", border: "none", background: "none", padding: 0, fontFamily: "inherit", cursor: "pointer" }}
+              >
+                <div className="checkout-cta-glow" />
+                <div style={{
+                  position: "relative", zIndex: 1, width: "100%",
+                  padding: "15px 20px", background: BRAND.coral, borderRadius: 12,
+                  color: "#fff", fontWeight: 700, fontSize: 16, fontFamily: "inherit",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                }}>
+                  <ShoppingCart size={17} />
+                  Proceed to Payment
+                </div>
+              </button>
+
+              <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <Shield size={13} color={BRAND.textSecondary} />
+                  <span style={{ fontSize: 12, color: BRAND.textSecondary }}>Secure payment processing</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <Check size={13} color={BRAND.textSecondary} />
+                  <span style={{ fontSize: 12, color: BRAND.textSecondary }}>All prices include VAT where applicable</span>
+                </div>
+                {quantity < 3 && (
+                  <div style={{ textAlign: "center", marginTop: 4 }}>
+                    <span style={{ fontSize: 12, color: BRAND.coral, fontWeight: 600 }}>
+                      Add {3 - quantity} more {3 - quantity === 1 ? "study" : "studies"} for 10% volume discount
+                    </span>
+                  </div>
+                )}
+                {effectiveIsMember && (
+                  <div style={{ textAlign: "center", marginTop: 4 }}>
+                    <span style={{ fontSize: 12, color: BRAND.textSecondary }}>Exclusive member benefits included</span>
+                  </div>
+                )}
+                {!effectiveIsMember && !isLoggedIn && (
+                  <div style={{ textAlign: "center", marginTop: 4 }}>
+                    <span style={{ fontSize: 12, color: BRAND.violet, fontWeight: 600 }}>
+                      Log in to access member pricing
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
