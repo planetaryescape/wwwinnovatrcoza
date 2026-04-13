@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import contactBackground from "@assets/pexels-chris-f-8344064_1764657952677.jpeg";
 
-const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LdhcLUsAAAAAPq9MLCV_FrBh3XHMqQtbDu3YHgk";
+const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 export default function ContactSection() {
   const { toast } = useToast();
@@ -36,11 +36,12 @@ export default function ContactSection() {
 
     try {
       let recaptchaToken = "";
-      if ((window as any).grecaptcha) {
+      const grecaptcha = window.grecaptcha;
+      if (grecaptcha) {
         recaptchaToken = await new Promise<string>((resolve, reject) => {
-          (window as any).grecaptcha.ready(async () => {
+          grecaptcha.ready(async () => {
             try {
-              const token = await (window as any).grecaptcha.execute(SITE_KEY, { action: "contact" });
+              const token = await grecaptcha.execute(SITE_KEY, { action: "contact" });
               resolve(token);
             } catch (err) {
               reject(err);

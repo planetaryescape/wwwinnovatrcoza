@@ -175,7 +175,7 @@ function WhySection() {
 
 /* ─── Right column: Contact Form ─────────────────────────────────────────── */
 function ContactForm() {
-  const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LdhcLUsAAAAAPq9MLCV_FrBh3XHMqQtbDu3YHgk";
+  const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
   const [form, setForm] = useState({ name: "", company: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -187,11 +187,12 @@ function ContactForm() {
     setLoading(true);
     try {
       let recaptchaToken = "";
-      if ((window as any).grecaptcha) {
+      const grecaptcha = window.grecaptcha;
+      if (grecaptcha) {
         recaptchaToken = await new Promise<string>((resolve, reject) => {
-          (window as any).grecaptcha.ready(async () => {
+          grecaptcha.ready(async () => {
             try {
-              const token = await (window as any).grecaptcha.execute(SITE_KEY, { action: "contact" });
+              const token = await grecaptcha.execute(SITE_KEY, { action: "contact" });
               resolve(token);
             } catch (err) {
               reject(err);
