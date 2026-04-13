@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, Star, ShoppingCart, Shield, Clock } from "lucide-react";
+import { ArrowLeft, Check, Star, ShoppingCart, Shield } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import OrderFormDialog from "@/components/OrderFormDialog";
