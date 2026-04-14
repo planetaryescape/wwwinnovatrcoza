@@ -1218,7 +1218,7 @@ export default function ResearchTools() {
   return (
     <div style={{ background: BRAND.offWhite, minHeight: "100vh", fontFamily: "'DM Sans', sans-serif" }}>
       <PublicNavbar activePage="Our Tools" />
-
+      <main>
       <section
         style={{
           background: "#fff",
@@ -1627,7 +1627,7 @@ export default function ResearchTools() {
         </div>
         </div>
       </section>
-
+      </main>
       <InnovatrFooter />
 
       {selectedTool && (

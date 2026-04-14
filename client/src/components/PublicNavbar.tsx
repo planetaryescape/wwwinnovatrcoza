@@ -73,7 +73,9 @@ export default function PublicNavbar({ activePage }: PublicNavbarProps) {
   return (
     <>
       <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} defaultSignup={loginDefaultSignup} />
+      <header role="banner">
       <nav
+        aria-label="Main navigation"
         style={{
           position: "fixed",
           top: 0,
@@ -483,6 +485,7 @@ export default function PublicNavbar({ activePage }: PublicNavbarProps) {
           }
         `}</style>
       </nav>
+      </header>
     </>
   );
 }

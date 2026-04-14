@@ -271,9 +271,9 @@ export default function PrivacyPolicy() {
   return (
     <div style={{ fontFamily: '"DM Sans", sans-serif', backgroundColor: BRAND.offWhite, color: BRAND.dark, minHeight: "100vh" }}>
       <PublicNavbar />
-
+      <main>
       {/* Hero */}
-      <section style={{ background: BRAND.dark, padding: "100px 32px 72px", position: "relative", overflow: "hidden" }}>
+      <section aria-label="Page heading" style={{ background: BRAND.dark, padding: "100px 32px 72px", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: -120, right: -80, width: 400, height: 400, background: `radial-gradient(ellipse, ${BRAND.violet}22 0%, transparent 65%)`, pointerEvents: "none" }} />
         <div style={{ position: "absolute", bottom: -60, left: "15%", width: 300, height: 300, background: `radial-gradient(ellipse, ${BRAND.coral}12 0%, transparent 65%)`, pointerEvents: "none" }} />
         <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center", position: "relative", zIndex: 1 }}>
@@ -303,7 +303,7 @@ export default function PrivacyPolicy() {
       </div>
 
       {/* Sections */}
-      <main style={{ padding: "48px 32px 80px" }}>
+      <div style={{ padding: "48px 32px 80px" }}>
         <div style={{ maxWidth: 800, margin: "0 auto" }}>
           {sections.map((section, idx) => (
             <div key={section.num}>
@@ -344,8 +344,8 @@ export default function PrivacyPolicy() {
             </a>
           </div>
         </div>
+      </div>
       </main>
-
       <InnovatrFooter />
     </div>
   );

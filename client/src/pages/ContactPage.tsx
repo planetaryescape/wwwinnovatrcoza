@@ -133,10 +133,10 @@ function WhySection() {
   return (
     <div style={{ display: "flex", flexDirection: "column" as const }}>
       {/* Header */}
-      <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 42, color: BRAND.dark, margin: "0 0 16px", lineHeight: 1.1 }}>
+      <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 42, color: BRAND.dark, margin: "0 0 16px", lineHeight: 1.1 }}>
         The team behind<br />
         <span style={{ color: BRAND.violet }}>200+ growth stories.</span>
-      </h2>
+      </h1>
       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: `${BRAND.dark}bb`, lineHeight: 1.8, margin: "0 0 32px", maxWidth: 460 }}>
         Innovatr is the decision-making infrastructure for ambitious brands — combining strategy, real consumer insights, and the power of AI to deliver decisions that drive action. Not in weeks. In 24 hours.
       </p>
@@ -410,18 +410,18 @@ export default function ContactUs() {
   return (
     <div style={{ fontFamily: "'DM Sans', sans-serif", background: BRAND.offWhite, minHeight: "100vh" }}>
       <PublicNavbar activePage="Contact" />
-
-      <div className="ir-contact-outer" style={{ width: "100%", padding: "116px 60px 88px", boxSizing: "border-box" as const }}>
-        <div className="ir-two-col" style={{ display: "flex", flexDirection: "row" as const, gap: 60, alignItems: "flex-start" }}>
-          <div style={{ flex: "1 1 0", minWidth: 0 }}>
-            <WhySection />
-          </div>
-          <div style={{ flex: "1 1 0", minWidth: 0 }}>
-            <ContactForm />
+      <main>
+        <div className="ir-contact-outer" style={{ width: "100%", padding: "116px 60px 88px", boxSizing: "border-box" as const }}>
+          <div className="ir-two-col" style={{ display: "flex", flexDirection: "row" as const, gap: 60, alignItems: "flex-start" }}>
+            <div style={{ flex: "1 1 0", minWidth: 0 }}>
+              <WhySection />
+            </div>
+            <div style={{ flex: "1 1 0", minWidth: 0 }}>
+              <ContactForm />
+            </div>
           </div>
         </div>
-      </div>
-
+      </main>
       <InnovatrFooter />
     </div>
   );

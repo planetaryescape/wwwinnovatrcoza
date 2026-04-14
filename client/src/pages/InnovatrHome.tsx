@@ -1654,7 +1654,8 @@ export default function InnovatrHome() {
   return (
     <div style={{ fontFamily: '"DM Sans", sans-serif', background: BRAND.offWhite }}>
       <PublicNavbar activePage="Home" />
-      <section id="home"><HeroSection onPlayVideo={() => setVideoOpen(true)} /></section>
+      <main>
+      <section id="home" aria-label="Hero"><HeroSection onPlayVideo={() => setVideoOpen(true)} /></section>
       {videoOpen && (
         <div
           onClick={() => setVideoOpen(false)}
@@ -1718,6 +1719,7 @@ export default function InnovatrHome() {
       <section id="contact" style={{ display: "none" }} />
       <HomeMembershipSection />
       <NewsletterSection />
+      </main>
       <InnovatrFooter />
     </div>
   );

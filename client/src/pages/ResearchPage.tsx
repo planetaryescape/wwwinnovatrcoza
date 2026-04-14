@@ -936,10 +936,12 @@ export default function PricingPage() {
   return (
     <div style={{ minHeight: "100vh", background: BRAND.offWhite }}>
       <PublicNavbar activePage="Research" />
-      <HeroSection />
-      <OfferingsSection />
-      <MembershipSection />
-      <NewsletterSection />
+      <main>
+        <HeroSection />
+        <OfferingsSection />
+        <MembershipSection />
+        <NewsletterSection />
+      </main>
       <InnovatrFooter />
     </div>
   );

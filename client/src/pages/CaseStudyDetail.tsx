@@ -106,17 +106,19 @@ export default function CaseStudyDetail() {
     return (
       <div style={{ minHeight: "100vh", background: BRAND.offWhite }}>
         <PublicNavbar activePage="Case Studies" />
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "120px 32px 48px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48 }}>
-            <div style={{ aspectRatio: "1", background: `${BRAND.dark}08`, borderRadius: 16 }} />
-            <div style={{ display: "flex", flexDirection: "column", gap: 16, paddingTop: 16 }}>
-              <div style={{ height: 20, width: "40%", background: `${BRAND.dark}08`, borderRadius: 6 }} />
-              <div style={{ height: 48, width: "100%", background: `${BRAND.dark}08`, borderRadius: 6 }} />
-              <div style={{ height: 48, width: "75%", background: `${BRAND.dark}08`, borderRadius: 6 }} />
-              <div style={{ height: 80, width: "100%", background: `${BRAND.dark}08`, borderRadius: 8 }} />
+        <main>
+          <div style={{ maxWidth: 1200, margin: "0 auto", padding: "120px 32px 48px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48 }}>
+              <div style={{ aspectRatio: "1", background: `${BRAND.dark}08`, borderRadius: 16 }} />
+              <div style={{ display: "flex", flexDirection: "column", gap: 16, paddingTop: 16 }}>
+                <div style={{ height: 20, width: "40%", background: `${BRAND.dark}08`, borderRadius: 6 }} />
+                <div style={{ height: 48, width: "100%", background: `${BRAND.dark}08`, borderRadius: 6 }} />
+                <div style={{ height: 48, width: "75%", background: `${BRAND.dark}08`, borderRadius: 6 }} />
+                <div style={{ height: 80, width: "100%", background: `${BRAND.dark}08`, borderRadius: 8 }} />
+              </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     );
   }
@@ -125,7 +127,7 @@ export default function CaseStudyDetail() {
     return (
       <div style={{ minHeight: "100vh", background: BRAND.offWhite, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <PublicNavbar activePage="Case Studies" />
-        <div style={{ textAlign: "center" }}>
+        <main style={{ textAlign: "center" }}>
           <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, color: BRAND.dark, marginBottom: 16 }}>
             Case Study Not Found
           </h1>
@@ -148,7 +150,7 @@ export default function CaseStudyDetail() {
             <ArrowLeft size={16} />
             Back to Case Studies
           </a>
-        </div>
+        </main>
       </div>
     );
   }
@@ -159,7 +161,7 @@ export default function CaseStudyDetail() {
   return (
     <div style={{ minHeight: "100vh", background: BRAND.offWhite, fontFamily: '"DM Sans", sans-serif' }}>
       <PublicNavbar activePage="Case Studies" />
-
+      <main>
       {/* Main Content */}
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
         {/* Back Link */}
@@ -510,8 +512,9 @@ export default function CaseStudyDetail() {
         </section>
       </div>
 
+      </main>
       {/* Footer */}
-      <footer style={{ background: BRAND.dark, color: "#fff", padding: "36px 32px 24px" }}>
+      <footer aria-label="Site footer" style={{ background: BRAND.dark, color: "#fff", padding: "36px 32px 24px" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16, paddingBottom: 20, borderBottom: "1px solid rgba(255,255,255,0.08)", marginBottom: 20 }}>
             <img src={innovatrLogo} alt="Innovatr" style={{ height: 30, filter: "brightness(0) invert(1)" }} />
@@ -534,7 +537,6 @@ export default function CaseStudyDetail() {
           </div>
         </div>
       </footer>
-
       <style>{`
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }

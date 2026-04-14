@@ -29,6 +29,14 @@ app.use(express.urlencoded({
 }));
 
 app.use((req, res, next) => {
+  if (req.path !== "/" && req.path.endsWith("/") && !req.path.startsWith("/api/")) {
+    const cleanUrl = req.path.slice(0, -1) + (req.url.includes("?") ? "?" + req.url.split("?")[1] : "");
+    return res.redirect(301, cleanUrl);
+  }
+  next();
+});
+
+app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;

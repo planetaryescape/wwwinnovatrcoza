@@ -1078,8 +1078,10 @@ export default function CaseStudies() {
   return (
     <div style={{ fontFamily: "'DM Sans', sans-serif", background: BRAND.offWhite }}>
       <PublicNavbar activePage="Case Studies" />
-      <CaseStudiesBody />
-      <CTASection />
+      <main>
+        <CaseStudiesBody />
+        <CTASection />
+      </main>
       <InnovatrFooter />
     </div>
   );

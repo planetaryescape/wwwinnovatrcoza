@@ -69,7 +69,7 @@ function BackToTopButton() {
 export function InnovatrFooter() {
   return (
     <>
-      <footer style={{
+      <footer aria-label="Site footer" style={{
         background: BRAND.dark,
         color: "#fff",
         padding: "36px 32px 24px",

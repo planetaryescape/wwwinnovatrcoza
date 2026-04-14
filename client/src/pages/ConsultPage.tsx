@@ -700,10 +700,12 @@ export default function WhatWeDo() {
   return (
     <div style={{ minHeight: "100vh", background: BRAND.offWhite }}>
       <PublicNavbar activePage="Consult" />
-      <HeroSection />
-      <ProblemSolutionSection />
-      <ProcessSection />
-      <CTASection />
+      <main>
+        <HeroSection />
+        <ProblemSolutionSection />
+        <ProcessSection />
+        <CTASection />
+      </main>
       <InnovatrFooter />
     </div>
   );
