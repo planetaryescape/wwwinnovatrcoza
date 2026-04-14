@@ -6,6 +6,7 @@ import { LoginDialog } from "@/components/LoginDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import PublicNavbar from "@/components/PublicNavbar";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
+import { useSEO } from "@/hooks/use-seo";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -82,6 +83,12 @@ export default function CheckoutProMembers() {
   const hasActiveEntryMembership = Boolean(
     isLoggedIn && isMember && membershipTier && membershipTier !== "STARTER"
   );
+
+  useSEO({
+    title: "Test24 Pro — Buy Studies",
+    description: "Purchase Test24 Pro studies with member pricing available. Enterprise-level quant and qual consumer research in 24 hours.",
+    canonicalUrl: "https://www.innovatr.co.za/checkout/pro-members",
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);

@@ -5,6 +5,7 @@ import OrderFormDialog from "@/components/OrderFormDialog";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import PublicNavbar from "@/components/PublicNavbar";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
+import { useSEO } from "@/hooks/use-seo";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -63,6 +64,12 @@ export default function CheckoutMembershipEntry() {
   const [paymentType, setPaymentType] = useState<"monthly" | "annual">("annual");
   const [showOrderForm, setShowOrderForm] = useState(false);
   const { formatPrice } = useCurrency();
+
+  useSEO({
+    title: "Starter Membership",
+    description: "Join the Innovatr Starter Membership for discounted research pricing, private dashboard access, and priority support. Monthly or annual plans available.",
+    canonicalUrl: "https://www.innovatr.co.za/checkout/membership-entry",
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);

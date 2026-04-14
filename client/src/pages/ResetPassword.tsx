@@ -8,11 +8,18 @@ import { useToast } from "@/hooks/use-toast";
 import { Check, X, Lock, ArrowLeft, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function ResetPassword() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { login } = useAuth();
+
+  useSEO({
+    title: "Reset Password",
+    description: "Reset your Innovatr account password securely.",
+    canonicalUrl: "https://www.innovatr.co.za/reset-password",
+  });
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);

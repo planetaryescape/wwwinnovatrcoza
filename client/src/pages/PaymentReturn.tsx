@@ -3,11 +3,18 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle, Loader2, AlertCircle } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function PaymentReturn() {
   const [location, setLocation] = useLocation();
   const [status, setStatus] = useState<"loading" | "success" | "cancelled" | "error">("loading");
   const [message, setMessage] = useState("");
+
+  useSEO({
+    title: "Payment Status",
+    description: "View your Innovatr payment status and confirmation details.",
+    canonicalUrl: "https://www.innovatr.co.za/payment/return",
+  });
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

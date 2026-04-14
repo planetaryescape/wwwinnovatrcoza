@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useSEO } from "@/hooks/use-seo";
 import { Mail, FileText } from "lucide-react";
 import PublicNavbar from "@/components/PublicNavbar";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
@@ -269,10 +270,14 @@ const sections = [
 ];
 
 export default function TermsOfUse() {
+  useSEO({
+    title: "Terms of Use",
+    description: "Innovatr's terms of use. Read the terms and conditions that govern your use of our research platform, tools, and consulting services.",
+    canonicalUrl: "https://www.innovatr.co.za/terms-of-use",
+  });
+
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Terms of Use | Innovatr";
-    return () => { document.title = "Innovatr - Smart Research in 24 Hours"; };
   }, []);
 
   return (

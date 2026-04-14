@@ -8,7 +8,7 @@ interface SEOProps {
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
-const DEFAULT_TITLE = "Innovatr - Smart Research in 24 Hours";
+const DEFAULT_TITLE = "Innovatr";
 const DEFAULT_DESC = "AI-powered, decision-centric testing. Local insights. Market-ready answers—all within 24 hours. Test ideas today, get answers tomorrow.";
 const DEFAULT_OG_DESC = "AI-powered, decision-centric testing. Local insights. Market-ready answers—all within 24 hours.";
 const DEFAULT_URL = "https://www.innovatr.co.za";

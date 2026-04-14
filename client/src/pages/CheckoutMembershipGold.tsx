@@ -5,6 +5,7 @@ import OrderFormDialog from "@/components/OrderFormDialog";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import PublicNavbar from "@/components/PublicNavbar";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
+import { useSEO } from "@/hooks/use-seo";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -53,6 +54,12 @@ export default function CheckoutMembershipGold() {
   const backHref = ref === 'home-pricing' ? '/#pricing' : ref === 'home-membership' ? '/#membership' : ref === 'research-membership' ? '/research#membership' : '/research#our-offering';
   const [showOrderForm, setShowOrderForm] = useState(false);
   const { formatPrice, formatShortPrice } = useCurrency();
+
+  useSEO({
+    title: "Growth Membership",
+    description: "Upgrade to the Innovatr Growth Membership. Includes 10 Basic credits, 2 Pro studies, advanced analytics, and quarterly strategy sessions.",
+    canonicalUrl: "https://www.innovatr.co.za/checkout/membership-gold",
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);

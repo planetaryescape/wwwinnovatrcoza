@@ -12,11 +12,18 @@ import { useToast } from "@/hooks/use-toast";
 import { Gift, CheckCircle2, Copy, ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
 import coverImage from "@assets/Picture 1_1763494967673.jpg";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function CouponSignup() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [claimedCoupon, setClaimedCoupon] = useState<CouponClaim | null>(null);
+
+  useSEO({
+    title: "Claim Your Coupon",
+    description: "Claim your exclusive Innovatr coupon and get started with discounted consumer research.",
+    canonicalUrl: "https://www.innovatr.co.za/claim-coupon",
+  });
 
   const form = useForm<InsertCouponClaim>({
     resolver: zodResolver(insertCouponClaimSchema),

@@ -5,6 +5,7 @@ import OrderFormDialog from "@/components/OrderFormDialog";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import PublicNavbar from "@/components/PublicNavbar";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
+import { useSEO } from "@/hooks/use-seo";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -93,6 +94,12 @@ export default function CheckoutBasicPAYG() {
   const [selectedPackage, setSelectedPackage] = useState("10x");
   const [customCredits, setCustomCredits] = useState<number>(4);
   const [showOrderForm, setShowOrderForm] = useState(false);
+
+  useSEO({
+    title: "Test24 Basic — Pay As You Go",
+    description: "Purchase Test24 Basic credits with no membership required. Flexible pay-as-you-go pricing for 24-hour consumer research.",
+    canonicalUrl: "https://www.innovatr.co.za/checkout/basic-payg",
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);

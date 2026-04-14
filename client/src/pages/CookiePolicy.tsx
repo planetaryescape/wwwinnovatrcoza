@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Mail, Cookie } from "lucide-react";
 import PublicNavbar from "@/components/PublicNavbar";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
+import { useSEO } from "@/hooks/use-seo";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -212,10 +213,14 @@ const sections = [
 ];
 
 export default function CookiePolicy() {
+  useSEO({
+    title: "Cookie Policy",
+    description: "Innovatr's cookie policy. Understand what cookies we use, why we use them, and how to manage your cookie preferences.",
+    canonicalUrl: "https://www.innovatr.co.za/cookie-policy",
+  });
+
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Cookie Policy | Innovatr";
-    return () => { document.title = "Innovatr - Smart Research in 24 Hours"; };
   }, []);
 
   return (

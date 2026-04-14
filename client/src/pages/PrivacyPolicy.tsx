@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Mail, ExternalLink, Shield } from "lucide-react";
 import PublicNavbar from "@/components/PublicNavbar";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
+import { useSEO } from "@/hooks/use-seo";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -257,10 +258,14 @@ const sections = [
 ];
 
 export default function PrivacyPolicy() {
+  useSEO({
+    title: "Privacy Policy",
+    description: "Innovatr's privacy policy. Learn how we collect, use, and protect your personal information when you use our research and consulting services.",
+    canonicalUrl: "https://www.innovatr.co.za/privacy-policy",
+  });
+
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Privacy Policy | Innovatr";
-    return () => { document.title = "Innovatr - Smart Research in 24 Hours"; };
   }, []);
 
   return (

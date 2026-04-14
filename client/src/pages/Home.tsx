@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { Microscope, Brain } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
 import StatsCounter from "@/components/StatsCounter";
@@ -62,6 +63,12 @@ function WhatAreYouLookingFor() {
 }
 
 export default function Home() {
+  useSEO({
+    title: "Portal Home",
+    description: "Innovatr Portal — access your research dashboard, Test24 credits, and consulting tools.",
+    canonicalUrl: "https://www.innovatr.co.za/home",
+  });
+
   useEffect(() => {
     const hash = window.location.hash;
     if (hash) {

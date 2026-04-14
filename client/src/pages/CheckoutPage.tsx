@@ -11,6 +11,7 @@ import { CreditCard, Smartphone, CheckCircle2, Loader2 } from "lucide-react";
 import { SiApplepay } from "react-icons/si";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useSEO } from "@/hooks/use-seo";
 
 interface CheckoutItem {
   type: string;
@@ -31,6 +32,12 @@ export default function CheckoutPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [selectedProvider, setSelectedProvider] = useState<string>("");
+
+  useSEO({
+    title: "Checkout",
+    description: "Complete your Innovatr purchase securely.",
+    canonicalUrl: "https://www.innovatr.co.za/checkout",
+  });
   const [isProcessing, setIsProcessing] = useState(false);
 
   const params = new URLSearchParams(window.location.search);

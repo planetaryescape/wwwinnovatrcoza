@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { X, Menu, ArrowRight, Target, Lightbulb, Trophy, TrendingUp, Mail, GitBranch } from "lucide-react";
 import { SiWhatsapp, SiInstagram } from "react-icons/si";
 import { Link, useLocation } from "wouter";
+import { useSEO } from "@/hooks/use-seo";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import CustomCursor from "@/components/CustomCursor";
 import ProblemSolutionSection from "@/components/ProblemSolutionSection";
@@ -261,6 +262,12 @@ export default function CinematicLanding() {
   const [, setLocation] = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
+
+  useSEO({
+    title: "Growth Consulting",
+    description: "Innovatr Growth Consulting — strategic consulting to turn insights into real growth. Trends, ideation, brand health, and end-to-end innovation design.",
+    canonicalUrl: "https://www.innovatr.co.za/consult-cinematic",
+  });
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);

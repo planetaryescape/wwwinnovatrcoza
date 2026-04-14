@@ -131,7 +131,7 @@ export default function CheckoutBasicMembers() {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
 
   useSEO({
-    title: "Test24 Basic — Buy Credits | Innovatr",
+    title: "Test24 Basic — Buy Credits",
     description: "Purchase Test24 Basic credits and get 24-hour consumer research results. Member pricing available. Start testing your ideas today.",
     canonicalUrl: "https://www.innovatr.co.za/checkout/basic-members",
   });

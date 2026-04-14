@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import OrderFormDialog from "@/components/OrderFormDialog";
 import PublicNavbar from "@/components/PublicNavbar";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
+import { useSEO } from "@/hooks/use-seo";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -67,6 +68,12 @@ export default function CheckoutProPAYG() {
   const [quantity, setQuantity] = useState(1);
   const [selectedReach, setSelectedReach] = useState(100);
   const [showOrderForm, setShowOrderForm] = useState(false);
+
+  useSEO({
+    title: "Test24 Pro — Pay As You Go",
+    description: "Purchase Test24 Pro studies with no membership required. Enterprise-level quant and qual testing in 24 hours.",
+    canonicalUrl: "https://www.innovatr.co.za/checkout/pro-payg",
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);
