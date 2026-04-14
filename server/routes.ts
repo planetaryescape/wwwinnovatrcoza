@@ -12,6 +12,7 @@ import type { PaymentConfig } from "./payments/types";
 import * as emailService from "./emails/email-service";
 import { sendAdminOrderNotification, sendCustomerOrderConfirmation, sendContactFormMessage, sendInvoiceRequestNotification, sendBriefConfirmationEmail, sendBriefAdminNotification } from "./emails/email-service";
 import { uploadFile, downloadFile, deleteFile, listFiles, fileExists } from "./app-storage";
+import { digApi, DigApiError } from "./integrations/dig-etl";
 import { generateInvoicePdf } from "./invoices/generator";
 import { createAndUploadPlaceholderPDF } from "./pdf-generator";
 import { hashPassword, verifyPassword, validatePasswordStrength, generateResetToken, hashResetToken, getResetTokenExpiry, generateSessionToken, getSessionExpiry, isExpired, hashSessionToken } from "./auth/password";
@@ -5613,493 +5614,96 @@ Income: ${(incomes || []).join(", ") || "All"} · Region: ${(regions || []).join
     }
   });
 
-  // ── Dig Direct SQL Routes ──────────────────────────────
-  // These routes query the dig.* schema directly (same Neon Postgres database).
-  // Tenant isolation is enforced by WHERE company_id = companyId on EVERY query/subquery.
-  // Response shapes match client/src/lib/dig-api.types.ts contracts exactly.
+  // ── Dig ETL Proxy Routes ──────────────────────────────
+  // These routes proxy through to the Innovatr Dig ETL read API.
+  // Tenant isolation is enforced by passing req.user.companyId as X-Company-Id.
 
-  interface DigStudyRow {
-    id: string;
-    company_id: string;
-    study_name: string;
-    public_client_report_id: string | null;
-    status: string;
-    created_at: string;
-    updated_at: string;
-    concept_count: number;
-    respondent_count: number;
+  function handleDigError(res: Response, err: unknown) {
+    if (err instanceof DigApiError) {
+      return res.status(err.status).json({ error: err.body });
+    }
+    console.error("dig-etl proxy error:", err);
+    return res.status(500).json({
+      error: { code: "INTERNAL", message: "Upstream Dig ETL error" },
+    });
   }
 
-  const digError = (res: Response, code: string, message: string, status = 500) =>
-    res.status(status).json({ error: { code, message } });
-
-  async function verifyStudyForTenant(studyId: string, companyId: string): Promise<DigStudyRow | null> {
-    const rows = await db.execute(sql`
-      SELECT id, company_id,
-             COALESCE(title, source_study_name, id) AS study_name,
-             public_client_report_id,
-             ingest_status AS status,
-             concept_count, respondent_count,
-             created_at, updated_at
-      FROM dig.studies
-      WHERE id = ${studyId} AND company_id = ${companyId}
-      LIMIT 1
-    `) as unknown as DigStudyRow[];
-    return rows.length > 0 ? rows[0] : null;
-  }
-
-  // 1. List studies → { studies: DigStudy[] }
   app.get("/api/member/dig/studies", requireAuth, async (req: AuthenticatedRequest, res) => {
     const companyId = req.user?.companyId;
-    if (!companyId) return digError(res, "UNAUTHORIZED", "No company context", 401);
+    if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
     try {
-      const studies = await db.execute(sql`
-        SELECT id, company_id,
-               COALESCE(title, source_study_name, id) AS study_name,
-               public_client_report_id,
-               ingest_status AS status,
-               concept_count, respondent_count,
-               created_at, updated_at
-        FROM dig.studies
-        WHERE company_id = ${companyId}
-        ORDER BY created_at DESC
-      `);
-      res.json({ studies });
-    } catch (err) {
-      console.error("dig.studies query failed:", err);
-      digError(res, "INTERNAL", "Database error");
-    }
+      res.json(await digApi.listStudies(companyId));
+    } catch (err) { handleDigError(res, err); }
   });
 
-  // 2. Single study → DigStudyDetail (flat, with concepts[])
-  app.get("/api/member/dig/studies/:studyId", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/member/dig/studies/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     const companyId = req.user?.companyId;
-    if (!companyId) return digError(res, "UNAUTHORIZED", "No company context", 401);
+    if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
     try {
-      const study = await verifyStudyForTenant(req.params.studyId, companyId);
-      if (!study) return digError(res, "STUDY_NOT_FOUND", "Study not found or access denied", 404);
-
-      interface ConceptLabelRow { id: string; label: string; }
-      const conceptLabels = await db.execute(sql`
-        SELECT id, COALESCE(name, id) AS label
-        FROM dig.concepts
-        WHERE dig_study_id = ${req.params.studyId} AND company_id = ${companyId}
-        ORDER BY name ASC
-      `) as unknown as ConceptLabelRow[];
-
-      res.json({ ...study, concepts: conceptLabels });
-    } catch (err) {
-      console.error("dig.studies/:id query failed:", err);
-      digError(res, "INTERNAL", "Database error");
-    }
+      res.json(await digApi.getStudy(companyId, req.params.id));
+    } catch (err) { handleDigError(res, err); }
   });
 
-  // 3. Concepts for study → DigConcept[]
-  app.get("/api/member/dig/studies/:studyId/concepts", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/member/dig/studies/:id/concepts", requireAuth, async (req: AuthenticatedRequest, res) => {
     const companyId = req.user?.companyId;
-    if (!companyId) return digError(res, "UNAUTHORIZED", "No company context", 401);
+    if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
     try {
-      const study = await verifyStudyForTenant(req.params.studyId, companyId);
-      if (!study) return digError(res, "STUDY_NOT_FOUND", "Study not found or access denied", 404);
-
-      const studyId = req.params.studyId;
-      interface ConceptRow {
-        id: string; label: string;
-        interest_sample: number; interested_yes: number;
-        wins: number; losses: number;
-      }
-      const rows = await db.execute(sql`
-        SELECT
-          c.id,
-          COALESCE(c.name, c.id) AS label,
-          COUNT(DISTINCT si.id)::int AS interest_sample,
-          COUNT(DISTINCT si.id) FILTER (WHERE si.interested)::int AS interested_yes,
-          (SELECT COUNT(*)::int FROM dig.screening_commitment sc
-            WHERE sc.won_concept_id = c.id AND sc.company_id = ${companyId}
-              AND sc.dig_study_id = ${studyId}) AS wins,
-          (SELECT COUNT(*)::int FROM dig.screening_commitment sc
-            WHERE sc.lost_concept_id = c.id AND sc.company_id = ${companyId}
-              AND sc.dig_study_id = ${studyId}) AS losses
-        FROM dig.concepts c
-        LEFT JOIN dig.screening_interest si ON si.concept_id = c.id
-          AND si.company_id = ${companyId} AND si.dig_study_id = ${studyId}
-        WHERE c.dig_study_id = ${studyId}
-          AND c.company_id = ${companyId}
-        GROUP BY c.id, c.name
-        ORDER BY c.name ASC
-      `) as unknown as ConceptRow[];
-
-      const concepts = rows.map((r) => {
-        const commitmentSample = r.wins + r.losses;
-        return {
-          id: r.id,
-          study_id: studyId,
-          label: r.label,
-          idea_score: null,
-          interest_score: r.interest_sample > 0 ? Math.round((r.interested_yes / r.interest_sample) * 100) : null,
-          commitment_score: commitmentSample > 0 ? Math.round((r.wins / commitmentSample) * 100) : null,
-          emotions: {} as Record<string, number>,
-          agreement: {} as Record<string, Record<string, number>>,
-          themes: [] as string[],
-          sample_verbatims: [] as string[],
-        };
-      });
-
-      res.json(concepts);
-    } catch (err) {
-      console.error("dig concepts query failed:", err);
-      digError(res, "INTERNAL", "Database error");
-    }
+      res.json(await digApi.listConcepts(companyId, req.params.id));
+    } catch (err) { handleDigError(res, err); }
   });
 
-  // 4. Single concept detail → DigConceptDetail
-  app.get("/api/member/dig/studies/:studyId/concepts/:conceptId", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/member/dig/studies/:id/concepts/:cid", requireAuth, async (req: AuthenticatedRequest, res) => {
     const companyId = req.user?.companyId;
-    if (!companyId) return digError(res, "UNAUTHORIZED", "No company context", 401);
-    const studyId = req.params.studyId;
-    const conceptId = req.params.conceptId;
+    if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
     try {
-      const study = await verifyStudyForTenant(studyId, companyId);
-      if (!study) return digError(res, "STUDY_NOT_FOUND", "Study not found or access denied", 404);
-
-      interface ConceptMetaRow { id: string; label: string; }
-      const conceptRows = await db.execute(sql`
-        SELECT id, COALESCE(name, id) AS label
-        FROM dig.concepts
-        WHERE id = ${conceptId} AND dig_study_id = ${studyId} AND company_id = ${companyId}
-        LIMIT 1
-      `) as unknown as ConceptMetaRow[];
-      if (conceptRows.length === 0) return digError(res, "CONCEPT_NOT_FOUND", "Concept not found", 404);
-
-      interface EmotionRow { emotion: string; percentage: number; }
-      interface AgreementRow { question_group: string; statement: string; agree_percentage: number; }
-      interface ThemeRow { theme_category: string; }
-      interface VerbatimRow { comment: string; }
-      interface InterestRow { interest_sample: number; interested_yes: number; }
-      interface CommitRow { wins: number; losses: number; }
-
-      const [emotionRows, agreementRows, themeRows, verbatimRows, interestRows, commitRows] = await Promise.all([
-        db.execute(sql`
-          SELECT
-            ee.emotion,
-            (COUNT(*) FILTER (WHERE ee.selected)::float / NULLIF(COUNT(*), 0) * 100)::float AS percentage
-          FROM dig.eval_emotions ee
-          JOIN dig.evaluations e ON e.id = ee.evaluation_id
-          WHERE e.concept_id = ${conceptId}
-            AND e.dig_study_id = ${studyId}
-            AND e.company_id = ${companyId}
-          GROUP BY ee.emotion
-          ORDER BY percentage DESC
-        `) as unknown as EmotionRow[],
-
-        db.execute(sql`
-          SELECT
-            ea.question_group,
-            ea.statement,
-            (COUNT(*) FILTER (WHERE ea.response_code >= 4)::float / NULLIF(COUNT(*), 0) * 100)::float AS agree_percentage
-          FROM dig.eval_agreements ea
-          JOIN dig.evaluations e ON e.id = ea.evaluation_id
-          WHERE e.concept_id = ${conceptId}
-            AND e.dig_study_id = ${studyId}
-            AND e.company_id = ${companyId}
-          GROUP BY ea.question_group, ea.statement
-          ORDER BY ea.question_group ASC, ea.statement ASC
-        `) as unknown as AgreementRow[],
-
-        db.execute(sql`
-          SELECT DISTINCT theme_category
-          FROM dig.open_ended_themes
-          WHERE concept_id = ${conceptId}
-            AND dig_study_id = ${studyId}
-            AND company_id = ${companyId}
-          ORDER BY theme_category ASC
-        `) as unknown as ThemeRow[],
-
-        db.execute(sql`
-          SELECT e.clarity_comment AS comment
-          FROM dig.evaluations e
-          WHERE e.concept_id = ${conceptId}
-            AND e.dig_study_id = ${studyId}
-            AND e.company_id = ${companyId}
-            AND e.clarity_comment IS NOT NULL
-            AND e.clarity_comment <> ''
-          ORDER BY e.created_at DESC
-          LIMIT 5
-        `) as unknown as VerbatimRow[],
-
-        db.execute(sql`
-          SELECT
-            COUNT(*)::int AS interest_sample,
-            COUNT(*) FILTER (WHERE interested)::int AS interested_yes
-          FROM dig.screening_interest
-          WHERE concept_id = ${conceptId}
-            AND dig_study_id = ${studyId}
-            AND company_id = ${companyId}
-        `) as unknown as InterestRow[],
-
-        db.execute(sql`
-          SELECT
-            (SELECT COUNT(*)::int FROM dig.screening_commitment
-              WHERE won_concept_id = ${conceptId} AND dig_study_id = ${studyId}
-                AND company_id = ${companyId}) AS wins,
-            (SELECT COUNT(*)::int FROM dig.screening_commitment
-              WHERE lost_concept_id = ${conceptId} AND dig_study_id = ${studyId}
-                AND company_id = ${companyId}) AS losses
-        `) as unknown as CommitRow[],
-      ]);
-
-      const emotions: Record<string, number> = {};
-      for (const e of emotionRows) emotions[e.emotion] = Math.round(e.percentage);
-
-      const agreement: Record<string, Record<string, number>> = {};
-      for (const a of agreementRows) {
-        if (!agreement[a.question_group]) agreement[a.question_group] = {};
-        agreement[a.question_group][a.statement] = Math.round(a.agree_percentage);
-      }
-
-      const ir = interestRows[0];
-      const cr = commitRows[0];
-      const commitmentSample = (cr?.wins ?? 0) + (cr?.losses ?? 0);
-
-      res.json({
-        id: conceptRows[0].id,
-        study_id: studyId,
-        label: conceptRows[0].label,
-        idea_score: null,
-        interest_score: ir && ir.interest_sample > 0 ? Math.round((ir.interested_yes / ir.interest_sample) * 100) : null,
-        commitment_score: commitmentSample > 0 ? Math.round(((cr?.wins ?? 0) / commitmentSample) * 100) : null,
-        emotions,
-        agreement,
-        themes: themeRows.map((t) => t.theme_category),
-        sample_verbatims: verbatimRows.map((v) => v.comment),
-        heatmap_url: null,
-      });
-    } catch (err) {
-      console.error("dig concept detail query failed:", err);
-      digError(res, "INTERNAL", "Database error");
-    }
+      res.json(await digApi.getConcept(companyId, req.params.id, req.params.cid));
+    } catch (err) { handleDigError(res, err); }
   });
 
-  // 5. Heatmap → DigHeatmap
-  app.get("/api/member/dig/studies/:studyId/concepts/:conceptId/heatmap", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/member/dig/studies/:id/concepts/:cid/heatmap", requireAuth, async (req: AuthenticatedRequest, res) => {
     const companyId = req.user?.companyId;
-    if (!companyId) return digError(res, "UNAUTHORIZED", "No company context", 401);
-    const studyId = req.params.studyId;
-    const conceptId = req.params.conceptId;
+    if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
     try {
-      const study = await verifyStudyForTenant(studyId, companyId);
-      if (!study) return digError(res, "STUDY_NOT_FOUND", "Study not found or access denied", 404);
-
-      interface ConceptCheckRow { id: string; }
-      const conceptCheck = await db.execute(sql`
-        SELECT id FROM dig.concepts
-        WHERE id = ${conceptId} AND dig_study_id = ${studyId} AND company_id = ${companyId}
-        LIMIT 1
-      `) as unknown as ConceptCheckRow[];
-      if (conceptCheck.length === 0) return digError(res, "CONCEPT_NOT_FOUND", "Concept not found", 404);
-
-      interface ClickRow { x_coord: number; y_coord: number; }
-      const clicks = await db.execute(sql`
-        SELECT h.x_coord, h.y_coord
-        FROM dig.eval_heatmap_clicks h
-        JOIN dig.evaluations e ON e.id = h.evaluation_id
-        WHERE e.concept_id = ${conceptId}
-          AND e.dig_study_id = ${studyId}
-          AND e.company_id = ${companyId}
-        ORDER BY h.click_order
-      `) as unknown as ClickRow[];
-
-      const zones = clicks.map((c) => ({
-        x: c.x_coord,
-        y: c.y_coord,
-        radius: 20,
-        intensity: 1,
-      }));
-
-      res.json({
-        concept_id: conceptId,
-        image_url: null,
-        zones,
-      });
-    } catch (err) {
-      console.error("dig heatmap query failed:", err);
-      digError(res, "INTERNAL", "Database error");
-    }
+      res.json(await digApi.getHeatmap(companyId, req.params.id, req.params.cid));
+    } catch (err) { handleDigError(res, err); }
   });
 
-  // 6. Ranking → DigRanking
-  app.get("/api/member/dig/studies/:studyId/ranking", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/member/dig/studies/:id/ranking", requireAuth, async (req: AuthenticatedRequest, res) => {
     const companyId = req.user?.companyId;
-    if (!companyId) return digError(res, "UNAUTHORIZED", "No company context", 401);
-    const studyId = req.params.studyId;
+    if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
     try {
-      const study = await verifyStudyForTenant(studyId, companyId);
-      if (!study) return digError(res, "STUDY_NOT_FOUND", "Study not found or access denied", 404);
-
-      interface RankRow {
-        id: string; label: string;
-        interest_sample: number; interested_yes: number;
-        wins: number; losses: number;
-      }
-      const rows = await db.execute(sql`
-        SELECT
-          c.id,
-          COALESCE(c.name, c.id) AS label,
-          COUNT(DISTINCT si.id)::int AS interest_sample,
-          COUNT(DISTINCT si.id) FILTER (WHERE si.interested)::int AS interested_yes,
-          (SELECT COUNT(*)::int FROM dig.screening_commitment sc
-            WHERE sc.won_concept_id = c.id AND sc.company_id = ${companyId}
-              AND sc.dig_study_id = ${studyId}) AS wins,
-          (SELECT COUNT(*)::int FROM dig.screening_commitment sc
-            WHERE sc.lost_concept_id = c.id AND sc.company_id = ${companyId}
-              AND sc.dig_study_id = ${studyId}) AS losses
-        FROM dig.concepts c
-        LEFT JOIN dig.screening_interest si ON si.concept_id = c.id
-          AND si.company_id = ${companyId} AND si.dig_study_id = ${studyId}
-        WHERE c.dig_study_id = ${studyId}
-          AND c.company_id = ${companyId}
-        GROUP BY c.id, c.name
-        ORDER BY c.name ASC
-      `) as unknown as RankRow[];
-
-      const mapped = rows.map((r) => {
-        const commitmentSample = r.wins + r.losses;
-        return {
-          concept_id: r.id,
-          label: r.label,
-          idea_score: 0,
-          interest_score: r.interest_sample > 0 ? Math.round((r.interested_yes / r.interest_sample) * 100) : 0,
-          commitment_score: commitmentSample > 0 ? Math.round((r.wins / commitmentSample) * 100) : 0,
-          _sortKey: commitmentSample > 0 ? r.wins / commitmentSample : -1,
-        };
-      });
-
-      mapped.sort((a, b) => {
-        if (b._sortKey !== a._sortKey) return b._sortKey - a._sortKey;
-        return a.label.localeCompare(b.label);
-      });
-
-      const concepts = mapped.map((c, i) => ({
-        concept_id: c.concept_id,
-        label: c.label,
-        idea_score: c.idea_score,
-        interest_score: c.interest_score,
-        commitment_score: c.commitment_score,
-        rank: i + 1,
-      }));
-
-      res.json({ study_id: studyId, concepts });
-    } catch (err) {
-      console.error("dig ranking query failed:", err);
-      digError(res, "INTERNAL", "Database error");
-    }
+      res.json(await digApi.getRanking(companyId, req.params.id));
+    } catch (err) { handleDigError(res, err); }
   });
 
-  // 7. Demographics → DigDemographics
-  app.get("/api/member/dig/studies/:studyId/demographics", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/member/dig/studies/:id/demographics", requireAuth, async (req: AuthenticatedRequest, res) => {
     const companyId = req.user?.companyId;
-    if (!companyId) return digError(res, "UNAUTHORIZED", "No company context", 401);
-    const studyId = req.params.studyId;
+    if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
     try {
-      const study = await verifyStudyForTenant(studyId, companyId);
-      if (!study) return digError(res, "STUDY_NOT_FOUND", "Study not found or access denied", 404);
-
-      interface LabelCountRow { label: string; count: number; }
-      interface AgeRow { age: number | null; }
-
-      const AGE_BUCKETS = [
-        { bucket: "18-24", min: 18, max: 24 },
-        { bucket: "25-34", min: 25, max: 34 },
-        { bucket: "35-44", min: 35, max: 44 },
-        { bucket: "45-54", min: 45, max: 54 },
-        { bucket: "55-64", min: 55, max: 64 },
-        { bucket: "65+",   min: 65, max: 200 },
-      ];
-
-      const [genderRows, provinceRows, ageRows] = await Promise.all([
-        db.execute(sql`
-          SELECT gender_label AS label, COUNT(*)::int AS count
-          FROM dig.respondents
-          WHERE dig_study_id = ${studyId} AND company_id = ${companyId}
-          GROUP BY gender_label ORDER BY count DESC
-        `) as unknown as LabelCountRow[],
-
-        db.execute(sql`
-          SELECT province_label AS label, COUNT(*)::int AS count
-          FROM dig.respondents
-          WHERE dig_study_id = ${studyId} AND company_id = ${companyId}
-          GROUP BY province_label ORDER BY count DESC
-        `) as unknown as LabelCountRow[],
-
-        db.execute(sql`
-          SELECT age FROM dig.respondents
-          WHERE dig_study_id = ${studyId} AND company_id = ${companyId}
-        `) as unknown as AgeRow[],
-      ]);
-
-      const gender: Record<string, number> = {};
-      for (const r of genderRows) gender[r.label ?? "Unknown"] = r.count;
-
-      const age_buckets: Record<string, number> = {};
-      for (const b of AGE_BUCKETS) {
-        age_buckets[b.bucket] = ageRows.filter((r) => r.age !== null && r.age >= b.min && r.age <= b.max).length;
-      }
-
-      const provinces: Record<string, number> = {};
-      for (const r of provinceRows) provinces[r.label ?? "Unknown"] = r.count;
-
-      res.json({ study_id: studyId, gender, age_buckets, provinces });
-    } catch (err) {
-      console.error("dig demographics query failed:", err);
-      digError(res, "INTERNAL", "Database error");
-    }
+      res.json(await digApi.getDemographics(companyId, req.params.id));
+    } catch (err) { handleDigError(res, err); }
   });
 
-  // 8. Themes → DigThemesResponse
-  app.get("/api/member/dig/studies/:studyId/themes", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/member/dig/studies/:id/themes", requireAuth, async (req: AuthenticatedRequest, res) => {
     const companyId = req.user?.companyId;
-    if (!companyId) return digError(res, "UNAUTHORIZED", "No company context", 401);
-    const studyId = req.params.studyId;
+    if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
     try {
-      const study = await verifyStudyForTenant(studyId, companyId);
-      if (!study) return digError(res, "STUDY_NOT_FOUND", "Study not found or access denied", 404);
-
-      interface ThemeRow { theme_category: string; positive: number; negative: number; neutral: number; }
-      const themeRows = await db.execute(sql`
-        SELECT
-          t.theme_category,
-          SUM(CASE WHEN t.sentiment = 'positive' THEN t.mention_count ELSE 0 END)::int AS positive,
-          SUM(CASE WHEN t.sentiment = 'negative' THEN t.mention_count ELSE 0 END)::int AS negative,
-          SUM(CASE WHEN t.sentiment = 'neutral' THEN t.mention_count ELSE 0 END)::int AS neutral
-        FROM dig.open_ended_themes t
-        WHERE t.dig_study_id = ${studyId}
-          AND t.company_id = ${companyId}
-        GROUP BY t.theme_category
-        ORDER BY (SUM(t.mention_count)) DESC, t.theme_category ASC
-      `) as unknown as ThemeRow[];
-
-      const themes = themeRows.map((t) => ({
-        theme_category: t.theme_category,
-        positive: t.positive,
-        neutral: t.neutral,
-        negative: t.negative,
-        sample_verbatims: [] as string[],
-      }));
-
-      res.json({ study_id: studyId, themes });
-    } catch (err) {
-      console.error("dig themes query failed:", err);
-      digError(res, "INTERNAL", "Database error");
-    }
+      res.json(await digApi.getThemes(companyId, req.params.id));
+    } catch (err) { handleDigError(res, err); }
   });
 
-  // 9. Search → DigSearchResponse (stub)
-  app.post("/api/member/dig/studies/:studyId/search", requireAuth, async (req: AuthenticatedRequest, res) => {
-    res.json({
-      study_id: req.params.studyId,
-      query: req.body?.query ?? "",
-      results: [],
-    });
+  app.post("/api/member/dig/search", requireAuth, async (req: AuthenticatedRequest, res) => {
+    const companyId = req.user?.companyId;
+    if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
+    try {
+      const searchBody = {
+        query: typeof req.body?.query === "string" ? req.body.query : "",
+        study_id: typeof req.body?.study_id === "string" ? req.body.study_id : undefined,
+        concept_id: typeof req.body?.concept_id === "string" ? req.body.concept_id : undefined,
+        limit: typeof req.body?.limit === "number" ? Math.min(Math.max(1, req.body.limit), 100) : undefined,
+      };
+      res.json(await digApi.search(companyId, searchBody));
+    } catch (err) { handleDigError(res, err); }
   });
 
   const httpServer = createServer(app);

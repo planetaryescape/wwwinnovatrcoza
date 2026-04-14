@@ -38,7 +38,9 @@ export default function ThemeSummary({ studyId }: Props) {
     );
   }
 
-  if (!data || data.themes.length === 0) {
+  const themes = data?.themes ?? [];
+
+  if (themes.length === 0) {
     return (
       <Card>
         <CardHeader><CardTitle>Themes</CardTitle></CardHeader>
@@ -51,9 +53,10 @@ export default function ThemeSummary({ studyId }: Props) {
     );
   }
 
-  const chartData = data.themes.map((t) => ({
-    name: t.theme_category.length > 25 ? t.theme_category.slice(0, 23) + "…" : t.theme_category,
+  const chartData = themes.map((t) => ({
+    name: t.theme_category.length > 25 ? t.theme_category.slice(0, 23) + "\u2026" : t.theme_category,
     fullName: t.theme_category,
+    concept: t.concept_name,
     positive: t.positive,
     neutral: t.neutral,
     negative: t.negative,
@@ -65,7 +68,7 @@ export default function ThemeSummary({ studyId }: Props) {
         <CardTitle>Theme Sentiment</CardTitle>
       </CardHeader>
       <CardContent>
-        <div style={{ height: Math.max(300, data.themes.length * 45) }}>
+        <div style={{ height: Math.max(300, themes.length * 45) }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData}
@@ -78,7 +81,10 @@ export default function ThemeSummary({ studyId }: Props) {
               <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 11 }} />
               <Tooltip
                 formatter={(value: number, name: string) => [`${value}`, name.charAt(0).toUpperCase() + name.slice(1)]}
-                labelFormatter={(label: string, payload: Array<{ payload?: { fullName?: string } }>) => payload?.[0]?.payload?.fullName || label}
+                labelFormatter={(label: string, payload: Array<{ payload?: { fullName?: string; concept?: string } }>) => {
+                  const p = payload?.[0]?.payload;
+                  return p ? `${p.fullName} (${p.concept})` : label;
+                }}
               />
               <Legend />
               <Bar dataKey="positive" name="Positive" stackId="a" fill="#2A9E5C" barSize={20} />
@@ -89,21 +95,20 @@ export default function ThemeSummary({ studyId }: Props) {
         </div>
 
         <div className="mt-6 space-y-3">
-          {data.themes.map((t) => (
-            <div key={t.theme_category} className="border-b last:border-0 pb-3" data-testid={`theme-row-${t.theme_category}`}>
+          {themes.map((t, i) => (
+            <div key={`${t.concept_id}-${t.theme_category}-${i}`} className="border-b last:border-0 pb-3" data-testid={`theme-row-${t.theme_category}`}>
               <div className="flex items-center justify-between gap-2 mb-1">
-                <span className="text-sm font-medium">{t.theme_category}</span>
+                <div>
+                  <span className="text-sm font-medium">{t.theme_category}</span>
+                  <span className="text-xs text-muted-foreground ml-2">({t.concept_name})</span>
+                </div>
                 <div className="flex gap-3 text-xs text-muted-foreground">
                   <span className="text-green-600">+{t.positive}</span>
                   <span>~{t.neutral}</span>
                   <span className="text-red-500">-{t.negative}</span>
+                  <span>{t.mentions} mentions</span>
                 </div>
               </div>
-              {t.sample_verbatims.length > 0 && (
-                <p className="text-xs text-muted-foreground italic truncate">
-                  "{t.sample_verbatims[0]}"
-                </p>
-              )}
             </div>
           ))}
         </div>

@@ -35,14 +35,14 @@ export default function ReportDetailPage() {
   const reportId = params?.id;
   const [activeTab, setActiveTab] = useState<Tab>("overview");
 
-  const { data: digStudies, isLoading: loadingDig } = useDigStudies(!!user);
+  const { data: digStudiesData, isLoading: loadingDig } = useDigStudies(!!user);
 
   const digStudy = useMemo(() => {
-    if (!digStudies || !reportId) return null;
-    return digStudies.find(
+    if (!digStudiesData?.studies || !reportId) return null;
+    return digStudiesData.studies.find(
       (s) => s.public_client_report_id === reportId
     ) || null;
-  }, [digStudies, reportId]);
+  }, [digStudiesData, reportId]);
 
   const studyId = digStudy?.id;
 
@@ -88,7 +88,7 @@ export default function ReportDetailPage() {
               REPORT
             </span>
             <h1 className="font-serif text-xl text-white truncate max-w-md">
-              {digStudy?.study_name || `Report ${reportId.slice(0, 8)}`}
+              {digStudy?.title || `Report ${reportId.slice(0, 8)}`}
             </h1>
           </div>
         </div>
@@ -148,7 +148,7 @@ export default function ReportDetailPage() {
                 <div className="space-y-6 max-w-5xl">
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-sm text-muted-foreground">
-                      Status: <span className="font-medium capitalize">{digStudy.status}</span>
+                      Status: <span className="font-medium capitalize">{digStudy.ingest_status}</span>
                     </span>
                     <span className="text-sm text-muted-foreground">
                       Concepts: <span className="font-medium">{digStudy.concept_count}</span>

@@ -2,13 +2,12 @@ import { useDigRanking } from "@/lib/dig-api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 
 const COLORS = {
-  idea: "#3A2FBF",
+  winRate: "#3A2FBF",
   interest: "#3B82F6",
-  commitment: "#2A9E5C",
 };
 
 interface Props {
@@ -44,7 +43,9 @@ export default function ConceptRankingTable({ studyId }: Props) {
     );
   }
 
-  if (!data || data.concepts.length === 0) {
+  const ranking = data?.ranking ?? [];
+
+  if (ranking.length === 0) {
     return (
       <Card>
         <CardHeader><CardTitle>Concept Ranking</CardTitle></CardHeader>
@@ -57,14 +58,13 @@ export default function ConceptRankingTable({ studyId }: Props) {
     );
   }
 
-  const sorted = [...data.concepts].sort((a, b) => a.rank - b.rank);
+  const sorted = [...ranking].sort((a, b) => a.rank - b.rank);
 
   const chartData = sorted.map((c) => ({
-    name: c.label.length > 20 ? c.label.slice(0, 18) + "…" : c.label,
-    fullLabel: c.label,
-    idea: c.idea_score,
-    interest: c.interest_score,
-    commitment: c.commitment_score,
+    name: c.name.length > 20 ? c.name.slice(0, 18) + "\u2026" : c.name,
+    fullLabel: c.name,
+    winRate: c.win_rate ?? 0,
+    interest: c.interest_rate ?? 0,
     rank: c.rank,
   }));
 
@@ -81,13 +81,12 @@ export default function ConceptRankingTable({ studyId }: Props) {
               <XAxis type="number" domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
               <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 12 }} />
               <Tooltip
-                formatter={(value: number, name: string) => [`${value}%`, name.charAt(0).toUpperCase() + name.slice(1)]}
+                formatter={(value: number, name: string) => [`${value}%`, name === "winRate" ? "Win Rate" : "Interest"]}
                 labelFormatter={(label: string, payload: Array<{ payload?: { fullLabel?: string } }>) => payload?.[0]?.payload?.fullLabel || label}
               />
               <Legend />
-              <Bar dataKey="idea" name="Idea Score" fill={COLORS.idea} radius={[0, 4, 4, 0]} barSize={12} />
+              <Bar dataKey="winRate" name="Win Rate" fill={COLORS.winRate} radius={[0, 4, 4, 0]} barSize={12} />
               <Bar dataKey="interest" name="Interest" fill={COLORS.interest} radius={[0, 4, 4, 0]} barSize={12} />
-              <Bar dataKey="commitment" name="Commitment" fill={COLORS.commitment} radius={[0, 4, 4, 0]} barSize={12} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -98,19 +97,17 @@ export default function ConceptRankingTable({ studyId }: Props) {
               <tr className="border-b">
                 <th className="text-left py-2 px-2 font-medium text-muted-foreground">#</th>
                 <th className="text-left py-2 px-2 font-medium text-muted-foreground">Concept</th>
-                <th className="text-right py-2 px-2 font-medium text-muted-foreground">Idea</th>
+                <th className="text-right py-2 px-2 font-medium text-muted-foreground">Win Rate</th>
                 <th className="text-right py-2 px-2 font-medium text-muted-foreground">Interest</th>
-                <th className="text-right py-2 px-2 font-medium text-muted-foreground">Commitment</th>
               </tr>
             </thead>
             <tbody>
               {sorted.map((c) => (
                 <tr key={c.concept_id} className="border-b last:border-0" data-testid={`row-ranking-${c.concept_id}`}>
                   <td className="py-2 px-2 font-medium">{c.rank}</td>
-                  <td className="py-2 px-2">{c.label}</td>
-                  <td className="text-right py-2 px-2 font-mono">{c.idea_score}%</td>
-                  <td className="text-right py-2 px-2 font-mono">{c.interest_score}%</td>
-                  <td className="text-right py-2 px-2 font-mono">{c.commitment_score}%</td>
+                  <td className="py-2 px-2">{c.name}</td>
+                  <td className="text-right py-2 px-2 font-mono">{c.win_rate != null ? `${c.win_rate}%` : "\u2014"}</td>
+                  <td className="text-right py-2 px-2 font-mono">{c.interest_rate != null ? `${c.interest_rate}%` : "\u2014"}</td>
                 </tr>
               ))}
             </tbody>

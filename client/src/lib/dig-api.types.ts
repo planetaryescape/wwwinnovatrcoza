@@ -1,84 +1,140 @@
+export type IngestStatus = "pending" | "unpacking" | "parsing" | "parsed" | "ready" | "failed";
+
 export interface DigStudy {
   id: string;
-  company_id: string;
-  study_name: string;
+  title: string;
+  source_study_name: string | null;
   public_client_report_id: string | null;
-  status: string;
+  ingest_status: IngestStatus;
+  file_count: number;
+  respondent_count: number;
+  concept_count: number;
   created_at: string;
   updated_at: string;
-  concept_count: number;
-  respondent_count: number;
 }
 
 export interface DigStudyDetail extends DigStudy {
-  concepts: { id: string; label: string }[];
+  error_message: string | null;
+  metadata: Record<string, unknown> | null;
 }
 
-export interface DigConcept {
+export interface ConceptAggregate {
   id: string;
-  study_id: string;
-  label: string;
-  idea_score: number | null;
-  interest_score: number | null;
-  commitment_score: number | null;
-  emotions: Record<string, number>;
-  agreement: Record<string, Record<string, number>>;
-  themes: string[];
-  sample_verbatims: string[];
+  name: string;
+  concept_type: "control" | "new" | "existing" | string | null;
+  brand: string | null;
+  product_name: string | null;
+  product_format: string | null;
+  segments: string[];
+  interest_sample: number;
+  interest_rate: number | null;
+  commitment_sample: number;
+  wins: number;
+  losses: number;
+  win_rate: number | null;
 }
 
-export interface DigConceptDetail extends DigConcept {
-  heatmap_url: string | null;
+export interface ConceptEmotion {
+  emotion: string;
+  selected_count: number;
+  total: number;
+  percentage: number;
 }
 
-export interface DigHeatmap {
-  concept_id: string;
-  image_url: string | null;
-  zones: { x: number; y: number; radius: number; intensity: number }[];
+export interface ConceptAgreement {
+  question_group: "self" | "brand";
+  statement: string;
+  total: number;
+  agree_count: number;
+  agree_percentage: number;
+  avg_response_code: number | null;
 }
 
-export interface DigRanking {
-  study_id: string;
-  concepts: {
-    concept_id: string;
-    label: string;
-    idea_score: number;
-    interest_score: number;
-    commitment_score: number;
-    rank: number;
-  }[];
-}
-
-export interface DigDemographics {
-  study_id: string;
-  gender: Record<string, number>;
-  age_buckets: Record<string, number>;
-  provinces: Record<string, number>;
-}
-
-export interface DigTheme {
+export interface ConceptTheme {
   theme_category: string;
+  mentions: number;
   positive: number;
-  neutral: number;
   negative: number;
-  sample_verbatims: string[];
+  neutral: number;
 }
 
-export interface DigThemesResponse {
-  study_id: string;
-  themes: DigTheme[];
+export interface SampleVerbatim {
+  respondent_external_id: string | null;
+  clarity_label: string | null;
+  comment: string;
 }
 
-export interface DigSearchResult {
-  respondent_id: string;
-  text: string;
-  distance: number;
-  concept_label: string;
-  theme_category: string | null;
+export interface ConceptDetail {
+  id: string;
+  name: string;
+  concept_type: string | null;
+  brand: string | null;
+  product_name: string | null;
+  product_format: string | null;
+  segments: string[];
+  evaluation_count: number;
+  emotions: ConceptEmotion[];
+  agreements: ConceptAgreement[];
+  themes: ConceptTheme[];
+  sample_verbatims: SampleVerbatim[];
 }
 
-export interface DigSearchResponse {
-  study_id: string;
+export interface HeatmapClick {
+  evaluation_id: string;
+  respondent_external_id: string | null;
+  question_type: "like" | "dislike" | string;
+  click_order: number;
+  x_coord: number | null;
+  y_coord: number | null;
+  comment: string | null;
+  time_between_ms: number | null;
+}
+
+export interface RankedConcept {
+  rank: number;
+  concept_id: string;
+  name: string;
+  wins: number;
+  losses: number;
+  win_rate: number | null;
+  interest_rate: number | null;
+}
+
+export interface DemographicBucket {
+  label?: string | null;
+  bucket?: string;
+  count: number;
+  percentage: number;
+}
+
+export interface Demographics {
+  total_respondents: number;
+  gender: DemographicBucket[];
+  age_buckets: DemographicBucket[];
+  province: DemographicBucket[];
+}
+
+export interface CrossConceptTheme {
+  concept_id: string | null;
+  concept_name: string;
+  theme_category: string;
+  mentions: number;
+  positive: number;
+  negative: number;
+  neutral: number;
+}
+
+export interface SearchRequest {
   query: string;
-  results: DigSearchResult[];
+  study_id?: string;
+  concept_id?: string;
+  limit?: number;
+}
+
+export interface SearchResult {
+  content: string;
+  distance: number;
+  source_table: "evaluations" | "eval_heatmap_clicks";
+  source_id: string;
+  concept_id: string | null;
 }

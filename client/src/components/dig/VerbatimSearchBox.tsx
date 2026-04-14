@@ -12,11 +12,11 @@ interface Props {
 
 export default function VerbatimSearchBox({ studyId }: Props) {
   const [query, setQuery] = useState("");
-  const searchMutation = useDigSearch(studyId);
+  const searchMutation = useDigSearch();
 
   const handleSearch = () => {
     if (!query.trim()) return;
-    searchMutation.mutate({ query: query.trim() });
+    searchMutation.mutate({ query: query.trim(), study_id: studyId, limit: 20 });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -69,24 +69,19 @@ export default function VerbatimSearchBox({ studyId }: Props) {
         {searchMutation.data && searchMutation.data.results.length > 0 && (
           <div className="space-y-3" data-testid="list-search-results">
             <p className="text-xs text-muted-foreground">
-              {searchMutation.data.results.length} results for "{searchMutation.data.query}"
+              {searchMutation.data.results.length} results
             </p>
             {searchMutation.data.results.map((r, i) => (
               <div
-                key={`${r.respondent_id}-${i}`}
+                key={`${r.source_id}-${i}`}
                 className="p-3 rounded-md bg-muted/50 border space-y-1"
                 data-testid={`search-result-${i}`}
               >
-                <p className="text-sm">"{r.text}"</p>
+                <p className="text-sm">"{r.content}"</p>
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="outline" className="text-xs">
-                    {r.concept_label}
+                    {r.source_table}
                   </Badge>
-                  {r.theme_category && (
-                    <Badge variant="secondary" className="text-xs">
-                      {r.theme_category}
-                    </Badge>
-                  )}
                   <span className="text-xs text-muted-foreground ml-auto">
                     relevance: {(1 - r.distance).toFixed(2)}
                   </span>

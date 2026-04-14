@@ -99,7 +99,8 @@ const DIG_ETL_INGEST_URL = import.meta.env.VITE_DIG_ETL_INGEST_URL || "https://i
 
 export default function AdminClientReports() {
   const { toast } = useToast();
-  const { data: digStudies = [] } = useDigStudies(true);
+  const { data: digStudiesData } = useDigStudies(true);
+  const digStudies = digStudiesData?.studies ?? [];
   const digStudyByReportId = new Map<string, DigStudy>();
   for (const s of digStudies) {
     if (s.public_client_report_id) {
@@ -560,15 +561,15 @@ export default function AdminClientReports() {
                         {(() => {
                           const dig = digStudyByReportId.get(report.id);
                           if (!dig) return <span className="text-xs text-muted-foreground" data-testid={`text-dig-status-${report.id}`}>—</span>;
-                          const st = dig.status?.toLowerCase();
+                          const st = dig.ingest_status?.toLowerCase();
                           const color = st === "ready" || st === "parsed"
                             ? "text-green-600"
-                            : st === "error"
+                            : st === "failed" || st === "error"
                             ? "text-red-500"
                             : "text-yellow-600";
                           return (
                             <Badge variant="outline" className={`text-xs ${color}`} data-testid={`badge-dig-status-${report.id}`}>
-                              {dig.status}
+                              {dig.ingest_status}
                             </Badge>
                           );
                         })()}
@@ -609,7 +610,7 @@ export default function AdminClientReports() {
                             variant="ghost"
                             size="icon"
                             onClick={() => {
-                              window.open(`${DIG_ETL_INGEST_URL}/ingest?reportId=${report.id}`, "_blank");
+                              window.open(`${DIG_ETL_INGEST_URL}/admin/ingest?clientReportId=${report.id}`, "_blank");
                             }}
                             title="Upload CSVs to ETL"
                             data-testid={`button-upload-etl-${report.id}`}

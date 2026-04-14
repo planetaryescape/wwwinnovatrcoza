@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useDigConcepts } from "@/lib/dig-api";
+import { useDigConcepts, useDigConcept } from "@/lib/dig-api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,12 +30,16 @@ interface Props {
 }
 
 export default function ConceptDetailPanel({ studyId }: Props) {
-  const { data: concepts, isLoading, error } = useDigConcepts(studyId);
+  const { data: conceptsData, isLoading: loadingList, error: listError } = useDigConcepts(studyId);
   const [selectedId, setSelectedId] = useState<string>("");
 
-  const selected = concepts?.find((c) => c.id === selectedId) || concepts?.[0];
+  const concepts = conceptsData?.concepts ?? [];
+  const activeId = selectedId || concepts[0]?.id || "";
 
-  if (isLoading) {
+  const { data: detailData, isLoading: loadingDetail } = useDigConcept(studyId, activeId || undefined);
+  const detail = detailData?.concept;
+
+  if (loadingList) {
     return (
       <Card>
         <CardHeader><CardTitle>Concept Details</CardTitle></CardHeader>
@@ -47,7 +51,7 @@ export default function ConceptDetailPanel({ studyId }: Props) {
     );
   }
 
-  if (error) {
+  if (listError) {
     return (
       <Card>
         <CardHeader><CardTitle>Concept Details</CardTitle></CardHeader>
@@ -60,7 +64,7 @@ export default function ConceptDetailPanel({ studyId }: Props) {
     );
   }
 
-  if (!concepts || concepts.length === 0) {
+  if (concepts.length === 0) {
     return (
       <Card>
         <CardHeader><CardTitle>Concept Details</CardTitle></CardHeader>
@@ -73,20 +77,25 @@ export default function ConceptDetailPanel({ studyId }: Props) {
     );
   }
 
-  const emotionData = selected
-    ? Object.entries(selected.emotions).map(([key, val]) => ({
-        name: key.charAt(0).toUpperCase() + key.slice(1),
-        value: val,
-        fill: EMOTION_COLORS[key] || "#9CA3AF",
+  const emotionData = detail
+    ? detail.emotions.map((e) => ({
+        name: e.emotion.charAt(0).toUpperCase() + e.emotion.slice(1),
+        value: Math.round(e.percentage),
+        fill: EMOTION_COLORS[e.emotion.toLowerCase()] || "#9CA3AF",
       }))
     : [];
 
-  const agreementGroups = selected
-    ? Object.entries(selected.agreement).map(([group, questions]) => ({
-        group,
-        questions: Object.entries(questions).map(([q, val]) => ({ question: q, value: val })),
-      }))
+  const selfAgreements = detail
+    ? detail.agreements.filter((a) => a.question_group === "self")
     : [];
+  const brandAgreements = detail
+    ? detail.agreements.filter((a) => a.question_group === "brand")
+    : [];
+
+  const agreementGroups = [
+    ...(selfAgreements.length > 0 ? [{ group: "self", questions: selfAgreements.map((a) => ({ question: a.statement, value: Math.round(a.agree_percentage) })) }] : []),
+    ...(brandAgreements.length > 0 ? [{ group: "brand", questions: brandAgreements.map((a) => ({ question: a.statement, value: Math.round(a.agree_percentage) })) }] : []),
+  ];
 
   return (
     <Card data-testid="card-concept-detail">
@@ -94,7 +103,7 @@ export default function ConceptDetailPanel({ studyId }: Props) {
         <CardTitle>Concept Details</CardTitle>
         {concepts.length > 1 && (
           <Select
-            value={selected?.id || ""}
+            value={activeId}
             onValueChange={(v) => setSelectedId(v)}
           >
             <SelectTrigger className="w-56" data-testid="select-concept">
@@ -103,7 +112,7 @@ export default function ConceptDetailPanel({ studyId }: Props) {
             <SelectContent>
               {concepts.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
-                  {c.label}
+                  {c.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -111,17 +120,24 @@ export default function ConceptDetailPanel({ studyId }: Props) {
         )}
       </CardHeader>
       <CardContent className="space-y-6">
-        {selected && (
+        {loadingDetail && (
+          <div className="space-y-3">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-48 w-full" />
+          </div>
+        )}
+
+        {detail && (
           <>
             <div className="flex flex-wrap items-center gap-2">
-              {selected.idea_score != null && (
-                <Badge variant="secondary">Idea: {selected.idea_score}%</Badge>
+              {detail.evaluation_count > 0 && (
+                <Badge variant="secondary">Evaluations: {detail.evaluation_count}</Badge>
               )}
-              {selected.interest_score != null && (
-                <Badge variant="secondary">Interest: {selected.interest_score}%</Badge>
+              {detail.concept_type && (
+                <Badge variant="outline">{detail.concept_type}</Badge>
               )}
-              {selected.commitment_score != null && (
-                <Badge variant="secondary">Commitment: {selected.commitment_score}%</Badge>
+              {detail.brand && (
+                <Badge variant="outline">{detail.brand}</Badge>
               )}
             </div>
 
@@ -177,30 +193,33 @@ export default function ConceptDetailPanel({ studyId }: Props) {
               </div>
             )}
 
-            {selected.themes.length > 0 && (
+            {detail.themes.length > 0 && (
               <div>
                 <h4 className="text-sm font-medium mb-2 text-muted-foreground">Themes</h4>
                 <div className="flex flex-wrap gap-2">
-                  {selected.themes.map((t) => (
-                    <Badge key={t} variant="outline" data-testid={`badge-theme-${t}`}>
-                      {t}
+                  {detail.themes.map((t) => (
+                    <Badge key={t.theme_category} variant="outline" data-testid={`badge-theme-${t.theme_category}`}>
+                      {t.theme_category} ({t.mentions})
                     </Badge>
                   ))}
                 </div>
               </div>
             )}
 
-            {selected.sample_verbatims.length > 0 && (
+            {detail.sample_verbatims.length > 0 && (
               <div>
                 <h4 className="text-sm font-medium mb-2 text-muted-foreground">Sample Verbatims</h4>
                 <div className="space-y-2">
-                  {selected.sample_verbatims.slice(0, 5).map((v, i) => (
+                  {detail.sample_verbatims.slice(0, 5).map((v, i) => (
                     <div
                       key={i}
                       className="text-sm p-3 rounded-md bg-muted/50 border"
                       data-testid={`text-verbatim-${i}`}
                     >
-                      "{v}"
+                      "{v.comment}"
+                      {v.clarity_label && (
+                        <span className="text-xs text-muted-foreground ml-2">({v.clarity_label})</span>
+                      )}
                     </div>
                   ))}
                 </div>

@@ -14,7 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ClientReport } from "@shared/schema";
 import { useDigStudies, useDigRanking } from "@/lib/dig-api";
-import type { DigStudy, DigRanking } from "@/lib/dig-api.types";
+import type { DigStudy, RankedConcept } from "@/lib/dig-api.types";
 import {
   BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip, ResponsiveContainer, Legend as ReLegend,
 } from "recharts";
@@ -244,7 +244,9 @@ function RankingMiniChart({ studyId }: { studyId: string }) {
     );
   }
 
-  if (!data || data.concepts.length === 0) {
+  const ranking = data?.ranking ?? [];
+
+  if (ranking.length === 0) {
     return (
       <div className="px-5 py-3" style={{ borderTop: `1px solid ${N200}` }}>
         <div className="text-xs" style={{ color: N500 }}>No ranking data available yet.</div>
@@ -252,12 +254,11 @@ function RankingMiniChart({ studyId }: { studyId: string }) {
     );
   }
 
-  const sorted = [...data.concepts].sort((a, b) => a.rank - b.rank).slice(0, 5);
+  const sorted = [...ranking].sort((a, b) => a.rank - b.rank).slice(0, 5);
   const chartData = sorted.map((c) => ({
-    name: c.label.length > 15 ? c.label.slice(0, 13) + "…" : c.label,
-    idea: c.idea_score,
-    interest: c.interest_score,
-    commitment: c.commitment_score,
+    name: c.name.length > 15 ? c.name.slice(0, 13) + "\u2026" : c.name,
+    winRate: c.win_rate ?? 0,
+    interest: c.interest_rate ?? 0,
   }));
 
   return (
@@ -269,10 +270,9 @@ function RankingMiniChart({ studyId }: { studyId: string }) {
             <CartesianGrid strokeDasharray="3 3" horizontal={false} />
             <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
             <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 10 }} />
-            <ReTooltip formatter={(v: number, name: string) => [`${v}%`, name.charAt(0).toUpperCase() + name.slice(1)]} />
-            <Bar dataKey="idea" name="Idea" fill="#3A2FBF" barSize={8} radius={[0, 3, 3, 0]} />
+            <ReTooltip formatter={(v: number, name: string) => [`${v}%`, name === "winRate" ? "Win Rate" : "Interest"]} />
+            <Bar dataKey="winRate" name="Win Rate" fill="#3A2FBF" barSize={8} radius={[0, 3, 3, 0]} />
             <Bar dataKey="interest" name="Interest" fill="#3B82F6" barSize={8} radius={[0, 3, 3, 0]} />
-            <Bar dataKey="commitment" name="Commit" fill="#2A9E5C" barSize={8} radius={[0, 3, 3, 0]} />
           </ReBarChart>
         </ResponsiveContainer>
       </div>
@@ -326,7 +326,8 @@ export default function TestPage() {
     enabled: !!user,
   });
 
-  const { data: digStudies = [] } = useDigStudies(!!user);
+  const { data: digStudiesData } = useDigStudies(!!user);
+  const digStudies = digStudiesData?.studies ?? [];
 
   const digStudyMap = useMemo(() => {
     const m = new Map<string, DigStudy>();
@@ -1014,7 +1015,7 @@ export default function TestPage() {
                 {/* Real client study cards */}
                 {!isLoadingStudies && mappedStudies.map(study => {
                   const digMatch = digStudyMap.get(study.id);
-                  const digStatus = digMatch?.status?.toLowerCase();
+                  const digStatus = digMatch?.ingest_status?.toLowerCase();
                   const hasDigData = digMatch && (digStatus === "ready" || digStatus === "parsed");
 
                   const typeBadge = study.studyType === "PRO"

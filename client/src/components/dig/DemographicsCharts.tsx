@@ -2,7 +2,7 @@ import { useDigDemographics } from "@/lib/dig-api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend,
+  PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from "recharts";
 
@@ -41,7 +41,9 @@ export default function DemographicsCharts({ studyId }: Props) {
     );
   }
 
-  if (!data) {
+  const demographics = data?.demographics;
+
+  if (!demographics) {
     return (
       <Card>
         <CardHeader><CardTitle>Demographics</CardTitle></CardHeader>
@@ -54,11 +56,11 @@ export default function DemographicsCharts({ studyId }: Props) {
     );
   }
 
-  const genderData = Object.entries(data.gender).map(([name, value]) => ({ name, value }));
-  const ageData = Object.entries(data.age_buckets).map(([name, value]) => ({ name, value }));
-  const provinceData = Object.entries(data.provinces)
-    .sort((a, b) => b[1] - a[1])
-    .map(([name, value]) => ({ name, value }));
+  const genderData = demographics.gender.map((b) => ({ name: b.label ?? "Unknown", value: b.count }));
+  const ageData = demographics.age_buckets.map((b) => ({ name: b.bucket ?? b.label ?? "Unknown", value: b.count }));
+  const provinceData = [...demographics.province]
+    .sort((a, b) => b.count - a.count)
+    .map((b) => ({ name: b.label ?? "Unknown", value: b.count }));
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" data-testid="card-demographics">
