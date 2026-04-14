@@ -1,0 +1,687 @@
+# TASK: Swap the Dig ETL HTTP proxy for direct cross-schema SQL reads
+
+## Who you are
+
+You're the same senior full-stack engineer who completed the Dig ETL integration in the previous session by following the prompt at `https://innovatr-dig-etl.vercel.app/docs/11-replit-agent-prompt`. That work is now in the repo: `dig_api_keys` table, `server/integrations/dig-etl.ts`, 9 proxy routes under `/api/member/dig/*`, React Query hooks at `client/src/lib/dig-api.ts`, components under `client/src/components/dig/`, the new `/portal/reports/:id` page, and the `RichStudyCard` branch in `TestPage.tsx`.
+
+Innovatr decided the Bearer-key + HTTP proxy approach is unnecessary friction. The dashboard and the ETL share the same Neon Postgres database. The dashboard already enforces tenant isolation via `req.user.companyId` from its session. Going through HTTP and Bearer auth to read a sibling schema in the same database is overkill.
+
+Your job: rip out the proxy implementation, replace it with direct SQL reads against the `dig.*` schema. Same routes at `/api/member/dig/*`, same JSON response shapes, same client code. **Only the server-side route handlers change.**
+
+## The new architecture in one diagram
+
+```
+Before (current):                           After (this task):
+─────────────────                           ──────────────────
+React → /api/member/dig/studies             React → /api/member/dig/studies
+       ↓                                           ↓
+Express requireAuth                         Express requireAuth
+       ↓                                           ↓
+storage.getDigApiKey(companyId)             db.execute(SELECT ... FROM dig.studies
+       ↓                                                WHERE company_id = $1)
+fetch("https://innovatr-dig-etl....         ↓
+  .vercel.app/api/dig/studies",             return JSON
+  { Authorization: Bearer ... })
+       ↓
+ETL backend authenticateApiKey
+       ↓
+SELECT ... FROM dig.studies WHERE
+  company_id = ctx.companyId
+       ↓
+return JSON ← over HTTP ← React
+```
+
+The hop from "Express requireAuth" to "SELECT" goes from network + Bearer + remote service to a single local database query. Everything before requireAuth and after the SELECT is unchanged.
+
+## Why this is safe
+
+The same things that made the proxy approach safe make the direct approach safe:
+
+- The dashboard's session enforces tenant isolation: every authenticated request has `req.user.companyId` set by `server/middleware.ts` from the session cookie hash → user lookup → company link
+- Every new SQL query in this task includes `WHERE company_id = $1` with that value
+- The `dig.*` schema's tables ALL carry a denormalised `company_id` column for exactly this reason
+- The dashboard never queries `dig.*` without a `company_id` filter — the prompt's done criteria block enforces this
+
+The Bearer key approach added one extra layer of "the ETL also checks". With direct reads, the dashboard is the sole enforcement point, but it's the same enforcement point that already gates every other `/api/member/*` route in the repo. If the existing tenant isolation is trustworthy, this is too.
+
+## What stays exactly the same
+
+- `client/src/lib/dig-api.ts` — all 9 React Query hooks. URLs unchanged.
+- `client/src/lib/dig-api.types.ts` — type definitions unchanged. Response shapes are the contract.
+- `client/src/components/dig/*` — all 5 components.
+- `client/src/pages/portal/TestPage.tsx` — the `RichStudyCard` branch.
+- `client/src/pages/portal/ReportDetailPage.tsx` — the new detail route.
+- `client/src/pages/portal/AdminClientReports.tsx` — admin tweaks (ingest status column, "Upload to ETL" link).
+- `client/src/App.tsx` — `/portal/reports/:id` route registration.
+- The route paths `/api/member/dig/*` — same URLs.
+- The JSON response shapes returned from each route — same contract.
+
+You should NOT need to touch anything in `client/`. If you find yourself editing a client file, stop and re-read the spec.
+
+## What gets deleted
+
+1. `server/integrations/dig-etl.ts` — entirely. The typed HTTP client is gone.
+2. `server/integrations/dig-etl.types.ts` if you created it as a separate file (otherwise the types live in `client/src/lib/dig-api.types.ts` — leave that one alone, the React side still uses it).
+3. `getDigApiKey`, `setDigApiKey`, `deleteDigApiKey` from `server/storage.ts`.
+4. `digApiKeys` table definition from `shared/schema.ts`.
+5. `public.dig_api_keys` table from the database via a `DROP TABLE IF EXISTS` migration.
+6. Any environment variables related to the ETL: `DIG_ETL_API_URL`, `DIG_ETL_API_KEY_FALLBACK`, the per-tenant key in Replit Secrets. Remove from Replit Secrets too — the names will be `DIG_COMPANY_ID` and `DIG_ETL_API_KEY` if they were set in the previous session.
+7. `scripts/seed-dig-key.ts` — no longer needed.
+
+## What gets rewritten
+
+The 9 route handlers in `server/routes.ts` under `/api/member/dig/*`. Each one currently looks roughly like:
+
+```ts
+app.get("/api/member/dig/studies", requireAuth, async (req, res) => {
+  const key = await resolveKey(req, res);
+  if (!key) return;
+  try {
+    const data = await digApi.listStudies(key);
+    res.json(data);
+  } catch (err) {
+    handleDigError(res, err);
+  }
+});
+```
+
+Each one needs to become roughly:
+
+```ts
+app.get("/api/member/dig/studies", requireAuth, async (req: AuthenticatedRequest, res) => {
+  const companyId = req.user?.companyId;
+  if (!companyId) {
+    return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
+  }
+  try {
+    const studies = await db.execute(sql`
+      SELECT id, title, source_study_name, public_client_report_id, ingest_status,
+             file_count, respondent_count, concept_count, created_at, updated_at
+      FROM dig.studies
+      WHERE company_id = ${companyId}
+      ORDER BY created_at DESC
+    `);
+    res.json({ studies });
+  } catch (err) {
+    console.error("dig.studies query failed:", err);
+    res.status(500).json({ error: { code: "INTERNAL", message: "Database error" } });
+  }
+});
+```
+
+The exact SQL for each of the 9 routes is below, copied verbatim from the upstream ETL implementation. **Do not derive your own — use these.** They've been live in production and tested by an integration suite that asserts cross-tenant reads return nothing.
+
+## The 9 SQL queries
+
+All queries use `db.execute(sql\`...\`)` with parameterised inputs. The `db` instance and `sql` tagged template come from `drizzle-orm`. Import them at the top of `server/routes.ts` if they're not already imported:
+
+```ts
+import { sql } from "drizzle-orm";
+// db is already imported in this file
+```
+
+### 1. `GET /api/member/dig/studies` — list studies for tenant
+
+```sql
+SELECT
+  id,
+  title,
+  source_study_name,
+  public_client_report_id,
+  ingest_status,
+  file_count,
+  respondent_count,
+  concept_count,
+  created_at,
+  updated_at
+FROM dig.studies
+WHERE company_id = ${companyId}
+ORDER BY created_at DESC
+```
+
+Wrap result as `{ studies: rows }`.
+
+### 2. `GET /api/member/dig/studies/:id` — single study metadata
+
+```sql
+SELECT
+  id,
+  title,
+  source_study_name,
+  public_client_report_id,
+  ingest_status,
+  file_count,
+  respondent_count,
+  concept_count,
+  error_message,
+  metadata,
+  created_at,
+  updated_at
+FROM dig.studies
+WHERE id = ${req.params.id}
+  AND company_id = ${companyId}
+LIMIT 1
+```
+
+If `rows.length === 0`, return 404 with `{ error: { code: "STUDY_NOT_FOUND", message: ... } }`. Otherwise wrap as `{ study: rows[0] }`.
+
+### 3. `GET /api/member/dig/studies/:id/concepts` — concept aggregates
+
+This one has post-processing — the SQL returns raw counts, the route handler computes percentages.
+
+```sql
+SELECT
+  c.id,
+  c.name,
+  c.concept_type,
+  c.brand,
+  c.product_name,
+  c.product_format,
+  c.segments,
+  COUNT(DISTINCT si.id)::int AS interest_sample,
+  COUNT(DISTINCT si.id) FILTER (WHERE si.interested)::int AS interested_yes,
+  (SELECT COUNT(*)::int FROM dig.screening_commitment sc
+    WHERE sc.won_concept_id = c.id) AS wins,
+  (SELECT COUNT(*)::int FROM dig.screening_commitment sc
+    WHERE sc.lost_concept_id = c.id) AS losses
+FROM dig.concepts c
+LEFT JOIN dig.screening_interest si ON si.concept_id = c.id
+WHERE c.dig_study_id = ${req.params.id}
+  AND c.company_id = ${companyId}
+GROUP BY c.id, c.name, c.concept_type, c.brand, c.product_name, c.product_format, c.segments
+ORDER BY c.name ASC
+```
+
+Then in JS, transform each row:
+
+```ts
+const concepts = rows.map((r: any) => {
+  const commitmentSample = r.wins + r.losses;
+  return {
+    id: r.id,
+    name: r.name,
+    concept_type: r.concept_type,
+    brand: r.brand,
+    product_name: r.product_name,
+    product_format: r.product_format,
+    segments: r.segments,
+    interest_sample: r.interest_sample,
+    commitment_sample: commitmentSample,
+    interest_rate: r.interest_sample > 0 ? (r.interested_yes / r.interest_sample) * 100 : null,
+    wins: r.wins,
+    losses: r.losses,
+    win_rate: commitmentSample > 0 ? (r.wins / commitmentSample) * 100 : null,
+  };
+});
+res.json({ concepts });
+```
+
+Before running this query, verify the study belongs to the tenant by running query #2 first and bailing with 404 if not found. Do this for queries #3 through #8.
+
+### 4. `GET /api/member/dig/studies/:id/concepts/:cid` — single concept detail
+
+This is the biggest one. Four sub-queries, all parameterised by `studyId` and `conceptId`. After verifying the study exists for the tenant (via #2), run:
+
+**Sub-query A — concept metadata:**
+
+```sql
+SELECT
+  c.id, c.name, c.concept_type, c.brand, c.product_name, c.product_format, c.segments,
+  (SELECT COUNT(*)::int FROM dig.evaluations e
+    WHERE e.concept_id = c.id AND e.dig_study_id = ${studyId}) AS evaluation_count
+FROM dig.concepts c
+WHERE c.id = ${conceptId}
+  AND c.dig_study_id = ${studyId}
+  AND c.company_id = ${companyId}
+LIMIT 1
+```
+
+If empty, return 404 with `CONCEPT_NOT_FOUND`. Otherwise continue with the next three sub-queries:
+
+**Sub-query B — emotions:**
+
+```sql
+SELECT
+  ee.emotion,
+  COUNT(*) FILTER (WHERE ee.selected)::int AS selected_count,
+  COUNT(*)::int AS total,
+  (COUNT(*) FILTER (WHERE ee.selected)::float / NULLIF(COUNT(*), 0) * 100)::float AS percentage
+FROM dig.eval_emotions ee
+JOIN dig.evaluations e ON e.id = ee.evaluation_id
+WHERE e.concept_id = ${conceptId}
+  AND e.dig_study_id = ${studyId}
+GROUP BY ee.emotion
+ORDER BY selected_count DESC, ee.emotion ASC
+```
+
+**Sub-query C — agreements:**
+
+```sql
+SELECT
+  ea.question_group,
+  ea.statement,
+  COUNT(*)::int AS total,
+  COUNT(*) FILTER (WHERE ea.response_code >= 4)::int AS agree_count,
+  (COUNT(*) FILTER (WHERE ea.response_code >= 4)::float / NULLIF(COUNT(*), 0) * 100)::float AS agree_percentage,
+  AVG(ea.response_code)::float AS avg_response_code
+FROM dig.eval_agreements ea
+JOIN dig.evaluations e ON e.id = ea.evaluation_id
+WHERE e.concept_id = ${conceptId}
+  AND e.dig_study_id = ${studyId}
+GROUP BY ea.question_group, ea.statement
+ORDER BY ea.question_group ASC, ea.statement ASC
+```
+
+**Sub-query D — themes for this concept (top 20):**
+
+```sql
+SELECT
+  theme_category,
+  SUM(mention_count)::int AS mentions,
+  SUM(CASE WHEN sentiment = 'positive' THEN mention_count ELSE 0 END)::int AS positive,
+  SUM(CASE WHEN sentiment = 'negative' THEN mention_count ELSE 0 END)::int AS negative,
+  SUM(CASE WHEN sentiment = 'neutral' THEN mention_count ELSE 0 END)::int AS neutral
+FROM dig.open_ended_themes
+WHERE concept_id = ${conceptId}
+  AND dig_study_id = ${studyId}
+GROUP BY theme_category
+ORDER BY mentions DESC
+LIMIT 20
+```
+
+**Sub-query E — sample verbatims (5 most recent non-empty):**
+
+```sql
+SELECT
+  r.external_id AS respondent_external_id,
+  e.clarity_label,
+  e.clarity_comment AS comment
+FROM dig.evaluations e
+JOIN dig.respondents r ON r.id = e.respondent_id
+WHERE e.concept_id = ${conceptId}
+  AND e.dig_study_id = ${studyId}
+  AND e.clarity_comment IS NOT NULL
+  AND e.clarity_comment <> ''
+ORDER BY e.created_at DESC
+LIMIT 5
+```
+
+Combine all five into one response object:
+
+```ts
+res.json({
+  concept: {
+    id: conceptRow.id,
+    name: conceptRow.name,
+    concept_type: conceptRow.concept_type,
+    brand: conceptRow.brand,
+    product_name: conceptRow.product_name,
+    product_format: conceptRow.product_format,
+    segments: conceptRow.segments,
+    evaluation_count: conceptRow.evaluation_count,
+    emotions: emotionRows,
+    agreements: agreementRows,
+    themes: themeRows,
+    sample_verbatims: verbatimRows,
+  },
+});
+```
+
+### 5. `GET /api/member/dig/studies/:id/concepts/:cid/heatmap` — click coordinates
+
+After verifying study (via #2) and concept (via the first sub-query of #4):
+
+```sql
+SELECT
+  h.evaluation_id,
+  r.external_id AS respondent_external_id,
+  h.question_type,
+  h.click_order,
+  h.x_coord,
+  h.y_coord,
+  h.comment,
+  h.time_between_ms
+FROM dig.eval_heatmap_clicks h
+JOIN dig.evaluations e ON e.id = h.evaluation_id
+JOIN dig.respondents r ON r.id = e.respondent_id
+WHERE e.concept_id = ${conceptId}
+  AND e.dig_study_id = ${studyId}
+ORDER BY h.evaluation_id, h.click_order
+```
+
+Wrap as `{ clicks: rows }`.
+
+### 6. `GET /api/member/dig/studies/:id/ranking` — tournament ranking
+
+This one reuses the SQL from #3 then sorts in JavaScript. After verifying the study:
+
+1. Run query #3 with the same SQL + post-processing transformation
+2. Sort the result:
+
+```ts
+const sorted = [...concepts].sort((a, b) => {
+  const aw = a.win_rate ?? -1;
+  const bw = b.win_rate ?? -1;
+  if (bw !== aw) return bw - aw;
+  if (b.wins !== a.wins) return b.wins - a.wins;
+  return a.name.localeCompare(b.name);
+});
+
+const ranking = sorted.map((c, i) => ({
+  rank: i + 1,
+  concept_id: c.id,
+  name: c.name,
+  wins: c.wins,
+  losses: c.losses,
+  win_rate: c.win_rate,
+  interest_rate: c.interest_rate,
+}));
+
+res.json({ ranking });
+```
+
+Extract a shared helper `loadConceptAggregates(studyId, companyId)` if you want to avoid duplication between routes #3 and #6 — they run the same SQL.
+
+### 7. `GET /api/member/dig/studies/:id/demographics` — gender/age/province
+
+Three queries plus post-processing for the age buckets:
+
+**Total:**
+
+```sql
+SELECT COUNT(*)::int AS total
+FROM dig.respondents
+WHERE dig_study_id = ${studyId} AND company_id = ${companyId}
+```
+
+**Gender:**
+
+```sql
+SELECT gender_label AS label, COUNT(*)::int AS count
+FROM dig.respondents
+WHERE dig_study_id = ${studyId} AND company_id = ${companyId}
+GROUP BY gender_label
+ORDER BY count DESC
+```
+
+**Province:**
+
+```sql
+SELECT province_label AS label, COUNT(*)::int AS count
+FROM dig.respondents
+WHERE dig_study_id = ${studyId} AND company_id = ${companyId}
+GROUP BY province_label
+ORDER BY count DESC
+```
+
+**Age (raw):**
+
+```sql
+SELECT age FROM dig.respondents
+WHERE dig_study_id = ${studyId} AND company_id = ${companyId}
+```
+
+Then in JS:
+
+```ts
+const AGE_BUCKETS = [
+  { bucket: "18-24", min: 18, max: 24 },
+  { bucket: "25-34", min: 25, max: 34 },
+  { bucket: "35-44", min: 35, max: 44 },
+  { bucket: "45-54", min: 45, max: 54 },
+  { bucket: "55-64", min: 55, max: 64 },
+  { bucket: "65+",   min: 65, max: 200 },
+];
+
+const total = totalRows[0]?.total ?? 0;
+const pct = (count: number) => total > 0 ? (count / total) * 100 : 0;
+
+const age_buckets = AGE_BUCKETS.map((b) => {
+  const count = ageRows.filter((r: any) => r.age !== null && r.age >= b.min && r.age <= b.max).length;
+  return { bucket: b.bucket, count, percentage: pct(count) };
+});
+
+res.json({
+  demographics: {
+    total_respondents: total,
+    gender: genderRows.map((r: any) => ({ label: r.label, count: r.count, percentage: pct(r.count) })),
+    age_buckets,
+    province: provinceRows.map((r: any) => ({ label: r.label, count: r.count, percentage: pct(r.count) })),
+  },
+});
+```
+
+### 8. `GET /api/member/dig/studies/:id/themes` — themes by concept
+
+After verifying the study:
+
+```sql
+SELECT
+  t.concept_id,
+  COALESCE(c.name, t.raw_concept_name) AS concept_name,
+  t.theme_category,
+  SUM(t.mention_count)::int AS mentions,
+  SUM(CASE WHEN t.sentiment = 'positive' THEN t.mention_count ELSE 0 END)::int AS positive,
+  SUM(CASE WHEN t.sentiment = 'negative' THEN t.mention_count ELSE 0 END)::int AS negative,
+  SUM(CASE WHEN t.sentiment = 'neutral' THEN t.mention_count ELSE 0 END)::int AS neutral
+FROM dig.open_ended_themes t
+LEFT JOIN dig.concepts c ON c.id = t.concept_id
+WHERE t.dig_study_id = ${studyId}
+  AND t.company_id = ${companyId}
+GROUP BY t.concept_id, c.name, t.raw_concept_name, t.theme_category
+ORDER BY mentions DESC, t.theme_category ASC
+```
+
+Wrap as `{ themes: rows }`.
+
+### 9. `POST /api/member/dig/search` — semantic verbatim search
+
+This is the only endpoint that's not just SQL — it needs to embed the user's query text via OpenAI before running the cosine-distance lookup. Two paths:
+
+**Recommended path: add OpenAI to the dashboard.**
+
+1. Add `OPENAI_API_KEY` to Replit Secrets (the same key Innovatr already uses for the ETL — ask Alroy/Hannah if you don't have it)
+2. `npm install openai` (this is the one new dependency the previous prompt forbade — it's allowed here because it replaces the deleted `server/integrations/dig-etl.ts` rather than adding to it)
+3. Create `server/integrations/dig-search.ts`:
+
+```ts
+import OpenAI from "openai";
+import { sql } from "drizzle-orm";
+import { db } from "../db";
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+export interface SearchRequest {
+  query: string;
+  study_id?: string;
+  concept_id?: string;
+  limit?: number;
+}
+
+export interface SearchResult {
+  content: string;
+  distance: number;
+  source_table: "evaluations" | "eval_heatmap_clicks";
+  source_id: string;
+  concept_id: string | null;
+}
+
+export async function digSearch(
+  body: SearchRequest,
+  companyId: string,
+): Promise<{ results: SearchResult[] }> {
+  if (!body.query || typeof body.query !== "string") {
+    throw new Error("query is required");
+  }
+  const limit = Math.min(Math.max(body.limit ?? 10, 1), 100);
+
+  // Embed the query
+  const embeddingResponse = await openai.embeddings.create({
+    model: "text-embedding-3-small",
+    input: body.query,
+  });
+  const queryVec = embeddingResponse.data[0].embedding;
+  const queryVecLiteral = `[${queryVec.join(",")}]`;
+
+  // Search
+  const studyFilter = body.study_id
+    ? sql`AND dig_study_id = ${body.study_id}`
+    : sql``;
+  const conceptFilter = body.concept_id
+    ? sql`AND concept_id = ${body.concept_id}`
+    : sql``;
+
+  const results = await db.execute(sql`
+    SELECT
+      content,
+      (embedding <=> ${queryVecLiteral}::vector) AS distance,
+      source_table,
+      source_id,
+      concept_id
+    FROM dig.text_embeddings
+    WHERE company_id = ${companyId}
+      ${studyFilter}
+      ${conceptFilter}
+    ORDER BY embedding <=> ${queryVecLiteral}::vector
+    LIMIT ${limit}
+  `);
+
+  return { results: results as SearchResult[] };
+}
+```
+
+4. Wire the route:
+
+```ts
+import { digSearch } from "./integrations/dig-search.js";
+
+app.post("/api/member/dig/search", requireAuth, async (req: AuthenticatedRequest, res) => {
+  const companyId = req.user?.companyId;
+  if (!companyId) {
+    return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
+  }
+  try {
+    const data = await digSearch(req.body, companyId);
+    res.json(data);
+  } catch (err) {
+    console.error("dig search failed:", err);
+    res.status(500).json({ error: { code: "INTERNAL", message: err instanceof Error ? err.message : "Search failed" } });
+  }
+});
+```
+
+**Fallback path: defer the search endpoint.**
+
+If you can't get an `OPENAI_API_KEY` right now, leave the route returning empty results with a clear error code:
+
+```ts
+app.post("/api/member/dig/search", requireAuth, async (req, res) => {
+  res.json({
+    results: [],
+    note: "Semantic search not yet enabled — set OPENAI_API_KEY on the dashboard server to enable.",
+  });
+});
+```
+
+The Ask tab in the UI will render but won't return matches. All other tabs work normally. This is fine for an MVP.
+
+## Phases
+
+### Phase 0 — Read these files first
+
+- `server/routes.ts` — find the existing 9 `/api/member/dig/*` routes that you're going to rewrite
+- `server/integrations/dig-etl.ts` — what you're deleting
+- `server/storage.ts` — find `getDigApiKey`/`setDigApiKey`/`deleteDigApiKey` (you're deleting them)
+- `shared/schema.ts` — find the `digApiKeys` table definition (you're deleting it)
+- `client/src/lib/dig-api.types.ts` — these are the types your new route handlers must produce. Treat them as a contract.
+- `server/middleware.ts` — confirm `requireAuth` populates `req.user.companyId`
+
+### Phase 1 — Drop the table
+
+1. Generate a new Drizzle migration that does `DROP TABLE IF EXISTS public.dig_api_keys CASCADE;`
+2. Run the migration against your dev database
+3. Verify with `psql ... -c "\d dig_api_keys"` — should report "Did not find any relation".
+
+### Phase 2 — Delete the schema, storage, integration files
+
+1. Remove the `digApiKeys` export and `pgTable("dig_api_keys", ...)` definition from `shared/schema.ts`
+2. Remove `getDigApiKey`, `setDigApiKey`, `deleteDigApiKey` from `server/storage.ts`
+3. Delete `server/integrations/dig-etl.ts` entirely
+4. Delete `scripts/seed-dig-key.ts` if it exists
+5. Search the codebase for any remaining imports of the deleted functions/types and remove or replace them
+6. `npm run build` — fix any TypeScript errors that surface
+
+### Phase 3 — Rewrite the 9 routes
+
+Open `server/routes.ts`. Find the 9 routes under `/api/member/dig/*`. For each one:
+
+1. Remove the `await resolveKey(req, res)` call and the `digApi.xxx(key, ...)` fetch
+2. Replace with the appropriate SQL query from the section above
+3. Wrap the result in the same JSON shape the old route returned (this is the contract — `client/src/lib/dig-api.ts` and the components depend on it)
+4. Keep the `requireAuth` middleware exactly as-is
+5. Keep error handling — log and return a 500 with the standard error envelope on any DB failure
+6. Add a study existence check (query #2's logic) before running queries #3 through #8 so that hitting a non-existent or other-tenant study id returns 404, not an empty array
+7. For `/concepts/:cid` and `/concepts/:cid/heatmap`, also check the concept exists for that study + tenant → 404 `CONCEPT_NOT_FOUND` if not
+
+Once you've finished one route, start the dev server and curl it to verify before moving to the next.
+
+### Phase 4 — Search endpoint
+
+Pick one of the two paths above (recommended: add OpenAI). If you go the OpenAI path, install the package, set the env var, create `server/integrations/dig-search.ts`, wire the route. If you defer, replace the search route with the empty-results stub.
+
+### Phase 5 — Smoke test
+
+1. Sign in to the dashboard as a user whose `companyId` matches a tenant that has ingested data on the ETL side
+2. Visit `/portal/test`
+3. Open DevTools → Network and confirm `/api/member/dig/studies` returns 200 with at least one study
+4. If there's a study, click "View full analysis →" → should load `/portal/reports/:id` with all 5 tabs populated
+5. Open the Concepts tab → pick a concept → emotions and agreement charts render
+6. Open the Demographics tab → gender pie + age bar + province bar all show real data
+7. Open the Themes tab → see grouped sentiment bars
+8. Open the Ask tab → if you wired OpenAI, type "fragrance" and submit → see ranked verbatims
+
+### Phase 6 — Cleanup
+
+1. Remove `DIG_ETL_API_URL`, `DIG_ETL_API_KEY_FALLBACK`, `DIG_COMPANY_ID`, `DIG_ETL_API_KEY` from Replit Secrets
+2. Delete `seed-dig-key.ts` if you didn't already
+3. `npm run build` — confirm clean type check
+4. Commit everything as one atomic commit per phase, conventional-commits style
+
+## Style + constraints
+
+- **Match the rest of `/api/member/*` style.** Look at the existing `client-reports` route for handler shape, error envelope conventions, and typing.
+- **TypeScript strict.** No new `any`. The SQL results need explicit row type interfaces.
+- **Tenant filter is non-negotiable.** Every SQL query in this task includes `WHERE company_id = $1` or filters via a JOIN that does. If you write a query without it, stop and re-check.
+- **Don't touch the client side.** If you find yourself editing `client/`, you're off-track.
+- **No new dependencies** except `openai` (only if you take the recommended search path).
+- **Commits per phase**, conventional-commits style, e.g. `refactor(dig): drop dig_api_keys table`, `refactor(dig): inline SQL queries in proxy routes`.
+
+## Done criteria
+
+You are done when all of these are true:
+
+- [ ] `public.dig_api_keys` table no longer exists in the database
+- [ ] `shared/schema.ts` has no `digApiKeys` export
+- [ ] `server/integrations/dig-etl.ts` deleted
+- [ ] `server/storage.ts` has no `getDigApiKey`/`setDigApiKey`/`deleteDigApiKey`
+- [ ] `scripts/seed-dig-key.ts` deleted
+- [ ] All 9 `/api/member/dig/*` routes use direct `db.execute(sql\`...\`)` queries against `dig.*`
+- [ ] Every SQL query includes `WHERE company_id = $1` (no exceptions)
+- [ ] `requireAuth` is still attached to every route
+- [ ] Study-existence check happens before any deeper query, returning 404 `STUDY_NOT_FOUND`
+- [ ] Concept-existence check happens before any concept-detail query, returning 404 `CONCEPT_NOT_FOUND`
+- [ ] Search endpoint either calls OpenAI directly OR returns the empty-results stub (your choice)
+- [ ] `npm run build` succeeds with a clean type check
+- [ ] No console errors when navigating to `/portal/test` or `/portal/reports/:id` as a real user
+- [ ] Replit Secrets no longer contain `DIG_*` keys
+- [ ] One commit per phase
+
+If any box is unchecked, you are not done.
+
+## Reference
+
+- Live API spec for the upstream ETL (the source of truth for the response shapes): `https://innovatr-dig-etl.vercel.app/docs/05-api-reference`
+- Original integration guide (now describes both approaches): `https://innovatr-dig-etl.vercel.app/docs/09-dashboard-integration`
+- Previous (proxy) prompt for context: `https://innovatr-dig-etl.vercel.app/docs/11-replit-agent-prompt`
+
+Start at Phase 0. Verify after every phase. Don't skip ahead.

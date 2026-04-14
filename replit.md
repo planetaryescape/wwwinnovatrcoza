@@ -48,6 +48,7 @@ Preferred communication style: Simple, everyday language.
     - **Test**: Launch a Brief wizard, Studies list, Research Assistant, Research AI, Team Chat.
     - **Act**: Gaps analysis, Next Steps, Planning Assistant, Insights Query AI, Team Chat.
 - **Other Sections**: Trends & Insights Library, Launch New Brief, Credits & Billing, Past Research Dashboard, Member Deals, Settings.
+- **Dig Research Integration**: Direct cross-schema SQL reads against `dig.*` PostgreSQL tables at `/api/member/dig/*` (9 routes). Tenant isolation enforced via `WHERE company_id = $companyId` on every query — no API keys needed. Tables queried: `dig.studies`, `dig.concepts`, `dig.evaluations`, `dig.eval_emotions`, `dig.eval_agreements`, `dig.eval_heatmap_clicks`, `dig.screening_interest`, `dig.screening_commitment`, `dig.open_ended_themes`, `dig.respondents`. Client hooks in `client/src/lib/dig-api.ts`. UI components in `client/src/components/dig/`. Search endpoint returns stub (needs OPENAI_API_KEY for semantic search).
 - **Admin Section**: Dedicated `/portal/admin` for ADMIN users, with tabs for Overview, Companies, Users, Orders, Briefs, Reports, Deals. Includes a "View-as-Company Mode" for admin impersonation.
 - **Design**: Dark violet sidebar/topbar, coral branding, cream background, distinct phase colors.
 

@@ -10,6 +10,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import PortalLayout from "./PortalLayout";
 import type { Company } from "@shared/schema";
+import { useIndustryGroups } from "@/hooks/useIndustryGroups";
+import { filterByIndustry } from "@/lib/industry-groups";
+import { ALL_SIGNALS, ALL_STRATEGIC_GAPS, ALL_NEXT_STEPS } from "@/lib/portal-content";
 
 /* ── Design tokens ──────────────────────────────────────── */
 const VDK        = "#1E1B3A";
@@ -98,6 +101,11 @@ export default function Dashboard() {
   const studiesDone  = userActivity?.studiesCompleted ?? (clientReports?.length ?? 0);
   const liveStudies  = userActivity?.liveStudies ?? 0;
 
+  const { industryGroups } = useIndustryGroups();
+  const signalCount = useMemo(() => filterByIndustry(ALL_SIGNALS, industryGroups).length, [industryGroups]);
+  const gapCount    = useMemo(() => filterByIndustry(ALL_STRATEGIC_GAPS, industryGroups).length, [industryGroups]);
+  const recsCount   = useMemo(() => filterByIndustry(ALL_NEXT_STEPS, industryGroups).length, [industryGroups]);
+
   const greeting = (() => {
     const h = new Date().getHours();
     return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
@@ -176,7 +184,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <JourneyCard
               num="1" tag="EXPLORE" question="What's happening?" subtitle="Trends & Insights · Sandbox · Market Signals"
-              stat="12 signals active" gradient={EXPLORE_GRADIENT} onClick={() => setLocation("/portal/explore")} testId="card-journey-explore"
+              stat={`${signalCount} signal${signalCount === 1 ? "" : "s"} active`} gradient={EXPLORE_GRADIENT} onClick={() => setLocation("/portal/explore")} testId="card-journey-explore"
             />
             <JourneyCard
               num="2" tag="TEST" question="Does my idea work?" subtitle="Projects Overview · Test24 · QA Results"
@@ -184,16 +192,16 @@ export default function Dashboard() {
             />
             <JourneyCard
               num="3" tag="ACT" question="What should I do?" subtitle="Gaps · Recommendations · Strategic Next Steps"
-              stat="4 recommendations" gradient={ACT_GRADIENT} onClick={() => setLocation("/portal/act")} testId="card-journey-act"
+              stat={`${recsCount} recommendation${recsCount === 1 ? "" : "s"}`} gradient={ACT_GRADIENT} onClick={() => setLocation("/portal/act")} testId="card-journey-act"
             />
           </div>
 
           {/* ── Stat cards with donut ── */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <DonutStatCard num={loadingAct ? null : 12}         label="Signals"         sub="Trends & Insights active"   highlight="+3 overnight"   cta="EXPLORE"   color={VIO}      onClick={() => setLocation("/portal/explore")} testId="stat-card-signals"          />
-            <DonutStatCard num={loadingAct ? null : liveStudies} label="Live Studies"    sub="In field now"               highlight="~ 67% complete" cta="TEST"      color={AMBER_DK} onClick={() => setLocation("/portal/test")}    testId="stat-card-live"            />
-            <DonutStatCard num={4}                               label="Recommendations" sub="Strategic actions ready"    highlight="~ 2 high priority" cta="ACT"   color={CORAL}    onClick={() => setLocation("/portal/act")}     testId="stat-card-recommendations"  />
-            <DonutStatCard num={loadingAct ? null : studiesDone} label="Studies Done"    sub="Complete this year"         highlight="+1 this month"  cta="PORTFOLIO" color="#8B5CF6"  onClick={() => setLocation("/portal/test")}    testId="stat-card-studies"         />
+            <DonutStatCard num={signalCount}                     label="Signals"         sub="Trends & Insights active"   highlight={`${signalCount} for your industry`} cta="EXPLORE"   color={VIO}      onClick={() => setLocation("/portal/explore")} testId="stat-card-signals"          />
+            <DonutStatCard num={loadingAct ? null : liveStudies} label="Live Studies"    sub="In field now"               highlight={liveStudies > 0 ? `${liveStudies} in progress` : "None right now"} cta="TEST"      color={AMBER_DK} onClick={() => setLocation("/portal/test")}    testId="stat-card-live"            />
+            <DonutStatCard num={recsCount}                       label="Recommendations" sub="Strategic actions ready"     highlight={`${gapCount} gap${gapCount === 1 ? "" : "s"} identified`} cta="ACT"   color={CORAL}    onClick={() => setLocation("/portal/act")}     testId="stat-card-recommendations"  />
+            <DonutStatCard num={loadingAct ? null : studiesDone} label="Studies Done"    sub="Complete this year"         highlight={studiesDone > 0 ? `${studiesDone} completed` : "Launch your first"} cta="PORTFOLIO" color="#8B5CF6"  onClick={() => setLocation("/portal/test")}    testId="stat-card-studies"         />
           </div>
 
           {/* ── Phase preview feed ── */}
@@ -203,7 +211,7 @@ export default function Dashboard() {
               items={[
                 { dotColor: VIO,     text: "Nootropic beverages +41% search intent",    sub: "25–34 urban cohort · Detected overnight · High relevance", chip: { label: "Trend",   bg: VIO_LT,    color: VIO     } },
                 { dotColor: SUCCESS, text: "Functional Beverages 2025 — new report",    sub: "Innovatr Inside · GROWTH+ · 3 min read",                  chip: { label: "New",     bg: SUCCESS_LT, color: SUCCESS } },
-                { dotColor: N400,    text: "12 active market signals across categories", sub: "Food & Bev · Beauty · FMCG",                              chip: { label: "Signals", bg: VIO_LT,    color: VIO     } },
+                { dotColor: N400,    text: `${signalCount} active market signals across categories`, sub: "Food & Bev · Beauty · FMCG",                              chip: { label: "Signals", bg: VIO_LT,    color: VIO     } },
               ]}
             />
             <PhasePreviewCard
@@ -227,7 +235,7 @@ export default function Dashboard() {
               items={[
                 { dotColor: CORAL,   text: "Energy Drink — autonomous narrative r…",      sub: "72% purchase intent · 3 strategic gaps identified",  chip: { label: "Action", bg: CORAL_LT,   color: CORAL    } },
                 { dotColor: AMBER_DK,text: "Commitment gap widening — 28pt belo…",         sub: "Recommend packaging/pricing bridge study",            chip: { label: "Watch",  bg: AMBER_LT,  color: AMBER_DK } },
-                { dotColor: SUCCESS, text: "4 strategic recommendations available",         sub: "2 high priority · 2 medium priority",                 chip: { label: "Ready",  bg: SUCCESS_LT, color: SUCCESS  } },
+                { dotColor: SUCCESS, text: `${recsCount} strategic recommendations available`,  sub: `${gapCount} gaps · ${recsCount} next steps`,          chip: { label: "Ready",  bg: SUCCESS_LT, color: SUCCESS  } },
               ]}
             />
           </div>

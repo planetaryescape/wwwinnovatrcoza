@@ -13,6 +13,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ClientReport } from "@shared/schema";
+import { useDigStudies, useDigRanking } from "@/lib/dig-api";
+import type { DigStudy, DigRanking } from "@/lib/dig-api.types";
+import {
+  BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip, ResponsiveContainer, Legend as ReLegend,
+} from "recharts";
 
 /* ── Design System tokens ─────────────────────────────── */
 const VDK      = "#1E1B3A";
@@ -228,6 +233,53 @@ function buildAssistantData(r: ClientReport) {
   };
 }
 
+function RankingMiniChart({ studyId }: { studyId: string }) {
+  const { data, isLoading } = useDigRanking(studyId);
+
+  if (isLoading) {
+    return (
+      <div className="px-5 py-3" style={{ borderTop: `1px solid ${N200}` }}>
+        <Skeleton className="h-32 w-full" />
+      </div>
+    );
+  }
+
+  if (!data || data.concepts.length === 0) {
+    return (
+      <div className="px-5 py-3" style={{ borderTop: `1px solid ${N200}` }}>
+        <div className="text-xs" style={{ color: N500 }}>No ranking data available yet.</div>
+      </div>
+    );
+  }
+
+  const sorted = [...data.concepts].sort((a, b) => a.rank - b.rank).slice(0, 5);
+  const chartData = sorted.map((c) => ({
+    name: c.label.length > 15 ? c.label.slice(0, 13) + "…" : c.label,
+    idea: c.idea_score,
+    interest: c.interest_score,
+    commitment: c.commitment_score,
+  }));
+
+  return (
+    <div className="px-5 py-3" style={{ borderTop: `1px solid ${N200}` }} data-testid="ranking-mini-chart">
+      <div className="text-[10px] font-bold tracking-widest uppercase mb-2" style={{ color: VIO }}>Concept Ranking</div>
+      <div style={{ height: Math.max(120, sorted.length * 36) }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <ReBarChart data={chartData} layout="vertical" margin={{ left: 0, right: 10 }}>
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+            <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
+            <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 10 }} />
+            <ReTooltip formatter={(v: number, name: string) => [`${v}%`, name.charAt(0).toUpperCase() + name.slice(1)]} />
+            <Bar dataKey="idea" name="Idea" fill="#3A2FBF" barSize={8} radius={[0, 3, 3, 0]} />
+            <Bar dataKey="interest" name="Interest" fill="#3B82F6" barSize={8} radius={[0, 3, 3, 0]} />
+            <Bar dataKey="commitment" name="Commit" fill="#2A9E5C" barSize={8} radius={[0, 3, 3, 0]} />
+          </ReBarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
 export default function TestPage() {
   const [, setLocation]           = useLocation();
   const isMobile = useIsMobile();
@@ -273,6 +325,18 @@ export default function TestPage() {
     queryKey: ["/api/member/activity", user?.id],
     enabled: !!user,
   });
+
+  const { data: digStudies = [] } = useDigStudies(!!user);
+
+  const digStudyMap = useMemo(() => {
+    const m = new Map<string, DigStudy>();
+    for (const s of digStudies) {
+      if (s.public_client_report_id) {
+        m.set(s.public_client_report_id, s);
+      }
+    }
+    return m;
+  }, [digStudies]);
 
   /* Map real ClientReports to rich study card format */
   const mappedStudies = useMemo(
@@ -949,9 +1013,74 @@ export default function TestPage() {
 
                 {/* Real client study cards */}
                 {!isLoadingStudies && mappedStudies.map(study => {
+                  const digMatch = digStudyMap.get(study.id);
+                  const digStatus = digMatch?.status?.toLowerCase();
+                  const hasDigData = digMatch && (digStatus === "ready" || digStatus === "parsed");
+
                   const typeBadge = study.studyType === "PRO"
                     ? { label: "PRO",   bg: VIO_LT,  color: VIO    }
                     : { label: "BASIC", bg: CYAN_LT, color: CYAN_DK };
+
+                  if (hasDigData && digMatch) {
+                    return (
+                      <div key={study.id} className="portal-card-lg overflow-hidden mb-5" data-testid={`study-card-dig-${study.id}`}>
+                        <div className="flex items-start justify-between gap-3 px-5 py-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#EAE8FF", border: "1px solid rgba(58,47,191,0.2)" }}>
+                              <BarChart2 className="w-5 h-5" style={{ color: VIO }} />
+                            </div>
+                            <div>
+                              <div className="text-base font-semibold leading-snug" style={{ color: VDK }}>{study.title}</div>
+                              <div className="text-xs mt-0.5" style={{ color: N500 }}>
+                                {digMatch.concept_count} concepts · {digMatch.respondent_count} respondents · Dig Analysis
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            <span className="text-[10px] font-bold px-2 py-0.5" style={{ background: typeBadge.bg, color: typeBadge.color, borderRadius: 9999 }}>{typeBadge.label}</span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 flex items-center gap-1" style={{ background: "#EAE8FF", color: VIO, borderRadius: 9999 }}>
+                              <BarChart2 className="w-2.5 h-2.5" /> Dig Analysis
+                            </span>
+                          </div>
+                        </div>
+
+                        <RankingMiniChart studyId={digMatch.id} />
+
+                        <div className="px-5 py-3 flex gap-2" style={{ borderTop: `1px solid ${N200}`, background: "#F5F5F5" }}>
+                          <button
+                            onClick={() => setLocation(`/portal/reports/${study.id}`)}
+                            className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg flex items-center gap-1.5"
+                            style={{ background: VIO, borderRadius: 8 }}
+                            data-testid={`button-view-analysis-${study.id}`}
+                          >
+                            <BarChart2 className="w-3 h-3" /> View full analysis
+                          </button>
+                          <button
+                            onClick={() => { setActiveTab("assistant"); setSelectedAssistStudy(study.id); }}
+                            className="text-xs font-semibold px-4 py-1.5 rounded-lg flex items-center gap-1.5"
+                            style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}
+                            data-testid={`button-act-study-${study.id}`}
+                          >
+                            <Sparkles className="w-3 h-3" /> Analyse in Act
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (study.pdfUrl) {
+                                window.open(study.pdfUrl, "_blank");
+                              } else {
+                                toast({ title: "PDF Report", description: "Your full study report is delivered via email." });
+                              }
+                            }}
+                            className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                            style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}
+                            data-testid={`button-download-pdf-${study.id}`}
+                          >
+                            <ChevronRight className="w-3 h-3" /> Download PDF
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }
 
                   return (
                     <div key={study.id} className="portal-card-lg overflow-hidden mb-5" data-testid={`study-card-${study.id}`}>
@@ -1042,9 +1171,8 @@ export default function TestPage() {
                         </button>
                         <button
                           onClick={() => {
-                            const url = (study as any).pdfUrl || (study as any).reportUrl;
-                            if (url) {
-                              window.open(url, "_blank");
+                            if (study.pdfUrl) {
+                              window.open(study.pdfUrl, "_blank");
                             } else {
                               toast({ title: "PDF Report", description: "Your full study report is delivered via email. Contact your Innovatr account manager to access the interactive dashboard." });
                             }

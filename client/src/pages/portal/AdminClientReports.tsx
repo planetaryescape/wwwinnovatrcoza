@@ -55,6 +55,8 @@ import {
   ArchiveRestore
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useDigStudies } from "@/lib/dig-api";
+import type { DigStudy } from "@/lib/dig-api.types";
 
 interface ClientReport {
   id: string;
@@ -93,8 +95,17 @@ interface Company {
   name: string;
 }
 
+const DIG_ETL_INGEST_URL = import.meta.env.VITE_DIG_ETL_INGEST_URL || "https://innovatr-dig-etl.vercel.app";
+
 export default function AdminClientReports() {
   const { toast } = useToast();
+  const { data: digStudies = [] } = useDigStudies(true);
+  const digStudyByReportId = new Map<string, DigStudy>();
+  for (const s of digStudies) {
+    if (s.public_client_report_id) {
+      digStudyByReportId.set(s.public_client_report_id, s);
+    }
+  }
   const [reports, setReports] = useState<ClientReport[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [filteredReports, setFilteredReports] = useState<ClientReport[]>([]);
@@ -510,6 +521,7 @@ export default function AdminClientReports() {
                 <TableRow>
                   <TableHead>Title</TableHead>
                   <TableHead>Company</TableHead>
+                  <TableHead>Dig Status</TableHead>
                   <TableHead>Tags</TableHead>
                   <TableHead>Uploaded</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -518,7 +530,7 @@ export default function AdminClientReports() {
               <TableBody>
                 {filteredReports.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                       No reports found
                     </TableCell>
                   </TableRow>
@@ -543,6 +555,23 @@ export default function AdminClientReports() {
                           <Building2 className="w-4 h-4 text-muted-foreground" />
                           <span className="text-sm">{getCompanyName(report.companyId)}</span>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        {(() => {
+                          const dig = digStudyByReportId.get(report.id);
+                          if (!dig) return <span className="text-xs text-muted-foreground" data-testid={`text-dig-status-${report.id}`}>—</span>;
+                          const st = dig.status?.toLowerCase();
+                          const color = st === "ready" || st === "parsed"
+                            ? "text-green-600"
+                            : st === "error"
+                            ? "text-red-500"
+                            : "text-yellow-600";
+                          return (
+                            <Badge variant="outline" className={`text-xs ${color}`} data-testid={`badge-dig-status-${report.id}`}>
+                              {dig.status}
+                            </Badge>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
@@ -576,6 +605,17 @@ export default function AdminClientReports() {
                               <Download className="w-4 h-4" />
                             </Button>
                           )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              window.open(`${DIG_ETL_INGEST_URL}/ingest?reportId=${report.id}`, "_blank");
+                            }}
+                            title="Upload CSVs to ETL"
+                            data-testid={`button-upload-etl-${report.id}`}
+                          >
+                            <Upload className="w-4 h-4" />
+                          </Button>
                           <Button 
                             variant="ghost" 
                             size="icon"

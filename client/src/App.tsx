@@ -45,6 +45,7 @@ import CaseStudyDetail from "@/pages/CaseStudyDetail";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfUse from "@/pages/TermsOfUse";
 import CookiePolicy from "@/pages/CookiePolicy";
+import ReportDetailPage from "@/pages/portal/ReportDetailPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -99,6 +100,7 @@ function Router() {
           <Route path="/portal/health" component={HealthPage} />
           <Route path="/portal/research" component={PastResearch} />
           <Route path="/portal/deals" component={MemberDeals} />
+          <Route path="/portal/reports/:id" component={ReportDetailPage} />
           <Route path="/portal/admin" component={AdminPortal} />
           <Route path="/portal/admin/companies/:companyId" component={AdminCompanyDetail} />
           <Route path="/portal/settings" component={Settings} />

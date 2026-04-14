@@ -252,6 +252,7 @@ export interface IStorage {
   // Sandbox Runs
   createSandboxRun(run: InsertSandboxRun): Promise<SandboxRun>;
   getSandboxRunsByCompanyId(companyId: string): Promise<SandboxRun[]>;
+
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2159,6 +2160,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(sandboxRuns.createdAt))
       .limit(20);
   }
+
 }
 
 const databaseStorage = new DatabaseStorage();
