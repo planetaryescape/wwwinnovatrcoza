@@ -22,7 +22,7 @@ export function log(message: string, source = "express") {
 const CANONICAL_BASE = "https://www.innovatr.co.za";
 
 const PUBLIC_ROUTES: Record<string, string> = {
-  "/": CANONICAL_BASE + "/",
+  "/": CANONICAL_BASE,
   "/research": CANONICAL_BASE + "/research",
   "/consult": CANONICAL_BASE + "/consult",
   "/tools": CANONICAL_BASE + "/tools",
