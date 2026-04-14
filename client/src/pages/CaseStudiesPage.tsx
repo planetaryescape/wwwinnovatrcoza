@@ -594,6 +594,7 @@ function CaseStudyCard({
 function HeroSection() {
   return (
     <section
+      aria-label="Hero"
       style={{
         background: BRAND.offWhite,
         padding: "140px 32px 56px",
@@ -723,7 +724,7 @@ function CaseStudiesBody() {
   return (
     <>
       {/* Header — white background for contrast */}
-      <section style={{ background: "#fff", borderBottom: `1px solid ${BRAND.dark}08` }}>
+      <section aria-label="Filter controls" style={{ background: "#fff", borderBottom: `1px solid ${BRAND.dark}08` }}>
         <div
           style={{
             maxWidth: 1200,
@@ -792,7 +793,7 @@ function CaseStudiesBody() {
       </section>
 
       {/* Cards — white background */}
-      <section id="case-studies" style={{ background: "#fff", paddingBottom: 80 }}>
+      <section id="case-studies" aria-label="Case study list" style={{ background: "#fff", paddingBottom: 80 }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 80px 0" }}>
           {filtered.length === 0 ? (
             <div
@@ -820,6 +821,7 @@ function CaseStudiesBody() {
 function CTASection() {
   return (
     <section
+      aria-label="Call to action"
       style={{
         background: "#fff",
         borderTop: `1px solid ${BRAND.dark}08`,

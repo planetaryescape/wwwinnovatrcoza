@@ -1220,6 +1220,7 @@ export default function ResearchTools() {
       <PublicNavbar activePage="Our Tools" />
       <main>
       <section
+        aria-label="Hero"
         style={{
           background: "#fff",
           paddingTop: 140,
@@ -1341,7 +1342,7 @@ export default function ResearchTools() {
         </div>
       </section>
 
-      <section id="tools-section" style={{ padding: "56px 0 64px", borderTop: `1px solid ${BRAND.dark}0D` }}>
+      <section id="tools-section" aria-label="Research tools" style={{ padding: "56px 0 64px", borderTop: `1px solid ${BRAND.dark}0D` }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
           <div style={{ textAlign: "center" as const, marginBottom: 48 }}>
             <span
@@ -1404,7 +1405,7 @@ export default function ResearchTools() {
         </div>
       </section>
 
-      <section style={{ padding: "48px 0 64px", background: BRAND.offWhite, borderTop: `1px solid ${BRAND.dark}0D` }}>
+      <section aria-label="How it works" style={{ padding: "48px 0 64px", background: BRAND.offWhite, borderTop: `1px solid ${BRAND.dark}0D` }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <div style={{ textAlign: "center" as const, marginBottom: 48, padding: "0 32px" }}>
             <span
@@ -1454,6 +1455,7 @@ export default function ResearchTools() {
       </section>
 
       <section
+        aria-label="Platform highlights"
         style={{
           padding: "48px 0 64px",
           background: BRAND.offWhite,

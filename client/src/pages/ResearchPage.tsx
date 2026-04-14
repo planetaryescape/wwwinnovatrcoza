@@ -167,7 +167,7 @@ function useScrolled(threshold = 40) {
 
 function HeroSection() {
   return (
-    <section style={{
+    <section aria-label="Hero" style={{
       background: "#fff",
       padding: "120px 32px 100px",
       position: "relative",
@@ -289,7 +289,7 @@ function HeroSection() {
 
 function OfferingsSection() {
   return (
-    <section id="offerings" style={{
+    <section id="offerings" aria-label="Our offerings" style={{
       background: BRAND.offWhite,
       borderTop: `1px solid ${BRAND.dark}0D`,
       padding: "100px 32px",
@@ -525,7 +525,7 @@ function OfferingsSection() {
 
 function MembershipSection() {
   return (
-    <section id="membership" style={{
+    <section id="membership" aria-label="Membership" style={{
       background: BRAND.cyan,
       padding: "100px 32px",
       position: "relative",
@@ -775,7 +775,7 @@ function NewsletterSection() {
   const [loginOpen, setLoginOpen] = useState(false);
 
   return (
-    <section style={{ padding: "88px 0", background: "#fff", borderTop: `1px solid ${BRAND.dark}08` }}>
+    <section aria-label="Newsletter signup" style={{ padding: "88px 0", background: "#fff", borderTop: `1px solid ${BRAND.dark}08` }}>
       <div style={{ maxWidth: 580, margin: "0 auto", textAlign: "center" as const, padding: "0 24px" }}>
         <div style={{ width: 64, height: 64, borderRadius: "50%", background: `${BRAND.violet}12`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 28px" }}>
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={BRAND.violet} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

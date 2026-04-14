@@ -258,7 +258,7 @@ function SocialProofVisual() {
 
 function HeroSection({ onPlayVideo }: { onPlayVideo: () => void }) {
   return (
-    <section style={{
+    <section aria-label="Hero" style={{
       minHeight: "100dvh",
       background: BRAND.offWhite,
       display: "flex",
@@ -549,7 +549,7 @@ function BrandStrip() {
   const hoverColors = [BRAND.violet, BRAND.coral, BRAND.cyan, BRAND.amber];
 
   return (
-    <section style={{
+    <section aria-label="Trusted brands" style={{
       background: BRAND.offWhite,
       borderTop: `1px solid ${BRAND.violet}10`,
       borderBottom: `1px solid ${BRAND.violet}10`,
@@ -671,7 +671,7 @@ function StatsSection() {
   }, []);
 
   return (
-    <section ref={ref} style={{
+    <section aria-label="Key insights" ref={ref} style={{
       background: BRAND.offWhite,
       padding: "80px 32px",
     }}>
@@ -755,7 +755,7 @@ function InsightsSection() {
   ];
 
   return (
-    <section id="services" style={{
+    <section id="services" aria-label="Our services" style={{
       background: `linear-gradient(180deg, ${BRAND.offWhite} 0%, #F0EFE9 100%)`,
       padding: "100px 32px",
     }}>
@@ -979,7 +979,7 @@ function PricingSection() {
   const currentPlans = plans[activeTab];
 
   return (
-    <section id="pricing" style={{
+    <section id="pricing" aria-label="Pricing plans" style={{
       background: BRAND.offWhite,
       padding: "60px 32px",
     }}>
@@ -1290,7 +1290,7 @@ const homeMembershipPlans = [
 
 function HomeMembershipSection() {
   return (
-    <section id="membership" style={{ background: BRAND.coral, padding: "60px 32px", position: "relative", overflow: "hidden" }}>
+    <section id="membership" aria-label="Membership" style={{ background: BRAND.coral, padding: "60px 32px", position: "relative", overflow: "hidden" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.85)", letterSpacing: "0.14em", textTransform: "uppercase" as const, display: "block", marginBottom: 8 }}>
@@ -1364,7 +1364,7 @@ function NewsletterSection() {
   return (
     <>
       <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} defaultSignup={false} />
-      <section style={{ padding: "48px 0", background: "#fff", borderTop: `1px solid ${BRAND.dark}08` }}>
+      <section aria-label="Newsletter signup" style={{ padding: "48px 0", background: "#fff", borderTop: `1px solid ${BRAND.dark}08` }}>
         <div style={{ maxWidth: 580, margin: "0 auto", textAlign: "center" as const, padding: "0 24px" }}>
           <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.14em", color: BRAND.coral }}>
             Subscribe to Trends and Insights

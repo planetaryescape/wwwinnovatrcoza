@@ -234,9 +234,9 @@ export default function ConsultPillarPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white">
       <Navigation />
-      
+      <main>
       {/* Consult Sub-Navigation */}
-      <div className="sticky top-16 z-40 bg-[#0a0a0f]/95 backdrop-blur-sm border-b border-gray-800">
+      <nav aria-label="Consult sub-navigation" className="sticky top-16 z-40 bg-[#0a0a0f]/95 backdrop-blur-sm border-b border-gray-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-6 py-3 overflow-x-auto scrollbar-hide">
             <Link href="/consult">
@@ -259,10 +259,10 @@ export default function ConsultPillarPage() {
             ))}
           </div>
         </div>
-      </div>
+      </nav>
 
       {/* Hero Section */}
-      <section className="relative py-24 overflow-hidden">
+      <section aria-label="Hero" className="relative py-24 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] to-[#0d0d18]" />
         <div 
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-20 blur-[120px]"
@@ -300,7 +300,7 @@ export default function ConsultPillarPage() {
       </section>
 
       {/* Best For Section */}
-      <section className="py-16 bg-[#0d0d18]">
+      <section aria-label="Best for when" className="py-16 bg-[#0d0d18]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-serif font-bold mb-8 text-white">Best for when...</h2>
           <div className="grid md:grid-cols-2 gap-4">
@@ -321,7 +321,7 @@ export default function ConsultPillarPage() {
       </section>
 
       {/* Services Section */}
-      <section className="py-16 bg-[#0a0a0f]">
+      <section aria-label="Services" className="py-16 bg-[#0a0a0f]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-serif font-bold mb-8 text-white">Services</h2>
           <div className="space-y-8">
@@ -355,7 +355,7 @@ export default function ConsultPillarPage() {
       </section>
 
       {/* How We Work Section */}
-      <section className="py-16 bg-[#0d0d18]">
+      <section aria-label="How we work" className="py-16 bg-[#0d0d18]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-serif font-bold mb-8 text-white">How we work</h2>
           <div className="flex flex-wrap items-center justify-center gap-4">
@@ -377,7 +377,7 @@ export default function ConsultPillarPage() {
       </section>
 
       {/* Case Study Section */}
-      <section className="py-16 bg-[#0a0a0f]">
+      <section aria-label="Case study" className="py-16 bg-[#0a0a0f]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-serif font-bold mb-8 text-white">Case study</h2>
           <Card className="bg-[#12121a] border-gray-800 overflow-hidden">
@@ -408,7 +408,7 @@ export default function ConsultPillarPage() {
       </section>
 
       {/* Navigation between pillars */}
-      <section className="py-12 bg-[#0d0d18] border-t border-gray-800">
+      <section aria-label="Pillar navigation" className="py-12 bg-[#0d0d18] border-t border-gray-800">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             {prevPillar ? (
@@ -436,7 +436,7 @@ export default function ConsultPillarPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-16 bg-[#0a0a0f]">
+      <section aria-label="Call to action" className="py-16 bg-[#0a0a0f]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl sm:text-3xl font-serif font-bold mb-4">
             Ready to get started?
@@ -455,7 +455,7 @@ export default function ConsultPillarPage() {
           </Button>
         </div>
       </section>
-
+      </main>
       <Footer />
     </div>
   );

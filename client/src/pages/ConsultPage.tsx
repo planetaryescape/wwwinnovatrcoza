@@ -70,7 +70,7 @@ function useScrolled(threshold = 40) {
 
 function HeroSection() {
   return (
-    <section style={{
+    <section aria-label="Hero" style={{
       background: BRAND.offWhite,
       paddingTop: 140,
       paddingBottom: 100,
@@ -233,7 +233,7 @@ function ProblemSolutionSection() {
   ];
 
   return (
-    <section style={{
+    <section aria-label="Our approach" style={{
       background: "#fff",
       padding: "60px 32px 100px",
     }}>
@@ -365,7 +365,7 @@ function ProblemSolutionSection() {
 
 function ProcessSection() {
   return (
-    <section id="process" style={{
+    <section id="process" aria-label="Our process" style={{
       background: BRAND.amber,
       padding: "80px 32px 100px",
     }}>
@@ -506,7 +506,7 @@ function ProcessSection() {
 
 function CTASection() {
   return (
-    <section id="contact" style={{
+    <section id="contact" aria-label="Get in touch" style={{
       background: "#fff",
       borderTop: `1px solid ${BRAND.dark}08`,
       padding: "96px 32px",

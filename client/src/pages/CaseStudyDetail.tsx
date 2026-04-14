@@ -189,7 +189,7 @@ export default function CaseStudyDetail() {
         </div>
 
         {/* Hero Section */}
-        <section style={{ padding: "32px 0 64px" }}>
+        <section aria-label="Case study overview" style={{ padding: "32px 0 64px" }}>
           <div className="ir-hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 56, alignItems: "start" }}>
             {/* Left - GIF */}
             <motion.div
@@ -339,7 +339,7 @@ export default function CaseStudyDetail() {
         </section>
 
         {/* Content sections */}
-        <section style={{ paddingBottom: 64 }}>
+        <section aria-label="Research details" style={{ paddingBottom: 64 }}>
           <div style={{ maxWidth: 860, margin: "0 auto", display: "flex", flexDirection: "column", gap: 32 }}>
 
             {/* The Problem */}
@@ -417,7 +417,7 @@ export default function CaseStudyDetail() {
         </section>
 
         {/* CTA Section */}
-        <section style={{ paddingBottom: 80 }}>
+        <section aria-label="Call to action" style={{ paddingBottom: 80 }}>
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
