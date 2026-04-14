@@ -1,0 +1,1260 @@
+# TASK: Integrate the Innovatr Dig ETL read API into this dashboard
+
+## Who you are
+
+You're a senior full-stack engineer working inside the **Innovatr dashboard repo** — a Replit-hosted TypeScript monorepo with an Express backend, a Vite + React frontend, Drizzle ORM against a Neon Postgres, Wouter client-side routing, TanStack Query v5 for data fetching, shadcn/ui components, and Recharts already installed but currently unused in the report views.
+
+You know this codebase. You don't need to ask clarifying questions — this prompt tells you every file path, every fetch call, and every constraint. When you're unsure about a detail, read the file first, then proceed.
+
+## Your task in one sentence
+
+Wire up a thin **server-side proxy** layer so the dashboard can consume the Innovatr Dig ETL's read API (`https://innovatr-dig-etl.vercel.app/api/dig/*`), and surface the resulting research data in three places: the member-facing `TestPage` card grid, a new `/portal/reports/:id` detail page with five tabs, and the admin `AdminClientReports` table.
+
+When you're done, a member viewing a study in the portal will see a real, data-driven breakdown of all 12 concepts, the full emotion + agreement charts, the demographic mix of the 100 respondents, an Upsiide-classified theme summary, and a natural-language search box over all the verbatim comments — replacing the current single hand-entered "top idea" summary.
+
+## Architecture: server-side proxy with a single shared service token
+
+The Innovatr Dig ETL is a separate Next.js app that ingests raw Upsiide CSV bundles for a research study and writes the parsed data into 17 tables in a sibling `dig.*` schema inside the same Neon Postgres database. You consume that data through the ETL's HTTPS API, not by reading the tables directly.
+
+The dashboard's Express server adds 9 proxy routes under `/api/member/dig/*`. Each proxy route:
+
+1. Runs the existing `requireAuth` middleware (reuses the dashboard's session-cookie auth — no new login needed)
+2. Reads `req.user.companyId` from the authenticated session
+3. Makes an HTTPS call to the corresponding `/api/dig/*` endpoint on the ETL
+4. Sends two headers on every outbound call:
+   - `Authorization: Service <DIG_ETL_SERVICE_TOKEN>` — a shared secret proving the caller is trusted
+   - `X-Company-Id: <req.user.companyId>` — the tenant whose data to return
+5. Forwards the JSON response back to the React client unchanged
+
+The ETL's auth middleware accepts the service-token header as an alternative to the per-tenant Bearer keys it still supports for third-party consumers. When it sees a valid service token, it trusts the `X-Company-Id` header and runs every `dig.*` query with that tenant filter. **You do not need a per-tenant Bearer key. You do not need a `dig_api_keys` table. You do not need to seed anything.**
+
+This works because the dashboard and the ETL are the same team's apps and trust each other via network + shared secret. Tenant isolation still happens — it's just asserted by the dashboard based on the authenticated session, and the ETL takes the dashboard's word for it because the service token proves the caller is legitimate.
+
+**Three rules that don't bend:**
+
+1. `req.user.companyId` is the only source of truth for the calling tenant. Never accept `company_id` from a request body, query parameter, or arbitrary header on your own routes.
+2. The `DIG_ETL_SERVICE_TOKEN` lives only in server-side env. Never expose it to the React client, never log it, never include it in responses.
+3. Read-only. The dashboard calls `GET` on 8 endpoints and `POST /search` (which is also read-only). Don't add POST/PATCH/DELETE proxy calls.
+
+## Handoff credentials
+
+Replace this placeholder inside this prompt before you start. The ETL team will give you the real value out-of-band (1Password, signed message).
+
+```
+DIG_ETL_SERVICE_TOKEN=<<DIG_ETL_SERVICE_TOKEN>>
+```
+
+Add it to Replit Secrets as `DIG_ETL_SERVICE_TOKEN` when you hit Phase 1. If it's still the literal placeholder when you begin, stop and ask the human reading over your shoulder for the value. Don't invent it.
+
+## The 9 ETL endpoints you'll proxy
+
+| Path | Method | Returns |
+|---|---|---|
+| `/api/dig/studies` | GET | List studies for the asserted tenant |
+| `/api/dig/studies/:id` | GET | Single study metadata |
+| `/api/dig/studies/:id/concepts` | GET | All concepts in a study with aggregate interest + win rates |
+| `/api/dig/studies/:id/concepts/:cid` | GET | One concept with emotions, agreements, themes, sample verbatims |
+| `/api/dig/studies/:id/concepts/:cid/heatmap` | GET | Click coordinates for the concept image |
+| `/api/dig/studies/:id/ranking` | GET | Tournament ordering (rank 1 = top concept) |
+| `/api/dig/studies/:id/demographics` | GET | Gender, age bucket, province breakdowns |
+| `/api/dig/studies/:id/themes` | GET | Theme summary grouped by concept |
+| `/api/dig/search` | POST | Semantic vector search over respondent verbatim comments |
+
+Response shapes are stable and documented at `https://innovatr-dig-etl.vercel.app/docs/05-api-reference`. You'll also find them inline in the type definitions below (Phase 2) — use those as the contract.
+
+## Current state of your codebase (orient yourself)
+
+Read these files first:
+
+**Backend:**
+
+- `shared/schema.ts` — Drizzle tables. `companies` at ~L332, `clientReports` at ~L538. You're NOT adding any new tables — this integration adds zero schema changes.
+- `server/db.ts` — Drizzle instance (not used for the proxy routes — outbound fetch is HTTPS)
+- `server/middleware.ts` — `requireAuth` reads the session cookie, hydrates `req.user.companyId`. Look at ~L55 for the session lookup.
+- `server/routes.ts` — all Express routes. Existing `/api/admin/client-reports` routes around L3431. Existing `/api/member/*` pattern is similar. You'll add 9 new routes alongside them.
+- `server/emails/email-service.ts:16-49` — example of an existing outbound-HTTP pattern (Resend credentials). Match this style for the new dig-etl client.
+
+**Frontend:**
+
+- `client/src/App.tsx` — Wouter router. Add the new `/portal/reports/:id` route here.
+- `client/src/lib/queryClient.ts` — the TanStack Query default fetcher. It joins `queryKey` with `"/"` to build the URL and sends `credentials: "include"`. A query key of `["/api/member/dig/studies", studyId, "concepts"]` becomes the URL `/api/member/dig/studies/<uuid>/concepts` automatically.
+- `client/src/contexts/AuthContext.tsx` — `User` interface with `companyId: string | null`. Available via `useAuth()`.
+- `client/src/pages/portal/TestPage.tsx` — main member-facing report grid. Look at ~L267-270 for the existing `useQuery<ClientReport[]>` pattern, ~L87-167 for `mapReportToStudy`, ~L278-280 for the grid render.
+- `client/src/pages/portal/AdminClientReports.tsx` — admin form at ~L774-910. You'll add an ingest-status column to the table around ~L507.
+
+**Dependencies you already have** (check `package.json` — do not add new ones):
+
+- `@tanstack/react-query` v5
+- `wouter`
+- `recharts` v2.x — installed, currently unused in report views. **Use this for charts.**
+- `lucide-react` for icons
+- shadcn/ui primitives under `client/src/components/ui/`
+
+No new dependencies are needed. All 9 proxy routes use Node's built-in `fetch`.
+
+## What you will create
+
+```
+server/integrations/dig-etl.ts                     NEW — typed HTTPS client to the ETL API
+client/src/lib/dig-api.types.ts                    NEW — TypeScript interfaces for the 9 response shapes
+client/src/lib/dig-api.ts                          NEW — TanStack Query hooks
+client/src/components/dig/ConceptRankingTable.tsx  NEW
+client/src/components/dig/ConceptDetailPanel.tsx   NEW
+client/src/components/dig/DemographicsCharts.tsx   NEW
+client/src/components/dig/ThemeSummary.tsx         NEW
+client/src/components/dig/VerbatimSearchBox.tsx    NEW
+client/src/components/dig/HeatmapOverlay.tsx       NEW — placeholder with TODO
+client/src/pages/portal/ReportDetailPage.tsx       NEW — five-tab detail page
+```
+
+## What you will modify
+
+```
+server/routes.ts                                   + 9 routes under /api/member/dig/*
+client/src/App.tsx                                 + /portal/reports/:id route registration
+client/src/pages/portal/TestPage.tsx               + RichStudyCard branch in the existing card grid
+client/src/pages/portal/AdminClientReports.tsx     + ingest-status column + "Upload to ETL" link
+```
+
+## What you will NOT touch
+
+- `shared/schema.ts` — no new tables, no `dig_api_keys` table, nothing
+- `server/storage.ts` — no new helpers; the proxy routes call the typed HTTP client directly
+- `server/middleware.ts` — `requireAuth` is reused as-is
+- `client/src/lib/queryClient.ts` — the default fetcher already does what we need
+- `client/src/contexts/AuthContext.tsx` — `companyId` is already on the user object
+- Any existing route, component, or page outside the scope above
+
+If you find yourself editing one of these files, stop and re-read this prompt.
+
+## Phase 1 — Env config + read orientation files
+
+1. Add `DIG_ETL_SERVICE_TOKEN` to Replit Secrets with the value from the placeholder at the top of this prompt. (Optionally also add `DIG_ETL_API_URL=https://innovatr-dig-etl.vercel.app/api/dig` — the default below falls back to this, so the env var is only needed if you want to override for dev.)
+2. Read these files to ground yourself:
+   - `server/middleware.ts:1-100` — confirm `requireAuth` populates `req.user.companyId`
+   - `server/routes.ts:3431-3470` — see the existing `/api/admin/client-reports` handler style
+   - `server/routes.ts` — find an existing `/api/member/*` route to match
+   - `server/emails/email-service.ts:16-49` — existing outbound-HTTP pattern to match
+   - `client/src/lib/queryClient.ts:25-45` — see how `getQueryFn` joins `queryKey` to build URLs
+   - `client/src/pages/portal/TestPage.tsx:85-280` — see the existing `mapReportToStudy` pattern
+
+Once you've read these, you have everything you need. Don't read more files until a phase tells you to.
+
+## Phase 2 — Type definitions (client-side contract)
+
+Create `client/src/lib/dig-api.types.ts`. These are the response shapes for all 9 endpoints — the contract every component reads from.
+
+```ts
+// client/src/lib/dig-api.types.ts
+
+export type IngestStatus = "pending" | "unpacking" | "parsing" | "parsed" | "ready" | "failed";
+
+export interface DigStudy {
+  id: string;
+  title: string;
+  source_study_name: string | null;
+  public_client_report_id: string | null;
+  ingest_status: IngestStatus;
+  file_count: number;
+  respondent_count: number;
+  concept_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DigStudyDetail extends DigStudy {
+  error_message: string | null;
+  metadata: Record<string, unknown> | null;
+}
+
+export interface ConceptAggregate {
+  id: string;
+  name: string;
+  concept_type: "control" | "new" | "existing" | string | null;
+  brand: string | null;
+  product_name: string | null;
+  product_format: string | null;
+  segments: string[];
+  interest_sample: number;
+  interest_rate: number | null;
+  commitment_sample: number;
+  wins: number;
+  losses: number;
+  win_rate: number | null;
+}
+
+export interface ConceptEmotion {
+  emotion: string;
+  selected_count: number;
+  total: number;
+  percentage: number;
+}
+
+export interface ConceptAgreement {
+  question_group: "self" | "brand";
+  statement: string;
+  total: number;
+  agree_count: number;
+  agree_percentage: number;
+  avg_response_code: number | null;
+}
+
+export interface ConceptTheme {
+  theme_category: string;
+  mentions: number;
+  positive: number;
+  negative: number;
+  neutral: number;
+}
+
+export interface SampleVerbatim {
+  respondent_external_id: string | null;
+  clarity_label: string | null;
+  comment: string;
+}
+
+export interface ConceptDetail {
+  id: string;
+  name: string;
+  concept_type: string | null;
+  brand: string | null;
+  product_name: string | null;
+  product_format: string | null;
+  segments: string[];
+  evaluation_count: number;
+  emotions: ConceptEmotion[];
+  agreements: ConceptAgreement[];
+  themes: ConceptTheme[];
+  sample_verbatims: SampleVerbatim[];
+}
+
+export interface HeatmapClick {
+  evaluation_id: string;
+  respondent_external_id: string | null;
+  question_type: "like" | "dislike" | string;
+  click_order: number;
+  x_coord: number | null;
+  y_coord: number | null;
+  comment: string | null;
+  time_between_ms: number | null;
+}
+
+export interface RankedConcept {
+  rank: number;
+  concept_id: string;
+  name: string;
+  wins: number;
+  losses: number;
+  win_rate: number | null;
+  interest_rate: number | null;
+}
+
+export interface DemographicBucket {
+  label?: string | null;
+  bucket?: string;
+  count: number;
+  percentage: number;
+}
+
+export interface Demographics {
+  total_respondents: number;
+  gender: DemographicBucket[];
+  age_buckets: DemographicBucket[];
+  province: DemographicBucket[];
+}
+
+export interface CrossConceptTheme {
+  concept_id: string | null;
+  concept_name: string;
+  theme_category: string;
+  mentions: number;
+  positive: number;
+  negative: number;
+  neutral: number;
+}
+
+export interface SearchRequest {
+  query: string;
+  study_id?: string;
+  concept_id?: string;
+  limit?: number;
+}
+
+export interface SearchResult {
+  content: string;
+  distance: number;
+  source_table: "evaluations" | "eval_heatmap_clicks";
+  source_id: string;
+  concept_id: string | null;
+}
+```
+
+## Phase 3 — Typed HTTP client for the ETL
+
+Create `server/integrations/dig-etl.ts`. This is the single outbound-HTTP helper. It sends both auth headers on every call.
+
+```ts
+// server/integrations/dig-etl.ts
+
+const DIG_URL =
+  process.env.DIG_ETL_API_URL ?? "https://innovatr-dig-etl.vercel.app/api/dig";
+
+export class DigApiError extends Error {
+  constructor(
+    public status: number,
+    public body: { code: string; message: string },
+  ) {
+    super(body.message);
+    this.name = "DigApiError";
+  }
+}
+
+function buildHeaders(companyId: string, extra?: HeadersInit): HeadersInit {
+  const serviceToken = process.env.DIG_ETL_SERVICE_TOKEN;
+  if (!serviceToken) {
+    throw new Error(
+      "DIG_ETL_SERVICE_TOKEN is not set — add it to Replit Secrets",
+    );
+  }
+  return {
+    Authorization: `Service ${serviceToken}`,
+    "X-Company-Id": companyId,
+    "Content-Type": "application/json",
+    ...(extra ?? {}),
+  };
+}
+
+async function digFetch<T>(
+  path: string,
+  companyId: string,
+  init?: RequestInit,
+): Promise<T> {
+  const res = await fetch(`${DIG_URL}${path}`, {
+    ...init,
+    headers: buildHeaders(companyId, init?.headers),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new DigApiError(
+      res.status,
+      body.error ?? { code: "INTERNAL", message: `HTTP ${res.status}` },
+    );
+  }
+  return res.json() as Promise<T>;
+}
+
+// ——— Response type aliases (server side copies of the client types)
+// Keep them separate from client/src/lib/dig-api.types.ts so the server
+// doesn't import from the client tree. Same shapes, different home.
+
+export interface DigStudy {
+  id: string;
+  title: string;
+  source_study_name: string | null;
+  public_client_report_id: string | null;
+  ingest_status: string;
+  file_count: number;
+  respondent_count: number;
+  concept_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DigSearchRequest {
+  query: string;
+  study_id?: string;
+  concept_id?: string;
+  limit?: number;
+}
+
+// All response envelopes are `{ key: data }` — keep them typed loosely here
+// because the client has the strict types. The server's job is to pass through.
+
+export const digApi = {
+  listStudies: (companyId: string) =>
+    digFetch<{ studies: DigStudy[] }>("/studies", companyId),
+
+  getStudy: (companyId: string, id: string) =>
+    digFetch<{ study: unknown }>(`/studies/${id}`, companyId),
+
+  listConcepts: (companyId: string, studyId: string) =>
+    digFetch<{ concepts: unknown[] }>(`/studies/${studyId}/concepts`, companyId),
+
+  getConcept: (companyId: string, studyId: string, conceptId: string) =>
+    digFetch<{ concept: unknown }>(
+      `/studies/${studyId}/concepts/${conceptId}`,
+      companyId,
+    ),
+
+  getHeatmap: (companyId: string, studyId: string, conceptId: string) =>
+    digFetch<{ clicks: unknown[] }>(
+      `/studies/${studyId}/concepts/${conceptId}/heatmap`,
+      companyId,
+    ),
+
+  getRanking: (companyId: string, studyId: string) =>
+    digFetch<{ ranking: unknown[] }>(`/studies/${studyId}/ranking`, companyId),
+
+  getDemographics: (companyId: string, studyId: string) =>
+    digFetch<{ demographics: unknown }>(
+      `/studies/${studyId}/demographics`,
+      companyId,
+    ),
+
+  getThemes: (companyId: string, studyId: string) =>
+    digFetch<{ themes: unknown[] }>(`/studies/${studyId}/themes`, companyId),
+
+  search: (companyId: string, body: DigSearchRequest) =>
+    digFetch<{ results: unknown[] }>("/search", companyId, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+};
+```
+
+The `unknown[]` / `unknown` typing on the server is intentional — the server is a pass-through. The client's types in `dig-api.types.ts` carry the contract all the way to the components.
+
+## Phase 4 — Proxy routes in Express
+
+Add these to `server/routes.ts` alongside the existing `/api/member/*` routes. Import the new module at the top of the file:
+
+```ts
+import { digApi, DigApiError } from "./integrations/dig-etl";
+```
+
+And add a small helper above the routes to avoid repeating the error-forwarding boilerplate:
+
+```ts
+function handleDigError(res: Response, err: unknown) {
+  if (err instanceof DigApiError) {
+    return res.status(err.status).json({ error: err.body });
+  }
+  console.error("dig-etl proxy error:", err);
+  return res.status(500).json({
+    error: { code: "INTERNAL", message: "Upstream Dig ETL error" },
+  });
+}
+```
+
+Then the 9 routes:
+
+```ts
+app.get("/api/member/dig/studies", requireAuth, async (req: AuthenticatedRequest, res) => {
+  const companyId = req.user?.companyId;
+  if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
+  try {
+    res.json(await digApi.listStudies(companyId));
+  } catch (err) { handleDigError(res, err); }
+});
+
+app.get("/api/member/dig/studies/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+  const companyId = req.user?.companyId;
+  if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
+  try {
+    res.json(await digApi.getStudy(companyId, req.params.id));
+  } catch (err) { handleDigError(res, err); }
+});
+
+app.get("/api/member/dig/studies/:id/concepts", requireAuth, async (req: AuthenticatedRequest, res) => {
+  const companyId = req.user?.companyId;
+  if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
+  try {
+    res.json(await digApi.listConcepts(companyId, req.params.id));
+  } catch (err) { handleDigError(res, err); }
+});
+
+app.get("/api/member/dig/studies/:id/concepts/:cid", requireAuth, async (req: AuthenticatedRequest, res) => {
+  const companyId = req.user?.companyId;
+  if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
+  try {
+    res.json(await digApi.getConcept(companyId, req.params.id, req.params.cid));
+  } catch (err) { handleDigError(res, err); }
+});
+
+app.get("/api/member/dig/studies/:id/concepts/:cid/heatmap", requireAuth, async (req: AuthenticatedRequest, res) => {
+  const companyId = req.user?.companyId;
+  if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
+  try {
+    res.json(await digApi.getHeatmap(companyId, req.params.id, req.params.cid));
+  } catch (err) { handleDigError(res, err); }
+});
+
+app.get("/api/member/dig/studies/:id/ranking", requireAuth, async (req: AuthenticatedRequest, res) => {
+  const companyId = req.user?.companyId;
+  if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
+  try {
+    res.json(await digApi.getRanking(companyId, req.params.id));
+  } catch (err) { handleDigError(res, err); }
+});
+
+app.get("/api/member/dig/studies/:id/demographics", requireAuth, async (req: AuthenticatedRequest, res) => {
+  const companyId = req.user?.companyId;
+  if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
+  try {
+    res.json(await digApi.getDemographics(companyId, req.params.id));
+  } catch (err) { handleDigError(res, err); }
+});
+
+app.get("/api/member/dig/studies/:id/themes", requireAuth, async (req: AuthenticatedRequest, res) => {
+  const companyId = req.user?.companyId;
+  if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
+  try {
+    res.json(await digApi.getThemes(companyId, req.params.id));
+  } catch (err) { handleDigError(res, err); }
+});
+
+app.post("/api/member/dig/search", requireAuth, async (req: AuthenticatedRequest, res) => {
+  const companyId = req.user?.companyId;
+  if (!companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No company context" } });
+  try {
+    res.json(await digApi.search(companyId, req.body));
+  } catch (err) { handleDigError(res, err); }
+});
+```
+
+Match the `AuthenticatedRequest` type name and the `requireAuth` middleware name to whatever this repo already uses — look at neighbouring `/api/member/*` routes for the exact imports.
+
+## Phase 5 — Sanity check before any UI
+
+Restart the dev server. Sign in to the dashboard as a user whose `companyId` matches a tenant that has ingested data on the ETL side.
+
+From the browser console while signed in:
+
+```js
+fetch("/api/member/dig/studies", { credentials: "include" })
+  .then(r => r.json())
+  .then(console.log);
+```
+
+Expected: `{"studies": [...]}` with at least one study.
+
+Failure modes:
+
+- **401 on the dashboard proxy** — `requireAuth` didn't fire or the session expired. Re-login.
+- **401 with `{"error":{"code":"UNAUTHORIZED"}}` in the body** — the ETL rejected the service token. Confirm `DIG_ETL_SERVICE_TOKEN` in Replit Secrets matches the value the ETL team gave you.
+- **Error "DIG_ETL_SERVICE_TOKEN is not set"** — the env var didn't reach the Express process. Restart the dev server after adding the secret.
+- **500 with a network error in the logs** — the dashboard can't reach the ETL URL. Verify `DIG_ETL_API_URL` (if overridden) or test with `curl https://innovatr-dig-etl.vercel.app/api/health` from the Replit shell.
+- **HTML response** — the dashboard route isn't registered. Re-check `server/routes.ts`.
+
+**Do not proceed to Phase 6 until this fetch returns 200.** Everything downstream depends on the proxy layer being live.
+
+## Phase 6 — Client-side React Query hooks
+
+Create `client/src/lib/dig-api.ts`:
+
+```ts
+// client/src/lib/dig-api.ts
+import { useQuery, useMutation } from "@tanstack/react-query";
+import type {
+  DigStudy,
+  DigStudyDetail,
+  ConceptAggregate,
+  ConceptDetail,
+  HeatmapClick,
+  RankedConcept,
+  Demographics,
+  CrossConceptTheme,
+  SearchRequest,
+  SearchResult,
+} from "./dig-api.types";
+
+export function useDigStudies() {
+  return useQuery<{ studies: DigStudy[] }>({
+    queryKey: ["/api/member/dig/studies"],
+  });
+}
+
+export function useDigStudy(studyId: string | undefined) {
+  return useQuery<{ study: DigStudyDetail }>({
+    queryKey: ["/api/member/dig/studies", studyId],
+    enabled: !!studyId,
+  });
+}
+
+export function useDigRanking(studyId: string | undefined) {
+  return useQuery<{ ranking: RankedConcept[] }>({
+    queryKey: ["/api/member/dig/studies", studyId, "ranking"],
+    enabled: !!studyId,
+  });
+}
+
+export function useDigConcepts(studyId: string | undefined) {
+  return useQuery<{ concepts: ConceptAggregate[] }>({
+    queryKey: ["/api/member/dig/studies", studyId, "concepts"],
+    enabled: !!studyId,
+  });
+}
+
+export function useDigConcept(
+  studyId: string | undefined,
+  conceptId: string | undefined,
+) {
+  return useQuery<{ concept: ConceptDetail }>({
+    queryKey: ["/api/member/dig/studies", studyId, "concepts", conceptId],
+    enabled: !!studyId && !!conceptId,
+  });
+}
+
+export function useDigHeatmap(
+  studyId: string | undefined,
+  conceptId: string | undefined,
+) {
+  return useQuery<{ clicks: HeatmapClick[] }>({
+    queryKey: [
+      "/api/member/dig/studies",
+      studyId,
+      "concepts",
+      conceptId,
+      "heatmap",
+    ],
+    enabled: !!studyId && !!conceptId,
+  });
+}
+
+export function useDigDemographics(studyId: string | undefined) {
+  return useQuery<{ demographics: Demographics }>({
+    queryKey: ["/api/member/dig/studies", studyId, "demographics"],
+    enabled: !!studyId,
+  });
+}
+
+export function useDigThemes(studyId: string | undefined) {
+  return useQuery<{ themes: CrossConceptTheme[] }>({
+    queryKey: ["/api/member/dig/studies", studyId, "themes"],
+    enabled: !!studyId,
+  });
+}
+
+export function useDigSearch() {
+  return useMutation<{ results: SearchResult[] }, Error, SearchRequest>({
+    mutationFn: async (body) => {
+      const res = await fetch("/api/member/dig/search", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    },
+  });
+}
+```
+
+The trick: `queryKey: ["/api/member/dig/studies", studyId, "concepts"]` joins via the default fetcher in `client/src/lib/queryClient.ts` to `/api/member/dig/studies/<uuid>/concepts`. This is exactly how the existing `/api/member/*` queries work.
+
+## Phase 7 — Components
+
+Create `client/src/components/dig/` and add these five components + a placeholder for the heatmap. All use shadcn primitives + Recharts.
+
+### `ConceptRankingTable.tsx`
+
+```tsx
+import { useDigRanking } from "@/lib/dig-api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts";
+
+export function ConceptRankingTable({ studyId }: { studyId: string }) {
+  const { data, isLoading, error } = useDigRanking(studyId);
+
+  if (isLoading) return <Card><CardContent className="p-6 text-sm opacity-60">Loading ranking…</CardContent></Card>;
+  if (error) return <Card><CardContent className="p-6 text-sm text-red-600">Failed to load ranking</CardContent></Card>;
+  if (!data?.ranking?.length) return <Card><CardContent className="p-6 text-sm opacity-60">No ranking data yet.</CardContent></Card>;
+
+  const chartData = data.ranking.map((r) => ({
+    name: r.name.length > 30 ? r.name.slice(0, 28) + "…" : r.name,
+    winRate: r.win_rate ?? 0,
+    interest: r.interest_rate ?? 0,
+  }));
+
+  return (
+    <Card>
+      <CardHeader><CardTitle>Concept ranking</CardTitle></CardHeader>
+      <CardContent className="space-y-6">
+        <ResponsiveContainer width="100%" height={Math.max(240, data.ranking.length * 32)}>
+          <BarChart data={chartData} layout="vertical" margin={{ left: 120 }}>
+            <XAxis type="number" domain={[0, 100]} unit="%" />
+            <YAxis type="category" dataKey="name" width={180} />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="winRate" fill="#6366f1" name="Win rate" />
+            <Bar dataKey="interest" fill="#10b981" name="Interest rate" />
+          </BarChart>
+        </ResponsiveContainer>
+
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Rank</TableHead>
+              <TableHead>Concept</TableHead>
+              <TableHead className="text-right">Wins</TableHead>
+              <TableHead className="text-right">Losses</TableHead>
+              <TableHead className="text-right">Win rate</TableHead>
+              <TableHead className="text-right">Interest rate</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.ranking.map((r) => (
+              <TableRow key={r.concept_id}>
+                <TableCell className="font-mono">#{r.rank}</TableCell>
+                <TableCell>{r.name}</TableCell>
+                <TableCell className="text-right">{r.wins}</TableCell>
+                <TableCell className="text-right">{r.losses}</TableCell>
+                <TableCell className="text-right">{r.win_rate?.toFixed(1) ?? "—"}%</TableCell>
+                <TableCell className="text-right">{r.interest_rate?.toFixed(1) ?? "—"}%</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### `ConceptDetailPanel.tsx`
+
+Dropdown to pick a concept, then four blocks: emotions, agreements, themes, verbatims.
+
+```tsx
+import { useState, useEffect } from "react";
+import { useDigConcepts, useDigConcept } from "@/lib/dig-api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
+import { Badge } from "@/components/ui/badge";
+
+export function ConceptDetailPanel({ studyId }: { studyId: string }) {
+  const { data: conceptsData, isLoading: loadingConcepts } = useDigConcepts(studyId);
+  const [conceptId, setConceptId] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (conceptsData?.concepts?.[0] && !conceptId) {
+      setConceptId(conceptsData.concepts[0].id);
+    }
+  }, [conceptsData, conceptId]);
+
+  const { data: detail, isLoading: loadingDetail } = useDigConcept(studyId, conceptId);
+
+  if (loadingConcepts) return <Card><CardContent className="p-6 text-sm opacity-60">Loading concepts…</CardContent></Card>;
+  if (!conceptsData?.concepts?.length) return <Card><CardContent className="p-6 text-sm opacity-60">No concepts in this study.</CardContent></Card>;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Concept detail</CardTitle>
+        <Select value={conceptId} onValueChange={setConceptId}>
+          <SelectTrigger className="mt-2 max-w-md">
+            <SelectValue placeholder="Pick a concept" />
+          </SelectTrigger>
+          <SelectContent>
+            {conceptsData.concepts.map((c) => (
+              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </CardHeader>
+      <CardContent className="space-y-8">
+        {loadingDetail && <div className="text-sm opacity-60">Loading…</div>}
+        {detail?.concept && (
+          <>
+            <section>
+              <h3 className="text-sm font-semibold mb-3">Emotions ({detail.concept.evaluation_count} respondents)</h3>
+              <ResponsiveContainer width="100%" height={Math.max(280, detail.concept.emotions.length * 22)}>
+                <BarChart data={detail.concept.emotions} layout="vertical" margin={{ left: 110 }}>
+                  <XAxis type="number" domain={[0, 100]} unit="%" />
+                  <YAxis type="category" dataKey="emotion" width={100} />
+                  <Tooltip />
+                  <Bar dataKey="percentage" fill="#f59e0b" />
+                </BarChart>
+              </ResponsiveContainer>
+            </section>
+
+            <section>
+              <h3 className="text-sm font-semibold mb-3">Agreement statements</h3>
+              <ResponsiveContainer width="100%" height={Math.max(280, detail.concept.agreements.length * 28)}>
+                <BarChart data={detail.concept.agreements} layout="vertical" margin={{ left: 220 }}>
+                  <XAxis type="number" domain={[0, 100]} unit="%" />
+                  <YAxis type="category" dataKey="statement" width={210} fontSize={11} />
+                  <Tooltip />
+                  <Bar dataKey="agree_percentage" fill="#3b82f6" />
+                </BarChart>
+              </ResponsiveContainer>
+            </section>
+
+            <section>
+              <h3 className="text-sm font-semibold mb-3">Top themes</h3>
+              <div className="flex flex-wrap gap-2">
+                {detail.concept.themes.map((t) => (
+                  <Badge key={t.theme_category} variant="secondary">
+                    {t.theme_category} · {t.mentions}
+                    {t.positive > 0 && <span className="ml-1 text-green-700">+{t.positive}</span>}
+                    {t.negative > 0 && <span className="ml-1 text-red-700">−{t.negative}</span>}
+                  </Badge>
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <h3 className="text-sm font-semibold mb-3">Sample verbatims</h3>
+              <ul className="space-y-2">
+                {detail.concept.sample_verbatims.map((v, i) => (
+                  <li key={i} className="text-sm border-l-2 border-black/10 pl-3 py-1">
+                    <div className="opacity-60 text-xs">
+                      {v.respondent_external_id?.slice(0, 8)} {v.clarity_label && `· ${v.clarity_label}`}
+                    </div>
+                    <div>{v.comment}</div>
+                  </li>
+                ))}
+                {detail.concept.sample_verbatims.length === 0 && <li className="text-sm opacity-60">No verbatim comments for this concept.</li>}
+              </ul>
+            </section>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### `DemographicsCharts.tsx`
+
+```tsx
+import { useDigDemographics } from "@/lib/dig-api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Bar, BarChart, Pie, PieChart, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
+
+const PIE_COLORS = ["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4"];
+
+export function DemographicsCharts({ studyId }: { studyId: string }) {
+  const { data, isLoading, error } = useDigDemographics(studyId);
+
+  if (isLoading) return <Card><CardContent className="p-6 text-sm opacity-60">Loading demographics…</CardContent></Card>;
+  if (error) return <Card><CardContent className="p-6 text-sm text-red-600">Failed to load demographics</CardContent></Card>;
+  if (!data?.demographics) return null;
+
+  const d = data.demographics;
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <Card>
+        <CardHeader><CardTitle className="text-sm">Gender</CardTitle></CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={220}>
+            <PieChart>
+              <Pie data={d.gender} dataKey="count" nameKey="label" cx="50%" cy="50%" outerRadius={70} label={(e: any) => `${e.label} ${e.percentage.toFixed(0)}%`}>
+                {d.gender.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle className="text-sm">Age</CardTitle></CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={d.age_buckets} layout="vertical" margin={{ left: 40 }}>
+              <XAxis type="number" />
+              <YAxis type="category" dataKey="bucket" width={50} />
+              <Tooltip />
+              <Bar dataKey="count" fill="#6366f1" />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle className="text-sm">Province</CardTitle></CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={d.province} layout="vertical" margin={{ left: 80 }}>
+              <XAxis type="number" />
+              <YAxis type="category" dataKey="label" width={75} fontSize={11} />
+              <Tooltip />
+              <Bar dataKey="count" fill="#10b981" />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+```
+
+### `ThemeSummary.tsx`
+
+```tsx
+import { useDigThemes } from "@/lib/dig-api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts";
+
+export function ThemeSummary({ studyId }: { studyId: string }) {
+  const { data, isLoading } = useDigThemes(studyId);
+
+  if (isLoading) return <Card><CardContent className="p-6 text-sm opacity-60">Loading themes…</CardContent></Card>;
+  if (!data?.themes?.length) return <Card><CardContent className="p-6 text-sm opacity-60">No themes for this study.</CardContent></Card>;
+
+  const byCategory = new Map<string, { theme_category: string; positive: number; neutral: number; negative: number }>();
+  for (const t of data.themes) {
+    const existing = byCategory.get(t.theme_category) ?? { theme_category: t.theme_category, positive: 0, neutral: 0, negative: 0 };
+    existing.positive += t.positive;
+    existing.neutral += t.neutral;
+    existing.negative += t.negative;
+    byCategory.set(t.theme_category, existing);
+  }
+  const chartData = Array.from(byCategory.values())
+    .sort((a, b) => (b.positive + b.neutral + b.negative) - (a.positive + a.neutral + a.negative))
+    .slice(0, 15);
+
+  return (
+    <Card>
+      <CardHeader><CardTitle>Theme sentiment</CardTitle></CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={Math.max(300, chartData.length * 30)}>
+          <BarChart data={chartData} layout="vertical" stackOffset="sign" margin={{ left: 140 }}>
+            <XAxis type="number" />
+            <YAxis type="category" dataKey="theme_category" width={130} fontSize={11} />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="positive" stackId="a" fill="#10b981" name="Positive" />
+            <Bar dataKey="neutral" stackId="a" fill="#94a3b8" name="Neutral" />
+            <Bar dataKey="negative" stackId="a" fill="#ef4444" name="Negative" />
+          </BarChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### `VerbatimSearchBox.tsx`
+
+```tsx
+import { useState } from "react";
+import { useDigSearch } from "@/lib/dig-api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
+export function VerbatimSearchBox({ studyId }: { studyId: string }) {
+  const [query, setQuery] = useState("");
+  const search = useDigSearch();
+
+  function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!query.trim()) return;
+    search.mutate({ query, study_id: studyId, limit: 10 });
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Ask the respondents</CardTitle>
+        <p className="text-sm opacity-70 mt-1">
+          Natural-language search over every clarity comment + heatmap pin in this study.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={onSubmit} className="flex gap-2 mb-4">
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder='e.g. "the fragrance is too strong"'
+          />
+          <Button type="submit" disabled={search.isPending || !query.trim()}>
+            {search.isPending ? "Searching…" : "Search"}
+          </Button>
+        </form>
+
+        {search.data && (
+          <ul className="space-y-2">
+            {search.data.results.length === 0 && (
+              <li className="text-sm opacity-60">No matches.</li>
+            )}
+            {search.data.results.map((r, i) => (
+              <li key={i} className="text-sm border-l-2 border-black/10 pl-3 py-1 flex items-start gap-2">
+                <Badge variant="outline" className="font-mono shrink-0">{r.distance.toFixed(2)}</Badge>
+                <span>{r.content}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### `HeatmapOverlay.tsx` (placeholder — deferred)
+
+```tsx
+// TODO: Requires concept image asset from Upsiide. The
+// /api/member/dig/studies/:id/concepts/:cid/heatmap proxy route already
+// returns x/y coordinates and click counts. Once we have the image URL,
+// render an <img> with absolutely-positioned click markers.
+export function HeatmapOverlay() {
+  return null;
+}
+```
+
+## Phase 8 — Wire into TestPage
+
+Open `client/src/pages/portal/TestPage.tsx`. Near the existing `useQuery<ClientReport[]>` block (~L267), add:
+
+```tsx
+import { useMemo } from "react";
+import { useDigStudies } from "@/lib/dig-api";
+import type { DigStudy } from "@/lib/dig-api.types";
+import { Link } from "wouter";
+import { Badge } from "@/components/ui/badge";
+import { ConceptRankingTable } from "@/components/dig/ConceptRankingTable";
+```
+
+Inside the component:
+
+```tsx
+const { data: digStudiesResponse } = useDigStudies();
+const digStudiesByReportId = useMemo(
+  () =>
+    new Map(
+      (digStudiesResponse?.studies ?? [])
+        .filter((s) => s.public_client_report_id)
+        .map((s) => [s.public_client_report_id!, s])
+    ),
+  [digStudiesResponse]
+);
+```
+
+Create a new `RichStudyCard` component in the same file:
+
+```tsx
+function RichStudyCard({ report, digStudy }: { report: ClientReport; digStudy: DigStudy }) {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>{report.title}</CardTitle>
+          <Badge variant="secondary">Live data · {digStudy.ingest_status}</Badge>
+        </div>
+        <div className="text-xs opacity-60">
+          {digStudy.concept_count} concepts · {digStudy.respondent_count} respondents
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <ConceptRankingTable studyId={digStudy.id} />
+        <Link href={`/portal/reports/${report.id}`} className="text-sm text-primary hover:underline inline-block">
+          View full analysis →
+        </Link>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+Branch the existing `clientReports.map(...)` render (~L278) so that studies with matching ingested data render `<RichStudyCard>` while everything else keeps the existing `mapReportToStudy` fallback:
+
+```tsx
+{clientReports.map((r) => {
+  const digStudy = digStudiesByReportId.get(r.id);
+  if (digStudy && (digStudy.ingest_status === "ready" || digStudy.ingest_status === "parsed")) {
+    return <RichStudyCard key={r.id} report={r} digStudy={digStudy} />;
+  }
+  return mapReportToStudy(r, user?.name ?? undefined); // existing fallback, unchanged
+})}
+```
+
+Leave `mapReportToStudy` as-is. Studies that haven't been ingested yet still render the old way — no breakage.
+
+## Phase 9 — Report detail route
+
+Create `client/src/pages/portal/ReportDetailPage.tsx`:
+
+```tsx
+import { useParams, Link } from "wouter";
+import { useDigStudies } from "@/lib/dig-api";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { ConceptRankingTable } from "@/components/dig/ConceptRankingTable";
+import { ConceptDetailPanel } from "@/components/dig/ConceptDetailPanel";
+import { DemographicsCharts } from "@/components/dig/DemographicsCharts";
+import { ThemeSummary } from "@/components/dig/ThemeSummary";
+import { VerbatimSearchBox } from "@/components/dig/VerbatimSearchBox";
+
+export default function ReportDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const { data: studies, isLoading } = useDigStudies();
+
+  if (isLoading) return <div className="p-8 text-sm opacity-60">Loading…</div>;
+
+  const digStudy = studies?.studies.find((s) => s.public_client_report_id === id);
+
+  if (!digStudy) {
+    return (
+      <div className="p-8 max-w-2xl mx-auto">
+        <Card>
+          <CardContent className="p-6 space-y-3">
+            <h1 className="text-lg font-semibold">No ingested data yet</h1>
+            <p className="text-sm opacity-70">
+              This report hasn't been processed by the Dig ETL. Upload the raw Upsiide CSV bundle at{" "}
+              <a
+                href={`https://innovatr-dig-etl.vercel.app/admin/ingest?clientReportId=${id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-primary hover:underline"
+              >
+                the ingest page
+              </a>.
+            </p>
+            <Link href="/portal/test" className="text-sm text-primary hover:underline">
+              ← Back to reports
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 max-w-6xl mx-auto space-y-6">
+      <div>
+        <Link href="/portal/test" className="text-sm opacity-60 hover:opacity-100">
+          ← Back to reports
+        </Link>
+        <h1 className="text-2xl font-semibold mt-2">{digStudy.title}</h1>
+        <div className="text-sm opacity-60">
+          {digStudy.concept_count} concepts · {digStudy.respondent_count} respondents · status: {digStudy.ingest_status}
+        </div>
+      </div>
+
+      <Tabs defaultValue="overview">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="concepts">Concepts</TabsTrigger>
+          <TabsTrigger value="demographics">Demographics</TabsTrigger>
+          <TabsTrigger value="themes">Themes</TabsTrigger>
+          <TabsTrigger value="search">Ask</TabsTrigger>
+        </TabsList>
+        <TabsContent value="overview" className="mt-4"><ConceptRankingTable studyId={digStudy.id} /></TabsContent>
+        <TabsContent value="concepts" className="mt-4"><ConceptDetailPanel studyId={digStudy.id} /></TabsContent>
+        <TabsContent value="demographics" className="mt-4"><DemographicsCharts studyId={digStudy.id} /></TabsContent>
+        <TabsContent value="themes" className="mt-4"><ThemeSummary studyId={digStudy.id} /></TabsContent>
+        <TabsContent value="search" className="mt-4"><VerbatimSearchBox studyId={digStudy.id} /></TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+```
+
+Register the route in `client/src/App.tsx`. Find the Wouter `<Route>` list around L91 and add:
+
+```tsx
+import ReportDetailPage from "@/pages/portal/ReportDetailPage";
+// ...
+<Route path="/portal/reports/:id" component={ReportDetailPage} />
+```
+
+Match the surrounding auth-guard pattern used by other `/portal/*` routes.
+
+## Phase 10 — Admin enhancements
+
+Open `client/src/pages/portal/AdminClientReports.tsx`. Around L507-615 there's a table listing each client report. Two additions:
+
+1. **Ingest-status column.** Call `useDigStudies()` once at the top of the component, build a `Map<publicClientReportId, DigStudy>`, and render a new column showing the matching study's `ingest_status` (or "Not ingested" if no match) as a Badge, plus respondent/concept counts inline.
+
+2. **"Upload CSVs to ETL" button** on each row:
+
+```tsx
+<a
+  href={`https://innovatr-dig-etl.vercel.app/admin/ingest?clientReportId=${report.id}`}
+  target="_blank"
+  rel="noreferrer"
+>
+  <Button variant="outline" size="sm">Upload to ETL</Button>
+</a>
+```
+
+The ETL admin upload page accepts `?clientReportId=` as a query param and pre-selects the linked client_report.
+
+## Phase 11 — Final verification
+
+1. **Build succeeds** — `npm run build`. Clean type check. Fix anything you introduced.
+2. **Dev server boots** — `npm run dev`. No console errors.
+3. **Member flow:**
+   - Sign in as a user whose `companyId` matches a tenant with ingested data on the ETL side
+   - `/portal/test` → at least one `RichStudyCard` with a ranking chart
+   - Click "View full analysis →" → lands on `/portal/reports/:id`
+   - All five tabs (Overview, Concepts, Demographics, Themes, Ask) render without runtime errors
+   - Ask tab: type "fragrance" and submit → returns ranked verbatims
+4. **Admin flow:**
+   - `/portal/admin/client-reports` shows the new ingest-status column
+   - "Upload to ETL" button opens the ETL ingest page with the report id pre-filled
+5. **Tenant isolation sanity check:**
+   - Sign in as a user from a tenant with no ingested data → `/portal/test` falls through to legacy cards, `/api/member/dig/studies` returns `{"studies": []}`
+   - Never shows another tenant's data
+
+Check all five off before declaring done.
+
+## Style + constraints
+
+- **Match the repo's existing style.** Look at neighbouring files before writing any new code.
+- **TypeScript strict.** No new `any` except where the server pass-through is deliberately loose.
+- **Error UI is not optional.** Every component handles loading + error + empty states.
+- **No new dependencies.** Everything's already installed.
+- **Don't touch unrelated code.** Surgical edits.
+- **Service token stays on the server.** Never exposed to the client.
+- **Read-only.** All 9 routes are GET (or POST for search, which is still read-only). No mutations against the ETL.
+- **One commit per phase.** Conventional commits. e.g. `feat(dig): add typed HTTP client for ETL API`, `feat(dig): add 9 proxy routes under /api/member/dig/*`.
+
+## What NOT to do
+
+- **Do not add a `dig_api_keys` table** to `shared/schema.ts`. Zero schema changes.
+- **Do not add per-tenant Bearer keys.** One shared service token is the whole auth story.
+- **Do not read `dig.*` tables directly from Drizzle.** The dashboard goes through the HTTP API on every call.
+- **Do not expose `DIG_ETL_SERVICE_TOKEN` to the React client.** Never as a prop, never in a response body, never in a log line.
+- **Do not add a new charting library.** Recharts is already installed.
+- **Do not skip `requireAuth` on any proxy route.** Every single one is session-gated.
+- **Do not change the JSON response envelope shape** (`{ studies: [...] }`, `{ concept: {...} }`, `{ error: { code, message } }`).
+
+## Done criteria
+
+You are done when all of these are true:
+
+- [ ] `DIG_ETL_SERVICE_TOKEN` is in Replit Secrets
+- [ ] `server/integrations/dig-etl.ts` exists with the typed client and `DigApiError`
+- [ ] `client/src/lib/dig-api.types.ts` and `client/src/lib/dig-api.ts` exist with 9 hooks
+- [ ] All 9 proxy routes under `/api/member/dig/*` exist in `server/routes.ts`, each guarded by `requireAuth`
+- [ ] Every proxy route extracts `companyId` from `req.user.companyId` and passes it to `digApi.*` (never from a request param)
+- [ ] Manual `fetch("/api/member/dig/studies")` from the browser console returns 200 with the expected shape (Phase 5)
+- [ ] All 5 components exist under `client/src/components/dig/` + `HeatmapOverlay.tsx` placeholder
+- [ ] `TestPage.tsx` branches between `RichStudyCard` and the legacy `mapReportToStudy` based on ingest status — fallback is unchanged
+- [ ] `client/src/pages/portal/ReportDetailPage.tsx` exists with all 5 tabs
+- [ ] `/portal/reports/:id` route is registered in `App.tsx`
+- [ ] `AdminClientReports.tsx` shows ingest-status column + "Upload to ETL" button on each row
+- [ ] Phase 11 manual verification passes for member flow + admin flow + tenant isolation
+- [ ] `npm run build` succeeds with a clean type check
+- [ ] No new dependencies added
+- [ ] One commit per phase, conventional-commits style
+
+If any box is unchecked, you are not done.
+
+## If you get stuck
+
+- **401 on the dashboard proxy** — `requireAuth` didn't fire or the session is expired. Compare against `/api/member/client-reports`.
+- **401 `{"error":{"code":"UNAUTHORIZED"}}` from the ETL in the response body** — the service token is wrong or missing. Check Replit Secrets.
+- **Error "DIG_ETL_SERVICE_TOKEN is not set"** — the env var didn't reach the Express process. Restart the dev server after adding.
+- **500 with a fetch/network error** — the dashboard can't reach the ETL URL. Check `DIG_ETL_API_URL` (if overridden) or test with `curl https://innovatr-dig-etl.vercel.app/api/health` from the Replit shell.
+- **Empty `{studies: []}`** — `req.user.companyId` doesn't match a tenant that has ingested data on the ETL. Confirm the session user is in the same company.
+- **Recharts renders nothing** — `<ResponsiveContainer>` needs an explicit height. Check the parent.
+- **You genuinely cannot figure something out** — report the specific question in your final summary. Don't silently work around it.
+
+## Reference
+
+- Upstream ETL API spec: `https://innovatr-dig-etl.vercel.app/docs/05-api-reference`
+- Upstream auth model (the service-token path is documented here): `https://innovatr-dig-etl.vercel.app/docs/07-auth-and-tenancy`
+- Full integration walkthrough (human-readable, links back to this prompt): `https://innovatr-dig-etl.vercel.app/docs/09-dashboard-integration`
+
+Start at Phase 1. Verify after every phase. Don't skip ahead.
