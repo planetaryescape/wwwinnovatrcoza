@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { trackLinkedInConversion } from "@/lib/linkedin-tracking";
 import PublicNavbar from "@/components/PublicNavbar";
 import { LoginDialog } from "@/components/LoginDialog";
 import { useAuth } from "@/contexts/AuthContext";
@@ -382,7 +383,7 @@ function HeroSection({ onPlayVideo }: { onPlayVideo: () => void }) {
           <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
             <div className="hero-btn-wrap">
               <div className="hero-btn-glow hero-btn-glow-research" />
-              <a href="/research" className="hero-btn-inner" style={{ background: BRAND.violet }}>
+              <a href="/research" className="hero-btn-inner" style={{ background: BRAND.violet }} onClick={() => trackLinkedInConversion()}>
                 Explore Research
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
                   <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -391,7 +392,7 @@ function HeroSection({ onPlayVideo }: { onPlayVideo: () => void }) {
             </div>
             <div className="hero-btn-wrap">
               <div className="hero-btn-glow hero-btn-glow-consult" />
-              <a href="/consult" className="hero-btn-inner" style={{ background: BRAND.coral }}>
+              <a href="/consult" className="hero-btn-inner" style={{ background: BRAND.coral }} onClick={() => trackLinkedInConversion()}>
                 Explore Consult
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
                   <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -1191,6 +1192,7 @@ function PricingSection() {
               {/* Buy Now button */}
               <a
                 href={plan.href}
+                onClick={() => trackLinkedInConversion()}
                 style={{
                   display: "block",
                   textAlign: "center",
@@ -1343,6 +1345,7 @@ function HomeMembershipSection() {
               </div>
               <a
                 href={plan.href}
+                onClick={() => trackLinkedInConversion()}
                 style={{ display: "block", fontFamily: '"DM Sans", sans-serif', fontSize: 13, fontWeight: 600, color: "#fff", background: plan.accent, borderRadius: 7, padding: "10px 0", textDecoration: "none", textAlign: "center" as const, transition: "transform 0.18s, box-shadow 0.18s", marginTop: "auto" }}
                 onMouseEnter={(e) => { (e.currentTarget).style.transform = "scale(1.02)"; (e.currentTarget).style.boxShadow = `0 6px 20px ${plan.accent}50`; }}
                 onMouseLeave={(e) => { (e.currentTarget).style.transform = "scale(1)"; (e.currentTarget).style.boxShadow = "none"; }}
@@ -1389,6 +1392,7 @@ function NewsletterSection() {
             ) : (
               <a
                 href="/portal/trends"
+                onClick={() => trackLinkedInConversion()}
                 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, color: "#fff", background: BRAND.violet, border: "none", borderRadius: 8, padding: "11px 24px", cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}
               >
                 Subscribe Now
@@ -1399,7 +1403,7 @@ function NewsletterSection() {
             )}
             {!user && (
               <button
-                onClick={() => setLoginOpen(true)}
+                onClick={() => { trackLinkedInConversion(); setLoginOpen(true); }}
                 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 14, color: BRAND.dark, background: "transparent", border: `1.5px solid ${BRAND.dark}22`, borderRadius: 8, padding: "11px 24px", cursor: "pointer" }}
               >
                 Already a member? Log in

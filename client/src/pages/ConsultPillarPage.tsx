@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useSEO } from "@/hooks/use-seo";
 import { Button } from "@/components/ui/button";
+import { trackLinkedInConversion } from "@/lib/linkedin-tracking";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Link, useLocation, useRoute } from "wouter";
@@ -447,7 +448,7 @@ export default function ConsultPillarPage() {
           <Button
             size="lg"
             className="bg-[#4D5FF1] hover:bg-[#4D5FF1]/90 text-white"
-            onClick={() => setLocation("/#contact")}
+            onClick={() => { trackLinkedInConversion(); setLocation("/#contact"); }}
             data-testid="button-contact"
           >
             Book a consult call

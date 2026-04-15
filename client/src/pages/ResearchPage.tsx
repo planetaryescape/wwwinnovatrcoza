@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { trackLinkedInConversion } from "@/lib/linkedin-tracking";
 import PublicNavbar from "@/components/PublicNavbar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Zap, Target, TrendingUp, Rocket, User } from "lucide-react";
@@ -736,7 +737,7 @@ function MembershipSection() {
                 ))}
               </div>
 
-              <a href={plan.href} style={{
+              <a href={plan.href} onClick={() => trackLinkedInConversion()} style={{
                 display: "block",
                 fontFamily: '"DM Sans", sans-serif',
                 fontSize: 14,
@@ -795,6 +796,7 @@ function NewsletterSection() {
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" as const }}>
           <a
             href="/portal/explore"
+            onClick={() => trackLinkedInConversion()}
             style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 15, color: "#fff", background: BRAND.violet, border: "none", borderRadius: 8, padding: "13px 28px", cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}
           >
             {isLoggedIn ? "View Trends" : "Subscribe Now"}
@@ -805,7 +807,7 @@ function NewsletterSection() {
           {!isLoggedIn && (
             <a
               href="#"
-              onClick={(e) => { e.preventDefault(); setLoginOpen(true); }}
+              onClick={(e) => { e.preventDefault(); trackLinkedInConversion(); setLoginOpen(true); }}
               style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 15, color: BRAND.dark, background: "transparent", border: `1.5px solid ${BRAND.dark}22`, borderRadius: 8, padding: "13px 28px", cursor: "pointer", textDecoration: "none" }}
             >
               Already a member? Log in

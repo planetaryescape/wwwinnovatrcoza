@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import { trackLinkedInConversion } from "@/lib/linkedin-tracking";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -94,6 +95,7 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
   const isInView = useInView(cardRef, { once: false, amount: 0.5 });
 
   const handleBecomeMember = () => {
+    trackLinkedInConversion();
     if (plan.name === "Starter") {
       setLocation("/checkout/membership-entry");
     } else if (plan.name === "Growth") {
