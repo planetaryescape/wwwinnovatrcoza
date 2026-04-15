@@ -497,7 +497,7 @@ function OfferingsSection() {
                 ))}
               </div>
 
-              <a href={item.href} style={{
+              <a href={item.href} onClick={() => trackLinkedInConversion()} style={{
                 fontFamily: '"DM Sans", sans-serif',
                 fontSize: 13,
                 fontWeight: 700,
