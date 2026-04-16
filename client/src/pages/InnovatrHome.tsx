@@ -1299,7 +1299,7 @@ function HomeMembershipSection() {
             Memberships
           </span>
           <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: "clamp(1.7rem, 3.5vw, 2.6rem)", fontWeight: 400, color: "#fff", margin: "0 0 10px", letterSpacing: "-0.02em" }}>
-            Join the Club &{" "}<span style={{ color: BRAND.amber }}>Save</span>
+            Join the Club &{" "}<span style={{ color: BRAND.coral }}>Save</span>
           </h2>
           <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 15, fontWeight: 400, color: "#fff", lineHeight: 1.6, maxWidth: 460, margin: "0 auto" }}>
             Scale your research. Save up to 50%.

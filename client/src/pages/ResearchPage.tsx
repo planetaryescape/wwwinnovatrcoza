@@ -556,7 +556,7 @@ function MembershipSection() {
             letterSpacing: "-0.02em",
           }}>
             Join the Club &{" "}
-            <span style={{ color: BRAND.amber }}>Save</span>
+            <span style={{ color: BRAND.coral }}>Save</span>
           </h2>
           <p style={{
             fontFamily: '"DM Sans", sans-serif',

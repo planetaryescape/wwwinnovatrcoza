@@ -1,10 +1,48 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Users, Clock, CheckCircle2, Zap, Target, Download } from "lucide-react";
+import { ArrowLeft, Clock, CheckCircle2, Users, Zap, Target, Download, ArrowRight } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { useSEO } from "@/hooks/use-seo";
+import PublicNavbar from "@/components/PublicNavbar";
+import { InnovatrFooter } from "@/components/InnovatrFooter";
+
+const BRAND = {
+  violet: "#3A2FBF",
+  coral: "#E8503A",
+  cyan: "#4EC9E8",
+  offWhite: "#F8F7F4",
+  dark: "#0D0B1F",
+  cardBg: "#FFFFFF",
+  border: "#E5E3DE",
+  borderLight: "#EDEBE7",
+  textPrimary: "#0D0B1F",
+  textSecondary: "#4A4862",
+  textTertiary: "#8A879A",
+};
+
+const responsiveStyles = `
+  @media (max-width: 768px) {
+    .t24b-grid-3 { grid-template-columns: 1fr !important; }
+    .t24b-grid-2 { grid-template-columns: 1fr !important; }
+    .t24b-cta-row { flex-direction: column !important; }
+  }
+`;
+
+const features = [
+  { title: "24hr turnaround for rapid validation", desc: "Get insights fast when speed matters" },
+  { title: "Flexible idea volume with no minimum", desc: "Test as many or as few ideas as you need" },
+  { title: "X100 Consumer Reach, 5min Survey", desc: "Quick, focused feedback from real consumers" },
+  { title: "Automated brief upload portal saving you time", desc: "Simple, streamlined briefing process" },
+  { title: "Final Reports emailed 24hrs later", desc: "Actionable insights delivered on time" },
+];
+
+const useCases = [
+  "Testing a social media post before launch",
+  "Checking two packaging designs or thumbnails",
+  "Quick validation of a new product name",
+  "Understanding which claim or benefit feels strongest",
+  "Early concept screening for rough ideas or low fidelity designs",
+];
 
 export default function Test24BasicPage() {
   const [, setLocation] = useLocation();
@@ -34,274 +72,286 @@ export default function Test24BasicPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Button
-          variant="ghost"
-          className="mb-8"
+    <div style={{ minHeight: "100vh", background: BRAND.offWhite, color: BRAND.textPrimary, fontFamily: '"DM Sans", sans-serif' }}>
+      <style>{responsiveStyles}</style>
+      <PublicNavbar />
+
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "120px 24px 80px" }}>
+
+        {/* Back button */}
+        <button
           onClick={() => setLocation(backHref)}
           data-testid="button-back"
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: "none", border: "none", color: BRAND.textTertiary,
+            cursor: "pointer", fontSize: 14, fontFamily: "inherit",
+            marginBottom: 40, padding: "4px 0", transition: "color 0.2s",
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = BRAND.textPrimary; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = BRAND.textTertiary; }}
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <ArrowLeft size={16} />
           {backLabel}
-        </Button>
+        </button>
 
-        <div className="mb-12">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-16 h-16 rounded-md flex items-center justify-center" style={{ backgroundColor: 'rgba(242, 184, 168, 0.2)' }}>
-              <Clock className="w-8 h-8" style={{ color: '#F2B8A8' }} />
+        {/* Hero */}
+        <div style={{ marginBottom: 56 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 20 }}>
+            <div style={{
+              width: 60, height: 60, borderRadius: 14,
+              background: `${BRAND.coral}14`,
+              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+            }}>
+              <Clock size={28} color={BRAND.coral} />
             </div>
             <div>
-              <h1 className="text-5xl font-serif font-bold" style={{ color: '#F2B8A8' }}>
-                Innovatr Test24 Basic
+              <div style={{ fontSize: 11, fontWeight: 700, color: BRAND.coral, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6 }}>
+                Test24 Basic
+              </div>
+              <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontFamily: '"Playfair Display", serif', fontWeight: 700, margin: 0, color: BRAND.dark, letterSpacing: "-0.02em" }}>
+                24-Hour Consumer Research
               </h1>
             </div>
           </div>
-          
-          <p className="text-2xl font-medium mb-2">
-            24hr Pay Per Concept Testing – {formatPrice(5000)} per concept (members)
-          </p>
-          <p className="text-xl text-muted-foreground">
-            Idea, Design, Creative rapid testing in any format
+          <p style={{ fontSize: 18, color: BRAND.textSecondary, lineHeight: 1.6, maxWidth: 640, margin: 0 }}>
+            24hr Pay Per Concept Testing — {formatPrice(5000)} per concept (members). Idea, Design, Creative rapid testing in any format.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4 mb-12">
-          <Card className="bg-muted/30">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-2 mb-2">
-                <Users className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold">Ideal For</h3>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <span className="px-3 py-1 bg-accent/10 text-foreground rounded-full text-sm">
-                  Agencies
+        {/* 3 summary cards */}
+        <div className="t24b-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 48 }}>
+          <div style={{
+            background: BRAND.cardBg, border: `1px solid ${BRAND.border}`,
+            borderRadius: 14, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <Users size={18} color={BRAND.coral} />
+              <span style={{ fontWeight: 700, fontSize: 14, color: BRAND.dark }}>Ideal For</span>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {["Agencies", "Product Leads", "Startups"].map((tag) => (
+                <span key={tag} style={{
+                  background: `${BRAND.coral}10`, color: BRAND.coral,
+                  fontSize: 12, fontWeight: 600, padding: "4px 12px",
+                  borderRadius: 100, display: "inline-block",
+                }}>
+                  {tag}
                 </span>
-                <span className="px-3 py-1 bg-accent/10 text-foreground rounded-full text-sm">
-                  Product Leads
-                </span>
-                <span className="px-3 py-1 bg-accent/10 text-foreground rounded-full text-sm">
-                  Startups
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+              ))}
+            </div>
+          </div>
 
-          <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="pt-6">
-              <h3 className="font-semibold mb-2 flex items-center gap-2">
-                <Zap className="w-5 h-5 text-primary" />
-                Pain Point
-              </h3>
-              <p className="text-muted-foreground">
-                Teams wanting faster concept testing with flexibility to only pay per concept you want to test - flexibility & affordability unlocked
-              </p>
-            </CardContent>
-          </Card>
+          <div style={{
+            background: BRAND.cardBg, border: `1px solid ${BRAND.coral}30`,
+            borderRadius: 14, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <Zap size={18} color={BRAND.coral} />
+              <span style={{ fontWeight: 700, fontSize: 14, color: BRAND.dark }}>Pain Point</span>
+            </div>
+            <p style={{ fontSize: 13, color: BRAND.textSecondary, lineHeight: 1.6, margin: 0 }}>
+              Teams wanting faster concept testing with flexibility to only pay per concept — flexibility &amp; affordability unlocked.
+            </p>
+          </div>
 
-          <Card className="bg-muted/30">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-2 mb-3">
-                <Target className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold">Utilised For</h3>
-              </div>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-0.5">•</span>
-                  <span>Fast creative checks</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-0.5">•</span>
-                  <span>Quick design validation</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-0.5">•</span>
-                  <span>Early stage concept screening</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary mt-0.5">•</span>
-                  <span>Rapid decision support</span>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
+          <div style={{
+            background: BRAND.cardBg, border: `1px solid ${BRAND.border}`,
+            borderRadius: 14, padding: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <Target size={18} color={BRAND.coral} />
+              <span style={{ fontWeight: 700, fontSize: 14, color: BRAND.dark }}>Utilised For</span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {["Fast creative checks", "Quick design validation", "Early stage concept screening", "Rapid decision support"].map((item) => (
+                <div key={item} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: BRAND.coral, flexShrink: 0 }} />
+                  <span style={{ fontSize: 13, color: BRAND.textSecondary }}>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <Card className="mb-12 border-accent">
-          <CardContent className="pt-8">
-            <div className="flex items-center gap-2 mb-6">
-              <CheckCircle2 className="w-6 h-6 text-accent" />
-              <h2 className="text-3xl font-serif font-bold">Key Features</h2>
-            </div>
-            
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="flex gap-3">
-                <CheckCircle2 className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+        {/* Key Features */}
+        <div style={{
+          background: BRAND.cardBg, border: `1px solid ${BRAND.border}`,
+          borderRadius: 16, padding: 32, marginBottom: 32,
+          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+            <CheckCircle2 size={22} color={BRAND.coral} />
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: BRAND.dark, margin: 0 }}>Key Features</h2>
+          </div>
+          <div className="t24b-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 32px" }}>
+            {features.map((f) => (
+              <div key={f.title} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                <CheckCircle2 size={16} color={BRAND.coral} style={{ flexShrink: 0, marginTop: 2 }} />
                 <div>
-                  <h3 className="font-semibold mb-1">24hr turnaround for rapid validation</h3>
-                  <p className="text-sm text-muted-foreground">Get insights fast when speed matters</p>
+                  <div style={{ fontWeight: 600, fontSize: 14, color: BRAND.dark, marginBottom: 2 }}>{f.title}</div>
+                  <div style={{ fontSize: 13, color: BRAND.textTertiary, lineHeight: 1.5 }}>{f.desc}</div>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
 
-              <div className="flex gap-3">
-                <CheckCircle2 className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                <div>
-                  <h3 className="font-semibold mb-1">Flexible idea volume with no minimum</h3>
-                  <p className="text-sm text-muted-foreground">Test as many or as few ideas as you need</p>
-                </div>
-              </div>
+        {/* Download Demo Materials */}
+        <div style={{
+          background: BRAND.cardBg, border: `1px solid ${BRAND.border}`,
+          borderRadius: 16, padding: 32, marginBottom: 32,
+          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+        }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: BRAND.dark, margin: "0 0 6px" }}>
+            Download Demo Materials
+          </h2>
+          <p style={{ fontSize: 14, color: BRAND.textSecondary, margin: "0 0 20px" }}>
+            See what your reports and questionnaire will look like
+          </p>
+          <div className="t24b-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <a
+              href="/assets/reports/Test24-Basic-Demo.pdf"
+              download
+              data-testid="button-download-demo-report"
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                border: `1.5px solid ${BRAND.border}`, borderRadius: 10,
+                padding: "12px 20px", color: BRAND.textPrimary,
+                fontWeight: 600, fontSize: 14, textDecoration: "none",
+                fontFamily: "inherit", background: BRAND.offWhite,
+                transition: "border-color 0.2s, background 0.2s",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = BRAND.coral; (e.currentTarget as HTMLElement).style.background = `${BRAND.coral}06`; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = BRAND.border; (e.currentTarget as HTMLElement).style.background = BRAND.offWhite; }}
+            >
+              <Download size={15} color={BRAND.coral} />
+              Download Demo Report
+            </a>
+            <a
+              href="/assets/reports/Test24-Basic-Questionnaire.docx"
+              download
+              data-testid="button-download-demo-questionnaire"
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                border: `1.5px solid ${BRAND.border}`, borderRadius: 10,
+                padding: "12px 20px", color: BRAND.textPrimary,
+                fontWeight: 600, fontSize: 14, textDecoration: "none",
+                fontFamily: "inherit", background: BRAND.offWhite,
+                transition: "border-color 0.2s, background 0.2s",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = BRAND.coral; (e.currentTarget as HTMLElement).style.background = `${BRAND.coral}06`; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = BRAND.border; (e.currentTarget as HTMLElement).style.background = BRAND.offWhite; }}
+            >
+              <Download size={15} color={BRAND.coral} />
+              Download Demo Questionnaire
+            </a>
+          </div>
+        </div>
 
-              <div className="flex gap-3">
-                <CheckCircle2 className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                <div>
-                  <h3 className="font-semibold mb-1">X100 Consumer Reach, 5min Survey</h3>
-                  <p className="text-sm text-muted-foreground">Quick, focused feedback from real consumers</p>
-                </div>
-              </div>
+        {/* Respondent Experience Video */}
+        <div style={{
+          background: BRAND.cardBg, border: `1px solid ${BRAND.border}`,
+          borderRadius: 16, padding: 32, marginBottom: 48,
+          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+        }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: BRAND.dark, margin: "0 0 6px" }}>
+            Respondent Experience Video
+          </h2>
+          <p style={{ fontSize: 14, color: BRAND.textSecondary, margin: "0 0 20px" }}>
+            See what consumers experience when answering a survey
+          </p>
+          <div style={{ padding: "56.25% 0 0 0", position: "relative", borderRadius: 10, overflow: "hidden" }}>
+            <iframe
+              src="https://player.vimeo.com/video/1138122312?badge=0&autopause=0&player_id=0&app_id=58479&title=0&byline=0&portrait=0"
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+              allow="fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+              title="Respondent Experience Video"
+              data-testid="video-respondent-experience"
+            />
+          </div>
+        </div>
 
-              <div className="flex gap-3">
-                <CheckCircle2 className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                <div>
-                  <h3 className="font-semibold mb-1">Automated brief upload portal saving you time</h3>
-                  <p className="text-sm text-muted-foreground">Simple, streamlined briefing process</p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <CheckCircle2 className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                <div>
-                  <h3 className="font-semibold mb-1">Final Reports emailed 24hrs later</h3>
-                  <p className="text-sm text-muted-foreground">Actionable insights delivered on time</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="mb-12 bg-accent/5 border-accent/20">
-          <CardContent className="pt-8">
-            <h2 className="text-2xl font-serif font-bold mb-2 text-center">
-              Download Demo Materials
-            </h2>
-            <p className="text-center text-muted-foreground mb-6">
-              See what your reports and questionnaire will look like
-            </p>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <a
-                href="/assets/reports/Test24-Basic-Demo.pdf"
-                download
-                data-testid="button-download-demo-report"
-              >
-                <Button variant="outline" className="w-full">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download Demo Report
-                </Button>
-              </a>
-              <a
-                href="/assets/reports/Test24-Basic-Questionnaire.docx"
-                download
-                data-testid="button-download-demo-questionnaire"
-              >
-                <Button variant="outline" className="w-full">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download Demo Questionnaire
-                </Button>
-              </a>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="mb-12">
-          <CardContent className="pt-8">
-            <h2 className="text-3xl font-serif font-bold mb-4 text-center">
-              Respondent Experience Video
-            </h2>
-            <p className="text-lg text-muted-foreground text-center mb-6 max-w-2xl mx-auto">
-              See what consumers experience when answering a survey
-            </p>
-            <div style={{ padding: "56.25% 0 0 0", position: "relative" }}>
-              <iframe
-                src="https://player.vimeo.com/video/1138122312?badge=0&autopause=0&player_id=0&app_id=58479&title=0&byline=0&portrait=0"
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%"
-                }}
-                allow="fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-                referrerPolicy="strict-origin-when-cross-origin"
-                allowFullScreen
-                title="Respondent Experience Video"
-                data-testid="video-respondent-experience"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="mb-12">
-          <h2 className="text-3xl font-serif font-bold mb-4">
+        {/* When to use */}
+        <div style={{ marginBottom: 56 }}>
+          <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontFamily: '"Playfair Display", serif', fontWeight: 700, color: BRAND.dark, margin: "0 0 12px", letterSpacing: "-0.01em" }}>
             When to use Test24 Basic
           </h2>
-          <p className="text-lg text-muted-foreground mb-6">
+          <p style={{ fontSize: 16, color: BRAND.textSecondary, lineHeight: 1.6, margin: "0 0 24px" }}>
             Perfect for the moments when you need a fast signal, a simple yes or no, or a quick comparison before you invest more time or budget.
           </p>
-          
-          <h3 className="text-xl font-semibold mb-4">Typical Basic use cases</h3>
-          <ul className="space-y-3 mb-6">
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-              <span className="text-muted-foreground">Testing a social media post before launch</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-              <span className="text-muted-foreground">Checking two packaging designs or thumbnails</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-              <span className="text-muted-foreground">Quick validation of a new product name</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-              <span className="text-muted-foreground">Understanding which claim or benefit feels strongest</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-              <span className="text-muted-foreground">Early concept screening for rough ideas or low fidelity designs</span>
-            </li>
-          </ul>
-          
-          <p className="text-lg font-medium text-accent">
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: BRAND.dark, margin: "0 0 16px" }}>Typical Basic use cases</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
+            {useCases.map((item) => (
+              <div key={item} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                <CheckCircle2 size={16} color={BRAND.coral} style={{ flexShrink: 0, marginTop: 2 }} />
+                <span style={{ fontSize: 15, color: BRAND.textSecondary, lineHeight: 1.5 }}>{item}</span>
+              </div>
+            ))}
+          </div>
+          <p style={{ fontSize: 15, fontWeight: 600, color: BRAND.coral, margin: 0 }}>
             Short, sharp, and made for speed.
           </p>
         </div>
 
-        <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg p-8 text-center">
-          <h2 className="text-3xl font-serif font-bold mb-4">
-            Ready to test your ideas?
-          </h2>
-          <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Get started with Test24 Basic and validate your concepts in just 24 hours
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg"
-              asChild
-              data-testid="button-get-started"
-            >
-              <a href="/#pricing">Get Started</a>
-            </Button>
-            <Button 
-              size="lg"
-              variant="outline"
-              asChild
-              data-testid="button-learn-more"
-            >
-              <a href="/#pricing">Learn More</a>
-            </Button>
+        {/* CTA Banner */}
+        <div style={{
+          background: BRAND.dark, borderRadius: 18, padding: "48px 40px",
+          textAlign: "center", position: "relative", overflow: "hidden",
+        }}>
+          <div style={{
+            position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+            background: `radial-gradient(ellipse at 70% 50%, ${BRAND.coral}20 0%, transparent 60%)`,
+            pointerEvents: "none",
+          }} />
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontFamily: '"Playfair Display", serif', fontWeight: 700, color: "#fff", margin: "0 0 10px", letterSpacing: "-0.02em" }}>
+              Ready to test your ideas?
+            </h2>
+            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.65)", margin: "0 0 28px" }}>
+              Get started with Test24 Basic and validate your concepts in just 24 hours.
+            </p>
+            <div className="t24b-cta-row" style={{ display: "flex", justifyContent: "center", gap: 12 }}>
+              <a
+                href="/#pricing"
+                data-testid="button-get-started"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 8,
+                  background: BRAND.coral, color: "#fff",
+                  padding: "13px 28px", borderRadius: 10,
+                  fontWeight: 700, fontSize: 15, textDecoration: "none",
+                  fontFamily: "inherit", transition: "opacity 0.2s",
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.9"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+              >
+                Get Started
+                <ArrowRight size={15} />
+              </a>
+              <a
+                href="/research#our-offering"
+                data-testid="button-learn-more"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 8,
+                  border: "1.5px solid rgba(255,255,255,0.25)", color: "#fff",
+                  padding: "13px 28px", borderRadius: 10,
+                  fontWeight: 600, fontSize: 15, textDecoration: "none",
+                  fontFamily: "inherit", background: "rgba(255,255,255,0.06)",
+                  transition: "background 0.2s, border-color 0.2s",
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.12)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
+              >
+                Learn More
+              </a>
+            </div>
           </div>
         </div>
-      </main>
+      </div>
+
+      <InnovatrFooter />
     </div>
   );
 }
