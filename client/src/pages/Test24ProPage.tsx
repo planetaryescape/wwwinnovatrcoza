@@ -110,7 +110,7 @@ export default function Test24ProPage() {
                 Test24 Pro
               </div>
               <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontFamily: '"Playfair Display", serif', fontWeight: 700, margin: 0, color: BRAND.dark, letterSpacing: "-0.02em" }}>
-                Advanced Consumer Research
+                Innovatr Test24 Pro
               </h1>
             </div>
           </div>
@@ -315,7 +315,7 @@ export default function Test24ProPage() {
                 <ArrowRight size={15} />
               </a>
               <a
-                href="/research#our-offering"
+                href="/#pricing"
                 data-testid="button-learn-more"
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 8,
