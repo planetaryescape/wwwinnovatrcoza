@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Download, ArrowLeft, Calendar, Briefcase, Lock, Crown, CreditCard, LogIn, Play, ChevronUp, FileText, ExternalLink, Loader2, Mail, CheckCircle2, TrendingUp } from "lucide-react";
 import PortalLayout from "./PortalLayout";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
+import PublicNavbar from "@/components/PublicNavbar";
+import { InnovatrFooter } from "@/components/InnovatrFooter";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,9 +24,9 @@ function InsightPageWrapper({ children, isAuthenticated }: { children: React.Rea
   }
   return (
     <div className="min-h-screen flex flex-col">
-      <Navigation />
+      <PublicNavbar />
       <main className="flex-1">{children}</main>
-      <Footer />
+      <InnovatrFooter />
     </div>
   );
 }
@@ -301,6 +301,9 @@ export default function InsightDetail() {
   const [report, setReport] = useState<Report | null>(null);
   const [relatedReports, setRelatedReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  const hasHomeRef = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("ref") === "home";
+  const cameFromHome = hasHomeRef && !isAuthenticated;
+  const backDestination = cameFromHome ? "/#trends" : "/portal/trends";
 
   useEffect(() => {
     const fetchReport = async () => {
@@ -543,12 +546,18 @@ export default function InsightDetail() {
             <div className="max-w-3xl mx-auto">
               <Button
                 variant="ghost"
-                onClick={() => setLocation("/portal/trends")}
+                onClick={() => {
+                  if (cameFromHome) {
+                    window.location.href = "/?scrollTo=trends";
+                  } else {
+                    setLocation(backDestination);
+                  }
+                }}
                 className="mb-4 text-white hover:text-white hover:bg-white/20 -ml-2"
                 data-testid="button-back"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Library
+                {cameFromHome ? "Back to Trends" : "Back to Library"}
               </Button>
               
               <div className="flex items-center gap-2 mb-3 flex-wrap">
@@ -944,17 +953,46 @@ export default function InsightDetail() {
             </div>
           )}
 
-          <div className="text-center py-8">
-            <Button
-              variant="outline"
-              onClick={() => setLocation("/portal/trends")}
-              className="rounded-full border-[#5B6EF7] text-[#5B6EF7] hover:bg-[#5B6EF7] hover:text-white"
-              data-testid="button-back-footer"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Trends Library
-            </Button>
-          </div>
+          {isAuthenticated ? (
+            <div className="text-center py-8">
+              <Button
+                variant="outline"
+                onClick={() => setLocation("/portal/trends")}
+                className="rounded-full border-[#5B6EF7] text-[#5B6EF7] hover:bg-[#5B6EF7] hover:text-white"
+                data-testid="button-back-footer"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Trends Library
+              </Button>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <button
+                onClick={() => setLoginDialogOpen(true)}
+                data-testid="button-signup-cta"
+                style={{
+                  fontFamily: '"DM Sans", sans-serif',
+                  fontWeight: 700,
+                  fontSize: 16,
+                  color: '#fff',
+                  backgroundColor: '#E8503A',
+                  border: 'none',
+                  borderRadius: 10,
+                  padding: '15px 36px',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  transition: 'opacity 0.2s ease',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.9'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
+              >
+                <Mail className="w-5 h-5" />
+                Sign Up to Receive Trends &amp; Insights
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Floating Back to Top button */}
@@ -974,7 +1012,7 @@ export default function InsightDetail() {
       <LoginDialog
         open={loginDialogOpen}
         onOpenChange={setLoginDialogOpen}
-        defaultSignup={false}
+        defaultSignup={true}
         returnTo={params?.slug ? `/portal/insights/${params.slug}` : "/portal"}
       />
     </InsightPageWrapper>

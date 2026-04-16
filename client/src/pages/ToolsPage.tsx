@@ -244,6 +244,7 @@ function ImageCarousel({ images }: { images: string[] }) {
             key={idx}
             src={img}
             alt="Design portfolio"
+            loading="lazy"
             style={{ height: "100%", width: "auto", flexShrink: 0, objectFit: "cover", minWidth: 200 }}
           />
         ))}
@@ -297,6 +298,7 @@ function ToolCard({ tool, index, onSelect }: { tool: Tool; index: number; onSele
           <img
             src={tool.image}
             alt={tool.name}
+            loading="lazy"
             style={{
               width: "100%",
               height: "100%",
@@ -508,7 +510,7 @@ function ExpandedToolModal({ tool, onClose }: { tool: Tool; onClose: () => void 
                 {tool.video.includes(".gif") ? (
                   <img src={tool.video} alt={tool.name} style={{ width: "100%", height: "100%", objectFit: "contain", background: "#fff" }} />
                 ) : (
-                  <video src={tool.video} autoPlay loop muted playsInline style={{ width: "100%", height: "100%", objectFit: "contain", background: "#fff" }} />
+                  <video src={tool.video} autoPlay loop muted playsInline preload="none" style={{ width: "100%", height: "100%", objectFit: "contain", background: "#fff" }} />
                 )}
                 <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 60, background: "linear-gradient(to top, #fff, transparent)" }} />
               </div>
@@ -517,6 +519,7 @@ function ExpandedToolModal({ tool, onClose }: { tool: Tool; onClose: () => void 
                 <img
                   src={tool.image}
                   alt={tool.name}
+                  loading="lazy"
                   style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: tool.imagePosition === "object-left" ? "left center" : "center" }}
                 />
                 <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 60, background: "linear-gradient(to top, #fff, transparent)" }} />
@@ -875,6 +878,7 @@ function SocialMediaSection() {
                       loop
                       muted
                       playsInline
+                      preload="none"
                       style={{
                         display: "block",
                         width: "100%",
@@ -1110,6 +1114,7 @@ function DashboardSection() {
               <img
                 src={active.image}
                 alt={active.title}
+                loading="lazy"
                 style={{ width: "100%", height: "auto", display: "block" }}
               />
             )}

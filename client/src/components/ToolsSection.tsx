@@ -204,6 +204,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
                   loop
                   muted
                   playsInline
+                  preload="none"
                   className="w-full h-auto max-h-[85vh] object-contain bg-white rounded-lg"
                   onClick={(e) => e.stopPropagation()}
                 />
@@ -270,6 +271,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
                   loop
                   muted
                   playsInline
+                  preload="none"
                   poster={tool.image || ""}
                   className={`w-full h-full object-cover object-left transition-transform duration-700 ${(isHovered || isInView) ? 'scale-[0.95]' : 'scale-[0.85]'}`}
                   data-testid={`video-tool-${tool.id}`}

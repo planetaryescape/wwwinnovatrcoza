@@ -133,7 +133,6 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
           alt={`${plan.name} membership character`}
           width={176}
           height={176}
-          loading="lazy"
           className="h-44 w-auto object-contain z-10"
           animate={isActive ? { y: -8 } : { y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}

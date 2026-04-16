@@ -189,10 +189,10 @@ export function LoginDialog({ open, onOpenChange, defaultSignup = false, returnT
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={isSignup ? "sm:max-w-lg max-h-[90vh] overflow-y-auto" : "sm:max-w-md"} data-testid="dialog-login">
         <DialogHeader>
-          <DialogTitle data-testid="text-login-title" className="text-xl font-serif">
+          <DialogTitle data-testid="text-login-title" style={{ fontFamily: '"DM Serif Display", serif', fontSize: '1.35rem', fontWeight: 400, letterSpacing: '-0.01em' }}>
             {isSignup ? "Create a Free Account" : "Sign In"}
           </DialogTitle>
-          <DialogDescription data-testid="text-login-description">
+          <DialogDescription data-testid="text-login-description" style={{ fontFamily: '"DM Sans", sans-serif' }}>
             {isSignup
               ? "Join leading brands using Innovatr to make smarter decisions, faster."
               : "Access your portal and continue your research journey."}
@@ -382,6 +382,7 @@ export function LoginDialog({ open, onOpenChange, defaultSignup = false, returnT
             type="submit"
             data-testid="button-submit-login"
             className="w-full"
+            style={{ backgroundColor: '#5B6EF7', fontFamily: '"DM Sans", sans-serif', fontWeight: 600 }}
             disabled={isLoading || (isSignup && !allRequirementsMet)}
           >
             {isLoading ? "Please wait..." : isSignup ? "Create Free Account" : "Sign In"}
@@ -412,7 +413,8 @@ export function LoginDialog({ open, onOpenChange, defaultSignup = false, returnT
               type="button"
               data-testid="button-toggle-signup"
               onClick={() => setIsSignup(!isSignup)}
-              className="text-primary hover-elevate active-elevate-2"
+              className="hover-elevate active-elevate-2"
+              style={{ color: '#5B6EF7', fontFamily: '"DM Sans", sans-serif' }}
             >
               {isSignup ? "Already have an account? Sign in" : "Don't have an account? Sign up free"}
             </button>

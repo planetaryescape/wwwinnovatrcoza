@@ -1,23 +1,36 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { trackLinkedInConversion } from "@/lib/linkedin-tracking";
 import PublicNavbar from "@/components/PublicNavbar";
 import { LoginDialog } from "@/components/LoginDialog";
 import { useAuth } from "@/contexts/AuthContext";
-import { Timer, ClipboardCheck, BrainCircuit, Globe, User } from "lucide-react";
+import { Timer, ClipboardCheck, BrainCircuit, Globe, User, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import innovatrLogo from "@assets/Innovatr_logo-01_for_light_1774947393282.png";
 import mascotBasic from "@assets/Basic_1774944576263.png";
 import mascotMember from "@assets/Member_1774944576265.png";
 import binocularsImg from "@assets/search___find,_binoculars,_man,_people,_explore,_discover,_los_1775746963830.png";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
 import { useSEO } from "@/hooks/use-seo";
+import { isFreeContent } from "@shared/access";
+import insightsCover1 from "@assets/category-insights.png";
+import insightsCover2 from "@assets/category-insights-2.png";
+import insightsCover3 from "@assets/category-insights-3.png";
+import launchCover1 from "@assets/category-launch.png";
+import launchCover2 from "@assets/category-launch-2.png";
+import launchCover3 from "@assets/category-launch-3.png";
+import insideCover1 from "@assets/category-inside.png";
+import insideCover2 from "@assets/category-inside-2.png";
+import insideCover3 from "@assets/category-inside-3.png";
+import irlCover1 from "@assets/category-irl.png";
+import irlCover2 from "@assets/category-irl-2.png";
+import irlCover3 from "@assets/category-irl-3.png";
 import mascotStarter from "@assets/Starter_1774884250090.png";
 import mascotGrowth from "@assets/Growth_1774884250087.png";
 import mascotScale from "@assets/Scale_1774884250090.png";
-import personaTM from "@assets/personas/persona_tm.png";
-import personaJK from "@assets/personas/persona_jk.png";
-import personaNP from "@assets/personas/persona_np.png";
-import personaDR from "@assets/personas/persona_dr.png";
-import personaLW from "@assets/personas/persona_lw.png";
+import personaTM from "@assets/personas/persona_tm.webp";
+import personaJK from "@assets/personas/persona_jk.webp";
+import personaNP from "@assets/personas/persona_np.webp";
+import personaDR from "@assets/personas/persona_dr.webp";
+import personaLW from "@assets/personas/persona_lw.webp";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -1360,57 +1373,354 @@ function HomeMembershipSection() {
   );
 }
 
-function NewsletterSection() {
+const trendsCoverVariations: Record<string, string[]> = {
+  insights: [insightsCover1, insightsCover2, insightsCover3],
+  irl: [irlCover1, irlCover2, irlCover3],
+  inside: [insideCover1, insideCover2, insideCover3],
+  launch: [launchCover1, launchCover2, launchCover3],
+};
+
+function getTrendCoverImage(category: string, reportId?: number): string {
+  const key = category.toLowerCase().trim().replace("innovatr ", "");
+  const variations = trendsCoverVariations[key] || trendsCoverVariations.insights;
+  const variationIndex = (reportId || 0) % variations.length;
+  return variations[variationIndex];
+}
+
+const trendCategoryColors: Record<string, { bg: string; text: string }> = {
+  insights: { bg: "#EEF0FE", text: "#5B6EF7" },
+  launch: { bg: "#FFF3E0", text: "#C2410C" },
+  inside: { bg: "#F3E8FF", text: "#7C3AED" },
+  irl: { bg: "#FFF1F2", text: "#E11D48" },
+};
+
+interface TrendReport {
+  id: number;
+  category: string;
+  industry: string;
+  title: string;
+  teaser: string;
+  slug: string;
+  coverImageUrl?: string;
+  date: string;
+  accessLevel?: string;
+  topics?: string[];
+}
+
+function HomeTrendsSection() {
   const { user } = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
+  const [reports, setReports] = useState<TrendReport[]>([]);
+  const [activeIndustry, setActiveIndustry] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const fetchReports = useCallback(async () => {
+    try {
+      const res = await fetch("/api/reports");
+      if (res.ok) {
+        const data = await res.json();
+        setReports(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch trends:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchReports();
+  }, [fetchReports]);
+
+  const freeReports = useMemo(() => {
+    return reports.filter((r) =>
+      isFreeContent({
+        slug: r.slug,
+        title: r.title,
+        category: r.category,
+        accessLevel: r.accessLevel,
+      })
+    );
+  }, [reports]);
+
+  const industryFilters = useMemo(() => {
+    const counts: Record<string, number> = {};
+    freeReports.forEach((r) => {
+      const ind = (r.industry || "").trim();
+      if (!ind) return;
+      const key = ind.toLowerCase();
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    const filters = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([key]) => {
+        const report = freeReports.find((r) => (r.industry || "").toLowerCase() === key);
+        return { key, label: report?.industry || key };
+      });
+    return [{ key: "all", label: "All" }, ...filters];
+  }, [freeReports]);
+
+  const filteredReports = useMemo(() => {
+    if (activeIndustry === "all") return freeReports;
+    return freeReports.filter(
+      (r) => (r.industry || "").toLowerCase() === activeIndustry
+    );
+  }, [freeReports, activeIndustry]);
+
+  const updateScrollButtons = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    updateScrollButtons();
+    el.addEventListener("scroll", updateScrollButtons, { passive: true });
+    const resizeObs = new ResizeObserver(updateScrollButtons);
+    resizeObs.observe(el);
+    return () => {
+      el.removeEventListener("scroll", updateScrollButtons);
+      resizeObs.disconnect();
+    };
+  }, [filteredReports, updateScrollButtons]);
+
+  const scroll = (direction: "left" | "right") => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const scrollAmount = 340;
+    el.scrollBy({ left: direction === "left" ? -scrollAmount : scrollAmount, behavior: "smooth" });
+  };
+
+  if (loading) {
+    return (
+      <section aria-label="Trends and Insights" style={{ padding: "60px 32px", background: BRAND.offWhite }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", textAlign: "center" as const }}>
+          <div style={{ width: 32, height: 32, border: `3px solid ${BRAND.dark}15`, borderTopColor: BRAND.violet, borderRadius: "50%", animation: "spin 0.6s linear infinite", margin: "0 auto" }} />
+        </div>
+      </section>
+    );
+  }
+
+  if (freeReports.length === 0) return null;
 
   return (
     <>
       <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} defaultSignup={false} />
-      <section aria-label="Newsletter signup" style={{ padding: "48px 0", background: "#fff", borderTop: `1px solid ${BRAND.dark}08` }}>
-        <div style={{ maxWidth: 580, margin: "0 auto", textAlign: "center" as const, padding: "0 24px" }}>
-          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.14em", color: BRAND.coral }}>
-            Subscribe to Trends and Insights
-          </span>
-          <h2 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 28, color: BRAND.dark, margin: "10px 0 12px", lineHeight: 1.2 }}>
-            Your competitors are already reading it.
-          </h2>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: `${BRAND.dark}cc`, margin: "0 0 20px", lineHeight: 1.65 }}>
-            Bi-weekly Pulse Insights — <strong style={{ fontWeight: 600, color: BRAND.dark }}>free</strong>. Market shifts, category trends, and launch intelligence straight to your inbox.
-          </p>
-          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" as const }}>
-            {user ? (
-              <a
-                href="/portal/explore"
-                style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, color: "#fff", background: BRAND.violet, border: "none", borderRadius: 8, padding: "11px 24px", cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}
-              >
-                View Trends
-                <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-                  <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </a>
-            ) : (
-              <a
-                href="/portal/trends"
-                onClick={() => trackLinkedInConversion()}
-                style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, color: "#fff", background: BRAND.violet, border: "none", borderRadius: 8, padding: "11px 24px", cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}
-              >
-                Subscribe Now
-                <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-                  <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </a>
-            )}
-            {!user && (
+      <section id="trends" aria-label="Trends and Insights" style={{ padding: "60px 0 48px", background: BRAND.offWhite, borderTop: `1px solid ${BRAND.dark}08` }} data-testid="section-home-trends">
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
+          <div style={{ textAlign: "center" as const, marginBottom: 32 }}>
+            <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.14em", color: BRAND.coral, display: "block", marginBottom: 8 }}>
+              Subscribe to Trends and Insights
+            </span>
+            <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: "clamp(1.5rem, 3vw, 2.2rem)", fontWeight: 400, color: BRAND.dark, margin: "0 0 10px", letterSpacing: "-0.02em" }}>
+              Your competitors are already reading it.
+            </h2>
+            <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 15, color: `${BRAND.dark}aa`, lineHeight: 1.6, maxWidth: 540, margin: "0 auto" }}>
+              Bi-weekly Pulse Insights — <strong style={{ fontWeight: 600, color: BRAND.dark }}>free</strong>. Market shifts, category trends, and launch intelligence straight to your inbox.
+            </p>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 28, flexWrap: "wrap" as const }} data-testid="trends-industry-filters">
+            {industryFilters.map((ind) => {
+              const isActive = activeIndustry === ind.key;
+              return (
+                <button
+                  key={ind.key}
+                  onClick={() => setActiveIndustry(ind.key)}
+                  data-testid={`button-trend-filter-${ind.key}`}
+                  style={{
+                    fontFamily: '"DM Sans", sans-serif',
+                    fontSize: 13,
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive ? "#fff" : `${BRAND.dark}bb`,
+                    background: isActive ? BRAND.violet : `${BRAND.dark}06`,
+                    border: isActive ? `1.5px solid ${BRAND.violet}` : `1.5px solid ${BRAND.dark}10`,
+                    borderRadius: 100,
+                    padding: "7px 18px",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  {ind.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div style={{ position: "relative" }}>
+            {canScrollLeft && (
               <button
-                onClick={() => { trackLinkedInConversion(); setLoginOpen(true); }}
-                style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 14, color: BRAND.dark, background: "transparent", border: `1.5px solid ${BRAND.dark}22`, borderRadius: 8, padding: "11px 24px", cursor: "pointer" }}
+                onClick={() => scroll("left")}
+                data-testid="button-trends-scroll-left"
+                style={{
+                  position: "absolute", left: -16, top: "50%", transform: "translateY(-50%)", zIndex: 2,
+                  width: 40, height: 40, borderRadius: "50%", background: "#fff", border: `1px solid ${BRAND.dark}12`,
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.08)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                }}
               >
-                Already a member? Log in
+                <ChevronLeft size={18} color={BRAND.dark} />
               </button>
             )}
+
+            {canScrollRight && (
+              <button
+                onClick={() => scroll("right")}
+                data-testid="button-trends-scroll-right"
+                style={{
+                  position: "absolute", right: -16, top: "50%", transform: "translateY(-50%)", zIndex: 2,
+                  width: 40, height: 40, borderRadius: "50%", background: "#fff", border: `1px solid ${BRAND.dark}12`,
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.08)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                }}
+              >
+                <ChevronRight size={18} color={BRAND.dark} />
+              </button>
+            )}
+
+            <div
+              ref={scrollRef}
+              style={{
+                display: "flex", gap: 20, overflowX: "auto", scrollSnapType: "x mandatory",
+                paddingBottom: 8, scrollbarWidth: "none",
+                WebkitOverflowScrolling: "touch",
+              }}
+              className="trends-carousel-scroll"
+            >
+              {filteredReports.length === 0 ? (
+                <div style={{ width: "100%", textAlign: "center" as const, padding: "40px 0" }}>
+                  <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 14, color: `${BRAND.dark}99` }}>
+                    No trends in this industry yet.
+                  </p>
+                </div>
+              ) : (
+                filteredReports.map((report) => {
+                  const catKey = report.category.toLowerCase().trim().replace("innovatr ", "");
+                  const catColor = trendCategoryColors[catKey] || trendCategoryColors.insights;
+                  const cover = report.coverImageUrl || getTrendCoverImage(report.category, report.id);
+
+                  return (
+                    <a
+                      key={report.id}
+                      href={`/portal/insights/${report.slug}?ref=home`}
+                      data-testid={`card-trend-${report.id}`}
+                      style={{
+                        flex: "0 0 300px", scrollSnapAlign: "start",
+                        background: "#fff", borderRadius: 12, overflow: "hidden",
+                        textDecoration: "none", color: "inherit",
+                        border: `1px solid ${BRAND.dark}08`,
+                        transition: "transform 0.22s ease, box-shadow 0.22s ease",
+                        display: "flex", flexDirection: "column" as const,
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 12px 32px rgba(0,0,0,0.1)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+                    >
+                      <div style={{ position: "relative", paddingTop: "56%", overflow: "hidden" }}>
+                        <img
+                          src={cover}
+                          alt={report.title}
+                          loading="lazy"
+                          style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                          data-testid={`img-trend-cover-${report.id}`}
+                        />
+                      </div>
+                      <div style={{ padding: "16px 18px 20px", display: "flex", flexDirection: "column" as const, flex: 1 }}>
+                        <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" as const }}>
+                          <span style={{
+                            fontFamily: '"DM Sans", sans-serif', fontSize: 11, fontWeight: 600,
+                            background: catColor.bg, color: catColor.text,
+                            borderRadius: 100, padding: "3px 10px",
+                          }}>
+                            {report.category}
+                          </span>
+                          <span style={{
+                            fontFamily: '"DM Sans", sans-serif', fontSize: 11, fontWeight: 500,
+                            background: `${BRAND.dark}06`, color: `${BRAND.dark}99`,
+                            borderRadius: 100, padding: "3px 10px",
+                          }}>
+                            {report.category.toLowerCase() === "inside" ? "Products" : report.industry}
+                          </span>
+                        </div>
+                        <h3 style={{
+                          fontFamily: '"DM Serif Display", serif', fontSize: 17, fontWeight: 400,
+                          color: BRAND.dark, margin: "0 0 8px", lineHeight: 1.3,
+                          display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const, overflow: "hidden",
+                        }}>
+                          {report.title}
+                        </h3>
+                        <p style={{
+                          fontFamily: '"DM Sans", sans-serif', fontSize: 13, color: `${BRAND.dark}99`,
+                          margin: 0, lineHeight: 1.55, flex: 1,
+                          display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const, overflow: "hidden",
+                        }}>
+                          {report.teaser}
+                        </p>
+                        <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 6 }}>
+                          <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 12, fontWeight: 600, color: BRAND.violet }}>
+                            Read more
+                          </span>
+                          <ArrowRight size={13} color={BRAND.violet} />
+                        </div>
+                      </div>
+                    </a>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          <div style={{ textAlign: "center" as const, marginTop: 40, paddingBottom: 20 }}>
+            <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" as const }}>
+              {user ? (
+                <a
+                  href="/portal/explore"
+                  data-testid="link-view-trends"
+                  style={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: 15, color: "#fff", background: BRAND.coral, border: "none", borderRadius: 10, padding: "14px 32px", cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10, transition: "opacity 0.2s ease" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.9"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+                >
+                  View Trends
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </a>
+              ) : (
+                <a
+                  href="/portal/trends"
+                  onClick={() => trackLinkedInConversion()}
+                  data-testid="link-subscribe-trends"
+                  style={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: 15, color: "#fff", background: BRAND.coral, border: "none", borderRadius: 10, padding: "14px 32px", cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10, transition: "opacity 0.2s ease" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.9"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+                >
+                  Subscribe Now
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </a>
+              )}
+              {!user && (
+                <button
+                  onClick={() => { trackLinkedInConversion(); setLoginOpen(true); }}
+                  data-testid="button-member-login"
+                  style={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: 15, color: BRAND.dark, background: "transparent", border: `1.5px solid ${BRAND.dark}22`, borderRadius: 10, padding: "14px 32px", cursor: "pointer", transition: "background 0.2s ease" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = `${BRAND.dark}06`; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+                >
+                  Already a member? Log in
+                </button>
+              )}
+            </div>
           </div>
         </div>
+
+        <style>{`
+          .trends-carousel-scroll::-webkit-scrollbar { display: none; }
+        `}</style>
       </section>
     </>
   );
@@ -1648,11 +1958,23 @@ export default function InnovatrHome() {
 
   useEffect(() => {
     const hash = window.location.hash;
-    if (!hash) return;
-    const el = document.querySelector(hash);
-    if (el) {
-      setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
-    }
+    const scrollTo = new URLSearchParams(window.location.search).get("scrollTo");
+    const targetId = scrollTo || (hash ? hash.replace("#", "") : null);
+    if (!targetId) return;
+    const tryScroll = (attempts: number) => {
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        if (scrollTo) {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("scrollTo");
+          window.history.replaceState({}, "", url.pathname + url.hash);
+        }
+      } else if (attempts < 10) {
+        setTimeout(() => tryScroll(attempts + 1), 200);
+      }
+    };
+    setTimeout(() => tryScroll(0), 150);
   }, []);
 
   return (
@@ -1722,7 +2044,7 @@ export default function InnovatrHome() {
       <section id="consult" style={{ display: "none" }} />
       <section id="contact" style={{ display: "none" }} />
       <HomeMembershipSection />
-      <NewsletterSection />
+      <HomeTrendsSection />
       </main>
       <InnovatrFooter />
     </div>

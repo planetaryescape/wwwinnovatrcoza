@@ -20,7 +20,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Search, ArrowRight, ChevronDown, ChevronUp, Lock, Building2, Grid3x3, List, RefreshCw, Loader2, Crown, Clock, MessageSquarePlus, TrendingUp, LogIn, UserPlus, CheckCircle2 } from "lucide-react";
+import { Search, ArrowRight, ArrowLeft, ChevronDown, ChevronUp, Lock, Building2, Grid3x3, List, RefreshCw, Loader2, Crown, Clock, MessageSquarePlus, TrendingUp, LogIn, UserPlus, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PortalLayout from "./PortalLayout";
 import { LoginDialog } from "@/components/LoginDialog";
@@ -634,59 +634,142 @@ export default function TrendsInsights() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="max-w-3xl mx-auto px-6 py-16 text-center">
-          <div className="mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6">
-              <TrendingUp className="w-8 h-8 text-primary" />
+      <div className="min-h-screen" style={{ background: '#FAF9F7' }}>
+        <div style={{ padding: '16px 24px' }}>
+          <a
+            href="/"
+            data-testid="link-back-home"
+            style={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: 14,
+              fontWeight: 600,
+              color: '#1D1D1F',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '8px 16px',
+              borderRadius: 8,
+              border: '1.5px solid rgba(29,29,31,0.12)',
+              transition: 'background 0.2s ease',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(29,29,31,0.04)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+          >
+            <ArrowLeft size={16} />
+            Back to Home
+          </a>
+        </div>
+
+        <div style={{ maxWidth: 680, margin: '0 auto', padding: '48px 24px 64px', textAlign: 'center' }}>
+          <div style={{ marginBottom: 32 }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              width: 64, height: 64, borderRadius: '50%',
+              background: 'rgba(91,110,247,0.08)', marginBottom: 24,
+            }}>
+              <TrendingUp size={32} color="#5B6EF7" />
             </div>
             <h1
-              className="text-4xl md:text-5xl font-bold mb-4 text-foreground"
-              style={{ fontFamily: 'DM Serif Display, serif' }}
               data-testid="text-trends-gate-title"
+              style={{
+                fontFamily: '"DM Serif Display", serif',
+                fontSize: 'clamp(2rem, 4vw, 3rem)',
+                fontWeight: 400,
+                color: '#1D1D1F',
+                margin: '0 0 16px',
+                letterSpacing: '-0.02em',
+                lineHeight: 1.15,
+              }}
             >
-              Trends & Insights Library
+              Trends &amp; Insights Library
             </h1>
-            <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto" style={{ fontFamily: 'Roboto, sans-serif' }}>
+            <p style={{
+              fontFamily: '"DM Sans", sans-serif',
+              fontSize: 16,
+              color: 'rgba(29,29,31,0.7)',
+              margin: '0 auto 32px',
+              maxWidth: 520,
+              lineHeight: 1.65,
+            }}>
               Get exclusive access to bi-weekly curated insights, trend reports, and competitor intelligence across South Africa's key industries.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4 max-w-lg mx-auto mb-10 text-left">
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: 12, maxWidth: 480, margin: '0 auto 40px', textAlign: 'left',
+          }}>
             {[
               "Bi-weekly curated industry insights",
               "Trend reports & competitor alerts",
               "Downloadable research reports",
               "Personalised recommendations",
             ].map((feature) => (
-              <div key={feature} className="flex items-start gap-2">
-                <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                <span className="text-sm text-muted-foreground">{feature}</span>
+              <div key={feature} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                <CheckCircle2 size={18} color="#5B6EF7" style={{ flexShrink: 0, marginTop: 2 }} />
+                <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 14, color: 'rgba(29,29,31,0.7)' }}>{feature}</span>
               </div>
             ))}
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button
-              size="lg"
+          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
               onClick={() => { setLoginDialogSignup(true); setLoginDialogOpen(true); }}
               data-testid="button-signup-trends"
+              style={{
+                fontFamily: '"DM Sans", sans-serif',
+                fontWeight: 700,
+                fontSize: 15,
+                color: '#fff',
+                backgroundColor: '#E8503A',
+                border: 'none',
+                borderRadius: 10,
+                padding: '14px 32px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 10,
+                transition: 'opacity 0.2s ease',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.9'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
             >
-              <UserPlus className="w-4 h-4 mr-2" />
+              <UserPlus size={18} />
               Sign Up Free
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
+            </button>
+            <button
               onClick={() => { setLoginDialogSignup(false); setLoginDialogOpen(true); }}
               data-testid="button-login-trends"
+              style={{
+                fontFamily: '"DM Sans", sans-serif',
+                fontWeight: 600,
+                fontSize: 15,
+                color: '#1D1D1F',
+                backgroundColor: 'transparent',
+                border: '1.5px solid rgba(29,29,31,0.18)',
+                borderRadius: 10,
+                padding: '14px 32px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 10,
+                transition: 'background 0.2s ease',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(29,29,31,0.04)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
             >
-              <LogIn className="w-4 h-4 mr-2" />
+              <LogIn size={18} />
               Log In
-            </Button>
+            </button>
           </div>
 
-          <p className="text-xs text-muted-foreground mt-6">
+          <p style={{
+            fontFamily: '"DM Sans", sans-serif',
+            fontSize: 13,
+            color: 'rgba(29,29,31,0.5)',
+            marginTop: 24,
+          }}>
             Create a free account to browse insights. Upgrade to Starter for full access to all reports.
           </p>
         </div>

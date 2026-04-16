@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Switch, Route, Redirect, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -16,42 +17,44 @@ import ContactUs from "@/pages/ContactPage";
 import Test24BasicPage from "@/pages/Test24BasicPage";
 import Test24ProPage from "@/pages/Test24ProPage";
 import ConsultPillarPage from "@/pages/ConsultPillarPage";
-import CheckoutBasicPAYG from "@/pages/CheckoutBasicPAYG";
-import CheckoutProPAYG from "@/pages/CheckoutProPAYG";
-import CheckoutBasicMembers from "@/pages/CheckoutBasicMembers";
-import CheckoutProMembers from "@/pages/CheckoutProMembers";
-import CheckoutMembershipEntry from "@/pages/CheckoutMembershipEntry";
-import CheckoutMembershipGold from "@/pages/CheckoutMembershipGold";
-import CheckoutMembershipPlatinum from "@/pages/CheckoutMembershipPlatinum";
-import CheckoutPage from "@/pages/CheckoutPage";
-import PaymentReturn from "@/pages/PaymentReturn";
-import Dashboard from "@/pages/portal/Dashboard";
-import TrendsInsights from "@/pages/portal/TrendsInsights";
-import InsightDetail from "@/pages/portal/InsightDetail";
-import LaunchBrief from "@/pages/portal/LaunchBrief";
-import CreditsAndBilling from "@/pages/portal/CreditsAndBilling";
-import PastResearch from "@/pages/portal/PastResearch";
-import MemberDeals from "@/pages/portal/MemberDeals";
-import Settings from "@/pages/portal/Settings";
-import AdminPortal from "@/pages/portal/AdminPortal";
-import AdminCompanyDetail from "@/pages/portal/AdminCompanyDetail";
-import ExplorePage from "@/pages/portal/ExplorePage";
-import TestPage from "@/pages/portal/TestPage";
-import ActPage from "@/pages/portal/ActPage";
-import HealthPage from "@/pages/portal/HealthPage";
 import CouponSignup from "@/pages/CouponSignup";
 import ResetPassword from "@/pages/ResetPassword";
 import CaseStudyDetail from "@/pages/CaseStudyDetail";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfUse from "@/pages/TermsOfUse";
 import CookiePolicy from "@/pages/CookiePolicy";
-import ReportDetailPage from "@/pages/portal/ReportDetailPage";
 import NotFound from "@/pages/not-found";
+
+const CheckoutBasicPAYG = lazy(() => import("@/pages/CheckoutBasicPAYG"));
+const CheckoutProPAYG = lazy(() => import("@/pages/CheckoutProPAYG"));
+const CheckoutBasicMembers = lazy(() => import("@/pages/CheckoutBasicMembers"));
+const CheckoutProMembers = lazy(() => import("@/pages/CheckoutProMembers"));
+const CheckoutMembershipEntry = lazy(() => import("@/pages/CheckoutMembershipEntry"));
+const CheckoutMembershipGold = lazy(() => import("@/pages/CheckoutMembershipGold"));
+const CheckoutMembershipPlatinum = lazy(() => import("@/pages/CheckoutMembershipPlatinum"));
+const CheckoutPage = lazy(() => import("@/pages/CheckoutPage"));
+const PaymentReturn = lazy(() => import("@/pages/PaymentReturn"));
+const Dashboard = lazy(() => import("@/pages/portal/Dashboard"));
+const TrendsInsights = lazy(() => import("@/pages/portal/TrendsInsights"));
+const InsightDetail = lazy(() => import("@/pages/portal/InsightDetail"));
+const LaunchBrief = lazy(() => import("@/pages/portal/LaunchBrief"));
+const CreditsAndBilling = lazy(() => import("@/pages/portal/CreditsAndBilling"));
+const PastResearch = lazy(() => import("@/pages/portal/PastResearch"));
+const MemberDeals = lazy(() => import("@/pages/portal/MemberDeals"));
+const Settings = lazy(() => import("@/pages/portal/Settings"));
+const AdminPortal = lazy(() => import("@/pages/portal/AdminPortal"));
+const AdminCompanyDetail = lazy(() => import("@/pages/portal/AdminCompanyDetail"));
+const ExplorePage = lazy(() => import("@/pages/portal/ExplorePage"));
+const TestPage = lazy(() => import("@/pages/portal/TestPage"));
+const ActPage = lazy(() => import("@/pages/portal/ActPage"));
+const HealthPage = lazy(() => import("@/pages/portal/HealthPage"));
+const ReportDetailPage = lazy(() => import("@/pages/portal/ReportDetailPage"));
 
 function Router() {
   useGtmPageTracking();
   const [location] = useLocation();
   return (
+    <Suspense fallback={<div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}><div data-testid="loading-spinner" style={{ width: 32, height: 32, border: "3px solid #e5e7eb", borderTopColor: "#3A2FBF", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} /><style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style></div>}>
     <AnimatePresence mode="wait">
       <motion.div
         key={location}
@@ -110,6 +113,7 @@ function Router() {
         </Switch>
       </motion.div>
     </AnimatePresence>
+    </Suspense>
   );
 }
 

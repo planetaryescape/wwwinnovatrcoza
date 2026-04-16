@@ -16,6 +16,7 @@ Preferred communication style: Simple, everyday language.
 - **Styling**: Tailwind CSS v3 with custom design tokens, supporting light/dark themes, using Roboto and DM Serif Display fonts.
 - **Design Principles**: Conversion-optimized with clear CTAs, minimal friction, premium aesthetic featuring neon accents, white backgrounds, charcoal text, strategic imagery, and embedded videos.
 - **Public Website (6 Pages)**: Includes Home, Consult, Research, Tools, Case Studies (listing and detail), and Contact pages. Features a fixed glassmorphism navbar (auth-aware), dark footer with Innovatr logo and social links. Anchor sections are used for navigation.
+- **Homepage Trends Carousel**: The homepage includes a "Free Market Intelligence" carousel section (between Membership and Newsletter sections) that fetches free/public trend reports from `/api/reports`, filterable by category (Insights, Launch, IRL, Inside). Cards link to `/portal/insights/:slug`.
 - **Login Dialog**: `z-index` handled to appear above the fixed navbar.
 
 ### Backend

@@ -5,10 +5,10 @@ import { LoginDialog } from "@/components/LoginDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import innovatrLogo from "@assets/Innovatr_logo-01_for_light_1774947393282.png";
 import foldersImg from "@assets/Case_Studies_1774880110115.png";
-import dgbImg from "@assets/case-study-dgb.png";
-import namibianImg from "@assets/case-study-namibian.png";
-import discoveryImg from "@assets/case-study-discovery.png";
-import rainImg from "@assets/case-study-rain.png";
+import dgbImg from "@assets/case-study-dgb.webp";
+import namibianImg from "@assets/case-study-namibian.webp";
+import discoveryImg from "@assets/case-study-discovery.webp";
+import rainImg from "@assets/case-study-rain.webp";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
 import { useSEO } from "@/hooks/use-seo";
 
@@ -292,6 +292,7 @@ function CaseStudyVisual({
         <img
           src={image}
           alt={`${client} case study`}
+          loading="lazy"
           style={{
             width: "100%",
             height: "100%",
