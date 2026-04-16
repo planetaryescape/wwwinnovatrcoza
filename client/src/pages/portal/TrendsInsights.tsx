@@ -32,24 +32,24 @@ import {
   isFreeContent, 
   getEffectiveAccessLevel
 } from "@shared/access";
-import insightsCover1 from "@assets/category-insights.png";
-import insightsCover2 from "@assets/category-insights-2.png";
-import insightsCover3 from "@assets/category-insights-3.png";
-import launchCover1 from "@assets/category-launch.png";
-import launchCover2 from "@assets/category-launch-2.png";
-import launchCover3 from "@assets/category-launch-3.png";
-import insideCover1 from "@assets/category-inside.png";
-import insideCover2 from "@assets/category-inside-2.png";
-import insideCover3 from "@assets/category-inside-3.png";
-import irlCover1 from "@assets/category-irl.png";
-import irlCover2 from "@assets/category-irl-2.png";
-import irlCover3 from "@assets/category-irl-3.png";
-import foodCover from "@assets/industry-food.png";
-import beveragesCover from "@assets/industry-beverages.png";
-import alcoholCover from "@assets/industry-alcohol.png";
-import financialCover from "@assets/industry-financial.png";
-import fmcgCover from "@assets/industry-fmcg.png";
-import beautyCover from "@assets/industry-beauty.png";
+import insightsCover1 from "@assets/category-insights.webp";
+import insightsCover2 from "@assets/category-insights-2.webp";
+import insightsCover3 from "@assets/category-insights-3.webp";
+import launchCover1 from "@assets/category-launch.webp";
+import launchCover2 from "@assets/category-launch-2.webp";
+import launchCover3 from "@assets/category-launch-3.webp";
+import insideCover1 from "@assets/category-inside.webp";
+import insideCover2 from "@assets/category-inside-2.webp";
+import insideCover3 from "@assets/category-inside-3.webp";
+import irlCover1 from "@assets/category-irl.webp";
+import irlCover2 from "@assets/category-irl-2.webp";
+import irlCover3 from "@assets/category-irl-3.webp";
+import foodCover from "@assets/industry-food.webp";
+import beveragesCover from "@assets/industry-beverages.webp";
+import alcoholCover from "@assets/industry-alcohol.webp";
+import financialCover from "@assets/industry-financial.webp";
+import fmcgCover from "@assets/industry-fmcg.webp";
+import beautyCover from "@assets/industry-beauty.webp";
 
 const categoryCoverVariations: Record<string, string[]> = {
   insights: [insightsCover1, insightsCover2, insightsCover3],

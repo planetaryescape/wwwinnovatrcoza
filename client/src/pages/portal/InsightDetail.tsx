@@ -12,10 +12,10 @@ import { InnovatrFooter } from "@/components/InnovatrFooter";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import insightsHeader from "@assets/insights-header_1764322405058.png";
-import launchCover from "@assets/launch-cover_1764321848244.png";
-import insideCover from "@assets/inside-cover_1764321472939.png";
-import irlCover from "@assets/irl-cover_1764322310189.png";
+import insightsHeader from "@assets/insights-header_1764322405058.webp";
+import launchCover from "@assets/launch-cover_1764321848244.webp";
+import insideCover from "@assets/inside-cover_1764321472939.webp";
+import irlCover from "@assets/irl-cover_1764322310189.webp";
 import { getRelatedArticles } from "@/lib/getRelatedArticles";
 
 function InsightPageWrapper({ children, isAuthenticated }: { children: React.ReactNode; isAuthenticated: boolean }) {
