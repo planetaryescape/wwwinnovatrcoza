@@ -1,4 +1,4 @@
-import { ArrowLeft, Rocket, CheckCircle2, Building2, Target, Download, ArrowRight, Star } from "lucide-react";
+import { ArrowLeft, Rocket, CheckCircle2, Building2, Target, Download, ArrowRight } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 import { useSEO } from "@/hooks/use-seo";
@@ -113,10 +113,6 @@ export default function Test24ProPage() {
                 Innovatr Test24 Pro
               </h1>
             </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-            <Star size={14} color={BRAND.violet} fill={BRAND.violet} />
-            <span style={{ fontSize: 14, fontWeight: 600, color: BRAND.violet }}>Member Pricing Available</span>
           </div>
           <p style={{ fontSize: 18, color: BRAND.textSecondary, lineHeight: 1.6, maxWidth: 640, margin: 0 }}>
             Enterprise Level, Quant &amp; Qual Testing in 24hrs — Custom Quant Surveys with AI Qual Included.
