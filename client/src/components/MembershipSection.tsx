@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { trackLinkedInConversion } from "@/lib/linkedin-tracking";
 import { Button } from "@/components/ui/button";
+import { GradientButtonWrap } from "@/components/GradientButtonWrap";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check } from "lucide-react";
@@ -176,14 +177,16 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
             </li>
           ))}
         </ul>
-        <Button 
-          className={`w-full ${isStarter ? 'bg-[#ED876E] border-[#ED876E]' : 'bg-[#4D5FF1] border-[#4D5FF1]'}`}
-          size="lg"
-          onClick={handleBecomeMember}
-          data-testid={`button-membership-${index}`}
-        >
-          Become a Member
-        </Button>
+        <GradientButtonWrap variant={isStarter ? "coral" : "violet"} className="w-full">
+          <Button 
+            className={`w-full relative z-10 ${isStarter ? 'bg-[#ED876E] border-[#ED876E]' : 'bg-[#4D5FF1] border-[#4D5FF1]'}`}
+            size="lg"
+            onClick={handleBecomeMember}
+            data-testid={`button-membership-${index}`}
+          >
+            Become a Member
+          </Button>
+        </GradientButtonWrap>
       </CardContent>
     </Card>
   );

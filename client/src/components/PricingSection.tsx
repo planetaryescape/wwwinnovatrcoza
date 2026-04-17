@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { GradientButtonWrap } from "@/components/GradientButtonWrap";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Check, Zap, Target } from "lucide-react";
@@ -158,14 +159,16 @@ export default function PricingSection() {
                         </li>
                       ))}
                     </ul>
-                    <Button 
-                      className="w-full" 
-                      size="lg"
-                      onClick={() => handleBuyNow(plan.name)}
-                      data-testid={`button-buy-${index}`}
-                    >
-                      Buy Now
-                    </Button>
+                    <GradientButtonWrap variant="violet" className="w-full">
+                      <Button 
+                        className="w-full relative z-10" 
+                        size="lg"
+                        onClick={() => handleBuyNow(plan.name)}
+                        data-testid={`button-buy-${index}`}
+                      >
+                        Buy Now
+                      </Button>
+                    </GradientButtonWrap>
                   </CardContent>
                 </Card>
               ))}
@@ -222,14 +225,16 @@ export default function PricingSection() {
                         </li>
                       ))}
                     </ul>
-                    <Button 
-                      className="w-full" 
-                      size="lg"
-                      onClick={() => handleBuyNow(plan.name)}
-                      data-testid={`button-buy-member-${index}`}
-                    >
-                      Get Member Pricing
-                    </Button>
+                    <GradientButtonWrap variant="violet" className="w-full">
+                      <Button 
+                        className="w-full relative z-10" 
+                        size="lg"
+                        onClick={() => handleBuyNow(plan.name)}
+                        data-testid={`button-buy-member-${index}`}
+                      >
+                        Get Member Pricing
+                      </Button>
+                    </GradientButtonWrap>
                   </CardContent>
                 </Card>
               ))}

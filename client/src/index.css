@@ -473,3 +473,37 @@
     inset: -1px;
   }
 }
+
+/* Gradient CTA button glow effect */
+@keyframes grad-btn-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+.grad-btn-wrap {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  display: block;
+}
+.grad-btn-glow {
+  position: absolute;
+  width: 220%;
+  aspect-ratio: 1;
+  top: 50%; left: 50%;
+  border-radius: 50%;
+  filter: blur(14px);
+  animation: grad-btn-spin 5s linear infinite;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.grad-btn-wrap:hover .grad-btn-glow {
+  opacity: 1;
+  animation-duration: 2.5s;
+}
+.grad-btn-glow-violet {
+  background: conic-gradient(from 0deg, #3A2FBF, #E8503A, #4EC9E8, #3A2FBF);
+}
+.grad-btn-glow-coral {
+  background: conic-gradient(from 0deg, #E8503A, #F5C842, #3A2FBF, #E8503A);
+}

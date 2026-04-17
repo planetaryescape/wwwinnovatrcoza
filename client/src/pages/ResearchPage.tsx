@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { trackLinkedInConversion } from "@/lib/linkedin-tracking";
+import { GradientButtonWrap } from "@/components/GradientButtonWrap";
 import PublicNavbar from "@/components/PublicNavbar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Zap, Target, TrendingUp, Rocket, User } from "lucide-react";
@@ -737,31 +738,28 @@ function MembershipSection() {
                 ))}
               </div>
 
-              <a href={plan.href} onClick={() => trackLinkedInConversion()} style={{
-                display: "block",
-                fontFamily: '"DM Sans", sans-serif',
-                fontSize: 14,
-                fontWeight: 600,
-                color: "#fff",
-                background: plan.accent,
-                borderRadius: 8,
-                padding: "12px 0",
-                textDecoration: "none",
-                textAlign: "center",
-                transition: "transform 0.18s, box-shadow 0.18s",
-                marginTop: "auto",
-              }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget).style.transform = "scale(1.02)";
-                  (e.currentTarget).style.boxShadow = `0 6px 20px ${plan.accent}50`;
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget).style.transform = "scale(1)";
-                  (e.currentTarget).style.boxShadow = "none";
-                }}
+              <GradientButtonWrap
+                variant={plan.accent === BRAND.coral ? "coral" : "violet"}
+                borderRadius={8}
+                style={{ marginTop: "auto" }}
               >
-                Become a Member
-              </a>
+                <a href={plan.href} onClick={() => trackLinkedInConversion()} style={{
+                  display: "block",
+                  fontFamily: '"DM Sans", sans-serif',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: "#fff",
+                  background: plan.accent,
+                  borderRadius: 8,
+                  padding: "12px 0",
+                  textDecoration: "none",
+                  textAlign: "center",
+                  position: "relative",
+                  zIndex: 1,
+                }}>
+                  Become a Member
+                </a>
+              </GradientButtonWrap>
             </div>
           ))}
         </div>
