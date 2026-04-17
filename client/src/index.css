@@ -485,10 +485,21 @@
   cursor: pointer;
   display: block;
   padding: 2px;
+  box-sizing: border-box;
   transition: transform 0.18s ease;
 }
 .grad-btn-wrap:hover {
   transform: translateY(-2px);
+}
+.grad-btn-wrap-disabled {
+  cursor: default;
+  pointer-events: none;
+}
+.grad-btn-wrap-disabled:hover {
+  transform: none;
+}
+.grad-btn-wrap-disabled .grad-btn-glow {
+  display: none;
 }
 .grad-btn-glow {
   position: absolute;

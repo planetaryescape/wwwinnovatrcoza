@@ -1,6 +1,7 @@
 interface GradientButtonWrapProps {
   variant?: "violet" | "coral";
   borderRadius?: number | string;
+  disabled?: boolean;
   style?: React.CSSProperties;
   className?: string;
   children: React.ReactNode;
@@ -9,6 +10,7 @@ interface GradientButtonWrapProps {
 export function GradientButtonWrap({
   variant = "violet",
   borderRadius = 12,
+  disabled = false,
   style,
   className = "",
   children,
@@ -17,7 +19,7 @@ export function GradientButtonWrap({
 
   return (
     <div
-      className={`grad-btn-wrap${className ? ` ${className}` : ""}`}
+      className={`grad-btn-wrap${disabled ? " grad-btn-wrap-disabled" : ""}${className ? ` ${className}` : ""}`}
       style={{ borderRadius: outerRadius, ...style }}
     >
       <div className={`grad-btn-glow grad-btn-glow-${variant}`} />

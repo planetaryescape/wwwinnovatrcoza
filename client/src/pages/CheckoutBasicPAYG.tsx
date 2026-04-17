@@ -397,10 +397,11 @@ export default function CheckoutBasicPAYG() {
               <GradientButtonWrap
                 variant="violet"
                 borderRadius={12}
+                disabled={isCustomSelected && customCredits < 1}
                 style={{ opacity: isCustomSelected && customCredits < 1 ? 0.5 : 1 }}
               >
                 <button
-                  onClick={() => { if (!(isCustomSelected && customCredits < 1)) handleCheckout(); }}
+                  onClick={handleCheckout}
                   data-testid="button-proceed-checkout"
                   disabled={isCustomSelected && customCredits < 1}
                   style={{
