@@ -1215,7 +1215,7 @@ function PricingSection() {
                     fontSize: 15,
                     fontWeight: 700,
                     color: plan.popular ? "#fff" : BRAND.violet,
-                    background: plan.popular ? BRAND.violet : "transparent",
+                    background: plan.popular ? BRAND.violet : "#fff",
                     border: plan.popular ? "none" : `2px solid ${BRAND.violet}`,
                     borderRadius: 12,
                     padding: "14px 0",

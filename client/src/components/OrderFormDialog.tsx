@@ -15,23 +15,30 @@
  *    - Credits only become active when admin marks order as "paid"
  */
 
-import { useState, useRef } from "react";
+import { useState, useRef, type CSSProperties } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Loader2, CheckCircle2, CreditCard, FileText, Eye } from "lucide-react";
+import { Loader2, CheckCircle2, CreditCard, FileText, ShoppingCart, X } from "lucide-react";
+import { GradientButtonWrap } from "@/components/GradientButtonWrap";
+
+const BRAND = {
+  violet: "#3A2FBF",
+  coral: "#E8503A",
+  dark: "#0D0B1F",
+  offWhite: "#F8F7F4",
+  border: "#E5E3DE",
+  textSecondary: "#4A4862",
+  textTertiary: "#8A879A",
+};
 
 interface OrderItem {
   type: string;
@@ -403,30 +410,54 @@ export default function OrderFormDialog({
     }
   };
 
+  const isPending = createInquiryMutation.isPending || initiatePaymentMutation.isPending || createInvoiceOrderMutation.isPending;
+
+  const inputStyle: CSSProperties = {
+    width: "100%",
+    padding: "10px 14px",
+    borderRadius: 8,
+    border: `1px solid ${BRAND.border}`,
+    fontFamily: '"DM Sans", sans-serif',
+    fontSize: 14,
+    color: BRAND.dark,
+    background: "#fff",
+    outline: "none",
+    boxSizing: "border-box",
+  };
+
+  const labelStyle: CSSProperties = {
+    display: "block",
+    fontFamily: '"DM Sans", sans-serif',
+    fontSize: 13,
+    fontWeight: 600,
+    color: BRAND.textSecondary,
+    marginBottom: 6,
+  };
+
   // Success state for inquiry
   if (isSuccess) {
     return (
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-md">
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <CheckCircle2 className="w-16 h-16 text-green-500 mb-4" />
-            <DialogTitle className="text-2xl mb-2">
-              Quote Request Received!
-            </DialogTitle>
-            <DialogDescription className="text-base mb-6">
-              Thank you for your inquiry from{" "}
-              <span className="font-medium text-foreground">
-                {customerCompany}
-              </span>
-              . Our team will review it and contact you at{" "}
-              <span className="font-medium text-foreground">
-                {customerEmail}
-              </span>{" "}
-              to discuss your order and payment options.
-            </DialogDescription>
-            <Button onClick={handleClose} data-testid="button-close-success">
-              Back to Home
-            </Button>
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+          <DialogTitle className="sr-only">Order Submitted</DialogTitle>
+          <DialogDescription className="sr-only">Your order has been submitted successfully.</DialogDescription>
+          <div style={{ background: "#fff", borderRadius: 12 }}>
+            <div style={{ background: `linear-gradient(135deg, ${BRAND.violet} 0%, #6C5CE7 100%)`, padding: "32px 28px 24px", textAlign: "center" }}>
+              <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                <CheckCircle2 size={28} color="#fff" />
+              </div>
+              <h2 style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: 22, fontWeight: 400, color: "#fff", margin: 0 }}>Order Submitted!</h2>
+            </div>
+            <div style={{ padding: "28px 28px 32px", textAlign: "center" }}>
+              <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 15, color: BRAND.textSecondary, lineHeight: 1.6, margin: "0 0 24px" }}>
+                Thank you for your inquiry from <strong style={{ color: BRAND.dark }}>{customerCompany}</strong>. Our team will review it and contact you at <strong style={{ color: BRAND.dark }}>{customerEmail}</strong> to discuss your order.
+              </p>
+              <GradientButtonWrap variant="violet" borderRadius={8}>
+                <button onClick={handleClose} data-testid="button-close-success" style={{ width: "100%", border: "none", padding: "13px 28px", background: BRAND.violet, borderRadius: 8, color: "#fff", fontWeight: 700, fontSize: 15, fontFamily: '"DM Sans", sans-serif', cursor: "pointer" }}>
+                  Back to Home
+                </button>
+              </GradientButtonWrap>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
@@ -437,21 +468,26 @@ export default function OrderFormDialog({
   if (isInvoiceSuccess) {
     return (
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-md">
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <CheckCircle2 className="w-16 h-16 text-green-500 mb-4" />
-            <DialogTitle className="text-2xl mb-2">
-              Invoice Request Submitted!
-            </DialogTitle>
-            <DialogDescription className="text-base mb-6">
-              Thank you, <span className="font-medium text-foreground">{customerName}</span>!{" "}
-              We'll prepare an invoice and send it to{" "}
-              <span className="font-medium text-foreground">{customerEmail}</span>.{" "}
-              Your credits will be activated once payment is received.
-            </DialogDescription>
-            <Button onClick={handleClose} data-testid="button-view-billing">
-              View Credits & Billing
-            </Button>
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+          <DialogTitle className="sr-only">Invoice Request Sent</DialogTitle>
+          <DialogDescription className="sr-only">Your invoice request has been submitted.</DialogDescription>
+          <div style={{ background: "#fff", borderRadius: 12 }}>
+            <div style={{ background: `linear-gradient(135deg, ${BRAND.violet} 0%, #6C5CE7 100%)`, padding: "32px 28px 24px", textAlign: "center" }}>
+              <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                <FileText size={28} color="#fff" />
+              </div>
+              <h2 style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: 22, fontWeight: 400, color: "#fff", margin: 0 }}>Invoice Request Sent!</h2>
+            </div>
+            <div style={{ padding: "28px 28px 32px", textAlign: "center" }}>
+              <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 15, color: BRAND.textSecondary, lineHeight: 1.6, margin: "0 0 24px" }}>
+                We'll prepare an invoice and send it to <strong style={{ color: BRAND.dark }}>{customerEmail}</strong>. Your credits will be activated once payment is received.
+              </p>
+              <GradientButtonWrap variant="violet" borderRadius={8}>
+                <button onClick={handleClose} data-testid="button-view-billing" style={{ width: "100%", border: "none", padding: "13px 28px", background: BRAND.violet, borderRadius: 8, color: "#fff", fontWeight: 700, fontSize: 15, fontFamily: '"DM Sans", sans-serif', cursor: "pointer" }}>
+                  View Credits &amp; Billing
+                </button>
+              </GradientButtonWrap>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
@@ -460,173 +496,124 @@ export default function OrderFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Complete Your Order</DialogTitle>
-          <DialogDescription>
-            Enter your details below and our team will contact you to process
-            your payment.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-lg p-0 overflow-hidden max-h-[95vh]">
+        <DialogTitle className="sr-only">Complete Your Order</DialogTitle>
+        <DialogDescription className="sr-only">Enter your details to complete your purchase.</DialogDescription>
+        <div style={{ background: "#fff", borderRadius: 12, display: "flex", flexDirection: "column", maxHeight: "95vh" }}>
 
-        <form ref={formRef} onSubmit={(e) => { e.preventDefault(); }} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="customerName">Full Name</Label>
-            <Input
-              id="customerName"
-              placeholder="Enter your full name"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-              required
-              data-testid="input-customer-name"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="customerEmail">Email Address</Label>
-            <Input
-              id="customerEmail"
-              type="email"
-              placeholder="Enter your email address"
-              value={customerEmail}
-              onChange={(e) => setCustomerEmail(e.target.value)}
-              required
-              data-testid="input-customer-email"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="customerCompany">Company Name</Label>
-            <Input
-              id="customerCompany"
-              placeholder="Enter your company name"
-              value={customerCompany}
-              onChange={(e) => setCustomerCompany(e.target.value)}
-              required
-              data-testid="input-customer-company"
-            />
-          </div>
-
-          <div className="space-y-3 rounded-lg border p-4">
-            <div className="flex items-center space-x-3">
-              <Checkbox
-                id="invoiceRequested"
-                checked={invoiceRequested}
-                onCheckedChange={(checked) =>
-                  setInvoiceRequested(checked === true)
-                }
-                data-testid="checkbox-request-invoice"
-              />
-              <Label
-                htmlFor="invoiceRequested"
-                className="flex items-center gap-2 cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Send me an invoice
-              </Label>
-            </div>
-
-            {invoiceRequested && (
-              <div className="space-y-3 pt-2 border-t mt-3">
-                <p className="text-xs text-muted-foreground">
-                  Please provide your business details for the tax invoice (VAT
-                  calculated at 15%)
-                </p>
-                <div className="space-y-2">
-                  <Label htmlFor="businessRegNumber">
-                    Business Registration Number
-                  </Label>
-                  <Input
-                    id="businessRegNumber"
-                    placeholder="e.g., 2023/123456/07"
-                    value={businessRegNumber}
-                    onChange={(e) => setBusinessRegNumber(e.target.value)}
-                    data-testid="input-business-reg"
-                  />
+          {/* Header */}
+          <div style={{ background: `linear-gradient(135deg, ${BRAND.violet} 0%, #6C5CE7 100%)`, padding: "24px 28px 20px", flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <ShoppingCart size={20} color="#fff" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="vatNumber">VAT Number (optional)</Label>
-                  <Input
-                    id="vatNumber"
-                    placeholder="e.g., 4123456789"
-                    value={vatNumber}
-                    onChange={(e) => setVatNumber(e.target.value)}
-                    data-testid="input-vat-number"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="companyAddress">Company Address</Label>
-                  <Input
-                    id="companyAddress"
-                    placeholder="e.g., 123 Main Street, City, 1234"
-                    value={companyAddress}
-                    onChange={(e) => setCompanyAddress(e.target.value)}
-                    data-testid="input-company-address"
-                  />
+                <div>
+                  <h2 style={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: 20, fontWeight: 400, color: "#fff", margin: 0, lineHeight: 1.2 }}>Complete Your Order</h2>
+                  <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 13, color: "rgba(255,255,255,0.75)", margin: "3px 0 0" }}>Secure checkout powered by PayFast</p>
                 </div>
               </div>
-            )}
-          </div>
-
-          <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-            <h4 className="font-semibold text-sm">Order Summary</h4>
-            {orderItems.map((item, index) => (
-              <div key={index} className="flex justify-between text-sm">
-                <span className="text-muted-foreground">
-                  {item.description}
-                </span>
-                <span>x{item.quantity}</span>
-              </div>
-            ))}
-            <div className="flex justify-between font-bold pt-2 border-t">
-              <span>Total</span>
-              <span className="text-primary">{formatPrice(totalAmount)}</span>
             </div>
           </div>
 
-          <div className="flex gap-2 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={
-                createInquiryMutation.isPending ||
-                initiatePaymentMutation.isPending ||
-                createInvoiceOrderMutation.isPending
-              }
-              data-testid="button-cancel-order"
-            >
-              Cancel
-            </Button>
-            {/* Dynamic button based on invoice checkbox */}
-            <Button
-              type="button"
-              onClick={invoiceRequested ? handleInvoiceRequest : handlePayOnline}
-              disabled={
-                createInquiryMutation.isPending ||
-                initiatePaymentMutation.isPending ||
-                createInvoiceOrderMutation.isPending
-              }
-              data-testid={invoiceRequested ? "button-invoice-me" : "button-pay-online"}
-            >
-              {initiatePaymentMutation.isPending || createInvoiceOrderMutation.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Processing...
-                </>
-              ) : invoiceRequested ? (
-                <>
-                  <FileText className="w-4 h-4 mr-2" />
-                  Invoice me
-                </>
-              ) : (
-                <>
-                  <CreditCard className="w-4 h-4 mr-2" />
-                  Pay Online
-                </>
-              )}
-            </Button>
+          {/* Scrollable body */}
+          <div style={{ overflowY: "auto", padding: "24px 28px", flex: 1 }}>
+            <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
+
+              {/* Your Details */}
+              <div style={{ marginBottom: 20 }}>
+                <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 12, fontWeight: 700, color: BRAND.textTertiary, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 14px" }}>Your Details</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div>
+                    <label htmlFor="customerName" style={labelStyle}>Full Name</label>
+                    <input id="customerName" placeholder="Enter your full name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} required data-testid="input-customer-name" style={inputStyle} />
+                  </div>
+                  <div>
+                    <label htmlFor="customerEmail" style={labelStyle}>Email Address</label>
+                    <input id="customerEmail" type="email" placeholder="Enter your email address" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} required data-testid="input-customer-email" style={inputStyle} />
+                  </div>
+                  <div>
+                    <label htmlFor="customerCompany" style={labelStyle}>Company Name</label>
+                    <input id="customerCompany" placeholder="Enter your company name" value={customerCompany} onChange={(e) => setCustomerCompany(e.target.value)} required data-testid="input-customer-company" style={inputStyle} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Summary */}
+              <div style={{ background: BRAND.offWhite, borderRadius: 10, padding: "16px 18px", marginBottom: 20, border: `1px solid ${BRAND.border}` }}>
+                <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 12, fontWeight: 700, color: BRAND.textTertiary, letterSpacing: "0.08em", textTransform: "uppercase", margin: "0 0 12px" }}>Order Summary</p>
+                {orderItems.map((item, index) => (
+                  <div key={index} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: index < orderItems.length - 1 ? `1px solid ${BRAND.border}` : "none" }}>
+                    <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 13, color: BRAND.textSecondary }}>{item.description}</span>
+                    <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 13, color: BRAND.dark, fontWeight: 600 }}>x{item.quantity}</span>
+                  </div>
+                ))}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 12, marginTop: 4, borderTop: `1px solid ${BRAND.border}` }}>
+                  <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 14, fontWeight: 700, color: BRAND.dark }}>Total</span>
+                  <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 16, fontWeight: 800, color: BRAND.coral }}>{formatPrice(totalAmount)}</span>
+                </div>
+              </div>
+
+              {/* Invoice option */}
+              <div style={{ borderRadius: 10, border: `1px solid ${BRAND.border}`, padding: "14px 16px", marginBottom: 20 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <Checkbox id="invoiceRequested" checked={invoiceRequested} onCheckedChange={(checked) => setInvoiceRequested(checked === true)} data-testid="checkbox-request-invoice" />
+                  <label htmlFor="invoiceRequested" style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 14, fontWeight: 600, color: BRAND.dark, cursor: "pointer" }}>
+                    Send me an invoice instead
+                  </label>
+                </div>
+                {!invoiceRequested && (
+                  <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 12, color: BRAND.textTertiary, margin: "8px 0 0 30px" }}>
+                    Check this to receive a tax invoice rather than paying online now.
+                  </p>
+                )}
+
+                {invoiceRequested && (
+                  <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${BRAND.border}`, display: "flex", flexDirection: "column", gap: 12 }}>
+                    <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 12, color: BRAND.textTertiary, margin: 0 }}>
+                      Provide your business details for the tax invoice (VAT at 15%)
+                    </p>
+                    <div>
+                      <label htmlFor="businessRegNumber" style={labelStyle}>Business Registration Number</label>
+                      <input id="businessRegNumber" placeholder="e.g., 2023/123456/07" value={businessRegNumber} onChange={(e) => setBusinessRegNumber(e.target.value)} data-testid="input-business-reg" style={inputStyle} />
+                    </div>
+                    <div>
+                      <label htmlFor="vatNumber" style={labelStyle}>VAT Number <span style={{ fontWeight: 400, color: BRAND.textTertiary }}>(optional)</span></label>
+                      <input id="vatNumber" placeholder="e.g., 4123456789" value={vatNumber} onChange={(e) => setVatNumber(e.target.value)} data-testid="input-vat-number" style={inputStyle} />
+                    </div>
+                    <div>
+                      <label htmlFor="companyAddress" style={labelStyle}>Company Address</label>
+                      <input id="companyAddress" placeholder="e.g., 123 Main Street, City, 1234" value={companyAddress} onChange={(e) => setCompanyAddress(e.target.value)} data-testid="input-company-address" style={inputStyle} />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: "flex", gap: 10 }}>
+                <button type="button" onClick={() => onOpenChange(false)} disabled={isPending} data-testid="button-cancel-order"
+                  style={{ flex: "0 0 auto", padding: "13px 20px", borderRadius: 8, border: `1px solid ${BRAND.border}`, background: "#fff", fontFamily: '"DM Sans", sans-serif', fontSize: 14, fontWeight: 600, color: BRAND.textSecondary, cursor: isPending ? "not-allowed" : "pointer", opacity: isPending ? 0.5 : 1 }}
+                >
+                  Cancel
+                </button>
+                <GradientButtonWrap variant={invoiceRequested ? "violet" : "coral"} borderRadius={8} disabled={isPending} style={{ flex: 1, opacity: isPending ? 0.7 : 1 }}>
+                  <button type="button" onClick={invoiceRequested ? handleInvoiceRequest : handlePayOnline} disabled={isPending} data-testid={invoiceRequested ? "button-invoice-me" : "button-pay-online"}
+                    style={{ width: "100%", border: "none", padding: "13px 0", borderRadius: 8, background: invoiceRequested ? BRAND.violet : BRAND.coral, color: "#fff", fontWeight: 700, fontSize: 15, fontFamily: '"DM Sans", sans-serif', cursor: isPending ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, position: "relative", zIndex: 1 }}
+                  >
+                    {isPending ? (
+                      <><Loader2 size={16} className="animate-spin" /> Processing...</>
+                    ) : invoiceRequested ? (
+                      <><FileText size={16} /> Invoice me</>
+                    ) : (
+                      <><CreditCard size={16} /> Pay Online</>
+                    )}
+                  </button>
+                </GradientButtonWrap>
+              </div>
+
+            </form>
           </div>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
