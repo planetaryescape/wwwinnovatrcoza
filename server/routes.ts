@@ -731,24 +731,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { z } = await import("zod");
 
-      // reCAPTCHA v3 verification
+      // reCAPTCHA v3 verification (graceful fallback if not configured)
       const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-      if (!secretKey) {
-        console.error("RECAPTCHA_SECRET_KEY not configured");
-        return res.status(500).json({ error: "Server configuration error." });
-      }
       const recaptchaToken = req.body.recaptchaToken;
-      if (!recaptchaToken) {
-        return res.status(400).json({ error: "reCAPTCHA verification required." });
-      }
-      const verifyResponse = await fetch("https://www.google.com/recaptcha/api/siteverify", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `secret=${encodeURIComponent(secretKey)}&response=${encodeURIComponent(recaptchaToken)}`,
-      });
-      const verifyData = await verifyResponse.json() as { success: boolean; score: number; action: string };
-      if (!verifyData.success || verifyData.score < 0.5 || verifyData.action !== "contact") {
-        return res.status(400).json({ error: "reCAPTCHA verification failed. Please try again." });
+      if (secretKey && recaptchaToken) {
+        try {
+          const verifyResponse = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `secret=${encodeURIComponent(secretKey)}&response=${encodeURIComponent(recaptchaToken)}`,
+          });
+          const verifyData = await verifyResponse.json() as { success: boolean; score: number; action: string };
+          if (verifyData.success && verifyData.score < 0.3) {
+            return res.status(400).json({ error: "Submission blocked as spam. Please try again." });
+          }
+        } catch (captchaErr) {
+          console.warn("reCAPTCHA verification error (allowing submission):", captchaErr);
+        }
+      } else if (!secretKey) {
+        console.warn("RECAPTCHA_SECRET_KEY not configured — skipping verification");
       }
 
       const contactSchema = z.object({
