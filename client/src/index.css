@@ -484,6 +484,7 @@
   overflow: hidden;
   cursor: pointer;
   display: block;
+  padding: 2px;
   transition: transform 0.18s ease;
 }
 .grad-btn-wrap:hover {

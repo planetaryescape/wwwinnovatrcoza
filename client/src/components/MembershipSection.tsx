@@ -177,7 +177,7 @@ function MembershipCard({ plan, index }: { plan: MembershipPlan; index: number }
             </li>
           ))}
         </ul>
-        <GradientButtonWrap variant={isStarter ? "coral" : "violet"} className="w-full">
+        <GradientButtonWrap variant={isStarter ? "coral" : "violet"} borderRadius={6} className="w-full">
           <Button 
             className={`w-full relative z-10 ${isStarter ? 'bg-[#ED876E] border-[#ED876E]' : 'bg-[#4D5FF1] border-[#4D5FF1]'}`}
             size="lg"

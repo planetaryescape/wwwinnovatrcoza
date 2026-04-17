@@ -13,10 +13,12 @@ export function GradientButtonWrap({
   className = "",
   children,
 }: GradientButtonWrapProps) {
+  const outerRadius = typeof borderRadius === "number" ? borderRadius + 2 : borderRadius;
+
   return (
     <div
       className={`grad-btn-wrap${className ? ` ${className}` : ""}`}
-      style={{ borderRadius, ...style }}
+      style={{ borderRadius: outerRadius, ...style }}
     >
       <div className={`grad-btn-glow grad-btn-glow-${variant}`} />
       {children}

@@ -159,7 +159,7 @@ export default function PricingSection() {
                         </li>
                       ))}
                     </ul>
-                    <GradientButtonWrap variant="violet" className="w-full">
+                    <GradientButtonWrap variant="violet" borderRadius={6} className="w-full">
                       <Button 
                         className="w-full relative z-10" 
                         size="lg"
@@ -225,7 +225,7 @@ export default function PricingSection() {
                         </li>
                       ))}
                     </ul>
-                    <GradientButtonWrap variant="violet" className="w-full">
+                    <GradientButtonWrap variant="violet" borderRadius={6} className="w-full">
                       <Button 
                         className="w-full relative z-10" 
                         size="lg"
