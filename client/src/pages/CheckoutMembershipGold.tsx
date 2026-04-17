@@ -6,6 +6,7 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 import PublicNavbar from "@/components/PublicNavbar";
 import { InnovatrFooter } from "@/components/InnovatrFooter";
 import { useSEO } from "@/hooks/use-seo";
+import { GradientButtonWrap } from "@/components/GradientButtonWrap";
 
 const BRAND = {
   violet: "#3A2FBF",
@@ -27,23 +28,6 @@ const responsiveStyles = `
     .checkout-grid { grid-template-columns: 1fr !important; }
     .checkout-features-grid { grid-template-columns: 1fr !important; }
     .checkout-tier-grid { grid-template-columns: 1fr !important; }
-  }
-  @keyframes checkout-glow-spin {
-    from { transform: translate(-50%, -50%) rotate(0deg); }
-    to   { transform: translate(-50%, -50%) rotate(360deg); }
-  }
-  .checkout-cta-wrap {
-    position: relative; border-radius: 14px; overflow: hidden; cursor: pointer;
-  }
-  .checkout-cta-glow {
-    position: absolute; width: 220%; aspect-ratio: 1;
-    top: 50%; left: 50%; border-radius: 50%; filter: blur(14px);
-    background: conic-gradient(from 0deg, #3A2FBF, #E8503A, #4EC9E8, #3A2FBF);
-    animation: checkout-glow-spin 5s linear infinite;
-    pointer-events: none; opacity: 0.7;
-  }
-  .checkout-cta-wrap:hover .checkout-cta-glow {
-    opacity: 1; animation-duration: 2.5s;
   }
 `;
 
@@ -290,23 +274,23 @@ export default function CheckoutMembershipGold() {
                 </div>
               </div>
 
-              <button
-                className="checkout-cta-wrap"
-                onClick={handleCheckout}
-                data-testid="button-proceed-checkout"
-                style={{ width: "100%", border: "none", background: "none", padding: 0, fontFamily: "inherit", cursor: "pointer" }}
-              >
-                <div className="checkout-cta-glow" />
-                <div style={{
-                  position: "relative", zIndex: 1, width: "100%",
-                  padding: "15px 20px", background: BRAND.coral, borderRadius: 12,
-                  color: "#fff", fontWeight: 700, fontSize: 16, fontFamily: "inherit",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                }}>
+              <GradientButtonWrap variant="violet" borderRadius={12}>
+                <button
+                  onClick={handleCheckout}
+                  data-testid="button-proceed-checkout"
+                  style={{
+                    position: "relative", zIndex: 1,
+                    width: "100%", border: "none",
+                    padding: "15px 20px", background: BRAND.coral, borderRadius: 12,
+                    color: "#fff", fontWeight: 700, fontSize: 16, fontFamily: "inherit",
+                    cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  }}
+                >
                   <ShoppingCart size={17} />
                   Proceed to Payment
-                </div>
-              </button>
+                </button>
+              </GradientButtonWrap>
 
               <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 8 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
