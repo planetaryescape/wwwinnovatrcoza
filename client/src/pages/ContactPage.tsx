@@ -177,39 +177,28 @@ function WhySection() {
 
 /* ─── Right column: Contact Form ─────────────────────────────────────────── */
 function ContactForm() {
-  const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
-  const [form, setForm] = useState({ name: "", company: "", email: "", message: "" });
+  const [form, setForm] = useState({ name: "", company: "", email: "", message: "", website: "" });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    if (loading) return;
+    if (!form.name.trim() || !form.email.trim() || form.message.trim().length < 10) {
+      setError("Please fill in your name, email, and a message of at least 10 characters.");
+      return;
+    }
     setError(null);
     setLoading(true);
     try {
-      let recaptchaToken = "";
-      const grecaptcha = window.grecaptcha;
-      if (grecaptcha) {
-        recaptchaToken = await new Promise<string>((resolve, reject) => {
-          grecaptcha.ready(async () => {
-            try {
-              const token = await grecaptcha.execute(SITE_KEY, { action: "contact" });
-              resolve(token);
-            } catch (err) {
-              reject(err);
-            }
-          });
-        });
-      }
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, recaptchaToken }),
+        body: JSON.stringify(form),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to send message");
-      setForm({ name: "", company: "", email: "", message: "" });
+      setForm({ name: "", company: "", email: "", message: "", website: "" });
       setSubmitted(true);
       setTimeout(() => {
         try {
@@ -225,6 +214,13 @@ function ContactForm() {
       setError(err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEnterKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSubmit();
     }
   };
 
@@ -270,21 +266,34 @@ function ContactForm() {
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: `${BRAND.dark}aa`, margin: 0 }}>We'll be in touch within one business day.</p>
         </div>
       ) : (
-        <form onSubmit={handleSubmit}>
+        <div>
+          {/* Honeypot field — hidden from humans, bots fill it in */}
+          <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", top: "auto", width: 1, height: 1, overflow: "hidden" }}>
+            <label>Website (leave empty)
+              <input
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                value={form.website}
+                onChange={e => setForm({ ...form, website: e.target.value })}
+              />
+            </label>
+          </div>
+
           <div className="ir-card-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
             <div>
               <label style={labelStyle}>Your name</label>
-              <input data-testid="input-name" type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Hannah Smith" style={fieldStyle} required />
+              <input data-testid="input-name" type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} onKeyDown={handleEnterKey} placeholder="Hannah Smith" style={fieldStyle} required />
             </div>
             <div>
               <label style={labelStyle}>Company</label>
-              <input data-testid="input-company" type="text" value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} placeholder="Your company" style={fieldStyle} />
+              <input data-testid="input-company" type="text" value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} onKeyDown={handleEnterKey} placeholder="Your company" style={fieldStyle} />
             </div>
           </div>
 
           <div style={{ marginBottom: 14 }}>
             <label style={labelStyle}>Email address</label>
-            <input data-testid="input-email" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="you@company.com" style={fieldStyle} required />
+            <input data-testid="input-email" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} onKeyDown={handleEnterKey} placeholder="you@company.com" style={fieldStyle} required />
           </div>
 
           <div style={{ marginBottom: 24 }}>
@@ -307,19 +316,17 @@ function ContactForm() {
           )}
           <button
             data-testid="button-submit-contact"
-            type="submit"
+            type="button"
+            onClick={handleSubmit}
             disabled={loading}
             style={{ width: "100%", fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 700, color: "#fff", background: loading ? `${BRAND.violet}99` : BRAND.violet, border: "none", borderRadius: 10, padding: "15px 0", cursor: loading ? "not-allowed" : "pointer", transition: "background 0.2s" }}
           >
             {loading ? "Sending…" : "Send Message"}
           </button>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: `${BRAND.dark}55`, margin: "12px 0 0", textAlign: "center" as const }}>
-            Protected by reCAPTCHA &mdash;{" "}
-            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style={{ color: `${BRAND.dark}55` }}>Privacy</a>
-            {" "}&amp;{" "}
-            <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" style={{ color: `${BRAND.dark}55` }}>Terms</a>
+            We respect your privacy. Your details are only used to reply to your enquiry.
           </p>
-        </form>
+        </div>
       )}
     </div>
   );

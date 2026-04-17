@@ -727,37 +727,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Simple in-memory IP rate limit for contact form (5 per hour per IP)
+  const contactRateLimit = new Map<string, number[]>();
+  const CONTACT_RATE_LIMIT = 5;
+  const CONTACT_RATE_WINDOW_MS = 60 * 60 * 1000;
+
   app.post("/api/contact", async (req, res) => {
     try {
       const { z } = await import("zod");
 
-      // reCAPTCHA v3 verification (graceful fallback if not configured)
-      const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-      const recaptchaToken = req.body.recaptchaToken;
-      if (secretKey && recaptchaToken) {
-        try {
-          const verifyResponse = await fetch("https://www.google.com/recaptcha/api/siteverify", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `secret=${encodeURIComponent(secretKey)}&response=${encodeURIComponent(recaptchaToken)}`,
-          });
-          const verifyData = await verifyResponse.json() as { success: boolean; score: number; action: string };
-          if (verifyData.success && verifyData.score < 0.3) {
-            return res.status(400).json({ error: "Submission blocked as spam. Please try again." });
-          }
-        } catch (captchaErr) {
-          console.warn("reCAPTCHA verification error (allowing submission):", captchaErr);
-        }
-      } else if (!secretKey) {
-        console.warn("RECAPTCHA_SECRET_KEY not configured — skipping verification");
+      // Honeypot: bots fill in the hidden "website" field
+      if (typeof req.body.website === "string" && req.body.website.trim() !== "") {
+        return res.status(200).json({ success: true, message: "Message sent successfully" });
       }
+
+      // IP rate limit
+      const ip = (req.headers["x-forwarded-for"]?.toString().split(",")[0].trim() || req.socket.remoteAddress || "unknown");
+      const now = Date.now();
+      const recent = (contactRateLimit.get(ip) || []).filter((t) => now - t < CONTACT_RATE_WINDOW_MS);
+      if (recent.length >= CONTACT_RATE_LIMIT) {
+        return res.status(429).json({ error: "Too many submissions. Please try again later." });
+      }
+      recent.push(now);
+      contactRateLimit.set(ip, recent);
 
       const contactSchema = z.object({
         name: z.string().min(1, "Name is required").max(100, "Name is too long"),
         email: z.string().email("Please provide a valid email address"),
         company: z.string().max(100, "Company name is too long").optional(),
         message: z.string().min(10, "Message must be at least 10 characters").max(5000, "Message is too long"),
-        recaptchaToken: z.string().optional(),
+        website: z.string().optional(),
       });
 
       const validated = contactSchema.parse(req.body);
