@@ -175,7 +175,7 @@ export function LoginDialog({ open, onOpenChange, defaultSignup = false, returnT
     fontFamily: "'DM Sans', sans-serif",
     fontSize: 14,
     color: BRAND.dark,
-    background: "#fff",
+    background: BRAND.offWhite,
     border: `1.5px solid ${BRAND.dark}18`,
     borderRadius: 8,
     padding: "11px 14px",
