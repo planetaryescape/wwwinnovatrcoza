@@ -209,9 +209,18 @@ function ContactForm() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to send message");
-      setSubmitted(true);
-      trackLinkedInConversion();
       setForm({ name: "", company: "", email: "", message: "" });
+      setSubmitted(true);
+      setTimeout(() => {
+        try {
+          if (typeof window !== "undefined") {
+            (window as any).dataLayer = (window as any).dataLayer || [];
+            (window as any).dataLayer.push({ event: "contact_form_submit" });
+            trackLinkedInConversion();
+          }
+        } catch {
+        }
+      }, 0);
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please try again.");
     } finally {
