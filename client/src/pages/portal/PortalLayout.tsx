@@ -33,7 +33,7 @@ import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
 const VDK   = "#1E1B3A";
 const CORAL  = "#E8503A";
 const N300   = "#C9B99A";
-const N400   = "#A89078";
+const N400   = "#9C9AB0";
 const SUCCESS = "#2A9E5C";
 
 const EXPLORE_COLOR = "#3A2FBF";
@@ -144,7 +144,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
   const isHealth    = location.startsWith("/portal/health");
 
   const sidebarStyle = {
-    "--sidebar-width": isTablet ? "3rem" : "14.5rem",
+    "--sidebar-width": isTablet ? "3rem" : "12.5rem",
     "--sidebar-width-icon": "3rem",
   };
 
@@ -288,7 +288,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
           <aside
             className="flex-shrink-0 overflow-hidden"
             style={{
-              width: isTablet ? "3rem" : "14.5rem",
+              width: isTablet ? "3rem" : "12.5rem",
               borderRight: "1px solid rgba(255,255,255,0.07)",
               transition: "width 0.2s ease",
             }}
@@ -461,7 +461,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
 
 function SbSection({ label, top }: { label: string; top?: boolean }) {
   return (
-    <div className={`px-2 pb-1.5 text-[10px] font-bold tracking-widest uppercase ${top ? "pt-4" : "pt-1.5"}`} style={{ color: "#A89078" }}>
+    <div className={`px-2 pb-1.5 text-[10px] font-bold tracking-widest uppercase ${top ? "pt-4" : "pt-1.5"}`} style={{ color: "#9C9AB0" }}>
       {label}
     </div>
   );

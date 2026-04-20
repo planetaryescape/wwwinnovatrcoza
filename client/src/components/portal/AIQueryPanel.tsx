@@ -7,7 +7,7 @@ const VDK   = "#1E1B3A";
 const VIO   = "#3A2FBF";
 const CORAL = "#E8503A";
 const N200  = "#E2D5BF";
-const N400  = "#A89078";
+const N400  = "#9C9AB0";
 const N500  = "#8A7260";
 const CREAM = "#FFFFFF";
 
@@ -267,7 +267,7 @@ export default function AIQueryPanel({
       </div>
 
       {/* Source selector */}
-      <div className="flex-shrink-0" style={{ background: "#F5EFE4", borderBottom: `1px solid ${N200}` }}>
+      <div className="flex-shrink-0" style={{ background: "#FFFFFF", borderBottom: `1px solid ${N200}` }}>
         <button
           className="w-full flex items-center gap-2 px-3 py-2 text-left"
           onClick={() => setShowSources(o => !o)}
@@ -370,7 +370,7 @@ export default function AIQueryPanel({
       {suggestedPrompts.length > 0 && messages.length === 0 && (
         <div
           className="flex-shrink-0 px-3 py-2 flex flex-wrap gap-1.5"
-          style={{ background: "#F5EFE4", borderTop: `1px solid ${N200}` }}
+          style={{ background: "#FFFFFF", borderTop: `1px solid ${N200}` }}
         >
           {suggestedPrompts.map((p, i) => (
             <button

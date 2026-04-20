@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
-import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
+import PortalLayout from "./PortalLayout";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { ClientReport } from "@shared/schema";
 import { useIndustryGroups } from "@/hooks/useIndustryGroups";
@@ -24,7 +24,7 @@ const VIO_LT   = "#EAE8FF";
 const CORAL    = "#E8503A";
 const CORAL_LT = "#FDECEA";
 const N200     = "#EBEBEB";
-const N400     = "#A89078";
+const N400     = "#9C9AB0";
 const N500     = "#8A7260";
 const SUCCESS  = "#2A9E5C";
 const SUC_LT   = "#D1FAE5";
@@ -181,9 +181,8 @@ export default function ActPage() {
   ];
 
   return (
-    <div className="portal-root flex h-screen overflow-hidden" style={{ background: CREAM }}>
-      <MobilePortalNav />
-      <div className="flex flex-col w-full h-full">
+    <PortalLayout showPhaseTopbar={false}>
+      <div className="flex flex-col w-full h-full" style={{ background: CREAM }}>
 
         {/* ── Phase topbar ── */}
         <div
@@ -707,7 +706,7 @@ export default function ActPage() {
           )}
         </div>
       </div>
-    </div>
+    </PortalLayout>
   );
 }
 

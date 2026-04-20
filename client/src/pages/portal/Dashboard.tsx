@@ -25,7 +25,7 @@ const CYAN_LT    = "#DFF6FC";
 const AMBER_DK   = "#B8911A";
 const AMBER_LT   = "#FEF6D6";
 const N200       = "#EBEBEB";
-const N400       = "#A89078";
+const N400       = "#9C9AB0";
 const N500       = "#8A7260";
 const SUCCESS    = "#2A9E5C";
 const SUCCESS_LT = "#D1FAE5";
@@ -124,38 +124,38 @@ export default function Dashboard() {
 
           {/* ── Hero card ── */}
           <div
-            className="rounded-2xl p-6 flex items-start justify-between gap-6 flex-wrap"
+            className="rounded-2xl p-6"
             style={{ background: `linear-gradient(135deg, ${VDK} 0%, #2A2660 60%, #3A3575 100%)` }}
             data-testid="hero-card"
           >
-            <div className="min-w-0">
-              <div className="text-[11px] font-bold tracking-widest uppercase flex items-center gap-1.5 mb-2" style={{ color: CORAL }}>
-                <Sparkles className="w-3 h-3" />
-                {greeting}, {user?.name?.split(" ")[0]} &middot;&nbsp;
-                {isPaidMember ? (user?.membershipTier?.toUpperCase() || "STARTER") : "FREE"} TIER
-              </div>
-              <h1 className="font-serif text-4xl text-white mb-1.5">Dashboard</h1>
-              <p className="text-sm max-w-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
-                Your intelligence hub — trends, live studies, and strategic signals, all in one place.
-              </p>
+            <div className="text-[11px] font-bold tracking-widest uppercase flex items-center gap-1.5 mb-2" style={{ color: CORAL }}>
+              <Sparkles className="w-3 h-3" />
+              {greeting}, {user?.name?.split(" ")[0]} &middot;&nbsp;
+              {isPaidMember ? (user?.membershipTier?.toUpperCase() || "STARTER") : "FREE"} TIER
             </div>
-            <div className="flex items-center gap-6 flex-shrink-0 flex-wrap">
-              {[
-                { val: loadingAct ? null : basicCredits, label: "Basic credits" },
-                { val: loadingAct ? null : proCredits,   label: "Pro credits"   },
-                { val: loadingAct ? null : studiesDone,  label: "Studies done"  },
-              ].map((s, i, arr) => (
-                <div key={i} className="flex items-center gap-4">
-                  <div className="text-center" data-testid={`hero-stat-${i}`}>
-                    <div className="text-4xl font-bold font-mono text-white leading-none">
-                      {s.val === null ? <Skeleton className="h-9 w-8 inline-block bg-white/20" /> : s.val}
+            <div className="flex items-end justify-between gap-6 flex-wrap">
+              <h1 className="font-serif text-4xl text-white leading-none">Dashboard</h1>
+              <div className="flex items-center gap-6 flex-shrink-0 flex-wrap">
+                {[
+                  { val: loadingAct ? null : basicCredits, label: "Basic credits" },
+                  { val: loadingAct ? null : proCredits,   label: "Pro credits"   },
+                  { val: loadingAct ? null : studiesDone,  label: "Studies done"  },
+                ].map((s, i, arr) => (
+                  <div key={i} className="flex items-center gap-6">
+                    <div className="text-center" data-testid={`hero-stat-${i}`}>
+                      <div className="text-3xl font-bold font-mono text-white leading-none">
+                        {s.val === null ? <Skeleton className="h-8 w-8 inline-block bg-white/20" /> : s.val}
+                      </div>
+                      <div className="text-xs mt-1.5" style={{ color: "rgba(255,255,255,0.55)" }}>{s.label}</div>
                     </div>
-                    <div className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>{s.label}</div>
+                    {i < arr.length - 1 && <div className="w-px h-10 self-center" style={{ background: "rgba(255,255,255,0.15)" }} />}
                   </div>
-                  {i < arr.length - 1 && <div className="w-px h-10 self-center" style={{ background: "rgba(255,255,255,0.15)" }} />}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
+            <p className="text-sm leading-relaxed mt-4" style={{ color: "rgba(255,255,255,0.65)" }}>
+              Your intelligence hub — trends, live studies, and strategic signals, all in one place.
+            </p>
           </div>
 
           {/* ── Low credit warning ── */}

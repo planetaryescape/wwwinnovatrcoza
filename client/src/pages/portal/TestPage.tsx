@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
-import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
+import PortalLayout from "./PortalLayout";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   X, Sparkles, Send, MessageSquare, ChevronDown, ExternalLink,
@@ -25,7 +25,7 @@ const VIO      = "#3A2FBF";
 const VIO_LT   = "#EAE8FF";
 const CORAL    = "#E8503A";
 const N200     = "#EBEBEB";
-const N400     = "#A89078";
+const N400     = "#9C9AB0";
 const N500     = "#8A7260";
 const SUCCESS  = "#2A9E5C";
 const SUC_LT   = "#D1FAE5";
@@ -488,9 +488,8 @@ export default function TestPage() {
   };
 
   return (
-    <div className="portal-root flex h-screen overflow-hidden" style={{ background: CREAM }}>
-      <MobilePortalNav />
-      <div className="flex flex-col w-full h-full">
+    <PortalLayout showPhaseTopbar={false}>
+      <div className="flex flex-col w-full h-full" style={{ background: CREAM }}>
 
         {/* Phase topbar */}
         <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
@@ -1388,7 +1387,7 @@ export default function TestPage() {
           )}
         </div>
       </div>
-    </div>
+    </PortalLayout>
   );
 }
 

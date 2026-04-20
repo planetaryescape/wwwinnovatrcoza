@@ -9,14 +9,14 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import type { ClientReport } from "@shared/schema";
-import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
+import PortalLayout from "./PortalLayout";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 /* ── Design System ───────────────────────────────────────── */
 const VDK      = "#1E1B3A";
 const VIO      = "#3A2FBF";
 const N200     = "#E2D5BF";
-const N400     = "#A89078";
+const N400     = "#9C9AB0";
 const N500     = "#8A7260";
 const SUCCESS  = "#2A9E5C";
 const SUC_LT   = "#D1FAE5";
@@ -269,9 +269,8 @@ export default function HealthPage() {
   const hasData = completed.length > 0;
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: CREAM }}>
-      <MobilePortalNav />
-      <div className="flex flex-col w-full h-full">
+    <PortalLayout showPhaseTopbar={false}>
+      <div className="flex flex-col w-full h-full" style={{ background: CREAM }}>
 
         {/* ── Topbar ── */}
         <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: VDK, borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
@@ -539,6 +538,6 @@ export default function HealthPage() {
 
         </div>
       </div>
-    </div>
+    </PortalLayout>
   );
 }

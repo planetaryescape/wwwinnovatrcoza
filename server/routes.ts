@@ -92,8 +92,8 @@ const DEMO_ACCOUNTS = [
   "richard@innovatr.co.za",
   "alroy@innovatr.co.za",
 ];
-const DEMO_MIN_BASIC_CREDITS = 25;
-const DEMO_MIN_PRO_CREDITS = 4;
+const DEMO_MIN_BASIC_CREDITS = 3;
+const DEMO_MIN_PRO_CREDITS = 2;
 
 // Helper function to apply demo minimum credits to user response
 function applyDemoUserCredits(user: any) {
@@ -3690,7 +3690,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!company) {
           return res.status(404).json({ error: "Company not found" });
         }
-        return res.json(company);
+        return res.json(applyDemoCredits(company, sessionUser.email));
       }
       
       // For regular users, get their own company
@@ -4973,7 +4973,8 @@ Income: ${(incomes || []).join(", ") || "All"} · Region: ${(regions || []).join
       let basicCreditsRemaining = 0;
       let proCreditsRemaining = 0;
       if (sessionUser.companyId) {
-        const company = await storage.getCompany(sessionUser.companyId);
+        const rawCompany = await storage.getCompany(sessionUser.companyId);
+        const company = rawCompany ? applyDemoCredits(rawCompany, sessionUser.email) : null;
         if (company) {
           basicCreditsRemaining = (company.basicCreditsTotal || 0) - (company.basicCreditsUsed || 0);
           proCreditsRemaining = (company.proCreditsTotal || 0) - (company.proCreditsUsed || 0);

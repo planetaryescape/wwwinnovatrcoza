@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDigStudies } from "@/lib/dig-api";
-import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
+import PortalLayout from "./PortalLayout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -55,9 +55,8 @@ export default function ReportDetailPage() {
   }
 
   return (
-    <div className="portal-root flex h-screen overflow-hidden" style={{ background: CREAM }}>
-      <MobilePortalNav />
-      <div className="flex flex-col w-full h-full">
+    <PortalLayout showPhaseTopbar={false}>
+      <div className="flex flex-col w-full h-full" style={{ background: CREAM }}>
         <div
           className="flex items-center justify-between flex-shrink-0 px-5"
           style={{
@@ -188,6 +187,6 @@ export default function ReportDetailPage() {
           </>
         )}
       </div>
-    </div>
+    </PortalLayout>
   );
 }
