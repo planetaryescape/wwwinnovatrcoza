@@ -2,9 +2,41 @@ import { useMemo, useEffect, useState } from "react";
 import { logActivity } from "@/lib/activityLogger";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Download, ArrowRight, Sparkles, BarChart3,
-  Zap, CreditCard, Home, Search, AlertTriangle,
+  ArrowRight, Sparkles, BarChart3,
+  Search, AlertTriangle,
 } from "lucide-react";
+import insightsCover1 from "@assets/category-insights.webp";
+import insightsCover2 from "@assets/category-insights-2.webp";
+import insightsCover3 from "@assets/category-insights-3.webp";
+import foodCover from "@assets/industry-food.webp";
+import beveragesCover from "@assets/industry-beverages.webp";
+import alcoholCover from "@assets/industry-alcohol.webp";
+import financialCover from "@assets/industry-financial.webp";
+import fmcgCover from "@assets/industry-fmcg.webp";
+import beautyCover from "@assets/industry-beauty.webp";
+
+const INDUSTRY_COVERS: Record<string, string> = {
+  food: foodCover,
+  beverages: beveragesCover,
+  alcohol: alcoholCover,
+  financial: financialCover,
+  finance: financialCover,
+  fmcgs: fmcgCover,
+  fmcg: fmcgCover,
+  beauty: beautyCover,
+};
+const FALLBACK_COVERS = [insightsCover1, insightsCover2, insightsCover3];
+
+function getStudyCover(study: any): string {
+  if (study.thumbnailUrl) return study.thumbnailUrl;
+  const ind = (study.industry || "").toLowerCase().trim();
+  if (INDUSTRY_COVERS[ind]) return INDUSTRY_COVERS[ind];
+  // Stable fallback based on id
+  const idStr = String(study.id || study.title || "");
+  let hash = 0;
+  for (let i = 0; i < idStr.length; i++) hash = (hash * 31 + idStr.charCodeAt(i)) | 0;
+  return FALLBACK_COVERS[Math.abs(hash) % FALLBACK_COVERS.length];
+}
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -283,7 +315,7 @@ export default function Dashboard() {
             ) : filteredStudies.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {filteredStudies.map((study: any) => (
-                  <StudyCard key={study.id} study={study} onActClick={() => setLocation("/portal/act")} />
+                  <StudyCard key={study.id} study={study} onClick={() => setLocation("/portal/test")} />
                 ))}
               </div>
             ) : (
@@ -413,7 +445,7 @@ function PhasePreviewCard({ num, title, subtitle, color, onOpen, items }: {
 }
 
 /* ── Study Card ───────────────────────────────────────────── */
-function StudyCard({ study, onActClick }: { study: any; onActClick: () => void }) {
+function StudyCard({ study, onClick }: { study: any; onClick: () => void }) {
   const typeBadge = (() => {
     const t = study.studyType?.toLowerCase() || "";
     if (t.includes("pro")) return { label: "PRO",   bg: "#EAE8FF", color: VIO };
@@ -428,96 +460,74 @@ function StudyCard({ study, onActClick }: { study: any; onActClick: () => void }
     { label: "COMMITMENT", val: study.topIdeaCommitment  },
   ].filter(m => m.val !== null && m.val !== undefined);
 
-  const smallMetrics = [
-    { label: "MEANING",    val: study.topIdeaMeaning     },
-    { label: "DIFFERENCE", val: study.topIdeaDifference  },
-    { label: "WORTH",      val: study.topIdeaWorth       },
-  ].filter(m => m.val !== null && m.val !== undefined);
-
-  // Pick an icon based on study name/type
-  const Icon = (() => {
-    const t = (study.title || "").toLowerCase();
-    if (t.includes("campaign") || t.includes("ad") || t.includes("creative")) return Zap;
-    if (t.includes("bank") || t.includes("audit") || t.includes("finance"))   return CreditCard;
-    return Home;
-  })();
-
-  const iconBg = (() => {
-    const t = (study.title || "").toLowerCase();
-    if (t.includes("campaign") || t.includes("ad"))  return "linear-gradient(135deg, #2A9E5C, #3DBF72)";
-    if (t.includes("bank") || t.includes("audit"))   return "linear-gradient(135deg, #3A2FBF, #5b50d9)";
-    return "linear-gradient(135deg, #E85A3A, #EF8A4E)";
-  })();
+  const cover = getStudyCover(study);
 
   return (
-    <div className="portal-card-lg overflow-hidden flex flex-col" data-testid={`study-card-${study.id}`}>
-      {/* Header */}
-      <div className="p-4 flex items-start gap-3" style={{ borderBottom: `1px solid ${N200}` }}>
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: iconBg }}>
-          <Icon className="w-5 h-5 text-white" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold leading-snug mb-1" style={{ color: VDK }}>{study.title}</div>
-          <div className="text-[11px]" style={{ color: N500 }}>
-            {[study.companyName, study.industry].filter(Boolean).join(" · ")}
-            {study.respondentCount ? ` · ${study.respondentCount} respondents` : ""}
-          </div>
-        </div>
-        <div className="flex flex-col items-end gap-1 flex-shrink-0">
-          <span className={typeBadge.label === "PRO" ? "badge-pro" : "badge-basic"}>
+    <button
+      onClick={onClick}
+      data-testid={`study-card-${study.id}`}
+      className="text-left portal-card-lg overflow-hidden flex flex-col hover-elevate active-elevate-2"
+    >
+      {/* Cover image with gradient wash */}
+      <div
+        className="relative w-full"
+        style={{
+          height: 160,
+          backgroundImage: `url(${cover})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        {/* Dark wash for text legibility */}
+        <div
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(180deg, rgba(30,27,58,0.15) 0%, rgba(30,27,58,0.55) 60%, rgba(30,27,58,0.85) 100%)" }}
+        />
+        {/* Top-right badges */}
+        <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
+          <span
+            className="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded"
+            style={{ background: typeBadge.bg, color: typeBadge.color }}
+          >
             {typeBadge.label}
           </span>
           {isComplete && (
-            <span className="badge-completed">Complete</span>
+            <span
+              className="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded"
+              style={{ background: SUCCESS_LT, color: SUCCESS }}
+            >
+              Complete
+            </span>
           )}
+        </div>
+        {/* Title + meta over image */}
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          <div className="font-serif text-lg leading-snug text-white mb-1 line-clamp-2">
+            {study.title}
+          </div>
+          <div className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.75)" }}>
+            {[study.companyName, study.industry].filter(Boolean).join(" · ") || "Study"}
+            {study.respondentCount ? ` · ${study.respondentCount} resp.` : ""}
+          </div>
         </div>
       </div>
 
-      {/* Big metrics (Idea / Interest / Commitment) */}
-      {bigMetrics.length > 0 && (
-        <div className="px-4 pt-4 pb-2 grid grid-cols-3 gap-2">
+      {/* Metrics row */}
+      {bigMetrics.length > 0 ? (
+        <div className="px-4 py-4 grid grid-cols-3 gap-2 mt-auto">
           {bigMetrics.map(m => (
             <div key={m.label} className="text-center">
               <div className="text-2xl font-bold font-mono leading-none" style={{ color: metricColor(m.val) }}>{m.val}%</div>
-              <div className="text-[9px] font-bold tracking-widest mt-1" style={{ color: N500 }}>{m.label}</div>
+              <div className="text-[9px] font-bold tracking-widest mt-1.5" style={{ color: N500 }}>{m.label}</div>
             </div>
           ))}
         </div>
-      )}
-
-      {/* Small metrics (Meaning / Difference / Worth) */}
-      {smallMetrics.length > 0 && (
-        <div className="px-4 pb-3 grid grid-cols-3 gap-2">
-          {smallMetrics.map(m => (
-            <div key={m.label} className="text-center">
-              <div className="text-base font-bold font-mono leading-none" style={{ color: N400 }}>{m.val}%</div>
-              <div className="text-[9px] font-bold tracking-widest mt-0.5" style={{ color: N500 }}>{m.label}</div>
-            </div>
-          ))}
+      ) : (
+        <div className="px-4 py-4 flex items-center justify-between mt-auto">
+          <span className="text-xs" style={{ color: N500 }}>Tap to view results</span>
+          <ArrowRight className="w-4 h-4" style={{ color: VIO }} />
         </div>
       )}
-
-      {/* Actions */}
-      <div className="px-4 py-3 flex gap-2 mt-auto" style={{ borderTop: `1px solid ${N200}` }}>
-        <button
-          onClick={onActClick}
-          data-testid={`button-act-study-${study.id}`}
-          className="flex-1 text-xs font-semibold py-2 text-white rounded-lg"
-          style={{ background: VIO }}
-        >
-          Analyse in Act
-        </button>
-        {study.pdfUrl && (
-          <button
-            onClick={() => window.open(study.pdfUrl, "_blank")}
-            data-testid={`button-download-study-${study.id}`}
-            className="flex-1 text-xs font-semibold py-2 flex items-center justify-center gap-1 rounded-lg"
-            style={{ border: `1px solid ${N200}`, color: N500, background: "#fff" }}
-          >
-            <Download className="w-3 h-3" /> Download PDF
-          </button>
-        )}
-      </div>
-    </div>
+    </button>
   );
 }
