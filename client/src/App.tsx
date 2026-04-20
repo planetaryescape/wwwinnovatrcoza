@@ -4,7 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { useGtmPageTracking } from "@/hooks/use-gtm-page-tracking";
 import { AnimatePresence, motion } from "framer-motion";
@@ -50,6 +50,24 @@ const ActPage = lazy(() => import("@/pages/portal/ActPage"));
 const HealthPage = lazy(() => import("@/pages/portal/HealthPage"));
 const ReportDetailPage = lazy(() => import("@/pages/portal/ReportDetailPage"));
 
+/**
+ * AdminOnly wraps a portal page so that only admins (Hannah, Richard, Alroy)
+ * can access it. Non-admins are bounced back to the dashboard. Used to lock
+ * down all portal pages except Dashboard, Explore, Test (incl. Launch a Brief),
+ * and Settings while we finalise the rest of the experience.
+ */
+function AdminOnly({ children }: { children: React.ReactNode }) {
+  const { isAdmin, isLoading, isAuthenticated } = useAuth();
+  if (isLoading) return null;
+  if (!isAuthenticated) {
+    return <Redirect to="/" />;
+  }
+  if (!isAdmin) {
+    return <Redirect to="/portal/dashboard" />;
+  }
+  return <>{children}</>;
+}
+
 function Router() {
   useGtmPageTracking();
   const [location] = useLocation();
@@ -93,17 +111,17 @@ function Router() {
           <Route path="/payment/cancel" component={PaymentReturn} />
           <Route path="/portal" component={Dashboard} />
           <Route path="/portal/dashboard" component={Dashboard} />
-          <Route path="/portal/trends" component={TrendsInsights} />
-          <Route path="/portal/insights/:slug" component={InsightDetail} />
+          <Route path="/portal/trends">{() => <AdminOnly><TrendsInsights /></AdminOnly>}</Route>
+          <Route path="/portal/insights/:slug">{(params) => <AdminOnly><InsightDetail {...(params as any)} /></AdminOnly>}</Route>
           <Route path="/portal/launch" component={LaunchBrief} />
-          <Route path="/portal/credits" component={CreditsAndBilling} />
+          <Route path="/portal/credits">{() => <AdminOnly><CreditsAndBilling /></AdminOnly>}</Route>
           <Route path="/portal/explore" component={ExplorePage} />
           <Route path="/portal/test" component={TestPage} />
-          <Route path="/portal/act" component={ActPage} />
-          <Route path="/portal/health" component={HealthPage} />
-          <Route path="/portal/research" component={PastResearch} />
-          <Route path="/portal/deals" component={MemberDeals} />
-          <Route path="/portal/reports/:id" component={ReportDetailPage} />
+          <Route path="/portal/act">{() => <AdminOnly><ActPage /></AdminOnly>}</Route>
+          <Route path="/portal/health">{() => <AdminOnly><HealthPage /></AdminOnly>}</Route>
+          <Route path="/portal/research">{() => <AdminOnly><PastResearch /></AdminOnly>}</Route>
+          <Route path="/portal/deals">{() => <AdminOnly><MemberDeals /></AdminOnly>}</Route>
+          <Route path="/portal/reports/:id">{(params) => <AdminOnly><ReportDetailPage {...(params as any)} /></AdminOnly>}</Route>
           <Route path="/portal/admin" component={AdminPortal} />
           <Route path="/portal/admin/companies/:companyId" component={AdminCompanyDetail} />
           <Route path="/portal/settings" component={Settings} />

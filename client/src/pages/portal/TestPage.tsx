@@ -283,7 +283,7 @@ function RankingMiniChart({ studyId }: { studyId: string }) {
 export default function TestPage() {
   const [, setLocation]           = useLocation();
   const isMobile = useIsMobile();
-  const { user }                  = useAuth();
+  const { user, isAdmin }         = useAuth();
   const { toast }                 = useToast();
   const [activeTab, setActiveTab] = useState<Tab>("studies");
   const [briefMode, setBriefMode] = useState<BriefMode>("choose");
@@ -523,7 +523,7 @@ export default function TestPage() {
 
         {/* Sub-tabs — sticky white bar */}
         <div className="flex flex-shrink-0 px-5 sticky-tab-bar border-b" style={{ borderColor: N200 }}>
-          {(["brief", "studies", "assistant"] as Tab[]).map(tab => (
+          {((isAdmin ? ["brief", "studies", "assistant"] : ["brief", "studies"]) as Tab[]).map(tab => (
             <button
               key={tab}
               onClick={() => { setActiveTab(tab); if (tab === "brief") setBriefMode("choose"); }}
@@ -1056,14 +1056,16 @@ export default function TestPage() {
                           >
                             <BarChart2 className="w-3 h-3" /> View full analysis
                           </button>
-                          <button
-                            onClick={() => { setActiveTab("assistant"); setSelectedAssistStudy(study.id); }}
-                            className="text-xs font-semibold px-4 py-1.5 rounded-lg flex items-center gap-1.5"
-                            style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}
-                            data-testid={`button-act-study-${study.id}`}
-                          >
-                            <Sparkles className="w-3 h-3" /> Analyse in Act
-                          </button>
+                          {isAdmin && (
+                            <button
+                              onClick={() => { setActiveTab("assistant"); setSelectedAssistStudy(study.id); }}
+                              className="text-xs font-semibold px-4 py-1.5 rounded-lg flex items-center gap-1.5"
+                              style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}
+                              data-testid={`button-act-study-${study.id}`}
+                            >
+                              <Sparkles className="w-3 h-3" /> Analyse in Act
+                            </button>
+                          )}
                           <button
                             onClick={() => {
                               if (study.pdfUrl) {
@@ -1162,14 +1164,16 @@ export default function TestPage() {
 
                       {/* Actions */}
                       <div className="px-5 py-3 flex gap-2" style={{ borderTop: `1px solid ${N200}`, background: "#F5F5F5" }}>
-                        <button
-                          onClick={() => { setActiveTab("assistant"); setSelectedAssistStudy(study.id); }}
-                          className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg flex items-center gap-1.5"
-                          style={{ background: CORAL, borderRadius: 8 }}
-                          data-testid={`button-act-study-${study.id}`}
-                        >
-                          <Sparkles className="w-3 h-3" /> Analyse in Act
-                        </button>
+                        {isAdmin && (
+                          <button
+                            onClick={() => { setActiveTab("assistant"); setSelectedAssistStudy(study.id); }}
+                            className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg flex items-center gap-1.5"
+                            style={{ background: CORAL, borderRadius: 8 }}
+                            data-testid={`button-act-study-${study.id}`}
+                          >
+                            <Sparkles className="w-3 h-3" /> Analyse in Act
+                          </button>
+                        )}
                         <button
                           onClick={() => {
                             if (study.pdfUrl) {
@@ -1200,8 +1204,8 @@ export default function TestPage() {
               </div>
             )}
 
-            {/* ── RESEARCH ASSISTANT ── */}
-            {activeTab === "assistant" && (
+            {/* ── RESEARCH ASSISTANT ── (admin-only) */}
+            {activeTab === "assistant" && isAdmin && (
               <div>
                 {/* Empty state — no studies yet */}
                 {clientReports.length === 0 && !isLoadingStudies && (
@@ -1302,8 +1306,8 @@ export default function TestPage() {
             )}
           </div>
 
-          {/* Right: AI Panel — hidden on mobile and on the Launch a Brief tab */}
-          {!isMobile && activeTab !== "brief" && (
+          {/* Right: AI Panel — hidden on mobile, on the Launch a Brief tab, and for non-admins on the Assistant tab */}
+          {!isMobile && activeTab !== "brief" && (activeTab !== "assistant" || isAdmin) && (
           <div
             className={`flex flex-col overflow-hidden flex-shrink-0 ${activeTab === "assistant" ? "w-[340px] min-w-[340px]" : "w-80 min-w-[320px]"}`}
             style={{ background: "#fff", borderLeft: `1px solid ${N200}` }}

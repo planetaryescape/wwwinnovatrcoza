@@ -79,11 +79,19 @@ const reportFileUpload = multer({
 
 // Helper to check if user is admin
 const isAdminUser = (email?: string) => {
-  return email === "hannah@innovatr.co.za" || email === "richard@innovatr.co.za";
+  return (
+    email === "hannah@innovatr.co.za" ||
+    email === "richard@innovatr.co.za" ||
+    email === "alroy@innovatr.co.za"
+  );
 };
 
 // Demo accounts list - used for minimum credit display
-const DEMO_ACCOUNTS = ["hannah@innovatr.co.za", "richard@innovatr.co.za"];
+const DEMO_ACCOUNTS = [
+  "hannah@innovatr.co.za",
+  "richard@innovatr.co.za",
+  "alroy@innovatr.co.za",
+];
 const DEMO_MIN_BASIC_CREDITS = 25;
 const DEMO_MIN_PRO_CREDITS = 4;
 
@@ -4804,35 +4812,101 @@ Age: ${(ages || []).join(", ") || "All"} · Gender: ${(genders || []).join(", ")
 Income: ${(incomes || []).join(", ") || "All"} · Region: ${(regions || []).join(", ") || "All"}
 `;
 
-      await sendBriefAdminNotification({
-        id: briefId,
-        submittedByName: submittedByName || "Portal User",
-        submittedByEmail: submittedByEmail || "",
-        submittedByContact: null,
-        companyName: companyName || "Unknown Company",
-        companyBrand: concept,
-        studyType: studyLabel,
-        numIdeas: numConcepts || 1,
-        researchObjective: `${objective}\n\n${questionnaire}${context ? `\n\nAdditional context: ${context}` : ""}`,
-        regions: regions || [],
-        ages: ages || [],
-        genders: genders || [],
-        incomes: incomes || [],
-        industry: null,
-        competitors: [],
-        projectFileUrls: [],
-        files: (files || []).map((name: string) => ({
-          id: name,
-          fileName: name,
-          fileSize: 0,
-          mimeType: "application/octet-stream",
-          url: "",
-          uploadedAt: new Date().toISOString(),
-        })),
-        createdAt: new Date(),
-      });
+      const fullObjective = `${objective}\n\n${questionnaire}${context ? `\n\nAdditional context: ${context}` : ""}`;
+      const fileObjects = (files || []).map((name: string) => ({
+        id: name,
+        fileName: name,
+        fileSize: 0,
+        mimeType: "application/octet-stream",
+        url: "",
+        uploadedAt: new Date().toISOString(),
+      }));
 
-      res.json({ success: true, briefId });
+      // 1) Persist a backup of the brief to the database BEFORE we attempt to email,
+      //    so a transient email failure can never lose the brief.
+      let savedBriefId: string | null = null;
+      try {
+        const saved = await storage.createBriefSubmission({
+          submittedByName: submittedByName || "Portal User",
+          submittedByEmail: submittedByEmail || req.user?.email || "unknown@portal.local",
+          submittedByContact: null,
+          companyId: req.user?.companyId || null,
+          companyName: companyName || "Unknown Company",
+          companyBrand: concept,
+          studyType: studyLabel,
+          numIdeas: numConcepts || 1,
+          numConsumers: 100,
+          researchObjective: fullObjective,
+          regions: regions || [],
+          ages: ages || [],
+          genders: genders || [],
+          incomes: incomes || [],
+          industry: null,
+          competitors: [],
+          projectFileUrls: [],
+          files: fileObjects,
+          concepts: [],
+          paymentMethod: "invoice",
+          paymentStatus: null,
+          paymentIntentId: null,
+          basicCreditsUsed: 0,
+          proCreditsUsed: 0,
+          status: "new",
+          notes: "AI Brief Assistant submission (auto-generated questionnaire). Awaiting Hannah's approval.",
+        } as any);
+        savedBriefId = saved.id;
+        console.log(`[ai-brief] saved DB backup id=${saved.id} for ${submittedByEmail}`);
+      } catch (dbErr: any) {
+        // DB persistence is REQUIRED — if we cannot save, we must not silently
+        // try email-only and let the user think the brief is safe. Surface
+        // the error immediately so the user can retry.
+        console.error("[ai-brief] DB backup save FAILED:", dbErr?.message || dbErr);
+        return res.status(500).json({
+          error: "We could not save your brief. Please try again, or email it directly to hannah@innovatr.co.za.",
+        });
+      }
+
+      // 2) Send admin email notification
+      let emailSent = false;
+      try {
+        await sendBriefAdminNotification({
+          id: savedBriefId || briefId,
+          submittedByName: submittedByName || "Portal User",
+          submittedByEmail: submittedByEmail || "",
+          submittedByContact: null,
+          companyName: companyName || "Unknown Company",
+          companyBrand: concept,
+          studyType: studyLabel,
+          numIdeas: numConcepts || 1,
+          researchObjective: fullObjective,
+          regions: regions || [],
+          ages: ages || [],
+          genders: genders || [],
+          incomes: incomes || [],
+          industry: null,
+          competitors: [],
+          projectFileUrls: [],
+          files: fileObjects,
+          createdAt: new Date(),
+        });
+        emailSent = true;
+      } catch (emailErr: any) {
+        console.error("[ai-brief] Email send FAILED:", emailErr?.message || emailErr);
+      }
+
+      // If both DB save AND email failed, surface an error so the user knows
+      if (!savedBriefId && !emailSent) {
+        return res.status(500).json({
+          error: "Failed to save and email brief. Please try again or contact hannah@innovatr.co.za directly.",
+        });
+      }
+
+      res.json({
+        success: true,
+        briefId: savedBriefId || briefId,
+        savedToDatabase: !!savedBriefId,
+        emailSent,
+      });
     } catch (error: any) {
       console.error("AI brief submit error:", error);
       res.status(500).json({ error: error.message || "Failed to submit brief" });

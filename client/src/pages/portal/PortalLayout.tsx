@@ -234,19 +234,25 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
         {isTablet && !isMobile && <div className="h-3" />}
         <PhaseNavItem num="01" label="Explore" color={EXPLORE_COLOR} isActive={isExplore} onClick={() => setLocation("/portal/explore")} testId="menu-item-explore" iconOnly={isTablet && !isMobile} tooltip="Explore" />
         <PhaseNavItem num="02" label="Test"    color={TEST_COLOR}    isActive={isTest}    onClick={() => setLocation("/portal/test")}    testId="menu-item-test"    iconOnly={isTablet && !isMobile} tooltip="Test"    />
-        <PhaseNavItem num="03" label="Act"     color={ACT_COLOR}     isActive={isAct}     onClick={() => setLocation("/portal/act")}     testId="menu-item-act"     iconOnly={isTablet && !isMobile} tooltip="Act"     />
+        {isAdmin && (
+          <PhaseNavItem num="03" label="Act"     color={ACT_COLOR}     isActive={isAct}     onClick={() => setLocation("/portal/act")}     testId="menu-item-act"     iconOnly={isTablet && !isMobile} tooltip="Act" />
+        )}
 
-        {(!isTablet || isMobile) && <SbSection label="Company" top />}
-        {isTablet && !isMobile && <div className="h-3" />}
-        <SbNavItem
-          icon={<span className="w-4 h-4 flex items-center justify-center text-[10px] font-bold rounded-full flex-shrink-0" style={{ border: `1px solid ${HEALTH_COLOR}50`, color: HEALTH_COLOR }}>C</span>}
-          label="Company"
-          isActive={isHealth}
-          onClick={() => setLocation("/portal/health")}
-          testId="menu-item-health"
-          iconOnly={isTablet && !isMobile}
-          tooltip="Company Health"
-        />
+        {isAdmin && (
+          <>
+            {(!isTablet || isMobile) && <SbSection label="Company" top />}
+            {isTablet && !isMobile && <div className="h-3" />}
+            <SbNavItem
+              icon={<span className="w-4 h-4 flex items-center justify-center text-[10px] font-bold rounded-full flex-shrink-0" style={{ border: `1px solid ${HEALTH_COLOR}50`, color: HEALTH_COLOR }}>C</span>}
+              label="Company"
+              isActive={isHealth}
+              onClick={() => setLocation("/portal/health")}
+              testId="menu-item-health"
+              iconOnly={isTablet && !isMobile}
+              tooltip="Company Health"
+            />
+          </>
+        )}
 
         {isAdmin && !impersonation.isImpersonating && (
           <>
@@ -361,7 +367,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
                 <ChevronRight className="w-3 h-3 mx-1" style={{ color: N400 }} />
                 <PhaseTab num="2" label="Test"    color={TEST_COLOR}    isActive={isTest}    onClick={() => setLocation("/portal/test")}    />
                 <ChevronRight className="w-3 h-3 mx-1" style={{ color: N400 }} />
-                <PhaseTab num="3" label="Act"     color={ACT_COLOR}     isActive={isAct}     onClick={() => setLocation("/portal/act")}     />
+                {isAdmin && <PhaseTab num="3" label="Act"     color={ACT_COLOR}     isActive={isAct}     onClick={() => setLocation("/portal/act")}     />}
               </div>
               <div className="flex items-center gap-2">
                 {!isMobile && (
@@ -426,12 +432,16 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
             <CommandItem onSelect={() => { setSearchOpen(false); setLocation("/portal/test"); }} data-testid="search-item-test">
               <BarChart2 className="mr-2 h-4 w-4" />Test — Studies & Briefs
             </CommandItem>
-            <CommandItem onSelect={() => { setSearchOpen(false); setLocation("/portal/act"); }} data-testid="search-item-act">
-              <Lightbulb className="mr-2 h-4 w-4" />Act — Planning & Gaps
-            </CommandItem>
-            <CommandItem onSelect={() => { setSearchOpen(false); setLocation("/portal/health"); }} data-testid="search-item-company">
-              <Building2 className="mr-2 h-4 w-4" />Company Health
-            </CommandItem>
+            {isAdmin && (
+              <CommandItem onSelect={() => { setSearchOpen(false); setLocation("/portal/act"); }} data-testid="search-item-act">
+                <Lightbulb className="mr-2 h-4 w-4" />Act — Planning & Gaps
+              </CommandItem>
+            )}
+            {isAdmin && (
+              <CommandItem onSelect={() => { setSearchOpen(false); setLocation("/portal/health"); }} data-testid="search-item-company">
+                <Building2 className="mr-2 h-4 w-4" />Company Health
+              </CommandItem>
+            )}
             <CommandItem onSelect={() => { setSearchOpen(false); setLocation("/portal/settings"); }} data-testid="search-item-settings">
               <Settings className="mr-2 h-4 w-4" />Settings
             </CommandItem>
@@ -457,31 +467,34 @@ function SbSection({ label, top }: { label: string; top?: boolean }) {
   );
 }
 
-function SbNavItem({ icon, label, isActive, onClick, testId, badge, iconOnly, tooltip }: {
-  icon: React.ReactNode; label: string; isActive: boolean; onClick: () => void; testId?: string; badge?: React.ReactNode; iconOnly?: boolean; tooltip?: string;
+function SbNavItem({ icon, label, isActive, onClick, testId, badge, iconOnly, tooltip, locked }: {
+  icon: React.ReactNode; label: string; isActive: boolean; onClick: () => void; testId?: string; badge?: React.ReactNode; iconOnly?: boolean; tooltip?: string; locked?: boolean;
 }) {
   return (
     <button
-      onClick={onClick}
+      onClick={locked ? undefined : onClick}
       data-testid={testId}
+      disabled={locked}
       title={iconOnly ? tooltip : undefined}
       className="w-full flex items-center px-2.5 py-2 rounded-md text-sm font-medium transition-colors mb-0.5 relative"
       style={{
         gap: iconOnly ? "0" : "0.625rem",
         justifyContent: iconOnly ? "center" : "flex-start",
-        color: isActive ? "#ffffff" : "rgba(255,255,255,0.65)",
+        color: isActive ? "#ffffff" : locked ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.65)",
         background: isActive ? "rgba(255,255,255,0.12)" : "transparent",
+        cursor: locked ? "not-allowed" : "pointer",
         minHeight: "44px",
       }}
-      onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
-      onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+      onMouseEnter={e => { if (!isActive && !locked) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
+      onMouseLeave={e => { if (!isActive && !locked) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
     >
       {isActive && !iconOnly && (
         <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r" style={{ background: "#E8503A" }} />
       )}
-      <span style={{ color: isActive ? "#E8503A" : "rgba(255,255,255,0.55)", flexShrink: 0 }}>{icon}</span>
+      <span style={{ color: isActive ? "#E8503A" : locked ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.55)", flexShrink: 0 }}>{icon}</span>
       {!iconOnly && <span className="flex-1 text-left">{label}</span>}
-      {!iconOnly && badge}
+      {!iconOnly && locked && <Lock className="w-3 h-3 flex-shrink-0" style={{ color: "rgba(255,255,255,0.25)" }} />}
+      {!iconOnly && !locked && badge}
       {iconOnly && isActive && (
         <span
           className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"

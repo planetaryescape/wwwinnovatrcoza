@@ -117,7 +117,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Check if user has admin role or admin email
           const isAdmin = dbUser.role === "ADMIN" || 
             dbUser.email === "hannah@innovatr.co.za" || 
-            dbUser.email === "richard@innovatr.co.za";
+            dbUser.email === "richard@innovatr.co.za" ||
+            dbUser.email === "alroy@innovatr.co.za";
           
           const tierMap: Record<string, UserTier> = {
             STARTER: "starter",
@@ -218,7 +219,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check if user has admin role or admin email
     const isAdmin = dbUser.role === "ADMIN" || 
       email === "hannah@innovatr.co.za" || 
-      email === "richard@innovatr.co.za";
+      email === "richard@innovatr.co.za" ||
+      email === "alroy@innovatr.co.za";
     
     const tierMap: Record<string, UserTier> = {
       STARTER: "starter",

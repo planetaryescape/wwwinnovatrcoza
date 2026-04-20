@@ -21,7 +21,7 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
-const ADMIN_EMAILS = ["hannah@innovatr.co.za", "richard@innovatr.co.za"];
+const ADMIN_EMAILS = ["hannah@innovatr.co.za", "richard@innovatr.co.za", "alroy@innovatr.co.za"];
 
 export function isAdminUser(email?: string | null): boolean {
   return email !== undefined && email !== null && ADMIN_EMAILS.includes(email);

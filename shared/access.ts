@@ -160,7 +160,11 @@ export function isAdminUser(email?: string | null, role?: string | null): boolea
   if (role?.toUpperCase() === "ADMIN") return true;
   if (!email) return false;
   const lowerEmail = email.toLowerCase();
-  return lowerEmail === "hannah@innovatr.co.za" || lowerEmail === "richard@innovatr.co.za";
+  return (
+    lowerEmail === "hannah@innovatr.co.za" ||
+    lowerEmail === "richard@innovatr.co.za" ||
+    lowerEmail === "alroy@innovatr.co.za"
+  );
 }
 
 export function isFreeContent(report: { 

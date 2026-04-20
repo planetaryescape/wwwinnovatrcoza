@@ -1,6 +1,7 @@
 import { useLocation } from "wouter";
-import { LayoutDashboard, FlaskConical, BarChart2, Lightbulb, Building2 } from "lucide-react";
+import { LayoutDashboard, FlaskConical, BarChart2, Lightbulb, Building2, Settings } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
 
 const VDK   = "#1E1B3A";
 const CORAL  = "#E8503A";
@@ -30,6 +31,7 @@ function MobileNavBtn({ icon, label, isActive, onClick, testId }: {
 export function MobilePortalNav() {
   const [location, setLocation] = useLocation();
   const isMobile = useIsMobile();
+  const { isAdmin } = useAuth();
 
   if (!isMobile) return null;
 
@@ -38,6 +40,7 @@ export function MobilePortalNav() {
   const isTest      = location === "/portal/test";
   const isAct       = location === "/portal/act";
   const isHealth    = location.startsWith("/portal/health");
+  const isSettings  = location === "/portal/settings";
 
   return (
     <nav
@@ -57,8 +60,14 @@ export function MobilePortalNav() {
       <MobileNavBtn icon={<LayoutDashboard className="w-5 h-5" />} label="Home"   isActive={isDashboard} onClick={() => setLocation("/portal/dashboard")} testId="mobile-nav-dashboard" />
       <MobileNavBtn icon={<FlaskConical   className="w-5 h-5" />}  label="Explore" isActive={isExplore}   onClick={() => setLocation("/portal/explore")}   testId="mobile-nav-explore"   />
       <MobileNavBtn icon={<BarChart2      className="w-5 h-5" />}  label="Test"    isActive={isTest}      onClick={() => setLocation("/portal/test")}      testId="mobile-nav-test"      />
-      <MobileNavBtn icon={<Lightbulb      className="w-5 h-5" />}  label="Act"     isActive={isAct}       onClick={() => setLocation("/portal/act")}       testId="mobile-nav-act"       />
-      <MobileNavBtn icon={<Building2      className="w-5 h-5" />}  label="Health"  isActive={isHealth}    onClick={() => setLocation("/portal/health")}    testId="mobile-nav-health"    />
+      {isAdmin ? (
+        <>
+          <MobileNavBtn icon={<Lightbulb      className="w-5 h-5" />}  label="Act"     isActive={isAct}       onClick={() => setLocation("/portal/act")}       testId="mobile-nav-act"       />
+          <MobileNavBtn icon={<Building2      className="w-5 h-5" />}  label="Health"  isActive={isHealth}    onClick={() => setLocation("/portal/health")}    testId="mobile-nav-health"    />
+        </>
+      ) : (
+        <MobileNavBtn icon={<Settings       className="w-5 h-5" />}  label="Settings" isActive={isSettings}  onClick={() => setLocation("/portal/settings")}  testId="mobile-nav-settings" />
+      )}
     </nav>
   );
 }
