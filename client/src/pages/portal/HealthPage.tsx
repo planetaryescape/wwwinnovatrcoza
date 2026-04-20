@@ -25,7 +25,7 @@ const AMBER_LT = "#FEF6D6";
 const CYAN     = "#4EC9E8";
 const CORAL    = "#E8503A";
 const CORAL_LT = "#FDECEA";
-const CREAM    = "#FAF3E8";
+const CREAM    = "#FFFFFF";
 
 const CARD: React.CSSProperties = {
   background: "#ffffff",

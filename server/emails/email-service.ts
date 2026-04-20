@@ -1659,9 +1659,9 @@ export async function sendFinancialPulseMailer(to: string, firstName: string = "
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Cash Is King Again | Innovatr Insights</title></head>
-<body style="margin:0;padding:0;background-color:#FAF3E8;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<body style="margin:0;padding:0;background-color:#FFFFFF;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;color:#f4f4f5;">Digital fatigue is real. And it's reshaping how people spend. &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FAF3E8;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF;">
     <tr><td align="center" style="padding:24px 16px;">
       <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
         <tr><td style="background-color:${BRAND_COLOR};padding:10px 24px;text-align:center;"><span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Innovatr Insights</span></td></tr>
@@ -1738,9 +1738,9 @@ export async function sendBeautyPulseMailer(to: string, firstName: string = "the
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Township Beauty Economy | Innovatr Insights</title></head>
-<body style="margin:0;padding:0;background-color:#FAF3E8;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<body style="margin:0;padding:0;background-color:#FFFFFF;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;color:#f4f4f5;">Informal entrepreneurs are becoming micro-brands — and retail is watching. &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FAF3E8;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF;">
     <tr><td align="center" style="padding:24px 16px;">
       <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
         <tr><td style="background-color:${BRAND_COLOR};padding:10px 24px;text-align:center;"><span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Innovatr Insights</span></td></tr>
@@ -1816,9 +1816,9 @@ export async function sendHealthPulseMailer(to: string, firstName: string = "the
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Clinic vs Clicks vs Creator | Innovatr Insights</title></head>
-<body style="margin:0;padding:0;background-color:#FAF3E8;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<body style="margin:0;padding:0;background-color:#FFFFFF;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;color:#f4f4f5;">Doctors still lead. But they're no longer alone. &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FAF3E8;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF;">
     <tr><td align="center" style="padding:24px 16px;">
       <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
         <tr><td style="background-color:${BRAND_COLOR};padding:10px 24px;text-align:center;"><span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Innovatr Insights</span></td></tr>
@@ -1894,9 +1894,9 @@ export async function sendFoodPulseMailer(to: string, firstName: string = "there
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Price Memory Is Becoming Brutal | Innovatr Insights</title></head>
-<body style="margin:0;padding:0;background-color:#FAF3E8;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<body style="margin:0;padding:0;background-color:#FFFFFF;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;color:#f4f4f5;">When prices move, consumers notice immediately. &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FAF3E8;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF;">
     <tr><td align="center" style="padding:24px 16px;">
       <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
         <tr><td style="background-color:${BRAND_COLOR};padding:10px 24px;text-align:center;"><span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Innovatr Insights</span></td></tr>
@@ -1980,13 +1980,13 @@ export async function sendPulseMailer(to: string, firstName: string = "there") {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Home Is the New Bar (Again, But Smarter) | Innovatr Insights</title>
 </head>
-<body style="margin:0;padding:0;background-color:#FAF3E8;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<body style="margin:0;padding:0;background-color:#FFFFFF;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <!-- Pre-header (preview text in inbox) -->
   <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;color:#f4f4f5;">
     South Africans Aren't Going Out Less. They're Drinking Differently. &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
   </div>
 
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FAF3E8;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF;">
     <tr>
       <td align="center" style="padding:24px 16px;">
         <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
@@ -2151,9 +2151,9 @@ export async function sendPredictiveModellingMailer(to: string, firstName: strin
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Predictive Modelling Behaviour | Innovatr Insights</title></head>
-<body style="margin:0;padding:0;background-color:#FAF3E8;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<body style="margin:0;padding:0;background-color:#FFFFFF;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;color:#f4f4f5;">The signals were there. Brands that read them acted first. &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FAF3E8;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFFFFF;">
     <tr><td align="center" style="padding:24px 16px;">
       <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
 

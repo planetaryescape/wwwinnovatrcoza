@@ -9,7 +9,7 @@ const CORAL = "#E8503A";
 const N200  = "#E2D5BF";
 const N400  = "#A89078";
 const N500  = "#8A7260";
-const CREAM = "#FAF3E8";
+const CREAM = "#FFFFFF";
 
 const SERIES_COLOR: Record<string, string> = {
   IRL: "#3A2FBF",
