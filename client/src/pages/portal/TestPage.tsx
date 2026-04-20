@@ -1305,8 +1305,8 @@ export default function TestPage() {
             )}
           </div>
 
-          {/* Right: AI Panel — hidden on mobile, on the Launch a Brief tab, and for non-admins on the Assistant tab */}
-          {!isMobile && activeTab !== "brief" && (activeTab !== "assistant" || isAdmin) && (
+          {/* Right: AI Panel — only on the Research Assistant tab (admin only); hidden on Studies / Launch a Brief / mobile */}
+          {!isMobile && activeTab === "assistant" && isAdmin && (
           <div
             className={`flex flex-col overflow-hidden flex-shrink-0 ${activeTab === "assistant" ? "w-[340px] min-w-[340px]" : "w-80 min-w-[320px]"}`}
             style={{ background: "#fff", borderLeft: `1px solid ${N200}` }}
