@@ -10,6 +10,8 @@ import {
   X,
   Search,
   ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Lock,
   BarChart2,
   FlaskConical,
@@ -91,6 +93,14 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("portal-sidebar-collapsed") === "1";
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem("portal-sidebar-collapsed", collapsed ? "1" : "0");
+  }, [collapsed]);
 
   const bp = useBreakpoint();
   const isMobile  = bp === "mobile";
@@ -143,8 +153,11 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
   const isAct       = location === "/portal/act";
   const isHealth    = location.startsWith("/portal/health");
 
+  // Compact sidebar: forced on tablet breakpoint OR when user toggles collapse on desktop
+  const isCompact = (isTablet && !isMobile) || (collapsed && isDesktop);
+
   const sidebarStyle = {
-    "--sidebar-width": isTablet ? "3rem" : "12.5rem",
+    "--sidebar-width": isCompact ? "3rem" : "12.5rem",
     "--sidebar-width-icon": "3rem",
   };
 
@@ -170,7 +183,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
           >
             I
           </div>
-          {(!isTablet || isMobile) && (
+          {!isCompact && (
             <span className="font-serif text-base text-white tracking-wide truncate">Innovatr</span>
           )}
         </button>
@@ -187,7 +200,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
       </div>
 
       {/* User badge */}
-      {(!isTablet || isMobile) && (
+      {!isCompact && (
         <div
           className="px-4 py-3 flex items-center gap-2.5 flex-shrink-0"
           style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.04)" }}
@@ -218,37 +231,37 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-2 px-2">
-        {(!isTablet || isMobile) && <SbSection label="Research" />}
+        {!isCompact && <SbSection label="Research" />}
         <SbNavItem
           icon={<LayoutDashboard className="w-4 h-4" />}
           label="Dashboard"
           isActive={isDashboard}
           onClick={() => setLocation("/portal/dashboard")}
           testId="menu-item-dashboard"
-          iconOnly={isTablet && !isMobile}
+          iconOnly={isCompact}
           tooltip="Dashboard"
           badge={trendsStatus?.hasNew ? <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: CORAL }} /> : undefined}
         />
 
-        {(!isTablet || isMobile) && <SbSection label="3 Phases" top />}
-        {isTablet && !isMobile && <div className="h-3" />}
-        <PhaseNavItem num="01" label="Explore" color={EXPLORE_COLOR} isActive={isExplore} onClick={() => setLocation("/portal/explore")} testId="menu-item-explore" iconOnly={isTablet && !isMobile} tooltip="Explore" />
-        <PhaseNavItem num="02" label="Test"    color={TEST_COLOR}    isActive={isTest}    onClick={() => setLocation("/portal/test")}    testId="menu-item-test"    iconOnly={isTablet && !isMobile} tooltip="Test"    />
+        {!isCompact && <SbSection label="3 Phases" top />}
+        {isCompact && <div className="h-3" />}
+        <PhaseNavItem num="01" label="Explore" color={EXPLORE_COLOR} isActive={isExplore} onClick={() => setLocation("/portal/explore")} testId="menu-item-explore" iconOnly={isCompact} tooltip="Explore" />
+        <PhaseNavItem num="02" label="Test"    color={TEST_COLOR}    isActive={isTest}    onClick={() => setLocation("/portal/test")}    testId="menu-item-test"    iconOnly={isCompact} tooltip="Test"    />
         {isAdmin && (
-          <PhaseNavItem num="03" label="Act"     color={ACT_COLOR}     isActive={isAct}     onClick={() => setLocation("/portal/act")}     testId="menu-item-act"     iconOnly={isTablet && !isMobile} tooltip="Act" />
+          <PhaseNavItem num="03" label="Act"     color={ACT_COLOR}     isActive={isAct}     onClick={() => setLocation("/portal/act")}     testId="menu-item-act"     iconOnly={isCompact} tooltip="Act" />
         )}
 
         {isAdmin && (
           <>
-            {(!isTablet || isMobile) && <SbSection label="Company" top />}
-            {isTablet && !isMobile && <div className="h-3" />}
+            {!isCompact && <SbSection label="Company" top />}
+            {isCompact && <div className="h-3" />}
             <SbNavItem
               icon={<span className="w-4 h-4 flex items-center justify-center text-[10px] font-bold rounded-full flex-shrink-0" style={{ border: `1px solid ${HEALTH_COLOR}50`, color: HEALTH_COLOR }}>C</span>}
               label="Company"
               isActive={isHealth}
               onClick={() => setLocation("/portal/health")}
               testId="menu-item-health"
-              iconOnly={isTablet && !isMobile}
+              iconOnly={isCompact}
               tooltip="Company Health"
             />
           </>
@@ -256,15 +269,15 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
 
         {isAdmin && !impersonation.isImpersonating && (
           <>
-            {(!isTablet || isMobile) && <SbSection label="System" top />}
-            {isTablet && !isMobile && <div className="h-3" />}
+            {!isCompact && <SbSection label="System" top />}
+            {isCompact && <div className="h-3" />}
             <SbNavItem
               icon={<Shield className="w-4 h-4" />}
               label="Admin"
               isActive={location.startsWith("/portal/admin")}
               onClick={() => setLocation("/portal/admin")}
               testId="menu-item-admin"
-              iconOnly={isTablet && !isMobile}
+              iconOnly={isCompact}
               tooltip="Admin"
             />
           </>
@@ -273,8 +286,22 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
 
       {/* Bottom */}
       <div className="p-2 flex-shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
-        <SbNavItem icon={<Settings className="w-4 h-4" />} label="Settings" isActive={location === "/portal/settings"} onClick={() => setLocation("/portal/settings")} testId="menu-item-settings" iconOnly={isTablet && !isMobile} tooltip="Settings" />
-        <SbNavItem icon={<LogOut className="w-4 h-4" />}   label="Log out"  isActive={false}                          onClick={handleLogout}                          testId="button-sidebar-logout"  iconOnly={isTablet && !isMobile} tooltip="Log out"  />
+        <SbNavItem icon={<Settings className="w-4 h-4" />} label="Settings" isActive={location === "/portal/settings"} onClick={() => setLocation("/portal/settings")} testId="menu-item-settings" iconOnly={isCompact} tooltip="Settings" />
+        <SbNavItem icon={<LogOut className="w-4 h-4" />}   label="Log out"  isActive={false}                          onClick={handleLogout}                          testId="button-sidebar-logout"  iconOnly={isCompact} tooltip="Log out"  />
+        {/* Collapse / expand toggle (desktop only — tablet is forced compact, mobile uses drawer) */}
+        {isDesktop && (
+          <button
+            onClick={() => setCollapsed(c => !c)}
+            data-testid="button-sidebar-collapse"
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="mt-1 w-full flex items-center gap-2 px-2 py-2 rounded-md text-xs font-medium hover-elevate"
+            style={{ color: N400, justifyContent: collapsed ? "center" : "flex-start" }}
+          >
+            {collapsed ? <ChevronsRight className="w-4 h-4" /> : <ChevronsLeft className="w-4 h-4" />}
+            {!collapsed && <span>Collapse</span>}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -288,7 +315,7 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
           <aside
             className="flex-shrink-0 overflow-hidden"
             style={{
-              width: isTablet ? "3rem" : "12.5rem",
+              width: isCompact ? "3rem" : "12.5rem",
               borderRight: "1px solid rgba(255,255,255,0.07)",
               transition: "width 0.2s ease",
             }}
