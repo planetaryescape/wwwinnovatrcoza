@@ -218,6 +218,20 @@ export default function OrderFormDialog({
           form.appendChild(input);
         });
 
+        // If any item in this order is a membership purchase, set a short-lived
+        // sessionStorage flag so PaymentReturn can fire the LinkedIn
+        // membership_purchase conversion only on a successful return.
+        try {
+          const isMembershipOrder = orderItems.some(
+            (it) => it.type === "membership" || it.type === "membership_upgrade",
+          );
+          if (isMembershipOrder && typeof window !== "undefined") {
+            window.sessionStorage.setItem("pendingMembershipPurchase", "1");
+          }
+        } catch {
+          // ignore storage errors (private mode etc.)
+        }
+
         document.body.appendChild(form);
         form.submit();
 

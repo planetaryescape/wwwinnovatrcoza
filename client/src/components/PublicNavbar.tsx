@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
-import { trackLinkedInConversion } from "@/lib/linkedin-tracking";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoginDialog } from "@/components/LoginDialog";
 import { LayoutDashboard, LogOut, User } from "lucide-react";
@@ -46,8 +45,8 @@ export default function PublicNavbar({ activePage }: PublicNavbarProps) {
   const [, navigate] = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
 
-  const openSignup = () => { trackLinkedInConversion(); setLoginDefaultSignup(true); setLoginOpen(true); };
-  const openLogin = () => { trackLinkedInConversion(); setLoginDefaultSignup(false); setLoginOpen(true); };
+  const openSignup = () => { setLoginDefaultSignup(true); setLoginOpen(true); };
+  const openLogin = () => { setLoginDefaultSignup(false); setLoginOpen(true); };
 
   const initials = user?.name
     ? user.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import PublicNavbar from "@/components/PublicNavbar";
+import { trackLinkedInEvent } from "@/lib/linkedin-tracking";
 import { User } from "lucide-react";
 import { LoginDialog } from "@/components/LoginDialog";
 import { useAuth } from "@/contexts/AuthContext";
@@ -920,6 +921,7 @@ function CTASection() {
             href="https://calendly.com/richard-1220"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackLinkedInEvent("book_demo")}
             style={{
               display: "inline-flex",
               alignItems: "center",

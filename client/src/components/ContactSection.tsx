@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Calendar, MessageSquare, Loader2, CheckCircle } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { trackLinkedInEvent } from "@/lib/linkedin-tracking";
 import contactBackground from "@assets/pexels-chris-f-8344064_1764657952677.jpeg";
 
 const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
@@ -82,6 +83,7 @@ export default function ContactSection() {
   };
 
   const handleBookDemo = () => {
+    trackLinkedInEvent("book_demo");
     window.open("https://calendly.com/richard-1220", "_blank");
   };
 

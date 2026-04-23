@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { trackLinkedInConversion } from "@/lib/linkedin-tracking";
+import { trackLinkedInEvent } from "@/lib/linkedin-tracking";
 import PublicNavbar from "@/components/PublicNavbar";
 import { User } from "lucide-react";
 import { LoginDialog } from "@/components/LoginDialog";
@@ -163,7 +163,7 @@ function WhySection() {
         target="_blank"
         rel="noopener noreferrer"
         data-testid="button-book-demo"
-        onClick={() => trackLinkedInConversion()}
+        onClick={() => trackLinkedInEvent("book_demo")}
         style={{ display: "inline-flex", alignItems: "center", gap: 10, fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: BRAND.dark, background: BRAND.amber, padding: "13px 26px", borderRadius: 10, textDecoration: "none", cursor: "pointer", alignSelf: "flex-start" }}
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -205,7 +205,6 @@ function ContactForm() {
           if (typeof window !== "undefined") {
             (window as any).dataLayer = (window as any).dataLayer || [];
             (window as any).dataLayer.push({ event: "contact_form_submit" });
-            trackLinkedInConversion();
           }
         } catch {
         }

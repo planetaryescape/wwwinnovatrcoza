@@ -11,6 +11,7 @@ import {
   type TierLevel,
   TIER_LEVELS
 } from "@shared/access";
+import { trackLinkedInEvent } from "@/lib/linkedin-tracking";
 
 export type UserTier = "free" | "starter" | "growth" | "scale" | "custom";
 export type MembershipTier = "STARTER" | "GROWTH" | "SCALE" | "CUSTOM" | "ADMIN";
@@ -263,7 +264,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     const dbUser = await res.json();
-    
+
+    // Fire LinkedIn Sign Up conversion only on a successful signup
+    trackLinkedInEvent("sign_up");
+
     // After signup, automatically log in to create session
     await login(email, password);
   };

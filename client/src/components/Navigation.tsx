@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogOut, LayoutDashboard } from "lucide-react";
-import { trackLinkedInConversion } from "@/lib/linkedin-tracking";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import ThemeToggle from "./ThemeToggle";
@@ -211,7 +210,7 @@ export default function Navigation() {
               ) : (
                 <Button 
                   variant="outline"
-                  onClick={() => { trackLinkedInConversion(); setShowLoginDialog(true); }}
+                  onClick={() => { setShowLoginDialog(true); }}
                   data-testid="button-login"
                   className={!isScrolled ? 'border-white/30 text-white hover:bg-white/10' : ''}
                 >
@@ -331,7 +330,6 @@ export default function Navigation() {
                   <Button 
                     className="w-full"
                     onClick={() => {
-                      trackLinkedInConversion();
                       setShowLoginDialog(true);
                       setIsMobileMenuOpen(false);
                     }}

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Mail, ArrowRight } from "lucide-react";
 import { useLocation } from "wouter";
-import { trackLinkedInConversion } from "@/lib/linkedin-tracking";
+import { trackLinkedInEvent } from "@/lib/linkedin-tracking";
 
 export default function MailerSection() {
   const [, setLocation] = useLocation();
@@ -22,7 +22,7 @@ export default function MailerSection() {
           <Button
             size="lg"
             className="text-lg px-8"
-            onClick={() => { trackLinkedInConversion(); setLocation("/portal?subscribe=true"); }}
+            onClick={() => { trackLinkedInEvent("subscribe_trends"); setLocation("/portal?subscribe=true"); }}
             data-testid="button-subscribe-now"
           >
             Subscribe Now
@@ -32,7 +32,7 @@ export default function MailerSection() {
             variant="outline"
             size="lg"
             className="text-lg px-8"
-            onClick={() => { trackLinkedInConversion(); setLocation("/portal"); }}
+            onClick={() => { setLocation("/portal"); }}
             data-testid="button-login-member"
           >
             Already a member? Log in

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { trackLinkedInConversion } from "@/lib/linkedin-tracking";
+import { trackLinkedInEvent } from "@/lib/linkedin-tracking";
 import PublicNavbar from "@/components/PublicNavbar";
 import { Compass, Lightbulb, Rocket, User } from "lucide-react";
 import innovatrLogo from "@assets/Innovatr_logo-01_for_light_1774947393282.png";
@@ -184,7 +184,7 @@ function HeroSection() {
               gap: 6,
               transition: "all 0.2s",
             }}
-              onClick={() => trackLinkedInConversion()}
+              onClick={() => trackLinkedInEvent("book_demo")}
               onMouseEnter={(e) => { (e.currentTarget).style.background = `${BRAND.violet}10`; }}
               onMouseLeave={(e) => { (e.currentTarget).style.background = "transparent"; }}
             >
@@ -567,7 +567,7 @@ function CTASection() {
             gap: 8,
             transition: "transform 0.18s, box-shadow 0.18s",
           }}
-            onClick={() => trackLinkedInConversion()}
+            onClick={() => trackLinkedInEvent("book_demo")}
             onMouseEnter={(e) => {
               (e.currentTarget).style.transform = "scale(1.03)";
               (e.currentTarget).style.boxShadow = `0 8px 24px ${BRAND.violet}40`;

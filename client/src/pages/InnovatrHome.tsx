@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { trackLinkedInConversion } from "@/lib/linkedin-tracking";
 import { GradientButtonWrap } from "@/components/GradientButtonWrap";
 import PublicNavbar from "@/components/PublicNavbar";
 import { LoginDialog } from "@/components/LoginDialog";
@@ -397,7 +396,7 @@ function HeroSection({ onPlayVideo }: { onPlayVideo: () => void }) {
           <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
             <div className="hero-btn-wrap">
               <div className="hero-btn-glow hero-btn-glow-research" />
-              <a href="/research" className="hero-btn-inner" style={{ background: BRAND.violet }} onClick={() => trackLinkedInConversion()}>
+              <a href="/research" className="hero-btn-inner" style={{ background: BRAND.violet }}>
                 Explore Research
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
                   <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -406,7 +405,7 @@ function HeroSection({ onPlayVideo }: { onPlayVideo: () => void }) {
             </div>
             <div className="hero-btn-wrap">
               <div className="hero-btn-glow hero-btn-glow-consult" />
-              <a href="/consult" className="hero-btn-inner" style={{ background: BRAND.coral }} onClick={() => trackLinkedInConversion()}>
+              <a href="/consult" className="hero-btn-inner" style={{ background: BRAND.coral }}>
                 Explore Consult
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
                   <path d="M3 8h10M9 4l4 4-4 4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -1207,7 +1206,6 @@ function PricingSection() {
               <GradientButtonWrap variant="violet" borderRadius={12}>
                 <a
                   href={plan.href}
-                  onClick={() => trackLinkedInConversion()}
                   style={{
                     display: "block",
                     textAlign: "center",
@@ -1356,7 +1354,6 @@ function HomeMembershipSection() {
               >
                 <a
                   href={plan.href}
-                  onClick={() => trackLinkedInConversion()}
                   style={{ display: "block", fontFamily: '"DM Sans", sans-serif', fontSize: 13, fontWeight: 600, color: "#fff", background: plan.accent, borderRadius: 7, padding: "10px 0", textDecoration: "none", textAlign: "center" as const, position: "relative", zIndex: 1 }}
                 >
                   Become a Member
@@ -1688,7 +1685,6 @@ function HomeTrendsSection() {
               ) : (
                 <a
                   href="/portal/trends"
-                  onClick={() => trackLinkedInConversion()}
                   data-testid="link-subscribe-trends"
                   style={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: 15, color: "#fff", background: BRAND.coral, border: "none", borderRadius: 10, padding: "14px 32px", cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10, transition: "opacity 0.2s ease" }}
                   onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.9"; }}
@@ -1702,7 +1698,7 @@ function HomeTrendsSection() {
               )}
               {!user && (
                 <button
-                  onClick={() => { trackLinkedInConversion(); setLoginOpen(true); }}
+                  onClick={() => setLoginOpen(true)}
                   data-testid="button-member-login"
                   style={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 600, fontSize: 15, color: BRAND.dark, background: "transparent", border: `1.5px solid ${BRAND.dark}22`, borderRadius: 10, padding: "14px 32px", cursor: "pointer", transition: "background 0.2s ease" }}
                   onMouseEnter={(e) => { e.currentTarget.style.background = `${BRAND.dark}06`; }}

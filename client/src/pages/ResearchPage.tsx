@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { trackLinkedInConversion } from "@/lib/linkedin-tracking";
 import { GradientButtonWrap } from "@/components/GradientButtonWrap";
 import PublicNavbar from "@/components/PublicNavbar";
 import { useAuth } from "@/contexts/AuthContext";
@@ -498,7 +497,7 @@ function OfferingsSection() {
                 ))}
               </div>
 
-              <a href={item.href} onClick={() => trackLinkedInConversion()} style={{
+              <a href={item.href} style={{
                 fontFamily: '"DM Sans", sans-serif',
                 fontSize: 13,
                 fontWeight: 700,
@@ -743,7 +742,7 @@ function MembershipSection() {
                 borderRadius={8}
                 style={{ marginTop: "auto" }}
               >
-                <a href={plan.href} onClick={() => trackLinkedInConversion()} style={{
+                <a href={plan.href} style={{
                   display: "block",
                   fontFamily: '"DM Sans", sans-serif',
                   fontSize: 14,
@@ -794,7 +793,7 @@ function NewsletterSection() {
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" as const }}>
           <a
             href="/portal/explore"
-            onClick={() => trackLinkedInConversion()}
+           
             style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 15, color: "#fff", background: BRAND.violet, border: "none", borderRadius: 8, padding: "13px 28px", cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}
           >
             {isLoggedIn ? "View Trends" : "Subscribe Now"}
@@ -805,7 +804,7 @@ function NewsletterSection() {
           {!isLoggedIn && (
             <a
               href="#"
-              onClick={(e) => { e.preventDefault(); trackLinkedInConversion(); setLoginOpen(true); }}
+              onClick={(e) => { e.preventDefault(); setLoginOpen(true); }}
               style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: 15, color: BRAND.dark, background: "transparent", border: `1.5px solid ${BRAND.dark}22`, borderRadius: 8, padding: "13px 28px", cursor: "pointer", textDecoration: "none" }}
             >
               Already a member? Log in

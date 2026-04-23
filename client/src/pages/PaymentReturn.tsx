@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle, Loader2, AlertCircle } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
+import { trackLinkedInEvent } from "@/lib/linkedin-tracking";
 
 export default function PaymentReturn() {
   const [location, setLocation] = useLocation();
@@ -19,6 +20,7 @@ export default function PaymentReturn() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const paymentStatus = params.get("status");
+    let resolvedToSuccess = false;
 
     if (location.includes("/payment/cancel")) {
       setStatus("cancelled");
@@ -26,6 +28,7 @@ export default function PaymentReturn() {
     } else if (paymentStatus === "success") {
       setStatus("success");
       setMessage("Your payment was successful! Thank you for your purchase.");
+      resolvedToSuccess = true;
     } else if (paymentStatus === "cancelled") {
       setStatus("cancelled");
       setMessage("Your payment was cancelled. No charges were made.");
@@ -36,7 +39,25 @@ export default function PaymentReturn() {
       setTimeout(() => {
         setStatus("success");
         setMessage("Payment processing complete.");
+        firePendingMembershipConversion();
       }, 2000);
+    }
+
+    if (resolvedToSuccess) {
+      firePendingMembershipConversion();
+    }
+
+    function firePendingMembershipConversion() {
+      try {
+        if (typeof window === "undefined") return;
+        const flag = window.sessionStorage.getItem("pendingMembershipPurchase");
+        if (flag === "1") {
+          trackLinkedInEvent("membership_purchase");
+          window.sessionStorage.removeItem("pendingMembershipPurchase");
+        }
+      } catch {
+        // ignore storage errors
+      }
     }
   }, [location]);
 
