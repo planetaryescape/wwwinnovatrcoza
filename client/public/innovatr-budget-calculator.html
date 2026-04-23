@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Innovatr — Budget Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--violet:#5B4FCF;--violet-light:#7B6FE8;--violet-dark:#3D3499;--coral:#F2613F;--coral-light:#FF8066;--cyan:#00B8C8;--amber:#F5A623;--cream:#FAF8F3;--ink:#1A1730;--ink-mid:#3D3A52;--ink-light:#7B7896;--border:#E8E4F8;--surface:#FFFFFF;--surface-hover:#F4F2FD;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;}
+header{background:var(--ink);padding:18px 40px;display:flex;align-items:center;}
+.logo{font-family:'DM Serif Display',serif;font-size:22px;color:#fff;letter-spacing:-0.5px;}
+.logo span{color:var(--coral);}
+.logo-sub{font-size:11px;color:var(--ink-light);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+.app{max-width:980px;margin:0 auto;padding:40px 24px 80px;}
+.hero{text-align:center;margin-bottom:44px;}
+.hero h1{font-family:'DM Serif Display',serif;font-size:40px;color:var(--ink);line-height:1.1;letter-spacing:-1px;margin-bottom:12px;}
+.hero h1 em{font-style:italic;color:var(--violet);}
+.hero p{font-size:16px;color:var(--ink-light);max-width:520px;margin:0 auto;line-height:1.6;}
+.progress-bar{display:flex;gap:6px;margin-bottom:36px;justify-content:center;}
+.progress-step{height:4px;flex:1;max-width:72px;border-radius:2px;background:var(--border);transition:background 0.3s;}
+.progress-step.active{background:var(--violet);}
+.progress-step.done{background:var(--cyan);}
+.step-card{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:36px 40px;margin-bottom:20px;display:none;animation:fadeUp 0.32s ease;}
+.step-card.visible{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.step-label{font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--violet);margin-bottom:8px;}
+.step-title{font-family:'DM Serif Display',serif;font-size:26px;color:var(--ink);margin-bottom:6px;letter-spacing:-0.5px;}
+.step-sub{font-size:14px;color:var(--ink-light);margin-bottom:24px;line-height:1.5;}
+.options-grid{display:grid;gap:12px;}
+.options-grid.cols-2{grid-template-columns:1fr 1fr;}
+.options-grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
+.option-btn{border:1.5px solid var(--border);border-radius:12px;padding:18px 20px;cursor:pointer;background:var(--surface);text-align:left;transition:all 0.2s;position:relative;}
+.option-btn:hover{border-color:var(--violet-light);background:var(--surface-hover);}
+.option-btn.selected{border-color:var(--violet);background:var(--surface-hover);box-shadow:0 0 0 3px rgba(91,79,207,0.12);}
+.option-btn .opt-icon{font-size:22px;margin-bottom:8px;display:block;}
+.option-btn .opt-label{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:3px;}
+.option-btn .opt-sub{font-size:12px;color:var(--ink-light);line-height:1.4;}
+.option-btn .opt-tag{position:absolute;top:12px;right:12px;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:20px;background:var(--border);color:var(--violet);}
+.option-btn.selected .opt-tag{background:var(--violet);color:#fff;}
+.gate-toggle-grid{display:flex;flex-direction:column;gap:12px;}
+.gate-toggle{border:1.5px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color 0.2s;}
+.gate-toggle.active{border-color:var(--violet);box-shadow:0 0 0 3px rgba(91,79,207,0.1);}
+.gate-toggle-header{display:flex;align-items:center;gap:14px;padding:18px 20px;cursor:pointer;user-select:none;}
+.gate-toggle-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.gate-toggle-info{flex:1;}
+.gate-toggle-name{font-size:15px;font-weight:600;color:var(--ink);}
+.gate-toggle-desc{font-size:12px;color:var(--ink-light);margin-top:3px;line-height:1.4;}
+.gate-toggle-switch{width:40px;height:22px;border-radius:11px;background:var(--border);position:relative;transition:background 0.2s;flex-shrink:0;}
+.gate-toggle-switch::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);}
+.gate-toggle.active .gate-toggle-switch{background:var(--violet);}
+.gate-toggle.active .gate-toggle-switch::after{transform:translateX(18px);}
+.gate-deliverables-panel{display:none;padding:14px 20px 18px;border-top:1px solid var(--border);}
+.gate-toggle.active .gate-deliverables-panel{display:block;}
+.deliverable-list{display:flex;flex-direction:column;gap:5px;margin-top:8px;}
+.deliverable-item{display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--ink-mid);line-height:1.4;}
+.deliverable-item::before{content:'→';color:var(--violet);font-weight:700;flex-shrink:0;margin-top:1px;}
+.gate-cost-tag{display:inline-flex;align-items:center;background:rgba(91,79,207,0.08);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;color:var(--violet);margin-top:10px;}
+.check-option{display:flex;align-items:flex-start;gap:14px;border:1.5px solid var(--border);border-radius:12px;padding:16px 18px;cursor:pointer;transition:all 0.2s;background:var(--surface);}
+.check-option:hover{border-color:var(--violet-light);background:var(--surface-hover);}
+.check-option.checked{border-color:var(--violet);background:var(--surface-hover);}
+.check-box{width:20px;height:20px;border:2px solid var(--border);border-radius:6px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.check-option.checked .check-box{background:var(--violet);border-color:var(--violet);}
+.check-box::after{content:'✓';color:#fff;font-size:12px;font-weight:700;display:none;}
+.check-option.checked .check-box::after{display:block;}
+.check-label{font-size:14px;font-weight:600;color:var(--ink);}
+.check-sub{font-size:12px;color:var(--ink-light);line-height:1.4;margin-top:2px;}
+.check-price{margin-left:auto;font-size:13px;font-weight:600;color:var(--coral);white-space:nowrap;flex-shrink:0;padding-top:2px;}
+.lever-group{margin-bottom:24px;}
+.lever-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.lever-name{font-size:14px;font-weight:600;color:var(--ink);}
+.lever-value{font-size:13px;font-weight:600;color:var(--violet);background:var(--border);padding:3px 10px;border-radius:20px;}
+.lever-desc{font-size:12px;color:var(--ink-light);margin-bottom:10px;}
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--border);outline:none;cursor:pointer;}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--violet);cursor:pointer;box-shadow:0 2px 8px rgba(91,79,207,0.35);}
+.lever-ticks{display:flex;justify-content:space-between;margin-top:6px;}
+.lever-tick{font-size:10px;color:var(--ink-light);}
+.step-nav{display:flex;justify-content:space-between;margin-top:32px;align-items:center;}
+.btn-back{font-size:14px;font-weight:500;color:var(--ink-light);background:none;border:none;cursor:pointer;padding:10px 0;transition:color 0.2s;}
+.btn-back:hover{color:var(--ink);}
+.btn-next{font-size:14px;font-weight:600;color:#fff;background:var(--violet);border:none;border-radius:10px;padding:13px 28px;cursor:pointer;transition:all 0.2s;}
+.btn-next:hover{background:var(--violet-dark);transform:translateY(-1px);box-shadow:0 4px 16px rgba(91,79,207,0.3);}
+.btn-next:disabled{background:var(--border);color:var(--ink-light);cursor:not-allowed;transform:none;box-shadow:none;}
+.summary-card{background:var(--ink);border-radius:20px;padding:40px;color:#fff;margin-bottom:20px;}
+.summary-title{font-family:'DM Serif Display',serif;font-size:28px;margin-bottom:4px;letter-spacing:-0.5px;}
+.summary-sub-text{font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:28px;}
+.summary-line{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.07);font-size:14px;}
+.summary-line:last-child{border-bottom:none;}
+.summary-line .sl-label{color:rgba(255,255,255,0.6);}
+.summary-line .sl-val{font-weight:600;color:#fff;}
+.summary-line.highlight .sl-label{color:rgba(255,255,255,0.85);}
+.summary-total{display:flex;justify-content:space-between;align-items:baseline;margin-top:22px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.15);}
+.summary-total .st-label{font-family:'DM Serif Display',serif;font-size:18px;color:rgba(255,255,255,0.6);}
+.summary-total .st-val{font-family:'DM Serif Display',serif;font-size:38px;color:var(--coral);letter-spacing:-1px;}
+.discount-badge{display:inline-flex;align-items:center;gap:6px;background:var(--cyan);color:var(--ink);font-size:12px;font-weight:700;letter-spacing:0.5px;padding:5px 12px;border-radius:20px;margin-bottom:16px;}
+.panel{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:28px 32px;margin-bottom:20px;}
+.panel-title{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:4px;}
+.panel-sub{font-size:13px;color:var(--ink-light);margin-bottom:18px;}
+.phase-card{border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px;}
+.phase-card-header{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;}
+.phase-card-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.phase-card-name{font-size:14px;font-weight:600;color:var(--ink);flex:1;}
+.phase-card-cost{font-size:13px;font-weight:600;color:var(--violet);}
+.phase-card-chevron{font-size:10px;color:var(--ink-light);transition:transform 0.2s;margin-left:8px;}
+.phase-card.open .phase-card-chevron{transform:rotate(180deg);}
+.phase-card-body{display:none;padding:0 18px 16px;border-top:1px solid var(--border);}
+.phase-card.open .phase-card-body{display:block;padding-top:14px;}
+.phase-summary-text{font-size:13px;color:var(--ink-light);line-height:1.5;margin-bottom:14px;}
+.deliverable-row{display:flex;gap:10px;padding:7px 0;border-bottom:1px dashed var(--border);font-size:12px;align-items:flex-start;}
+.deliverable-row:last-child{border-bottom:none;}
+.dr-name{font-weight:600;color:var(--ink-mid);min-width:180px;flex-shrink:0;}
+.dr-what{flex:1;color:var(--ink-light);line-height:1.4;}
+.dr-cost{color:var(--ink);font-weight:600;white-space:nowrap;margin-left:12px;}
+.portfolio-proj-card{border:1.5px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+.portfolio-proj-header{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--surface-hover);}
+.portfolio-proj-name{font-size:14px;font-weight:600;color:var(--ink);flex:1;}
+.proj-btn{font-size:12px;font-weight:600;border:none;cursor:pointer;padding:5px 10px;border-radius:6px;transition:all 0.2s;}
+.proj-btn.edit{background:var(--border);color:var(--violet);}
+.proj-btn.edit:hover{background:var(--violet);color:#fff;}
+.proj-btn.remove{background:transparent;color:var(--ink-light);font-size:14px;}
+.proj-btn.remove:hover{color:var(--coral);}
+.add-project-btn{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--violet);background:none;border:1.5px dashed var(--violet-light);border-radius:12px;padding:14px 20px;cursor:pointer;width:100%;transition:all 0.2s;}
+.add-project-btn:hover{background:var(--surface-hover);}
+.notice{background:rgba(91,79,207,0.06);border:1px solid rgba(91,79,207,0.15);border-radius:10px;padding:12px 16px;font-size:12px;color:var(--ink-mid);line-height:1.5;margin-top:16px;}
+.notice strong{color:var(--violet);}
+.modal-overlay{position:fixed;inset:0;background:rgba(26,23,48,0.65);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+.modal-overlay.hidden{display:none;}
+.modal{background:var(--surface);border-radius:20px;padding:40px;max-width:700px;width:100%;max-height:90vh;overflow-y:auto;position:relative;animation:fadeUp 0.28s ease;}
+.modal-close{position:absolute;top:20px;right:24px;font-size:20px;color:var(--ink-light);cursor:pointer;background:none;border:none;transition:color 0.2s;}
+.modal-close:hover{color:var(--ink);}
+.modal-title{font-family:'DM Serif Display',serif;font-size:24px;color:var(--ink);margin-bottom:4px;}
+.modal-meta{font-size:13px;color:var(--ink-light);margin-bottom:28px;}
+.modal-section-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--violet);margin-bottom:12px;}
+.modal-options{display:grid;gap:10px;margin-bottom:20px;}
+.modal-options.cols-2{grid-template-columns:1fr 1fr;}
+.modal-options.cols-3{grid-template-columns:1fr 1fr 1fr;}
+.modal-nav{display:flex;justify-content:space-between;margin-top:28px;}
+.field-group{margin-bottom:20px;}
+.field-label{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+input[type="text"]{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;transition:border-color 0.2s;}
+input[type="text"]:focus{border-color:var(--violet);}
+.cta-row{display:flex;gap:12px;margin-top:8px;}
+.btn-cta-primary{flex:1;font-size:15px;font-weight:600;color:#fff;background:var(--coral);border:none;border-radius:12px;padding:16px 24px;cursor:pointer;transition:all 0.2s;}
+.btn-cta-primary:hover{background:var(--coral-light);transform:translateY(-1px);box-shadow:0 6px 20px rgba(242,97,63,0.3);}
+.btn-cta-pdf{font-size:14px;font-weight:600;color:var(--ink);background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px 20px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:8px;}
+.btn-cta-pdf:hover{border-color:var(--violet-light);background:var(--surface-hover);}
+.reset-link{text-align:center;margin-top:24px;font-size:13px;color:var(--ink-light);cursor:pointer;text-decoration:underline;}
+.reset-link:hover{color:var(--violet);}
+.monthly-cadence{margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);}
+.monthly-cadence-title{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:16px;}
+.monthly-phase-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+.monthly-phase-row:last-child{margin-bottom:0;}
+.mph-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.mph-name{font-size:12px;color:rgba(255,255,255,0.55);flex:1;min-width:0;}
+.mph-duration{font-size:11px;color:rgba(255,255,255,0.35);white-space:nowrap;margin-right:8px;}
+.mph-bar-wrap{width:120px;flex-shrink:0;height:4px;border-radius:2px;background:rgba(255,255,255,0.08);}
+.mph-bar{height:4px;border-radius:2px;transition:width 0.4s ease;}
+.mph-monthly{font-size:13px;font-weight:600;color:#fff;text-align:right;white-space:nowrap;min-width:90px;}
+.monthly-pm-row{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.07);font-size:12px;color:rgba(255,255,255,0.4);}
+.monthly-pm-val{font-size:12px;font-weight:600;color:rgba(255,255,255,0.6);}
+.monthly-total-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;font-size:12px;color:rgba(255,255,255,0.4);}
+.monthly-total-note{font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;}
+.check-option-highlight{border-color:var(--amber)!important;background:rgba(245,166,35,0.04)!important;}
+.check-option-highlight.checked{border-color:var(--amber)!important;background:rgba(245,166,35,0.08)!important;box-shadow:0 0 0 3px rgba(245,166,35,0.12)!important;}
+.extra-recommended-tag{display:inline-flex;align-items:center;background:var(--amber);color:#fff;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle;}
+.summary-line.membership-line .sl-label{color:rgba(0,184,200,0.9);}
+.summary-line.membership-line .sl-val{color:var(--cyan);}
+.membership-panel{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:28px 32px;margin-bottom:20px;}
+.membership-panel-title{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:4px;}
+.membership-panel-sub{font-size:13px;color:var(--ink-light);margin-bottom:18px;}
+.mem-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:14px;letter-spacing:0.3px;}
+.mem-badge-member{background:rgba(91,79,207,0.1);color:var(--violet);border:1px solid rgba(91,79,207,0.2);}
+.mem-badge-nonmember{background:rgba(242,97,63,0.1);color:var(--coral);border:1px solid rgba(242,97,63,0.2);}
+.mem-toggle-row{display:flex;gap:8px;margin-bottom:16px;}
+.mem-btn{flex:1;font-size:13px;font-weight:600;padding:11px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--ink-light);cursor:pointer;transition:all 0.2s;text-align:center;}
+.mem-btn:hover{border-color:var(--violet-light);color:var(--violet);}
+.mem-btn-active{border-color:var(--violet);background:var(--surface-hover);color:var(--violet);}
+.mem-perks{display:flex;flex-direction:column;gap:5px;}
+.mem-perk{font-size:12px;color:var(--ink-mid);}
+.mem-perk-locked{color:var(--ink-light);text-decoration:line-through;}
+.mem-join-box{display:flex;align-items:flex-start;gap:14px;border:1.5px solid var(--amber);border-radius:12px;padding:16px 18px;cursor:pointer;transition:all 0.2s;background:rgba(245,166,35,0.03);margin-bottom:12px;}
+.mem-join-box:hover{background:rgba(245,166,35,0.07);}
+.mem-join-checked{background:rgba(245,166,35,0.08)!important;box-shadow:0 0 0 3px rgba(245,166,35,0.12);}
+.mem-join-check{flex-shrink:0;margin-top:2px;}
+.mem-join-label{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+.mem-join-sub{font-size:12px;color:var(--ink-light);line-height:1.5;}
+.mem-saving-callout{background:rgba(0,184,200,0.06);border:1px solid rgba(0,184,200,0.2);border-radius:10px;padding:11px 14px;font-size:12px;color:var(--ink-mid);line-height:1.5;margin-bottom:12px;}
+.budget-preview-box{background:var(--surface-hover);border:1.5px solid var(--border);border-radius:12px;padding:18px 20px;margin-top:12px;}
+.budget-preview-label{font-size:12px;color:var(--ink-light);margin-bottom:4px;}
+.budget-preview-val{font-family:'DM Serif Display',serif;font-size:28px;color:var(--violet);}
+.budget-preview-note{font-size:11px;color:var(--ink-light);margin-top:4px;}
+@media(max-width:640px){.options-grid.cols-2,.options-grid.cols-3,.modal-options.cols-2,.modal-options.cols-3{grid-template-columns:1fr;}header{padding:16px 20px;}.app{padding:24px 16px 60px;}.step-card{padding:24px 20px;}.summary-card{padding:24px 20px;}.hero h1{font-size:30px;}.modal{padding:28px 20px;}.cta-row{flex-direction:column;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">innov<span>a</span>tr</div>
+    <div class="logo-sub">Budget Calculator</div>
+  </div>
+</header>
+
+<div class="modal-overlay hidden" id="projectModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div class="app">
+  <div class="hero">
+    <h1>From <em>idea</em> to shelf,<br>what will it cost?</h1>
+    <p>Answer a few questions and we'll build your Innovatr programme budget from the ground up.</p>
+  </div>
+
+  <div class="progress-bar" id="progressBar"></div>
+
+  <div class="step-card visible" id="step1">
+    <div class="step-label">Step 1 of 7</div>
+    <div class="step-title">Where does your project begin?</div>
+    <div class="step-sub">Your starting point determines the default gates recommended for your programme.</div>
+    <div class="options-grid cols-2">
+      <button class="option-btn" onclick="selectOption(this,'start','scratch')">
+        <span class="opt-icon">💡</span><div class="opt-label">Blank page</div>
+        <div class="opt-sub">I have an idea or category I want to enter — full journey needed</div>
+        <span class="opt-tag">All 3 gates</span>
+      </button>
+      <button class="option-btn" onclick="selectOption(this,'start','concept')">
+        <span class="opt-icon">📋</span><div class="opt-label">I have a concept</div>
+        <div class="opt-sub">Direction is set — I need to develop, validate, and launch it</div>
+        <span class="opt-tag">Gate 2 + 3</span>
+      </button>
+      <button class="option-btn" onclick="selectOption(this,'start','formulated')">
+        <span class="opt-icon">🧪</span><div class="opt-label">I have a formulated product</div>
+        <div class="opt-sub">Product exists — I need packaging, commercialisation, and launch</div>
+        <span class="opt-tag">Gate 3</span>
+      </button>
+      <button class="option-btn" onclick="selectOption(this,'start','ready')">
+        <span class="opt-icon">🚀</span><div class="opt-label">Ready to launch</div>
+        <div class="opt-sub">Product and pack are done — I need a go-to-market plan only</div>
+        <span class="opt-tag">Launch only</span>
+      </button>
+    </div>
+    <div class="step-nav"><span></span><button class="btn-next" id="next1" disabled onclick="goToStep(2)">Next →</button></div>
+  </div>
+
+  <div class="step-card" id="step2">
+    <div class="step-label">Step 2 of 7</div>
+    <div class="step-title">Which stage-gates do you need Innovatr to support?</div>
+    <div class="step-sub">We've pre-selected the gates that match your starting point — but you can customise exactly which phases you want Innovatr's support on. Toggle a gate to see everything included.</div>
+    <div class="gate-toggle-grid" id="gateToggles"></div>
+    <div class="step-nav">
+      <button class="btn-back" onclick="goToStep(1)">← Back</button>
+      <button class="btn-next" onclick="goToStep(3)">Next →</button>
+    </div>
+  </div>
+
+  <div class="step-card" id="step3">
+    <div class="step-label">Step 3 of 7</div>
+    <div class="step-title">What type of product are you developing?</div>
+    <div class="step-sub">This shapes which development workstreams are most applicable.</div>
+    <div class="options-grid cols-3">
+      <button class="option-btn" onclick="selectOption(this,'category','food')"><span class="opt-icon">🍽️</span><div class="opt-label">Food</div><div class="opt-sub">Snacks, meals, condiments, fresh</div></button>
+      <button class="option-btn" onclick="selectOption(this,'category','beverage')"><span class="opt-icon">🥤</span><div class="opt-label">Beverage</div><div class="opt-sub">Soft drinks, juices, RTD, alcohol</div></button>
+      <button class="option-btn" onclick="selectOption(this,'category','health')"><span class="opt-icon">💊</span><div class="opt-label">Health &amp; Wellness</div><div class="opt-sub">Supplements, functional foods</div></button>
+      <button class="option-btn" onclick="selectOption(this,'category','personal')"><span class="opt-icon">🧴</span><div class="opt-label">Personal Care</div><div class="opt-sub">Beauty, skincare, haircare</div></button>
+      <button class="option-btn" onclick="selectOption(this,'category','household')"><span class="opt-icon">🏠</span><div class="opt-label">Household</div><div class="opt-sub">Cleaning, home, pet</div></button>
+      <button class="option-btn" onclick="selectOption(this,'category','other')"><span class="opt-icon">📦</span><div class="opt-label">Other</div><div class="opt-sub">Non-food FMCG or other</div></button>
+    </div>
+    <div class="step-nav"><button class="btn-back" onclick="goToStep(2)">← Back</button><button class="btn-next" id="next3" disabled onclick="goToStep(4)">Next →</button></div>
+  </div>
+
+  <div class="step-card" id="step4">
+    <div class="step-label">Step 4 of 7</div>
+    <div class="step-title">How many concepts are you exploring?</div>
+    <div class="step-sub">More concepts increase ideation, design, and research costs — but improve your chance of finding a winner.</div>
+    <div class="options-grid cols-3">
+      <button class="option-btn" onclick="selectOption(this,'concepts','1')"><span class="opt-icon">🎯</span><div class="opt-label">1 concept</div><div class="opt-sub">Single-minded pursuit of one strong idea</div></button>
+      <button class="option-btn" onclick="selectOption(this,'concepts','3')"><span class="opt-icon">🔀</span><div class="opt-label">2–3 concepts</div><div class="opt-sub">Test and select from a shortlist</div><span class="opt-tag">Recommended</span></button>
+      <button class="option-btn" onclick="selectOption(this,'concepts','5')"><span class="opt-icon">🌐</span><div class="opt-label">4–6 concepts</div><div class="opt-sub">Broad exploration across the space</div></button>
+    </div>
+    <div class="step-nav"><button class="btn-back" onclick="goToStep(3)">← Back</button><button class="btn-next" id="next4" disabled onclick="goToStep(5)">Next →</button></div>
+  </div>
+
+  <div class="step-card" id="step5">
+    <div class="step-label">Step 5 of 7</div>
+    <div class="step-title">What is your launch ambition?</div>
+    <div class="step-sub">This determines the complexity of go-to-market, marketing investment, and launch assets required.</div>
+    <div class="options-grid cols-2">
+      <button class="option-btn" onclick="selectOption(this,'ambition','regional')"><span class="opt-icon">📍</span><div class="opt-label">Regional test market</div><div class="opt-sub">Select regions or channels — validate before scaling</div></button>
+      <button class="option-btn" onclick="selectOption(this,'ambition','national')"><span class="opt-icon">🇿🇦</span><div class="opt-label">National rollout</div><div class="opt-sub">Full South African market across major retailers</div></button>
+      <button class="option-btn" onclick="selectOption(this,'ambition','export')"><span class="opt-icon">✈️</span><div class="opt-label">Export / multi-market</div><div class="opt-sub">Africa, SADC, or international ambitions from launch</div></button>
+      <button class="option-btn" onclick="selectOption(this,'ambition','ecomm')"><span class="opt-icon">🛒</span><div class="opt-label">E-commerce first</div><div class="opt-sub">Direct-to-consumer or online marketplace led</div></button>
+    </div>
+    <div class="step-nav"><button class="btn-back" onclick="goToStep(4)">← Back</button><button class="btn-next" id="next5" disabled onclick="goToStep(6)">Next →</button></div>
+  </div>
+
+  <div class="step-card" id="step6">
+    <div class="step-label">Step 6 of 7</div>
+    <div class="step-title">Tune your budget</div>
+    <div class="step-sub">Adjust these levers to prioritise or reduce spend in each area.</div>
+    <div class="lever-group">
+      <div class="lever-label"><span class="lever-name">Research depth</span><span class="lever-value" id="val-research">Standard</span></div>
+      <div class="lever-desc">How rigorously you validate at each gate. Lean = directional quant; full = statistically robust.</div>
+      <input type="range" min="0" max="2" step="1" value="1" oninput="updateLever('research',this.value)">
+      <div class="lever-ticks"><span class="lever-tick">Lean</span><span class="lever-tick">Standard</span><span class="lever-tick">Full</span></div>
+    </div>
+    <div class="lever-group">
+      <div class="lever-label"><span class="lever-name">Design investment</span><span class="lever-value" id="val-design">Standard</span></div>
+      <div class="lever-desc">Pack design, brand identity, and visual assets. Lean = 1 route; premium = multiple routes + toolkit.</div>
+      <input type="range" min="0" max="2" step="1" value="1" oninput="updateLever('design',this.value)">
+      <div class="lever-ticks"><span class="lever-tick">Lean</span><span class="lever-tick">Standard</span><span class="lever-tick">Premium</span></div>
+    </div>
+    <div class="lever-group">
+      <div class="lever-label"><span class="lever-name">Speed to market</span><span class="lever-value" id="val-speed">Balanced</span></div>
+      <div class="lever-desc">Compressed timelines require parallel workstreams — efficient but increases total cost.</div>
+      <input type="range" min="0" max="2" step="1" value="1" oninput="updateLever('speed',this.value)">
+      <div class="lever-ticks"><span class="lever-tick">Relaxed</span><span class="lever-tick">Balanced</span><span class="lever-tick">Fast-track</span></div>
+    </div>
+    <div class="lever-group">
+      <div class="lever-label"><span class="lever-name">Launch investment</span><span class="lever-value" id="val-launch">Core</span></div>
+      <div class="lever-desc">Marketing, creative, POS, and activation. Core = essentials; full = 360 launch toolkit.</div>
+      <input type="range" min="0" max="2" step="1" value="1" oninput="updateLever('launch',this.value)">
+      <div class="lever-ticks"><span class="lever-tick">Minimal</span><span class="lever-tick">Core</span><span class="lever-tick">360°</span></div>
+    </div>
+    <div class="step-nav"><button class="btn-back" onclick="goToStep(5)">← Back</button><button class="btn-next" onclick="goToStep(7)">See my budget →</button></div>
+  </div>
+
+  <div class="step-card" id="step7">
+    <div class="step-label">Your Programme Budget</div>
+    <div class="step-title">Project estimate</div>
+    <div class="step-sub">Based on your inputs. All amounts in South African Rand, excl. VAT.</div>
+
+    <div class="summary-card">
+      <div id="portfolioDiscountBadge" style="display:none" class="discount-badge">🎉 Portfolio discount applied — 5% off all projects</div>
+      <div class="summary-title" id="summaryProjectName">Your Programme</div>
+      <div class="summary-sub-text" id="summaryProjectSub"></div>
+      <div id="summaryLines"></div>
+      <div class="summary-total">
+        <span class="st-label">Estimated total</span>
+        <span class="st-val" id="summaryTotal">R0</span>
+      </div>
+      <div class="monthly-cadence" id="monthlyCadence"></div>
+    </div>
+
+    <div class="membership-panel">
+      <div class="membership-panel-title">Membership &amp; Pricing</div>
+      <div class="membership-panel-sub">All pricing shown is for Innovatr members. If you are not currently a member, non-member development rates apply at +15%. You can choose to join during this engagement.</div>
+      <div id="membershipPanel"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">What's included in your programme</div>
+      <div class="panel-sub">Expand each gate to see every deliverable and what you receive — costed at your selected settings.</div>
+      <div id="phaseCards"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Add-on Enhancements</div>
+      <div class="panel-sub">Strengthen your programme with optional extras. Portfolio discount applies automatically where eligible.</div>
+      <div id="extrasList" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Portfolio Programme</div>
+      <div class="panel-sub">Add more projects — each goes through its own scoping questionnaire with independent gate selection. Reach 3 or more projects and unlock a 5% discount across the entire portfolio.</div>
+      <div id="portfolioList"></div>
+      <button class="add-project-btn" onclick="openNewProjectModal()">+ Scope another project</button>
+      <div class="notice"><strong>Portfolio discount:</strong> When 3 or more projects are active, 5% is automatically applied to the total of each project, including add-ons.</div>
+    </div>
+
+    <div class="cta-row">
+      <button class="btn-cta-primary" onclick="alert('Thank you — an Innovatr consultant will be in touch to discuss your programme.')">📩 Request a proposal</button>
+      <button class="btn-cta-pdf" onclick="buildPDF()">📄 Build PDF proposal</button>
+    </div>
+    <div class="reset-link" onclick="resetCalculator()">Start over</div>
+  </div>
+</div>
+
+<script>
+const GATE_DEFS = {
+  g1:{id:'g1',label:'Gate 1',name:'Concept Lock',color:'#5B4FCF',basePrice:840000,weeks:4,
+    summary:'From raw idea to a validated, investor-ready concept — with category intelligence, ideation, and consumer-tested pack designs.',
+    deliverables:[
+      {name:'Category Audit',what:'Sub-category deep-dive — where the white space lives',cost:90000},
+      {name:'Jobs to Be Done',what:'Strategic so-what, JTBD framework, TAPS analysis',cost:75000},
+      {name:'Ideation Pre-workshop',what:'Innovatr team generates 50+ ideas before client session',cost:180000},
+      {name:'Client Ideation Workshop',what:'2-day facilitated workshop with category experts in attendance',cost:180000},
+      {name:'Overnight Consumer Testing',what:'Rapid quant (x100 consumers) to stress-test top ideas overnight',cost:135000},
+      {name:'Pack-cept Design',what:'5 winning pack-cept concepts designed for consumer evaluation',cost:82500},
+      {name:'Concept Research',what:'Quant concept assessment (x100 consumers) — score, refine, select',cost:90000},
+      {name:'Gate 1 Sign-off',what:'Structured client alignment session and go/no-go decision',cost:7500}
+    ]},
+  g2:{id:'g2',label:'Gate 2',name:'Full Mix Development',color:'#F2613F',basePrice:587500,weeks:7,
+    summary:'Product formulation, packaging finalisation, and a topline business case — everything needed to commit to production.',
+    deliverables:[
+      {name:'Liquid Prototype Development',what:'3–5 prototypes developed with flavour houses',cost:25000},
+      {name:'Liquid Screen Research',what:'Central location blind taste test — 3 prototypes vs 3 competitors',cost:250000},
+      {name:'Packaging Rework',what:'3 potential final packaging routes crafted from winning pack-cept',cost:150000},
+      {name:'Pack Assess Research',what:'Quant packaging evaluation (x300 consumers)',cost:90000},
+      {name:'Naming & Claims Lock',what:'Name and consumer claim finalisation with client',cost:7500},
+      {name:'Final Artwork & Regulatory',what:'Complete final artwork including regulatory compliance and barcodes',cost:30000},
+      {name:'Topline Business Case',what:'Volume targets, pricing strategy, and margin modelling',cost:25000},
+      {name:'Gate 2 Sign-off',what:'Full mix alignment and manufacturing go-ahead',cost:10000}
+    ]},
+  g3:{id:'g3',label:'Gate 3',name:'Launch',color:'#00B8C8',basePrice:380000,weeks:12,
+    summary:'Channel strategy, creative campaign, trade activation, and manufacturing lock — everything to get your product to shelf.',
+    deliverables:[
+      {name:'Channel Strategy',what:'Full customer plan — channel prioritisation, ranging, distribution',cost:37500},
+      {name:'Launch Big Idea',what:'Creative concept and campaign development',cost:75000},
+      {name:'Creative Assessment Research',what:'Campaign quant test with x100 consumers before going live',cost:40000},
+      {name:'360 Launch Marketing Plan',what:'Full commercialisation plan — media, digital, PR, activation',cost:20000},
+      {name:'Creative Toolkit',what:'Visual assets, social templates, and website development',cost:75000},
+      {name:'Merchandising Development',what:'Supplier engagement for in-store merchandising units',cost:15000},
+      {name:'Point of Sale Development',what:'POSM supplier engagement and artwork',cost:15000},
+      {name:'Shelf Life Testing',what:'Fast-track liquid shelf life testing (run in parallel)',cost:30000},
+      {name:'3rd Party Manufacturing Lock',what:'Sourcing, contracting, and production planning',cost:37500},
+      {name:'Customer Listing',what:'New product listing support and DC planning',cost:5000},
+      {name:'Gate 3 Sign-off',what:'Launch readiness review and final go-live approval',cost:5000}
+    ]}
+};
+
+const PM_COST = 224000;
+const LEVER_LABELS = {research:['Lean','Standard','Full'],design:['Lean','Standard','Premium'],speed:['Relaxed','Balanced','Fast-track'],launch:['Minimal','Core','360°']};
+const EXTRAS_DEF = [
+  {id:'eliq',label:'Liquid Development & Optimisation',sub:'Extended flavour house engagement — iterative liquid refinement across multiple development rounds until optimal formulation is achieved, including sensory panel sessions',basePrice:185000,highlight:true},
+  {id:'eq',label:'Quant Research Uplift',sub:'Increase consumer sample to x300 per wave for statistically robust results',basePrice:75000},
+  {id:'eql',label:'Qualitative Deep Dive',sub:'Focus groups or ethnography to uncover emotional drivers and unmet needs',basePrice:95000},
+  {id:'es',label:'In-store Shelf Test',sub:'Live placement test with eye-tracking and sales measurement',basePrice:120000},
+  {id:'ep',label:'Additional Packaging Routes',sub:'+2 extra design directions explored and consumer-tested',basePrice:60000},
+  {id:'eb',label:'Full Brand Toolkit',sub:'Brand guidelines, extended asset suite, and social template system',basePrice:85000},
+  {id:'ec',label:'Creative Assessment Research',sub:'Quant-test your launch campaign with real consumers before going live',basePrice:40000}
+];
+
+const MEMBERSHIP_FEE = 60000;
+const NON_MEMBER_UPLIFT = 0.15;
+
+const state = {
+  start:null,category:null,concepts:null,ambition:null,
+  gates:{g1:true,g2:true,g3:true},
+  levers:{research:1,design:1,speed:1,launch:1},
+  extras:{},portfolio:[],
+  isMember:true,
+  joinMembership:false
+};
+let editingProjectId = null;
+let modalStep = 1;
+let modalState = {};
+let projCounter = 0;
+
+function goToStep(n) {
+  document.querySelectorAll('.step-card').forEach(c=>c.classList.remove('visible'));
+  document.getElementById('step'+n).classList.add('visible');
+  updateProgress(n);
+  if(n===7) buildSummary();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updateProgress(cur) {
+  const bar = document.getElementById('progressBar');
+  bar.innerHTML='';
+  for(let i=1;i<=7;i++){
+    const d=document.createElement('div');
+    d.className='progress-step'+(i<cur?' done':i===cur?' active':'');
+    bar.appendChild(d);
+  }
+}
+
+function selectOption(el,key,val) {
+  el.closest('.options-grid').querySelectorAll('.option-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  state[key]=val;
+  const stepNum = el.closest('.step-card').id.replace('step','');
+  const nb=document.getElementById('next'+stepNum);
+  if(nb) nb.disabled=false;
+  if(key==='start') initGateToggles(val,false);
+}
+
+function gatesForStart(start) {
+  return {scratch:{g1:true,g2:true,g3:true},concept:{g1:false,g2:true,g3:true},formulated:{g1:false,g2:false,g3:true},ready:{g1:false,g2:false,g3:true}}[start]||{g1:true,g2:true,g3:true};
+}
+
+function initGateToggles(start,forModal) {
+  if(!forModal){
+    state.gates={...gatesForStart(start)};
+    renderGateToggles('gateToggles',state.gates,false);
+  }
+}
+
+function renderGateToggles(containerId,gatesObj,forModal) {
+  const container=document.getElementById(containerId);
+  if(!container) return;
+  container.innerHTML = ['g1','g2','g3'].map(gid=>{
+    const g=GATE_DEFS[gid];
+    const on=gatesObj[gid];
+    const fn = forModal ? `modalToggleGate('${gid}')` : `mainToggleGate('${gid}')`;
+    return `<div class="gate-toggle${on?' active':''}" id="${containerId}-${gid}">
+      <div class="gate-toggle-header" onclick="${fn}">
+        <div class="gate-toggle-dot" style="background:${g.color}"></div>
+        <div class="gate-toggle-info">
+          <div class="gate-toggle-name">${g.label} — ${g.name}</div>
+          <div class="gate-toggle-desc">${g.summary}</div>
+        </div>
+        <div class="gate-toggle-switch"></div>
+      </div>
+      <div class="gate-deliverables-panel">
+        <div class="modal-section-label" style="margin-bottom:10px;">What's included</div>
+        <div class="deliverable-list">
+          ${g.deliverables.map(d=>`<div class="deliverable-item"><strong>${d.name}</strong> — ${d.what}</div>`).join('')}
+        </div>
+        <div class="gate-cost-tag">Base cost: ${fmt(g.basePrice)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function mainToggleGate(gid) {
+  state.gates[gid]=!state.gates[gid];
+  renderGateToggles('gateToggles',state.gates,false);
+}
+
+function modalToggleGate(gid) {
+  modalState.gates[gid]=!modalState.gates[gid];
+  renderGateToggles('modalGateToggles',modalState.gates,true);
+}
+
+function updateLever(key,val) {
+  state.levers[key]=parseInt(val);
+  document.getElementById('val-'+key).textContent=LEVER_LABELS[key][val];
+}
+
+function updateModalLever(key,val) {
+  modalState.levers[key]=parseInt(val);
+  const el=document.getElementById('modal-lev-val-'+key);
+  if(el) el.textContent=LEVER_LABELS[key][val];
+  refreshModalBudgetPreview();
+}
+
+function refreshModalBudgetPreview() {
+  const el=document.getElementById('modalBudgetPreview');
+  if(el) { const bd=calcBudget(modalState); el.textContent=fmt(totalFromBd(bd)); }
+}
+
+function calcBudget(st) {
+  const cm={'1':0.75,'3':1.0,'5':1.35}[st.concepts]||1;
+  const am={regional:0.75,national:1.0,export:1.3,ecomm:0.85}[st.ambition]||1;
+  const mm=memberMultiplier(st);
+  let g1=st.gates.g1?GATE_DEFS.g1.basePrice:0;
+  let g2=st.gates.g2?GATE_DEFS.g2.basePrice:0;
+  let g3=st.gates.g3?GATE_DEFS.g3.basePrice:0;
+  let pm=(st.gates.g1||st.gates.g2||st.gates.g3)?PM_COST:0;
+  g1*=cm; g2*=cm; g3*=am;
+  const ra=[-0.2,0,0.25][st.levers.research];
+  g1+=g1*0.4*ra; g2+=g2*0.4*ra;
+  const da=[-0.15,0,0.2][st.levers.design];
+  g1+=g1*0.2*da; g2+=g2*0.25*da;
+  const la=[-0.25,0,0.3][st.levers.launch];
+  g3+=g3*0.5*la;
+  const speedCost=(g1+g2+g3)*([0,0,0.12][st.levers.speed]);
+  g1=Math.round(g1*mm); g2=Math.round(g2*mm); g3=Math.round(g3*mm);
+  pm=Math.round(pm*mm);
+  return{g1,g2,g3,pm,speed:Math.round(speedCost*mm)};
+}
+
+function totalFromBd(bd){return bd.g1+bd.g2+bd.g3+bd.pm+bd.speed;}
+function portfolioDiscount(){return(state.portfolio.length+1)>=3?0.05:0;}
+function memberMultiplier(st){
+  if(st.isMember===true||(st.isMember===false&&st.joinMembership)) return 1.0;
+  return 1+NON_MEMBER_UPLIFT;
+}
+function extrasCost(disc,isNonMember){
+  let t=0;
+  const mm=isNonMember?1+NON_MEMBER_UPLIFT:1.0;
+  EXTRAS_DEF.forEach(e=>{if(state.extras[e.id])t+=Math.round(e.basePrice*mm);});
+  return Math.round(t*(1-disc));
+}
+function fmt(n){return'R'+Math.round(n).toLocaleString('en-ZA');}
+
+function buildSummary() {
+  const bd=calcBudget(state);
+  const disc=portfolioDiscount();
+  const base=totalFromBd(bd);
+  const discAmt=Math.round(base*disc);
+  const extras=extrasCost(disc,state.isMember===false&&!state.joinMembership);
+  const membershipLine=(!state.isMember&&state.joinMembership)?MEMBERSHIP_FEE:0;
+  const grand=base-discAmt+extras+membershipLine;
+
+  document.getElementById('portfolioDiscountBadge').style.display=disc>0?'flex':'none';
+  const SL={scratch:'Full Idea-to-Shelf Programme',concept:'Concept-to-Launch Programme',formulated:'Launch-Ready Programme',ready:'Launch Programme'};
+  const CL={food:'Food',beverage:'Beverage',health:'Health & Wellness',personal:'Personal Care',household:'Household',other:'Other'};
+  const AL={regional:'Regional',national:'National',export:'Export/Multi-market',ecomm:'E-commerce'};
+  const ag=Object.entries(state.gates).filter(([,v])=>v).map(([k])=>GATE_DEFS[k].label).join(', ')||'No gates selected';
+  document.getElementById('summaryProjectName').textContent=SL[state.start]||'Custom Programme';
+  document.getElementById('summaryProjectSub').textContent=`${CL[state.category]||''} · ${AL[state.ambition]||''} · ${state.concepts==='1'?'1 concept':state.concepts==='3'?'2–3 concepts':'4–6 concepts'} · Gates: ${ag} · ${state.isMember===false?'Non-member pricing':'Member pricing'}`;
+  const lines=[];
+  if(bd.g1>0) lines.push({l:'Gate 1 — Concept Lock',v:fmt(bd.g1)});
+  if(bd.g2>0) lines.push({l:'Gate 2 — Full Mix Development',v:fmt(bd.g2)});
+  if(bd.g3>0) lines.push({l:'Gate 3 — Launch',v:fmt(bd.g3)});
+  if(bd.pm>0) lines.push({l:'Project Management (8 months)',v:fmt(bd.pm)});
+  if(bd.speed>0) lines.push({l:'Fast-track parallel workstream premium',v:fmt(bd.speed)});
+  if(extras>0) lines.push({l:'Add-on enhancements',v:fmt(extras)});
+  if(disc>0) lines.push({l:'Portfolio discount (5%)',v:`−${fmt(discAmt)}`,h:true});
+  if(membershipLine>0) lines.push({l:'Innovatr Starter Membership (12 months)',v:fmt(membershipLine),m:true});
+  document.getElementById('summaryLines').innerHTML=lines.map(l=>`<div class="summary-line${l.h?' highlight':l.m?' membership-line':''}"><span class="sl-label">${l.l}</span><span class="sl-val">${l.v}</span></div>`).join('');
+  document.getElementById('summaryTotal').textContent=fmt(grand);
+  buildPhaseCards(bd);
+  buildMonthlyCadence(bd);
+  buildExtras(disc);
+  buildMembershipPanel();
+  buildPortfolioList();
+}
+
+function buildPhaseCards(bd) {
+  const cm={'1':0.75,'3':1.0,'5':1.35}[state.concepts]||1;
+  const am={regional:0.75,national:1.0,export:1.3,ecomm:0.85}[state.ambition]||1;
+  const activeGates=Object.entries(state.gates).filter(([,v])=>v).map(([k])=>k);
+  const panel=document.getElementById('phaseCards');
+  if(!activeGates.length){panel.innerHTML='<div style="font-size:14px;color:var(--ink-light);padding:8px 0;">No gates selected — go back to Step 2 to choose which stages Innovatr will support.</div>';return;}
+  panel.innerHTML=activeGates.map((gid,idx)=>{
+    const g=GATE_DEFS[gid];
+    const gTotal={g1:bd.g1,g2:bd.g2,g3:bd.g3}[gid];
+    const mult=(gid==='g3')?am:cm;
+    const delRows=g.deliverables.map(d=>`<div class="deliverable-row"><span class="dr-name">${d.name}</span><span class="dr-what">${d.what}</span><span class="dr-cost">${fmt(Math.round(d.cost*mult))}</span></div>`).join('');
+    return `<div class="phase-card" id="pcard-${idx}">
+      <div class="phase-card-header" onclick="togglePhaseCard(${idx})">
+        <div class="phase-card-dot" style="background:${g.color}"></div>
+        <span class="phase-card-name">${g.label} — ${g.name}</span>
+        <span class="phase-card-cost">${fmt(gTotal)}</span>
+        <span class="phase-card-chevron">▼</span>
+      </div>
+      <div class="phase-card-body">
+        <div class="phase-summary-text">${g.summary}</div>
+        ${delRows}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function togglePhaseCard(i){document.getElementById('pcard-'+i).classList.toggle('open');}
+
+function buildMonthlyCadence(bd){
+  const el=document.getElementById('monthlyCadence');
+  if(!el) return;
+  const speedFactor=[1.0,1.0,0.75][state.levers.speed];
+  const activeGates=Object.entries(state.gates).filter(([,v])=>v).map(([k])=>k);
+  if(!activeGates.length){el.innerHTML='';return;}
+  const phases=activeGates.map(gid=>{
+    const g=GATE_DEFS[gid];
+    const cost={g1:bd.g1,g2:bd.g2,g3:bd.g3}[gid];
+    const adjWeeks=Math.max(1,Math.round(g.weeks*speedFactor));
+    const months=adjWeeks/4.33;
+    const perMonth=Math.round(cost/months);
+    return{gid,g,cost,adjWeeks,months,perMonth};
+  });
+  const totalWeeks=phases.reduce((s,p)=>s+p.adjWeeks,0);
+  const totalMonths=Math.max(1,totalWeeks/4.33);
+  const pmMonthly=bd.pm>0?Math.round(bd.pm/totalMonths):0;
+  const maxPerMonth=Math.max(...phases.map(p=>p.perMonth),(pmMonthly||0));
+  const rows=phases.map(p=>`
+    <div class="monthly-phase-row">
+      <div class="mph-dot" style="background:${p.g.color}"></div>
+      <div class="mph-name">${p.g.label} — ${p.g.name}</div>
+      <div class="mph-duration">${p.adjWeeks} wk${p.adjWeeks!==1?'s':''}</div>
+      <div class="mph-bar-wrap"><div class="mph-bar" style="width:${Math.round((p.perMonth/maxPerMonth)*100)}%;background:${p.g.color};opacity:0.7;"></div></div>
+      <div class="mph-monthly">${fmt(p.perMonth)}<span style="font-size:10px;font-weight:400;color:rgba(255,255,255,0.4);"> /mo</span></div>
+    </div>`).join('');
+  const pmRow=bd.pm>0?`<div class="monthly-pm-row">
+    <span>Project Management — spread across ${Math.round(totalMonths)} months</span>
+    <span class="monthly-pm-val">${fmt(pmMonthly)} /mo</span>
+  </div>`:'';
+  const speedNote=state.levers.speed===2?`<div class="monthly-total-note">⚡ Fast-track timelines applied — phases compressed by ~25%</div>`:'';
+  el.innerHTML=`
+    <div class="monthly-cadence-title">Monthly cost cadence</div>
+    ${rows}
+    ${pmRow}
+    ${speedNote}`;
+}
+
+function buildExtras(disc){
+  const mm=state.isMember===false&&!state.joinMembership?1+NON_MEMBER_UPLIFT:1.0;
+  document.getElementById('extrasList').innerHTML=EXTRAS_DEF.map(e=>{
+    const checked=!!state.extras[e.id];
+    const price=Math.round(e.basePrice*mm*(disc>0?0.95:1));
+    const isHighlight=!!e.highlight;
+    return `<div class="check-option${checked?' checked':''}${isHighlight?' check-option-highlight':''}" onclick="toggleExtra('${e.id}')">
+      <div class="check-box"></div>
+      <div style="flex:1">
+        <div class="check-label">${e.label}${isHighlight?'<span class="extra-recommended-tag">Recommended</span>':''}</div>
+        <div class="check-sub">${e.sub}</div>
+      </div>
+      <div class="check-price">${fmt(price)}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleExtra(id){state.extras[id]=!state.extras[id];buildSummary();}
+
+function setMembership(isMember){
+  state.isMember=isMember;
+  state.joinMembership=false;
+  buildSummary();
+}
+
+function toggleJoinMembership(){
+  state.joinMembership=!state.joinMembership;
+  buildSummary();
+}
+
+function buildMembershipPanel(){
+  const stateAsNonMember = {...state, isMember:false, joinMembership:false};
+  const bdNonMem = calcBudget(stateAsNonMember);
+  const baseNonMem = totalFromBd(bdNonMem);
+  const stateAsMember = {...state, isMember:true, joinMembership:false};
+  const bdMem = calcBudget(stateAsMember);
+  const baseMem = totalFromBd(bdMem);
+  const saving = baseNonMem - baseMem;
+  const netSaving = saving - MEMBERSHIP_FEE;
+
+  const panel=document.getElementById('membershipPanel');
+  if(!panel) return;
+
+  if(state.isMember){
+    panel.innerHTML=`
+      <div class="mem-badge mem-badge-member">✦ Member pricing applied</div>
+      <div class="mem-toggle-row">
+        <button class="mem-btn mem-btn-active">I am an Innovatr member</button>
+        <button class="mem-btn" onclick="setMembership(false)">I am not a member</button>
+      </div>
+      <div class="mem-perks">
+        <div class="mem-perk">✓ Member development pricing applied</div>
+        <div class="mem-perk">✓ Priority access to the Innovatr team</div>
+        <div class="mem-perk">✓ Live dashboard &amp; AI insight portal included</div>
+        <div class="mem-perk">✓ Portfolio discount eligibility unlocked</div>
+      </div>`;
+  } else {
+    const joinChecked = state.joinMembership;
+    panel.innerHTML=`
+      <div class="mem-badge mem-badge-nonmember">Non-member pricing — +15% on all development</div>
+      <div class="mem-toggle-row">
+        <button class="mem-btn" onclick="setMembership(true)">I am an Innovatr member</button>
+        <button class="mem-btn mem-btn-active">I am not a member</button>
+      </div>
+      <div class="mem-join-box${joinChecked?' mem-join-checked':''}" onclick="toggleJoinMembership()">
+        <div class="mem-join-check">
+          <div class="check-box" style="${joinChecked?'background:var(--violet);border-color:var(--violet);':'border-color:var(--amber);'}">
+            ${joinChecked?'<span style="color:#fff;font-size:12px;font-weight:700;">✓</span>':''}
+          </div>
+        </div>
+        <div style="flex:1;">
+          <div class="mem-join-label">Add Innovatr Starter Membership — <strong style="color:var(--coral);">+${fmt(MEMBERSHIP_FEE)} / year</strong></div>
+          <div class="mem-join-sub">Unlock member rates on this project${netSaving>0?` and save a net <strong style="color:var(--cyan);">${fmt(netSaving)}</strong> compared to non-member pricing`:''}, plus 12 months of platform access, priority team contact, and a live insight dashboard.</div>
+        </div>
+      </div>
+      ${joinChecked?`<div class="mem-saving-callout">
+        💡 By joining, your development costs reduce by <strong>${fmt(saving)}</strong>. After the ${fmt(MEMBERSHIP_FEE)} annual fee, the net saving on this project is <strong style="color:var(--cyan);">${fmt(netSaving)}</strong>.
+      </div>`:''}
+      <div class="mem-perks" style="margin-top:4px;">
+        <div class="mem-perk${joinChecked?'':' mem-perk-locked'}">${joinChecked?'✓':'✗'} Member development pricing${joinChecked?' applied':' (currently +15%)'}</div>
+        <div class="mem-perk${joinChecked?'':' mem-perk-locked'}">${joinChecked?'✓':'✗'} Priority access to the Innovatr team</div>
+        <div class="mem-perk${joinChecked?'':' mem-perk-locked'}">${joinChecked?'✓':'✗'} Live dashboard &amp; AI insight portal</div>
+        <div class="mem-perk${joinChecked?'':' mem-perk-locked'}">${joinChecked?'✓':'✗'} Portfolio discount eligibility</div>
+      </div>`;
+  }
+}
+
+function buildPortfolioList(){
+  const disc=portfolioDiscount();
+  const listEl=document.getElementById('portfolioList');
+  listEl.innerHTML=state.portfolio.map(p=>{
+    const pb=calcBudget(p);
+    const base=totalFromBd(pb);
+    const shown=disc>0?Math.round(base*0.95):base;
+    const gates=Object.entries(p.gates).filter(([,v])=>v).map(([k])=>GATE_DEFS[k].label).join(', ')||'No gates';
+    const CL={food:'Food',beverage:'Beverage',health:'Health & Wellness',personal:'Personal Care',household:'Household',other:'Other'};
+    return `<div class="portfolio-proj-card">
+      <div class="portfolio-proj-header">
+        <div style="flex:1">
+          <div class="portfolio-proj-name">${p.name}</div>
+          <div style="font-size:11px;color:var(--ink-light);margin-top:3px;">${CL[p.category]||''} · Gates: ${gates} · ${fmt(shown)}${disc>0?' <span style="color:var(--cyan);font-weight:700;">(5% disc. applied)</span>':''}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="proj-btn edit" onclick="openEditProjectModal('${p.id}')">Edit scope</button>
+          <button class="proj-btn remove" onclick="removeProject('${p.id}')">✕</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function removeProject(id){state.portfolio=state.portfolio.filter(p=>p.id!==id);buildSummary();}
+
+function openNewProjectModal(){
+  editingProjectId=null;
+  modalState={name:'',start:null,category:null,concepts:null,ambition:null,gates:{g1:true,g2:true,g3:true},levers:{research:1,design:1,speed:1,launch:1},extras:{}};
+  modalStep=1;
+  document.getElementById('projectModal').classList.remove('hidden');
+  renderModalStep();
+}
+
+function openEditProjectModal(id){
+  editingProjectId=id;
+  const p=state.portfolio.find(x=>x.id===id);
+  modalState=JSON.parse(JSON.stringify(p));
+  modalStep=1;
+  document.getElementById('projectModal').classList.remove('hidden');
+  renderModalStep();
+}
+
+function closeModal(){document.getElementById('projectModal').classList.add('hidden');}
+
+function modalSelectOption(el,key,val){
+  el.closest('.modal-options').querySelectorAll('.option-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  modalState[key]=val;
+  if(key==='start'){modalState.gates={...gatesForStart(val)};renderGateToggles('modalGateToggles',modalState.gates,true);}
+}
+
+function renderModalStep(){
+  const isEdit=!!editingProjectId;
+  const totalSteps=5;
+  let html=`<div class="modal-title">${isEdit?'Edit project scope':'Scope a new project'}</div>
+    <div class="modal-meta">Step ${modalStep} of ${totalSteps}${modalState.name?' — <strong>'+modalState.name+'</strong>':''}</div>`;
+
+  if(modalStep===1){
+    html+=`<div class="field-group"><div class="field-label">Project name</div>
+      <input type="text" id="mNameInput" value="${modalState.name||''}" placeholder="e.g. Project Sunrise" oninput="modalState.name=this.value">
+    </div>
+    <div class="modal-section-label">Where does this project begin?</div>
+    <div class="modal-options cols-2">
+      ${[{v:'scratch',i:'💡',l:'Blank page',s:'Full idea-to-shelf journey',t:'All 3 gates'},
+         {v:'concept',i:'📋',l:'Have a concept',s:'Develop, validate, and launch',t:'Gate 2+3'},
+         {v:'formulated',i:'🧪',l:'Formulated product',s:'Packaging and launch needed',t:'Gate 3'},
+         {v:'ready',i:'🚀',l:'Ready to launch',s:'Go-to-market plan only',t:'Launch'}
+      ].map(o=>`<button class="option-btn${modalState.start===o.v?' selected':''}" onclick="modalSelectOption(this,'start','${o.v}')">
+        <span class="opt-icon">${o.i}</span><div class="opt-label">${o.l}</div>
+        <div class="opt-sub">${o.s}</div><span class="opt-tag">${o.t}</span>
+      </button>`).join('')}
+    </div>`;
+  } else if(modalStep===2){
+    html+=`<div class="modal-section-label">Which gates does this project need?</div>
+      <div class="gate-toggle-grid" id="modalGateToggles"></div>`;
+  } else if(modalStep===3){
+    html+=`<div class="modal-section-label">Product type</div>
+    <div class="modal-options cols-3" style="margin-bottom:20px;">
+      ${[{v:'food',i:'🍽️',l:'Food'},{v:'beverage',i:'🥤',l:'Beverage'},{v:'health',i:'💊',l:'Health & Wellness'},{v:'personal',i:'🧴',l:'Personal Care'},{v:'household',i:'🏠',l:'Household'},{v:'other',i:'📦',l:'Other'}]
+      .map(o=>`<button class="option-btn${modalState.category===o.v?' selected':''}" onclick="modalSelectOption(this,'category','${o.v}')">
+        <span class="opt-icon">${o.i}</span><div class="opt-label">${o.l}</div>
+      </button>`).join('')}
+    </div>
+    <div class="modal-section-label">How many concepts?</div>
+    <div class="modal-options cols-3">
+      ${[{v:'1',i:'🎯',l:'1 concept'},{v:'3',i:'🔀',l:'2–3 concepts',t:'Recommended'},{v:'5',i:'🌐',l:'4–6 concepts'}]
+      .map(o=>`<button class="option-btn${modalState.concepts===o.v?' selected':''}" onclick="modalSelectOption(this,'concepts','${o.v}')">
+        <span class="opt-icon">${o.i}</span><div class="opt-label">${o.l}</div>${o.t?`<span class="opt-tag">${o.t}</span>`:''}
+      </button>`).join('')}
+    </div>`;
+  } else if(modalStep===4){
+    html+=`<div class="modal-section-label">Launch ambition</div>
+    <div class="modal-options cols-2">
+      ${[{v:'regional',i:'📍',l:'Regional test market',s:'Select regions or channels'},
+         {v:'national',i:'🇿🇦',l:'National rollout',s:'Full South African market'},
+         {v:'export',i:'✈️',l:'Export / multi-market',s:'Africa, SADC, or international'},
+         {v:'ecomm',i:'🛒',l:'E-commerce first',s:'Direct-to-consumer led'}
+      ].map(o=>`<button class="option-btn${modalState.ambition===o.v?' selected':''}" onclick="modalSelectOption(this,'ambition','${o.v}')">
+        <span class="opt-icon">${o.i}</span><div class="opt-label">${o.l}</div><div class="opt-sub">${o.s}</div>
+      </button>`).join('')}
+    </div>`;
+  } else if(modalStep===5){
+    const bd=calcBudget(modalState);
+    const total=totalFromBd(bd);
+    html+=`<div class="modal-section-label">Fine-tune this project's budget</div>
+    ${[{k:'research',l:'Research depth',d:'How rigorously you validate at each gate.',t:['Lean','Standard','Full']},
+       {k:'design',l:'Design investment',d:'Pack design and visual assets.',t:['Lean','Standard','Premium']},
+       {k:'launch',l:'Launch investment',d:'Marketing, creative, POS, and activation.',t:['Minimal','Core','360°']}
+    ].map(lv=>`<div class="lever-group">
+      <div class="lever-label"><span class="lever-name">${lv.l}</span><span class="lever-value" id="modal-lev-val-${lv.k}">${lv.t[modalState.levers[lv.k]]}</span></div>
+      <div class="lever-desc">${lv.d}</div>
+      <input type="range" min="0" max="2" step="1" value="${modalState.levers[lv.k]}" oninput="updateModalLever('${lv.k}',this.value)">
+      <div class="lever-ticks">${lv.t.map(t=>`<span class="lever-tick">${t}</span>`).join('')}</div>
+    </div>`).join('')}
+    <div class="budget-preview-box">
+      <div class="budget-preview-label">Estimated project budget</div>
+      <div class="budget-preview-val" id="modalBudgetPreview">${fmt(total)}</div>
+      <div class="budget-preview-note">excl. VAT — before portfolio discount</div>
+    </div>`;
+  }
+
+  html+=`<div class="modal-nav">
+    ${modalStep>1?`<button class="btn-back" onclick="modalGoStep(${modalStep-1})">← Back</button>`:`<button class="btn-back" onclick="closeModal()">Cancel</button>`}
+    ${modalStep<totalSteps?`<button class="btn-next" onclick="modalGoStep(${modalStep+1})">Next →</button>`:`<button class="btn-next" onclick="saveProject()">${isEdit?'Save changes':'Add to portfolio'}</button>`}
+  </div>`;
+
+  document.getElementById('modalContent').innerHTML=html;
+  if(modalStep===2) renderGateToggles('modalGateToggles',modalState.gates,true);
+}
+
+function modalGoStep(n){
+  if(n===2&&!modalState.start){alert('Please select a starting point.');return;}
+  if(n===4&&(!modalState.category||!modalState.concepts)){alert('Please complete all selections.');return;}
+  if(n===5&&!modalState.ambition){alert('Please select a launch ambition.');return;}
+  modalStep=n;
+  renderModalStep();
+}
+
+function saveProject(){
+  if(!modalState.name||!modalState.start||!modalState.category||!modalState.concepts||!modalState.ambition){alert('Please complete all steps.');return;}
+  if(editingProjectId){
+    const idx=state.portfolio.findIndex(p=>p.id===editingProjectId);
+    if(idx>-1) state.portfolio[idx]={...modalState,id:editingProjectId};
+  } else {
+    projCounter++;
+    state.portfolio.push({...modalState,id:'p'+projCounter});
+  }
+  closeModal();
+  buildSummary();
+}
+
+function buildPDF(){
+  const disc=portfolioDiscount();
+  const bd=calcBudget(state);
+  const base=totalFromBd(bd);
+  const discAmt=Math.round(base*disc);
+  const extras=extrasCost(disc,state.isMember===false&&!state.joinMembership);
+  const membershipLine=(!state.isMember&&state.joinMembership)?MEMBERSHIP_FEE:0;
+  const grand=base-discAmt+extras+membershipLine;
+  const pricingNote=state.isMember?'Member pricing':'Non-member pricing (+15%)'+(state.joinMembership?' — Starter Membership added':'');
+  const cm={'1':0.75,'3':1.0,'5':1.35}[state.concepts]||1;
+  const am={regional:0.75,national:1.0,export:1.3,ecomm:0.85}[state.ambition]||1;
+  const activeGates=Object.entries(state.gates).filter(([,v])=>v).map(([k])=>k);
+  const SL={scratch:'Full Idea-to-Shelf Programme',concept:'Concept-to-Launch Programme',formulated:'Launch-Ready Programme',ready:'Launch Programme'};
+  const CL={food:'Food',beverage:'Beverage',health:'Health & Wellness',personal:'Personal Care',household:'Household',other:'Other'};
+  const AL={regional:'Regional Test Market',national:'National Rollout',export:'Export / Multi-market',ecomm:'E-commerce First'};
+
+  const gateRows=activeGates.map(gid=>{
+    const g=GATE_DEFS[gid]; const gTotal={g1:bd.g1,g2:bd.g2,g3:bd.g3}[gid]; const mult=(gid==='g3')?am:cm;
+    const itemRows=g.deliverables.map(d=>`<tr style="background:#FAF8F3"><td style="padding-left:28px;color:#3D3A52;font-size:12px;">↳ ${d.name}</td><td style="color:#7B7896;font-size:12px;">${d.what}</td><td style="font-size:12px;font-weight:600;">${fmt(Math.round(d.cost*mult))}</td></tr>`).join('');
+    return `<tr style="background:${g.color}22"><td colspan="2"><strong>${g.label} — ${g.name}</strong><br><span style="font-size:11px;color:#3D3A52;">${g.summary}</span></td><td><strong>${fmt(gTotal)}</strong></td></tr>${itemRows}`;
+  }).join('');
+
+  const speedFactor=[1.0,1.0,0.75][state.levers.speed];
+  const pdfPhases=activeGates.map(gid=>{
+    const g=GATE_DEFS[gid];
+    const cost={g1:bd.g1,g2:bd.g2,g3:bd.g3}[gid];
+    const adjWeeks=Math.max(1,Math.round(g.weeks*speedFactor));
+    const months=adjWeeks/4.33;
+    const perMonth=Math.round(cost/months);
+    return{g,cost,adjWeeks,months,perMonth};
+  });
+  const totalPdfWeeks=pdfPhases.reduce((s,p)=>s+p.adjWeeks,0);
+  const totalPdfMonths=Math.max(1,totalPdfWeeks/4.33);
+  const pmMonthlyPdf=bd.pm>0?Math.round(bd.pm/totalPdfMonths):0;
+  const cadenceRows=pdfPhases.map(p=>`<tr>
+    <td><strong>${p.g.label} — ${p.g.name}</strong></td>
+    <td style="color:#7B7896;">${p.adjWeeks} weeks (~${Math.round(p.months*10)/10} months)</td>
+    <td style="font-weight:600;">${fmt(p.cost)}</td>
+    <td style="font-weight:700;color:#5B4FCF;">${fmt(p.perMonth)} <span style="font-weight:400;font-size:11px;color:#7B7896;">/mo</span></td>
+  </tr>`).join('');
+  const pmCadenceRow=bd.pm>0?`<tr style="background:#FAF8F3"><td>Project Management</td><td style="color:#7B7896;">Across full ${Math.round(totalPdfMonths)} months</td><td style="font-weight:600;">${fmt(bd.pm)}</td><td style="font-weight:700;color:#5B4FCF;">${fmt(pmMonthlyPdf)} <span style="font-weight:400;font-size:11px;color:#7B7896;">/mo</span></td></tr>`:'';
+
+  const portfolioRows=state.portfolio.map(p=>{
+    const pb=calcBudget(p); const pt=totalFromBd(pb); const pd=disc>0?Math.round(pt*0.05):0;
+    const gates=Object.entries(p.gates).filter(([,v])=>v).map(([k])=>GATE_DEFS[k].label).join(', ')||'None';
+    return `<tr><td>${p.name}</td><td>${gates}</td><td>${fmt(pt)}</td><td>${disc>0?fmt(pt-pd):'—'}</td></tr>`;
+  }).join('');
+
+  const extraRows=EXTRAS_DEF.filter(e=>state.extras[e.id]).map(e=>`<tr><td>${e.label}</td><td>${e.sub}</td><td>${fmt(disc>0?Math.round(e.basePrice*0.95):e.basePrice)}</td></tr>`).join('');
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Innovatr — Programme Proposal</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'DM Sans',sans-serif;color:#1A1730;background:#fff;padding:48px 56px;font-size:13px;}
+    .logo{font-family:'DM Serif Display',serif;font-size:28px;color:#1A1730;}
+    .logo span{color:#F2613F;}
+    .tagline{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7B7896;margin-top:2px;margin-bottom:40px;}
+    h1{font-family:'DM Serif Display',serif;font-size:34px;color:#1A1730;margin-bottom:8px;letter-spacing:-0.5px;}
+    h2{font-family:'DM Serif Display',serif;font-size:20px;color:#1A1730;margin:32px 0 14px;}
+    .meta{display:flex;flex-wrap:wrap;gap:20px;padding:16px 20px;background:#F4F2FD;border-radius:10px;margin-bottom:32px;}
+    .mi label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#5B4FCF;display:block;margin-bottom:3px;}
+    .mi span{font-size:14px;font-weight:600;color:#1A1730;}
+    table{width:100%;border-collapse:collapse;margin-bottom:24px;}
+    th{background:#1A1730;color:#fff;padding:10px 14px;text-align:left;font-size:11px;letter-spacing:1px;text-transform:uppercase;}
+    td{padding:9px 14px;border-bottom:1px solid #E8E4F8;vertical-align:top;}
+    .disc-note{background:#E0FAF8;border:1px solid #00B8C8;border-radius:8px;padding:12px 16px;margin-bottom:24px;font-size:12px;}
+    .total-val{font-family:'DM Serif Display',serif;font-size:32px;color:#F2613F;}
+    .footer{margin-top:40px;padding-top:20px;border-top:1px solid #E8E4F8;font-size:11px;color:#7B7896;display:flex;justify-content:space-between;}
+    @media print{body{padding:28px 36px;}}
+  </style></head><body>
+
+  <div class="logo">innov<span>a</span>tr</div>
+  <div class="tagline">Programme Budget Proposal</div>
+  <h1>${SL[state.start]||'Custom Programme'}</h1>
+  <div class="meta">
+    <div class="mi"><label>Category</label><span>${CL[state.category]||'—'}</span></div>
+    <div class="mi"><label>Launch ambition</label><span>${AL[state.ambition]||'—'}</span></div>
+    <div class="mi"><label>Concepts</label><span>${state.concepts==='1'?'1 concept':state.concepts==='3'?'2–3 concepts':'4–6 concepts'}</span></div>
+    <div class="mi"><label>Active gates</label><span>${activeGates.map(g=>GATE_DEFS[g].label).join(', ')||'None'}</span></div>
+    <div class="mi"><label>Pricing basis</label><span>${pricingNote}</span></div>
+    <div class="mi"><label>Date</label><span>${new Date().toLocaleDateString('en-ZA',{day:'numeric',month:'long',year:'numeric'})}</span></div>
+  </div>
+  ${disc>0?`<div class="disc-note">🎉 A 5% portfolio discount is applied to this project as part of a ${state.portfolio.length+1}-project portfolio programme.</div>`:''}
+  <h2>Programme Deliverables &amp; Budget</h2>
+  <table><thead><tr><th>Deliverable</th><th>What you receive</th><th>Cost</th></tr></thead><tbody>${gateRows}</tbody></table>
+  ${bd.pm>0?`<table><tbody><tr><td><strong>Project Management</strong></td><td>4hrs per week × 8 months, dedicated Innovatr lead</td><td><strong>${fmt(bd.pm)}</strong></td></tr></tbody></table>`:''}
+  ${bd.speed>0?`<table><tbody><tr><td><strong>Fast-track premium</strong></td><td>Parallel workstreams for compressed timeline</td><td><strong>${fmt(bd.speed)}</strong></td></tr></tbody></table>`:''}
+  <h2>Monthly Cost Cadence</h2>
+  <table><thead><tr><th>Phase</th><th>Duration</th><th>Phase total</th><th>Monthly rate</th></tr></thead><tbody>${cadenceRows}${pmCadenceRow}</tbody></table>
+  ${extraRows?`<h2>Add-on Enhancements</h2><table><thead><tr><th>Enhancement</th><th>Description</th><th>Cost</th></tr></thead><tbody>${extraRows}</tbody></table>`:''}
+  ${portfolioRows?`<h2>Portfolio Programme</h2><table><thead><tr><th>Project</th><th>Gates</th><th>Full cost</th><th>After 5% disc.</th></tr></thead><tbody>${portfolioRows}</tbody></table>`:''}
+  <table><tbody>
+    ${disc>0?`<tr><td>Portfolio discount (5%)</td><td></td><td style="color:#F2613F">−${fmt(discAmt)}</td></tr>`:''}
+    ${membershipLine>0?`<tr><td>Innovatr Starter Membership (12 months)</td><td>Member rates applied to this project + platform access, dashboard &amp; priority team</td><td style="color:#00B8C8;font-weight:600;">${fmt(membershipLine)}</td></tr>`:''}
+    <tr style="background:#F4F2FD"><td colspan="2"><strong>Total programme investment</strong><br><span style="font-size:11px;font-weight:400;color:#7B7896">South African Rand, excl. VAT · Indicative estimate · ${pricingNote}</span></td><td><span class="total-val">${fmt(grand)}</span></td></tr>
+  </tbody></table>
+  <div class="footer"><span>innovatr.co.za · Rapid Research &amp; Growth Consultancy · Hermanus, Western Cape</span><span>Formal proposal provided following consultation</span></div>
+  </body></html>`;
+
+  const win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(()=>win.print(),800);
+}
+
+function resetCalculator(){
+  Object.assign(state,{start:null,category:null,concepts:null,ambition:null,gates:{g1:true,g2:true,g3:true},levers:{research:1,design:1,speed:1,launch:1},extras:{},portfolio:[],isMember:true,joinMembership:false});
+  document.querySelectorAll('.option-btn').forEach(b=>b.classList.remove('selected'));
+  document.querySelectorAll('input[type="range"]').forEach(r=>{r.value=1;});
+  ['research','design','speed','launch'].forEach(k=>{state.levers[k]=1;document.getElementById('val-'+k).textContent=LEVER_LABELS[k][1];});
+  ['next1','next3','next4','next5'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=true;});
+  initGateToggles('scratch',false);
+  goToStep(1);
+}
+
+updateProgress(1);
+initGateToggles('scratch',false);
+</script>
+
+</body>
+</html>

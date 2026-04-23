@@ -506,6 +506,124 @@ function ProcessSection() {
 }
 
 
+function BudgetCalculatorSection() {
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+
+  useEffect(() => {
+    const frame = iframeRef.current;
+    if (!frame) return;
+    let interval: number | undefined;
+
+    const resize = () => {
+      try {
+        const doc = frame.contentWindow?.document;
+        if (!doc) return;
+        const h = doc.body.scrollHeight;
+        if (h && Math.abs(parseInt(frame.style.height || "0") - h) > 4) {
+          frame.style.height = h + "px";
+        }
+      } catch {
+        /* same-origin only */
+      }
+    };
+
+    const onLoad = () => {
+      try {
+        const doc = frame.contentWindow?.document;
+        if (doc) {
+          const hdr = doc.querySelector("header");
+          if (hdr) (hdr as HTMLElement).style.display = "none";
+          const app = doc.querySelector(".app") as HTMLElement | null;
+          if (app) app.style.paddingTop = "0";
+        }
+      } catch {
+        /* ignore */
+      }
+      resize();
+      if (interval) window.clearInterval(interval);
+      interval = window.setInterval(resize, 400);
+    };
+
+    frame.addEventListener("load", onLoad);
+    return () => {
+      frame.removeEventListener("load", onLoad);
+      if (interval) window.clearInterval(interval);
+    };
+  }, []);
+
+  return (
+    <section
+      id="budget-calculator"
+      aria-label="Innovatr budget calculator"
+      style={{
+        padding: "80px 0",
+        background: "#FAF8F3",
+      }}
+    >
+      <div style={{ maxWidth: 680, margin: "0 auto 48px", textAlign: "center", padding: "0 24px" }}>
+        <span
+          style={{
+            display: "block",
+            fontFamily: '"DM Sans", sans-serif',
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            color: BRAND.violet,
+            marginBottom: 12,
+          }}
+        >
+          Build your budget
+        </span>
+        <h2
+          style={{
+            fontFamily: '"DM Serif Display", serif',
+            fontSize: "clamp(1.75rem, 3.2vw, 2.4rem)",
+            fontWeight: 400,
+            color: BRAND.dark,
+            letterSpacing: "-0.02em",
+            lineHeight: 1.15,
+            margin: "0 0 14px",
+          }}
+        >
+          What will your programme cost?
+        </h2>
+        <p
+          style={{
+            fontFamily: '"DM Sans", sans-serif',
+            fontSize: 16,
+            color: `${BRAND.dark}b3`,
+            lineHeight: 1.6,
+            margin: 0,
+          }}
+        >
+          Answer a few questions and we'll build your Innovatr project budget from the ground up — gate by gate, phase by phase.
+        </p>
+      </div>
+      <div style={{ maxWidth: 1020, margin: "0 auto", padding: "0 24px" }}>
+        <iframe
+          ref={iframeRef}
+          src="/innovatr-budget-calculator.html"
+          id="budgetCalcFrame"
+          title="Innovatr Budget Calculator"
+          scrolling="no"
+          frameBorder={0}
+          data-testid="iframe-budget-calculator"
+          style={{
+            width: "100%",
+            border: "none",
+            display: "block",
+            borderRadius: 20,
+            boxShadow: "0 8px 48px rgba(26, 23, 48, 0.10)",
+            minHeight: 900,
+            background: "#FAF8F3",
+          }}
+        />
+      </div>
+    </section>
+  );
+}
+
 function CTASection() {
   return (
     <section id="contact" aria-label="Get in touch" style={{
@@ -707,6 +825,7 @@ export default function WhatWeDo() {
         <HeroSection />
         <ProblemSolutionSection />
         <ProcessSection />
+        <BudgetCalculatorSection />
         <CTASection />
       </main>
       <InnovatrFooter />
