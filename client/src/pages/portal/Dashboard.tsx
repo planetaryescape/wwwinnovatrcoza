@@ -96,9 +96,20 @@ function metricColor(v: number) {
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
-  const { user, isPaidMember } = useAuth();
+  const { user, isPaidMember, isAdmin } = useAuth();
   const [studySearch, setStudySearch] = useState("");
   const [studyScope, setStudyScope] = useState<"mine" | "company">("mine");
+  const [adminCompanyId, setAdminCompanyId] = useState<string>("");
+
+  const { data: adminCompanies = [] } = useQuery<Array<{ id: string; name: string }>>({
+    queryKey: ["/api/admin/companies"],
+    queryFn: async () => {
+      const r = await fetch("/api/admin/companies");
+      if (!r.ok) return [];
+      return r.json();
+    },
+    enabled: !!isAdmin,
+  });
 
   useEffect(() => { logActivity("view_dashboard"); }, []);
 
@@ -119,9 +130,12 @@ export default function Dashboard() {
   }>({ queryKey: ["/api/member/activity", user?.id], enabled: !!user });
 
   const { data: clientReports, isLoading: loadingReports } = useQuery<any[]>({
-    queryKey: ["/api/member/studies", studyScope],
+    queryKey: ["/api/member/studies", isAdmin ? `admin:${adminCompanyId || "all"}` : studyScope],
     queryFn: async () => {
-      const r = await fetch(`/api/member/studies?scope=${studyScope}`);
+      const url = isAdmin
+        ? (adminCompanyId ? `/api/member/studies?companyId=${encodeURIComponent(adminCompanyId)}` : "/api/member/studies")
+        : `/api/member/studies?scope=${studyScope}`;
+      const r = await fetch(url);
       if (!r.ok) return [];
       return r.json();
     },
@@ -291,31 +305,62 @@ export default function Dashboard() {
                     data-testid="input-study-search"
                   />
                 </div>
-                <div className="inline-flex rounded-lg p-0.5" style={{ background: "#fff", border: `1px solid ${N200}` }}>
-                  <button
-                    onClick={() => setStudyScope("mine")}
-                    data-testid="button-scope-mine"
-                    className="text-xs font-semibold px-3 py-1.5 rounded-md transition-colors"
-                    style={studyScope === "mine"
-                      ? { background: VIO, color: "#fff" }
-                      : { background: "transparent", color: N500 }}
+                {isAdmin ? (
+                  <select
+                    value={adminCompanyId}
+                    onChange={(e) => setAdminCompanyId(e.target.value)}
+                    data-testid="select-admin-company"
+                    className="rounded-lg px-3 py-2 text-xs focus:outline-none"
+                    style={{ background: "#fff", border: `1px solid ${N200}`, color: VDK }}
                   >
-                    My studies
-                  </button>
-                  {user?.companyId && (
+                    <option value="">All companies</option>
+                    {adminCompanies
+                      .slice()
+                      .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+                      .map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                  </select>
+                ) : (
+                  <div className="inline-flex rounded-lg p-0.5" style={{ background: "#fff", border: `1px solid ${N200}` }}>
                     <button
-                      onClick={() => setStudyScope("company")}
-                      data-testid="button-scope-company"
+                      onClick={() => setStudyScope("mine")}
+                      data-testid="button-scope-mine"
                       className="text-xs font-semibold px-3 py-1.5 rounded-md transition-colors"
-                      style={studyScope === "company"
+                      style={studyScope === "mine"
                         ? { background: VIO, color: "#fff" }
                         : { background: "transparent", color: N500 }}
                     >
-                      My company
+                      My studies
                     </button>
-                  )}
-                </div>
-                <button onClick={() => setLocation(`/portal/test?scope=${studyScope}`)} className="text-xs font-semibold flex items-center gap-1" style={{ color: VIO }} data-testid="link-view-all-studies">
+                    {user?.companyId && (
+                      <button
+                        onClick={() => setStudyScope("company")}
+                        data-testid="button-scope-company"
+                        className="text-xs font-semibold px-3 py-1.5 rounded-md transition-colors"
+                        style={studyScope === "company"
+                          ? { background: VIO, color: "#fff" }
+                          : { background: "transparent", color: N500 }}
+                      >
+                        My company
+                      </button>
+                    )}
+                  </div>
+                )}
+                <button
+                  onClick={() => {
+                    if (isAdmin) {
+                      setLocation(adminCompanyId
+                        ? `/portal/test?companyId=${encodeURIComponent(adminCompanyId)}`
+                        : "/portal/test");
+                    } else {
+                      setLocation(`/portal/test?scope=${studyScope}`);
+                    }
+                  }}
+                  className="text-xs font-semibold flex items-center gap-1"
+                  style={{ color: VIO }}
+                  data-testid="link-view-all-studies"
+                >
                   View All <ArrowRight className="w-3 h-3" />
                 </button>
               </div>

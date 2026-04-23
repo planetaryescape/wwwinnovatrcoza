@@ -323,11 +323,46 @@ export default function TestPage() {
   })();
   const [studyScope, setStudyScope] = useState<"mine" | "company">(initialScope);
 
+  /* Admin-only company filter (kept in sync with the URL ?companyId=…) */
+  const initialAdminCompanyId: string = (() => {
+    if (typeof window === "undefined") return "";
+    return new URLSearchParams(window.location.search).get("companyId") || "";
+  })();
+  const [adminCompanyId, setAdminCompanyId] = useState<string>(initialAdminCompanyId);
+
+  const { data: adminCompanies = [] } = useQuery<Array<{ id: string; name: string }>>({
+    queryKey: ["/api/admin/companies"],
+    queryFn: async () => {
+      const r = await fetch("/api/admin/companies");
+      if (!r.ok) return [];
+      return r.json();
+    },
+    enabled: !!isAdmin,
+  });
+
+  useEffect(() => {
+    if (!isAdmin || typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (adminCompanyId) {
+      params.set("companyId", adminCompanyId);
+    } else {
+      params.delete("companyId");
+    }
+    const qs = params.toString();
+    const next = window.location.pathname + (qs ? `?${qs}` : "");
+    if (next !== window.location.pathname + window.location.search) {
+      window.history.replaceState(null, "", next);
+    }
+  }, [isAdmin, adminCompanyId]);
+
   /* Real client reports — scoped server-side */
   const { data: clientReports = [], isLoading: isLoadingStudies } = useQuery<ClientReport[]>({
-    queryKey: ["/api/member/client-reports", studyScope],
+    queryKey: ["/api/member/client-reports", isAdmin ? `admin:${adminCompanyId || "all"}` : studyScope],
     queryFn: async () => {
-      const r = await fetch(`/api/member/client-reports?scope=${studyScope}`);
+      const url = isAdmin
+        ? (adminCompanyId ? `/api/member/client-reports?companyId=${encodeURIComponent(adminCompanyId)}` : "/api/member/client-reports")
+        : `/api/member/client-reports?scope=${studyScope}`;
+      const r = await fetch(url);
       if (!r.ok) return [];
       return r.json();
     },
@@ -997,6 +1032,23 @@ export default function TestPage() {
                     <option>In Field</option>
                     <option>Analysing</option>
                   </select>
+                  {isAdmin && (
+                    <select
+                      value={adminCompanyId}
+                      onChange={(e) => setAdminCompanyId(e.target.value)}
+                      data-testid="select-test-admin-company"
+                      className="rounded-lg px-3 py-2 text-xs focus:outline-none"
+                      style={{ background: "#fff", border: `1px solid ${N200}`, color: VDK }}
+                    >
+                      <option value="">All companies</option>
+                      {adminCompanies
+                        .slice()
+                        .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+                        .map((c) => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                    </select>
+                  )}
                   {!isAdmin && (
                     <div className="inline-flex rounded-lg p-0.5" style={{ background: "#fff", border: `1px solid ${N200}` }}>
                       <button
