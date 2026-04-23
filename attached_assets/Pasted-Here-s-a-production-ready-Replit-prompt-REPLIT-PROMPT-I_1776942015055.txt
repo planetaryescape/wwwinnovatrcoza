@@ -1,0 +1,176 @@
+Here’s a production-ready Replit prompt:
+
+REPLIT PROMPT — Innovatr Budget Calculator Integration
+
+You are integrating a pre-built interactive budget calculator into an existing Innovatr website. The calculator is a fully self-contained HTML/CSS/JS tool. Your job is to embed it cleanly into the Consult tab of the Innovatr website, positioned directly below the existing process phase description section. Do not rebuild the calculator — embed it exactly as provided.
+
+CONTEXT: WHO INNOVATR IS
+Innovatr (innovatr.co.za) is a South African rapid research and growth consultancy. The brand uses:
+	•	Fonts: DM Serif Display (headings) and DM Sans (body) — already loaded via Google Fonts in the calculator
+	•	Colours: Violet #5B4FCF, Coral #F2613F, Cyan #00B8C8, Amber #F5A623, Cream #FAF8F3, Ink #1A1730
+	•	Tone: professional, warm, analytically confident — not corporate
+
+WHAT YOU ARE EMBEDDING
+The budget calculator file is provided as innovatr-budget-calculator.html. It is a single self-contained file containing all HTML, CSS, and JavaScript — no external dependencies beyond Google Fonts. It must be embedded into the Consult tab of the main website without stripping, modifying, or re-styling its internals.
+
+EXACT PLACEMENT
+	1.	Open the main website file (likely index.html, consult.html, or the relevant page file — check the project structure first).
+	2.	Navigate to the Consult tab section.
+	3.	Find the process phase description — this is the section that describes Innovatr’s stage-gate development process (Gate 1 Concept Lock, Gate 2 Full Mix, Gate 3 Launch, or similar phrasing).
+	4.	Insert the calculator immediately below that process description block, before any closing section tags, testimonials, or CTAs that follow it.
+
+HOW TO EMBED
+Use an <iframe> approach to preserve the calculator’s self-contained styles and scripts without conflicts with the parent site’s CSS:
+
+<!-- Innovatr Budget Calculator -->
+<section class="calculator-section" id="budget-calculator">
+  <div class="calculator-intro">
+    <p class="calculator-eyebrow">Build your budget</p>
+    <h2>What will your programme cost?</h2>
+    <p>Answer a few questions and we'll build your Innovatr project budget from the ground up — gate by gate, phase by phase.</p>
+  </div>
+  <div class="calculator-frame-wrap">
+    <iframe
+      src="innovatr-budget-calculator.html"
+      id="budgetCalcFrame"
+      title="Innovatr Budget Calculator"
+      scrolling="no"
+      frameborder="0"
+      style="width:100%;border:none;display:block;"
+    ></iframe>
+  </div>
+</section>
+
+
+Add this CSS to the parent site stylesheet (or in a <style> block in the <head>):
+
+/* ── Budget Calculator Section ── */
+.calculator-section {
+  padding: 80px 0;
+  background: #FAF8F3;
+}
+
+.calculator-intro {
+  max-width: 680px;
+  margin: 0 auto 48px;
+  text-align: center;
+  padding: 0 24px;
+}
+
+.calculator-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #5B4FCF;
+  margin-bottom: 12px;
+}
+
+.calculator-intro h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 36px;
+  color: #1A1730;
+  letter-spacing: -0.5px;
+  margin-bottom: 14px;
+  line-height: 1.15;
+}
+
+.calculator-intro p {
+  font-size: 16px;
+  color: #7B7896;
+  line-height: 1.6;
+}
+
+.calculator-frame-wrap {
+  max-width: 1020px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+#budgetCalcFrame {
+  width: 100%;
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 8px 48px rgba(26, 23, 48, 0.10);
+  min-height: 900px;
+}
+
+
+Add this JavaScript to auto-resize the iframe so no scrollbar appears inside it:
+
+<script>
+  (function() {
+    var frame = document.getElementById('budgetCalcFrame');
+    function resizeFrame() {
+      try {
+        var h = frame.contentWindow.document.body.scrollHeight;
+        frame.style.height = h + 'px';
+      } catch(e) {}
+    }
+    frame.addEventListener('load', function() {
+      resizeFrame();
+      // Poll for height changes as calculator steps change
+      setInterval(resizeFrame, 400);
+    });
+  })();
+</script>
+
+
+If the site is on the same domain (which it will be since the calculator file lives in the same repo), this cross-frame height approach will work without CORS issues.
+
+FILE PLACEMENT
+Place innovatr-budget-calculator.html in the project root, or in the same directory as the page that embeds it. Update the src path in the <iframe> accordingly:
+	•	If root: src="innovatr-budget-calculator.html"
+	•	If in a subfolder: src="tools/innovatr-budget-calculator.html" — adjust to match your directory structure
+
+HEADER HANDLING
+The calculator file has its own <header> with the Innovatr logo and “Budget Calculator” subtitle. Since it is embedded in the website (which has its own nav), you have two options:
+Option A — Hide the calculator’s internal header (recommended):
+Add this to the <iframe>’s parent page, or inject it via the auto-resize script:
+
+frame.addEventListener('load', function() {
+  try {
+    var iDoc = frame.contentWindow.document;
+    var hdr = iDoc.querySelector('header');
+    if (hdr) hdr.style.display = 'none';
+    // Adjust app padding since header is removed
+    var app = iDoc.querySelector('.app');
+    if (app) app.style.paddingTop = '0';
+  } catch(e) {}
+  resizeFrame();
+  setInterval(resizeFrame, 400);
+});
+
+
+Option B — Keep the header if the calculator is also used as a standalone page linked from elsewhere. In that case leave it as-is.
+Default to Option A unless the existing site structure makes Option B appropriate.
+
+DO NOT DO ANY OF THE FOLLOWING
+	•	Do not re-extract or rebuild the calculator’s HTML/CSS/JS into the parent page inline — keep it as an iframe
+	•	Do not restyle, recolour, or modify the calculator’s internals
+	•	Do not add a wrapper CTA (“speak to us”, “get in touch”) immediately after the calculator — it already has its own “Request a proposal” button inside
+	•	Do not remove the calculator’s PDF export, portfolio, or membership toggle functionality
+	•	Do not add loading spinners or placeholder states — the iframe loads fast enough
+
+RESPONSIVE BEHAVIOUR
+The calculator is already mobile-responsive internally. On the parent site, ensure:
+
+@media (max-width: 768px) {
+  .calculator-section { padding: 48px 0; }
+  .calculator-intro h2 { font-size: 28px; }
+  .calculator-frame-wrap { padding: 0 12px; }
+  #budgetCalcFrame { border-radius: 12px; min-height: 700px; }
+}
+
+
+FINAL CHECKLIST BEFORE MARKING DONE
+	•	innovatr-budget-calculator.html is in the correct directory relative to the embedding page
+	•	The <iframe src="..."> path resolves correctly — open in browser and confirm calculator loads
+	•	Auto-resize script is firing — no scrollbar visible inside the iframe
+	•	Calculator header is hidden (Option A) — site nav handles branding
+	•	Section appears immediately below the process phase description, above any footer/CTA
+	•	Section renders correctly on mobile (test at 375px width)
+	•	“Request a proposal” and “Build PDF proposal” buttons inside the calculator are functional
+	•	No console errors in the browser developer tools
+
+That’s everything Replit needs to place it precisely. The only thing to confirm before running is which file and which section selector contains the process phase description — if the site uses a component-based framework (React, Vue, Astro) rather than plain HTML, flag that and I’ll rewrite the embed approach for that stack.​​​​​​​​​​​​​​​​
