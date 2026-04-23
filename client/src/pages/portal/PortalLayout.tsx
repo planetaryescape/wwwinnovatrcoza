@@ -420,13 +420,6 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
                     <Search className="w-4 h-4" />
                   </button>
                 )}
-                <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold cursor-pointer flex-shrink-0"
-                  style={{ background: CORAL }}
-                  data-testid="button-user-avatar"
-                >
-                  {initials}
-                </div>
               </div>
             </header>
           )}
