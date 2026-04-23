@@ -21,10 +21,12 @@ export default function PaymentReturn() {
     const params = new URLSearchParams(window.location.search);
     const paymentStatus = params.get("status");
     let resolvedToSuccess = false;
+    let terminalNonSuccess = false;
 
     if (location.includes("/payment/cancel")) {
       setStatus("cancelled");
       setMessage("Your payment was cancelled. No charges were made.");
+      terminalNonSuccess = true;
     } else if (paymentStatus === "success") {
       setStatus("success");
       setMessage("Your payment was successful! Thank you for your purchase.");
@@ -32,9 +34,11 @@ export default function PaymentReturn() {
     } else if (paymentStatus === "cancelled") {
       setStatus("cancelled");
       setMessage("Your payment was cancelled. No charges were made.");
+      terminalNonSuccess = true;
     } else if (paymentStatus === "failed") {
       setStatus("error");
       setMessage("Your payment failed. Please try again or contact support.");
+      terminalNonSuccess = true;
     } else {
       setTimeout(() => {
         setStatus("success");
@@ -45,6 +49,11 @@ export default function PaymentReturn() {
 
     if (resolvedToSuccess) {
       firePendingMembershipConversion();
+    } else if (terminalNonSuccess) {
+      // Always clear the pending-membership flag on any terminal non-success
+      // outcome so a stale flag from an abandoned/failed checkout cannot be
+      // attributed to a later, unrelated successful payment.
+      clearPendingMembershipFlag();
     }
 
     function firePendingMembershipConversion() {
@@ -55,6 +64,15 @@ export default function PaymentReturn() {
           trackLinkedInEvent("membership_purchase");
           window.sessionStorage.removeItem("pendingMembershipPurchase");
         }
+      } catch {
+        // ignore storage errors
+      }
+    }
+
+    function clearPendingMembershipFlag() {
+      try {
+        if (typeof window === "undefined") return;
+        window.sessionStorage.removeItem("pendingMembershipPurchase");
       } catch {
         // ignore storage errors
       }
