@@ -315,9 +315,22 @@ export default function TestPage() {
   const [assistantMsgs, setAssistantMsgs]       = useState<{ role: "user" | "ai"; text: string }[]>([]);
   const [selectedAssistStudy, setSelectedAssistStudy] = useState("");
 
-  /* Real client reports — scoped to this company by the server */
+  /* Scope: 'mine' = only studies the user submitted, 'company' = all studies for their company */
+  const initialScope: "mine" | "company" = (() => {
+    if (typeof window === "undefined") return "mine";
+    const p = new URLSearchParams(window.location.search).get("scope");
+    return p === "company" ? "company" : "mine";
+  })();
+  const [studyScope, setStudyScope] = useState<"mine" | "company">(initialScope);
+
+  /* Real client reports — scoped server-side */
   const { data: clientReports = [], isLoading: isLoadingStudies } = useQuery<ClientReport[]>({
-    queryKey: ["/api/member/client-reports"],
+    queryKey: ["/api/member/client-reports", studyScope],
+    queryFn: async () => {
+      const r = await fetch(`/api/member/client-reports?scope=${studyScope}`);
+      if (!r.ok) return [];
+      return r.json();
+    },
     enabled: !!user,
   });
 
@@ -984,6 +997,32 @@ export default function TestPage() {
                     <option>In Field</option>
                     <option>Analysing</option>
                   </select>
+                  {!isAdmin && (
+                    <div className="inline-flex rounded-lg p-0.5" style={{ background: "#fff", border: `1px solid ${N200}` }}>
+                      <button
+                        onClick={() => setStudyScope("mine")}
+                        data-testid="button-test-scope-mine"
+                        className="text-xs font-semibold px-3 py-1 rounded-md transition-colors"
+                        style={studyScope === "mine"
+                          ? { background: VIO, color: "#fff" }
+                          : { background: "transparent", color: N500 }}
+                      >
+                        My studies
+                      </button>
+                      {user?.companyId && (
+                        <button
+                          onClick={() => setStudyScope("company")}
+                          data-testid="button-test-scope-company"
+                          className="text-xs font-semibold px-3 py-1 rounded-md transition-colors"
+                          style={studyScope === "company"
+                            ? { background: VIO, color: "#fff" }
+                            : { background: "transparent", color: N500 }}
+                        >
+                          My company
+                        </button>
+                      )}
+                    </div>
+                  )}
                   <span className="text-xs ml-auto" style={{ color: N400 }}>
                     {isLoadingStudies ? "—" : `${mappedStudies.length} ${mappedStudies.length === 1 ? "study" : "studies"}`}
                   </span>

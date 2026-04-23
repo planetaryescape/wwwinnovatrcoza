@@ -98,6 +98,7 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { user, isPaidMember } = useAuth();
   const [studySearch, setStudySearch] = useState("");
+  const [studyScope, setStudyScope] = useState<"mine" | "company">("mine");
 
   useEffect(() => { logActivity("view_dashboard"); }, []);
 
@@ -118,10 +119,9 @@ export default function Dashboard() {
   }>({ queryKey: ["/api/member/activity", user?.id], enabled: !!user });
 
   const { data: clientReports, isLoading: loadingReports } = useQuery<any[]>({
-    queryKey: ["/api/member/reports", user?.companyId],
+    queryKey: ["/api/member/studies", studyScope],
     queryFn: async () => {
-      const url = user?.companyId ? `/api/member/reports?companyId=${user.companyId}` : `/api/member/reports`;
-      const r = await fetch(url);
+      const r = await fetch(`/api/member/studies?scope=${studyScope}`);
       if (!r.ok) return [];
       return r.json();
     },
@@ -130,7 +130,7 @@ export default function Dashboard() {
 
   const basicCredits = userActivity?.basicCreditsRemaining ?? (company as any)?.basicCreditsRemaining ?? 0;
   const proCredits   = userActivity?.proCreditsRemaining  ?? (company as any)?.proCreditsRemaining  ?? 0;
-  const studiesDone  = userActivity?.studiesCompleted ?? (clientReports?.length ?? 0);
+  const studiesDone  = userActivity?.studiesCompleted ?? 0;
   const liveStudies  = userActivity?.liveStudies ?? 0;
 
   const { industryGroups } = useIndustryGroups();
@@ -291,13 +291,31 @@ export default function Dashboard() {
                     data-testid="input-study-search"
                   />
                 </div>
-                <select className="rounded-lg px-3 py-2 text-xs focus:outline-none" style={{ background: "#fff", border: `1px solid ${N200}`, color: VDK }} data-testid="select-client-filter">
-                  <option>All Clients</option>
-                  <option>Rugani Juice</option>
-                  <option>Discovery Bank</option>
-                  <option>Meta</option>
-                </select>
-                <button onClick={() => setLocation("/portal/test")} className="text-xs font-semibold flex items-center gap-1" style={{ color: VIO }} data-testid="link-view-all-studies">
+                <div className="inline-flex rounded-lg p-0.5" style={{ background: "#fff", border: `1px solid ${N200}` }}>
+                  <button
+                    onClick={() => setStudyScope("mine")}
+                    data-testid="button-scope-mine"
+                    className="text-xs font-semibold px-3 py-1.5 rounded-md transition-colors"
+                    style={studyScope === "mine"
+                      ? { background: VIO, color: "#fff" }
+                      : { background: "transparent", color: N500 }}
+                  >
+                    My studies
+                  </button>
+                  {user?.companyId && (
+                    <button
+                      onClick={() => setStudyScope("company")}
+                      data-testid="button-scope-company"
+                      className="text-xs font-semibold px-3 py-1.5 rounded-md transition-colors"
+                      style={studyScope === "company"
+                        ? { background: VIO, color: "#fff" }
+                        : { background: "transparent", color: N500 }}
+                    >
+                      My company
+                    </button>
+                  )}
+                </div>
+                <button onClick={() => setLocation(`/portal/test?scope=${studyScope}`)} className="text-xs font-semibold flex items-center gap-1" style={{ color: VIO }} data-testid="link-view-all-studies">
                   View All <ArrowRight className="w-3 h-3" />
                 </button>
               </div>

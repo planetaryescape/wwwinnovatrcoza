@@ -3623,7 +3623,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const sessionUser = req.user!;
       const queryCompanyId = req.query.companyId as string | undefined;
-      
+      const rawScope = (req.query.scope as string | undefined)?.toLowerCase();
+      const scope: "mine" | "company" = rawScope === "company" ? "company" : "mine";
+
       // Admin users (@innovatr.co.za) can see reports for a specific company or all
       if (isAdminUser(sessionUser.email)) {
         if (queryCompanyId) {
@@ -3636,7 +3638,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }));
           return res.json(enrichedReports);
         }
-        
+
         // Admin viewing all reports
         const allReports = await storage.getAllClientReports();
         const enrichedReports = await Promise.all(
@@ -3650,13 +3652,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
         return res.json(enrichedReports);
       }
-      
-      // Regular users get their own company's reports
+
+      // Non-admins: scope server-side.
+      // 'mine' (default) = only reports linked to studies the user submitted.
+      if (scope === "mine") {
+        const ownStudies = await storage.getStudiesByEmail(sessionUser.email);
+        const linkedReportIds = new Set(
+          ownStudies.map(s => s.clientReportId).filter((v): v is string => !!v)
+        );
+        if (linkedReportIds.size === 0) {
+          return res.json([]);
+        }
+        const company = sessionUser.companyId ? await storage.getCompany(sessionUser.companyId) : null;
+        const allMineCompanyReports = sessionUser.companyId
+          ? await storage.getClientReportsByCompanyId(sessionUser.companyId)
+          : [];
+        const filtered = allMineCompanyReports.filter(r => linkedReportIds.has(r.id));
+        return res.json(filtered.map(r => ({
+          ...r,
+          companyName: company?.name || "Unknown Company",
+        })));
+      }
+
+      // 'company' = all reports for the user's company
       if (!sessionUser.companyId) {
         return res.json([]);
       }
-      
-      // For regular users, get their company name to include in reports
       const company = await storage.getCompany(sessionUser.companyId);
       const reports = await storage.getClientReportsByCompanyId(sessionUser.companyId);
       const enrichedReports = reports.map((report) => ({
@@ -4916,7 +4937,9 @@ Income: ${(incomes || []).join(", ") || "All"} · Region: ${(regions || []).join
   app.get("/api/member/studies", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const sessionUser = req.user!;
-      
+      const rawScope = (req.query.scope as string | undefined)?.toLowerCase();
+      const scope: "mine" | "company" = rawScope === "company" ? "company" : "mine";
+
       // Admin users can see all studies or filter by companyId
       if (isAdminUser(sessionUser.email)) {
         if (req.query.companyId) {
@@ -4926,25 +4949,20 @@ Income: ${(incomes || []).join(", ") || "All"} · Region: ${(regions || []).join
         const allStudies = await storage.getAllStudies();
         return res.json(allStudies);
       }
-      
-      // For regular users, get studies by their email or company
-      let studies = await storage.getStudiesByEmail(sessionUser.email);
-      
-      // If user has a company, also include company studies
-      if (sessionUser.companyId) {
-        const companyStudies = await storage.getStudiesByCompanyId(sessionUser.companyId);
-        // Merge and deduplicate by ID
-        const studyIds = new Set(studies.map(s => s.id));
-        for (const study of companyStudies) {
-          if (!studyIds.has(study.id)) {
-            studies.push(study);
-          }
+
+      // Non-admins: enforce scope server-side. Default 'mine' = own submissions.
+      if (scope === "company") {
+        if (!sessionUser.companyId) {
+          return res.json([]);
         }
-        // Sort by createdAt descending
-        studies.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        const companyStudies = await storage.getStudiesByCompanyId(sessionUser.companyId);
+        companyStudies.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        return res.json(companyStudies);
       }
-      
-      res.json(studies);
+
+      const ownStudies = await storage.getStudiesByEmail(sessionUser.email);
+      ownStudies.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      res.json(ownStudies);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
