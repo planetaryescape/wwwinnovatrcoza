@@ -594,46 +594,6 @@ function BudgetCalculatorSection() {
         background: "#FAF8F3",
       }}
     >
-      <div style={{ maxWidth: 680, margin: "0 auto 48px", textAlign: "center", padding: "0 24px" }}>
-        <span
-          style={{
-            display: "block",
-            fontFamily: '"DM Sans", sans-serif',
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: BRAND.violet,
-            marginBottom: 12,
-          }}
-        >
-          Build your budget
-        </span>
-        <h2
-          style={{
-            fontFamily: '"DM Serif Display", serif',
-            fontSize: "clamp(1.75rem, 3.2vw, 2.4rem)",
-            fontWeight: 400,
-            color: BRAND.dark,
-            letterSpacing: "-0.02em",
-            lineHeight: 1.15,
-            margin: "0 0 14px",
-          }}
-        >
-          What will your programme cost?
-        </h2>
-        <p
-          style={{
-            fontFamily: '"DM Sans", sans-serif',
-            fontSize: 16,
-            color: `${BRAND.dark}b3`,
-            lineHeight: 1.6,
-            margin: 0,
-          }}
-        >
-          Answer a few questions and we'll build your Innovatr project budget from the ground up — gate by gate, phase by phase.
-        </p>
-      </div>
       <div style={{ maxWidth: 1020, margin: "0 auto", padding: "0 24px" }}>
         <iframe
           ref={iframeRef}
