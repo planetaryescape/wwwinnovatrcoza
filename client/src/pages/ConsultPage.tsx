@@ -512,14 +512,23 @@ function BudgetCalculatorSection() {
   useEffect(() => {
     const frame = iframeRef.current;
     if (!frame) return;
-    let interval: number | undefined;
+    let resizeObserver: ResizeObserver | undefined;
+    let mutationObserver: MutationObserver | undefined;
+    let fallbackInterval: number | undefined;
 
     const resize = () => {
       try {
         const doc = frame.contentWindow?.document;
         if (!doc) return;
-        const h = doc.body.scrollHeight;
-        if (h && Math.abs(parseInt(frame.style.height || "0") - h) > 4) {
+        const body = doc.body;
+        const html = doc.documentElement;
+        const h = Math.max(
+          body.scrollHeight,
+          body.offsetHeight,
+          html.scrollHeight,
+          html.offsetHeight,
+        );
+        if (h && Math.abs(parseInt(frame.style.height || "0") - h) > 1) {
           frame.style.height = h + "px";
         }
       } catch {
@@ -534,20 +543,44 @@ function BudgetCalculatorSection() {
           const hdr = doc.querySelector("header");
           if (hdr) (hdr as HTMLElement).style.display = "none";
           const app = doc.querySelector(".app") as HTMLElement | null;
-          if (app) app.style.paddingTop = "0";
+          if (app) {
+            app.style.padding = "32px 24px";
+          }
+          const body = doc.body;
+          if (typeof ResizeObserver !== "undefined") {
+            resizeObserver = new ResizeObserver(() => resize());
+            resizeObserver.observe(body);
+            resizeObserver.observe(doc.documentElement);
+          } else {
+            fallbackInterval = window.setInterval(resize, 200);
+          }
+          mutationObserver = new MutationObserver(() => resize());
+          mutationObserver.observe(body, {
+            attributes: true,
+            childList: true,
+            subtree: true,
+            characterData: true,
+          });
+          frame.contentWindow?.addEventListener("resize", resize);
         }
       } catch {
         /* ignore */
       }
       resize();
-      if (interval) window.clearInterval(interval);
-      interval = window.setInterval(resize, 400);
+      window.requestAnimationFrame(resize);
     };
 
     frame.addEventListener("load", onLoad);
     return () => {
       frame.removeEventListener("load", onLoad);
-      if (interval) window.clearInterval(interval);
+      resizeObserver?.disconnect();
+      mutationObserver?.disconnect();
+      if (fallbackInterval) window.clearInterval(fallbackInterval);
+      try {
+        frame.contentWindow?.removeEventListener("resize", resize);
+      } catch {
+        /* ignore */
+      }
     };
   }, []);
 
@@ -615,7 +648,7 @@ function BudgetCalculatorSection() {
             display: "block",
             borderRadius: 20,
             boxShadow: "0 8px 48px rgba(26, 23, 48, 0.10)",
-            minHeight: 900,
+            height: 480,
             background: "#FAF8F3",
           }}
         />
