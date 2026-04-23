@@ -544,7 +544,8 @@ function BudgetCalculatorSection() {
           if (hdr) (hdr as HTMLElement).style.display = "none";
           const app = doc.querySelector(".app") as HTMLElement | null;
           if (app) {
-            app.style.padding = "32px 24px";
+            app.style.paddingTop = "32px";
+            app.style.paddingBottom = "32px";
           }
           const body = doc.body;
           if (typeof ResizeObserver !== "undefined") {
