@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { trackLinkedInEvent } from "@/lib/linkedin-tracking";
 import { GradientButtonWrap } from "@/components/GradientButtonWrap";
 import PublicNavbar from "@/components/PublicNavbar";
 import { LoginDialog } from "@/components/LoginDialog";
@@ -1686,6 +1687,7 @@ function HomeTrendsSection() {
                 <a
                   href="/portal/trends"
                   data-testid="link-subscribe-trends"
+                  onClick={() => trackLinkedInEvent("subscribe_trends")}
                   style={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: 15, color: "#fff", background: BRAND.coral, border: "none", borderRadius: 10, padding: "14px 32px", cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 10, transition: "opacity 0.2s ease" }}
                   onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.9"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
