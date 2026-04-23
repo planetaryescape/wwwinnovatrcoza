@@ -520,14 +520,11 @@ function BudgetCalculatorSection() {
       try {
         const doc = frame.contentWindow?.document;
         if (!doc) return;
-        const body = doc.body;
-        const html = doc.documentElement;
-        const h = Math.max(
-          body.scrollHeight,
-          body.offsetHeight,
-          html.scrollHeight,
-          html.offsetHeight,
-        );
+        const app = doc.querySelector(".app") as HTMLElement | null;
+        const measured = app
+          ? app.offsetTop + app.offsetHeight
+          : doc.body.scrollHeight;
+        const h = Math.ceil(measured);
         if (h && Math.abs(parseInt(frame.style.height || "0") - h) > 1) {
           frame.style.height = h + "px";
         }
@@ -548,6 +545,12 @@ function BudgetCalculatorSection() {
             app.style.paddingBottom = "32px";
           }
           const body = doc.body;
+          // Neutralize min-height:100vh so the body shrinks to fit content.
+          body.style.minHeight = "0";
+          doc.documentElement.style.minHeight = "0";
+          doc.documentElement.style.height = "auto";
+          body.style.height = "auto";
+          body.style.overflow = "hidden";
           if (typeof ResizeObserver !== "undefined") {
             resizeObserver = new ResizeObserver(() => resize());
             resizeObserver.observe(body);
