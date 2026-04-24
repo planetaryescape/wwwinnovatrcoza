@@ -32,7 +32,7 @@ export default function CompanyCreditsCard({ companyId }: CompanyCreditsCardProp
     const fetchCompany = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/member/company?companyId=${companyId}`);
+        const res = await fetch("/api/member/company");
         if (!res.ok) {
           throw new Error("Failed to fetch company");
         }

@@ -7,9 +7,8 @@ import { Calendar, MessageSquare, Loader2, CheckCircle } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { trackLinkedInEvent } from "@/lib/linkedin-tracking";
+import { getRecaptchaToken } from "@/lib/recaptcha";
 import contactBackground from "@assets/pexels-chris-f-8344064_1764657952677.jpeg";
-
-const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 export default function ContactSection() {
   const { toast } = useToast();
@@ -36,20 +35,7 @@ export default function ContactSection() {
     setIsSubmitting(true);
 
     try {
-      let recaptchaToken = "";
-      const grecaptcha = window.grecaptcha;
-      if (grecaptcha) {
-        recaptchaToken = await new Promise<string>((resolve, reject) => {
-          grecaptcha.ready(async () => {
-            try {
-              const token = await grecaptcha.execute(SITE_KEY, { action: "contact" });
-              resolve(token);
-            } catch (err) {
-              reject(err);
-            }
-          });
-        });
-      }
+      const recaptchaToken = await getRecaptchaToken();
 
       const response = await fetch("/api/contact", {
         method: "POST",

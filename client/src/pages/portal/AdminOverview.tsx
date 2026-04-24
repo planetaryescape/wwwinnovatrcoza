@@ -518,7 +518,7 @@ export default function AdminOverview() {
               variant="ghost"
               size="sm"
               className="text-xs text-muted-foreground"
-              onClick={() => window.location.href = "/portal/research"}
+              onClick={() => window.location.href = "/portal/test"}
               data-testid="button-view-my-research"
             >
               View My Research
@@ -588,7 +588,7 @@ export default function AdminOverview() {
                         variant="ghost"
                         size="icon"
                         className="h-7 w-7"
-                        onClick={() => window.location.href = "/portal/research"}
+                        onClick={() => window.location.href = "/portal/test"}
                         data-testid={`button-view-research-${item.id}`}
                         title="View in My Research"
                       >

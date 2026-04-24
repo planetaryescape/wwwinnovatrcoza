@@ -367,6 +367,64 @@ export const insertCompanySchema = createInsertSchema(companies)
 export type InsertCompany = z.infer<typeof insertCompanySchema>;
 export type Company = typeof companies.$inferSelect;
 
+export const companyMemberships = pgTable("company_memberships", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  companyId: varchar("company_id").notNull(),
+  role: varchar("role", { length: 20 }).notNull().default("MEMBER"),
+  status: varchar("status", { length: 20 }).notNull().default("ACTIVE"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertCompanyMembershipSchema = createInsertSchema(companyMemberships)
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    role: z.enum(["OWNER", "ADMIN", "MEMBER"]).default("MEMBER"),
+    status: z.enum(["ACTIVE", "REMOVED"]).default("ACTIVE"),
+  });
+
+export type InsertCompanyMembership = z.infer<typeof insertCompanyMembershipSchema>;
+export type CompanyMembership = typeof companyMemberships.$inferSelect;
+
+export const companyInvites = pgTable("company_invites", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull(),
+  email: text("email").notNull(),
+  role: varchar("role", { length: 20 }).notNull().default("MEMBER"),
+  tokenHash: text("token_hash").notNull().unique(),
+  invitedByUserId: varchar("invited_by_user_id").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  acceptedAt: timestamp("accepted_at"),
+  revokedAt: timestamp("revoked_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertCompanyInviteSchema = createInsertSchema(companyInvites)
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+    acceptedAt: true,
+    revokedAt: true,
+  })
+  .extend({
+    email: z.string().email("Invalid email"),
+    role: z.enum(["ADMIN", "MEMBER"]).default("MEMBER"),
+  });
+
+export type InsertCompanyInvite = z.infer<typeof insertCompanyInviteSchema>;
+export type CompanyInvite = typeof companyInvites.$inferSelect;
+
 // Helper functions for credit calculations
 export function getBasicCreditsRemaining(company: Company): number {
   return (company.basicCreditsTotal ?? 0) - (company.basicCreditsUsed ?? 0);
@@ -533,6 +591,44 @@ export const insertCaseStudySchema = createInsertSchema(caseStudies)
 
 export type InsertCaseStudy = z.infer<typeof insertCaseStudySchema>;
 export type CaseStudy = typeof caseStudies.$inferSelect;
+
+export const consultOfferTemplates = pgTable("consult_offer_templates", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  slug: text("slug").notNull().unique(),
+  serviceType: varchar("service_type", { length: 50 }).notNull(),
+  title: text("title").notNull(),
+  descriptionTemplate: text("description_template").notNull(),
+  note: text("note"),
+  badgeLabel: text("badge_label").notNull().default("10% off"),
+  triggerTags: text("trigger_tags").array().notNull().default([]),
+  isActive: boolean("is_active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertConsultOfferTemplateSchema = createInsertSchema(consultOfferTemplates)
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .extend({
+    slug: z.string().min(1, "Slug is required"),
+    serviceType: z.string().min(1, "Service type is required"),
+    title: z.string().min(1, "Title is required"),
+    descriptionTemplate: z.string().min(1, "Description template is required"),
+    note: z.string().optional().nullable(),
+    badgeLabel: z.string().min(1, "Badge label is required").default("10% off"),
+    triggerTags: z.array(z.string()).default([]),
+    isActive: z.boolean().default(true),
+    sortOrder: z.number().int().default(0),
+  });
+
+export type InsertConsultOfferTemplate = z.infer<typeof insertConsultOfferTemplateSchema>;
+export type ConsultOfferTemplate = typeof consultOfferTemplates.$inferSelect;
 
 // Client Reports - Past Research delivered to specific companies
 export const clientReports = pgTable("client_reports", {
@@ -965,4 +1061,3 @@ export const insertSandboxRunSchema = createInsertSchema(sandboxRuns).omit({
 
 export type InsertSandboxRun = z.infer<typeof insertSandboxRunSchema>;
 export type SandboxRun = typeof sandboxRuns.$inferSelect;
-

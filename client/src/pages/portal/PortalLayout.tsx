@@ -1,6 +1,22 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
   Settings,
@@ -8,34 +24,39 @@ import {
   Shield,
   Eye,
   X,
-  Search,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  Lock,
-  BarChart2,
-  FlaskConical,
   Lightbulb,
   Building2,
+  ArrowRight,
+  Brain,
+  Palette,
+  Layers,
+  ChevronsUpDown,
 } from "lucide-react";
 import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
+import { usePortalFeed, type PortalConsultOffer } from "@/lib/portal-feed";
+import { cn } from "@/lib/utils";
 
 /* ── Innovatr Design System tokens ─────────────────────── */
 const VDK   = "#1E1B3A";
 const CORAL  = "#E8503A";
-const N300   = "#C9B99A";
-const N400   = "#9C9AB0";
+const N400   = "#A89078";
 const SUCCESS = "#2A9E5C";
 
 const EXPLORE_COLOR = "#3A2FBF";
@@ -58,54 +79,18 @@ function getTierLabel(user: any, isAdmin: boolean, isPaidMember: boolean) {
 
 interface PortalLayoutProps {
   children: React.ReactNode;
+  /** @deprecated topbar removed; the SidebarTrigger handles open/close. */
   showPhaseTopbar?: boolean;
 }
 
-/* ── useBreakpoint: simple responsive hook ─────────────── */
-function useBreakpoint() {
-  const [bp, setBp] = useState<"mobile" | "tablet" | "desktop">(() => {
-    if (typeof window === "undefined") return "desktop";
-    if (window.innerWidth < 768) return "mobile";
-    if (window.innerWidth < 1024) return "tablet";
-    return "desktop";
-  });
-
-  useEffect(() => {
-    const handle = () => {
-      const w = window.innerWidth;
-      if (w < 768) setBp("mobile");
-      else if (w < 1024) setBp("tablet");
-      else setBp("desktop");
-    };
-    window.addEventListener("resize", handle);
-    return () => window.removeEventListener("resize", handle);
-  }, []);
-
-  return bp;
-}
-
-export default function PortalLayout({ children, showPhaseTopbar = true }: PortalLayoutProps) {
+export default function PortalLayout({ children }: PortalLayoutProps) {
   const [location, setLocation] = useLocation();
+  const isMobile = useIsMobile();
   const {
     user, logout, isAuthenticated, isLoading, isPaidMember, isAdmin,
     impersonation, exitImpersonation, isViewingAsCompany, viewingCompanyName,
+    memberships, activeCompany, switchCompany,
   } = useAuth();
-
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return localStorage.getItem("portal-sidebar-collapsed") === "1";
-  });
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    localStorage.setItem("portal-sidebar-collapsed", collapsed ? "1" : "0");
-  }, [collapsed]);
-
-  const bp = useBreakpoint();
-  const isMobile  = bp === "mobile";
-  const isTablet  = bp === "tablet";
-  const isDesktop = bp === "desktop";
 
   const { data: trendsStatus } = useQuery<{ hasNew: boolean }>({
     queryKey: ["/api/trends/has-new"],
@@ -113,493 +98,478 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
     refetchInterval: 60000,
   });
 
+  const { data: portalFeed } = usePortalFeed(isAuthenticated);
+  const featuredOffer = portalFeed?.consultOffers?.[0] ?? null;
+
   useEffect(() => {
     if (!isAuthenticated && !isLoading) setLocation("/");
   }, [isAuthenticated, isLoading, setLocation]);
 
-  /* Cmd+K / Ctrl+K listener */
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-      e.preventDefault();
-      setSearchOpen(open => !open);
-    }
-  }, []);
-
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
-
-  /* Body scroll lock when mobile drawer is open */
-  useEffect(() => {
-    if (isMobile && mobileDrawerOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => { document.body.style.overflow = ""; };
-  }, [isMobile, mobileDrawerOpen]);
-
-  /* Close drawer on route change */
-  useEffect(() => { setMobileDrawerOpen(false); }, [location]);
-
   if (!isAuthenticated) return null;
 
   const handleLogout = () => { logout(); setLocation("/"); };
+  const handleCompanyChange = async (companyId: string) => {
+    if (!companyId || companyId === activeCompany?.id) return;
+    await switchCompany(companyId);
+  };
 
   const isDashboard = location === "/portal" || location === "/portal/dashboard";
-  const isExplore   = location === "/portal/explore";
-  const isTest      = location === "/portal/test";
+  const isExplore   =
+    location === "/portal/explore" ||
+    location.startsWith("/portal/explore/") ||
+    location === "/portal/trends" ||
+    location.startsWith("/portal/insights/");
+  const isTest      =
+    location === "/portal/test" ||
+    location === "/portal/launch" ||
+    location === "/portal/research" ||
+    location.startsWith("/portal/reports/");
   const isAct       = location === "/portal/act";
-  const isHealth    = location.startsWith("/portal/health");
-
-  // Compact sidebar: forced on tablet breakpoint OR when user toggles collapse on desktop
-  const isCompact = (isTablet && !isMobile) || (collapsed && isDesktop);
-
-  const sidebarStyle = {
-    "--sidebar-width": isCompact ? "3rem" : "12.5rem",
-    "--sidebar-width-icon": "3rem",
-  };
+  const isHealth    = location.startsWith("/portal/health") || location.startsWith("/portal/credits");
 
   const tierLabel = getTierLabel(user, isAdmin, isPaidMember);
   const initials  = getInitials(user?.name);
-
-  /* Sidebar content — shared between desktop/tablet and mobile drawer */
-  const SidebarInner = () => (
-    <div className="flex flex-col h-full" style={{ background: VDK }}>
-      {/* Logo */}
-      <div
-        className="px-4 py-4 flex items-center gap-2.5 flex-shrink-0"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
-      >
-        <button
-          onClick={() => setLocation("/")}
-          className="flex items-center gap-2.5 min-w-0"
-          data-testid="link-sidebar-logo"
-        >
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-serif text-base flex-shrink-0"
-            style={{ background: CORAL }}
-          >
-            I
-          </div>
-          {!isCompact && (
-            <span className="font-serif text-base text-white tracking-wide truncate">Innovatr</span>
-          )}
-        </button>
-        {isMobile && (
-          <button
-            className="ml-auto w-7 h-7 flex items-center justify-center text-white"
-            onClick={() => setMobileDrawerOpen(false)}
-            data-testid="button-close-drawer"
-            aria-label="Close menu"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        )}
-      </div>
-
-      {/* User badge */}
-      {!isCompact && (
-        <div
-          className="px-4 py-3 flex items-center gap-2.5 flex-shrink-0"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.04)" }}
-        >
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0"
-            style={{ background: CORAL }}
-          >
-            {initials}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-white truncate" data-testid="text-member-name">
-              {user?.name}
-            </div>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-xs truncate" style={{ color: N400 }}>{user?.company || user?.email}</span>
-              <span
-                className="text-[9px] font-bold tracking-widest px-1.5 py-0.5 rounded-sm flex-shrink-0"
-                style={{ background: "rgba(232,80,58,0.18)", color: CORAL, border: `1px solid rgba(232,80,58,0.35)` }}
-                data-testid="badge-member-tier"
-              >
-                {tierLabel}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-2 px-2">
-        {!isCompact && <SbSection label="Research" />}
-        <SbNavItem
-          icon={<LayoutDashboard className="w-4 h-4" />}
-          label="Dashboard"
-          isActive={isDashboard}
-          onClick={() => setLocation("/portal/dashboard")}
-          testId="menu-item-dashboard"
-          iconOnly={isCompact}
-          tooltip="Dashboard"
-          badge={trendsStatus?.hasNew ? <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: CORAL }} /> : undefined}
-        />
-
-        {!isCompact && <SbSection label="3 Phases" top />}
-        {isCompact && <div className="h-3" />}
-        <PhaseNavItem num="01" label="Explore" color={EXPLORE_COLOR} isActive={isExplore} onClick={() => setLocation("/portal/explore")} testId="menu-item-explore" iconOnly={isCompact} tooltip="Explore" />
-        <PhaseNavItem num="02" label="Test"    color={TEST_COLOR}    isActive={isTest}    onClick={() => setLocation("/portal/test")}    testId="menu-item-test"    iconOnly={isCompact} tooltip="Test"    />
-        {isAdmin && (
-          <PhaseNavItem num="03" label="Act"     color={ACT_COLOR}     isActive={isAct}     onClick={() => setLocation("/portal/act")}     testId="menu-item-act"     iconOnly={isCompact} tooltip="Act" />
-        )}
-
-        {isAdmin && (
-          <>
-            {!isCompact && <SbSection label="Company" top />}
-            {isCompact && <div className="h-3" />}
-            <SbNavItem
-              icon={<span className="w-4 h-4 flex items-center justify-center text-[10px] font-bold rounded-full flex-shrink-0" style={{ border: `1px solid ${HEALTH_COLOR}50`, color: HEALTH_COLOR }}>C</span>}
-              label="Company"
-              isActive={isHealth}
-              onClick={() => setLocation("/portal/health")}
-              testId="menu-item-health"
-              iconOnly={isCompact}
-              tooltip="Company Health"
-            />
-          </>
-        )}
-
-        {isAdmin && !impersonation.isImpersonating && (
-          <>
-            {!isCompact && <SbSection label="System" top />}
-            {isCompact && <div className="h-3" />}
-            <SbNavItem
-              icon={<Shield className="w-4 h-4" />}
-              label="Admin"
-              isActive={location.startsWith("/portal/admin")}
-              onClick={() => setLocation("/portal/admin")}
-              testId="menu-item-admin"
-              iconOnly={isCompact}
-              tooltip="Admin"
-            />
-          </>
-        )}
-      </nav>
-
-      {/* Bottom */}
-      <div className="p-2 flex-shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
-        <SbNavItem icon={<Settings className="w-4 h-4" />} label="Settings" isActive={location === "/portal/settings"} onClick={() => setLocation("/portal/settings")} testId="menu-item-settings" iconOnly={isCompact} tooltip="Settings" />
-        <SbNavItem icon={<LogOut className="w-4 h-4" />}   label="Log out"  isActive={false}                          onClick={handleLogout}                          testId="button-sidebar-logout"  iconOnly={isCompact} tooltip="Log out"  />
-        {/* Collapse / expand toggle (desktop only — tablet is forced compact, mobile uses drawer) */}
-        {isDesktop && (
-          <button
-            onClick={() => setCollapsed(c => !c)}
-            data-testid="button-sidebar-collapse"
-            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="mt-1 w-full flex items-center gap-2 px-2 py-2 rounded-md text-xs font-medium hover-elevate"
-            style={{ color: N400, justifyContent: collapsed ? "center" : "flex-start" }}
-          >
-            {collapsed ? <ChevronsRight className="w-4 h-4" /> : <ChevronsLeft className="w-4 h-4" />}
-            {!collapsed && <span>Collapse</span>}
-          </button>
-        )}
-      </div>
-    </div>
-  );
+  const companyOptions = memberships.length > 0
+    ? memberships.map((membership) => ({
+      id: membership.companyId,
+      name: membership.company.name,
+    }))
+    : activeCompany
+      ? [{ id: activeCompany.id, name: activeCompany.name }]
+      : [];
 
   return (
-    <SidebarProvider style={sidebarStyle as React.CSSProperties}>
-      <div className="portal-root flex h-screen w-full overflow-hidden" style={{ background: "#FFFFFF" }}>
-
-        {/* ── Desktop / Tablet Sidebar ────────────────────────── */}
-        {!isMobile && (
-          <aside
-            className="flex-shrink-0 overflow-hidden"
-            style={{
-              width: isCompact ? "3rem" : "12.5rem",
-              borderRight: "1px solid rgba(255,255,255,0.07)",
-              transition: "width 0.2s ease",
-            }}
+    <SidebarProvider>
+      <Sidebar collapsible="icon" side="left" variant="sidebar">
+        {/* ── Logo ─────────────────────────────────────────── */}
+        <SidebarHeader className="border-b border-sidebar-border">
+          <button
+            onClick={() => setLocation("/")}
+            className="flex items-center gap-2.5 px-2 py-1 text-left min-w-0 outline-hidden focus-visible:ring-2 focus-visible:ring-sidebar-ring rounded-md group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
+            data-testid="link-sidebar-logo"
           >
-            <SidebarInner />
-          </aside>
-        )}
-
-        {/* ── Mobile backdrop ────────────────────────────────── */}
-        {isMobile && mobileDrawerOpen && (
-          <div
-            className="fixed inset-0 z-40"
-            style={{ background: "rgba(0,0,0,0.45)" }}
-            onClick={() => setMobileDrawerOpen(false)}
-            data-testid="mobile-drawer-backdrop"
-          />
-        )}
-
-        {/* ── Mobile drawer — full screen slide-over ─────────── */}
-        {isMobile && (
-          <aside
-            className="fixed inset-0 z-50 overflow-hidden"
-            style={{
-              transform: mobileDrawerOpen ? "translateX(0)" : "translateX(-100%)",
-              transition: "transform 0.22s ease",
-            }}
-          >
-            <SidebarInner />
-          </aside>
-        )}
-
-        {/* ── Main area ────────────────────────────────────────── */}
-        <div className="flex flex-col flex-1 overflow-hidden min-w-0">
-          {/* Impersonation bar */}
-          {impersonation.isImpersonating && (
-            <div
-              className="px-4 py-2 flex items-center justify-between flex-shrink-0"
-              style={{ background: "var(--ds-amber)", color: VDK }}
-              data-testid="impersonation-bar"
+            <span
+              className="flex h-8 w-8 items-center justify-center rounded-lg font-serif text-base text-white flex-shrink-0 group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7 group-data-[collapsible=icon]:text-sm"
+              style={{ background: CORAL }}
             >
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <Eye className="w-4 h-4" />
-                {isViewingAsCompany ? <>Viewing: <strong>{viewingCompanyName || user?.company}</strong></> : <>Viewing as: <strong>{user?.name || user?.email}</strong></>}
-              </div>
-              <Button size="sm" variant="ghost" onClick={() => { exitImpersonation(); setLocation("/portal/admin?tab=companies"); }} data-testid="button-exit-impersonation">
-                <X className="w-4 h-4 mr-1" />
-                {isViewingAsCompany ? "Back to Companies" : "Exit View"}
-              </Button>
+              I
+            </span>
+            <span className="font-serif text-base text-white tracking-wide truncate group-data-[collapsible=icon]:hidden">
+              Innovatr
+            </span>
+          </button>
+        </SidebarHeader>
+
+        {/* ── Nav ──────────────────────────────────────────── */}
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Research</SidebarGroupLabel>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={isDashboard}
+                  tooltip="Dashboard"
+                  onClick={() => setLocation("/portal/dashboard")}
+                  className={activeIndicatorClass(isDashboard)}
+                  data-testid="menu-item-dashboard"
+                >
+                  <LayoutDashboard />
+                  <span>Dashboard</span>
+                </SidebarMenuButton>
+                {trendsStatus?.hasNew && (
+                  <SidebarMenuBadge>
+                    <span
+                      className="block w-1.5 h-1.5 rounded-full"
+                      style={{ background: CORAL }}
+                      aria-label="New activity"
+                    />
+                  </SidebarMenuBadge>
+                )}
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+
+          <SidebarGroup>
+            <SidebarGroupLabel>3 Phases</SidebarGroupLabel>
+            <SidebarMenu>
+              <PhaseSidebarItem
+                num="01"
+                label="Explore"
+                color={EXPLORE_COLOR}
+                isActive={isExplore}
+                onClick={() => setLocation("/portal/explore")}
+                testId="menu-item-explore"
+              />
+              <PhaseSidebarItem
+                num="02"
+                label="Test"
+                color={TEST_COLOR}
+                isActive={isTest}
+                onClick={() => setLocation("/portal/test")}
+                testId="menu-item-test"
+              />
+              <PhaseSidebarItem
+                num="03"
+                label="Act"
+                color={ACT_COLOR}
+                isActive={isAct}
+                onClick={() => setLocation("/portal/act")}
+                testId="menu-item-act"
+              />
+            </SidebarMenu>
+          </SidebarGroup>
+
+          <SidebarGroup>
+            <SidebarGroupLabel>Company</SidebarGroupLabel>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={isHealth}
+                  tooltip="Company Health"
+                  onClick={() => setLocation("/portal/health")}
+                  className={activeIndicatorClass(isHealth)}
+                  data-testid="menu-item-health"
+                >
+                  <span
+                    className="flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold flex-shrink-0"
+                    style={{ border: `1px solid ${HEALTH_COLOR}50`, color: HEALTH_COLOR }}
+                  >
+                    C
+                  </span>
+                  <span>Company</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+
+          {isAdmin && !impersonation.isImpersonating && (
+            <SidebarGroup>
+              <SidebarGroupLabel>System</SidebarGroupLabel>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    isActive={location.startsWith("/portal/admin")}
+                    tooltip="Admin"
+                    onClick={() => setLocation("/portal/admin")}
+                    className={activeIndicatorClass(location.startsWith("/portal/admin"))}
+                    data-testid="menu-item-admin"
+                  >
+                    <Shield />
+                    <span>Admin</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroup>
+          )}
+        </SidebarContent>
+
+        {/* ── Footer: consult offer · company switcher · account ── */}
+        <SidebarFooter>
+          {/* Consult offer (hidden in icon-only mode) */}
+          <div className="group-data-[collapsible=icon]:hidden">
+            <SidebarConsultOffer
+              offer={featuredOffer}
+              onOpen={() => setLocation("/portal/act?tab=planning")}
+            />
+          </div>
+
+          {/* Company switcher (hidden in icon-only mode) */}
+          {companyOptions.length > 0 && !isViewingAsCompany && (
+            <div className="group-data-[collapsible=icon]:hidden">
+              <Select value={activeCompany?.id ?? ""} onValueChange={handleCompanyChange}>
+                <SelectTrigger
+                  className="h-auto w-full items-center gap-2 rounded-lg border-white/10 bg-white/[0.04] px-2.5 py-2 text-left text-xs text-white hover:bg-white/10 focus:ring-0 focus:ring-offset-0"
+                  data-testid="select-active-company"
+                  aria-label="Active company"
+                >
+                  <Building2 className="h-3.5 w-3.5 shrink-0" style={{ color: N400 }} />
+                  <span className="min-w-0 flex-1 truncate text-xs font-medium text-white">
+                    {activeCompany?.name ?? "Select company"}
+                  </span>
+                </SelectTrigger>
+                <SelectContent>
+                  {companyOptions.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
 
-          {/* Phase topbar — gradient */}
-          {showPhaseTopbar && (
-            <header
-              className="h-12 px-4 flex items-center justify-between flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
-            >
-              <div className="flex items-center">
-                {/* Hamburger for mobile */}
-                {isMobile && (
-                  <button
-                    className="mr-2 w-8 h-8 flex items-center justify-center rounded-md"
-                    style={{ color: "rgba(255,255,255,0.7)" }}
-                    onClick={() => setMobileDrawerOpen(true)}
-                    data-testid="button-mobile-menu"
-                    aria-label="Open menu"
-                  >
-                    <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
-                      <rect y="0"  width="18" height="2" rx="1" fill="currentColor"/>
-                      <rect y="6"  width="18" height="2" rx="1" fill="currentColor"/>
-                      <rect y="12" width="18" height="2" rx="1" fill="currentColor"/>
-                    </svg>
-                  </button>
-                )}
-                <PhaseTab num="1" label="Explore" color={EXPLORE_COLOR} isActive={isExplore} onClick={() => setLocation("/portal/explore")} />
-                <ChevronRight className="w-3 h-3 mx-1" style={{ color: N400 }} />
-                <PhaseTab num="2" label="Test"    color={TEST_COLOR}    isActive={isTest}    onClick={() => setLocation("/portal/test")}    />
-                <ChevronRight className="w-3 h-3 mx-1" style={{ color: N400 }} />
-                {isAdmin && <PhaseTab num="3" label="Act"     color={ACT_COLOR}     isActive={isAct}     onClick={() => setLocation("/portal/act")}     />}
-              </div>
-              <div className="flex items-center gap-2">
-                {!isMobile && (
-                  <button
-                    onClick={() => setSearchOpen(true)}
-                    className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs min-w-[160px]"
-                    style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", color: N400 }}
-                    data-testid="input-search"
-                  >
-                    <Search className="w-3.5 h-3.5" />
-                    <span>Search anything…</span>
-                    <kbd className="ml-auto rounded px-1 text-[10px] font-mono" style={{ background: "rgba(255,255,255,0.1)", color: N300, border: "1px solid rgba(255,255,255,0.12)" }}>⌘K</kbd>
-                  </button>
-                )}
-                {isMobile && (
-                  <button
-                    className="w-8 h-8 flex items-center justify-center rounded-md"
-                    style={{ color: "rgba(255,255,255,0.7)" }}
-                    onClick={() => setSearchOpen(true)}
-                    data-testid="input-search"
-                    aria-label="Search"
-                  >
-                    <Search className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            </header>
-          )}
+          {/* Account card → dropdown (always visible; compacts to avatar in icon mode) */}
+          <UserAccountMenu
+            name={user?.name}
+            subline={
+              isViewingAsCompany
+                ? viewingCompanyName ?? null
+                : activeCompany?.name ?? user?.company ?? user?.email ?? null
+            }
+            tierLabel={tierLabel}
+            initials={initials}
+            onSettings={() => setLocation("/portal/settings")}
+            onLogout={handleLogout}
+          />
+        </SidebarFooter>
+      </Sidebar>
 
-          <main
-            className="flex-1 overflow-auto"
-            style={{ background: "#FFFFFF", paddingBottom: isMobile ? "56px" : 0 }}
+      {/* ── Main ─────────────────────────────────────────── */}
+      <SidebarInset className="bg-white">
+        {/* Impersonation banner */}
+        {impersonation.isImpersonating && (
+          <div
+            className="px-4 py-2 flex items-center justify-between flex-shrink-0"
+            style={{ background: "var(--ds-amber)", color: VDK }}
+            data-testid="impersonation-bar"
           >
-            {children}
-          </main>
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <Eye className="w-4 h-4" />
+              {isViewingAsCompany ? <>Viewing: <strong>{viewingCompanyName || user?.company}</strong></> : <>Viewing as: <strong>{user?.name || user?.email}</strong></>}
+            </div>
+            <Button size="sm" variant="ghost" onClick={async () => { await exitImpersonation(); setLocation("/portal/admin?tab=companies"); }} data-testid="button-exit-impersonation">
+              <X className="w-4 h-4 mr-1" />
+              {isViewingAsCompany ? "Back to Companies" : "Exit View"}
+            </Button>
+          </div>
+        )}
 
-        </div>
-      </div>
+        {/* Mobile-only header containing the menu trigger */}
+        <header
+          className="md:hidden h-12 px-3 flex items-center gap-2 flex-shrink-0"
+          style={{ background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+        >
+          <SidebarTrigger className="text-white hover:bg-white/10" data-testid="button-mobile-menu" />
+        </header>
 
-      {/* ── Mobile fixed bottom nav (shared component) ──────── */}
+        <main
+          className="flex-1 overflow-auto"
+          style={{ background: "#FFFFFF", paddingBottom: isMobile ? 56 : 0 }}
+        >
+          {children}
+        </main>
+      </SidebarInset>
+
       <MobilePortalNav />
-
-      {/* ── Global ⌘K Search Dialog ──────────────────────── */}
-      <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
-        <CommandInput placeholder="Search pages, features…" data-testid="input-search-dialog" />
-        <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup heading="Navigation">
-            <CommandItem onSelect={() => { setSearchOpen(false); setLocation("/portal/dashboard"); }} data-testid="search-item-dashboard">
-              <LayoutDashboard className="mr-2 h-4 w-4" />Dashboard
-            </CommandItem>
-            <CommandItem onSelect={() => { setSearchOpen(false); setLocation("/portal/explore"); }} data-testid="search-item-explore">
-              <FlaskConical className="mr-2 h-4 w-4" />Explore — Market Signals & Sandbox
-            </CommandItem>
-            <CommandItem onSelect={() => { setSearchOpen(false); setLocation("/portal/test"); }} data-testid="search-item-test">
-              <BarChart2 className="mr-2 h-4 w-4" />Test — Studies & Briefs
-            </CommandItem>
-            {isAdmin && (
-              <CommandItem onSelect={() => { setSearchOpen(false); setLocation("/portal/act"); }} data-testid="search-item-act">
-                <Lightbulb className="mr-2 h-4 w-4" />Act — Planning & Gaps
-              </CommandItem>
-            )}
-            {isAdmin && (
-              <CommandItem onSelect={() => { setSearchOpen(false); setLocation("/portal/health"); }} data-testid="search-item-company">
-                <Building2 className="mr-2 h-4 w-4" />Company Health
-              </CommandItem>
-            )}
-            <CommandItem onSelect={() => { setSearchOpen(false); setLocation("/portal/settings"); }} data-testid="search-item-settings">
-              <Settings className="mr-2 h-4 w-4" />Settings
-            </CommandItem>
-            {isAdmin && (
-              <CommandItem onSelect={() => { setSearchOpen(false); setLocation("/portal/admin"); }} data-testid="search-item-admin">
-                <Shield className="mr-2 h-4 w-4" />Admin Panel
-              </CommandItem>
-            )}
-          </CommandGroup>
-        </CommandList>
-      </CommandDialog>
     </SidebarProvider>
   );
 }
 
-/* ── Sub-components ─────────────────────────────────────── */
-
-function SbSection({ label, top }: { label: string; top?: boolean }) {
-  return (
-    <div className={`px-2 pb-1.5 text-[10px] font-bold tracking-widest uppercase ${top ? "pt-4" : "pt-1.5"}`} style={{ color: "#9C9AB0" }}>
-      {label}
-    </div>
+/* ── Active-state coral indicator (used on all SidebarMenuButtons) ─ */
+function activeIndicatorClass(active: boolean) {
+  return cn(
+    "relative",
+    active &&
+      "before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-0.5 before:rounded-r before:bg-sidebar-primary before:content-[''] group-data-[collapsible=icon]:before:hidden",
   );
 }
 
-function SbNavItem({ icon, label, isActive, onClick, testId, badge, iconOnly, tooltip, locked }: {
-  icon: React.ReactNode; label: string; isActive: boolean; onClick: () => void; testId?: string; badge?: React.ReactNode; iconOnly?: boolean; tooltip?: string; locked?: boolean;
+/* ── Phase nav item (colored 01/02/03 chip + label) ─────── */
+function PhaseSidebarItem({
+  num,
+  label,
+  color,
+  isActive,
+  onClick,
+  testId,
+}: {
+  num: string;
+  label: string;
+  color: string;
+  isActive: boolean;
+  onClick: () => void;
+  testId?: string;
 }) {
   return (
-    <button
-      onClick={locked ? undefined : onClick}
-      data-testid={testId}
-      disabled={locked}
-      title={iconOnly ? tooltip : undefined}
-      className="w-full flex items-center px-2.5 py-2 rounded-md text-sm font-medium transition-colors mb-0.5 relative"
-      style={{
-        gap: iconOnly ? "0" : "0.625rem",
-        justifyContent: iconOnly ? "center" : "flex-start",
-        color: isActive ? "#ffffff" : locked ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.65)",
-        background: isActive ? "rgba(255,255,255,0.12)" : "transparent",
-        cursor: locked ? "not-allowed" : "pointer",
-        minHeight: "44px",
-      }}
-      onMouseEnter={e => { if (!isActive && !locked) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
-      onMouseLeave={e => { if (!isActive && !locked) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
-    >
-      {isActive && !iconOnly && (
-        <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r" style={{ background: "#E8503A" }} />
-      )}
-      <span style={{ color: isActive ? "#E8503A" : locked ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.55)", flexShrink: 0 }}>{icon}</span>
-      {!iconOnly && <span className="flex-1 text-left">{label}</span>}
-      {!iconOnly && locked && <Lock className="w-3 h-3 flex-shrink-0" style={{ color: "rgba(255,255,255,0.25)" }} />}
-      {!iconOnly && !locked && badge}
-      {iconOnly && isActive && (
-        <span
-          className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
-          style={{ background: "#E8503A" }}
-        />
-      )}
-    </button>
-  );
-}
-
-function PhaseNavItem({ num, label, color, isActive, onClick, testId, locked, iconOnly, tooltip }: {
-  num: string; label: string; color: string; isActive: boolean; onClick: () => void; testId?: string; locked?: boolean; iconOnly?: boolean; tooltip?: string;
-}) {
-  return (
-    <button
-      onClick={locked ? undefined : onClick}
-      data-testid={testId}
-      disabled={locked}
-      title={iconOnly ? tooltip : undefined}
-      className="w-full flex items-center px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors mb-0.5 relative"
-      style={{
-        gap: iconOnly ? "0" : "0.625rem",
-        justifyContent: iconOnly ? "center" : "flex-start",
-        color: isActive ? "#ffffff" : locked ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.65)",
-        background: isActive ? "rgba(255,255,255,0.12)" : "transparent",
-        cursor: locked ? "not-allowed" : "pointer",
-        minHeight: "44px",
-      }}
-      onMouseEnter={e => { if (!isActive && !locked) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"; }}
-      onMouseLeave={e => { if (!isActive && !locked) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
-    >
-      {isActive && !iconOnly && (
-        <span className="absolute left-0 top-1 bottom-1 w-0.5 rounded-r" style={{ background: "#E8503A" }} />
-      )}
-      {/* Colored dot indicator for active phase (icon-only mode) */}
-      {isActive && iconOnly && (
-        <span
-          className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
-          style={{ background: color }}
-        />
-      )}
-      <span
-        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-        style={
-          isActive
-            ? { background: color, color: "#fff" }
-            : locked
-            ? { border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.3)" }
-            : { border: `1px solid ${color}40`, color }
-        }
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        isActive={isActive}
+        tooltip={label}
+        onClick={onClick}
+        className={activeIndicatorClass(isActive)}
+        data-testid={testId}
       >
-        {num}
-      </span>
-      {!iconOnly && <span className="flex-1 text-left">{label}</span>}
-      {!iconOnly && locked && <Lock className="w-3 h-3 flex-shrink-0" style={{ color: "rgba(255,255,255,0.25)" }} />}
-    </button>
+        <span
+          className="flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold leading-none flex-shrink-0"
+          style={
+            isActive
+              ? { background: color, color: "#fff" }
+              : { border: `1px solid ${color}40`, color }
+          }
+        >
+          {num}
+        </span>
+        <span>{label}</span>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
   );
 }
 
-function PhaseTab({ num, label, color, isActive, onClick }: {
-  num: string; label: string; color: string; isActive: boolean; onClick: () => void;
+/* ── Sidebar Consult Offer ─────────────────────────────────── */
+const CORAL_SIDEBAR = "#E8503A";
+
+function consultOfferIcon(serviceType: string | undefined) {
+  switch (serviceType) {
+    case "strategy": return Brain;
+    case "creative": return Palette;
+    case "pricing":  return Layers;
+    default:         return Lightbulb;
+  }
+}
+
+function consultOfferLabel(serviceType: string | undefined) {
+  switch (serviceType) {
+    case "strategy": return "Strategy";
+    case "creative": return "Creative";
+    case "pricing":  return "Pricing";
+    default:         return "Consult";
+  }
+}
+
+/* ── User Account Menu (avatar trigger → Settings / Logout) ─ */
+function AccountAvatar({ initials, size = 28 }: { initials: string; size?: number }) {
+  return (
+    <span
+      className="flex shrink-0 items-center justify-center rounded-full text-[11px] font-semibold"
+      style={{
+        width: size,
+        height: size,
+        background: "rgba(232,80,58,0.16)",
+        color: CORAL,
+        border: "1px solid rgba(232,80,58,0.32)",
+      }}
+      aria-hidden
+    >
+      {initials}
+    </span>
+  );
+}
+
+function UserAccountMenu({
+  name,
+  subline,
+  tierLabel,
+  initials,
+  onSettings,
+  onLogout,
+}: {
+  name: string | undefined;
+  subline: string | null;
+  tierLabel: string;
+  initials: string;
+  onSettings: () => void;
+  onLogout: () => void;
 }) {
+  const { state, isMobile } = useSidebar();
+  const iconOnly = state === "collapsed" && !isMobile;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className={
+            iconOnly
+              ? "mx-auto flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+              : "flex w-full items-center gap-2.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2 text-left transition-colors hover:bg-white/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+          }
+          aria-label="Open account menu"
+          data-testid="button-account-menu"
+        >
+          <AccountAvatar initials={initials} size={28} />
+          {!iconOnly && (
+            <>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-xs font-semibold text-white" data-testid="text-member-name">
+                  {name ?? "Account"}
+                </span>
+                {subline && (
+                  <span className="block truncate text-[11px]" style={{ color: N400 }}>
+                    {subline}
+                  </span>
+                )}
+              </span>
+              <ChevronsUpDown className="h-3.5 w-3.5 shrink-0" style={{ color: N400 }} />
+            </>
+          )}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent side="top" align="end" sideOffset={8} className="w-56">
+        <DropdownMenuLabel className="flex items-center gap-2.5 py-2">
+          <AccountAvatar initials={initials} size={28} />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-semibold">{name ?? "Account"}</span>
+            <span className="mt-0.5 flex items-center gap-1.5">
+              {subline && (
+                <span className="truncate text-[11px] text-muted-foreground">{subline}</span>
+              )}
+              <span
+                className="shrink-0 rounded-sm border px-1.5 py-0.5 text-[9px] font-bold tracking-widest"
+                style={{ background: "rgba(232,80,58,0.10)", color: CORAL, borderColor: "rgba(232,80,58,0.30)" }}
+                data-testid="badge-member-tier"
+              >
+                {tierLabel}
+              </span>
+            </span>
+          </span>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={onSettings} data-testid="menu-item-settings">
+          <Settings className="h-4 w-4" />
+          Settings
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onSelect={onLogout}
+          className="text-destructive focus:text-destructive"
+          data-testid="button-sidebar-logout"
+        >
+          <LogOut className="h-4 w-4" />
+          Log out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function SidebarConsultOffer({ offer, onOpen }: { offer: PortalConsultOffer | null; onOpen: () => void }) {
+  const isPlaceholder = !offer;
+  const Icon = consultOfferIcon(offer?.serviceType);
+  const eyebrow = isPlaceholder
+    ? "Consult"
+    : `${consultOfferLabel(offer.serviceType)} offer`;
+  const title = offer?.title ?? "Need expert help?";
+
   return (
     <button
-      onClick={onClick}
-      className="flex items-center gap-1.5 px-3.5 h-12 text-sm font-medium transition-colors border-b-2"
+      type="button"
+      onClick={onOpen}
+      className="group w-full text-left rounded-xl p-3.5 transition-all hover:-translate-y-px"
       style={{
-        color: isActive ? "#ffffff" : "rgba(255,255,255,0.55)",
-        borderBottomColor: isActive ? color : "transparent",
+        background: "linear-gradient(135deg, rgba(232,80,58,0.32) 0%, rgba(232,80,58,0.12) 100%)",
+        border: "1px solid rgba(232,80,58,0.45)",
+        boxShadow: "0 1px 14px rgba(232,80,58,0.10)",
       }}
-      onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.85)"; }}
-      onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.55)"; }}
+      data-testid="sidebar-consult-offer"
     >
-      <span
-        className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[9px] font-bold"
-        style={
-          isActive
-            ? { background: color, color: "#fff" }
-            : { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.45)" }
-        }
+      <div className="flex items-center gap-1.5 mb-2.5">
+        <Icon className="w-3.5 h-3.5" style={{ color: CORAL_SIDEBAR }} />
+        <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: CORAL_SIDEBAR }}>
+          {eyebrow}
+        </span>
+      </div>
+
+      <div className="text-sm font-semibold leading-snug text-white line-clamp-2 mb-2.5">
+        {title}
+      </div>
+
+      <div
+        className="flex items-center gap-1 text-[11px] font-semibold transition-transform group-hover:translate-x-0.5"
+        style={{ color: CORAL_SIDEBAR }}
       >
-        {num}
-      </span>
-      <span>{label}</span>
+        {isPlaceholder ? "Talk to us" : "View offer"}
+        <ArrowRight className="w-3 h-3" />
+      </div>
     </button>
   );
 }
-

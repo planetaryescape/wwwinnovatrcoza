@@ -42,7 +42,7 @@ export interface ConceptEmotion {
 }
 
 export interface ConceptAgreement {
-  question_group: "self" | "brand";
+  question_group: "self_relevance" | "brand_comparison";
   statement: string;
   total: number;
   agree_count: number;
@@ -82,7 +82,7 @@ export interface ConceptDetail {
 export interface HeatmapClick {
   evaluation_id: string;
   respondent_external_id: string | null;
-  question_type: "like" | "dislike" | string;
+  question_type: "like" | "change" | string;
   click_order: number;
   x_coord: number | null;
   y_coord: number | null;

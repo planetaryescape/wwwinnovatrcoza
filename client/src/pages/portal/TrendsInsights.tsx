@@ -24,6 +24,7 @@ import { Search, ArrowRight, ArrowLeft, ChevronDown, ChevronUp, Lock, Building2,
 import { useToast } from "@/hooks/use-toast";
 import PortalLayout from "./PortalLayout";
 import { LoginDialog } from "@/components/LoginDialog";
+import { PortalBreadcrumbs } from "@/components/portal/PortalBreadcrumbs";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
@@ -91,6 +92,18 @@ const categoryColors: Record<string, { bg: string; text: string }> = {
   inside: { bg: "bg-violet-50", text: "text-violet-700" },
   irl: { bg: "bg-rose-50", text: "text-rose-700" },
 };
+
+const REPORT_REQUEST_INDUSTRIES = [
+  "Food",
+  "Beverages",
+  "Alcohol",
+  "Financial",
+  "FMCGs",
+  "Beauty",
+  "Retail",
+  "Technology",
+  "Other",
+] as const;
 
 function getCategoryStyle(category: string) {
   const key = normalizeCategoryKey(category);
@@ -291,7 +304,7 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId, isPaidSeat, o
       e.preventDefault();
       onLockedClick(report);
     } else {
-      setLocation(`/portal/insights/${report.slug}`);
+      setLocation(`/portal/explore/insights/${report.slug}`);
     }
   };
 
@@ -407,7 +420,7 @@ export default function TrendsInsights() {
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [loginDialogSignup, setLoginDialogSignup] = useState(false);
   const [loginDialogReturnTo, setLoginDialogReturnTo] = useState<string | undefined>(undefined);
-  const { user, isAdmin, hasPaidSeatAccess, isAuthenticated, isPaidMember } = useAuth();
+  const { user, isAdmin, hasPaidSeatAccess, isAuthenticated, isPaidMember, activeCompany } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const userTier = user?.membershipTier;
@@ -424,7 +437,7 @@ export default function TrendsInsights() {
   
   const handleLockedClick = (report: Report) => {
     if (!isAuthenticated) {
-      setLoginDialogReturnTo(`/portal/insights/${report.slug}`);
+      setLoginDialogReturnTo(`/portal/explore/insights/${report.slug}`);
       setLoginDialogSignup(true);
       setLoginDialogOpen(true);
     } else {
@@ -434,7 +447,7 @@ export default function TrendsInsights() {
   };
   
   const handleUnlockedClick = (report: Report) => {
-    navigate(`/portal/insights/${report.slug}`);
+    navigate(`/portal/explore/insights/${report.slug}`);
   };
 
   const handleRequestSubmit = async () => {
@@ -447,14 +460,21 @@ export default function TrendsInsights() {
       const res = await fetch("/api/report-requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestForm),
+        credentials: "include",
+        body: JSON.stringify({
+          ...requestForm,
+          companyName: activeCompany?.name || user?.company || undefined,
+        }),
       });
-      if (!res.ok) throw new Error("Failed to submit request");
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Failed to submit request");
+      }
       toast({ title: "Request submitted", description: "We'll review your request and get back to you." });
       setRequestModalOpen(false);
       setRequestForm({ name: "", email: "", industry: "", topic: "", reason: "" });
     } catch (err) {
-      toast({ title: "Something went wrong", description: "Please try again later.", variant: "destructive" });
+      toast({ title: "Something went wrong", description: err instanceof Error ? err.message : "Please try again later.", variant: "destructive" });
     } finally {
       setRequestSubmitting(false);
     }
@@ -462,7 +482,11 @@ export default function TrendsInsights() {
 
   const openRequestModal = () => {
     if (user) {
-      setRequestForm(prev => ({ ...prev, name: user.name || "", email: user.email || "" }));
+      setRequestForm(prev => ({
+        ...prev,
+        name: prev.name || user.name || "",
+        email: prev.email || user.email || "",
+      }));
     }
     setRequestModalOpen(true);
   };
@@ -557,7 +581,12 @@ export default function TrendsInsights() {
   const hasMoreReports = filteredAndSortedReports.length > 6;
 
   const { data: companyData } = useQuery<{ industry?: string }>({
-    queryKey: ['/api/companies', user?.companyId],
+    queryKey: ['/api/member/company', user?.companyId],
+    queryFn: async () => {
+      const response = await fetch('/api/member/company');
+      if (!response.ok) return null;
+      return response.json();
+    },
     enabled: !!user?.companyId,
   });
   const companyIndustry = companyData?.industry || null;
@@ -800,7 +829,8 @@ export default function TrendsInsights() {
             </div>
           )}
           <div className="mb-8 flex items-end justify-between gap-4">
-            <div>
+            <div className="min-w-0 flex-1">
+              <PortalBreadcrumbs items={[{ label: "Dashboard", href: "/portal/dashboard" }, { label: "Explore", href: "/portal/explore" }, { label: "Trends" }]} />
               <h1 
                 className="text-4xl md:text-5xl font-bold mb-3 text-foreground"
                 style={{ fontFamily: 'DM Serif Display, serif' }}
@@ -1104,10 +1134,16 @@ export default function TrendsInsights() {
               Request a Report
             </DialogTitle>
             <DialogDescription>
-              Tell us what you'd like to see researched. We'll review your request and get back to you.
+              Send a real research request to the Innovatr team. We use this to prioritise new trend reports.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 mt-2">
+          <form
+            className="space-y-4 mt-2"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void handleRequestSubmit();
+            }}
+          >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="req-name">Your name</Label>
@@ -1141,15 +1177,11 @@ export default function TrendsInsights() {
                   <SelectValue placeholder="Select an industry" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Food">Food</SelectItem>
-                  <SelectItem value="Beverages">Beverages</SelectItem>
-                  <SelectItem value="Alcohol">Alcohol</SelectItem>
-                  <SelectItem value="Financial">Financial</SelectItem>
-                  <SelectItem value="FMCGs">FMCGs</SelectItem>
-                  <SelectItem value="Beauty">Beauty</SelectItem>
-                  <SelectItem value="Retail">Retail</SelectItem>
-                  <SelectItem value="Technology">Technology</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
+                  {REPORT_REQUEST_INDUSTRIES.map((industry) => (
+                    <SelectItem key={industry} value={industry}>
+                      {industry}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -1176,11 +1208,11 @@ export default function TrendsInsights() {
               />
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setRequestModalOpen(false)} data-testid="button-request-cancel">
+              <Button type="button" variant="outline" onClick={() => setRequestModalOpen(false)} data-testid="button-request-cancel">
                 Cancel
               </Button>
               <Button
-                onClick={handleRequestSubmit}
+                type="submit"
                 disabled={requestSubmitting}
                 data-testid="button-request-submit"
               >
@@ -1188,7 +1220,7 @@ export default function TrendsInsights() {
                 Submit Request
               </Button>
             </div>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
     </PortalLayout>

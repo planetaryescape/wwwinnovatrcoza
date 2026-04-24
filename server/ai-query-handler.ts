@@ -49,7 +49,7 @@ function buildSummary(query: string, results: SearchResult[], studies: ResearchS
   const queryShort = query.length > 60 ? query.slice(0, 60) + "…" : query;
 
   if (sources === "trends" || (sources === "combined" && hasTrends)) {
-    const seriesCount = [...new Set(results.map(r => r.entry.series))].length;
+    const seriesCount = Array.from(new Set(results.map(r => r.entry.series))).length;
     const reportWord = results.length === 1 ? "report" : "reports";
     const seriesWord = seriesCount === 1 ? "series" : "series";
 

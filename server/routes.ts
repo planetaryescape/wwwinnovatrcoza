@@ -17,6 +17,8 @@ import { generateInvoicePdf } from "./invoices/generator";
 import { createAndUploadPlaceholderPDF } from "./pdf-generator";
 import { hashPassword, verifyPassword, validatePasswordStrength, generateResetToken, hashResetToken, getResetTokenExpiry, generateSessionToken, getSessionExpiry, isExpired, hashSessionToken } from "./auth/password";
 import { requireAuth, requireAdmin, redactUser, redactUsers, isAdminUser as isAdminUserMiddleware, apiError, type AuthenticatedRequest } from "./middleware";
+import { getPortalFeedData } from "./portal-feed";
+import { applyTenantContextToUser, resolveTenantContext } from "./tenant-context";
 
 // Multer for handling multipart/form-data (PayFast webhooks and file uploads)
 const upload = multer();
@@ -86,40 +88,19 @@ const isAdminUser = (email?: string) => {
   );
 };
 
-// Demo accounts list - used for minimum credit display
-const DEMO_ACCOUNTS = [
-  "hannah@innovatr.co.za",
-  "richard@innovatr.co.za",
-  "alroy@innovatr.co.za",
-];
-const DEMO_MIN_BASIC_CREDITS = 3;
-const DEMO_MIN_PRO_CREDITS = 2;
+const COMPANY_MANAGER_ROLES = new Set(["OWNER", "ADMIN"]);
 
-// Helper function to apply demo minimum credits to user response
-function applyDemoUserCredits(user: any) {
-  if (!user || !DEMO_ACCOUNTS.includes(user.email)) {
-    return user;
-  }
-  
-  // For demo accounts, show minimum credits directly on user object
-  return {
-    ...user,
-    creditsBasic: Math.max(user.creditsBasic ?? 0, DEMO_MIN_BASIC_CREDITS),
-    creditsPro: Math.max(user.creditsPro ?? 0, DEMO_MIN_PRO_CREDITS),
-  };
+function hashInviteToken(token: string): string {
+  return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-// Helper function to apply demo minimum credits to company
-function applyDemoCredits(company: any, userEmail?: string) {
-  if (!company || !userEmail || !DEMO_ACCOUNTS.includes(userEmail)) {
-    return company;
-  }
-  
-  return {
-    ...company,
-    basicCreditsTotal: Math.max(company.basicCreditsTotal ?? 0, DEMO_MIN_BASIC_CREDITS + (company.basicCreditsUsed ?? 0)),
-    proCreditsTotal: Math.max(company.proCreditsTotal ?? 0, DEMO_MIN_PRO_CREDITS + (company.proCreditsUsed ?? 0)),
-  };
+function canManageActiveCompany(req: AuthenticatedRequest): boolean {
+  return !!req.activeMembership && COMPANY_MANAGER_ROLES.has(req.activeMembership.role);
+}
+
+function redactInvite(invite: any) {
+  const { tokenHash, ...safeInvite } = invite;
+  return safeInvite;
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -197,36 +178,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Hash the password BEFORE creating user (never store plaintext)
       const passwordHash = await hashPassword(password);
       
-      // Handle company creation/linking
-      let companyId: string | null = null;
+      // Handle company creation. Public signup must never attach by company name.
       const companyName = company.trim();
       const userIndustry = industry.trim();
-      
-      // Check if company already exists
-      const allCompanies = await storage.getAllCompanies();
-      const existingCompany = allCompanies.find(c => 
-        c.name.toLowerCase() === companyName.toLowerCase()
-      );
-      
-      if (existingCompany) {
-        // Link to existing company, update industry if not set
-        companyId = existingCompany.id;
-        if (!existingCompany.industry && userIndustry) {
-          await storage.updateCompany(existingCompany.id, { industry: userIndustry });
-        }
-      } else {
-        // Create a new FREE tier company with industry
-        const newCompany = await storage.createCompany({
-          name: companyName,
-          tier: "FREE",
-          industry: userIndustry || null,
-          basicCreditsTotal: 0,
-          basicCreditsUsed: 0,
-          proCreditsTotal: 0,
-          proCreditsUsed: 0,
-        });
-        companyId = newCompany.id;
-      }
+      const newCompany = await storage.createCompany({
+        name: companyName,
+        tier: "FREE",
+        industry: userIndustry || null,
+        basicCreditsTotal: 0,
+        basicCreditsUsed: 0,
+        proCreditsTotal: 0,
+        proCreditsUsed: 0,
+      });
+      const companyId = newCompany.id;
       
       // Create user with FREE tier (never STARTER for new signups)
       // If no company is provided, they are an independent member
@@ -254,6 +218,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateUser(newUser.id, { 
         passwordHash,
         emailVerified: false 
+      });
+
+      await storage.createCompanyMembership({
+        userId: newUser.id,
+        companyId,
+        role: "OWNER",
+        status: "ACTIVE",
       });
       
       // Send welcome email to new user
@@ -335,10 +306,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { token, tokenHash } = generateSessionToken();
       const expiresAt = getSessionExpiry(30); // 30 days
       
+      const tenantContext = await resolveTenantContext(user.id, user.companyId);
+
       // Create session in storage
       await storage.createSession({
         userId: user.id,
-        companyId: user.companyId || undefined,
+        companyId: tenantContext.activeCompany?.id || undefined,
         tokenHash,
         ipAddress: req.ip || req.socket.remoteAddress || undefined,
         userAgent: req.get("User-Agent") || undefined,
@@ -367,12 +340,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         path: "/",
       });
       
-      // Return user without password fields, with demo credits applied
+      // Return user without password fields
       const { password: _, passwordHash: __, ...safeUser } = user;
-      
-      // Apply demo minimum credits for demo accounts
-      const userWithDemoCredits = applyDemoUserCredits(safeUser);
-      res.json(userWithDemoCredits);
+      res.json(applyTenantContextToUser(safeUser, tenantContext));
     } catch (error: any) {
       console.error("Login error:", error);
       res.status(400).json({ message: error.message });
@@ -439,10 +409,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Return user without password fields, with demo credits applied
+      const tenantContext = await resolveTenantContext(user.id, session.companyId);
+      if (tenantContext.activeCompany && tenantContext.activeCompany.id !== session.companyId) {
+        await storage.updateSession(session.id, { companyId: tenantContext.activeCompany.id });
+      }
+
+      // Return user without password fields
       const { password: _, passwordHash: __, ...safeUser } = user;
-      const userWithDemoCredits = applyDemoUserCredits(safeUser);
-      res.json(userWithDemoCredits);
+      res.json(applyTenantContextToUser(safeUser, tenantContext));
     } catch (error: any) {
       console.error("Auth check error:", error);
       res.status(400).json({ message: error.message });
@@ -472,6 +446,206 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Still clear the cookie even if there's an error
       res.clearCookie("session", { path: "/" });
       res.json({ message: "Logged out" });
+    }
+  });
+
+  app.get("/api/member/companies", requireAuth, async (req: AuthenticatedRequest, res) => {
+    res.json({
+      memberships: req.memberships ?? [],
+      activeCompany: req.activeCompany ?? null,
+    });
+  });
+
+  app.post("/api/member/active-company", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { companyId } = req.body;
+      if (!companyId || typeof companyId !== "string") {
+        return res.status(400).json({ error: "companyId is required" });
+      }
+
+      const membership = await storage.getCompanyMembership(req.user!.id, companyId);
+      if (!membership) {
+        return res.status(403).json({ error: "You are not a member of this company" });
+      }
+
+      await storage.updateSession(req.session!.id, { companyId });
+      const tenantContext = await resolveTenantContext(req.user!.id, companyId);
+      res.json({
+        memberships: tenantContext.memberships,
+        activeCompany: tenantContext.activeCompany,
+      });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/member/companies", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { name, industry } = req.body;
+      if (!name || typeof name !== "string" || !name.trim()) {
+        return res.status(400).json({ error: "Company name is required" });
+      }
+
+      const company = await storage.createCompany({
+        name: name.trim(),
+        industry: typeof industry === "string" && industry.trim() ? industry.trim() : null,
+        tier: "FREE",
+        basicCreditsTotal: 0,
+        basicCreditsUsed: 0,
+        proCreditsTotal: 0,
+        proCreditsUsed: 0,
+      });
+
+      await storage.createCompanyMembership({
+        userId: req.user!.id,
+        companyId: company.id,
+        role: "OWNER",
+        status: "ACTIVE",
+      });
+      await storage.updateSession(req.session!.id, { companyId: company.id });
+
+      const tenantContext = await resolveTenantContext(req.user!.id, company.id);
+      res.status(201).json({
+        company,
+        memberships: tenantContext.memberships,
+        activeCompany: tenantContext.activeCompany,
+      });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/admin/session-company", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { companyId } = req.body;
+      if (!companyId || typeof companyId !== "string") {
+        return res.status(400).json({ error: "companyId is required" });
+      }
+
+      const company = await storage.getCompany(companyId);
+      if (!company) {
+        return res.status(404).json({ error: "Company not found" });
+      }
+
+      await storage.updateSession(req.session!.id, { companyId });
+      res.json({ activeCompany: company });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.delete("/api/admin/session-company", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      await storage.updateSession(req.session!.id, { companyId: null });
+      res.json({ activeCompany: null });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/member/invites", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.activeCompany) {
+        return res.status(400).json({ error: "No active company selected" });
+      }
+      if (!canManageActiveCompany(req)) {
+        return res.status(403).json({ error: "Company owner or admin access required" });
+      }
+
+      const invites = await storage.getCompanyInvitesByCompanyId(req.activeCompany.id);
+      res.json(invites.map(redactInvite));
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/member/invites", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.activeCompany) {
+        return res.status(400).json({ error: "No active company selected" });
+      }
+      if (!canManageActiveCompany(req)) {
+        return res.status(403).json({ error: "Company owner or admin access required" });
+      }
+
+      const parsed = z.object({
+        email: z.string().email(),
+        role: z.enum(["ADMIN", "MEMBER"]).default("MEMBER"),
+      }).parse(req.body);
+
+      const token = crypto.randomBytes(32).toString("base64url");
+      const invite = await storage.createCompanyInvite({
+        companyId: req.activeCompany.id,
+        email: parsed.email.toLowerCase(),
+        role: parsed.role,
+        tokenHash: hashInviteToken(token),
+        invitedByUserId: req.user!.id,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      });
+
+      res.status(201).json({ ...redactInvite(invite), token });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/member/invites/accept", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { token } = req.body;
+      if (!token || typeof token !== "string") {
+        return res.status(400).json({ error: "Invite token is required" });
+      }
+
+      const invite = await storage.getCompanyInviteByTokenHash(hashInviteToken(token));
+      if (!invite || invite.revokedAt || invite.acceptedAt || new Date(invite.expiresAt) <= new Date()) {
+        return res.status(400).json({ error: "Invite is invalid or expired" });
+      }
+      if (invite.email.toLowerCase() !== req.user!.email.toLowerCase()) {
+        return res.status(403).json({ error: "Invite is for a different email address" });
+      }
+
+      const existingMembership = await storage.getCompanyMembership(req.user!.id, invite.companyId);
+      if (!existingMembership) {
+        await storage.createCompanyMembership({
+          userId: req.user!.id,
+          companyId: invite.companyId,
+          role: invite.role as "ADMIN" | "MEMBER",
+          status: "ACTIVE",
+        });
+      }
+
+      await storage.updateCompanyInvite(invite.id, { acceptedAt: new Date() });
+      await storage.updateSession(req.session!.id, { companyId: invite.companyId });
+      const tenantContext = await resolveTenantContext(req.user!.id, invite.companyId);
+      res.json({
+        invite: redactInvite({ ...invite, acceptedAt: new Date() }),
+        memberships: tenantContext.memberships,
+        activeCompany: tenantContext.activeCompany,
+      });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.delete("/api/member/invites/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.activeCompany) {
+        return res.status(400).json({ error: "No active company selected" });
+      }
+      if (!canManageActiveCompany(req)) {
+        return res.status(403).json({ error: "Company owner or admin access required" });
+      }
+
+      const invites = await storage.getCompanyInvitesByCompanyId(req.activeCompany.id);
+      const invite = invites.find((candidate) => candidate.id === req.params.id);
+      if (!invite) {
+        return res.status(404).json({ error: "Invite not found" });
+      }
+
+      await storage.updateCompanyInvite(invite.id, { revokedAt: new Date() });
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
     }
   });
 
@@ -929,14 +1103,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/user-orders", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const sessionUser = req.user!;
-      
-      // Admin users can optionally query by email
-      if (isAdminUser(sessionUser.email) && req.query.email) {
-        const orders = await storage.getOrdersByEmail(req.query.email as string);
-        return res.json(orders);
-      }
-      
-      // Regular users get their own orders
       const orders = await storage.getOrdersByEmail(sessionUser.email);
       res.json(orders);
     } catch (error: any) {
@@ -2221,20 +2387,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userCompanyId = sessionUser.companyId;
       const reports = await storage.getAllReports();
       
-      // Admin users can see any published report
-      if (isAdminUser(sessionUser.email)) {
-        const report = reports.find(r => 
-          r.slug === slug && 
-          r.status === "published" && 
-          !r.isArchived
-        );
-        if (!report) {
-          return res.status(404).json({ error: "Report not found" });
-        }
-        return res.json(report);
-      }
-      
-      // Regular members can see public reports and their company's client reports
+      // Members can see public reports and reports assigned to the active company.
       const report = reports.find(r => {
         if (r.slug !== slug || r.status !== "published" || r.isArchived) {
           return false;
@@ -2264,14 +2417,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userCompanyId = sessionUser.companyId;
       const reports = await storage.getAllReports();
       
-      // Admin users can see ALL published reports (including all client-specific reports)
-      if (isAdminUser(sessionUser.email)) {
-        const allPublishedReports = reports.filter(r => 
-          r.status === "published" && !r.isArchived
-        );
-        return res.json(allPublishedReports);
-      }
-      
       // Resolve the user's industry groups for trend-report filtering
       const { resolveIndustryGroups } = await import("./pdf-library");
       const company = userCompanyId ? await storage.getCompany(userCompanyId) : null;
@@ -2281,7 +2426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
        * Maps a report's `industry` field to the set of audience tags whose members
        * should see it. "cross-industry" means everyone can see it.
        */
-      function resolveReportAudience(reportIndustry: string | null | undefined): string[] {
+      const resolveReportAudience = (reportIndustry: string | null | undefined): string[] => {
         if (!reportIndustry) return ["cross-industry"];
         const k = reportIndustry.toLowerCase().trim();
         if (/bank|financ|fintech|insur/.test(k))           return ["finance"];
@@ -2296,7 +2441,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (/restaurant|qsr|quick service|fast food/.test(k)) return ["qsr", "food", "beverage"];
         // Services, Inside, IRL, general / unrecognised → cross-industry (everyone)
         return ["cross-industry"];
-      }
+      };
       
       // Filter reports based on access rules for regular users
       const filteredReports = reports.filter(r => {
@@ -2593,11 +2738,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const user = await storage.getUser(session.userId);
           if (user) {
             userId = user.id;
-            companyId = user.companyId || undefined;
-            if (user.companyId) {
-              const company = await storage.getCompany(user.companyId);
-              resolvedCompanyName = company?.name || companyName;
-            }
+            const tenantContext = await resolveTenantContext(user.id, session.companyId);
+            companyId = tenantContext.activeCompany?.id || user.companyId || undefined;
+            resolvedCompanyName = tenantContext.activeCompany?.name || companyName || user.company || undefined;
           }
         }
       }
@@ -2876,8 +3019,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/member/deals", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const deals = await storage.getAllDeals();
-      res.json(deals);
+      const sessionUser = req.user!;
+      const now = new Date();
+      const activeCompanyId = sessionUser.companyId;
+      const activeTier = sessionUser.membershipTier;
+      const allDeals = await storage.getAllDeals();
+      const availableDeals = allDeals.filter((deal) => {
+        if (!deal.isActive) return false;
+        if (deal.validFrom && new Date(deal.validFrom) > now) return false;
+        if (deal.validTo && new Date(deal.validTo) <= now) return false;
+        if (deal.ownerCompanyId && deal.ownerCompanyId !== activeCompanyId) return false;
+        if (deal.targetUserIds?.length && !deal.targetUserIds.includes(sessionUser.id)) return false;
+        if (deal.targetTierKeys?.length && !deal.targetTierKeys.includes(activeTier)) return false;
+        return true;
+      });
+
+      res.json(availableDeals);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
@@ -2947,14 +3104,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/member/orders", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const sessionUser = req.user!;
-      
-      // Admin users can optionally query by email
-      if (isAdminUser(sessionUser.email) && req.query.email) {
-        const orders = await storage.getOrdersByEmail(req.query.email as string);
-        return res.json(orders);
-      }
-      
-      // Regular users get their own orders
       const orders = await storage.getOrdersByEmail(sessionUser.email);
       res.json(orders);
     } catch (error: any) {
@@ -2978,9 +3127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Company not found" });
       }
       
-      // Apply demo minimum credits for Hannah and Richard
-      const adjustedCompany = applyDemoCredits(company, sessionUser.email);
-      res.json(adjustedCompany);
+      res.json(company);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
@@ -3622,59 +3769,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/member/client-reports", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const sessionUser = req.user!;
-      const queryCompanyId = req.query.companyId as string | undefined;
-      const rawScope = (req.query.scope as string | undefined)?.toLowerCase();
-      const scope: "mine" | "company" = rawScope === "company" ? "company" : "mine";
 
-      // Admin users (@innovatr.co.za) can see reports for a specific company or all
-      if (isAdminUser(sessionUser.email)) {
-        if (queryCompanyId) {
-          // Admin viewing a specific company's reports
-          const company = await storage.getCompany(queryCompanyId);
-          const reports = await storage.getClientReportsByCompanyId(queryCompanyId);
-          const enrichedReports = reports.map((report) => ({
-            ...report,
-            companyName: company?.name || "Unknown Company",
-          }));
-          return res.json(enrichedReports);
-        }
-
-        // Admin viewing all reports
-        const allReports = await storage.getAllClientReports();
-        const enrichedReports = await Promise.all(
-          allReports.map(async (report) => {
-            const company = await storage.getCompany(report.companyId);
-            return {
-              ...report,
-              companyName: company?.name || "Unknown Company",
-            };
-          })
-        );
-        return res.json(enrichedReports);
-      }
-
-      // Non-admins: scope server-side.
-      // 'mine' (default) = only reports linked to studies the user submitted.
-      if (scope === "mine") {
-        const ownStudies = await storage.getStudiesByEmail(sessionUser.email);
-        const linkedReportIds = new Set(
-          ownStudies.map(s => s.clientReportId).filter((v): v is string => !!v)
-        );
-        if (linkedReportIds.size === 0) {
-          return res.json([]);
-        }
-        const company = sessionUser.companyId ? await storage.getCompany(sessionUser.companyId) : null;
-        const allMineCompanyReports = sessionUser.companyId
-          ? await storage.getClientReportsByCompanyId(sessionUser.companyId)
-          : [];
-        const filtered = allMineCompanyReports.filter(r => linkedReportIds.has(r.id));
-        return res.json(filtered.map(r => ({
-          ...r,
-          companyName: company?.name || "Unknown Company",
-        })));
-      }
-
-      // 'company' = all reports for the user's company
       if (!sessionUser.companyId) {
         return res.json([]);
       }
@@ -3685,6 +3780,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         companyName: company?.name || "Unknown Company",
       }));
       res.json(enrichedReports);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/member/portal-feed", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const sessionUser = req.user!;
+      const portalFeed = await getPortalFeedData(storage, {
+        email: sessionUser.email,
+        companyId: sessionUser.companyId ?? null,
+        isAdmin: false,
+      });
+
+      res.json(portalFeed);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
@@ -3704,17 +3814,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/member/company", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const sessionUser = req.user!;
-      
-      // Admin users can optionally query by companyId
-      if (isAdminUser(sessionUser.email) && req.query.companyId) {
-        const company = await storage.getCompany(req.query.companyId as string);
-        if (!company) {
-          return res.status(404).json({ error: "Company not found" });
-        }
-        return res.json(applyDemoCredits(company, sessionUser.email));
-      }
-      
-      // For regular users, get their own company
+
       if (!sessionUser.companyId) {
         return res.status(404).json({ error: "User not associated with a company" });
       }
@@ -3724,9 +3824,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Company not found" });
       }
       
-      // Apply demo credits for Hannah and Richard
-      const adjustedCompany = applyDemoCredits(company, sessionUser.email);
-      res.json(adjustedCompany);
+      res.json(company);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
@@ -3736,30 +3834,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/member/briefs", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const sessionUser = req.user!;
-      
-      // Admin users can see all briefs
-      if (isAdminUser(sessionUser.email)) {
-        const allBriefs = await storage.getAllBriefSubmissions();
-        return res.json(allBriefs);
+
+      if (!sessionUser.companyId) {
+        return res.json([]);
       }
-      
-      // For regular users, get briefs by their email and optionally their company
-      let briefs = await storage.getBriefSubmissionsByEmail(sessionUser.email);
-      
-      // If user has a company, also include company briefs
-      if (sessionUser.companyId) {
-        const companyBriefs = await storage.getBriefSubmissionsByCompanyId(sessionUser.companyId);
-        // Merge and deduplicate by ID
-        const briefIds = new Set(briefs.map(b => b.id));
-        for (const brief of companyBriefs) {
-          if (!briefIds.has(brief.id)) {
-            briefs.push(brief);
-          }
-        }
-        // Sort by createdAt descending
-        briefs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      }
-      
+
+      const briefs = await storage.getBriefSubmissionsByCompanyId(sessionUser.companyId);
+      briefs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       res.json(briefs);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -3770,14 +3851,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/member/credit-ledger", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const sessionUser = req.user!;
-      
-      // Admin users can optionally query by companyId
-      if (isAdminUser(sessionUser.email) && req.query.companyId) {
-        const ledgerEntries = await storage.getCreditLedgerByCompanyId(req.query.companyId as string);
-        return res.json(ledgerEntries);
-      }
-      
-      // For regular users, get their company's credit ledger
+
       if (!sessionUser.companyId) {
         return res.json([]); // No company, no credit history
       }
@@ -4065,25 +4139,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: "Access denied - invalid file path" });
       }
 
-      // Non-admins must own the company whose files they are requesting
-      if (!isAdminUser(sessionUser.email)) {
-        if (!sessionUser.companyId) {
-          return res.status(403).json({ error: "Access denied" });
-        }
-        const company = await storage.getCompany(sessionUser.companyId);
-        if (!company) {
-          return res.status(403).json({ error: "Access denied" });
-        }
-        const sanitizedCompanyName = company.name
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-|-$/g, "")
-          .slice(0, 50) || "unknown";
-        const pathParts = filePath.split("/");
-        const fileCompanySegment = pathParts[1]; // briefs/{company-name}/{file}
-        if (fileCompanySegment !== sanitizedCompanyName) {
-          return res.status(403).json({ error: "Access denied" });
-        }
+      const briefFile = await storage.getBriefFileByStoragePath(filePath);
+      if (!briefFile) {
+        return res.status(404).json({ error: "File not found" });
+      }
+
+      if (briefFile.companyId !== sessionUser.companyId) {
+        return res.status(403).json({ error: "Access denied" });
       }
 
       const exists = await fileExists(filePath);
@@ -4179,43 +4241,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "File path required" });
       }
 
-      // Access control: check if user is allowed to view this file
-      // Admins can access all files; regular users can only access:
-      // - Public files (thumbnails, general pdfs)
-      // - Their own company's client reports
-      // - Their own company's brief files
-      if (!isAdminUser(sessionUser.email)) {
-        // Check if this is a client report - restrict to company owner
-        if (filePath.startsWith("client_reports/")) {
-          const pathParts = filePath.split("/");
-          const companyId = pathParts[1]; // client_reports/{companyId}/{file}
-          if (sessionUser.companyId !== companyId) {
-            return res.status(403).json({ error: "Access denied" });
-          }
+      // Access control: authorize DB-backed tenant files before touching storage.
+      if (filePath.startsWith("client_reports/")) {
+        const report = await storage.getClientReportByPdfUrl(`/api/files/${filePath}`);
+        if (!report) {
+          return res.status(404).json({ error: "File not found" });
         }
+        if (report.companyId !== sessionUser.companyId) {
+          return res.status(403).json({ error: "Access denied" });
+        }
+      }
 
-        // Check if this is a brief file - restrict to owning company
-        if (filePath.startsWith("briefs/")) {
-          // Brief files are stored as: briefs/{sanitized-company-name}/{filename}
-          // We verify ownership by looking up the user's company and comparing the sanitized name
-          if (!sessionUser.companyId) {
-            return res.status(403).json({ error: "Access denied" });
-          }
-          const company = await storage.getCompany(sessionUser.companyId);
-          if (!company) {
-            return res.status(403).json({ error: "Access denied" });
-          }
-          const sanitizedCompanyName = company.name
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/^-|-$/g, "")
-            .slice(0, 50) || "unknown";
-          const pathParts = filePath.split("/");
-          const fileCompanySegment = pathParts[1]; // briefs/{company-name}/{file}
-          if (fileCompanySegment !== sanitizedCompanyName) {
-            return res.status(403).json({ error: "Access denied" });
-          }
+      if (filePath.startsWith("briefs/")) {
+        const briefFile = await storage.getBriefFileByStoragePath(filePath);
+        if (!briefFile) {
+          return res.status(404).json({ error: "File not found" });
         }
+        if (briefFile.companyId !== sessionUser.companyId) {
+          return res.status(403).json({ error: "Access denied" });
+        }
+      }
+
+      if (filePath.startsWith("reports/")) {
+        const report = await storage.getReportByPdfUrl(`/api/files/${filePath}`);
+        if (!report || report.status !== "published" || report.isArchived) {
+          return res.status(404).json({ error: "File not found" });
+        }
+        if (report.clientCompanyIds?.length && !report.clientCompanyIds.includes(sessionUser.companyId ?? "")) {
+          return res.status(403).json({ error: "Access denied" });
+        }
+      }
+
+      const allowedFilePrefixes = ["client_reports/", "briefs/", "reports/", "company_logos/"];
+      if (!allowedFilePrefixes.some((prefix) => filePath.startsWith(prefix))) {
+        return res.status(403).json({ error: "Access denied" });
       }
 
       const exists = await fileExists(filePath);
@@ -4501,7 +4560,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Determine credit deduction payload for the transaction
-      const creditType = isBasicStudy ? 'basic' : 'pro';
+      const creditType: "basic" | "pro" = isBasicStudy ? "basic" : "pro";
       const isCreditsPayment = validated.paymentMethod === "credits";
       const isInvoicePayment = validated.paymentMethod === "invoice";
 
@@ -4937,32 +4996,14 @@ Income: ${(incomes || []).join(", ") || "All"} · Region: ${(regions || []).join
   app.get("/api/member/studies", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const sessionUser = req.user!;
-      const rawScope = (req.query.scope as string | undefined)?.toLowerCase();
-      const scope: "mine" | "company" = rawScope === "company" ? "company" : "mine";
 
-      // Admin users can see all studies or filter by companyId
-      if (isAdminUser(sessionUser.email)) {
-        if (req.query.companyId) {
-          const studies = await storage.getStudiesByCompanyId(req.query.companyId as string);
-          return res.json(studies);
-        }
-        const allStudies = await storage.getAllStudies();
-        return res.json(allStudies);
+      if (!sessionUser.companyId) {
+        return res.json([]);
       }
 
-      // Non-admins: enforce scope server-side. Default 'mine' = own submissions.
-      if (scope === "company") {
-        if (!sessionUser.companyId) {
-          return res.json([]);
-        }
-        const companyStudies = await storage.getStudiesByCompanyId(sessionUser.companyId);
-        companyStudies.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        return res.json(companyStudies);
-      }
-
-      const ownStudies = await storage.getStudiesByEmail(sessionUser.email);
-      ownStudies.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      res.json(ownStudies);
+      const studies = await storage.getStudiesByCompanyId(sessionUser.companyId);
+      studies.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      res.json(studies);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
@@ -4991,8 +5032,7 @@ Income: ${(incomes || []).join(", ") || "All"} · Region: ${(regions || []).join
       let basicCreditsRemaining = 0;
       let proCreditsRemaining = 0;
       if (sessionUser.companyId) {
-        const rawCompany = await storage.getCompany(sessionUser.companyId);
-        const company = rawCompany ? applyDemoCredits(rawCompany, sessionUser.email) : null;
+        const company = await storage.getCompany(sessionUser.companyId);
         if (company) {
           basicCreditsRemaining = (company.basicCreditsTotal || 0) - (company.basicCreditsUsed || 0);
           proCreditsRemaining = (company.proCreditsTotal || 0) - (company.proCreditsUsed || 0);
@@ -5673,14 +5713,14 @@ Income: ${(incomes || []).join(", ") || "All"} · Region: ${(regions || []).join
       const studies: any[] = [];
       if ((sources === "research" || sources === "combined") && req.user?.companyId) {
         try {
-          const rawStudies = await storage.getMemberStudies(req.user.companyId);
+          const rawStudies = await storage.getStudiesByCompanyId(req.user.companyId);
           for (const s of rawStudies.slice(0, 8)) {
             studies.push({
               title: s.title,
               status: s.status,
               type: s.studyType ?? undefined,
               description: s.description ?? undefined,
-              scores: s.scores as Record<string, number> ?? undefined,
+              scores: (s as any).scores as Record<string, number> | undefined,
             });
           }
         } catch { /* studies remain empty */ }

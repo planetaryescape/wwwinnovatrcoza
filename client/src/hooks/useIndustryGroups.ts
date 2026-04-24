@@ -21,11 +21,11 @@ export function useIndustryGroups(): {
 } {
   const { user } = useAuth();
 
-  const { data: company, isLoading } = useQuery<CompanyData>({
+  const { data: company, isLoading } = useQuery<CompanyData | null>({
     queryKey: ["/api/member/company", user?.companyId],
     queryFn: async () => {
       if (!user?.companyId) return null;
-      const r = await fetch(`/api/member/company?companyId=${user.companyId}`);
+      const r = await fetch("/api/member/company");
       if (!r.ok) return null;
       return r.json();
     },

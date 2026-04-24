@@ -1,16 +1,17 @@
 import { useState, useMemo, useRef } from "react";
 import { useLocation } from "wouter";
 import {
-  X, MessageSquare, Send, ArrowRight, ChevronDown, Loader2, BookOpen, Lock, Zap, Sparkles,
+  MessageSquare, Send, ArrowRight, ChevronDown, Loader2, BookOpen, Lock, Zap, Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { apiRequest } from "@/lib/queryClient";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
+import { PortalTabs } from "@/components/portal/PortalTabs";
+import { PortalBreadcrumbs } from "@/components/portal/PortalBreadcrumbs";
 import type { SandboxRun } from "@shared/schema";
-import { useIndustryGroups } from "@/hooks/useIndustryGroups";
-import { filterByIndustry } from "@/lib/industry-groups";
-import { ALL_SIGNALS, ALL_MARKET_GAPS } from "@/lib/portal-content";
+import { usePortalFeed } from "@/lib/portal-feed";
 import { useIsMobile } from "@/hooks/use-mobile";
 import PortalLayout from "./PortalLayout";
 
@@ -20,13 +21,12 @@ const VIO      = "#3A2FBF";
 const VIO_LT   = "#EAE8FF";
 const CORAL    = "#E8503A";
 const N200     = "#EBEBEB";
-const N400     = "#9C9AB0";
+const N400     = "#A89078";
 const N500     = "#8A7260";
 const SUCCESS  = "#2A9E5C";
 const SUC_LT   = "#D1FAE5";
 const AMBER_DK = "#B8911A";
 const AMBER_LT = "#FEF6D6";
-const CREAM    = "#FFFFFF";
 const EXPLORE_COLOR = VIO;
 
 const CARD: React.CSSProperties = {
@@ -54,8 +54,8 @@ const RECENT_RUNS = [
 const AI_MESSAGES = [
   {
     type: "system" as const,
-    text: "Based on your category focus, I've surfaced 12 signals this week. The nootropic trend in 25–34 urban males is the strongest first-mover opportunity in your portfolio — no local brand has claimed this space.",
-    rec: "→ Run a Sandbox model first, then commission a Test24 Brief if intent exceeds 65%.",
+    text: "I'm plugged into the current Explore library and can help surface the most commercially useful signals for your category.",
+    rec: "→ Open a signal or run a Sandbox test to validate the next move.",
   },
 ];
 
@@ -66,7 +66,13 @@ const AI_PROMPTS = [
   "Summarise this week's signals",
 ];
 
-type Tab = "signals" | "sandbox" | "intelligence";
+const EXPLORE_TAB_VALUES = ["signals", "sandbox", "intelligence"] as const;
+type Tab = typeof EXPLORE_TAB_VALUES[number];
+const EXPLORE_TABS: { value: Tab; label: string; testId: string }[] = [
+  { value: "signals", label: "Market Signals", testId: "tab-explore-signals" },
+  { value: "sandbox", label: "Sandbox", testId: "tab-explore-sandbox" },
+  { value: "intelligence", label: "Intelligence Library", testId: "tab-explore-intelligence" },
+];
 
 function scoreFromSeed(seed: number, min: number, max: number): number {
   const x = Math.sin(seed) * 10000;
@@ -97,14 +103,27 @@ export default function ExplorePage() {
   const isMobile = useIsMobile();
   const { user }        = useAuth();
   const queryClient     = useQueryClient();
-  const [activeTab, setActiveTab]           = useState<Tab>("signals");
+  const [activeTab, setActiveTab]           = useQueryState(
+    "tab",
+    parseAsStringLiteral(EXPLORE_TAB_VALUES).withDefault("signals"),
+  );
+  const [signalFilter, setSignalFilter]     = useState<"all" | "featured" | "insights" | "launch">("all");
   const [chatInput, setChatInput]           = useState("");
   const [showChat, setShowChat]             = useState(false);
 
-  /* Industry personalisation */
-  const { industryGroups } = useIndustryGroups();
-  const signals    = useMemo(() => filterByIndustry(ALL_SIGNALS,      industryGroups), [industryGroups]);
-  const marketGaps = useMemo(() => filterByIndustry(ALL_MARKET_GAPS,  industryGroups), [industryGroups]);
+  const { data: portalFeed, isLoading: loadingPortalFeed } = usePortalFeed(!!user);
+  const signals = portalFeed?.signals ?? [];
+  const marketGaps = portalFeed?.gaps ?? [];
+  const filteredSignals = useMemo(() => {
+    return signals.filter((signal) => {
+      if (signalFilter === "all") return true;
+      if (signalFilter === "featured") {
+        const chip = signal.chip.label.toLowerCase();
+        return chip === "featured" || chip === "new";
+      }
+      return signal.tag.toLowerCase() === signalFilter;
+    });
+  }, [signalFilter, signals]);
 
   /* Sandbox state */
   const [sandboxIdea, setSandboxIdea]       = useState("");
@@ -113,11 +132,24 @@ export default function ExplorePage() {
   const [sandboxResult, setSandboxResult]   = useState<{ interest: number; commitment: number; ideaScore: number } | null>(null);
   const runCountRef = useRef(0);
 
-  const { data: reports } = useQuery<any[]>({ queryKey: ["/api/member/reports"], enabled: !!user });
+  const { data: reports } = useQuery<any[]>({
+    queryKey: ["/api/member/reports", user?.companyId],
+    queryFn: async () => {
+      const response = await fetch("/api/member/reports");
+      if (!response.ok) throw new Error("Failed to fetch reports");
+      return response.json();
+    },
+    enabled: !!user,
+  });
 
   /* Sandbox run history */
   const { data: sandboxHistory = [] } = useQuery<SandboxRun[]>({
-    queryKey: ["/api/member/sandbox-runs"],
+    queryKey: ["/api/member/sandbox-runs", user?.companyId],
+    queryFn: async () => {
+      const response = await fetch("/api/member/sandbox-runs");
+      if (!response.ok) throw new Error("Failed to fetch sandbox runs");
+      return response.json();
+    },
     enabled: !!user,
   });
 
@@ -169,90 +201,68 @@ export default function ExplorePage() {
   };
 
   return (
-    <PortalLayout showPhaseTopbar={false}>
-      <div className="flex flex-col w-full h-full" style={{ background: CREAM }}>
-
-        {/* Phase topbar */}
-        <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-          <div className="flex items-center gap-3">
-            <span
-              className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1"
-              style={{ background: "rgba(58,47,191,0.3)", color: VIO_LT, border: `1px solid rgba(58,47,191,0.5)`, borderRadius: 6 }}
-            >
-              PHASE 01
-            </span>
-            <h1 className="font-serif text-xl text-white">Explore</h1>
-            <span className="text-sm hidden sm:block" style={{ color: N400 }}>Discover trends, signals &amp; market intelligence</span>
+    <PortalLayout>
+      <div className="portal-workspace">
+        <div className="portal-page-header flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div className="min-w-0 flex-1">
+            <PortalBreadcrumbs items={[{ label: "Dashboard", href: "/portal/dashboard" }, { label: "Explore" }]} />
+            <h1 className="font-serif text-3xl leading-tight" style={{ color: VDK }}>What is happening in my market?</h1>
+            <p className="mt-2 max-w-none text-sm leading-relaxed" style={{ color: N500 }}>
+              Use Explore for category context, market signals, and lightweight sandbox checks before choosing what to test.
+            </p>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setLocation("/portal/test")}
-              data-testid="button-launch-brief"
-              className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg"
-              style={{ background: CORAL, borderRadius: 8 }}
-            >
-              Launch a Brief
-            </button>
-            <button
-              onClick={() => setLocation("/portal/dashboard")}
-              className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
-              style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}
-              data-testid="button-close-explore"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          <button
+            onClick={() => setLocation("/portal/launch")}
+            data-testid="button-launch-brief"
+            className="text-xs font-semibold px-4 py-2 text-white rounded-lg md:self-start"
+            style={{ background: CORAL, borderRadius: 8 }}
+          >
+            Launch a Brief
+          </button>
         </div>
 
-        {/* Sub-tabs — sticky white bar */}
-        <div className="flex flex-shrink-0 px-5 sticky-tab-bar border-b" style={{ borderColor: N200 }}>
-          {(["signals", "sandbox", "intelligence"] as Tab[]).map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              data-testid={`tab-explore-${tab}`}
-              className="flex-shrink-0 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap"
-              style={{
-                color: activeTab === tab ? VDK : N500,
-                borderBottomColor: activeTab === tab ? CORAL : "transparent",
-                background: "transparent",
-              }}
-            >
-              {tab === "signals" ? "Market Signals" : tab === "sandbox" ? "Sandbox" : "Intelligence Library"}
-            </button>
-          ))}
-        </div>
-
+        <PortalTabs value={activeTab} onValueChange={(tab) => void setActiveTab(tab)} tabs={EXPLORE_TABS} accentColor={CORAL}>
         {/* Body */}
-        <div className="flex flex-1 overflow-hidden">
+        <div className="portal-body">
           {/* Main content */}
-          <div className="flex-1 overflow-y-auto p-6 pb-20 sm:pb-6" style={{ background: CREAM }}>
+          <div className="portal-main-scroll">
 
             {/* ── SIGNALS ── */}
             {activeTab === "signals" && (
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: CORAL }}>
-                    {signals.length} Active Signals
+                    {loadingPortalFeed ? "Loading signals" : `${filteredSignals.length} Active Signals`}
                   </span>
                   <div className="flex gap-2">
-                    {["All", "Trends", "Opportunities", "Reports"].map((f, i) => (
+                    {[
+                      { key: "all", label: "All" },
+                      { key: "featured", label: "Featured" },
+                      { key: "insights", label: "Insights" },
+                      { key: "launch", label: "Launch" },
+                    ].map((filter) => (
                       <button
-                        key={f}
+                        key={filter.key}
+                        onClick={() => setSignalFilter(filter.key as "all" | "featured" | "insights" | "launch")}
                         className="px-3 py-1 text-xs font-medium rounded-lg"
-                        style={i === 0
+                        style={signalFilter === filter.key
                           ? { background: VDK, color: "#fff", border: `1px solid ${VDK}` }
                           : { background: "#fff", border: `1px solid ${N200}`, color: N500 }
                         }
                       >
-                        {f}
+                        {filter.label}
                       </button>
                     ))}
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {signals.map(signal => (
-                    <div key={signal.id} className="portal-card p-4 cursor-pointer" data-testid={`signal-card-${signal.id}`}>
+                  {filteredSignals.map(signal => (
+                    <div
+                      key={signal.id}
+                      className="portal-card p-4 cursor-pointer"
+                      data-testid={`signal-card-${signal.id}`}
+                      onClick={() => signal.slug ? setLocation(`/portal/explore/insights/${signal.slug}`) : void setActiveTab("intelligence")}
+                    >
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5" style={{ background: signal.tagBg, color: signal.tagColor, borderRadius: 9999 }}>
                           {signal.tag}
@@ -265,6 +275,13 @@ export default function ExplorePage() {
                       <div className="text-xs" style={{ color: N500 }}>{signal.meta}</div>
                     </div>
                   ))}
+                  {!loadingPortalFeed && filteredSignals.length === 0 && (
+                    <div style={CARD} className="p-8 text-center md:col-span-2">
+                      <BookOpen className="w-8 h-8 mx-auto mb-3" style={{ color: N400 }} />
+                      <p className="text-sm font-semibold mb-1" style={{ color: VDK }}>No matching signals</p>
+                      <p className="text-xs" style={{ color: N500 }}>Try a different filter or publish more industry reports.</p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -310,48 +327,54 @@ export default function ExplorePage() {
                     <div>
                       <div className="mb-3">
                         <div className="text-base font-semibold" style={{ color: VDK }}>Market Gaps to Watch</div>
-                        <div className="text-xs" style={{ color: N500 }}>AI-identified white spaces — ranked by opportunity score</div>
+                        <div className="text-xs" style={{ color: N500 }}>Latest persisted gaps from your study portfolio</div>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {marketGaps.map(gap => (
-                          <div key={gap.id} style={CARD} className="p-4">
-                            <div className="flex items-start justify-between mb-3">
-                              <div className="flex items-start gap-2.5">
+                      {marketGaps.length === 0 ? (
+                        <div style={CARD} className="p-6 text-sm" data-testid="explore-gap-empty-state">
+                          <div className="font-semibold mb-1" style={{ color: VDK }}>No persisted gaps yet</div>
+                          <div style={{ color: N500 }}>
+                            Once a project has an Upsiide ingest, its real portfolio gaps will show here.
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {marketGaps.map(gap => (
+                            <div key={gap.id} style={CARD} className="p-4">
+                              <div className="flex items-start gap-2.5 mb-3">
                                 <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#FFF1ED", border: "1px solid rgba(232,80,58,0.15)" }}>
-                                  {gap.useZap
+                                  {gap.priority <= 2
                                     ? <Zap className="w-4 h-4" style={{ color: CORAL }} />
                                     : <Sparkles className="w-4 h-4" style={{ color: CORAL }} />
                                   }
                                 </div>
-                                <div>
+                                <div className="min-w-0">
                                   <div className="text-sm font-semibold leading-snug" style={{ color: VDK }}>{gap.title}</div>
-                                  <div className="text-xs" style={{ color: N500 }}>{gap.meta}</div>
+                                  <div className="text-xs mt-1" style={{ color: N500 }}>{gap.desc}</div>
                                 </div>
                               </div>
-                              <div className="text-right flex-shrink-0 ml-2">
-                                <div className="text-2xl font-bold font-mono" style={{ color: VIO }}>{gap.score}</div>
-                                <div className="text-[10px]" style={{ color: N500 }}>Gap Score</div>
+                              <div className="flex flex-wrap gap-1.5 mb-3">
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: gap.priorityStyle.bg, color: gap.priorityStyle.color }}>
+                                  Priority {gap.priority}
+                                </span>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: gap.chip.bg, color: gap.chip.color }}>
+                                  {gap.chip.label}
+                                </span>
                               </div>
+                              <button
+                                onClick={() => {
+                                  setSandboxIdea(`${gap.title}. ${gap.desc}`);
+                                  setSandboxResult(null);
+                                }}
+                                className="w-full text-xs font-semibold py-2.5 rounded-lg text-white flex items-center justify-center gap-1.5"
+                                style={{ background: CORAL }}
+                                data-testid={`button-gap-sandbox-${gap.id}`}
+                              >
+                                Use In Sandbox <ArrowRight className="w-3.5 h-3.5" />
+                              </button>
                             </div>
-                            <p className="text-xs leading-relaxed mb-3" style={{ color: N500 }}>{gap.desc}</p>
-                            <div className="flex flex-wrap gap-1.5 mb-3">
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: gap.priorityBg, color: gap.priorityColor }}>{gap.priority}</span>
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: gap.priorityBg, color: gap.priorityColor }}>{gap.potential}</span>
-                            </div>
-                            <div className="h-1.5 rounded-full mb-3 overflow-hidden" style={{ background: "#F0EBE0" }}>
-                              <div className="h-full rounded-full" style={{ width: `${gap.barPct}%`, background: gap.priorityColor }} />
-                            </div>
-                            <button
-                              onClick={() => { setSandboxIdea(gap.concept); setSandboxResult(null); }}
-                              className="w-full text-xs font-semibold py-2.5 rounded-lg text-white flex items-center justify-center gap-1.5"
-                              style={{ background: CORAL }}
-                              data-testid={`button-gap-sandbox-${gap.id}`}
-                            >
-                              Run Sandbox Test <ArrowRight className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -463,7 +486,7 @@ export default function ExplorePage() {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: CORAL }}>Intelligence Library</span>
-                  <button className="text-xs font-semibold flex items-center gap-1" style={{ color: VIO }} onClick={() => setLocation("/portal/trends")}>
+                  <button className="text-xs font-semibold flex items-center gap-1" style={{ color: VIO }} onClick={() => setLocation("/portal/explore/trends")}>
                     Browse all <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
@@ -487,7 +510,7 @@ export default function ExplorePage() {
                           key={r.id || i}
                           style={CARD}
                           className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer flex"
-                          onClick={() => r.slug ? setLocation(`/portal/insights/${r.slug}`) : setLocation("/portal/trends")}
+                          onClick={() => r.slug ? setLocation(`/portal/explore/insights/${r.slug}`) : setLocation("/portal/explore/trends")}
                           data-testid={`report-card-${i}`}
                         >
                           {/* Cover image */}
@@ -536,7 +559,7 @@ export default function ExplorePage() {
 
           {/* Right: AI Panel — hidden on mobile */}
           {!isMobile && (
-            <div className="w-80 min-w-[320px] flex flex-col overflow-hidden" style={{ background: "#fff", borderLeft: `1px solid ${N200}` }}>
+            <div className="portal-ai-rail">
               {/* AI Query Panel */}
               <div className="flex-1 overflow-hidden flex flex-col" style={{ minHeight: 0 }}>
                 <AIQueryPanel
@@ -586,6 +609,7 @@ export default function ExplorePage() {
             </div>
           )}
         </div>
+        </PortalTabs>
       </div>
     </PortalLayout>
   );

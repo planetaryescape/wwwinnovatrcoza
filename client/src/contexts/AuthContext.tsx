@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { queryClient } from "@/lib/queryClient";
 import { 
   normalizeUserTier, 
   getTierLevel, 
@@ -46,6 +47,15 @@ export interface Company {
   proCreditsUsed: number;
 }
 
+export interface CompanyMembership {
+  id: string;
+  userId: string;
+  companyId: string;
+  role: "OWNER" | "ADMIN" | "MEMBER";
+  status: "ACTIVE" | "REMOVED";
+  company: Company;
+}
+
 export function getBasicCreditsRemaining(company: Company): number {
   return (company.basicCreditsTotal ?? 0) - (company.basicCreditsUsed ?? 0);
 }
@@ -57,9 +67,13 @@ export function getProCreditsRemaining(company: Company): number {
 interface AuthContextType {
   user: User | null;
   company: Company | null;
+  activeCompany: Company | null;
+  memberships: CompanyMembership[];
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string, company: string, industry: string, extras?: { surname?: string; referralSource?: string; wantsContact?: boolean; subscribeNewsletter?: boolean }) => Promise<void>;
   logout: () => Promise<void>;
+  switchCompany: (companyId: string) => Promise<void>;
+  createCompany: (data: { name: string; industry?: string }) => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
   isMember: boolean;
@@ -73,7 +87,7 @@ interface AuthContextType {
   impersonation: ImpersonationState;
   impersonateUser: (userId: string) => Promise<void>;
   impersonateCompany: (companyId: string) => Promise<void>;
-  exitImpersonation: () => void;
+  exitImpersonation: () => Promise<void>;
   isViewingAsCompany: boolean;
   viewingCompanyName?: string;
 }
@@ -88,8 +102,41 @@ const defaultImpersonation: ImpersonationState = {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
+  const [memberships, setMemberships] = useState<CompanyMembership[]>([]);
   const [impersonation, setImpersonation] = useState<ImpersonationState>(defaultImpersonation);
   const [isLoading, setIsLoading] = useState(true);
+
+  const applyAuthPayload = (dbUser: any, fallbackEmail?: string): User => {
+    const isAdmin = dbUser.role === "ADMIN" ||
+      dbUser.email === "hannah@innovatr.co.za" ||
+      dbUser.email === "richard@innovatr.co.za" ||
+      dbUser.email === "alroy@innovatr.co.za";
+
+    const tierMap: Record<string, UserTier> = {
+      STARTER: "starter",
+      GROWTH: "growth",
+      SCALE: "scale",
+      FREE: "free",
+    };
+
+    const sessionUser: User = {
+      id: dbUser.id,
+      email: dbUser.email,
+      name: dbUser.name || (fallbackEmail || dbUser.email).split("@")[0],
+      company: dbUser.activeCompany?.name ?? dbUser.company,
+      companyId: dbUser.activeCompany?.id ?? dbUser.companyId,
+      tier: isAdmin ? "scale" : (tierMap[dbUser.membershipTier] || "free"),
+      membershipTier: isAdmin ? "SCALE" : dbUser.membershipTier,
+      isAdmin,
+      isPaidSeat: dbUser.isPaidSeat ?? false,
+    };
+
+    setUser(sessionUser);
+    setCompany(dbUser.activeCompany ?? null);
+    setMemberships(dbUser.memberships ?? []);
+    localStorage.setItem("innovatr_user", JSON.stringify(sessionUser));
+    return sessionUser;
+  };
 
   // Check for existing session on mount using HTTP-only cookie
   useEffect(() => {
@@ -114,37 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (res.ok) {
           const dbUser = await res.json();
-          
-          // Check if user has admin role or admin email
-          const isAdmin = dbUser.role === "ADMIN" || 
-            dbUser.email === "hannah@innovatr.co.za" || 
-            dbUser.email === "richard@innovatr.co.za" ||
-            dbUser.email === "alroy@innovatr.co.za";
-          
-          const tierMap: Record<string, UserTier> = {
-            STARTER: "starter",
-            GROWTH: "growth",
-            SCALE: "scale",
-            FREE: "free",
-          };
-          
-          // Determine tier: admins get scale, others get their tier or free for missing/unknown
-          const effectiveTier = isAdmin 
-            ? "scale" 
-            : (tierMap[dbUser.membershipTier] || "free");
-          
-          const sessionUser: User = {
-            id: dbUser.id,
-            email: dbUser.email,
-            name: dbUser.name || dbUser.email.split("@")[0],
-            company: dbUser.company,
-            companyId: dbUser.companyId,
-            tier: effectiveTier,
-            membershipTier: isAdmin ? "SCALE" : dbUser.membershipTier,
-            isAdmin,
-            isPaidSeat: dbUser.isPaidSeat ?? false,
-          };
-          
+
           // If impersonation is active, don't overwrite the impersonated user
           // Just verify the session is valid (admin is still logged in)
           if (restoredImpersonation?.isImpersonating && restoredImpersonation.originalAdmin) {
@@ -152,14 +169,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // The impersonated user was already set above from savedUser
           } else {
             // No active impersonation - use the real session user
-            setUser(sessionUser);
-            localStorage.setItem("innovatr_user", JSON.stringify(sessionUser));
+            applyAuthPayload(dbUser);
           }
         } else {
           // No valid session - clear everything including impersonation
           localStorage.removeItem("innovatr_user");
           localStorage.removeItem("innovatr_impersonation");
           setUser(null);
+          setCompany(null);
+          setMemberships([]);
           setImpersonation(defaultImpersonation);
         }
       } catch (err) {
@@ -167,6 +185,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem("innovatr_user");
         localStorage.removeItem("innovatr_impersonation");
         setUser(null);
+        setCompany(null);
+        setMemberships([]);
         setImpersonation(defaultImpersonation);
       } finally {
         setIsLoading(false);
@@ -181,9 +201,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const fetchCompany = async () => {
       if (user?.companyId) {
         try {
-          // Pass user email for demo account credit display
-          const emailParam = user.email ? `?email=${encodeURIComponent(user.email)}` : '';
-          const res = await fetch(`/api/companies/${user.companyId}${emailParam}`, {
+          const res = await fetch(`/api/member/company`, {
             credentials: "include", // Include session cookie
           });
           if (res.ok) {
@@ -198,7 +216,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
     fetchCompany();
-  }, [user?.companyId, user?.email]);
+  }, [user?.companyId]);
 
   const login = async (email: string, password: string) => {
     // Use real API authentication with bcrypt password validation
@@ -216,35 +234,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     const dbUser = await res.json();
-    
-    // Check if user has admin role or admin email
-    const isAdmin = dbUser.role === "ADMIN" || 
-      email === "hannah@innovatr.co.za" || 
-      email === "richard@innovatr.co.za" ||
-      email === "alroy@innovatr.co.za";
-    
-    const tierMap: Record<string, UserTier> = {
-      STARTER: "starter",
-      GROWTH: "growth",
-      SCALE: "scale",
-      FREE: "free",
-    };
-    
-    const loggedInUser: User = {
-      id: dbUser.id,
-      email: dbUser.email,
-      name: dbUser.name || email.split("@")[0],
-      company: dbUser.company,
-      companyId: dbUser.companyId,
-      // Admins always get Scale tier access
-      tier: isAdmin ? "scale" : (tierMap[dbUser.membershipTier] || "free"),
-      membershipTier: isAdmin ? "SCALE" : dbUser.membershipTier,
-      isAdmin,
-      isPaidSeat: dbUser.isPaidSeat ?? false,
-    };
-    
-    setUser(loggedInUser);
-    localStorage.setItem("innovatr_user", JSON.stringify(loggedInUser));
+    queryClient.clear();
+    applyAuthPayload(dbUser, email);
   };
 
   const signup = async (email: string, password: string, name: string, company: string, industry: string, extras?: { surname?: string; referralSource?: string; wantsContact?: boolean; subscribeNewsletter?: boolean }) => {
@@ -285,9 +276,72 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     setUser(null);
     setCompany(null);
+    setMemberships([]);
     setImpersonation(defaultImpersonation);
+    queryClient.clear();
     localStorage.removeItem("innovatr_user");
     localStorage.removeItem("innovatr_impersonation");
+  };
+
+  const switchCompany = async (companyId: string) => {
+    queryClient.clear();
+    const res = await fetch("/api/member/active-company", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ companyId }),
+    });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.error || error.message || "Failed to switch company");
+    }
+
+    const payload = await res.json();
+    const activeCompany = payload.activeCompany ?? null;
+    setCompany(activeCompany);
+    setMemberships(payload.memberships ?? []);
+    setUser((current) => {
+      if (!current) return current;
+      const updated = {
+        ...current,
+        company: activeCompany?.name ?? null,
+        companyId: activeCompany?.id ?? null,
+        membershipTier: activeCompany?.tier ?? current.membershipTier,
+      };
+      localStorage.setItem("innovatr_user", JSON.stringify(updated));
+      return updated;
+    });
+    queryClient.clear();
+  };
+
+  const createCompany = async (data: { name: string; industry?: string }) => {
+    const res = await fetch("/api/member/companies", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.error || error.message || "Failed to create company");
+    }
+
+    const payload = await res.json();
+    const activeCompany = payload.activeCompany ?? payload.company ?? null;
+    setCompany(activeCompany);
+    setMemberships(payload.memberships ?? []);
+    setUser((current) => {
+      if (!current) return current;
+      const updated = {
+        ...current,
+        company: activeCompany?.name ?? null,
+        companyId: activeCompany?.id ?? null,
+        membershipTier: activeCompany?.tier ?? current.membershipTier,
+      };
+      localStorage.setItem("innovatr_user", JSON.stringify(updated));
+      return updated;
+    });
+    queryClient.clear();
   };
 
   const impersonateUser = async (userId: string) => {
@@ -329,6 +383,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setImpersonation(newImpersonation);
       localStorage.setItem("innovatr_user", JSON.stringify(impersonatedUser));
       localStorage.setItem("innovatr_impersonation", JSON.stringify(newImpersonation));
+      queryClient.clear();
     } catch (error) {
       console.error("Failed to impersonate user:", error);
     }
@@ -338,12 +393,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user?.isAdmin) return;
     
     try {
-      const companyRes = await fetch(`/api/admin/companies/${companyId}`, {
+      const companyRes = await fetch("/api/admin/session-company", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
+        body: JSON.stringify({ companyId }),
       });
       if (!companyRes.ok) throw new Error("Failed to fetch company");
       
-      const company = await companyRes.json();
+      const payload = await companyRes.json();
+      const company = payload.activeCompany;
+      if (!company) throw new Error("Failed to set company context");
+
       const tierMap: Record<string, UserTier> = {
         STARTER: "starter",
         GROWTH: "growth",
@@ -370,21 +431,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
       
       setUser(companyViewUser);
+      setCompany(company);
+      setMemberships([]);
       setImpersonation(newImpersonation);
       localStorage.setItem("innovatr_user", JSON.stringify(companyViewUser));
       localStorage.setItem("innovatr_impersonation", JSON.stringify(newImpersonation));
+      queryClient.clear();
     } catch (error) {
       console.error("Failed to impersonate company:", error);
     }
   };
 
-  const exitImpersonation = () => {
+  const exitImpersonation = async () => {
     if (!impersonation.isImpersonating || !impersonation.originalAdmin) return;
-    
-    setUser(impersonation.originalAdmin);
+
+    const originalAdmin = impersonation.originalAdmin;
+
+    try {
+      await fetch("/api/admin/session-company", {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      const res = await fetch("/api/auth/me", {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const dbUser = await res.json();
+        applyAuthPayload(dbUser);
+      } else {
+        setUser(originalAdmin);
+        localStorage.setItem("innovatr_user", JSON.stringify(originalAdmin));
+      }
+    } catch (error) {
+      setUser(originalAdmin);
+      localStorage.setItem("innovatr_user", JSON.stringify(originalAdmin));
+    }
+
     setImpersonation(defaultImpersonation);
-    localStorage.setItem("innovatr_user", JSON.stringify(impersonation.originalAdmin));
     localStorage.removeItem("innovatr_impersonation");
+    queryClient.clear();
   };
 
   const isAuthenticated = user !== null;
@@ -409,9 +495,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider value={{ 
       user,
       company,
+      activeCompany: company,
+      memberships,
       login, 
       signup, 
       logout, 
+      switchCompany,
+      createCompany,
       isAuthenticated,
       isLoading,
       isMember, 

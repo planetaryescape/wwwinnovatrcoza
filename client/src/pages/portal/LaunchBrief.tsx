@@ -38,6 +38,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { FileText, Zap, CheckCircle, Upload, ArrowRight, FileUp, X, Download, ChevronDown, Plus, Loader2, Trash2, CreditCard, FileCheck, AlertCircle, Coins, ShoppingCart } from "lucide-react";
 import PortalLayout from "./PortalLayout";
 import { useToast } from "@/hooks/use-toast";
@@ -46,6 +54,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Link, useLocation } from "wouter";
 import { useAuth, getBasicCreditsRemaining, getProCreditsRemaining } from "@/contexts/AuthContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
+import { PortalBreadcrumbs } from "@/components/portal/PortalBreadcrumbs";
 
 type BriefType = "basic" | "pro" | null;
 
@@ -86,9 +95,8 @@ function MultiSelect({ options, selected, onChange, placeholder, testId, error }
     }
   };
 
-  const getSelectedLabels = () => {
-    return selected.map(v => options.find(o => o.value === v)?.label).filter(Boolean);
-  };
+  const getSelectedLabels = () =>
+    selected.map(v => options.find(o => o.value === v)?.label).filter(Boolean);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -120,38 +128,81 @@ function MultiSelect({ options, selected, onChange, placeholder, testId, error }
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-2" align="start">
-        <div className="space-y-1 max-h-60 overflow-auto">
-          {options.map((option) => (
-            <div
-              key={option.value}
-              className="flex items-center space-x-2 p-2 hover-elevate rounded cursor-pointer"
-              onClick={() => toggleOption(option.value)}
-              data-testid={`option-${testId}-${option.value}`}
-            >
-              <Checkbox
-                checked={selected.includes(option.value)}
-                className="pointer-events-none"
-              />
-              <span className="text-sm">{option.label}</span>
+      <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]" align="start">
+        <Command>
+          <CommandInput placeholder="Search…" />
+          <CommandList className="max-h-60">
+            <CommandEmpty>No results.</CommandEmpty>
+            <CommandGroup>
+              {options.map((option) => (
+                <CommandItem
+                  key={option.value}
+                  value={option.label}
+                  onSelect={() => toggleOption(option.value)}
+                  data-testid={`option-${testId}-${option.value}`}
+                >
+                  <Checkbox
+                    checked={selected.includes(option.value)}
+                    className="pointer-events-none mr-2"
+                  />
+                  {option.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+          {selected.length > 0 && (
+            <div className="border-t p-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-xs"
+                onClick={() => onChange([])}
+                data-testid={`button-clear-${testId}`}
+              >
+                Clear all
+              </Button>
             </div>
-          ))}
-        </div>
-        {selected.length > 0 && (
-          <div className="pt-2 mt-2 border-t">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full text-xs"
-              onClick={() => onChange([])}
-              data-testid={`button-clear-${testId}`}
-            >
-              Clear all
-            </Button>
-          </div>
-        )}
+          )}
+        </Command>
       </PopoverContent>
     </Popover>
+  );
+}
+
+function LaunchProgress({ step }: { step: 1 | 2 | 3 }) {
+  const steps = ["Choose type", "Brief details", "Submitted"] as const;
+
+  return (
+    <ol className="mt-5 grid gap-2 sm:grid-cols-3" aria-label="Launch progress">
+      {steps.map((label, index) => {
+        const number = (index + 1) as 1 | 2 | 3;
+        const isActive = number === step;
+        const isComplete = number < step;
+        return (
+          <li
+            key={label}
+            className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
+              isActive
+                ? "border-primary bg-primary/5 text-primary"
+                : isComplete
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border-border bg-background text-muted-foreground"
+            }`}
+          >
+            <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+              isActive
+                ? "bg-primary text-primary-foreground"
+                : isComplete
+                  ? "bg-emerald-600 text-white"
+                  : "bg-muted text-muted-foreground"
+            }`}>
+              {isComplete ? <CheckCircle className="h-3.5 w-3.5" /> : number}
+            </span>
+            {label}
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 
@@ -889,6 +940,11 @@ export default function LaunchBrief() {
   const competitorsLabel = isBasic 
     ? "Competitors (optional, up to 2)" 
     : "Competitors (optional, up to 5)";
+  const launchStepLabel = selectedBrief
+    ? selectedBrief === "basic"
+      ? "Test24 Basic"
+      : "Test24 Pro"
+    : "Choose type";
 
   // File upload for additional materials (20MB limit)
   const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
@@ -1147,7 +1203,7 @@ export default function LaunchBrief() {
       
       // Invalidate company data if credits were used
       if (company) {
-        queryClient.invalidateQueries({ queryKey: ['/api/companies', company.id] });
+        queryClient.invalidateQueries({ queryKey: ['/api/member/company'] });
       }
       
       // Invalidate activity so dashboard credit and activity counts refresh immediately
@@ -1402,7 +1458,15 @@ export default function LaunchBrief() {
   if (showSuccess) {
     return (
       <PortalLayout>
-        <div className="p-6 max-w-2xl mx-auto">
+        <div className="portal-workspace">
+          <div className="portal-page-header">
+            <PortalBreadcrumbs items={[{ label: "Dashboard", href: "/portal/dashboard" }, { label: "Test", href: "/portal/test" }, { label: "Launch a Brief" }]} />
+            <h1 className="text-4xl font-serif font-bold mb-2">Launch New Brief</h1>
+            <p className="text-lg text-muted-foreground">Your study request is on its way.</p>
+            <LaunchProgress step={3} />
+          </div>
+          <div className="portal-main-scroll">
+          <div className="max-w-2xl mx-auto">
           <Card className="border-primary">
             <CardContent className="pt-12 pb-8 text-center space-y-6">
               <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
@@ -1418,9 +1482,9 @@ export default function LaunchBrief() {
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-                <Link href="/portal/research">
+                <Link href="/portal/test">
                   <Button size="lg" data-testid="button-go-to-research">
-                    Go to My Research
+                    Go to Test
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
@@ -1432,6 +1496,8 @@ export default function LaunchBrief() {
               </div>
             </CardContent>
           </Card>
+          </div>
+          </div>
         </div>
       </PortalLayout>
     );
@@ -1440,13 +1506,17 @@ export default function LaunchBrief() {
   if (!selectedBrief) {
     return (
       <PortalLayout>
-        <div className="p-6 max-w-5xl mx-auto space-y-6">
-          <div>
+        <div className="portal-workspace">
+          <div className="portal-page-header">
+            <PortalBreadcrumbs items={[{ label: "Dashboard", href: "/portal/dashboard" }, { label: "Test", href: "/portal/test" }, { label: "Launch a Brief" }]} />
             <h1 className="text-4xl font-serif font-bold mb-2">Launch New Brief</h1>
             <p className="text-lg text-muted-foreground">
               Choose your research type and launch in minutes
             </p>
+            <LaunchProgress step={1} />
           </div>
+          <div className="portal-main-scroll">
+          <div className="max-w-5xl mx-auto space-y-6">
 
           {/* Free user membership promo */}
           {isFreeUser && (
@@ -1572,6 +1642,8 @@ export default function LaunchBrief() {
               </CardContent>
             </Card>
           </div>
+          </div>
+          </div>
         </div>
       </PortalLayout>
     );
@@ -1579,10 +1651,11 @@ export default function LaunchBrief() {
 
   return (
     <PortalLayout>
-      <div className="p-6 max-w-4xl mx-auto space-y-8" ref={formRef}>
-        {/* Page Header */}
-        <div className="flex items-center justify-between">
+      <div className="portal-workspace">
+        <div className="portal-page-header">
+          <div className="flex items-start justify-between gap-4">
           <div>
+            <PortalBreadcrumbs items={[{ label: "Dashboard", href: "/portal/dashboard" }, { label: "Test", href: "/portal/test" }, { label: "Launch a Brief", href: "/portal/launch" }, { label: launchStepLabel }]} />
             <h1 className="text-4xl font-serif font-bold mb-2">Submit Your Brief</h1>
             <p className="text-lg text-muted-foreground">
               {selectedBrief === "basic" ? "Test24 Basic" : "Test24 Pro"}
@@ -1595,7 +1668,11 @@ export default function LaunchBrief() {
           >
             Change Type
           </Button>
+          </div>
+          <LaunchProgress step={2} />
         </div>
+        <div className="portal-main-scroll">
+        <div className="max-w-4xl mx-auto space-y-8" ref={formRef}>
 
         {/* How It Works Section */}
         <Card className="bg-muted/30">
@@ -2346,7 +2423,7 @@ export default function LaunchBrief() {
                           You have {availableCreditsForStudy} Test24 {requiredCreditsType} credit{availableCreditsForStudy !== 1 ? "s" : ""} but need {creditsRequired}.
                           Use the "Use Credits + Pay Remainder" option below, or top up your credits.
                         </p>
-                        <Link href="/portal/billing">
+                        <Link href="/portal/credits">
                           <Button 
                             variant="outline" 
                             size="sm" 
@@ -2369,7 +2446,7 @@ export default function LaunchBrief() {
                         <p className="mt-1 text-sm text-muted-foreground">
                           Top up now to unlock faster launches and member-only pricing.
                         </p>
-                        <Link href="/portal/billing">
+                        <Link href="/portal/credits">
                           <Button 
                             variant="outline" 
                             size="sm" 
@@ -2663,6 +2740,8 @@ export default function LaunchBrief() {
             </Button>
           </CardContent>
         </Card>
+      </div>
+      </div>
       </div>
     </PortalLayout>
   );

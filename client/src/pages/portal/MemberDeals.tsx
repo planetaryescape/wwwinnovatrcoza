@@ -89,7 +89,7 @@ function getNextMonthLabel() {
 
 export default function MemberDeals() {
   const [, setLocation] = useLocation();
-  const { isFreeUser } = useAuth();
+  const { user, isFreeUser } = useAuth();
   const { formatPrice } = useCurrency();
 
   useEffect(() => {
@@ -97,7 +97,13 @@ export default function MemberDeals() {
   }, []);
 
   const { data: allDeals = [], isLoading } = useQuery<Deal[]>({
-    queryKey: ["/api/member/deals"],
+    queryKey: ["/api/member/deals", user?.companyId],
+    queryFn: async () => {
+      const response = await fetch("/api/member/deals");
+      if (!response.ok) throw new Error("Failed to fetch deals");
+      return response.json();
+    },
+    enabled: !!user,
   });
 
   const now = new Date();
@@ -164,7 +170,7 @@ export default function MemberDeals() {
                         View Membership Plans
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
-                      <Button variant="outline" size="lg" onClick={() => setLocation("/portal/trends")} data-testid="button-browse-free-content">
+                      <Button variant="outline" size="lg" onClick={() => setLocation("/portal/explore/trends")} data-testid="button-browse-free-content">
                         Browse Free Content
                       </Button>
                     </div>
