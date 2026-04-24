@@ -291,7 +291,7 @@ async function buildPersistedRecommendations(ctx: PortalContext) {
     WHERE ${scopeSql}
     ORDER BY s.public_project_id, s.created_at DESC
   `);
-  const rows = Array.from(rawRows as Iterable<{
+  const rows = (Array.isArray(rawRows) ? rawRows : (rawRows as any).rows ?? []) as Array<{
     project_id: string;
     project_name: string;
     company_name: string;
@@ -299,7 +299,7 @@ async function buildPersistedRecommendations(ctx: PortalContext) {
     market_gaps: PersistedGap[] | null;
     next_steps: PersistedNextStep[] | null;
     created_at: string;
-  }>);
+  }>;
 
   const gaps: PortalRecommendationGap[] = [];
   const nextSteps: PortalRecommendationStep[] = [];
