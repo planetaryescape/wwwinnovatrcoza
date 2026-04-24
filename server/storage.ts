@@ -25,6 +25,10 @@ import {
   type InsertSubscription,
   type Company,
   type InsertCompany,
+  type CompanyMembership,
+  type InsertCompanyMembership,
+  type CompanyInvite,
+  type InsertCompanyInvite,
   type ClientReport,
   type InsertClientReport,
   type BriefSubmission,
@@ -66,6 +70,8 @@ import {
   paymentIntents,
   paymentEvents,
   companies,
+  companyMemberships,
+  companyInvites,
   reports,
   deals,
   caseStudies,
@@ -118,6 +124,7 @@ export interface IStorage {
 
   createReport(report: InsertReport): Promise<Report>;
   getReport(id: string): Promise<Report | undefined>;
+  getReportByPdfUrl(pdfUrl: string): Promise<Report | undefined>;
   getAllReports(): Promise<Report[]>;
   updateReport(id: string, updates: Partial<Report>): Promise<void>;
   deleteReport(id: string): Promise<void>;
@@ -153,11 +160,21 @@ export interface IStorage {
   updateCompany(id: string, updates: Partial<Company>): Promise<void>;
   deleteCompany(id: string): Promise<void>;
   getUsersByCompanyId(companyId: string): Promise<User[]>;
+  createCompanyMembership(membership: InsertCompanyMembership): Promise<CompanyMembership>;
+  getCompanyMembership(userId: string, companyId: string): Promise<CompanyMembership | undefined>;
+  getActiveCompanyMembershipsByUserId(userId: string): Promise<CompanyMembership[]>;
+  getCompanyMembershipsByCompanyId(companyId: string): Promise<CompanyMembership[]>;
+  updateCompanyMembership(id: string, updates: Partial<CompanyMembership>): Promise<void>;
+  createCompanyInvite(invite: InsertCompanyInvite): Promise<CompanyInvite>;
+  getCompanyInviteByTokenHash(tokenHash: string): Promise<CompanyInvite | undefined>;
+  getCompanyInvitesByCompanyId(companyId: string): Promise<CompanyInvite[]>;
+  updateCompanyInvite(id: string, updates: Partial<CompanyInvite>): Promise<void>;
   
   deleteUser(id: string): Promise<void>;
 
   createClientReport(report: InsertClientReport): Promise<ClientReport>;
   getClientReport(id: string): Promise<ClientReport | undefined>;
+  getClientReportByPdfUrl(pdfUrl: string): Promise<ClientReport | undefined>;
   getClientReportsByCompanyId(companyId: string): Promise<ClientReport[]>;
   getAllClientReports(): Promise<ClientReport[]>;
   updateClientReport(id: string, updates: Partial<ClientReport>): Promise<void>;
@@ -186,11 +203,13 @@ export interface IStorage {
   
   createSession(session: InsertSession): Promise<Session>;
   getSessionByTokenHash(tokenHash: string): Promise<Session | undefined>;
+  updateSession(id: string, updates: Partial<Session>): Promise<void>;
   deleteSession(id: string): Promise<void>;
   deleteUserSessions(userId: string): Promise<void>;
   
   createCreditLedgerEntry(entry: InsertCreditLedger): Promise<CreditLedgerEntry>;
   getCreditLedgerByCompanyId(companyId: string): Promise<CreditLedgerEntry[]>;
+  getBriefFileByStoragePath(storagePath: string): Promise<BriefFileRecord | undefined>;
   getCompanyCreditBalance(companyId: string, creditType: 'basic' | 'pro'): Promise<number>;
   atomicDeductCredits(companyId: string, creditType: 'basic' | 'pro', amount: number): Promise<{ success: boolean; newUsed: number; total: number }>;
   submitBriefWithCredits(params: {
@@ -402,6 +421,7 @@ export class DatabaseStorage implements IStorage {
 
     const tempPasswordHash = await hashPassword("TempPass123!");
     const adminPasswordHash = await hashPassword("Innovatr@Admin!");
+    let hannahUserId: string | null = null;
 
     // Admin users - Innovatr
     const adminUsersData = [
@@ -410,8 +430,13 @@ export class DatabaseStorage implements IStorage {
     ];
 
     for (const u of adminUsersData) {
+      const userId = randomUUID();
+      if (u.email === "hannah@innovatr.co.za") {
+        hannahUserId = userId;
+      }
+
       await db.insert(users).values({
-        id: randomUUID(),
+        id: userId,
         username: u.username,
         email: u.email,
         password: "",
@@ -429,6 +454,17 @@ export class DatabaseStorage implements IStorage {
         isActive: true,
         emailVerified: true,
       });
+    }
+
+    if (hannahUserId) {
+      await db.insert(companyMemberships).values(
+        companiesData.map((company) => ({
+          userId: hannahUserId,
+          companyId: company.id,
+          role: "ADMIN",
+          status: "ACTIVE",
+        })),
+      );
     }
 
     // Nando's user - Simone Kakana
@@ -1144,6 +1180,11 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
+  async getReportByPdfUrl(pdfUrl: string): Promise<Report | undefined> {
+    const result = await db.select().from(reports).where(eq(reports.pdfUrl, pdfUrl));
+    return result[0];
+  }
+
   async getAllReports(): Promise<Report[]> {
     return db.select().from(reports);
   }
@@ -1393,6 +1434,103 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(users).where(eq(users.companyId, companyId));
   }
 
+  async createCompanyMembership(insertMembership: InsertCompanyMembership): Promise<CompanyMembership> {
+    const id = randomUUID();
+    const now = new Date();
+    const result = await db
+      .insert(companyMemberships)
+      .values({
+        id,
+        userId: insertMembership.userId,
+        companyId: insertMembership.companyId,
+        role: insertMembership.role ?? "MEMBER",
+        status: insertMembership.status ?? "ACTIVE",
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
+    return result[0];
+  }
+
+  async getCompanyMembership(userId: string, companyId: string): Promise<CompanyMembership | undefined> {
+    const result = await db
+      .select()
+      .from(companyMemberships)
+      .where(
+        and(
+          eq(companyMemberships.userId, userId),
+          eq(companyMemberships.companyId, companyId),
+          eq(companyMemberships.status, "ACTIVE"),
+        ),
+      );
+    return result[0];
+  }
+
+  async getActiveCompanyMembershipsByUserId(userId: string): Promise<CompanyMembership[]> {
+    return db
+      .select()
+      .from(companyMemberships)
+      .where(and(eq(companyMemberships.userId, userId), eq(companyMemberships.status, "ACTIVE")))
+      .orderBy(desc(companyMemberships.createdAt));
+  }
+
+  async getCompanyMembershipsByCompanyId(companyId: string): Promise<CompanyMembership[]> {
+    return db
+      .select()
+      .from(companyMemberships)
+      .where(and(eq(companyMemberships.companyId, companyId), eq(companyMemberships.status, "ACTIVE")))
+      .orderBy(desc(companyMemberships.createdAt));
+  }
+
+  async updateCompanyMembership(id: string, updates: Partial<CompanyMembership>): Promise<void> {
+    await db
+      .update(companyMemberships)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(companyMemberships.id, id));
+  }
+
+  async createCompanyInvite(insertInvite: InsertCompanyInvite): Promise<CompanyInvite> {
+    const id = randomUUID();
+    const now = new Date();
+    const result = await db
+      .insert(companyInvites)
+      .values({
+        id,
+        companyId: insertInvite.companyId,
+        email: insertInvite.email.toLowerCase(),
+        role: insertInvite.role ?? "MEMBER",
+        tokenHash: insertInvite.tokenHash,
+        invitedByUserId: insertInvite.invitedByUserId,
+        expiresAt: insertInvite.expiresAt,
+        acceptedAt: null,
+        revokedAt: null,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
+    return result[0];
+  }
+
+  async getCompanyInviteByTokenHash(tokenHash: string): Promise<CompanyInvite | undefined> {
+    const result = await db.select().from(companyInvites).where(eq(companyInvites.tokenHash, tokenHash));
+    return result[0];
+  }
+
+  async getCompanyInvitesByCompanyId(companyId: string): Promise<CompanyInvite[]> {
+    return db
+      .select()
+      .from(companyInvites)
+      .where(eq(companyInvites.companyId, companyId))
+      .orderBy(desc(companyInvites.createdAt));
+  }
+
+  async updateCompanyInvite(id: string, updates: Partial<CompanyInvite>): Promise<void> {
+    await db
+      .update(companyInvites)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(companyInvites.id, id));
+  }
+
   async deleteUser(id: string): Promise<void> {
     await db.delete(users).where(eq(users.id, id));
   }
@@ -1436,6 +1574,11 @@ export class DatabaseStorage implements IStorage {
 
   async getClientReport(id: string): Promise<ClientReport | undefined> {
     const result = await db.select().from(clientReports).where(eq(clientReports.id, id));
+    return result[0];
+  }
+
+  async getClientReportByPdfUrl(pdfUrl: string): Promise<ClientReport | undefined> {
+    const result = await db.select().from(clientReports).where(eq(clientReports.pdfUrl, pdfUrl));
     return result[0];
   }
 
@@ -1622,6 +1765,10 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
+  async updateSession(id: string, updates: Partial<Session>): Promise<void> {
+    await db.update(sessions).set({ ...updates, lastActiveAt: new Date() }).where(eq(sessions.id, id));
+  }
+
   async deleteSession(id: string): Promise<void> {
     await db.delete(sessions).where(eq(sessions.id, id));
   }
@@ -1650,6 +1797,11 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
+  async getBriefFileByStoragePath(storagePath: string): Promise<BriefFileRecord | undefined> {
+    const result = await db.select().from(briefFiles).where(eq(briefFiles.storagePath, storagePath));
+    return result[0];
+  }
+
   async getCreditLedgerByCompanyId(companyId: string): Promise<CreditLedgerEntry[]> {
     return db.select().from(creditLedger).where(eq(creditLedger.companyId, companyId));
   }
@@ -1674,12 +1826,12 @@ export class DatabaseStorage implements IStorage {
             sql`${companies.basicCreditsUsed} + ${amount} <= ${companies.basicCreditsTotal}`
           )
         )
-        .returning({ newUsed: companies.basicCreditsUsed, total: companies.basicCreditsTotal });
+        .returning();
       if (result.length === 0) {
         const company = await db.select({ used: companies.basicCreditsUsed, total: companies.basicCreditsTotal }).from(companies).where(eq(companies.id, companyId));
         return { success: false, newUsed: company[0]?.used ?? 0, total: company[0]?.total ?? 0 };
       }
-      return { success: true, newUsed: result[0].newUsed, total: result[0].total };
+      return { success: true, newUsed: result[0].basicCreditsUsed, total: result[0].basicCreditsTotal };
     } else {
       const result = await db
         .update(companies)
@@ -1691,12 +1843,12 @@ export class DatabaseStorage implements IStorage {
             sql`${companies.proCreditsUsed} + ${amount} <= ${companies.proCreditsTotal}`
           )
         )
-        .returning({ newUsed: companies.proCreditsUsed, total: companies.proCreditsTotal });
+        .returning();
       if (result.length === 0) {
         const company = await db.select({ used: companies.proCreditsUsed, total: companies.proCreditsTotal }).from(companies).where(eq(companies.id, companyId));
         return { success: false, newUsed: company[0]?.used ?? 0, total: company[0]?.total ?? 0 };
       }
-      return { success: true, newUsed: result[0].newUsed, total: result[0].total };
+      return { success: true, newUsed: result[0].proCreditsUsed, total: result[0].proCreditsTotal };
     }
   }
 
@@ -1714,7 +1866,7 @@ export class DatabaseStorage implements IStorage {
       if (creditDeduction) {
         const { companyId, creditType, amount, description, userId } = creditDeduction;
 
-        let deductResult: { newUsed: number; total: number }[] = [];
+        let deductResult: Company[] = [];
 
         if (creditType === 'basic') {
           deductResult = await tx
@@ -1727,7 +1879,7 @@ export class DatabaseStorage implements IStorage {
                 sql`${companies.basicCreditsUsed} + ${amount} <= ${companies.basicCreditsTotal}`
               )
             )
-            .returning({ newUsed: companies.basicCreditsUsed, total: companies.basicCreditsTotal });
+            .returning();
         } else {
           deductResult = await tx
             .update(companies)
@@ -1739,7 +1891,7 @@ export class DatabaseStorage implements IStorage {
                 sql`${companies.proCreditsUsed} + ${amount} <= ${companies.proCreditsTotal}`
               )
             )
-            .returning({ newUsed: companies.proCreditsUsed, total: companies.proCreditsTotal });
+            .returning();
         }
 
         if (deductResult.length === 0) {
@@ -1748,7 +1900,10 @@ export class DatabaseStorage implements IStorage {
         }
 
         // Step 2: Insert ledger entry within the same transaction
-        const remaining = deductResult[0].total - deductResult[0].newUsed;
+        const updatedCompany = deductResult[0];
+        const newUsed = creditType === "basic" ? updatedCompany.basicCreditsUsed : updatedCompany.proCreditsUsed;
+        const total = creditType === "basic" ? updatedCompany.basicCreditsTotal : updatedCompany.proCreditsTotal;
+        const remaining = total - newUsed;
         await tx.insert(creditLedger).values({
           id: randomUUID(),
           companyId,
@@ -1954,6 +2109,8 @@ export class DatabaseStorage implements IStorage {
     totalDownloads: number;
     viewsThisMonth: number;
     downloadsThisMonth: number;
+    allTimeViews: number;
+    allTimeDownloads: number;
     mostPopularReport: { id: string; title: string; views: number } | null;
   }> {
     const periodStart = since ?? new Date(0);

@@ -12,6 +12,7 @@ import { InnovatrFooter } from "@/components/InnovatrFooter";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { PortalBreadcrumbs } from "@/components/portal/PortalBreadcrumbs";
 import insightsHeader from "@assets/insights-header_1764322405058.webp";
 import launchCover from "@assets/launch-cover_1764321848244.webp";
 import insideCover from "@assets/inside-cover_1764321472939.webp";
@@ -79,6 +80,7 @@ interface Report {
   status?: "live" | "scheduled" | "draft" | "published";
   title: string;
   teaser: string;
+  body?: string | null;
   slug: string;
   coverImage: string;
   pdfPath: string | null;
@@ -158,7 +160,7 @@ function RelatedReportCard({ report }: { report: Report }) {
   const coverImage = report.coverImage || report.coverImageUrl || getCoverImage(report.category);
 
   return (
-    <Link href={`/portal/insights/${report.slug}`}>
+    <Link href={`/portal/explore/insights/${report.slug}`}>
       <article className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden border border-gray-100 flex flex-col h-full">
         <div className="relative h-28 overflow-hidden">
           <img
@@ -292,7 +294,9 @@ function AccessPaywall({
 }
 
 export default function InsightDetail() {
-  const [, params] = useRoute("/portal/insights/:slug");
+  const [, nestedParams] = useRoute("/portal/explore/insights/:slug");
+  const [, legacyParams] = useRoute("/portal/insights/:slug");
+  const params = nestedParams ?? legacyParams;
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { user, isAuthenticated, hasPaidSeatAccess } = useAuth();
@@ -303,7 +307,7 @@ export default function InsightDetail() {
   const [loading, setLoading] = useState(true);
   const hasHomeRef = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("ref") === "home";
   const cameFromHome = hasHomeRef && !isAuthenticated;
-  const backDestination = cameFromHome ? "/#trends" : "/portal/trends";
+  const backDestination = cameFromHome ? "/#trends" : "/portal/explore/trends";
 
   useEffect(() => {
     const fetchReport = async () => {
@@ -451,11 +455,11 @@ export default function InsightDetail() {
   };
 
   const handleUpgrade = () => {
-    setLocation("/portal/billing");
+    setLocation("/portal/credits");
   };
 
   const handlePurchaseCredits = () => {
-    setLocation("/portal/billing");
+    setLocation("/portal/credits");
   };
 
   if (loading) {
@@ -486,13 +490,13 @@ export default function InsightDetail() {
               The report you're looking for doesn't exist or has been moved.
             </p>
             <Button 
-              onClick={() => setLocation("/portal/trends")} 
+              onClick={() => setLocation("/portal/explore/trends")}
               className="rounded-full"
               style={{ backgroundColor: '#5B6EF7' }}
               data-testid="button-back-library"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Library
+              Back to Trends
             </Button>
           </div>
         </div>
@@ -534,6 +538,20 @@ export default function InsightDetail() {
   return (
     <InsightPageWrapper isAuthenticated={isAuthenticated}>
       <div className="min-h-screen bg-white">
+        {isAuthenticated && (
+          <div className="px-6 pt-5">
+            <div className="max-w-3xl mx-auto">
+              <PortalBreadcrumbs
+                items={[
+                  { label: "Dashboard", href: "/portal/dashboard" },
+                  { label: "Explore", href: "/portal/explore" },
+                  { label: "Trends", href: "/portal/explore/trends" },
+                  { label: report.title },
+                ]}
+              />
+            </div>
+          </div>
+        )}
         <div className={`relative w-full ${hasOwnCover ? 'h-80 md:h-[28rem]' : 'h-72 md:h-96'} overflow-hidden`}>
           <img
             src={heroImage}
@@ -544,21 +562,23 @@ export default function InsightDetail() {
           
           <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
             <div className="max-w-3xl mx-auto">
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  if (cameFromHome) {
-                    window.location.href = "/?scrollTo=trends";
-                  } else {
-                    setLocation(backDestination);
-                  }
-                }}
-                className="mb-4 text-white hover:text-white hover:bg-white/20 -ml-2"
-                data-testid="button-back"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                {cameFromHome ? "Back to Trends" : "Back to Library"}
-              </Button>
+              {!isAuthenticated && (
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    if (cameFromHome) {
+                      window.location.href = "/?scrollTo=trends";
+                    } else {
+                      setLocation(backDestination);
+                    }
+                  }}
+                  className="mb-4 text-white hover:text-white hover:bg-white/20 -ml-2"
+                  data-testid="button-back"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Trends
+                </Button>
+              )}
               
               <div className="flex items-center gap-2 mb-3 flex-wrap">
                 <Badge 
@@ -692,7 +712,7 @@ export default function InsightDetail() {
                   ))}
 
                   {report.content.closingLine && (
-                    <p className="text-lg text-gray-900 font-medium italic border-l-4 border-[#5B6EF7] pl-4 mt-8">
+                    <p className="mt-8 rounded-2xl border border-[#5B6EF7]/20 bg-[#5B6EF7]/5 px-5 py-4 text-lg font-medium italic text-gray-900">
                       {report.content.closingLine}
                     </p>
                   )}
@@ -810,7 +830,7 @@ export default function InsightDetail() {
                   ))}
 
                   {report.content.closingLine && (
-                    <p className="text-lg text-gray-900 font-medium italic border-l-4 border-[#5B6EF7] pl-4 mt-8 mb-8">
+                    <p className="mt-8 mb-8 rounded-2xl border border-[#5B6EF7]/20 bg-[#5B6EF7]/5 px-5 py-4 text-lg font-medium italic text-gray-900">
                       {report.content.closingLine}
                     </p>
                   )}
@@ -819,7 +839,7 @@ export default function InsightDetail() {
 
               {!report.content && report.body && (
                 <article className="prose prose-lg max-w-none">
-                  {report.body.split(/\n{2,}/).map((paragraph, idx) => {
+                  {report.body.split(/\n{2,}/).map((paragraph: string, idx: number) => {
                     const trimmed = paragraph.trim();
                     if (!trimmed) return null;
                     const isShortLine = trimmed.length < 80 && !trimmed.includes(".");
@@ -957,7 +977,7 @@ export default function InsightDetail() {
             <div className="text-center py-8">
               <Button
                 variant="outline"
-                onClick={() => setLocation("/portal/trends")}
+                onClick={() => setLocation("/portal/explore/trends")}
                 className="rounded-full border-[#5B6EF7] text-[#5B6EF7] hover:bg-[#5B6EF7] hover:text-white"
                 data-testid="button-back-footer"
               >
@@ -1013,7 +1033,7 @@ export default function InsightDetail() {
         open={loginDialogOpen}
         onOpenChange={setLoginDialogOpen}
         defaultSignup={true}
-        returnTo={params?.slug ? `/portal/insights/${params.slug}` : "/portal"}
+        returnTo={params?.slug ? `/portal/explore/insights/${params.slug}` : "/portal"}
       />
     </InsightPageWrapper>
   );

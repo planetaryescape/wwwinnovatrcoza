@@ -10,6 +10,12 @@ const COLORS = {
   interest: "#3B82F6",
 };
 
+const COMMITMENT_LABEL = "Commitment win rate";
+
+function formatPercent(value: number | null | undefined) {
+  return value == null ? "\u2014" : `${Math.round(value)}%`;
+}
+
 interface Props {
   studyId: string;
 }
@@ -72,6 +78,9 @@ export default function ConceptRankingTable({ studyId }: Props) {
     <Card data-testid="card-concept-ranking">
       <CardHeader>
         <CardTitle>Concept Ranking</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Interest is the initial appeal score. Commitment win rate is the pairwise choice result from the commitment exercise.
+        </p>
       </CardHeader>
       <CardContent>
         <div className="w-full" style={{ height: Math.max(250, sorted.length * 50) }}>
@@ -81,11 +90,14 @@ export default function ConceptRankingTable({ studyId }: Props) {
               <XAxis type="number" domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
               <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 12 }} />
               <Tooltip
-                formatter={(value: number, name: string) => [`${value}%`, name === "winRate" ? "Win Rate" : "Interest"]}
+                formatter={(value: number, _name: string, item: { dataKey?: string | number }) => [
+                  formatPercent(value),
+                  String(item.dataKey) === "winRate" ? COMMITMENT_LABEL : "Interest",
+                ]}
                 labelFormatter={(label: string, payload: Array<{ payload?: { fullLabel?: string } }>) => payload?.[0]?.payload?.fullLabel || label}
               />
               <Legend />
-              <Bar dataKey="winRate" name="Win Rate" fill={COLORS.winRate} radius={[0, 4, 4, 0]} barSize={12} />
+              <Bar dataKey="winRate" name={COMMITMENT_LABEL} fill={COLORS.winRate} radius={[0, 4, 4, 0]} barSize={12} />
               <Bar dataKey="interest" name="Interest" fill={COLORS.interest} radius={[0, 4, 4, 0]} barSize={12} />
             </BarChart>
           </ResponsiveContainer>
@@ -97,7 +109,7 @@ export default function ConceptRankingTable({ studyId }: Props) {
               <tr className="border-b">
                 <th className="text-left py-2 px-2 font-medium text-muted-foreground">#</th>
                 <th className="text-left py-2 px-2 font-medium text-muted-foreground">Concept</th>
-                <th className="text-right py-2 px-2 font-medium text-muted-foreground">Win Rate</th>
+                <th className="text-right py-2 px-2 font-medium text-muted-foreground">{COMMITMENT_LABEL}</th>
                 <th className="text-right py-2 px-2 font-medium text-muted-foreground">Interest</th>
               </tr>
             </thead>
@@ -106,8 +118,8 @@ export default function ConceptRankingTable({ studyId }: Props) {
                 <tr key={c.concept_id} className="border-b last:border-0" data-testid={`row-ranking-${c.concept_id}`}>
                   <td className="py-2 px-2 font-medium">{c.rank}</td>
                   <td className="py-2 px-2">{c.name}</td>
-                  <td className="text-right py-2 px-2 font-mono">{c.win_rate != null ? `${c.win_rate}%` : "\u2014"}</td>
-                  <td className="text-right py-2 px-2 font-mono">{c.interest_rate != null ? `${c.interest_rate}%` : "\u2014"}</td>
+                  <td className="text-right py-2 px-2 font-mono">{formatPercent(c.win_rate)}</td>
+                  <td className="text-right py-2 px-2 font-mono">{formatPercent(c.interest_rate)}</td>
                 </tr>
               ))}
             </tbody>

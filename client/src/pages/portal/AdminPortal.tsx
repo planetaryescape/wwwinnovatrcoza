@@ -1,7 +1,8 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
-import { useEffect, useState, useCallback } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEffect } from "react";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
+import { PortalTabContent, PortalTabs } from "@/components/portal/PortalTabs";
 import PortalLayout from "./PortalLayout";
 import AdminOrders from "./AdminOrders";
 import AdminReports from "./AdminReports";
@@ -12,94 +13,80 @@ import AdminMembers from "./AdminMembers";
 import AdminBriefs from "./AdminBriefs";
 import AdminOverview from "./AdminOverview";
 
-const VALID_TABS = ["overview", "companies", "members", "reports", "briefs", "orders", "offers", "casestudies"];
+const ADMIN_TAB_VALUES = ["overview", "companies", "members", "reports", "briefs", "orders", "offers", "casestudies"] as const;
+type AdminTab = typeof ADMIN_TAB_VALUES[number];
+
+const ADMIN_TABS: { value: AdminTab; label: string; testId: string }[] = [
+  { value: "overview", label: "Overview", testId: "tab-admin-overview" },
+  { value: "companies", label: "Companies", testId: "tab-admin-companies" },
+  { value: "members", label: "Members", testId: "tab-admin-members" },
+  { value: "reports", label: "Intelligence", testId: "tab-admin-reports" },
+  { value: "briefs", label: "Briefs", testId: "tab-admin-briefs" },
+  { value: "orders", label: "Orders", testId: "tab-admin-orders" },
+  { value: "offers", label: "Offers", testId: "tab-admin-offers" },
+  { value: "casestudies", label: "Case Studies", testId: "tab-admin-casestudies" },
+];
 
 export default function AdminPortal() {
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
   const { isAdmin, isAuthenticated, isViewingAsCompany } = useAuth();
-  
-  const getTabFromUrl = useCallback(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get("tab");
-    return tab && VALID_TABS.includes(tab) ? tab : "overview";
-  }, []);
-  
-  const [activeTab, setActiveTab] = useState(getTabFromUrl);
+  const [activeTab, setActiveTab] = useQueryState(
+    "tab",
+    parseAsStringLiteral(ADMIN_TAB_VALUES).withDefault("overview"),
+  );
 
   useEffect(() => {
     if (!isAuthenticated || !isAdmin || isViewingAsCompany) {
       setLocation("/portal");
     }
   }, [isAuthenticated, isAdmin, isViewingAsCompany, setLocation]);
-  
-  useEffect(() => {
-    const urlTab = getTabFromUrl();
-    if (urlTab !== activeTab) {
-      setActiveTab(urlTab);
-    }
-  }, [location, getTabFromUrl]);
-  
-  const handleTabChange = (newTab: string) => {
-    setActiveTab(newTab);
-    setLocation(`/portal/admin?tab=${newTab}`, { replace: true });
-  };
-
   if (!isAdmin || !isAuthenticated || isViewingAsCompany) {
     return null;
   }
 
   return (
     <PortalLayout>
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="portal-page">
+        <div className="portal-page-content space-y-6">
         <div>
           <h1 className="text-4xl font-serif font-bold mb-2">Admin Dashboard</h1>
           <p className="text-muted-foreground text-[16px]">Our dashboard to oversee companies, briefs, orders, reports, deals, and the smooth running of… everything.</p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-8">
-            <TabsTrigger value="overview" data-testid="tab-admin-overview">Overview</TabsTrigger>
-            <TabsTrigger value="companies" data-testid="tab-admin-companies">Companies</TabsTrigger>
-            <TabsTrigger value="members" data-testid="tab-admin-members">Members</TabsTrigger>
-            <TabsTrigger value="reports" data-testid="tab-admin-reports">Intelligence</TabsTrigger>
-            <TabsTrigger value="briefs" data-testid="tab-admin-briefs">Briefs</TabsTrigger>
-            <TabsTrigger value="orders" data-testid="tab-admin-orders">Orders</TabsTrigger>
-            <TabsTrigger value="offers" data-testid="tab-admin-offers">Offers</TabsTrigger>
-            <TabsTrigger value="casestudies" data-testid="tab-admin-casestudies">Case Studies</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview">
+        <PortalTabs value={activeTab} onValueChange={(tab) => void setActiveTab(tab)} tabs={ADMIN_TABS} barClassName="px-0">
+          <PortalTabContent value="overview" className="mt-6">
             <AdminOverview />
-          </TabsContent>
+          </PortalTabContent>
 
-          <TabsContent value="companies">
+          <PortalTabContent value="companies" className="mt-6">
             <AdminCompanies />
-          </TabsContent>
+          </PortalTabContent>
 
-          <TabsContent value="orders">
+          <PortalTabContent value="orders" className="mt-6">
             <AdminOrders />
-          </TabsContent>
+          </PortalTabContent>
 
-          <TabsContent value="briefs">
+          <PortalTabContent value="briefs" className="mt-6">
             <AdminBriefs />
-          </TabsContent>
+          </PortalTabContent>
 
-          <TabsContent value="members">
+          <PortalTabContent value="members" className="mt-6">
             <AdminMembers />
-          </TabsContent>
+          </PortalTabContent>
 
-          <TabsContent value="reports">
+          <PortalTabContent value="reports" className="mt-6">
             <AdminReports />
-          </TabsContent>
+          </PortalTabContent>
 
-          <TabsContent value="offers">
+          <PortalTabContent value="offers" className="mt-6">
             <AdminDeals />
-          </TabsContent>
+          </PortalTabContent>
 
-          <TabsContent value="casestudies">
+          <PortalTabContent value="casestudies" className="mt-6">
             <AdminCaseStudies />
-          </TabsContent>
-        </Tabs>
+          </PortalTabContent>
+        </PortalTabs>
+        </div>
       </div>
     </PortalLayout>
   );

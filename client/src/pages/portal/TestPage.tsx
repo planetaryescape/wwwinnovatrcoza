@@ -1,23 +1,26 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useToast } from "@/hooks/use-toast";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
-import PortalLayout from "./PortalLayout";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
-  X, Sparkles, Send, MessageSquare, ChevronDown, ExternalLink,
-  ArrowRight, Loader2, Upload, CheckCircle2, ChevronRight, FileText,
+  Sparkles, Send, MessageSquare, ChevronDown,
+  CheckCircle2, ChevronRight, FileText,
   Search, AlertTriangle, BarChart2, Star,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { ClientReport } from "@shared/schema";
 import { useDigStudies, useDigRanking } from "@/lib/dig-api";
-import type { DigStudy, RankedConcept } from "@/lib/dig-api.types";
+import { mapPreferredDigStudiesByReportId } from "@/lib/dig-study-selection";
+import { PortalTabs } from "@/components/portal/PortalTabs";
+import { PortalBreadcrumbs } from "@/components/portal/PortalBreadcrumbs";
 import {
   BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip, ResponsiveContainer, Legend as ReLegend,
 } from "recharts";
+import PortalLayout from "./PortalLayout";
 
 /* ── Design System tokens ─────────────────────────────── */
 const VDK      = "#1E1B3A";
@@ -25,7 +28,7 @@ const VIO      = "#3A2FBF";
 const VIO_LT   = "#EAE8FF";
 const CORAL    = "#E8503A";
 const N200     = "#EBEBEB";
-const N400     = "#9C9AB0";
+const N400     = "#A89078";
 const N500     = "#8A7260";
 const SUCCESS  = "#2A9E5C";
 const SUC_LT   = "#D1FAE5";
@@ -33,7 +36,6 @@ const AMBER_DK = "#B8911A";
 const AMBER_LT = "#FEF6D6";
 const CYAN_DK  = "#1A8FAD";
 const CYAN_LT  = "#DFF6FC";
-const CREAM    = "#FFFFFF";
 const TEST_COLOR = SUCCESS;
 
 const CARD: React.CSSProperties = {
@@ -43,28 +45,11 @@ const CARD: React.CSSProperties = {
   boxShadow: "0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04)",
 };
 
-type Tab = "brief" | "studies" | "assistant";
-type BriefMode = "choose" | "standard" | "ai";
-type AiStep = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-
-const STUDY_TYPE_CARDS = [
-  { name: "Test24 Basic", desc: "100 consumers · 5 min · 24hr turnaround · 1 Basic credit",    price: "R5,000",     id: "basic" },
-  { name: "Test24 Pro",   desc: "100+ consumers · 10–15 min · 24hr · AI Qual included",        price: "From R45,000", id: "pro"   },
-];
-
-const AGE_CHIPS    = ["18–24", "25–34", "35–44", "45–54", "55+"];
-const GENDER_CHIPS = ["Male", "Female", "Non-binary", "All"];
-const INCOME_CHIPS = ["LSM 1–4", "LSM 5–7", "LSM 8–10", "All LSM"];
-const REGION_CHIPS = ["Gauteng", "Western Cape", "KZN", "Eastern Cape", "Limpopo", "All provinces"];
-
-const AI_STEPS = [
-  { q: "What product or concept are you testing?" },
-  { q: "What is the primary research objective for this study?" },
-  { q: "Who is your target audience? Select the demographics that apply." },
-  { q: "Which study type do you need?" },
-  { q: "How many concepts or stimuli are you testing, and do you have creative materials to upload?" },
-  { q: "Any specific competitors or market context we should know about?" },
-  { q: "Here is your brief summary. Review and submit for approval." },
+const TEST_TAB_VALUES = ["studies", "assistant"] as const;
+type Tab = typeof TEST_TAB_VALUES[number];
+const TEST_TABS: { value: Tab; label: string; testId: string }[] = [
+  { value: "studies", label: "Studies", testId: "tab-test-studies" },
+  { value: "assistant", label: "Research Assistant", testId: "tab-test-assistant" },
 ];
 
 const STATUS_MAP: Record<string, { label: string; bg: string; color: string }> = {
@@ -73,14 +58,6 @@ const STATUS_MAP: Record<string, { label: string; bg: string; color: string }> =
   ANALYSING_DATA: { label: "Analysing",       bg: AMBER_LT, color: AMBER_DK },
   COMPLETED:      { label: "Complete",        bg: SUC_LT,  color: SUCCESS  },
 };
-
-const AI_MESSAGES = [
-  {
-    type: "system",
-    text: "Project Aurum — Key Finding: The commitment gap (Interest 67% → Commit 54%) is the critical issue. A 43-point drop — among the widest in your library.",
-    rec: "→ Investigate price anchoring. The gap closes when price message is explicit.",
-  },
-];
 
 const AI_PROMPTS = [
   "What drove the commitment gap?",
@@ -255,6 +232,7 @@ function RankingMiniChart({ studyId }: { studyId: string }) {
   }
 
   const sorted = [...ranking].sort((a, b) => a.rank - b.rank).slice(0, 5);
+  const formatPercent = (value: number) => `${Math.round(value)}%`;
   const chartData = sorted.map((c) => ({
     name: c.name.length > 15 ? c.name.slice(0, 13) + "\u2026" : c.name,
     winRate: c.win_rate ?? 0,
@@ -263,15 +241,25 @@ function RankingMiniChart({ studyId }: { studyId: string }) {
 
   return (
     <div className="px-5 py-3" style={{ borderTop: `1px solid ${N200}` }} data-testid="ranking-mini-chart">
-      <div className="text-[10px] font-bold tracking-widest uppercase mb-2" style={{ color: VIO }}>Concept Ranking</div>
+      <div className="flex flex-wrap items-baseline justify-between gap-2 mb-2">
+        <div className="text-[10px] font-bold tracking-widest uppercase" style={{ color: VIO }}>Concept Ranking</div>
+        <div className="text-[10px]" style={{ color: N500 }}>
+          Interest = initial appeal · Commitment win rate = pairwise choice
+        </div>
+      </div>
       <div style={{ height: Math.max(120, sorted.length * 36) }}>
         <ResponsiveContainer width="100%" height="100%">
           <ReBarChart data={chartData} layout="vertical" margin={{ left: 0, right: 10 }}>
             <CartesianGrid strokeDasharray="3 3" horizontal={false} />
             <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
             <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 10 }} />
-            <ReTooltip formatter={(v: number, name: string) => [`${v}%`, name === "winRate" ? "Win Rate" : "Interest"]} />
-            <Bar dataKey="winRate" name="Win Rate" fill="#3A2FBF" barSize={8} radius={[0, 3, 3, 0]} />
+            <ReTooltip
+              formatter={(v: number, _name: string, item: { dataKey?: string | number }) => [
+                formatPercent(v),
+                String(item.dataKey) === "winRate" ? "Commitment win rate" : "Interest",
+              ]}
+            />
+            <Bar dataKey="winRate" name="Commitment win rate" fill="#3A2FBF" barSize={8} radius={[0, 3, 3, 0]} />
             <Bar dataKey="interest" name="Interest" fill="#3B82F6" barSize={8} radius={[0, 3, 3, 0]} />
           </ReBarChart>
         </ResponsiveContainer>
@@ -280,97 +268,73 @@ function RankingMiniChart({ studyId }: { studyId: string }) {
   );
 }
 
+function DisabledActionButton({
+  label,
+  icon,
+  message,
+  testId,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  message: string;
+  testId: string;
+}) {
+  return (
+    <TooltipProvider delayDuration={150}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex">
+            <button
+              type="button"
+              disabled
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-not-allowed opacity-60"
+              style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}
+              data-testid={testId}
+            >
+              {icon} {label}
+            </button>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>{message}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
 export default function TestPage() {
   const [, setLocation]           = useLocation();
   const isMobile = useIsMobile();
-  const { user, isAdmin }         = useAuth();
-  const { toast }                 = useToast();
-  const [activeTab, setActiveTab] = useState<Tab>("studies");
-  const [briefMode, setBriefMode] = useState<BriefMode>("choose");
-  const [aiInput, setAiInput]     = useState("");
-  const [chatMessages, setChatMessages] = useState<any[]>(AI_MESSAGES);
+  const { user }                  = useAuth();
+  const [activeTab, setActiveTab] = useQueryState(
+    "tab",
+    parseAsStringLiteral(TEST_TAB_VALUES).withDefault("studies"),
+  );
   const [chatInput, setChatInput] = useState("");
   const [showChat, setShowChat]   = useState(false);
-
-  /* AI brief assistant state */
-  const [aiStep, setAiStep]                 = useState<AiStep>(0);
-  const [aiAnswers, setAiAnswers]           = useState<Record<string, any>>({});
-  const [aiCurrentInput, setAiCurrentInput] = useState("");
-  const [agesSelected, setAgesSelected]     = useState<string[]>([]);
-  const [gendersSelected, setGenders]       = useState<string[]>([]);
-  const [incomesSelected, setIncomes]       = useState<string[]>([]);
-  const [regionsSelected, setRegions]       = useState<string[]>([]);
-  const [studyTypeAI, setStudyTypeAI]       = useState("basic");
-  const [numConceptsAI, setNumConceptsAI]   = useState(1);
-  const [uploadedFiles, setUploadedFiles]   = useState<File[]>([]);
-  const [briefSubmitted, setBriefSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting]     = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  /* Standard brief quick-form state */
-  const [selectedStudyType, setSelectedStudyType] = useState("basic");
 
   /* Research Assistant tab state */
   const [assistantInput, setAssistantInput]     = useState("");
   const [assistantMsgs, setAssistantMsgs]       = useState<{ role: "user" | "ai"; text: string }[]>([]);
   const [selectedAssistStudy, setSelectedAssistStudy] = useState("");
 
-  /* Scope: 'mine' = only studies the user submitted, 'company' = all studies for their company */
-  const initialScope: "mine" | "company" = (() => {
-    if (typeof window === "undefined") return "mine";
-    const p = new URLSearchParams(window.location.search).get("scope");
-    return p === "company" ? "company" : "mine";
-  })();
-  const [studyScope, setStudyScope] = useState<"mine" | "company">(initialScope);
-
-  /* Admin-only company filter (kept in sync with the URL ?companyId=…) */
-  const initialAdminCompanyId: string = (() => {
-    if (typeof window === "undefined") return "";
-    return new URLSearchParams(window.location.search).get("companyId") || "";
-  })();
-  const [adminCompanyId, setAdminCompanyId] = useState<string>(initialAdminCompanyId);
-
-  const { data: adminCompanies = [] } = useQuery<Array<{ id: string; name: string }>>({
-    queryKey: ["/api/admin/companies"],
-    queryFn: async () => {
-      const r = await fetch("/api/admin/companies");
-      if (!r.ok) return [];
-      return r.json();
-    },
-    enabled: !!isAdmin,
-  });
-
-  useEffect(() => {
-    if (!isAdmin || typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    if (adminCompanyId) {
-      params.set("companyId", adminCompanyId);
-    } else {
-      params.delete("companyId");
-    }
-    const qs = params.toString();
-    const next = window.location.pathname + (qs ? `?${qs}` : "");
-    if (next !== window.location.pathname + window.location.search) {
-      window.history.replaceState(null, "", next);
-    }
-  }, [isAdmin, adminCompanyId]);
-
-  /* Real client reports — scoped server-side */
+  /* Real client reports — scoped to this company by the server */
   const { data: clientReports = [], isLoading: isLoadingStudies } = useQuery<ClientReport[]>({
-    queryKey: ["/api/member/client-reports", isAdmin ? `admin:${adminCompanyId || "all"}` : studyScope],
+    queryKey: ["/api/member/client-reports", user?.companyId],
     queryFn: async () => {
-      const url = isAdmin
-        ? (adminCompanyId ? `/api/member/client-reports?companyId=${encodeURIComponent(adminCompanyId)}` : "/api/member/client-reports")
-        : `/api/member/client-reports?scope=${studyScope}`;
-      const r = await fetch(url);
-      if (!r.ok) return [];
-      return r.json();
+      const response = await fetch("/api/member/client-reports");
+      if (!response.ok) throw new Error("Failed to fetch client reports");
+      return response.json();
     },
     enabled: !!user,
   });
 
   const { data: userActivity } = useQuery<{ basicCreditsRemaining: number; proCreditsRemaining: number }>({
-    queryKey: ["/api/member/activity", user?.id],
+    queryKey: ["/api/member/activity", user?.id, user?.companyId],
+    queryFn: async () => {
+      const response = await fetch("/api/member/activity");
+      if (!response.ok) throw new Error("Failed to fetch member activity");
+      return response.json();
+    },
     enabled: !!user,
   });
 
@@ -378,13 +342,7 @@ export default function TestPage() {
   const digStudies = digStudiesData?.studies ?? [];
 
   const digStudyMap = useMemo(() => {
-    const m = new Map<string, DigStudy>();
-    for (const s of digStudies) {
-      if (s.public_client_report_id) {
-        m.set(s.public_client_report_id, s);
-      }
-    }
-    return m;
+    return mapPreferredDigStudiesByReportId(digStudies);
   }, [digStudies]);
 
   /* Map real ClientReports to rich study card format */
@@ -414,16 +372,6 @@ export default function TestPage() {
     if (!name) return "?";
     const p = name.split(" ");
     return p.length >= 2 ? (p[0][0] + p[1][0]).toUpperCase() : name[0].toUpperCase();
-  };
-
-  const handleSendAI = () => {
-    if (!aiInput.trim()) return;
-    setChatMessages(prev => [
-      ...prev,
-      { type: "user", text: aiInput },
-      { type: "system", text: "Based on your study portfolio, here's what I can see from that angle…", rec: "→ I'll need more study data to give a definitive answer, but this direction looks strong." },
-    ]);
-    setAiInput("");
   };
 
   const handleSendAssistant = () => {
@@ -469,544 +417,32 @@ export default function TestPage() {
     return                        { label: "BASIC",  bg: CYAN_LT, color: CYAN_DK };
   };
 
-  /* AI brief step helpers */
-  const toggleChip = (val: string, arr: string[], setArr: (v: string[]) => void) => {
-    setArr(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
-  };
-
-  const advanceAiStep = () => {
-    const step = aiStep;
-    let updated = { ...aiAnswers };
-
-    if (step === 0) updated.concept = aiCurrentInput;
-    if (step === 1) updated.objective = aiCurrentInput;
-    if (step === 2) updated.ages = agesSelected; updated.genders = gendersSelected; updated.incomes = incomesSelected; updated.regions = regionsSelected;
-    if (step === 3) updated.studyType = studyTypeAI;
-    if (step === 4) { updated.numConcepts = numConceptsAI; updated.files = uploadedFiles.map(f => f.name); }
-    if (step === 5) updated.context = aiCurrentInput;
-
-    setAiAnswers(updated);
-    setAiCurrentInput("");
-    if (step < 6) setAiStep((step + 1) as AiStep);
-  };
-
-  const submitAiBrief = async () => {
-    setIsSubmitting(true);
-    try {
-      await fetch("/api/ai-brief/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          submittedByName:  user?.name || "Portal User",
-          submittedByEmail: user?.email || "",
-          companyName:      user?.companyName || "Unknown Company",
-          concept:          aiAnswers.concept || "",
-          objective:        aiAnswers.objective || "",
-          ages:             aiAnswers.ages || [],
-          genders:          aiAnswers.genders || [],
-          incomes:          aiAnswers.incomes || [],
-          regions:          aiAnswers.regions || [],
-          studyType:        aiAnswers.studyType || "basic",
-          numConcepts:      aiAnswers.numConcepts || 1,
-          context:          aiAnswers.context || "",
-          files:            aiAnswers.files || [],
-        }),
-      });
-      setBriefSubmitted(true);
-    } catch (e) {
-      console.error("AI brief submit error", e);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const resetAiBrief = () => {
-    setAiStep(0);
-    setAiAnswers({});
-    setAiCurrentInput("");
-    setAgesSelected([]);
-    setGenders([]);
-    setIncomes([]);
-    setRegions([]);
-    setStudyTypeAI("basic");
-    setNumConceptsAI(1);
-    setUploadedFiles([]);
-    setBriefSubmitted(false);
-    setBriefMode("choose");
-  };
-
   return (
-    <PortalLayout showPhaseTopbar={false}>
-      <div className="flex flex-col w-full h-full" style={{ background: CREAM }}>
-
-        {/* Phase topbar */}
-        <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1" style={{ background: "rgba(42,158,92,0.2)", color: "#86EFAC", border: "1px solid rgba(42,158,92,0.4)", borderRadius: 6 }}>
-              PHASE 02
-            </span>
-            <h1 className="font-serif text-xl text-white">Test</h1>
-            <span className="text-sm hidden sm:block" style={{ color: N400 }}>Put your ideas in front of real consumers.</span>
+    <PortalLayout>
+      <div className="portal-workspace">
+        <div className="portal-page-header flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div className="min-w-0 flex-1">
+            <PortalBreadcrumbs items={[{ label: "Dashboard", href: "/portal/dashboard" }, { label: "Test" }]} />
+            <h1 className="font-serif text-3xl leading-tight" style={{ color: VDK }}>Does my idea work?</h1>
+            <p className="mt-2 max-w-none text-sm leading-relaxed" style={{ color: N500 }}>
+              Use Test to launch Test24 briefs, track live studies, and review consumer evidence when results land.
+            </p>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => { setActiveTab("brief"); setBriefMode("choose"); }}
-              data-testid="button-launch-brief"
-              className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg"
-              style={{ background: TEST_COLOR, borderRadius: 8 }}
-            >
-              Launch a Brief
-            </button>
-            <button
-              onClick={() => setLocation("/portal/dashboard")}
-              className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
-              style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}
-              data-testid="button-close-test"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          <button
+            onClick={() => setLocation("/portal/launch")}
+            data-testid="button-launch-brief"
+            className="text-xs font-semibold px-4 py-2 text-white rounded-lg md:self-start"
+            style={{ background: TEST_COLOR, borderRadius: 8 }}
+          >
+            Launch a Brief
+          </button>
         </div>
 
-        {/* Sub-tabs — sticky white bar */}
-        <div className="flex flex-shrink-0 px-5 sticky-tab-bar border-b" style={{ borderColor: N200 }}>
-          {((isAdmin ? ["brief", "studies", "assistant"] : ["brief", "studies"]) as Tab[]).map(tab => (
-            <button
-              key={tab}
-              onClick={() => { setActiveTab(tab); if (tab === "brief") setBriefMode("choose"); }}
-              data-testid={`tab-test-${tab}`}
-              className="flex-shrink-0 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap"
-              style={{
-                color: activeTab === tab ? VDK : N500,
-                borderBottomColor: activeTab === tab ? CORAL : "transparent",
-                background: "transparent",
-              }}
-            >
-              {tab === "brief" ? "Launch a Brief" : tab === "studies" ? "Studies" : "Research Assistant"}
-            </button>
-          ))}
-        </div>
-
+        <PortalTabs value={activeTab} onValueChange={(tab) => void setActiveTab(tab)} tabs={TEST_TABS} accentColor={CORAL}>
         {/* Body */}
-        <div className="flex flex-1 overflow-hidden">
+        <div className="portal-body">
           {/* Main */}
-          <div className="flex-1 overflow-y-auto p-6 pb-20 sm:pb-6" style={{ background: CREAM }}>
-
-            {/* ── LAUNCH A BRIEF ── */}
-            {activeTab === "brief" && (
-              <div>
-                {briefMode === "choose" && (
-                  <div>
-                    <div className="text-[11px] font-bold tracking-widest uppercase mb-4" style={{ color: CORAL }}>How would you like to submit your brief?</div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
-                      {/* Standard form */}
-                      <button
-                        onClick={() => setBriefMode("standard")}
-                        data-testid="button-choose-standard-brief"
-                        className="text-left rounded-2xl p-5 transition-all hover:shadow-md"
-                        style={{ background: "#fff", border: `2px solid ${N200}` }}
-                      >
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: SUC_LT }}>
-                          <FileText className="w-5 h-5" style={{ color: TEST_COLOR }} />
-                        </div>
-                        <div className="text-sm font-semibold mb-1" style={{ color: VDK }}>Standard Brief Form</div>
-                        <div className="text-xs leading-relaxed" style={{ color: N500 }}>Fill out the full structured brief form — objectives, audience, concepts, billing and review in one flow.</div>
-                        <div className="flex items-center gap-1 mt-3 text-xs font-semibold" style={{ color: TEST_COLOR }}>
-                          Go to brief form <ChevronRight className="w-3 h-3" />
-                        </div>
-                      </button>
-
-                      {/* AI Assistant */}
-                      <button
-                        onClick={() => { setBriefMode("ai"); setAiStep(0); setBriefSubmitted(false); }}
-                        data-testid="button-choose-ai-brief"
-                        className="text-left rounded-2xl p-5 transition-all hover:shadow-md"
-                        style={{ background: "#fff", border: `2px solid ${N200}` }}
-                      >
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: VIO_LT }}>
-                          <Sparkles className="w-5 h-5" style={{ color: VIO }} />
-                        </div>
-                        <div className="text-sm font-semibold mb-1" style={{ color: VDK }}>AI Brief Assistant</div>
-                        <div className="text-xs leading-relaxed" style={{ color: N500 }}>Answer a few conversational questions and the AI will design your survey questionnaire and send it to hannah@innovatr.co.za for approval.</div>
-                        <div className="flex items-center gap-1 mt-3 text-xs font-semibold" style={{ color: VIO }}>
-                          Start AI assistant <ChevronRight className="w-3 h-3" />
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {briefMode === "standard" && (
-                  <div style={{ ...CARD, maxWidth: 680 }}>
-                    <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${N200}`, background: "#F5F5F5" }}>
-                      <div>
-                        <div className="text-sm font-semibold" style={{ color: VDK }}>Research Brief</div>
-                        <div className="text-xs" style={{ color: N500 }}>Complete the structured brief form to launch your study</div>
-                      </div>
-                      <button onClick={() => setBriefMode("choose")} className="text-xs" style={{ color: N500 }}>← Back</button>
-                    </div>
-
-                    <div className="flex overflow-x-auto px-5" style={{ borderBottom: `1px solid ${N200}` }}>
-                      {["1 Objectives", "2 Audience", "3 Concepts", "4 Billing", "5 Review"].map((step, i) => (
-                        <div
-                          key={step}
-                          className="px-3 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 transition-colors"
-                          style={i === 0 ? { borderBottomColor: TEST_COLOR, color: TEST_COLOR } : { borderBottomColor: "transparent", color: N500 }}
-                        >
-                          {step}
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="p-5 space-y-4">
-                      <div className="text-sm font-semibold" style={{ color: VDK }}>1 Research Objectives</div>
-                      <div>
-                        <label className="text-xs font-semibold mb-1.5 block" style={{ color: N500 }}>Brief / Project Name <span style={{ color: CORAL }}>*</span></label>
-                        <input
-                          className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none"
-                          style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }}
-                          placeholder="e.g. Energy Drink Concept Test Q2 2026"
-                          data-testid="input-brief-name"
-                          onFocus={e => (e.target.style.borderColor = VIO)}
-                          onBlur={e => (e.target.style.borderColor = N200)}
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-semibold mb-1.5 block" style={{ color: N500 }}>Research Objective <span style={{ color: CORAL }}>*</span></label>
-                        <textarea
-                          className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none resize-none"
-                          style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }}
-                          rows={3}
-                          placeholder="Be as specific as possible. This drives the entire survey structure."
-                          data-testid="input-brief-objective"
-                          onFocus={e => (e.target.style.borderColor = VIO)}
-                          onBlur={e => (e.target.style.borderColor = N200)}
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-semibold mb-2 block" style={{ color: N500 }}>Study Type <span style={{ color: CORAL }}>*</span></label>
-                        <div className="grid grid-cols-2 gap-3">
-                          {STUDY_TYPE_CARDS.map(card => (
-                            <button
-                              key={card.id}
-                              onClick={() => setSelectedStudyType(card.id)}
-                              data-testid={`study-type-${card.id}`}
-                              className="border-2 rounded-xl p-4 text-left transition-all"
-                              style={selectedStudyType === card.id
-                                ? { borderColor: TEST_COLOR, background: SUC_LT }
-                                : { borderColor: N200, background: "#fff" }
-                              }
-                            >
-                              <div className="text-sm font-semibold mb-1" style={{ color: VDK }}>{card.name}</div>
-                              <div className="text-xs mb-2 leading-relaxed" style={{ color: N500 }}>{card.desc}</div>
-                              <div className="text-sm font-bold" style={{ color: TEST_COLOR }}>{card.price}</div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="flex justify-between pt-2" style={{ borderTop: `1px solid ${N200}` }}>
-                        <button onClick={() => setBriefMode("choose")} className="text-xs font-semibold px-4 py-2 rounded-lg" style={{ border: `1px solid ${N200}`, color: N500, background: "#fff" }}>← Back</button>
-                        <button
-                          onClick={() => setLocation("/portal/launch")}
-                          className="text-xs font-semibold px-4 py-2 text-white rounded-lg"
-                          style={{ background: TEST_COLOR, borderRadius: 8 }}
-                          data-testid="button-brief-next"
-                        >
-                          Continue in full form →
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {briefMode === "ai" && (
-                  <div style={{ ...CARD, maxWidth: 680 }}>
-                    {/* AI brief header */}
-                    <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${N200}`, background: "#F5F5F5" }}>
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: VIO }}>
-                          <Sparkles className="w-3.5 h-3.5 text-white" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold" style={{ color: VDK }}>AI Brief Assistant</div>
-                          <div className="text-xs" style={{ color: N500 }}>Once complete, a survey questionnaire is sent to hannah@innovatr.co.za for approval</div>
-                        </div>
-                      </div>
-                      <button onClick={() => setBriefMode("choose")} className="text-xs" style={{ color: N500 }}>← Back</button>
-                    </div>
-
-                    {/* Step progress */}
-                    {!briefSubmitted && (
-                      <div className="flex px-5 py-2 gap-1" style={{ borderBottom: `1px solid ${N200}`, background: "#F5F5F5" }}>
-                        {AI_STEPS.map((_, i) => (
-                          <div
-                            key={i}
-                            className="flex-1 h-1 rounded-full"
-                            style={{ background: i < aiStep ? VIO : i === aiStep ? VIO : N200, opacity: i <= aiStep ? 1 : 0.4 }}
-                          />
-                        ))}
-                      </div>
-                    )}
-
-                    <div className="p-5">
-                      {briefSubmitted ? (
-                        <div className="text-center py-8">
-                          <CheckCircle2 className="w-12 h-12 mx-auto mb-3" style={{ color: SUCCESS }} />
-                          <div className="text-base font-semibold mb-2" style={{ color: VDK }}>Brief submitted for approval</div>
-                          <p className="text-sm mb-6" style={{ color: N500 }}>
-                            A survey questionnaire has been generated from your brief and sent to hannah@innovatr.co.za for review and approval. You'll hear back within 24 hours.
-                          </p>
-                          <div className="space-y-2 text-left rounded-xl p-4 mb-6" style={{ background: "#F5F5F5", border: `1px solid ${N200}` }}>
-                            <div className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: CORAL }}>Brief Summary</div>
-                            {aiAnswers.concept && <div className="text-xs"><span className="font-semibold" style={{ color: VDK }}>Concept: </span><span style={{ color: N500 }}>{aiAnswers.concept}</span></div>}
-                            {aiAnswers.objective && <div className="text-xs"><span className="font-semibold" style={{ color: VDK }}>Objective: </span><span style={{ color: N500 }}>{aiAnswers.objective}</span></div>}
-                            {aiAnswers.studyType && <div className="text-xs"><span className="font-semibold" style={{ color: VDK }}>Study type: </span><span style={{ color: N500 }}>{aiAnswers.studyType === "basic" ? "Test24 Basic" : "Test24 Pro"}</span></div>}
-                            {aiAnswers.numConcepts && <div className="text-xs"><span className="font-semibold" style={{ color: VDK }}>Concepts: </span><span style={{ color: N500 }}>{aiAnswers.numConcepts}</span></div>}
-                          </div>
-                          <button onClick={resetAiBrief} className="text-sm font-semibold px-5 py-2.5 text-white rounded-lg" style={{ background: TEST_COLOR, borderRadius: 8 }} data-testid="button-brief-done">
-                            Done
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          {/* AI question bubble */}
-                          <div className="mb-4">
-                            <div className="flex items-center gap-1.5 mb-2">
-                              <div className="w-5 h-5 rounded-sm flex items-center justify-center" style={{ background: VIO }}><Sparkles className="w-3 h-3 text-white" /></div>
-                              <span className="text-[11px] font-semibold" style={{ color: VIO }}>Brief Assistant · Step {aiStep + 1} of {AI_STEPS.length}</span>
-                            </div>
-                            <div className="text-sm font-medium leading-relaxed p-4 rounded-xl" style={{ background: "#F8F7FF", border: `1px solid rgba(58,47,191,0.15)`, color: VDK }}>
-                              {AI_STEPS[aiStep].q}
-                            </div>
-                          </div>
-
-                          {/* Step 0: Concept */}
-                          {aiStep === 0 && (
-                            <textarea
-                              className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none resize-none"
-                              rows={3}
-                              style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }}
-                              placeholder="e.g. A premium energy drink with adaptogens, targeting health-conscious urban professionals aged 25–34"
-                              value={aiCurrentInput}
-                              onChange={e => setAiCurrentInput(e.target.value)}
-                              onFocus={e => (e.target.style.borderColor = VIO)}
-                              onBlur={e => (e.target.style.borderColor = N200)}
-                              data-testid="input-ai-concept"
-                            />
-                          )}
-
-                          {/* Step 1: Objective */}
-                          {aiStep === 1 && (
-                            <textarea
-                              className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none resize-none"
-                              rows={3}
-                              style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }}
-                              placeholder="e.g. Determine whether the concept drives sufficient purchase intent to justify launch investment in Gauteng"
-                              value={aiCurrentInput}
-                              onChange={e => setAiCurrentInput(e.target.value)}
-                              onFocus={e => (e.target.style.borderColor = VIO)}
-                              onBlur={e => (e.target.style.borderColor = N200)}
-                              data-testid="input-ai-objective"
-                            />
-                          )}
-
-                          {/* Step 2: Demographics */}
-                          {aiStep === 2 && (
-                            <div className="space-y-3">
-                              <div>
-                                <label className="text-xs font-semibold mb-2 block" style={{ color: N500 }}>Age groups</label>
-                                <div className="flex flex-wrap gap-2">
-                                  {AGE_CHIPS.map(c => (
-                                    <button key={c} onClick={() => toggleChip(c, agesSelected, setAgesSelected)} className="px-3 py-1 text-xs rounded-lg" data-testid={`chip-age-${c}`}
-                                      style={agesSelected.includes(c) ? { background: VIO, color: "#fff", border: `1px solid ${VIO}` } : { background: "#fff", border: `1px solid ${N200}`, color: N500 }}>
-                                      {c}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                              <div>
-                                <label className="text-xs font-semibold mb-2 block" style={{ color: N500 }}>Gender</label>
-                                <div className="flex flex-wrap gap-2">
-                                  {GENDER_CHIPS.map(c => (
-                                    <button key={c} onClick={() => toggleChip(c, gendersSelected, setGenders)} className="px-3 py-1 text-xs rounded-lg" data-testid={`chip-gender-${c}`}
-                                      style={gendersSelected.includes(c) ? { background: VIO, color: "#fff", border: `1px solid ${VIO}` } : { background: "#fff", border: `1px solid ${N200}`, color: N500 }}>
-                                      {c}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                              <div>
-                                <label className="text-xs font-semibold mb-2 block" style={{ color: N500 }}>Income (LSM)</label>
-                                <div className="flex flex-wrap gap-2">
-                                  {INCOME_CHIPS.map(c => (
-                                    <button key={c} onClick={() => toggleChip(c, incomesSelected, setIncomes)} className="px-3 py-1 text-xs rounded-lg" data-testid={`chip-income-${c}`}
-                                      style={incomesSelected.includes(c) ? { background: VIO, color: "#fff", border: `1px solid ${VIO}` } : { background: "#fff", border: `1px solid ${N200}`, color: N500 }}>
-                                      {c}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                              <div>
-                                <label className="text-xs font-semibold mb-2 block" style={{ color: N500 }}>Region</label>
-                                <div className="flex flex-wrap gap-2">
-                                  {REGION_CHIPS.map(c => (
-                                    <button key={c} onClick={() => toggleChip(c, regionsSelected, setRegions)} className="px-3 py-1 text-xs rounded-lg" data-testid={`chip-region-${c}`}
-                                      style={regionsSelected.includes(c) ? { background: VIO, color: "#fff", border: `1px solid ${VIO}` } : { background: "#fff", border: `1px solid ${N200}`, color: N500 }}>
-                                      {c}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Step 3: Study type */}
-                          {aiStep === 3 && (
-                            <div className="grid grid-cols-2 gap-3">
-                              {STUDY_TYPE_CARDS.map(card => (
-                                <button
-                                  key={card.id}
-                                  onClick={() => setStudyTypeAI(card.id)}
-                                  data-testid={`ai-study-type-${card.id}`}
-                                  className="border-2 rounded-xl p-4 text-left transition-all"
-                                  style={studyTypeAI === card.id ? { borderColor: TEST_COLOR, background: SUC_LT } : { borderColor: N200, background: "#fff" }}
-                                >
-                                  <div className="text-sm font-semibold mb-1" style={{ color: VDK }}>{card.name}</div>
-                                  <div className="text-xs mb-2 leading-relaxed" style={{ color: N500 }}>{card.desc}</div>
-                                  <div className="text-sm font-bold" style={{ color: TEST_COLOR }}>{card.price}</div>
-                                </button>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Step 4: Concepts + file upload */}
-                          {aiStep === 4 && (
-                            <div className="space-y-3">
-                              <div>
-                                <label className="text-xs font-semibold mb-2 block" style={{ color: N500 }}>How many concepts are you testing?</label>
-                                <div className="flex items-center gap-3">
-                                  <button onClick={() => setNumConceptsAI(Math.max(1, numConceptsAI - 1))} className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{ background: "#fff", border: `1px solid ${N200}`, color: VDK }}>−</button>
-                                  <span className="text-xl font-bold font-mono" style={{ color: VDK }}>{numConceptsAI}</span>
-                                  <button onClick={() => setNumConceptsAI(Math.min(5, numConceptsAI + 1))} className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{ background: "#fff", border: `1px solid ${N200}`, color: VDK }}>+</button>
-                                </div>
-                              </div>
-                              <div>
-                                <label className="text-xs font-semibold mb-2 block" style={{ color: N500 }}>Upload creative materials (optional — images, PDFs, video thumbnails)</label>
-                                <input
-                                  ref={fileInputRef}
-                                  type="file"
-                                  multiple
-                                  accept="image/*,.pdf"
-                                  className="hidden"
-                                  onChange={e => setUploadedFiles(Array.from(e.target.files || []))}
-                                  data-testid="input-brief-files"
-                                />
-                                <button
-                                  onClick={() => fileInputRef.current?.click()}
-                                  className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-lg"
-                                  style={{ border: `1.5px dashed ${N200}`, color: N500, background: "#F5F5F5" }}
-                                  data-testid="button-upload-creative"
-                                >
-                                  <Upload className="w-4 h-4" />
-                                  {uploadedFiles.length > 0 ? `${uploadedFiles.length} file${uploadedFiles.length > 1 ? "s" : ""} selected` : "Choose files to upload"}
-                                </button>
-                                {uploadedFiles.length > 0 && (
-                                  <div className="mt-2 space-y-1">
-                                    {uploadedFiles.map((f, i) => (
-                                      <div key={i} className="text-xs flex items-center gap-2 py-1" style={{ color: N500 }}>
-                                        <FileText className="w-3 h-3" /> {f.name}
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Step 5: Context */}
-                          {aiStep === 5 && (
-                            <textarea
-                              className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none resize-none"
-                              rows={3}
-                              style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }}
-                              placeholder="e.g. Main competitors are Monster Energy and Red Bull. The product will retail at R22 per unit in Pick n Pay and Woolworths."
-                              value={aiCurrentInput}
-                              onChange={e => setAiCurrentInput(e.target.value)}
-                              onFocus={e => (e.target.style.borderColor = VIO)}
-                              onBlur={e => (e.target.style.borderColor = N200)}
-                              data-testid="input-ai-context"
-                            />
-                          )}
-
-                          {/* Step 6: Review */}
-                          {aiStep === 6 && (
-                            <div className="space-y-3">
-                              <div className="rounded-xl p-4" style={{ background: "#F5F5F5", border: `1px solid ${N200}` }}>
-                                <div className="text-xs font-bold uppercase tracking-wide mb-3" style={{ color: CORAL }}>Brief Summary</div>
-                                {[
-                                  { label: "Concept",    value: aiAnswers.concept },
-                                  { label: "Objective",  value: aiAnswers.objective },
-                                  { label: "Ages",       value: (aiAnswers.ages || []).join(", ") || "Not specified" },
-                                  { label: "Genders",    value: (aiAnswers.genders || []).join(", ") || "Not specified" },
-                                  { label: "Income",     value: (aiAnswers.incomes || []).join(", ") || "Not specified" },
-                                  { label: "Regions",    value: (aiAnswers.regions || []).join(", ") || "Not specified" },
-                                  { label: "Study type", value: studyTypeAI === "basic" ? "Test24 Basic" : "Test24 Pro" },
-                                  { label: "Concepts",   value: String(numConceptsAI) },
-                                  { label: "Files",      value: uploadedFiles.length > 0 ? uploadedFiles.map(f => f.name).join(", ") : "None" },
-                                  { label: "Context",    value: aiAnswers.context || "None" },
-                                ].map(row => (
-                                  <div key={row.label} className="flex gap-3 mb-2">
-                                    <span className="text-xs font-semibold w-24 flex-shrink-0" style={{ color: VDK }}>{row.label}</span>
-                                    <span className="text-xs" style={{ color: N500 }}>{row.value}</span>
-                                  </div>
-                                ))}
-                              </div>
-                              <div className="text-xs rounded-xl p-3" style={{ background: VIO_LT, border: `1px solid rgba(58,47,191,0.2)`, color: VIO }}>
-                                <span className="font-semibold">What happens next: </span>The AI will generate a custom Upsiide survey questionnaire from your brief and send it to hannah@innovatr.co.za for review and approval. You'll be notified once approved.
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Navigation */}
-                          <div className="flex items-center justify-between mt-5 pt-4" style={{ borderTop: `1px solid ${N200}` }}>
-                            {aiStep > 0
-                              ? <button onClick={() => setAiStep((aiStep - 1) as AiStep)} className="text-xs font-semibold px-4 py-2 rounded-lg" style={{ border: `1px solid ${N200}`, color: N500, background: "#fff" }}>← Back</button>
-                              : <div />
-                            }
-                            {aiStep < 6 ? (
-                              <button
-                                onClick={advanceAiStep}
-                                disabled={
-                                  (aiStep === 0 && !aiCurrentInput.trim()) ||
-                                  (aiStep === 1 && !aiCurrentInput.trim()) ||
-                                  (aiStep === 5 && false)
-                                }
-                                data-testid={`button-ai-next-${aiStep}`}
-                                className="text-xs font-semibold px-5 py-2 text-white rounded-lg"
-                                style={{ background: VIO, borderRadius: 8 }}
-                              >
-                                Continue →
-                              </button>
-                            ) : (
-                              <button
-                                onClick={submitAiBrief}
-                                disabled={isSubmitting}
-                                data-testid="button-submit-ai-brief"
-                                className="flex items-center gap-2 text-xs font-semibold px-5 py-2.5 text-white rounded-lg"
-                                style={{ background: TEST_COLOR, borderRadius: 8 }}
-                              >
-                                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                                {isSubmitting ? "Submitting…" : "Submit for Approval"}
-                              </button>
-                            )}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+          <div className="portal-main-scroll">
 
             {/* ── STUDIES ── */}
             {activeTab === "studies" && (
@@ -1032,49 +468,6 @@ export default function TestPage() {
                     <option>In Field</option>
                     <option>Analysing</option>
                   </select>
-                  {isAdmin && (
-                    <select
-                      value={adminCompanyId}
-                      onChange={(e) => setAdminCompanyId(e.target.value)}
-                      data-testid="select-test-admin-company"
-                      className="rounded-lg px-3 py-2 text-xs focus:outline-none"
-                      style={{ background: "#fff", border: `1px solid ${N200}`, color: VDK }}
-                    >
-                      <option value="">All companies</option>
-                      {adminCompanies
-                        .slice()
-                        .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
-                        .map((c) => (
-                          <option key={c.id} value={c.id}>{c.name}</option>
-                        ))}
-                    </select>
-                  )}
-                  {!isAdmin && (
-                    <div className="inline-flex rounded-lg p-0.5" style={{ background: "#fff", border: `1px solid ${N200}` }}>
-                      <button
-                        onClick={() => setStudyScope("mine")}
-                        data-testid="button-test-scope-mine"
-                        className="text-xs font-semibold px-3 py-1 rounded-md transition-colors"
-                        style={studyScope === "mine"
-                          ? { background: VIO, color: "#fff" }
-                          : { background: "transparent", color: N500 }}
-                      >
-                        My studies
-                      </button>
-                      {user?.companyId && (
-                        <button
-                          onClick={() => setStudyScope("company")}
-                          data-testid="button-test-scope-company"
-                          className="text-xs font-semibold px-3 py-1 rounded-md transition-colors"
-                          style={studyScope === "company"
-                            ? { background: VIO, color: "#fff" }
-                            : { background: "transparent", color: N500 }}
-                        >
-                          My company
-                        </button>
-                      )}
-                    </div>
-                  )}
                   <span className="text-xs ml-auto" style={{ color: N400 }}>
                     {isLoadingStudies ? "—" : `${mappedStudies.length} ${mappedStudies.length === 1 ? "study" : "studies"}`}
                   </span>
@@ -1096,7 +489,7 @@ export default function TestPage() {
                     <BarChart2 className="w-10 h-10 mx-auto mb-3" style={{ color: N400 }} />
                     <div className="text-sm font-semibold mb-1" style={{ color: VDK }}>No studies yet</div>
                     <div className="text-xs mb-4" style={{ color: N500 }}>Launch your first brief to see study results here.</div>
-                    <button onClick={() => setActiveTab("brief")} className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg" style={{ background: SUCCESS, borderRadius: 8 }}>
+                    <button onClick={() => setLocation("/portal/launch")} className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg" style={{ background: SUCCESS, borderRadius: 8 }}>
                       Launch a Brief
                     </button>
                   </div>
@@ -1146,30 +539,33 @@ export default function TestPage() {
                           >
                             <BarChart2 className="w-3 h-3" /> View full analysis
                           </button>
-                          {isAdmin && (
-                            <button
-                              onClick={() => { setActiveTab("assistant"); setSelectedAssistStudy(study.id); }}
-                              className="text-xs font-semibold px-4 py-1.5 rounded-lg flex items-center gap-1.5"
-                              style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}
-                              data-testid={`button-act-study-${study.id}`}
-                            >
-                              <Sparkles className="w-3 h-3" /> Analyse in Act
-                            </button>
-                          )}
                           <button
-                            onClick={() => {
-                              if (study.pdfUrl) {
-                                window.open(study.pdfUrl, "_blank");
-                              } else {
-                                toast({ title: "PDF Report", description: "Your full study report is delivered via email." });
-                              }
-                            }}
-                            className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                            onClick={() => setLocation(`/portal/act?tab=nextsteps&reportId=${study.id}`)}
+                            className="text-xs font-semibold px-4 py-1.5 rounded-lg flex items-center gap-1.5"
                             style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}
-                            data-testid={`button-download-pdf-${study.id}`}
+                            data-testid={`button-act-study-${study.id}`}
                           >
-                            <ChevronRight className="w-3 h-3" /> Download PDF
+                            <Sparkles className="w-3 h-3" /> Analyse in Act
                           </button>
+                          {study.pdfUrl ? (
+                            <button
+                              onClick={() => {
+                                window.open(study.pdfUrl!, "_blank");
+                              }}
+                              className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                              style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}
+                              data-testid={`button-download-pdf-${study.id}`}
+                            >
+                              <ChevronRight className="w-3 h-3" /> Download PDF
+                            </button>
+                          ) : (
+                            <DisabledActionButton
+                              label="Download PDF"
+                              icon={<ChevronRight className="w-3 h-3" />}
+                              message="This report PDF is not available yet."
+                              testId={`button-download-pdf-${study.id}`}
+                            />
+                          )}
                         </div>
                       </div>
                     );
@@ -1254,38 +650,39 @@ export default function TestPage() {
 
                       {/* Actions */}
                       <div className="px-5 py-3 flex gap-2" style={{ borderTop: `1px solid ${N200}`, background: "#F5F5F5" }}>
-                        {isAdmin && (
+                        <button
+                          onClick={() => setLocation(`/portal/act?tab=nextsteps&reportId=${study.id}`)}
+                          className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg flex items-center gap-1.5"
+                          style={{ background: CORAL, borderRadius: 8 }}
+                          data-testid={`button-act-study-${study.id}`}
+                        >
+                          <Sparkles className="w-3 h-3" /> Analyse in Act
+                        </button>
+                        {study.pdfUrl ? (
                           <button
-                            onClick={() => { setActiveTab("assistant"); setSelectedAssistStudy(study.id); }}
-                            className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg flex items-center gap-1.5"
-                            style={{ background: CORAL, borderRadius: 8 }}
-                            data-testid={`button-act-study-${study.id}`}
+                            onClick={() => {
+                              window.open(study.pdfUrl!, "_blank");
+                            }}
+                            className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                            style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}
+                            data-testid={`button-download-pdf-${study.id}`}
                           >
-                            <Sparkles className="w-3 h-3" /> Analyse in Act
+                            <ChevronRight className="w-3 h-3" /> Download PDF
                           </button>
+                        ) : (
+                          <DisabledActionButton
+                            label="Download PDF"
+                            icon={<ChevronRight className="w-3 h-3" />}
+                            message="This report PDF is not available yet."
+                            testId={`button-download-pdf-${study.id}`}
+                          />
                         )}
-                        <button
-                          onClick={() => {
-                            if (study.pdfUrl) {
-                              window.open(study.pdfUrl, "_blank");
-                            } else {
-                              toast({ title: "PDF Report", description: "Your full study report is delivered via email. Contact your Innovatr account manager to access the interactive dashboard." });
-                            }
-                          }}
-                          className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5"
-                          style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}
-                          data-testid={`button-download-pdf-${study.id}`}
-                        >
-                          <ChevronRight className="w-3 h-3" /> Download PDF
-                        </button>
-                        <button
-                          onClick={() => toast({ title: "Coming soon", description: "Slide deck export launches in Q2 2025 — we'll notify you when it's ready." })}
-                          className="text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5"
-                          style={{ border: `1px solid ${N200}`, color: N500, background: "#fff", borderRadius: 8 }}
-                          data-testid={`button-slide-deck-${study.id}`}
-                        >
-                          <FileText className="w-3 h-3" /> Build Slide Deck
-                        </button>
+                        <DisabledActionButton
+                          label="Build Slide Deck"
+                          icon={<FileText className="w-3 h-3" />}
+                          message="Slide deck export is not available yet."
+                          testId={`button-slide-deck-${study.id}`}
+                        />
                       </div>
                     </div>
                   );
@@ -1294,8 +691,8 @@ export default function TestPage() {
               </div>
             )}
 
-            {/* ── RESEARCH ASSISTANT ── (admin-only) */}
-            {activeTab === "assistant" && isAdmin && (
+            {/* ── RESEARCH ASSISTANT ── */}
+            {activeTab === "assistant" && (
               <div>
                 {/* Empty state — no studies yet */}
                 {clientReports.length === 0 && !isLoadingStudies && (
@@ -1396,12 +793,9 @@ export default function TestPage() {
             )}
           </div>
 
-          {/* Right: AI Panel — only on the Research Assistant tab (admin only); hidden on Studies / Launch a Brief / mobile */}
-          {!isMobile && activeTab === "assistant" && isAdmin && (
-          <div
-            className={`flex flex-col overflow-hidden flex-shrink-0 ${activeTab === "assistant" ? "w-[340px] min-w-[340px]" : "w-80 min-w-[320px]"}`}
-            style={{ background: "#fff", borderLeft: `1px solid ${N200}` }}
-          >
+          {/* Right: AI Panel — hidden on mobile */}
+          {!isMobile && (
+          <div className="portal-ai-rail">
             {activeTab === "assistant" ? (
               /* ── Research Assistant Panel ── */
               <div className="flex flex-col h-full">
@@ -1477,6 +871,7 @@ export default function TestPage() {
           </div>
           )}
         </div>
+        </PortalTabs>
       </div>
     </PortalLayout>
   );

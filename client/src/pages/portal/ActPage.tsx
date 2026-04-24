@@ -1,21 +1,19 @@
 import { useState, useMemo, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
 import {
-  X, MessageSquare, ChevronDown, ArrowRight, Lock, Send,
+  MessageSquare, ChevronDown, ArrowRight, Lock, Send,
   FlaskConical, Layers, Lightbulb, CheckCircle2, Gift, Brain, Palette,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
-import PortalLayout from "./PortalLayout";
+import { PortalTabs } from "@/components/portal/PortalTabs";
+import { PortalBreadcrumbs } from "@/components/portal/PortalBreadcrumbs";
 import { useIsMobile } from "@/hooks/use-mobile";
-import type { ClientReport } from "@shared/schema";
-import { useIndustryGroups } from "@/hooks/useIndustryGroups";
-import { filterByIndustry } from "@/lib/industry-groups";
-import {
-  ALL_STRATEGIC_GAPS, ALL_NEXT_STEPS, ALL_RESEARCH_RECS,
-  ALL_PLANNING_PROMPTS, ALL_COVERAGE,
-} from "@/lib/portal-content";
+import type { Study } from "@shared/schema";
+import { usePortalFeed } from "@/lib/portal-feed";
+import PortalLayout from "./PortalLayout";
 
 /* ── Design System tokens ─────────────────────────────── */
 const VDK      = "#1E1B3A";
@@ -24,14 +22,13 @@ const VIO_LT   = "#EAE8FF";
 const CORAL    = "#E8503A";
 const CORAL_LT = "#FDECEA";
 const N200     = "#EBEBEB";
-const N400     = "#9C9AB0";
+const N400     = "#A89078";
 const N500     = "#8A7260";
 const SUCCESS  = "#2A9E5C";
 const SUC_LT   = "#D1FAE5";
 const AMBER_DK = "#B8911A";
 const AMBER_LT = "#FEF6D6";
 const CYAN_DK  = "#1A8FAD";
-const CREAM    = "#FFFFFF";
 const ACT_COLOR = CORAL;
 
 const CARD: React.CSSProperties = {
@@ -41,104 +38,147 @@ const CARD: React.CSSProperties = {
   boxShadow: "0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04)",
 };
 
-type Tab = "gaps" | "nextsteps" | "planning";
-
-/* ── Fallback connected studies (pre-real-data) ─────────── */
-const FALLBACK_CONNECTED_STUDIES = [
-  { name: "Energy Drink Concept Test",  status: "Active",  statusColor: SUCCESS,  statusBg: SUC_LT   },
-  { name: "Plant-Based Snack Range",    status: "Active",  statusColor: SUCCESS,  statusBg: SUC_LT   },
-  { name: "Skincare Repositioning",     status: "Active",  statusColor: AMBER_DK, statusBg: AMBER_LT },
+const ACT_TAB_VALUES = ["gaps", "nextsteps", "planning"] as const;
+type Tab = typeof ACT_TAB_VALUES[number];
+const ACT_TABS: { value: Tab; label: string; testId: string }[] = [
+  { value: "gaps", label: "Gaps", testId: "tab-act-gaps" },
+  { value: "nextsteps", label: "Next Steps", testId: "tab-act-nextsteps" },
+  { value: "planning", label: "Planning Assistant", testId: "tab-act-planning" },
 ];
 
-const CONSULT_OFFERS = [
-  {
-    id: "strategy",
-    Icon: Brain,
-    type: "Strategy",
-    title: "Brand Positioning Strategy Session",
-    desc: "Translate your research findings into a clear positioning platform and go-to-market narrative. Includes a written positioning brief and category landscape framing.",
-    discount: "10% off",
-    note: "Custom proposal sent offline",
-  },
-  {
-    id: "design",
-    Icon: Palette,
-    type: "Design",
-    title: "Creative Concepts & Design Sprint",
-    desc: "Commission packaging, campaign creative, or brand identity concepts to run alongside your next study — designed before fielding so findings directly validate the work.",
-    discount: "10% off",
-    note: "Custom proposal sent offline",
-  },
-];
+const PLANNING_GREETING = "Loading your portfolio context…";
 
-const PLANNING_GREETING = "Hi Jane. I've reviewed your 3 active studies. Ask me anything — or pick a prompt below to get started.";
-const PLANNING_AI_RESPONSE = `Energy Drink — pre-launch research sequence
+const LIVE_STUDY_STATUSES = new Set(["NEW", "AUDIENCE_LIVE", "ANALYSING_DATA"]);
 
-Based on your current data (72% intent, packaging as a top driver), here's what still needs validation before market:
+function formatStudyStatus(status: string) {
+  return LIVE_STUDY_STATUSES.has(status) ? "Active" : "Complete";
+}
 
-1. Packaging Variants Test (1 Basic Credit)
-Test 3–4 packaging options with the 25–34 urban cohort. Focus on "premium but accessible" perception. Your current concept sets this up well — the pack design needs to close it.
+function offerMeta(serviceType: string) {
+  switch (serviceType) {
+    case "strategy":
+      return { Icon: Brain, label: "Strategy" };
+    case "creative":
+      return { Icon: Palette, label: "Creative" };
+    case "pricing":
+      return { Icon: Layers, label: "Pricing" };
+    default:
+      return { Icon: Lightbulb, label: "Consult" };
+  }
+}
 
-2. Price Sensitivity — Township (Sandbox, no credits)
-Model R12, R14, and R16 price points before committing to a full SKU brief. Takes 30 minutes in Sandbox.
+function buildPlanningReply(
+  studies: Study[],
+  gaps: { title: string; desc: string }[],
+  nextSteps: { title: string; desc: string }[],
+) {
+  const lines: string[] = [];
+  const liveStudies = studies.filter((study) => LIVE_STUDY_STATUSES.has(study.status));
 
-3. Channel Strategy Signal (optional, 1 Pro Credit)
-If you're considering multiple channels (convenience, grocery, online), a channel-preference study will reduce launch risk significantly.
+  if (nextSteps.length > 0) {
+    lines.push("Based on the studies and recommendations already in your portfolio, here is the best sequence right now:");
+    lines.push("");
+    nextSteps.slice(0, 3).forEach((step, index) => {
+      lines.push(`${index + 1}. ${step.title}`);
+      lines.push(step.desc);
+      lines.push("");
+    });
+  } else if (gaps.length > 0) {
+    lines.push("There is not a full next-step sequence yet, but the clearest gap to act on is:");
+    lines.push("");
+    lines.push(`1. ${gaps[0].title}`);
+    lines.push(gaps[0].desc);
+    lines.push("");
+  } else if (liveStudies.length > 0) {
+    lines.push("You have live work in field, so the right move is to stay disciplined until results land:");
+    lines.push("");
+    liveStudies.slice(0, 2).forEach((study, index) => {
+      lines.push(`${index + 1}. Monitor ${study.title}`);
+      lines.push(`Status: ${formatStudyStatus(study.status)}. Hold downstream decisions until this evidence is back in the system.`);
+      lines.push("");
+    });
+  } else {
+    lines.push("There is not enough persisted portfolio evidence yet to sequence a precise recommendation.");
+    lines.push("");
+    lines.push("Start with one live study or upload one completed project so the planning assistant has something real to work with.");
+    lines.push("");
+  }
 
-Want me to draft a brief for step 1 now?`;
+  if (gaps[0]) {
+    lines.push(`Priority gap: ${gaps[0].title}`);
+    lines.push("");
+  }
+
+  lines.push("Want me to turn the highest-priority move into a brief?");
+  return lines.join("\n").trim();
+}
 
 export default function ActPage() {
   const [, setLocation]           = useLocation();
   const isMobile = useIsMobile();
   const { user }                  = useAuth();
-  const [activeTab, setActiveTab] = useState<Tab>("gaps");
+  const [activeTab, setActiveTab] = useQueryState(
+    "tab",
+    parseAsStringLiteral(ACT_TAB_VALUES).withDefault("gaps"),
+  );
   const [chatInput, setChatInput] = useState("");
   const [showChat, setShowChat]   = useState(false);
   const [planningInput, setPlanningInput] = useState("");
-  const [offerState, setOfferState] = useState<Record<string, "idle" | "accepted" | "declined">>({ strategy: "idle", design: "idle" });
-
-  /* ── Industry personalisation ── */
-  const { industryGroups } = useIndustryGroups();
-  const gaps          = useMemo(() => filterByIndustry(ALL_STRATEGIC_GAPS, industryGroups), [industryGroups]);
-  const nextSteps     = useMemo(() => filterByIndustry(ALL_NEXT_STEPS,     industryGroups), [industryGroups]);
-  const researchRecs  = useMemo(() => filterByIndustry(ALL_RESEARCH_RECS,  industryGroups), [industryGroups]);
-  const planningPrompts = useMemo(
-    () => filterByIndustry(ALL_PLANNING_PROMPTS, industryGroups).map(p => p.text),
-    [industryGroups],
-  );
-  const coverageItems = useMemo(() => filterByIndustry(ALL_COVERAGE, industryGroups), [industryGroups]);
+  const [offerState, setOfferState] = useState<Record<string, "idle" | "accepted" | "declined">>({});
+  const { data: portalFeed } = usePortalFeed(!!user);
+  const gaps = portalFeed?.gaps ?? [];
+  const nextSteps = portalFeed?.nextSteps ?? [];
+  const planningPrompts = portalFeed?.planningPrompts ?? [];
+  const coverageItems = portalFeed?.coverage ?? [];
+  const consultOffers = portalFeed?.consultOffers ?? [];
 
   /* ── Real study data ── */
-  const { data: clientReports = [] } = useQuery<ClientReport[]>({
-    queryKey: ["/api/member/client-reports"],
+  const { data: studies = [] } = useQuery<Study[]>({
+    queryKey: ["/api/member/studies", user?.companyId],
+    queryFn: async () => {
+      const response = await fetch("/api/member/studies");
+      if (!response.ok) throw new Error("Failed to fetch studies");
+      return response.json();
+    },
     enabled: !!user,
   });
 
-  const liveStudies = useMemo(() => {
-    const completed = clientReports.filter(r => r.status === "Completed");
-    const inProgress = clientReports.filter(r => r.status !== "Completed");
-    return [...inProgress, ...completed].slice(0, 5);
-  }, [clientReports]);
+  const connectedStudies = useMemo(
+    () => [...studies]
+      .sort((a, b) => {
+        const aIsLive = LIVE_STUDY_STATUSES.has(a.status);
+        const bIsLive = LIVE_STUDY_STATUSES.has(b.status);
+        if (aIsLive !== bIsLive) return aIsLive ? -1 : 1;
 
-  const connectedStudies = useMemo(() => {
-    if (liveStudies.length === 0) return FALLBACK_CONNECTED_STUDIES;
-    return liveStudies.map(r => {
-      const isCompleted = r.status === "Completed";
-      return {
-        name: r.title,
-        status: isCompleted ? "Complete" : "Active",
-        statusColor: isCompleted ? SUCCESS : AMBER_DK,
-        statusBg: isCompleted ? SUC_LT : AMBER_LT,
-      };
-    });
-  }, [liveStudies]);
+        const aDate = new Date(a.statusUpdatedAt ?? a.deliveryDate ?? a.createdAt).getTime();
+        const bDate = new Date(b.statusUpdatedAt ?? b.deliveryDate ?? b.createdAt).getTime();
+        return bDate - aDate;
+      })
+      .slice(0, 5)
+      .map((study) => {
+        const isLive = LIVE_STUDY_STATUSES.has(study.status);
+        return {
+          name: study.title,
+          status: formatStudyStatus(study.status),
+          statusColor: isLive ? AMBER_DK : SUCCESS,
+          statusBg: isLive ? AMBER_LT : SUC_LT,
+        };
+      }),
+    [studies],
+  );
+  const activeStudyCount = useMemo(
+    () => studies.filter((study) => LIVE_STUDY_STATUSES.has(study.status)).length,
+    [studies],
+  );
+  const connectedStudyCount = studies.length;
+  const availableNextStepCount = nextSteps.filter((step) => !step.locked).length;
 
   const planningGreeting = useMemo(() => {
     const firstName = user?.name?.split(" ")[0] || "there";
-    const count = clientReports.length;
+    const count = studies.length;
     if (count === 0) return `Hi ${firstName}. No studies in your portfolio yet. Once you launch your first brief, I'll have data to work with. Ask me anything to get started.`;
     return `Hi ${firstName}. I've reviewed your ${count} ${count === 1 ? "study" : "studies"}. Ask me anything — or pick a prompt below to get started.`;
-  }, [user, clientReports]);
+  }, [studies, user]);
 
   const [planningMsgs, setPlanningMsgs] = useState<{ role: "user" | "ai"; text: string }[]>(() => [
     { role: "ai", text: PLANNING_GREETING },
@@ -146,15 +186,13 @@ export default function ActPage() {
 
   /* Update greeting when real data loads */
   useEffect(() => {
-    if (clientReports.length > 0) {
-      setPlanningMsgs(prev => {
-        if (prev.length === 1 && prev[0].role === "ai") {
-          return [{ role: "ai", text: planningGreeting }];
-        }
-        return prev;
-      });
-    }
-  }, [planningGreeting, clientReports.length]);
+    setPlanningMsgs(prev => {
+      if (prev.length === 1 && prev[0].role === "ai") {
+        return [{ role: "ai", text: planningGreeting }];
+      }
+      return prev;
+    });
+  }, [planningGreeting]);
 
   const handleSendPlanning = () => {
     const msg = planningInput.trim();
@@ -162,83 +200,40 @@ export default function ActPage() {
     setPlanningMsgs(prev => [
       ...prev,
       { role: "user", text: msg },
-      { role: "ai", text: "I've reviewed your portfolio data and here's my recommendation based on your current studies and gaps. Would you like me to draft a brief for the highest-priority action now?" },
+      { role: "ai", text: buildPlanningReply(studies, gaps, nextSteps) },
     ]);
     setPlanningInput("");
   };
 
-  const handleCtaAction = (action: string | null) => {
+  const handleCtaAction = (action: string | null, href?: string | null) => {
+    if (href) {
+      setLocation(href);
+      return;
+    }
     if (!action) return;
     if (action === "test")       setLocation("/portal/test");
+    else if (action === "launch") setLocation("/portal/launch");
+    else if (action === "evidence") return;
     else if (action === "explore") setLocation("/portal/explore");
-    else if (action === "nextsteps") setActiveTab("nextsteps");
+    else if (action === "nextsteps") void setActiveTab("nextsteps");
   };
 
-  const TABS: { key: Tab; label: string }[] = [
-    { key: "gaps",      label: "Gaps" },
-    { key: "nextsteps", label: "Next Steps" },
-    { key: "planning",  label: "Planning Assistant" },
-  ];
-
   return (
-    <PortalLayout showPhaseTopbar={false}>
-      <div className="flex flex-col w-full h-full" style={{ background: CREAM }}>
-
-        {/* ── Phase topbar ── */}
-        <div
-          className="flex items-center justify-between flex-shrink-0 px-5"
-          style={{ minHeight: 52, background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
-        >
-          <div className="flex items-center gap-3">
-            <span
-              className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1"
-              style={{ background: "rgba(232,80,58,0.2)", color: "#FCA5A5", border: "1px solid rgba(232,80,58,0.4)", borderRadius: 6 }}
-            >
-              PHASE 03
-            </span>
-            <h1 className="font-serif text-xl text-white">Act</h1>
-          </div>
-          <button
-            onClick={() => setLocation("/portal/dashboard")}
-            className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}
-            data-testid="button-close-act"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* ── Main scrollable body ── */}
-        <div className="flex-1 overflow-y-auto pb-20 sm:pb-0" style={{ background: CREAM }}>
-
+    <PortalLayout>
+      <div className="portal-workspace">
             {/* In-page header */}
-            <div className="px-6 pt-6 pb-2">
-              <div className="text-xs font-bold tracking-widest uppercase mb-1" style={{ color: N400 }}>
-                03 · ACT
-              </div>
-              <h2 className="text-3xl font-bold mb-4" style={{ color: VDK }}>Where to move next</h2>
+            <div className="portal-page-header">
+              <PortalBreadcrumbs items={[{ label: "Dashboard", href: "/portal/dashboard" }, { label: "Act" }]} />
+              <h1 className="font-serif text-3xl leading-tight" style={{ color: VDK }}>What should we do next?</h1>
+              <p className="mt-2 max-w-none text-sm leading-relaxed" style={{ color: N500 }}>
+                Use Act after evidence exists, when you need gaps, recommendations, and planning prompts for the next move.
+              </p>
             </div>
 
-            {/* In-page tabs — sticky */}
-            <div className="sticky-tab-bar flex gap-0 px-6 border-b" style={{ borderColor: N200 }}>
-              {TABS.map(t => (
-                <button
-                  key={t.key}
-                  onClick={() => setActiveTab(t.key)}
-                  data-testid={`tab-act-${t.key}`}
-                  className="flex-shrink-0 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap"
-                  style={{
-                    color: activeTab === t.key ? VDK : N500,
-                    borderBottomColor: activeTab === t.key ? ACT_COLOR : "transparent",
-                    background: "transparent",
-                  }}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
+            <PortalTabs value={activeTab} onValueChange={(tab) => void setActiveTab(tab)} tabs={ACT_TABS} accentColor={ACT_COLOR}>
 
-            <div className="px-6 pt-5 pb-2">
+            <div className="portal-body">
+              <div className="portal-main-scroll">
 
             {/* ── GAPS TAB ── */}
             {activeTab === "gaps" && (
@@ -270,8 +265,8 @@ export default function ActPage() {
                             </span>
                           </div>
                           <p className="text-xs leading-relaxed mb-2" style={{ color: N500 }}>{gap.desc}</p>
-                          {gap.cta && (
-                            <button onClick={() => handleCtaAction(gap.ctaAction)} className="text-xs font-semibold flex items-center gap-1" style={{ color: ACT_COLOR }}>
+                          {gap.cta && (gap.ctaAction !== "evidence" || gap.ctaHref) && (
+                            <button onClick={() => handleCtaAction(gap.ctaAction, gap.ctaHref)} className="text-xs font-semibold flex items-center gap-1" style={{ color: ACT_COLOR }}>
                               {gap.cta} <ArrowRight className="w-3 h-3" />
                             </button>
                           )}
@@ -282,7 +277,11 @@ export default function ActPage() {
 
                   <div className="text-[11px] font-bold tracking-widest uppercase mb-3" style={{ color: CORAL }}>Research Coverage</div>
                   <div style={{ ...CARD, overflow: "hidden", padding: 0 }}>
-                    {coverageItems.map((item, i) => (
+                    {coverageItems.length === 0 ? (
+                      <div className="px-5 py-4 text-xs" style={{ color: N500 }}>
+                        No persisted portfolio coverage yet.
+                      </div>
+                    ) : coverageItems.map((item, i) => (
                       <div key={item.id} className="flex items-center justify-between px-5 py-3" style={i < coverageItems.length - 1 ? { borderBottom: `1px solid ${N200}` } : {}}>
                         <span className="text-sm font-medium" style={{ color: VDK }}>{item.category}</span>
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: item.chip.bg, color: item.chip.color }}>
@@ -293,24 +292,6 @@ export default function ActPage() {
                   </div>
                 </div>
 
-                {/* Gaps right panel: AI Query — hidden on mobile */}
-                {!isMobile && (
-                <div className="w-80 min-w-[300px] flex-shrink-0">
-                  <div className="flex flex-col overflow-hidden rounded-2xl" style={{ border: `1px solid ${N200}`, height: 480 }}>
-                    <AIQueryPanel
-                      accentColor={ACT_COLOR}
-                      label="Act AI"
-                      suggestedPrompts={[
-                        "What's the biggest strategic gap in my category?",
-                        "Which pillar should I address first?",
-                        "How do I close the commitment gap?",
-                        "Find trends on indulgence and snacking",
-                      ]}
-                      defaultSource="combined"
-                    />
-                  </div>
-                </div>
-                )}
               </div>
             )}
 
@@ -344,9 +325,9 @@ export default function ActPage() {
                           <div className="flex-1">
                             <div className="text-sm font-semibold mb-1" style={{ color: VDK }}>{step.title}</div>
                             <p className="text-xs leading-relaxed mb-3" style={{ color: N500 }}>{step.desc}</p>
-                            {step.cta && (
+                            {step.cta && (step.cta.action !== "evidence" || step.cta.href) && (
                               <button
-                                onClick={() => handleCtaAction(step.cta!.action)}
+                                onClick={() => handleCtaAction(step.cta!.action, step.cta!.href)}
                                 className="text-xs font-semibold px-4 py-2 rounded-lg inline-flex items-center gap-1.5"
                                 style={step.cta.primary
                                   ? { background: CORAL, color: "#fff" }
@@ -404,13 +385,13 @@ export default function ActPage() {
                     </div>
                     <div className="p-4">
                       <div className="text-xs leading-relaxed p-4 rounded-xl mb-3" style={{ background: "#F5F5F5", border: `1px solid ${N200}`, color: VDK }}>
-                        I've sequenced your 4 next steps above in order of strategic momentum. Packaging variants should come first — concept scores are strong enough that the brand story is working. The Township SKU is your biggest volume unlock. Want me to help you draft a brief for any of these?
+                        I've sequenced your {availableNextStepCount} current next {availableNextStepCount === 1 ? "step" : "steps"} based on the studies and reports already in the system. Want me to help you draft a brief for the highest-priority one?
                       </div>
                       <div className="flex gap-2">
                         <input
                           value={planningInput}
                           onChange={e => setPlanningInput(e.target.value)}
-                          onKeyDown={e => { if (e.key === "Enter") { handleSendPlanning(); setActiveTab("planning"); } }}
+                          onKeyDown={e => { if (e.key === "Enter") { handleSendPlanning(); void setActiveTab("planning"); } }}
                           className="flex-1 rounded-lg px-3 py-2 text-xs focus:outline-none"
                           style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }}
                           placeholder="e.g. Help me write a brief for the packaging…"
@@ -419,7 +400,7 @@ export default function ActPage() {
                           onBlur={e => (e.target.style.borderColor = N200)}
                         />
                         <button
-                          onClick={() => { handleSendPlanning(); setActiveTab("planning"); }}
+                          onClick={() => { handleSendPlanning(); void setActiveTab("planning"); }}
                           className="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0"
                           style={{ background: VIO }}
                           data-testid="button-send-planning-mini"
@@ -449,12 +430,14 @@ export default function ActPage() {
                         </div>
                         <div>
                           <div className="text-sm font-semibold" style={{ color: VDK }}>Planning Assistant</div>
-                          <div className="text-xs" style={{ color: N500 }}>3 active studies connected</div>
+                          <div className="text-xs" style={{ color: N500 }}>
+                            {connectedStudyCount} {connectedStudyCount === 1 ? "study" : "studies"} connected
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: SUCCESS }}>
                         <span className="w-2 h-2 rounded-full" style={{ background: SUCCESS }} />
-                        3 studies active
+                        {activeStudyCount} {activeStudyCount === 1 ? "study" : "studies"} active
                       </div>
                     </div>
 
@@ -516,7 +499,11 @@ export default function ActPage() {
                   <div className="portal-card p-5">
                     <div className="text-sm font-semibold mb-3" style={{ color: VDK }}>Suggested Planning Prompts</div>
                     <div className="space-y-2">
-                      {planningPrompts.map(q => (
+                      {planningPrompts.length === 0 ? (
+                        <div className="rounded-xl px-3 py-3 text-xs" style={{ background: "#F5F5F5", border: `1px solid ${N200}`, color: N500 }}>
+                          Add studies or ingested projects to generate real planning prompts.
+                        </div>
+                      ) : planningPrompts.map(q => (
                         <button
                           key={q}
                           onClick={() => { setPlanningInput(q); }}
@@ -533,19 +520,25 @@ export default function ActPage() {
                   {/* Connected Studies */}
                   <div className="portal-card p-5">
                     <div className="text-sm font-semibold mb-3" style={{ color: VDK }}>Connected Studies</div>
-                    <div className="space-y-0">
-                      {connectedStudies.map((s, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center justify-between py-2.5"
-                          style={{ borderBottom: i < connectedStudies.length - 1 ? `1px solid ${N200}` : "none" }}
-                          data-testid={`connected-study-${i}`}
-                        >
-                          <span className="text-xs font-medium" style={{ color: VDK }}>{s.name}</span>
-                          <span className="text-xs font-bold px-2 py-0.5 rounded-full text-[10px]" style={{ color: s.statusColor, background: s.statusBg }}>{s.status}</span>
-                        </div>
-                      ))}
-                    </div>
+                    {connectedStudies.length === 0 ? (
+                      <div className="text-xs" style={{ color: N500 }}>
+                        No studies connected yet.
+                      </div>
+                    ) : (
+                      <div className="space-y-0">
+                        {connectedStudies.map((s, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center justify-between py-2.5"
+                            style={{ borderBottom: i < connectedStudies.length - 1 ? `1px solid ${N200}` : "none" }}
+                            data-testid={`connected-study-${i}`}
+                          >
+                            <span className="text-xs font-medium" style={{ color: VDK }}>{s.name}</span>
+                            <span className="text-xs font-bold px-2 py-0.5 rounded-full text-[10px]" style={{ color: s.statusColor, background: s.statusBg }}>{s.status}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* ── Recommended Research ── */}
@@ -555,29 +548,31 @@ export default function ActPage() {
                       <div className="text-sm font-semibold" style={{ color: VDK }}>Recommended Research</div>
                     </div>
                     <div className="space-y-3">
-                      {researchRecs.map((rec, i) => (
-                        <div key={rec.id} className="rounded-xl p-3" style={{ background: "#F5F5F5", border: `1px solid ${N200}` }} data-testid={`research-rec-${i}`}>
-                          {/* Method + Priority row */}
+                      {nextSteps.length === 0 ? (
+                        <div className="rounded-xl p-3 text-[11px]" style={{ background: "#F5F5F5", border: `1px solid ${N200}`, color: N500 }}>
+                          No persisted research recommendations yet. Once a project has an ingest, the next-step playbook will show here.
+                        </div>
+                      ) : nextSteps.map((step, i) => (
+                        <div key={step.id} className="rounded-xl p-3" style={{ background: "#F5F5F5", border: `1px solid ${N200}` }} data-testid={`research-rec-${i}`}>
                           <div className="flex items-center gap-1.5 mb-2 flex-wrap">
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: rec.methodBg, color: rec.methodColor }}>
-                              {rec.method}
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: VIO_LT, color: VIO }}>
+                              {step.cta?.action === "explore" ? "Explore" : "Test24"}
                             </span>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: rec.priorityBg, color: rec.priorityColor }}>
-                              {rec.priority}
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: step.cta?.primary ? CORAL_LT : SUC_LT, color: step.cta?.primary ? CORAL : SUCCESS }}>
+                              {step.cta?.primary ? "Primary" : "Queued"}
                             </span>
                           </div>
-                          {/* Title */}
-                          <div className="text-xs font-semibold mb-1" style={{ color: VDK }}>{rec.title}</div>
-                          {/* Research type tags */}
-                          <div className="flex gap-1 flex-wrap mb-1.5">
-                            {rec.types.map(t => (
-                              <span key={t} className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: VIO_LT, color: VIO }}>
-                                {t}
-                              </span>
-                            ))}
-                          </div>
-                          {/* Description */}
-                          <p className="text-[11px] leading-relaxed" style={{ color: N500 }}>{rec.desc}</p>
+                          <div className="text-xs font-semibold mb-1" style={{ color: VDK }}>{step.title}</div>
+                          <p className="text-[11px] leading-relaxed mb-2" style={{ color: N500 }}>{step.desc}</p>
+                          {step.cta && (step.cta.action !== "evidence" || step.cta.href) && (
+                            <button
+                              onClick={() => handleCtaAction(step.cta!.action, step.cta!.href)}
+                              className="text-[11px] font-semibold flex items-center gap-1"
+                              style={{ color: step.cta.primary ? CORAL : VIO }}
+                            >
+                              {step.cta.label} <ArrowRight className="w-3 h-3" />
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -592,20 +587,26 @@ export default function ActPage() {
                         <div className="text-xs font-bold text-white">Tailored Consult Offer</div>
                         <div className="text-[10px] opacity-70 text-white">Available for your portfolio</div>
                       </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: "rgba(232,80,58,0.8)" }}>
-                        10% off
-                      </span>
+                      {consultOffers[0] && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: "rgba(232,80,58,0.8)" }}>
+                          {consultOffers[0].badgeLabel}
+                        </span>
+                      )}
                     </div>
 
                     {/* Offer body */}
                     <div className="bg-white p-4 space-y-3" data-testid="consult-offer">
                       <p className="text-xs leading-relaxed" style={{ color: N500 }}>
-                        Based on your research portfolio, we can offer tailored consulting to convert your insights into strategic action and creative output. Accept any offer below — we'll build a custom proposal and send it separately.
+                        These offers are matched against the studies, gaps, and next steps already in your portfolio. Accept any offer below and the team can turn it into a scoped proposal.
                       </p>
 
-                      {CONSULT_OFFERS.map(offer => {
+                      {consultOffers.length === 0 ? (
+                        <div className="rounded-xl p-4 text-[11px]" style={{ background: "#F5F5F5", border: `1px solid ${N200}`, color: N500 }}>
+                          No portfolio-matched consult offers yet. Once more project evidence is in the system, relevant offers will show here automatically.
+                        </div>
+                      ) : consultOffers.map(offer => {
                         const state = offerState[offer.id];
-                        const { Icon } = offer;
+                        const { Icon, label } = offerMeta(offer.serviceType);
                         return (
                           <div key={offer.id} className="rounded-xl p-4" style={{ background: "#F5F5F5", border: `1px solid ${N200}` }} data-testid={`consult-offer-${offer.id}`}>
                             <div className="flex items-start gap-2.5 mb-2">
@@ -614,8 +615,8 @@ export default function ActPage() {
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="text-xs font-bold" style={{ color: VDK }}>{offer.type}</span>
-                                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: CORAL_LT, color: CORAL }}>10% off</span>
+                                  <span className="text-xs font-bold" style={{ color: VDK }}>{label}</span>
+                                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: CORAL_LT, color: CORAL }}>{offer.badgeLabel}</span>
                                 </div>
                                 <div className="text-xs font-semibold mt-0.5" style={{ color: VDK }}>{offer.title}</div>
                               </div>
@@ -655,9 +656,11 @@ export default function ActPage() {
                               </div>
                             )}
 
-                            <div className="text-[10px] text-center mt-2" style={{ color: N400 }}>
-                              {offer.note}
-                            </div>
+                            {offer.note && (
+                              <div className="text-[10px] text-center mt-2" style={{ color: N400 }}>
+                                {offer.note}
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -668,8 +671,6 @@ export default function ActPage() {
                 )}
               </div>
             )}
-
-          </div>
 
           {/* Team Chat (bottom sticky only for non-planning tabs) */}
           {activeTab !== "planning" && (
@@ -704,7 +705,24 @@ export default function ActPage() {
               </div>
             </div>
           )}
-        </div>
+              </div>
+              {!isMobile && activeTab === "gaps" && (
+                <div className="portal-ai-rail">
+                  <AIQueryPanel
+                    accentColor={ACT_COLOR}
+                    label="Act AI"
+                    suggestedPrompts={[
+                      "What's the biggest strategic gap in my category?",
+                      "Which pillar should I address first?",
+                      "How do I close the commitment gap?",
+                      "Find trends on indulgence and snacking",
+                    ]}
+                    defaultSource="combined"
+                  />
+                </div>
+              )}
+            </div>
+            </PortalTabs>
       </div>
     </PortalLayout>
   );

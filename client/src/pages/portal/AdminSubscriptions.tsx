@@ -11,6 +11,15 @@ import {
 } from "@/components/ui/select";
 import { Search, RefreshCw, Calendar, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Progress } from "@/components/ui/progress";
 
 interface Subscription {
   id: string;
@@ -198,81 +207,76 @@ export default function AdminSubscriptions() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="border-b">
-                  <tr>
-                    <th className="text-left py-2 px-2">Customer</th>
-                    <th className="text-left py-2 px-2">Plan</th>
-                    <th className="text-left py-2 px-2">Amount</th>
-                    <th className="text-left py-2 px-2">Frequency</th>
-                    <th className="text-left py-2 px-2">Progress</th>
-                    <th className="text-left py-2 px-2">Status</th>
-                    <th className="text-left py-2 px-2">Next Billing</th>
-                    <th className="text-left py-2 px-2">Started</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredSubscriptions.map((subscription) => (
-                    <tr
-                      key={subscription.id}
-                      className="border-b hover:bg-muted/50"
-                      data-testid={`row-subscription-${subscription.id}`}
-                    >
-                      <td className="py-3 px-2">
-                        <div>
-                          <p className="font-medium">{subscription.customerName}</p>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Plan</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Frequency</TableHead>
+                  <TableHead>Progress</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Next Billing</TableHead>
+                  <TableHead>Started</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredSubscriptions.map((subscription) => (
+                  <TableRow
+                    key={subscription.id}
+                    data-testid={`row-subscription-${subscription.id}`}
+                  >
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{subscription.customerName}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {subscription.customerEmail}
+                        </p>
+                        {subscription.customerCompany && (
                           <p className="text-xs text-muted-foreground">
-                            {subscription.customerEmail}
+                            {subscription.customerCompany}
                           </p>
-                          {subscription.customerCompany && (
-                            <p className="text-xs text-muted-foreground">
-                              {subscription.customerCompany}
-                            </p>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-3 px-2">
-                        <span className="capitalize">
-                          {subscription.planType.replace(/_/g, " ")}
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="capitalize">
+                        {subscription.planType.replace(/_/g, " ")}
+                      </span>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {formatAmount(subscription.amount)}
+                    </TableCell>
+                    <TableCell>{getFrequencyLabel(subscription.frequency)}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Progress
+                          value={
+                            subscription.cyclesTotal > 0
+                              ? (subscription.cyclesCompleted / subscription.cyclesTotal) * 100
+                              : 0
+                          }
+                          className="h-2 max-w-20 flex-1"
+                        />
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {subscription.cyclesCompleted}/{subscription.cyclesTotal}
                         </span>
-                      </td>
-                      <td className="py-3 px-2 font-medium">
-                        {formatAmount(subscription.amount)}
-                      </td>
-                      <td className="py-3 px-2">
-                        {getFrequencyLabel(subscription.frequency)}
-                      </td>
-                      <td className="py-3 px-2">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 h-2 bg-muted rounded-full max-w-20">
-                            <div
-                              className="h-full bg-primary rounded-full"
-                              style={{
-                                width: `${(subscription.cyclesCompleted / subscription.cyclesTotal) * 100}%`,
-                              }}
-                            />
-                          </div>
-                          <span className="text-xs text-muted-foreground whitespace-nowrap">
-                            {subscription.cyclesCompleted}/{subscription.cyclesTotal}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-2">{getStatusBadge(subscription.status)}</td>
-                      <td className="py-3 px-2">
-                        <div className="flex items-center gap-1 text-xs">
-                          <Calendar className="w-3 h-3 text-muted-foreground" />
-                          {formatDate(subscription.nextBillingDate)}
-                        </div>
-                      </td>
-                      <td className="py-3 px-2 text-xs">
-                        {formatDate(subscription.startDate)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>{getStatusBadge(subscription.status)}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1 text-xs">
+                        <Calendar className="w-3 h-3 text-muted-foreground" />
+                        {formatDate(subscription.nextBillingDate)}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {formatDate(subscription.startDate)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>

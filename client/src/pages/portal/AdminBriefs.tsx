@@ -227,19 +227,35 @@ export default function AdminBriefs() {
       const response = await apiRequest("PATCH", `/api/admin/briefs/${id}`, { status, notes });
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/briefs"] });
-      toast({
-        title: "Brief updated",
-        description: "The brief has been updated successfully.",
-      });
+    // Optimistic update — apply the new status/notes to the local cache before the server replies.
+    onMutate: async ({ id, status, notes }) => {
+      await queryClient.cancelQueries({ queryKey: ["/api/admin/briefs"] });
+      const previous = queryClient.getQueryData<BriefSubmission[]>(["/api/admin/briefs"]);
+      queryClient.setQueryData<BriefSubmission[]>(["/api/admin/briefs"], (old) =>
+        old?.map((b) =>
+          b.id === id
+            ? { ...b, ...(status !== undefined ? { status } : {}), ...(notes !== undefined ? { notes } : {}) }
+            : b,
+        ),
+      );
+      return { previous };
     },
-    onError: (error: any) => {
+    onError: (error: any, _vars, ctx) => {
+      if (ctx?.previous) queryClient.setQueryData(["/api/admin/briefs"], ctx.previous);
       toast({
         title: "Update failed",
         description: error.message || "Failed to update brief.",
         variant: "destructive",
       });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Brief updated",
+        description: "The brief has been updated successfully.",
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/briefs"] });
     },
   });
 
@@ -271,8 +287,29 @@ export default function AdminBriefs() {
       const response = await apiRequest("PATCH", `/api/admin/studies/${id}/status`, { status, sendNotification });
       return response.json();
     },
+    // Optimistic update — apply the new status to the local cache + reflect it in the open detail pane.
+    onMutate: async ({ id, status }) => {
+      const nextStatus = status as Study["status"];
+      await queryClient.cancelQueries({ queryKey: ["/api/admin/studies"] });
+      const previous = queryClient.getQueryData<Study[]>(["/api/admin/studies"]);
+      queryClient.setQueryData<Study[]>(["/api/admin/studies"], (old) =>
+        old?.map((s) => (s.id === id ? { ...s, status: nextStatus } : s)),
+      );
+      const previousLinkedStatus = studyStatus;
+      setStudyStatus(status);
+      if (linkedStudy && linkedStudy.id === id) setLinkedStudy({ ...linkedStudy, status: nextStatus });
+      return { previous, previousLinkedStatus };
+    },
+    onError: (error: any, _vars, ctx) => {
+      if (ctx?.previous) queryClient.setQueryData(["/api/admin/studies"], ctx.previous);
+      if (ctx?.previousLinkedStatus !== undefined) setStudyStatus(ctx.previousLinkedStatus);
+      toast({
+        title: "Status update failed",
+        description: error.message || "Failed to update study status.",
+        variant: "destructive",
+      });
+    },
     onSuccess: (study) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/studies"] });
       setLinkedStudy(study);
       setStudyStatus(study.status);
       toast({
@@ -280,12 +317,8 @@ export default function AdminBriefs() {
         description: `Study status changed to ${studyStatusConfig[study.status]?.label || study.status}.`,
       });
     },
-    onError: (error: any) => {
-      toast({
-        title: "Status update failed",
-        description: error.message || "Failed to update study status.",
-        variant: "destructive",
-      });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/studies"] });
     },
   });
 

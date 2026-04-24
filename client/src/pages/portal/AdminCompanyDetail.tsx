@@ -46,6 +46,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
+import { PortalBreadcrumbs } from "@/components/portal/PortalBreadcrumbs";
 import { 
   ArrowLeft,
   Building2,
@@ -830,16 +831,16 @@ export default function AdminCompanyDetail() {
   return (
     <PortalLayout>
       <div className="p-6 max-w-6xl mx-auto space-y-6">
-        {/* Header with Back Button and Delete */}
-        <div className="flex items-center justify-between">
-          <Button 
-            variant="ghost" 
-            onClick={() => setLocation("/portal/admin?tab=companies")}
-            data-testid="button-back-to-companies"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Companies
-          </Button>
+        {/* Breadcrumb + delete */}
+        <div className="flex items-start justify-between gap-4">
+          <PortalBreadcrumbs
+            items={[
+              { label: "Admin", href: "/portal/admin" },
+              { label: "Companies", href: "/portal/admin?tab=companies" },
+              { label: company.name },
+            ]}
+            className="mb-0"
+          />
           <Button
             variant="destructive"
             size="sm"
@@ -849,6 +850,24 @@ export default function AdminCompanyDetail() {
             <Trash2 className="w-4 h-4 mr-2" />
             Delete Company
           </Button>
+        </div>
+
+        {/* Credit KPI strip — derived from existing company state, no new fetch */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4" data-testid="company-kpi-grid">
+          <CreditKpi
+            label="Basic credits"
+            remaining={basicRemaining}
+            total={company.basicCreditsTotal}
+            color="var(--ds-violet, #3A2FBF)"
+            testId="kpi-basic-credits"
+          />
+          <CreditKpi
+            label="Pro credits"
+            remaining={proRemaining}
+            total={company.proCreditsTotal}
+            color="var(--ds-coral, #E8503A)"
+            testId="kpi-pro-credits"
+          />
         </div>
 
         {/* Company Header */}
@@ -1383,7 +1402,7 @@ export default function AdminCompanyDetail() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => setLocation("/portal/research")}
+                            onClick={() => setLocation("/portal/test")}
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -2127,5 +2146,44 @@ export default function AdminCompanyDetail() {
         </AlertDialogContent>
       </AlertDialog>
     </PortalLayout>
+  );
+}
+
+function CreditKpi({
+  label,
+  remaining,
+  total,
+  color,
+  testId,
+}: {
+  label: string;
+  remaining: number;
+  total: number;
+  color: string;
+  testId?: string;
+}) {
+  const percentRemaining = total > 0 ? (remaining / total) * 100 : 0;
+  return (
+    <div
+      className="rounded-2xl p-4"
+      style={{
+        background: `linear-gradient(135deg, ${color}1F 0%, ${color}08 100%)`,
+        border: `1px solid ${color}2E`,
+      }}
+      data-testid={testId}
+    >
+      <div className="flex items-center justify-between gap-3 mb-2">
+        <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color }}>
+          {label}
+        </div>
+        <div className="font-mono text-2xl font-bold" style={{ color: "var(--ds-violet-dk, #1E1B3A)" }}>
+          {remaining}
+          <span className="text-sm font-normal" style={{ color: "var(--ds-n500, #8A7260)" }}>
+            {" "}/ {total}
+          </span>
+        </div>
+      </div>
+      <Progress value={percentRemaining} className="h-1.5" />
+    </div>
   );
 }

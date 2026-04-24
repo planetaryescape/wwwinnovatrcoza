@@ -23,10 +23,22 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { User, Building2, Bell, Shield, Users, Check, X, AlertTriangle, Loader2, BarChart3, Mail, TrendingUp, Activity } from "lucide-react";
 import PortalLayout from "./PortalLayout";
+import { PortalTabContent, PortalTabs } from "@/components/portal/PortalTabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { INDUSTRY_OPTIONS } from "@shared/access";
+
+const SETTINGS_TAB_VALUES = ["profile", "notifications", "team", "security", "admin"] as const;
+type SettingsTab = typeof SETTINGS_TAB_VALUES[number];
+const SETTINGS_TABS: { value: SettingsTab; label: string; testId: string; adminOnly?: boolean }[] = [
+  { value: "profile", label: "Profile", testId: "tab-settings-profile" },
+  { value: "notifications", label: "Notifications", testId: "tab-settings-notifications" },
+  { value: "team", label: "Team Access", testId: "tab-settings-team" },
+  { value: "security", label: "Security", testId: "tab-settings-security" },
+  { value: "admin", label: "Admin", testId: "tab-settings-admin", adminOnly: true },
+];
 
 interface UserProfile {
   id: string;
@@ -41,10 +53,22 @@ export default function Settings() {
   const { toast } = useToast();
   const { user, isViewingAsCompany } = useAuth();
   const isAdmin = user?.isAdmin === true;
+  const [activeTab, setActiveTab] = useQueryState(
+    "tab",
+    parseAsStringLiteral(SETTINGS_TAB_VALUES).withDefault("profile"),
+  );
+  const visibleTabs = useMemo(
+    () => SETTINGS_TABS.filter((tab) => !tab.adminOnly || isAdmin),
+    [isAdmin],
+  );
 
   useEffect(() => {
     logActivity("view_settings");
   }, []);
+
+  useEffect(() => {
+    if (activeTab === "admin" && !isAdmin) void setActiveTab("profile");
+  }, [activeTab, isAdmin, setActiveTab]);
   
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -271,8 +295,10 @@ export default function Settings() {
   if (loading) {
     return (
       <PortalLayout>
-        <div className="p-6 max-w-5xl mx-auto flex items-center justify-center min-h-[400px]">
-          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        <div className="portal-page">
+          <div className="portal-page-content flex items-center justify-center min-h-[400px]">
+            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          </div>
         </div>
       </PortalLayout>
     );
@@ -280,7 +306,8 @@ export default function Settings() {
 
   return (
     <PortalLayout>
-      <div className="p-6 max-w-5xl mx-auto space-y-6">
+      <div className="portal-page">
+        <div className="portal-page-content space-y-6">
         <div>
           <h1 className="text-4xl font-serif font-bold mb-2">Settings</h1>
           <p className="text-lg text-muted-foreground">
@@ -297,6 +324,8 @@ export default function Settings() {
           </Alert>
         )}
 
+        <PortalTabs value={activeTab} onValueChange={(tab) => void setActiveTab(tab)} tabs={visibleTabs} barClassName="px-0">
+        <PortalTabContent value="profile" className="mt-6">
         {/* Profile Information */}
         <Card>
           <CardHeader>
@@ -404,7 +433,9 @@ export default function Settings() {
             </Button>
           </CardContent>
         </Card>
+        </PortalTabContent>
 
+        <PortalTabContent value="notifications" className="mt-6">
         {/* Notification Preferences */}
         <Card>
           <CardHeader>
@@ -472,7 +503,9 @@ export default function Settings() {
             </Button>
           </CardContent>
         </Card>
+        </PortalTabContent>
 
+        <PortalTabContent value="team" className="mt-6">
         {/* Team Access */}
         <Card>
           <CardHeader>
@@ -501,7 +534,9 @@ export default function Settings() {
             </Button>
           </CardContent>
         </Card>
+        </PortalTabContent>
 
+        <PortalTabContent value="security" className="mt-6">
         {/* Security */}
         <Card>
           <CardHeader>
@@ -527,7 +562,9 @@ export default function Settings() {
             </Button>
           </CardContent>
         </Card>
+        </PortalTabContent>
 
+        <PortalTabContent value="admin" className="mt-6 space-y-6">
         {/* Admin Insights - Only visible to admins */}
         {isAdmin && (
           <>
@@ -677,6 +714,9 @@ export default function Settings() {
             </Card>
           </>
         )}
+        </PortalTabContent>
+        </PortalTabs>
+        </div>
       </div>
 
       {/* Change Password Dialog */}

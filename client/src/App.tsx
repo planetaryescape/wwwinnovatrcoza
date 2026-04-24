@@ -1,30 +1,30 @@
 import { Suspense, lazy } from "react";
-import { Switch, Route, Redirect, useLocation } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { useGtmPageTracking } from "@/hooks/use-gtm-page-tracking";
-import { AnimatePresence, motion } from "framer-motion";
-import InnovatrHome from "@/pages/InnovatrHome";
-import WhatWeDo from "@/pages/ConsultPage";
-import PricingPage from "@/pages/ResearchPage";
-import ResearchTools from "@/pages/ToolsPage";
-import CaseStudies from "@/pages/CaseStudiesPage";
-import ContactUs from "@/pages/ContactPage";
-import Test24BasicPage from "@/pages/Test24BasicPage";
-import Test24ProPage from "@/pages/Test24ProPage";
-import ConsultPillarPage from "@/pages/ConsultPillarPage";
-import CouponSignup from "@/pages/CouponSignup";
-import ResetPassword from "@/pages/ResetPassword";
-import CaseStudyDetail from "@/pages/CaseStudyDetail";
-import PrivacyPolicy from "@/pages/PrivacyPolicy";
-import TermsOfUse from "@/pages/TermsOfUse";
-import CookiePolicy from "@/pages/CookiePolicy";
-import NotFound from "@/pages/not-found";
+import { NuqsAdapter } from "nuqs/adapters/react";
 
+const InnovatrHome = lazy(() => import("@/pages/InnovatrHome"));
+const WhatWeDo = lazy(() => import("@/pages/ConsultPage"));
+const PricingPage = lazy(() => import("@/pages/ResearchPage"));
+const ResearchTools = lazy(() => import("@/pages/ToolsPage"));
+const CaseStudies = lazy(() => import("@/pages/CaseStudiesPage"));
+const ContactUs = lazy(() => import("@/pages/ContactPage"));
+const Test24BasicPage = lazy(() => import("@/pages/Test24BasicPage"));
+const Test24ProPage = lazy(() => import("@/pages/Test24ProPage"));
+const ConsultPillarPage = lazy(() => import("@/pages/ConsultPillarPage"));
+const CouponSignup = lazy(() => import("@/pages/CouponSignup"));
+const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
+const CaseStudyDetail = lazy(() => import("@/pages/CaseStudyDetail"));
+const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
+const TermsOfUse = lazy(() => import("@/pages/TermsOfUse"));
+const CookiePolicy = lazy(() => import("@/pages/CookiePolicy"));
+const NotFound = lazy(() => import("@/pages/not-found"));
 const CheckoutBasicPAYG = lazy(() => import("@/pages/CheckoutBasicPAYG"));
 const CheckoutProPAYG = lazy(() => import("@/pages/CheckoutProPAYG"));
 const CheckoutBasicMembers = lazy(() => import("@/pages/CheckoutBasicMembers"));
@@ -39,7 +39,6 @@ const TrendsInsights = lazy(() => import("@/pages/portal/TrendsInsights"));
 const InsightDetail = lazy(() => import("@/pages/portal/InsightDetail"));
 const LaunchBrief = lazy(() => import("@/pages/portal/LaunchBrief"));
 const CreditsAndBilling = lazy(() => import("@/pages/portal/CreditsAndBilling"));
-const PastResearch = lazy(() => import("@/pages/portal/PastResearch"));
 const MemberDeals = lazy(() => import("@/pages/portal/MemberDeals"));
 const Settings = lazy(() => import("@/pages/portal/Settings"));
 const AdminPortal = lazy(() => import("@/pages/portal/AdminPortal"));
@@ -70,17 +69,8 @@ function AdminOnly({ children }: { children: React.ReactNode }) {
 
 function Router() {
   useGtmPageTracking();
-  const [location] = useLocation();
   return (
     <Suspense fallback={<div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}><div data-testid="loading-spinner" style={{ width: 32, height: 32, border: "3px solid #e5e7eb", borderTopColor: "#3A2FBF", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} /><style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style></div>}>
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={location}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -6 }}
-        transition={{ duration: 0.22, ease: "easeInOut" }}
-      >
         <Switch>
           <Route path="/" component={InnovatrHome} />
           <Route path="/research" component={PricingPage} />
@@ -111,17 +101,19 @@ function Router() {
           <Route path="/payment/cancel" component={PaymentReturn} />
           <Route path="/portal" component={Dashboard} />
           <Route path="/portal/dashboard" component={Dashboard} />
-          <Route path="/portal/trends" component={TrendsInsights} />
-          <Route path="/portal/insights/:slug">{(params) => <InsightDetail {...(params as any)} />}</Route>
+          <Route path="/portal/explore/trends" component={TrendsInsights} />
+          <Route path="/portal/explore/insights/:slug" component={InsightDetail} />
+          <Route path="/portal/trends">{() => <Redirect to="/portal/explore/trends" />}</Route>
+          <Route path="/portal/insights/:slug" component={InsightDetail} />
           <Route path="/portal/launch" component={LaunchBrief} />
           <Route path="/portal/credits">{() => <AdminOnly><CreditsAndBilling /></AdminOnly>}</Route>
           <Route path="/portal/explore" component={ExplorePage} />
           <Route path="/portal/test" component={TestPage} />
-          <Route path="/portal/act">{() => <AdminOnly><ActPage /></AdminOnly>}</Route>
-          <Route path="/portal/health">{() => <AdminOnly><HealthPage /></AdminOnly>}</Route>
-          <Route path="/portal/research">{() => <AdminOnly><PastResearch /></AdminOnly>}</Route>
-          <Route path="/portal/deals">{() => <AdminOnly><MemberDeals /></AdminOnly>}</Route>
-          <Route path="/portal/reports/:id">{(params) => <AdminOnly><ReportDetailPage {...(params as any)} /></AdminOnly>}</Route>
+          <Route path="/portal/act" component={ActPage} />
+          <Route path="/portal/health" component={HealthPage} />
+          <Route path="/portal/research">{() => <Redirect to="/portal/test" />}</Route>
+          <Route path="/portal/deals" component={MemberDeals} />
+          <Route path="/portal/reports/:id" component={ReportDetailPage} />
           <Route path="/portal/admin" component={AdminPortal} />
           <Route path="/portal/admin/companies/:companyId" component={AdminCompanyDetail} />
           <Route path="/portal/settings" component={Settings} />
@@ -129,24 +121,24 @@ function Router() {
           <Route path="/reset-password" component={ResetPassword} />
           <Route component={NotFound} />
         </Switch>
-      </motion.div>
-    </AnimatePresence>
     </Suspense>
   );
 }
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <CurrencyProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
-        </CurrencyProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <NuqsAdapter>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <CurrencyProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </CurrencyProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </NuqsAdapter>
   );
 }
 

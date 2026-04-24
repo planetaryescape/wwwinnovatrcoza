@@ -315,10 +315,12 @@ async function extractPdfText(entry: PdfEntry): Promise<string> {
   if (!fs.existsSync(filePath)) return "";
 
   try {
-    // Dynamic import to avoid issues at module load time
-    const pdfParse = (await import("pdf-parse")).default;
+    // Dynamic import to avoid issues at module load time.
+    const { PDFParse } = await import("pdf-parse");
     const buffer = fs.readFileSync(filePath);
-    const data = await pdfParse(buffer);
+    const parser = new PDFParse({ data: buffer });
+    const data = await parser.getText();
+    await parser.destroy();
     const text = data.text || "";
     textCache.set(entry.id, text);
     return text;

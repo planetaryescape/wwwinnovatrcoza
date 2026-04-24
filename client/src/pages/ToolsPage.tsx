@@ -517,7 +517,7 @@ function ExpandedToolModal({ tool, onClose }: { tool: Tool; onClose: () => void 
             ) : (
               <div style={{ height: 220, borderRadius: "20px 20px 0 0", overflow: "hidden" }}>
                 <img
-                  src={tool.image}
+                  src={tool.image ?? undefined}
                   alt={tool.name}
                   loading="lazy"
                   style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: tool.imagePosition === "object-left" ? "left center" : "center" }}

@@ -17,8 +17,8 @@ import { CreditCard, Download, Package, CheckCircle, Clock, AlertCircle, FileTex
 import PortalLayout from "./PortalLayout";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCurrency } from "@/contexts/CurrencyContext";
 import OrderFormDialog from "@/components/OrderFormDialog";
+import { PortalBreadcrumbs } from "@/components/portal/PortalBreadcrumbs";
 import type { Order } from "@shared/schema";
 
 const creditPackages = [
@@ -55,7 +55,6 @@ const creditPackages = [
 export default function CreditsAndBilling() {
   const [, setLocation] = useLocation();
   const { isPaidMember, user, company: authCompany } = useAuth();
-  const { formatPrice } = useCurrency();
   const [showOrderForm, setShowOrderForm] = useState(false);
 
   useEffect(() => {
@@ -67,7 +66,7 @@ export default function CreditsAndBilling() {
   const { data: freshCompany } = useQuery({
     queryKey: ['/api/member/company', user?.companyId],
     queryFn: async () => {
-      const response = await fetch(`/api/member/company?companyId=${user?.companyId}`);
+      const response = await fetch('/api/member/company');
       if (!response.ok) return null;
       return response.json();
     },
@@ -79,9 +78,9 @@ export default function CreditsAndBilling() {
 
   // Fetch user's orders
   const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
-    queryKey: ['/api/member/orders'],
+    queryKey: ['/api/member/orders', user?.id],
     queryFn: async () => {
-      const response = await fetch(`/api/member/orders?email=${encodeURIComponent(user?.email || '')}`);
+      const response = await fetch('/api/member/orders');
       if (!response.ok) throw new Error('Failed to fetch orders');
       return response.json();
     },
@@ -101,9 +100,18 @@ export default function CreditsAndBilling() {
     .filter((order) => !(order.invoiceRequested === true && order.status === 'pending'))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
+  const formatZar = (amount: number | string) => {
+    const num = typeof amount === "string" ? parseFloat(amount) : amount;
+    return new Intl.NumberFormat("en-ZA", {
+      style: "currency",
+      currency: "ZAR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(num);
+  };
+
   const formatPriceLocal = (amount: number | string) => {
-    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-    return formatPrice(num);
+    return formatZar(amount);
   };
 
   const formatDate = (date: Date | string) => {
@@ -188,72 +196,83 @@ export default function CreditsAndBilling() {
   if (!isPaidMember) {
     return (
       <PortalLayout>
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-serif font-bold mb-2">Purchase Membership & Credits</h1>
-              <p className="text-lg text-muted-foreground">
-                Upgrade your account and unlock exclusive features
-              </p>
+        <div className="portal-workspace portal-canvas">
+          <div className="portal-page-header">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div className="min-w-0">
+                <PortalBreadcrumbs items={[
+                  { label: "Dashboard", href: "/portal/dashboard" },
+                  { label: "Company", href: "/portal/health" },
+                  { label: "Credits" },
+                ]} />
+                <h1 className="text-4xl font-serif font-bold mb-2">Purchase Membership & Credits</h1>
+                <p className="text-lg text-muted-foreground">
+                  Upgrade your account and unlock exclusive features
+                </p>
+              </div>
+              <Badge variant="secondary" className="text-sm" data-testid="badge-free-tier">
+                Free Tier
+              </Badge>
             </div>
-            <Badge variant="secondary" className="text-sm" data-testid="badge-free-tier">
-              Free Tier
-            </Badge>
           </div>
+          <div className="portal-body">
+            <div className="portal-main-scroll space-y-6">
 
-          {/* Membership Purchase CTA */}
-          <Card className="border-primary bg-primary/5">
-            <CardContent className="p-8">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <CreditCard className="w-6 h-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-2xl font-semibold mb-3">Become an Innovatr Member</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Unlock discounted Test24 credits, access the full trends library, member offers, and priority support. Choose from Entry, Growth, or Scale tiers.
-                  </p>
-                  <div className="flex gap-3">
-                    <Button size="lg" onClick={() => setLocation("/#membership")} data-testid="button-explore-plans">
-                      View Membership Plans
-                    </Button>
-                    <Button variant="outline" size="lg" onClick={() => setLocation("/#pricing")} data-testid="button-payg-pricing">
-                      Pay-As-You-Go Pricing
-                    </Button>
+              {/* Membership Purchase CTA */}
+              <Card className="border-primary bg-primary/5">
+                <CardContent className="p-8">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <CreditCard className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-2xl font-semibold mb-3">Become an Innovatr Member</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Unlock discounted Test24 credits, access the full trends library, member offers, and priority support. Choose from Entry, Growth, or Scale tiers.
+                      </p>
+                      <div className="flex gap-3">
+                        <Button size="lg" onClick={() => setLocation("/#membership")} data-testid="button-explore-plans">
+                          View Membership Plans
+                        </Button>
+                        <Button variant="outline" size="lg" onClick={() => setLocation("/#pricing")} data-testid="button-payg-pricing">
+                          Pay-As-You-Go Pricing
+                        </Button>
+                      </div>
+                    </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Benefits Preview */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">What You'll Get with Membership</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <Card>
+                    <CardContent className="p-6">
+                      <h4 className="font-semibold mb-2">Discounted Credits</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Save up to 55% on Test24 Basic and Pro research credits
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6">
+                      <h4 className="font-semibold mb-2">Full Trends Library</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Download all industry reports and market insights
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6">
+                      <h4 className="font-semibold mb-2">Member Offers</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Access exclusive offers and bundle packages
+                      </p>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Benefits Preview */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">What You'll Get with Membership</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card>
-                <CardContent className="p-6">
-                  <h4 className="font-semibold mb-2">Discounted Credits</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Save up to 55% on Test24 Basic and Pro research credits
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6">
-                  <h4 className="font-semibold mb-2">Full Trends Library</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Download all industry reports and market insights
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6">
-                  <h4 className="font-semibold mb-2">Member Offers</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Access exclusive offers and bundle packages
-                  </p>
-                </CardContent>
-              </Card>
             </div>
           </div>
         </div>
@@ -263,236 +282,245 @@ export default function CreditsAndBilling() {
 
   return (
     <PortalLayout>
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-4xl font-serif font-bold mb-2">Credits & Billing</h1>
-          <p className="text-lg text-muted-foreground">
-            Manage your research credits and billing information
-          </p>
-        </div>
-
-        {/* Current Credit Balance */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="border-accent">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Test24 Basic Credits</span>
-                <Badge variant="secondary">{basicCredits.remaining} Available</Badge>
-              </CardTitle>
-              <CardDescription>
-                {company?.tier ? `Included in ${company.tier.charAt(0) + company.tier.slice(1).toLowerCase()} Membership` : 'Company credits'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Used</span>
-                  <span className="font-medium">
-                    {basicCredits.total - basicCredits.remaining} of {basicCredits.total}
-                  </span>
-                </div>
-                <Progress value={100 - basicPercentage} className="h-3" />
-              </div>
-              <div className="pt-2">
-                <p className="text-sm text-muted-foreground">
-                  Member rate: {formatPriceLocal(5000)} per credit (50% off)
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-primary">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Test24 Pro Credits</span>
-                <Badge variant="secondary">{proCredits.remaining} Available</Badge>
-              </CardTitle>
-              <CardDescription>
-                {company?.tier ? `Included in ${company.tier.charAt(0) + company.tier.slice(1).toLowerCase()} Membership` : 'Company credits'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Used</span>
-                  <span className="font-medium">
-                    {proCredits.total - proCredits.remaining} of {proCredits.total}
-                  </span>
-                </div>
-                <Progress value={100 - proPercentage} className="h-3" />
-              </div>
-              <div className="pt-2">
-                <p className="text-sm text-muted-foreground">
-                  Member rate: {formatPriceLocal(45000)} per credit (10% off)
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Purchase Credit Packs */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="w-5 h-5" />
-              Purchase Credit Packs
-            </CardTitle>
-            <CardDescription>
-              Top up your credits with exclusive member pricing
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {creditPackages.map((pack, index) => (
-                <Card
-                  key={index}
-                  className="hover-elevate"
-                  data-testid={`credit-pack-${index}`}
-                >
-                  <CardHeader>
-                    <Badge
-                      variant={pack.type === "Pro" ? "default" : "secondary"}
-                      className="w-fit"
-                    >
-                      {pack.type}
-                    </Badge>
-                    <CardTitle className="text-2xl mt-2">
-                      {pack.credits}x Credit{pack.credits > 1 ? "s" : ""}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <p className="text-3xl font-bold text-primary">
-                        {formatPriceLocal(pack.price)}
-                      </p>
-                      <p className="text-sm text-muted-foreground line-through">
-                        {formatPriceLocal(pack.regularPrice)}
-                      </p>
-                    </div>
-                    <div className="bg-accent/10 rounded-lg p-2 text-center">
-                      <p className="text-sm font-semibold text-accent">
-                        Save {pack.savings}%
-                      </p>
-                    </div>
-                    <Button 
-                      className="w-full" 
-                      data-testid={`button-buy-pack-${index}`}
-                      onClick={() => handlePurchasePack(pack)}
-                    >
-                      Purchase
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Pending Invoice Orders */}
-        {pendingInvoiceOrders.length > 0 && (
-          <Card className="border-amber-500/50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-amber-500" />
-                Pending Invoices
-              </CardTitle>
-              <CardDescription>
-                Orders awaiting payment. Credits will be activated once payment is received.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order ID</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead className="text-right">Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pendingInvoiceOrders.map((order) => (
-                    <TableRow key={order.id} data-testid={`pending-order-${order.id}`}>
-                      <TableCell className="font-medium font-mono text-xs">{order.id.slice(0, 8)}...</TableCell>
-                      <TableCell>{formatDate(order.createdAt)}</TableCell>
-                      <TableCell>{order.purchaseType}</TableCell>
-                      <TableCell className="text-right font-semibold">
-                        {formatPriceLocal(order.amount)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {getStatusBadge(order.status, order.invoiceRequested)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <p className="text-sm text-muted-foreground mt-4">
-                An invoice has been sent to your email. Once payment is confirmed, your credits will be activated automatically.
+      <div className="portal-workspace portal-canvas">
+        <div className="portal-page-header">
+          <div className="min-w-0">
+              <PortalBreadcrumbs items={[
+                { label: "Dashboard", href: "/portal/dashboard" },
+                { label: "Company", href: "/portal/health" },
+                { label: "Credits" },
+              ]} />
+              <h1 className="text-4xl font-serif font-bold mb-2">Credits & Billing</h1>
+              <p className="text-lg text-muted-foreground">
+                Manage your research credits and billing information
               </p>
-            </CardContent>
-          </Card>
-        )}
+          </div>
+        </div>
+        <div className="portal-body">
+          <div className="portal-main-scroll space-y-6">
 
-        {/* Billing History */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="w-5 h-5" />
-              Billing History
-            </CardTitle>
-            <CardDescription>
-              View and download your invoices
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order ID</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead className="text-right">Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {/* Show orders from API */}
-                {billingHistoryOrders.map((order) => (
-                  <TableRow key={order.id} data-testid={`order-${order.id}`}>
-                    <TableCell className="font-medium font-mono text-xs">{order.id.slice(0, 8)}...</TableCell>
-                    <TableCell>{formatDate(order.createdAt)}</TableCell>
-                    <TableCell>{order.purchaseType}</TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {formatPriceLocal(order.amount)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {getStatusBadge(order.status, order.invoiceRequested)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        data-testid={`button-download-order-${order.id}`}
-                      >
-                        <Download className="w-4 h-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {billingHistoryOrders.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                      No billing history yet. Your orders and payments will appear here.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+            {/* Current Credit Balance */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="border-accent">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Test24 Basic Credits</span>
+                    <Badge variant="secondary">{basicCredits.remaining} Available</Badge>
+                  </CardTitle>
+                  <CardDescription>
+                    {company?.tier ? `Included in ${company.tier.charAt(0) + company.tier.slice(1).toLowerCase()} Membership` : 'Company credits'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Used</span>
+                      <span className="font-medium">
+                        {basicCredits.total - basicCredits.remaining} of {basicCredits.total}
+                      </span>
+                    </div>
+                    <Progress value={100 - basicPercentage} className="h-3" />
+                  </div>
+                  <div className="pt-2">
+                    <p className="text-sm text-muted-foreground">
+                      Member rate: {formatPriceLocal(5000)} per credit (50% off)
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
 
+              <Card className="border-primary">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Test24 Pro Credits</span>
+                    <Badge variant="secondary">{proCredits.remaining} Available</Badge>
+                  </CardTitle>
+                  <CardDescription>
+                    {company?.tier ? `Included in ${company.tier.charAt(0) + company.tier.slice(1).toLowerCase()} Membership` : 'Company credits'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Used</span>
+                      <span className="font-medium">
+                        {proCredits.total - proCredits.remaining} of {proCredits.total}
+                      </span>
+                    </div>
+                    <Progress value={100 - proPercentage} className="h-3" />
+                  </div>
+                  <div className="pt-2">
+                    <p className="text-sm text-muted-foreground">
+                      Member rate: {formatPriceLocal(45000)} per credit (10% off)
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Purchase Credit Packs */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="w-5 h-5" />
+                  Purchase Credit Packs
+                </CardTitle>
+                <CardDescription>
+                  Top up your credits with exclusive member pricing
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {creditPackages.map((pack, index) => (
+                    <Card
+                      key={index}
+                      className="hover-elevate"
+                      data-testid={`credit-pack-${index}`}
+                    >
+                      <CardHeader>
+                        <Badge
+                          variant={pack.type === "Pro" ? "default" : "secondary"}
+                          className="w-fit"
+                        >
+                          {pack.type}
+                        </Badge>
+                        <CardTitle className="text-2xl mt-2">
+                          {pack.credits}x Credit{pack.credits > 1 ? "s" : ""}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <p className="text-3xl font-bold text-primary">
+                            {formatPriceLocal(pack.price)}
+                          </p>
+                          <p className="text-sm text-muted-foreground line-through">
+                            {formatPriceLocal(pack.regularPrice)}
+                          </p>
+                        </div>
+                        <div className="bg-accent/10 rounded-lg p-2 text-center">
+                          <p className="text-sm font-semibold text-accent">
+                            Save {pack.savings}%
+                          </p>
+                        </div>
+                        <Button 
+                          className="w-full" 
+                          data-testid={`button-buy-pack-${index}`}
+                          onClick={() => handlePurchasePack(pack)}
+                        >
+                          Purchase
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Pending Invoice Orders */}
+            {pendingInvoiceOrders.length > 0 && (
+              <Card className="border-amber-500/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-amber-500" />
+                    Pending Invoices
+                  </CardTitle>
+                  <CardDescription>
+                    Orders awaiting payment. Credits will be activated once payment is received.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Order ID</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead className="text-right">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pendingInvoiceOrders.map((order) => (
+                        <TableRow key={order.id} data-testid={`pending-order-${order.id}`}>
+                          <TableCell className="font-medium font-mono text-xs">{order.id.slice(0, 8)}...</TableCell>
+                          <TableCell>{formatDate(order.createdAt)}</TableCell>
+                          <TableCell>{order.purchaseType}</TableCell>
+                          <TableCell className="text-right font-semibold">
+                            {formatPriceLocal(order.amount)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {getStatusBadge(order.status, order.invoiceRequested)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  <p className="text-sm text-muted-foreground mt-4">
+                    An invoice has been sent to your email. Once payment is confirmed, your credits will be activated automatically.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Billing History */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="w-5 h-5" />
+                  Billing History
+                </CardTitle>
+                <CardDescription>
+                  View and download your invoices
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Order ID</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead className="text-right">Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {billingHistoryOrders.map((order) => (
+                      <TableRow key={order.id} data-testid={`order-${order.id}`}>
+                        <TableCell className="font-medium font-mono text-xs">{order.id.slice(0, 8)}...</TableCell>
+                        <TableCell>{formatDate(order.createdAt)}</TableCell>
+                        <TableCell>{order.purchaseType}</TableCell>
+                        <TableCell className="text-right font-semibold">
+                          {formatPriceLocal(order.amount)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {getStatusBadge(order.status, order.invoiceRequested)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            data-testid={`button-download-order-${order.id}`}
+                          >
+                            <Download className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {billingHistoryOrders.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                          No billing history yet. Your orders and payments will appear here.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
 
       {/* Order Form Dialog for Credit Pack Purchases */}

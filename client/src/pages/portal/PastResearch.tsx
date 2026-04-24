@@ -198,26 +198,9 @@ export default function PastResearch() {
       setLoading(true);
       setError(null);
       
-      // For admins: use viewCompanyId if provided, otherwise fetch ALL data (no companyId param)
-      // For regular users: use their companyId
-      let queryParams = `email=${encodeURIComponent(user?.email || '')}`;
-      
-      if (isAdmin) {
-        // Admin viewing specific company OR all companies
-        if (viewCompanyId) {
-          queryParams += `&companyId=${viewCompanyId}`;
-        }
-        // If no viewCompanyId, don't add companyId - backend will return ALL data for admin
-      } else {
-        // Regular users always filter by their company
-        if (user?.companyId) {
-          queryParams += `&companyId=${user.companyId}`;
-        }
-      }
-      
       const [reportsRes, studiesRes] = await Promise.all([
-        fetch(`/api/member/client-reports?${queryParams}`),
-        fetch(`/api/member/studies?${queryParams}`)
+        fetch("/api/member/client-reports"),
+        fetch("/api/member/studies")
       ]);
       
       if (!reportsRes.ok) {
@@ -827,7 +810,7 @@ export default function PastResearch() {
                       {inProgressStudies.map((study) => (
                         <Card 
                           key={study.id}
-                          className="border-l-4 border-l-primary hover-elevate"
+                          className="border-primary/20 bg-primary/5 hover-elevate"
                           data-testid={`study-card-${study.id}`}
                         >
                           <CardContent className="p-5">
@@ -889,7 +872,7 @@ export default function PastResearch() {
                       {activeReports.map((report) => (
                         <Card 
                           key={`active-report-${report.id}`}
-                          className="border-l-4 border-l-primary hover-elevate"
+                          className="border-primary/20 bg-primary/5 hover-elevate"
                           data-testid={`active-report-card-${report.id}`}
                         >
                           <CardContent className="p-5">

@@ -4,6 +4,8 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
 import { sendDailyAdminDigest } from "./emails/email-service";
+import { db } from "./db";
+import { consultOfferTemplates } from "@shared/schema";
 
 const app = express();
 
@@ -138,9 +140,12 @@ app.use((req, res, next) => {
           status: "draft",
           isFeatured: true,
           accessLevel: "member",
+          creditType: "none",
           teaser: "Drinking occasions are shifting into the home. Consumers are going out less often, but upgrading the quality of their at-home social moments.",
           body: `For years, alcohol culture revolved around going out. Bars. Restaurants. Events. Social occasions built around venues.\n\nBut over the past few years, that behaviour has shifted. South Africans are still socialising. They're still drinking. But increasingly, they're doing it at home.\n\nWhat started as a necessity during pandemic restrictions has quietly evolved into a lasting habit — one that is reshaping how alcohol brands are consumed.\n\n**The shift, in numbers**\n\n72% of alcohol consumption occasions now happen at home rather than at licensed venues. 58% say they go out for drinks less frequently than they did two years ago. Among urban professionals, 47% report hosting friends at home at least once per month. 44% say they are drinking less often but choosing higher-quality drinks. Premium mixer purchases have increased, with 39% of under-35s buying premium mixers in the past three months.\n\nFrequency may be moderating. But the quality of the occasion is increasing.\n\n**The rise of the home host**\n\nAt-home drinking is no longer about convenience alone. Consumers are actively upgrading the experience — better glassware, better mixers, ice moulds, cocktail kits, carefully curated drinks selections.\n\nHosting has become part of the ritual. Instead of multiple rounds at a venue, people create a smaller, more controlled social moment at home — where the environment, budget, and timing all feel easier to manage.\n\nThis shift is particularly visible among younger urban consumers who balance social lives with rising living costs. Hosting offers the same connection, but with greater flexibility.\n\n**What this means for alcohol brands**\n\nFor many brands, the mental model of drinking occasions still centres on venues. But when occasions move home, the role of the product changes. At a bar, the venue curates the experience. At home, the product becomes the experience.\n\nPackaging, mixers, serving suggestions, and occasion cues all start to matter more. Brands that equip the host — not just the drinker — gain relevance.\n\n**Innovatr's takeaway**\n\nThe future of alcohol occasions is not defined by where people drink. It's defined by how intentional the moment becomes. Consumers are drinking slightly less frequently, but with greater attention to the experience around the drink. In that environment, brands that focus only on volume risk missing the opportunity. The real growth sits inside the occasion.`,
           topics: ["Alcohol", "Social Occasions", "Premiumisation", "Hosting Culture", "Consumer Behaviour"],
+          themeTags: [],
+          methodTags: [],
           pdfUrl: "/reports/home-is-the-new-bar.pdf",
           coverImageUrl: "/reports/home-is-the-new-bar.jpg",
           thumbnailUrl: "/reports/home-is-the-new-bar.jpg",
@@ -233,6 +238,9 @@ app.use((req, res, next) => {
             status: MAILER_SLUGS.has(r.slug) ? "draft" : "published",
             isFeatured: true,
             accessLevel: "member",
+            creditType: "none",
+            themeTags: [],
+            methodTags: [],
             isArchived: false,
           });
           log(`Seeded report: "${r.title}" (${MAILER_SLUGS.has(r.slug) ? "draft — publishes on send" : "published"})`);
@@ -240,6 +248,58 @@ app.use((req, res, next) => {
       }
     } catch (err) {
       console.error("Failed to seed additional reports:", err);
+    }
+  })();
+
+  // Idempotent: seed consult offer templates used by the Act page
+  (async () => {
+    try {
+      const existing = await db.select().from(consultOfferTemplates);
+      const existingSlugs = new Set(existing.map((row) => row.slug));
+
+      const seeds = [
+        {
+          slug: "strategy-positioning",
+          serviceType: "strategy",
+          title: "Brand Positioning Strategy Session",
+          descriptionTemplate:
+            "Turn the current research into a sharper commercial narrative and decision path. {context}",
+          note: "Custom proposal sent offline",
+          badgeLabel: "10% off",
+          triggerTags: ["strategy", "gap", "commitment", "portfolio"],
+          sortOrder: 1,
+        },
+        {
+          slug: "creative-design",
+          serviceType: "creative",
+          title: "Creative Concepts & Design Sprint",
+          descriptionTemplate:
+            "Translate the strongest learning into pack, concept, or campaign development work. {context}",
+          note: "Custom proposal sent offline",
+          badgeLabel: "10% off",
+          triggerTags: ["creative", "pack", "message", "portfolio"],
+          sortOrder: 2,
+        },
+        {
+          slug: "pricing-value",
+          serviceType: "pricing",
+          title: "Pricing & Value Optimisation Sprint",
+          descriptionTemplate:
+            "Pressure-test price, value cues, and premium justification before rollout. {context}",
+          note: "Custom proposal sent offline",
+          badgeLabel: "10% off",
+          triggerTags: ["pricing", "value", "commitment", "portfolio"],
+          sortOrder: 3,
+        },
+      ];
+
+      for (const seed of seeds) {
+        if (existingSlugs.has(seed.slug)) continue;
+        await db.insert(consultOfferTemplates).values(seed);
+        log(`Seeded consult offer template: "${seed.title}"`);
+      }
+    } catch (err) {
+      console.error("Failed to seed consult offer templates:", err);
     }
   })();
 

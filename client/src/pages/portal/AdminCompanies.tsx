@@ -1,5 +1,7 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataTable } from "@/components/portal/DataTable";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -158,6 +160,134 @@ export default function AdminCompanies() {
   
   const [addReportOpen, setAddReportOpen] = useState(false);
   const [addingReport, setAddingReport] = useState(false);
+
+  const companyColumns = useMemo<ColumnDef<Company>[]>(() => [
+    {
+      id: "company",
+      accessorKey: "name",
+      header: "Company",
+      cell: ({ row }) => {
+        const company = row.original;
+        return (
+          <div>
+            <div className="font-medium">{company.name}</div>
+            <div className="text-sm text-muted-foreground">{company.domain || "—"}</div>
+            {company.industry && (
+              <span className="text-xs text-muted-foreground">{company.industry}</span>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      id: "tier",
+      accessorKey: "tier",
+      header: "Tier",
+      cell: ({ row }) => {
+        const tierInfo = tierConfig[row.original.tier] || tierConfig.STARTER;
+        const TierIcon = tierInfo.icon;
+        return (
+          <Badge className={tierInfo.color}>
+            <TierIcon className="w-3 h-3 mr-1" />
+            {tierInfo.label}
+          </Badge>
+        );
+      },
+    },
+    {
+      id: "members",
+      accessorFn: (c) => c.memberCount || 0,
+      header: "Members",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1">
+          <Users className="w-3 h-3 text-muted-foreground" />
+          <span className="font-medium">{row.original.memberCount || 0}</span>
+        </div>
+      ),
+    },
+    {
+      id: "lastActive",
+      accessorFn: (c) => c.lastActivityAt ? new Date(c.lastActivityAt).getTime() : 0,
+      header: "Last Active",
+      cell: ({ row }) => {
+        const company = row.original;
+        const lastActive = formatRelativeDate(company.lastActivityAt);
+        const isInactive = company.lastActivityAt === null ||
+          (Date.now() - new Date(company.lastActivityAt).getTime()) > 30 * 24 * 60 * 60 * 1000;
+        return (
+          <span
+            className={`text-sm ${isInactive ? "text-amber-600 dark:text-amber-400" : "text-foreground"}`}
+            data-testid={`text-last-active-${company.id}`}
+          >
+            {lastActive}
+          </span>
+        );
+      },
+    },
+    {
+      id: "logins",
+      accessorFn: (c) => c.totalLogins || 0,
+      header: "Logins",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1">
+          <LogIn className="w-3 h-3 text-muted-foreground" />
+          <span className="font-medium">{row.original.totalLogins || 0}</span>
+        </div>
+      ),
+    },
+    {
+      id: "reports",
+      accessorFn: (c) => c.reportsAccessed || 0,
+      header: "Client Reports",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1">
+          <FileText className="w-3 h-3 text-muted-foreground" />
+          <span className="font-medium">{row.original.reportsAccessed || 0}</span>
+        </div>
+      ),
+    },
+    {
+      id: "credits",
+      accessorFn: (c) => (c.basicCreditsTotal - c.basicCreditsUsed),
+      header: "Credits (B/P)",
+      cell: ({ row }) => {
+        const c = row.original;
+        return (
+          <span className="font-medium">
+            {c.basicCreditsTotal - c.basicCreditsUsed}
+            <span className="text-muted-foreground"> / </span>
+            {c.proCreditsTotal - c.proCreditsUsed}
+          </span>
+        );
+      },
+    },
+    {
+      id: "studies",
+      accessorFn: (c) => c.studyCount || 0,
+      header: "Studies",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1">
+          <FlaskConical className="w-3 h-3 text-muted-foreground" />
+          <span>{row.original.studyCount || 0}</span>
+        </div>
+      ),
+    },
+    {
+      id: "actions",
+      enableSorting: false,
+      header: "",
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setLocation(`/portal/admin/companies/${row.original.id}`)}
+          data-testid={`button-view-company-${row.original.id}`}
+        >
+          View
+        </Button>
+      ),
+    },
+  ], [setLocation]);
   const [deleteReportOpen, setDeleteReportOpen] = useState(false);
   const [reportToDelete, setReportToDelete] = useState<ClientReport | null>(null);
   const [deletingReport, setDeletingReport] = useState(false);
@@ -866,99 +996,16 @@ export default function AdminCompanies() {
             <div className="text-center py-8 text-muted-foreground">Loading companies...</div>
           ) : error ? (
             <div className="text-center py-8 text-destructive">{error}</div>
-          ) : filteredCompanies.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">No companies found</div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Tier</TableHead>
-                  <TableHead>Members</TableHead>
-                  <TableHead>Last Active</TableHead>
-                  <TableHead>Logins</TableHead>
-                  <TableHead>Client Reports</TableHead>
-                  <TableHead>Credits (B/P)</TableHead>
-                  <TableHead>Studies</TableHead>
-                  <TableHead></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCompanies.map((company) => {
-                  const tierInfo = tierConfig[company.tier] || tierConfig.STARTER;
-                  const TierIcon = tierInfo.icon;
-                  const lastActive = formatRelativeDate(company.lastActivityAt);
-                  const isInactive = company.lastActivityAt === null || 
-                    (Date.now() - new Date(company.lastActivityAt).getTime()) > 30 * 24 * 60 * 60 * 1000;
-                  return (
-                    <TableRow key={company.id} data-testid={`row-company-${company.id}`}>
-                      <TableCell>
-                        <div className="font-medium">{company.name}</div>
-                        <div className="text-sm text-muted-foreground">{company.domain || "—"}</div>
-                        {company.industry && (
-                          <span className="text-xs text-muted-foreground">{company.industry}</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={tierInfo.color}>
-                          <TierIcon className="w-3 h-3 mr-1" />
-                          {tierInfo.label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Users className="w-3 h-3 text-muted-foreground" />
-                          <span className="font-medium">{company.memberCount || 0}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span 
-                          className={`text-sm ${isInactive ? "text-amber-600 dark:text-amber-400" : "text-foreground"}`}
-                          data-testid={`text-last-active-${company.id}`}
-                        >
-                          {lastActive}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <LogIn className="w-3 h-3 text-muted-foreground" />
-                          <span className="font-medium">{company.totalLogins || 0}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <FileText className="w-3 h-3 text-muted-foreground" />
-                          <span className="font-medium">{company.reportsAccessed || 0}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-medium">
-                          {company.basicCreditsTotal - company.basicCreditsUsed}
-                          <span className="text-muted-foreground"> / </span>
-                          {company.proCreditsTotal - company.proCreditsUsed}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <FlaskConical className="w-3 h-3 text-muted-foreground" />
-                          <span>{company.studyCount || 0}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => setLocation(`/portal/admin/companies/${company.id}`)}
-                          data-testid={`button-view-company-${company.id}`}
-                        >
-                          View
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+            <DataTable
+              columns={companyColumns}
+              data={filteredCompanies}
+              defaultSort={[{ id: "lastActive", desc: true }]}
+              rowTestId={(c) => `row-company-${c.id}`}
+              emptyState={
+                <div className="py-8 text-center text-muted-foreground">No companies found</div>
+              }
+            />
           )}
         </CardContent>
       </Card>

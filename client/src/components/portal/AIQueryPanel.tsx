@@ -6,8 +6,9 @@ import { apiRequest } from "@/lib/queryClient";
 const VDK   = "#1E1B3A";
 const VIO   = "#3A2FBF";
 const CORAL = "#E8503A";
-const N200  = "#E2D5BF";
-const N400  = "#9C9AB0";
+const N100  = "#F5F5F5";
+const N200  = "#EBEBEB";
+const N400  = "#A89078";
 const N500  = "#8A7260";
 const CREAM = "#FFFFFF";
 
@@ -136,7 +137,7 @@ function AIResponseCard({ response }: { response: AIResponse }) {
 
       {/* Key findings */}
       {response.findings.length > 0 && (
-        <div className="rounded-md overflow-hidden" style={{ border: `1px solid ${N200}`, background: CREAM }}>
+        <div className="rounded-md overflow-hidden" style={{ border: `1px solid ${N200}`, background: "#fff" }}>
           <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: `1px solid ${N200}` }}>
             <ListChecks className="w-3.5 h-3.5" style={{ color: VIO }} />
             <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: VDK }}>Key Findings</span>
@@ -166,7 +167,7 @@ function AIResponseCard({ response }: { response: AIResponse }) {
       {/* Source citations */}
       {response.citations.length > 0 && (
         <div className="rounded-md overflow-hidden" style={{ border: `1px solid ${N200}` }}>
-          <div className="flex items-center gap-2 px-3 py-2" style={{ background: CREAM, borderBottom: `1px solid ${N200}` }}>
+          <div className="flex items-center gap-2 px-3 py-2" style={{ background: N100, borderBottom: `1px solid ${N200}` }}>
             <BookOpen className="w-3.5 h-3.5" style={{ color: CORAL }} />
             <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: VDK }}>Source Reports</span>
             <span className="ml-auto text-[10px]" style={{ color: N400 }}>{response.citations.length} matched</span>
@@ -267,7 +268,8 @@ export default function AIQueryPanel({
       </div>
 
       {/* Source selector */}
-      <div className="flex-shrink-0" style={{ background: "#FFFFFF", borderBottom: `1px solid ${N200}` }}>
+      <div className="flex-shrink-0" style={{ background: N100, borderBottom: `1px solid ${N200}` }}>
+
         <button
           className="w-full flex items-center gap-2 px-3 py-2 text-left"
           onClick={() => setShowSources(o => !o)}
@@ -370,7 +372,7 @@ export default function AIQueryPanel({
       {suggestedPrompts.length > 0 && messages.length === 0 && (
         <div
           className="flex-shrink-0 px-3 py-2 flex flex-wrap gap-1.5"
-          style={{ background: "#FFFFFF", borderTop: `1px solid ${N200}` }}
+          style={{ background: N100, borderTop: `1px solid ${N200}` }}
         >
           {suggestedPrompts.map((p, i) => (
             <button

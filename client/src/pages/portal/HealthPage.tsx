@@ -1,22 +1,24 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AIQueryPanel from "@/components/portal/AIQueryPanel";
+import { Button } from "@/components/ui/button";
+import { PortalBreadcrumbs } from "@/components/portal/PortalBreadcrumbs";
 import { useLocation } from "wouter";
 import {
-  X, Sparkles, TrendingUp, TrendingDown, Activity,
+  Sparkles, TrendingUp, TrendingDown, Activity,
   MessageSquare, Star, DollarSign, Eye, Clock, AlertTriangle,
   Search, Table2, Loader2,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import type { ClientReport } from "@shared/schema";
-import PortalLayout from "./PortalLayout";
 import { useIsMobile } from "@/hooks/use-mobile";
+import PortalLayout from "./PortalLayout";
 
 /* ── Design System ───────────────────────────────────────── */
 const VDK      = "#1E1B3A";
 const VIO      = "#3A2FBF";
-const N200     = "#E2D5BF";
-const N400     = "#9C9AB0";
+const N200     = "#EBEBEB";
+const N400     = "#A89078";
 const N500     = "#8A7260";
 const SUCCESS  = "#2A9E5C";
 const SUC_LT   = "#D1FAE5";
@@ -25,8 +27,6 @@ const AMBER_LT = "#FEF6D6";
 const CYAN     = "#4EC9E8";
 const CORAL    = "#E8503A";
 const CORAL_LT = "#FDECEA";
-const CREAM    = "#FFFFFF";
-
 const CARD: React.CSSProperties = {
   background: "#ffffff",
   border: `1px solid ${N200}`,
@@ -100,7 +100,7 @@ function ScoreRow({ label, color, delta, deltaColor, points }: {
 }
 
 /* ── Empty state ─────────────────────────────────────────── */
-function EmptyState() {
+function EmptyState({ onLaunch }: { onLaunch: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4" style={{ background: VIO + "15" }}>
@@ -110,6 +110,9 @@ function EmptyState() {
       <p className="text-sm max-w-xs" style={{ color: N500 }}>
         Once your first research study is completed and delivered, your health metrics will appear here.
       </p>
+      <Button className="mt-5" onClick={onLaunch} data-testid="button-health-launch-brief">
+        Launch a Brief
+      </Button>
     </div>
   );
 }
@@ -120,7 +123,12 @@ export default function HealthPage() {
   const { user } = useAuth();
 
   const { data: rawReports = [], isLoading } = useQuery<ClientReport[]>({
-    queryKey: ["/api/member/client-reports"],
+    queryKey: ["/api/member/client-reports", user?.companyId],
+    queryFn: async () => {
+      const response = await fetch("/api/member/client-reports");
+      if (!response.ok) throw new Error("Failed to fetch client reports");
+      return response.json();
+    },
     enabled: !!user,
   });
 
@@ -269,55 +277,31 @@ export default function HealthPage() {
   const hasData = completed.length > 0;
 
   return (
-    <PortalLayout showPhaseTopbar={false}>
-      <div className="flex flex-col w-full h-full" style={{ background: CREAM }}>
-
-        {/* ── Topbar ── */}
-        <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: VDK, borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1" style={{ background: "rgba(78,201,232,0.2)", color: CYAN, border: "1px solid rgba(78,201,232,0.4)", borderRadius: 6 }}>
-              PHASE 04
-            </span>
-            <h1 className="font-serif text-xl text-white">Company</h1>
-            <span className="text-sm hidden sm:block" style={{ color: N400 }}>Track overall health across all studies</span>
+    <PortalLayout>
+      <div className="portal-workspace">
+        {/* Page header */}
+        <div className="portal-page-header">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="min-w-0">
+              <PortalBreadcrumbs items={[{ label: "Dashboard", href: "/portal/dashboard" }, { label: "Company" }]} />
+              <h1 className="font-serif text-3xl leading-tight mb-1" style={{ color: VDK }}>Company Health Centre</h1>
+              <p className="text-sm" style={{ color: N500 }}>Track overall health, idea traction, and commitment signals across all studies.</p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setLocation("/portal/credits")}
+              data-testid="button-health-manage-credits"
+            >
+              Manage credits
+            </Button>
           </div>
-          <button
-            onClick={() => setLocation("/portal/dashboard")}
-            className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}
-            data-testid="button-close-health"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
         </div>
 
         {/* ── Body ── */}
-        <div className="flex flex-1 overflow-hidden">
+        <div className="portal-body">
 
           {/* ── Main content ── */}
-          <div className="flex-1 overflow-y-auto p-6 pb-20 sm:pb-6" style={{ background: CREAM }}>
-
-            {/* Page header */}
-            <div className="flex items-start justify-between mb-6 flex-wrap gap-3">
-              <div>
-                <div className="text-[11px] font-bold tracking-widest uppercase mb-1" style={{ color: SUCCESS }}>Overall Health</div>
-                <h2 className="text-2xl font-bold mb-1" style={{ color: VDK }}>Company Health Centre</h2>
-                <p className="text-sm" style={{ color: N500 }}>Track overall health, idea traction, and commitment signals across all studies.</p>
-              </div>
-              <div className="flex items-center gap-3 flex-wrap">
-                {isLoading ? (
-                  <div className="flex items-center gap-1.5 text-xs" style={{ color: N400 }}>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    Loading data…
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: SUCCESS }}>
-                    <span className="w-2 h-2 rounded-full" style={{ background: SUCCESS }} />
-                    {completed.length} {completed.length === 1 ? "study" : "studies"} analysed
-                  </div>
-                )}
-              </div>
-            </div>
+          <div className="portal-main-scroll">
 
             {/* Loading state */}
             {isLoading && (
@@ -328,7 +312,7 @@ export default function HealthPage() {
             )}
 
             {/* Empty state */}
-            {!isLoading && !hasData && <EmptyState />}
+            {!isLoading && !hasData && <EmptyState onLaunch={() => setLocation("/portal/launch")} />}
 
             {/* ── Data content ── */}
             {!isLoading && hasData && (
@@ -521,7 +505,7 @@ export default function HealthPage() {
 
           {/* ── Right: AI Panel — hidden on mobile ── */}
           {!isMobile && (
-            <div className="w-80 min-w-[320px] flex flex-col overflow-hidden" style={{ borderLeft: `1px solid ${N200}` }}>
+            <div className="portal-ai-rail">
               <AIQueryPanel
                 accentColor={SUCCESS}
                 label="Health AI"
