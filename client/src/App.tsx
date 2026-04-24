@@ -111,8 +111,8 @@ function Router() {
           <Route path="/payment/cancel" component={PaymentReturn} />
           <Route path="/portal" component={Dashboard} />
           <Route path="/portal/dashboard" component={Dashboard} />
-          <Route path="/portal/trends">{() => <AdminOnly><TrendsInsights /></AdminOnly>}</Route>
-          <Route path="/portal/insights/:slug">{(params) => <AdminOnly><InsightDetail {...(params as any)} /></AdminOnly>}</Route>
+          <Route path="/portal/trends" component={TrendsInsights} />
+          <Route path="/portal/insights/:slug">{(params) => <InsightDetail {...(params as any)} />}</Route>
           <Route path="/portal/launch" component={LaunchBrief} />
           <Route path="/portal/credits">{() => <AdminOnly><CreditsAndBilling /></AdminOnly>}</Route>
           <Route path="/portal/explore" component={ExplorePage} />
