@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "../server/db";
 import { companies, companyMemberships, users } from "../shared/schema";
 
@@ -47,14 +47,18 @@ async function main() {
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
     for (const [index, user] of companyUsers.entries()) {
-      const existing = await db.execute(sql`
-        SELECT id FROM company_memberships
-        WHERE user_id = ${user.id}
-          AND company_id = ${company.id}
-          AND status = 'ACTIVE'
-        LIMIT 1
-      `);
-      if (Array.isArray(existing) && existing.length > 0) continue;
+      const existing = await db
+        .select({ id: companyMemberships.id })
+        .from(companyMemberships)
+        .where(
+          and(
+            eq(companyMemberships.userId, user.id),
+            eq(companyMemberships.companyId, company.id),
+            eq(companyMemberships.status, "ACTIVE"),
+          ),
+        )
+        .limit(1);
+      if (existing.length > 0) continue;
 
       await db.insert(companyMemberships).values({
         userId: user.id,
@@ -70,22 +74,24 @@ async function main() {
   const hannah = allUsers.find((user) => user.email?.toLowerCase() === "hannah@innovatr.co.za");
   if (hannah) {
     for (const company of allCompanies) {
-      const existing = await db.execute(sql`
-        SELECT id, role FROM company_memberships
-        WHERE user_id = ${hannah.id}
-          AND company_id = ${company.id}
-          AND status = 'ACTIVE'
-        LIMIT 1
-      `);
+      const [existing] = await db
+        .select({ id: companyMemberships.id, role: companyMemberships.role })
+        .from(companyMemberships)
+        .where(
+          and(
+            eq(companyMemberships.userId, hannah.id),
+            eq(companyMemberships.companyId, company.id),
+            eq(companyMemberships.status, "ACTIVE"),
+          ),
+        )
+        .limit(1);
 
-      if (Array.isArray(existing) && existing.length > 0) {
-        const membership = existing[0] as { id: string; role: string };
-        if (membership.role !== "ADMIN") {
-          await db.execute(sql`
-            UPDATE company_memberships
-            SET role = 'ADMIN', updated_at = now()
-            WHERE id = ${membership.id}
-          `);
+      if (existing) {
+        if (existing.role !== "ADMIN") {
+          await db
+            .update(companyMemberships)
+            .set({ role: "ADMIN", updatedAt: new Date() })
+            .where(eq(companyMemberships.id, existing.id));
           adminGrants += 1;
         }
         continue;
