@@ -19,8 +19,6 @@ const VDK      = "#1E1B3A";
 const VIO      = "#3A2FBF";
 const VIO_LT   = "#EAE8FF";
 const CORAL    = "#E8503A";
-const CORAL_LT = "#FDECEA";
-const BLUE     = "#4860FA";
 const N200     = "#EBEBEB";
 const N400     = "#9C9AB0";
 const N500     = "#8A7260";
@@ -85,7 +83,7 @@ function BenchmarkBar({ value, benchmark, color }: { value: number; benchmark: n
         <span>100%</span>
       </div>
       <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "#F0EBE0", position: "relative" }}>
-        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${value}%`, background: color }} />
+        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${value}%`, background: atBench ? SUCCESS : color }} />
       </div>
       <div className="relative h-0" style={{ marginTop: -11 }}>
         <div className="absolute top-0 w-0.5 h-3.5" style={{ left: `${benchmark}%`, background: N400 }} />
@@ -175,30 +173,30 @@ export default function ExplorePage() {
       <div className="flex flex-col w-full h-full" style={{ background: CREAM }}>
 
         {/* Phase topbar */}
-        <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: "#FFFFFF", borderBottom: `1px solid ${N200}` }}>
+        <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
           <div className="flex items-center gap-3">
             <span
               className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1"
-              style={{ background: CORAL_LT, color: CORAL, border: `1px solid rgba(232,80,58,0.22)`, borderRadius: 6 }}
+              style={{ background: "rgba(58,47,191,0.3)", color: VIO_LT, border: `1px solid rgba(58,47,191,0.5)`, borderRadius: 6 }}
             >
               PHASE 01
             </span>
-            <h1 className="font-serif text-xl" style={{ color: VDK }}>Explore</h1>
-            <span className="text-sm hidden sm:block" style={{ color: N500 }}>Discover trends, signals &amp; market intelligence</span>
+            <h1 className="font-serif text-xl text-white">Explore</h1>
+            <span className="text-sm hidden sm:block" style={{ color: N400 }}>Discover trends, signals &amp; market intelligence</span>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setLocation("/portal/test")}
               data-testid="button-launch-brief"
               className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg"
-              style={{ background: BLUE, borderRadius: 8 }}
+              style={{ background: CORAL, borderRadius: 8 }}
             >
               Launch a Brief
             </button>
             <button
               onClick={() => setLocation("/portal/dashboard")}
               className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
-              style={{ background: "#F5F5F5", color: N500 }}
+              style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}
               data-testid="button-close-explore"
             >
               <X className="w-3.5 h-3.5" />
@@ -216,7 +214,7 @@ export default function ExplorePage() {
               className="flex-shrink-0 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap"
               style={{
                 color: activeTab === tab ? VDK : N500,
-                borderBottomColor: activeTab === tab ? BLUE : "transparent",
+                borderBottomColor: activeTab === tab ? CORAL : "transparent",
                 background: "transparent",
               }}
             >
@@ -234,7 +232,7 @@ export default function ExplorePage() {
             {activeTab === "signals" && (
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: N400 }}>
+                  <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: CORAL }}>
                     {signals.length} Active Signals
                   </span>
                   <div className="flex gap-2">
@@ -299,7 +297,7 @@ export default function ExplorePage() {
                                 <div className="text-sm font-medium truncate" style={{ color: VDK }}>{run.concept}</div>
                                 <div className="text-xs mt-0.5" style={{ color: N500 }}>{dateStr} · synthetic model</div>
                               </div>
-                              <div className="text-sm font-bold font-mono flex-shrink-0 ml-4" style={{ color: VDK }}>
+                              <div className="text-sm font-bold font-mono flex-shrink-0 ml-4" style={{ color: run.interestScore >= 65 ? SUCCESS : AMBER_DK }}>
                                 {run.interestScore}% interest
                               </div>
                             </div>
@@ -319,10 +317,10 @@ export default function ExplorePage() {
                           <div key={gap.id} style={CARD} className="p-4">
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex items-start gap-2.5">
-                                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#F5F5F5", border: `1px solid ${N200}` }}>
+                                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#FFF1ED", border: "1px solid rgba(232,80,58,0.15)" }}>
                                   {gap.useZap
-                                    ? <Zap className="w-4 h-4" style={{ color: VDK }} />
-                                    : <Sparkles className="w-4 h-4" style={{ color: VDK }} />
+                                    ? <Zap className="w-4 h-4" style={{ color: CORAL }} />
+                                    : <Sparkles className="w-4 h-4" style={{ color: CORAL }} />
                                   }
                                 </div>
                                 <div>
@@ -331,7 +329,7 @@ export default function ExplorePage() {
                                 </div>
                               </div>
                               <div className="text-right flex-shrink-0 ml-2">
-                                <div className="text-2xl font-bold font-mono" style={{ color: VDK }}>{gap.score}</div>
+                                <div className="text-2xl font-bold font-mono" style={{ color: VIO }}>{gap.score}</div>
                                 <div className="text-[10px]" style={{ color: N500 }}>Gap Score</div>
                               </div>
                             </div>
@@ -341,12 +339,12 @@ export default function ExplorePage() {
                               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: gap.priorityBg, color: gap.priorityColor }}>{gap.potential}</span>
                             </div>
                             <div className="h-1.5 rounded-full mb-3 overflow-hidden" style={{ background: "#F0EBE0" }}>
-                              <div className="h-full rounded-full" style={{ width: `${gap.barPct}%`, background: N400 }} />
+                              <div className="h-full rounded-full" style={{ width: `${gap.barPct}%`, background: gap.priorityColor }} />
                             </div>
                             <button
                               onClick={() => { setSandboxIdea(gap.concept); setSandboxResult(null); }}
                               className="w-full text-xs font-semibold py-2.5 rounded-lg text-white flex items-center justify-center gap-1.5"
-                              style={{ background: BLUE }}
+                              style={{ background: CORAL }}
                               data-testid={`button-gap-sandbox-${gap.id}`}
                             >
                               Run Sandbox Test <ArrowRight className="w-3.5 h-3.5" />
@@ -406,7 +404,7 @@ export default function ExplorePage() {
                           disabled={!sandboxIdea.trim() || sandboxRunning}
                           data-testid="button-run-sandbox"
                           className="w-full flex items-center justify-center gap-2 text-sm font-semibold py-3 text-white rounded-lg transition-opacity"
-                          style={{ background: BLUE, borderRadius: 8, opacity: !sandboxIdea.trim() ? 0.5 : 1 }}
+                          style={{ background: CORAL, borderRadius: 8, opacity: !sandboxIdea.trim() ? 0.5 : 1 }}
                         >
                           {sandboxRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                           {sandboxRunning ? "Running model…" : "Run Simulation →"}
@@ -416,24 +414,20 @@ export default function ExplorePage() {
                       {/* Simulation Results */}
                       {sandboxResult && (
                         <div className="px-5 pb-5 space-y-0" style={{ borderTop: `1px solid ${N200}` }}>
-                          <div className="text-[10px] font-bold tracking-widest uppercase pt-4 mb-3" style={{ color: N400 }}>Simulation Results</div>
+                          <div className="text-[10px] font-bold tracking-widest uppercase pt-4 mb-3" style={{ color: CORAL }}>Simulation Results</div>
                           {[
                             { label: "IDEA SCORE",  val: sandboxResult.ideaScore,  bench: 81, isGood: (v: number) => v >= 81 },
                             { label: "INTEREST",    val: sandboxResult.interest,   bench: 81, isGood: (v: number) => v >= 81 },
                             { label: "COMMITMENT",  val: sandboxResult.commitment, bench: 53, isGood: (v: number) => v >= 53 },
                           ].map((m, i, arr) => {
-                            const good = m.isGood(m.val);
-                            const dotColor = good ? SUCCESS : m.val >= m.bench * 0.8 ? AMBER_DK : CORAL;
+                            const c = m.isGood(m.val) ? SUCCESS : m.val >= m.bench * 0.8 ? AMBER_DK : CORAL;
                             return (
                               <div key={m.label} className="flex items-center justify-between py-2.5" style={{ borderBottom: i < arr.length - 1 ? `1px solid ${N200}` : "none" }}>
                                 <div>
                                   <div className="text-[10px] font-bold uppercase tracking-wide" style={{ color: N500 }}>{m.label}</div>
                                   <div className="text-[10px]" style={{ color: N400 }}>Benchmark &gt;{m.bench}%</div>
                                 </div>
-                                <div className="flex items-center gap-1.5">
-                                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: dotColor }} />
-                                  <span className="text-xl font-bold font-mono" style={{ color: VDK }}>{m.val}%</span>
-                                </div>
+                                <div className="text-xl font-bold font-mono" style={{ color: c }}>{m.val}%</div>
                               </div>
                             );
                           })}
@@ -441,7 +435,7 @@ export default function ExplorePage() {
                             <button
                               onClick={() => setLocation("/portal/test")}
                               className="w-full text-xs font-semibold py-2.5 rounded-lg text-white mt-3 flex items-center justify-center gap-1.5"
-                              style={{ background: BLUE }}
+                              style={{ background: SUCCESS }}
                               data-testid="button-launch-from-sandbox"
                             >
                               Launch a Test24 Brief <ArrowRight className="w-3.5 h-3.5" />
@@ -468,7 +462,7 @@ export default function ExplorePage() {
             {activeTab === "intelligence" && (
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: N400 }}>Intelligence Library</span>
+                  <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: CORAL }}>Intelligence Library</span>
                   <button className="text-xs font-semibold flex items-center gap-1" style={{ color: VIO }} onClick={() => setLocation("/portal/trends")}>
                     Browse all <ArrowRight className="w-3 h-3" />
                   </button>
@@ -521,7 +515,7 @@ export default function ExplorePage() {
                               </div>
                             </div>
                             {(r.series || r.category) && (
-                              <div className="text-[10px] font-bold uppercase tracking-wide mb-1.5" style={{ color: N400 }}>{r.series || r.category}</div>
+                              <div className="text-[10px] font-bold uppercase tracking-wide mb-1.5" style={{ color: CORAL }}>{r.series || r.category}</div>
                             )}
                             {truncated && (
                               <p className="text-xs leading-relaxed" style={{ color: N500 }}>{truncated}</p>
@@ -583,7 +577,7 @@ export default function ExplorePage() {
                       placeholder="Reply… use @ to tag"
                       data-testid="input-team-chat"
                     />
-                    <button className="w-7 h-7 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: BLUE }} data-testid="button-send-chat">
+                    <button className="w-7 h-7 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: VIO }} data-testid="button-send-chat">
                       <Send className="w-3 h-3" />
                     </button>
                   </div>

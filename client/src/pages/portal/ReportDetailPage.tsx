@@ -25,6 +25,7 @@ const VDK = "#1E1B3A";
 const N200 = "#EBEBEB";
 const N500 = "#8A7260";
 const CORAL = "#E8503A";
+const SUCCESS = "#2A9E5C";
 const CREAM = "#FFFFFF";
 
 export default function ReportDetailPage() {
@@ -60,8 +61,8 @@ export default function ReportDetailPage() {
           className="flex items-center justify-between flex-shrink-0 px-5"
           style={{
             minHeight: 52,
-            background: "#FFFFFF",
-            borderBottom: `1px solid ${N200}`,
+            background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)",
+            borderBottom: "1px solid rgba(255,255,255,0.07)",
           }}
         >
           <div className="flex items-center gap-3">
@@ -69,6 +70,7 @@ export default function ReportDetailPage() {
               size="icon"
               variant="ghost"
               onClick={() => setLocation("/portal/test")}
+              className="text-white/70 hover:text-white"
               data-testid="button-back-to-test"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -76,14 +78,15 @@ export default function ReportDetailPage() {
             <span
               className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1"
               style={{
-                background: N200,
-                color: VDK,
+                background: "rgba(42,158,92,0.2)",
+                color: "#86EFAC",
+                border: "1px solid rgba(42,158,92,0.4)",
                 borderRadius: 6,
               }}
             >
               REPORT
             </span>
-            <h1 className="font-serif text-xl truncate max-w-md" style={{ color: VDK }}>
+            <h1 className="font-serif text-xl text-white truncate max-w-md">
               {digStudy?.title || `Report ${reportId.slice(0, 8)}`}
             </h1>
           </div>

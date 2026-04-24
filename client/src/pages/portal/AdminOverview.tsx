@@ -326,8 +326,8 @@ export default function AdminOverview() {
               
               <div className="space-y-1" data-testid="stat-reports">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-                    <FileCheck className="w-4 h-4 text-muted-foreground" />
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
+                    <FileCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Reports</p>
@@ -339,8 +339,8 @@ export default function AdminOverview() {
               
               <div className="space-y-1 col-span-2 sm:col-span-1" data-testid="stat-credits">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-                    <Zap className="w-4 h-4 text-muted-foreground" />
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Credits Available</p>
@@ -356,7 +356,7 @@ export default function AdminOverview() {
         <Card data-testid="card-report-engagement">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-blue-500" />
+              <TrendingUp className="w-5 h-5 text-emerald-500" />
               Report Engagement ({periodLabel})
             </CardTitle>
           </CardHeader>
@@ -377,8 +377,8 @@ export default function AdminOverview() {
               
               <div className="space-y-1" data-testid="stat-total-downloads">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-                    <Download className="w-4 h-4 text-muted-foreground" />
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
+                    <Download className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Downloads</p>
@@ -434,8 +434,8 @@ export default function AdminOverview() {
 
             <div className="space-y-1" data-testid="stat-active-users">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-                  <Users className="w-4 h-4 text-muted-foreground" />
+                <div className="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+                  <Users className="w-4 h-4 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Active Users</p>
@@ -458,8 +458,8 @@ export default function AdminOverview() {
 
             <div className="space-y-1" data-testid="stat-reset-requests">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-                  <KeyRound className="w-4 h-4 text-muted-foreground" />
+                <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
+                  <KeyRound className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Reset Requests</p>
@@ -470,8 +470,8 @@ export default function AdminOverview() {
 
             <div className="space-y-1" data-testid="stat-reset-completions">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
-                  <CheckCircle className="w-4 h-4 text-muted-foreground" />
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
+                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Resets Done</p>
@@ -511,7 +511,7 @@ export default function AdminOverview() {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <CardTitle className="text-lg flex items-center gap-2">
-              <FlaskConical className="w-5 h-5 text-blue-500" />
+              <FlaskConical className="w-5 h-5 text-orange-500" />
               My Research
             </CardTitle>
             <Button
@@ -534,14 +534,14 @@ export default function AdminOverview() {
               </p>
               <p className="text-xs text-muted-foreground">Total</p>
             </div>
-            <div className="text-center p-3 border rounded-lg" data-testid="stat-active-research">
-              <p className="text-2xl font-bold">
+            <div className="text-center p-3 border rounded-lg bg-orange-50 dark:bg-orange-900/20" data-testid="stat-active-research">
+              <p className="text-2xl font-bold text-orange-700 dark:text-orange-400">
                 {analytics?.researchStats?.active ?? 0}
               </p>
               <p className="text-xs text-muted-foreground">In Progress</p>
             </div>
-            <div className="text-center p-3 border rounded-lg" data-testid="stat-completed-research">
-              <p className="text-2xl font-bold">
+            <div className="text-center p-3 border rounded-lg bg-green-50 dark:bg-green-900/20" data-testid="stat-completed-research">
+              <p className="text-2xl font-bold text-green-700 dark:text-green-400">
                 {analytics?.researchStats?.completed ?? 0}
               </p>
               <p className="text-xs text-muted-foreground">Completed</p>

@@ -1353,7 +1353,7 @@ export default function AdminCompanies() {
                   {companyUsers.length > 0 && (
                     <div className="flex gap-4 mb-4 p-3 rounded-lg bg-muted/30">
                       <div className="text-center">
-                        <p className="text-2xl font-bold">{companyUsers.filter(u => u.isPaidSeat).length}</p>
+                        <p className="text-2xl font-bold text-amber-600">{companyUsers.filter(u => u.isPaidSeat).length}</p>
                         <p className="text-xs text-muted-foreground">Paid Seats</p>
                       </div>
                       <div className="text-center">
@@ -1388,7 +1388,7 @@ export default function AdminCompanies() {
                               size="sm"
                               variant={user.isPaidSeat ? "default" : "outline"}
                               onClick={() => handleTogglePaidSeat(user.id, user.isPaidSeat)}
-                              className=""
+                              className={user.isPaidSeat ? "bg-amber-500 hover:bg-amber-600 text-white" : ""}
                               data-testid={`button-toggle-paid-${user.id}`}
                             >
                               {user.isPaidSeat ? (

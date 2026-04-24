@@ -23,7 +23,6 @@ const VIO      = "#3A2FBF";
 const VIO_LT   = "#EAE8FF";
 const CORAL    = "#E8503A";
 const CORAL_LT = "#FDECEA";
-const BLUE     = "#4860FA";
 const N200     = "#EBEBEB";
 const N400     = "#9C9AB0";
 const N500     = "#8A7260";
@@ -33,7 +32,7 @@ const AMBER_DK = "#B8911A";
 const AMBER_LT = "#FEF6D6";
 const CYAN_DK  = "#1A8FAD";
 const CREAM    = "#FFFFFF";
-const ACT_COLOR = BLUE;
+const ACT_COLOR = CORAL;
 
 const CARD: React.CSSProperties = {
   background: "#ffffff",
@@ -188,21 +187,21 @@ export default function ActPage() {
         {/* ── Phase topbar ── */}
         <div
           className="flex items-center justify-between flex-shrink-0 px-5"
-          style={{ minHeight: 52, background: "#FFFFFF", borderBottom: `1px solid ${N200}` }}
+          style={{ minHeight: 52, background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
         >
           <div className="flex items-center gap-3">
             <span
               className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1"
-              style={{ background: CORAL_LT, color: CORAL, border: `1px solid rgba(232,80,58,0.22)`, borderRadius: 6 }}
+              style={{ background: "rgba(232,80,58,0.2)", color: "#FCA5A5", border: "1px solid rgba(232,80,58,0.4)", borderRadius: 6 }}
             >
               PHASE 03
             </span>
-            <h1 className="font-serif text-xl" style={{ color: VDK }}>Act</h1>
+            <h1 className="font-serif text-xl text-white">Act</h1>
           </div>
           <button
             onClick={() => setLocation("/portal/dashboard")}
             className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: "#F5F5F5", color: N500 }}
+            style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}
             data-testid="button-close-act"
           >
             <X className="w-3.5 h-3.5" />
@@ -246,7 +245,7 @@ export default function ActPage() {
               <div className="flex flex-col lg:flex-row gap-5">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: N400 }}>Strategic Gaps</span>
+                    <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: CORAL }}>Strategic Gaps</span>
                     <span className="text-sm" style={{ color: N500 }}>{gaps.length} identified</span>
                   </div>
                   <div style={{ ...CARD, overflow: "hidden", padding: 0, marginBottom: 20 }}>
@@ -281,7 +280,7 @@ export default function ActPage() {
                     ))}
                   </div>
 
-                  <div className="text-[11px] font-bold tracking-widest uppercase mb-3" style={{ color: N400 }}>Research Coverage</div>
+                  <div className="text-[11px] font-bold tracking-widest uppercase mb-3" style={{ color: CORAL }}>Research Coverage</div>
                   <div style={{ ...CARD, overflow: "hidden", padding: 0 }}>
                     {coverageItems.map((item, i) => (
                       <div key={item.id} className="flex items-center justify-between px-5 py-3" style={i < coverageItems.length - 1 ? { borderBottom: `1px solid ${N200}` } : {}}>
@@ -321,7 +320,7 @@ export default function ActPage() {
 
                 {/* Left: step cards */}
                 <div className="flex-1 min-w-0">
-                  <div className="text-[11px] font-bold tracking-widest uppercase mb-4" style={{ color: N400 }}>Next Moves</div>
+                  <div className="text-[11px] font-bold tracking-widest uppercase mb-4" style={{ color: CORAL }}>Next Moves</div>
                   <div className="space-y-3">
                     {nextSteps.filter(s => !s.locked).map((step) => (
                       <div
@@ -330,7 +329,7 @@ export default function ActPage() {
                         style={{
                           background: "#fff",
                           border: `1px solid ${N200}`,
-                          borderTop: step.cta?.primary ? `3px solid ${BLUE}` : `1px solid ${N200}`,
+                          borderTop: step.cta?.primary ? `3px solid ${CORAL}` : `1px solid ${N200}`,
                           opacity: step.locked ? 0.55 : 1,
                         }}
                         data-testid={`next-step-${step.num}`}
@@ -338,7 +337,7 @@ export default function ActPage() {
                         <div className="flex items-start gap-4">
                           <div
                             className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 font-mono mt-0.5"
-                            style={{ background: "#F5F5F5", color: VDK, border: `1.5px solid ${N200}` }}
+                            style={{ background: CORAL_LT, color: CORAL, border: `1.5px solid ${CORAL}` }}
                           >
                             {step.num}
                           </div>
@@ -350,7 +349,7 @@ export default function ActPage() {
                                 onClick={() => handleCtaAction(step.cta!.action)}
                                 className="text-xs font-semibold px-4 py-2 rounded-lg inline-flex items-center gap-1.5"
                                 style={step.cta.primary
-                                  ? { background: BLUE, color: "#fff" }
+                                  ? { background: CORAL, color: "#fff" }
                                   : { background: "#F5F5F5", color: N500, border: `1px solid ${N200}` }
                                 }
                                 data-testid={`step-cta-${step.num}`}
@@ -422,7 +421,7 @@ export default function ActPage() {
                         <button
                           onClick={() => { handleSendPlanning(); setActiveTab("planning"); }}
                           className="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0"
-                          style={{ background: BLUE }}
+                          style={{ background: VIO }}
                           data-testid="button-send-planning-mini"
                         >
                           <Send className="w-3.5 h-3.5" />
@@ -500,7 +499,7 @@ export default function ActPage() {
                       <button
                         onClick={handleSendPlanning}
                         className="w-10 h-10 rounded-xl flex items-center justify-center text-white flex-shrink-0"
-                        style={{ background: BLUE }}
+                        style={{ background: VIO }}
                         data-testid="button-send-planning"
                       >
                         <Send className="w-4 h-4" />
@@ -585,15 +584,15 @@ export default function ActPage() {
                   </div>
 
                   {/* ── Tailored Consult Offer ── */}
-                  <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${N200}`, background: "#fff" }}>
+                  <div className="rounded-2xl overflow-hidden" style={{ border: `1.5px solid #D4B896` }}>
                     {/* Offer header */}
-                    <div className="px-5 py-3 flex items-center gap-2" style={{ background: "#fff", borderBottom: `1px solid ${N200}` }}>
-                      <Gift className="w-4 h-4" style={{ color: VDK }} />
+                    <div className="px-5 py-3 flex items-center gap-2" style={{ background: "linear-gradient(135deg, #2A1F6B 0%, #3A2FBF 100%)" }}>
+                      <Gift className="w-4 h-4 text-white opacity-80" />
                       <div className="flex-1">
-                        <div className="text-xs font-bold" style={{ color: VDK }}>Tailored Consult Offer</div>
-                        <div className="text-[10px]" style={{ color: N500 }}>Available for your portfolio</div>
+                        <div className="text-xs font-bold text-white">Tailored Consult Offer</div>
+                        <div className="text-[10px] opacity-70 text-white">Available for your portfolio</div>
                       </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: CORAL_LT, color: CORAL }}>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: "rgba(232,80,58,0.8)" }}>
                         10% off
                       </span>
                     </div>
@@ -610,13 +609,13 @@ export default function ActPage() {
                         return (
                           <div key={offer.id} className="rounded-xl p-4" style={{ background: "#F5F5F5", border: `1px solid ${N200}` }} data-testid={`consult-offer-${offer.id}`}>
                             <div className="flex items-start gap-2.5 mb-2">
-                              <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: BLUE }}>
+                              <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: VIO }}>
                                 <Icon className="w-3.5 h-3.5 text-white" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
                                   <span className="text-xs font-bold" style={{ color: VDK }}>{offer.type}</span>
-                                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: "#E8E8FF", color: BLUE }}>10% off</span>
+                                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: CORAL_LT, color: CORAL }}>10% off</span>
                                 </div>
                                 <div className="text-xs font-semibold mt-0.5" style={{ color: VDK }}>{offer.title}</div>
                               </div>
@@ -624,11 +623,11 @@ export default function ActPage() {
                             <p className="text-[11px] leading-relaxed mb-3" style={{ color: N500 }}>{offer.desc}</p>
 
                             {state === "accepted" ? (
-                              <div className="flex items-center gap-2 rounded-lg px-3 py-2.5" style={{ background: "#FAFAF8", border: `1px solid ${N200}` }}>
+                              <div className="flex items-center gap-2 rounded-lg px-3 py-2.5" style={{ background: SUC_LT }}>
                                 <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: SUCCESS }} />
                                 <div>
-                                  <div className="text-xs font-semibold" style={{ color: VDK }}>Offer accepted</div>
-                                  <div className="text-[10px]" style={{ color: N500 }}>We'll send your custom proposal shortly.</div>
+                                  <div className="text-xs font-semibold" style={{ color: SUCCESS }}>Offer accepted!</div>
+                                  <div className="text-[10px]" style={{ color: SUCCESS }}>We'll send your custom proposal shortly.</div>
                                 </div>
                               </div>
                             ) : state === "declined" ? (
@@ -640,7 +639,7 @@ export default function ActPage() {
                                 <button
                                   onClick={() => setOfferState(prev => ({ ...prev, [offer.id]: "accepted" }))}
                                   className="flex-1 text-xs font-semibold py-2 rounded-lg text-white"
-                                  style={{ background: BLUE }}
+                                  style={{ background: VIO }}
                                   data-testid={`accept-offer-${offer.id}`}
                                 >
                                   Accept Offer
@@ -698,7 +697,7 @@ export default function ActPage() {
                     </div>
                     <div className="px-3 pb-3 flex gap-2">
                       <input value={chatInput} onChange={e => setChatInput(e.target.value)} className="flex-1 rounded-lg px-3 py-1.5 text-xs focus:outline-none" style={{ background: "#F5F5F5", border: `1.5px solid ${N200}`, color: VDK }} placeholder="Reply… use @ to tag" data-testid="input-team-chat" />
-                      <button className="w-7 h-7 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: BLUE }} data-testid="button-send-chat"><Send className="w-3 h-3" /></button>
+                      <button className="w-7 h-7 rounded-lg flex items-center justify-center text-white flex-shrink-0" style={{ background: CORAL }} data-testid="button-send-chat"><Send className="w-3 h-3" /></button>
                     </div>
                   </div>
                 )}

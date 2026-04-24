@@ -362,7 +362,7 @@ export default function CreditsAndBilling() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <p className="text-3xl font-bold text-foreground">
+                      <p className="text-3xl font-bold text-primary">
                         {formatPriceLocal(pack.price)}
                       </p>
                       <p className="text-sm text-muted-foreground line-through">
@@ -390,7 +390,7 @@ export default function CreditsAndBilling() {
 
         {/* Pending Invoice Orders */}
         {pendingInvoiceOrders.length > 0 && (
-          <Card>
+          <Card className="border-amber-500/50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-amber-500" />

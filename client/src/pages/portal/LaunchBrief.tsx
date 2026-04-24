@@ -2311,17 +2311,17 @@ export default function LaunchBrief() {
                         <p className="text-sm text-muted-foreground">
                           Pay using your available Test24 credits. Fast, simple, and no billing required.
                         </p>
-                        <div className="p-3 bg-muted/50 border border-border rounded-md">
-                          <p className="text-sm font-medium text-foreground flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4 text-green-600" />
+                        <div className="p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-md">
+                          <p className="text-sm font-medium text-green-700 dark:text-green-300 flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4" />
                             You have enough credits to launch this study.
                           </p>
-                          <div className="mt-2 text-sm text-muted-foreground">
-                            <p className="font-medium text-foreground">Available Credits</p>
+                          <div className="mt-2 text-sm text-green-600 dark:text-green-400">
+                            <p className="font-medium">Available Credits</p>
                             <p>Test24 Basic: {basicCreditsRemaining} available</p>
                             <p>Test24 Pro: {proCreditsRemaining} available</p>
                           </div>
-                          <p className="mt-2 text-sm text-muted-foreground">
+                          <p className="mt-2 text-sm text-green-600 dark:text-green-400">
                             This study will use <strong>{creditsRequired} Test24 {requiredCreditsType}</strong> credit{creditsRequired > 1 ? "s" : ""}.
                           </p>
                         </div>
@@ -2337,12 +2337,12 @@ export default function LaunchBrief() {
 
                     {/* Not enough credits - show info message, partial payment option is separate */}
                     {!hasEnoughCredits && hasAnyCredits && formData.billingPreference === "credits" && (
-                      <div className="p-3 bg-muted/50 border border-border rounded-md">
-                        <p className="text-sm font-medium text-foreground flex items-center gap-2">
-                          <AlertCircle className="w-4 h-4 text-amber-600" />
+                      <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-md">
+                        <p className="text-sm font-medium text-amber-700 dark:text-amber-300 flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4" />
                           You don't have enough credits for this study.
                         </p>
-                        <p className="mt-2 text-sm text-muted-foreground">
+                        <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">
                           You have {availableCreditsForStudy} Test24 {requiredCreditsType} credit{availableCreditsForStudy !== 1 ? "s" : ""} but need {creditsRequired}.
                           Use the "Use Credits + Pay Remainder" option below, or top up your credits.
                         </p>

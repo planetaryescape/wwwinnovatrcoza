@@ -48,10 +48,8 @@ import { ALL_SIGNALS, ALL_STRATEGIC_GAPS, ALL_NEXT_STEPS } from "@/lib/portal-co
 
 /* ── Design tokens ──────────────────────────────────────── */
 const VDK        = "#1E1B3A";
-const BLUE       = "#4860FA";
 const VIO        = "#3A2FBF";
 const VIO_LT     = "#EAE8FF";
-const BLUE_LT    = "#E6EAFF";
 const CORAL      = "#E8503A";
 const CORAL_LT   = "#FDECEA";
 const CYAN_DK    = "#1A8FAD";
@@ -65,10 +63,9 @@ const SUCCESS    = "#2A9E5C";
 const SUCCESS_LT = "#D1FAE5";
 const CREAM      = "#FFFFFF";
 
-/* Phase accent colors used for thin top accent line / small chip only */
-const EXPLORE_COLOR = BLUE;
-const TEST_COLOR    = VIO;
-const ACT_COLOR     = CORAL;
+const EXPLORE_GRADIENT = "linear-gradient(135deg, #3A2FBF 0%, #5b50d9 55%, #7B70F0 100%)";
+const TEST_GRADIENT    = "linear-gradient(135deg, #D94A28 0%, #E8643A 50%, #EF8A4E 100%)";
+const ACT_GRADIENT     = "linear-gradient(135deg, #1A7A45 0%, #2A9E5C 55%, #3DBF72 100%)";
 
 const CARD: React.CSSProperties = {
   background: "#ffffff",
@@ -174,16 +171,16 @@ export default function Dashboard() {
           {/* ── Hero card ── */}
           <div
             className="rounded-2xl p-6"
-            style={CARD}
+            style={{ background: `linear-gradient(135deg, ${VDK} 0%, #2A2660 60%, #3A3575 100%)` }}
             data-testid="hero-card"
           >
-            <div className="text-[11px] font-bold tracking-widest uppercase flex items-center gap-1.5 mb-2" style={{ color: N500 }}>
-              <Sparkles className="w-3 h-3" style={{ color: BLUE }} />
+            <div className="text-[11px] font-bold tracking-widest uppercase flex items-center gap-1.5 mb-2" style={{ color: CORAL }}>
+              <Sparkles className="w-3 h-3" />
               {greeting}, {user?.name?.split(" ")[0]} &middot;&nbsp;
               {isPaidMember ? (user?.membershipTier?.toUpperCase() || "STARTER") : "FREE"} TIER
             </div>
             <div className="flex items-end justify-between gap-6 flex-wrap">
-              <h1 className="font-serif text-4xl leading-none" style={{ color: VDK }}>Dashboard</h1>
+              <h1 className="font-serif text-4xl text-white leading-none">Dashboard</h1>
               <div className="flex items-center gap-6 flex-shrink-0 flex-wrap">
                 {[
                   { val: loadingAct ? null : basicCredits, label: "Basic credits" },
@@ -192,28 +189,28 @@ export default function Dashboard() {
                 ].map((s, i, arr) => (
                   <div key={i} className="flex items-center gap-6">
                     <div className="text-center" data-testid={`hero-stat-${i}`}>
-                      <div className="text-3xl font-bold font-mono leading-none" style={{ color: VDK }}>
-                        {s.val === null ? <Skeleton className="h-8 w-8 inline-block" /> : s.val}
+                      <div className="text-3xl font-bold font-mono text-white leading-none">
+                        {s.val === null ? <Skeleton className="h-8 w-8 inline-block bg-white/20" /> : s.val}
                       </div>
-                      <div className="text-xs mt-1.5" style={{ color: N500 }}>{s.label}</div>
+                      <div className="text-xs mt-1.5" style={{ color: "rgba(255,255,255,0.55)" }}>{s.label}</div>
                     </div>
-                    {i < arr.length - 1 && <div className="w-px h-10 self-center" style={{ background: N200 }} />}
+                    {i < arr.length - 1 && <div className="w-px h-10 self-center" style={{ background: "rgba(255,255,255,0.15)" }} />}
                   </div>
                 ))}
               </div>
             </div>
-            <p className="text-sm leading-relaxed mt-4" style={{ color: N500 }}>
+            <p className="text-sm leading-relaxed mt-4" style={{ color: "rgba(255,255,255,0.65)" }}>
               Your intelligence hub — trends, live studies, and strategic signals, all in one place.
             </p>
           </div>
 
           {/* ── Low credit warning ── */}
           {!loadingAct && basicCredits <= 2 && (
-            <div className="rounded-xl px-4 py-3 flex items-center gap-3 flex-wrap" style={CARD} data-testid="banner-low-credits">
+            <div className="rounded-xl px-4 py-3 flex items-center gap-3 flex-wrap" style={{ background: AMBER_LT, border: `1px solid ${AMBER_DK}33` }} data-testid="banner-low-credits">
               <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: AMBER_DK }} />
-              <span className="badge-medium flex-shrink-0">Low credits</span>
               <div className="flex-1 min-w-0">
-                <span className="text-sm" style={{ color: VDK }}>
+                <span className="text-sm font-semibold" style={{ color: AMBER_DK }}>Low credits — </span>
+                <span className="text-sm" style={{ color: "#7a5c10" }}>
                   You have <strong>{basicCredits}</strong> Basic credit{basicCredits !== 1 ? "s" : ""} remaining.
                   {proCredits <= 0 && " Pro credits are also at zero."} Top up to keep researching.
                 </span>
@@ -221,7 +218,7 @@ export default function Dashboard() {
               <button
                 onClick={() => setLocation("/portal/credits")}
                 className="text-xs font-bold px-3 py-1.5 rounded-lg flex-shrink-0"
-                style={{ background: BLUE, color: "#fff", borderRadius: 8 }}
+                style={{ background: AMBER_DK, color: "#fff", borderRadius: 8 }}
                 data-testid="button-manage-credits-warn"
               >
                 Manage Credits →
@@ -233,40 +230,40 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <JourneyCard
               num="1" tag="EXPLORE" question="What's happening?" subtitle="Trends & Insights · Sandbox · Market Signals"
-              stat={`${signalCount} signal${signalCount === 1 ? "" : "s"} active`} accentColor={EXPLORE_COLOR} onClick={() => setLocation("/portal/explore")} testId="card-journey-explore"
+              stat={`${signalCount} signal${signalCount === 1 ? "" : "s"} active`} gradient={EXPLORE_GRADIENT} onClick={() => setLocation("/portal/explore")} testId="card-journey-explore"
             />
             <JourneyCard
               num="2" tag="TEST" question="Does my idea work?" subtitle="Projects Overview · Test24 · QA Results"
-              stat={`${liveStudies} live ${liveStudies === 1 ? "study" : "studies"}`} accentColor={TEST_COLOR} onClick={() => setLocation("/portal/test")} testId="card-journey-test"
+              stat={`${liveStudies} live ${liveStudies === 1 ? "study" : "studies"}`} gradient={TEST_GRADIENT} onClick={() => setLocation("/portal/test")} testId="card-journey-test"
             />
             <JourneyCard
               num="3" tag="ACT" question="What should I do?" subtitle="Gaps · Recommendations · Strategic Next Steps"
-              stat={`${recsCount} recommendation${recsCount === 1 ? "" : "s"}`} accentColor={ACT_COLOR} onClick={() => setLocation("/portal/act")} testId="card-journey-act"
+              stat={`${recsCount} recommendation${recsCount === 1 ? "" : "s"}`} gradient={ACT_GRADIENT} onClick={() => setLocation("/portal/act")} testId="card-journey-act"
             />
           </div>
 
           {/* ── Stat cards with donut ── */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <DonutStatCard num={signalCount}                     label="Signals"         sub="Trends & Insights active"   highlight={`${signalCount} for your industry`} cta="EXPLORE"   color={BLUE} onClick={() => setLocation("/portal/explore")} testId="stat-card-signals"          />
-            <DonutStatCard num={loadingAct ? null : liveStudies} label="Live Studies"    sub="In field now"               highlight={liveStudies > 0 ? `${liveStudies} in progress` : "None right now"} cta="TEST"      color={BLUE} onClick={() => setLocation("/portal/test")}    testId="stat-card-live"            />
-            <DonutStatCard num={recsCount}                       label="Recommendations" sub="Strategic actions ready"     highlight={`${gapCount} gap${gapCount === 1 ? "" : "s"} identified`} cta="ACT"   color={BLUE} onClick={() => setLocation("/portal/act")}     testId="stat-card-recommendations"  />
-            <DonutStatCard num={loadingAct ? null : studiesDone} label="Studies Done"    sub="Complete this year"         highlight={studiesDone > 0 ? `${studiesDone} completed` : "Launch your first"} cta="PORTFOLIO" color={BLUE} onClick={() => setLocation("/portal/test")}    testId="stat-card-studies"         />
+            <DonutStatCard num={signalCount}                     label="Signals"         sub="Trends & Insights active"   highlight={`${signalCount} for your industry`} cta="EXPLORE"   color={VIO}      onClick={() => setLocation("/portal/explore")} testId="stat-card-signals"          />
+            <DonutStatCard num={loadingAct ? null : liveStudies} label="Live Studies"    sub="In field now"               highlight={liveStudies > 0 ? `${liveStudies} in progress` : "None right now"} cta="TEST"      color={AMBER_DK} onClick={() => setLocation("/portal/test")}    testId="stat-card-live"            />
+            <DonutStatCard num={recsCount}                       label="Recommendations" sub="Strategic actions ready"     highlight={`${gapCount} gap${gapCount === 1 ? "" : "s"} identified`} cta="ACT"   color={CORAL}    onClick={() => setLocation("/portal/act")}     testId="stat-card-recommendations"  />
+            <DonutStatCard num={loadingAct ? null : studiesDone} label="Studies Done"    sub="Complete this year"         highlight={studiesDone > 0 ? `${studiesDone} completed` : "Launch your first"} cta="PORTFOLIO" color="#8B5CF6"  onClick={() => setLocation("/portal/test")}    testId="stat-card-studies"         />
           </div>
 
           {/* ── Phase preview feed ── */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <PhasePreviewCard
-              num="1" title="Explore" subtitle="Trends, insights & market signals" color={EXPLORE_COLOR} onOpen={() => setLocation("/portal/explore")}
+              num="1" title="Explore" subtitle="Trends, insights & market signals" color={VIO} onOpen={() => setLocation("/portal/explore")}
               items={[
-                { dotColor: BLUE,    text: "Nootropic beverages +41% search intent",    sub: "25–34 urban cohort · Detected overnight · High relevance", chip: { label: "Trend",   bg: BLUE_LT,   color: BLUE    } },
+                { dotColor: VIO,     text: "Nootropic beverages +41% search intent",    sub: "25–34 urban cohort · Detected overnight · High relevance", chip: { label: "Trend",   bg: VIO_LT,    color: VIO     } },
                 { dotColor: SUCCESS, text: "Functional Beverages 2025 — new report",    sub: "Innovatr Inside · GROWTH+ · 3 min read",                  chip: { label: "New",     bg: SUCCESS_LT, color: SUCCESS } },
-                { dotColor: N400,    text: `${signalCount} active market signals across categories`, sub: "Food & Bev · Beauty · FMCG",                              chip: { label: "Signals", bg: BLUE_LT,   color: BLUE    } },
+                { dotColor: N400,    text: `${signalCount} active market signals across categories`, sub: "Food & Bev · Beauty · FMCG",                              chip: { label: "Signals", bg: VIO_LT,    color: VIO     } },
               ]}
             />
             <PhasePreviewCard
-              num="2" title="Test" subtitle="Live studies & projects overview" color={TEST_COLOR} onOpen={() => setLocation("/portal/test")}
+              num="2" title="Test" subtitle="Live studies & projects overview" color={SUCCESS} onOpen={() => setLocation("/portal/test")}
               items={loadingReports
-                ? [{ dotColor: N400, text: "Loading…", sub: "" }]
+                ? [{ dotColor: AMBER_DK, text: "Loading…", sub: "" }]
                 : recentStudies.length > 0
                   ? recentStudies.map((r: any) => ({
                       dotColor: r.status?.toLowerCase().includes("complete") ? SUCCESS : AMBER_DK,
@@ -276,11 +273,11 @@ export default function Dashboard() {
                         ? { label: "Done", bg: SUCCESS_LT, color: SUCCESS }
                         : undefined,
                     }))
-                  : [{ dotColor: N400, text: "No studies yet", sub: "Launch your first brief to get started" }]
+                  : [{ dotColor: AMBER_DK, text: "No studies yet", sub: "Launch your first brief to get started" }]
               }
             />
             <PhasePreviewCard
-              num="3" title="Act" subtitle="Strategic gaps & recommendations" color={ACT_COLOR} onOpen={() => setLocation("/portal/act")}
+              num="3" title="Act" subtitle="Strategic gaps & recommendations" color={CORAL} onOpen={() => setLocation("/portal/act")}
               items={[
                 { dotColor: CORAL,   text: "Energy Drink — autonomous narrative r…",      sub: "72% purchase intent · 3 strategic gaps identified",  chip: { label: "Action", bg: CORAL_LT,   color: CORAL    } },
                 { dotColor: AMBER_DK,text: "Commitment gap widening — 28pt belo…",         sub: "Recommend packaging/pricing bridge study",            chip: { label: "Watch",  bg: AMBER_LT,  color: AMBER_DK } },
@@ -331,7 +328,7 @@ export default function Dashboard() {
                       data-testid="button-scope-mine"
                       className="text-xs font-semibold px-3 py-1.5 rounded-md transition-colors"
                       style={studyScope === "mine"
-                        ? { background: BLUE, color: "#fff" }
+                        ? { background: VIO, color: "#fff" }
                         : { background: "transparent", color: N500 }}
                     >
                       My studies
@@ -342,7 +339,7 @@ export default function Dashboard() {
                         data-testid="button-scope-company"
                         className="text-xs font-semibold px-3 py-1.5 rounded-md transition-colors"
                         style={studyScope === "company"
-                          ? { background: BLUE, color: "#fff" }
+                          ? { background: VIO, color: "#fff" }
                           : { background: "transparent", color: N500 }}
                       >
                         My company
@@ -361,7 +358,7 @@ export default function Dashboard() {
                     }
                   }}
                   className="text-xs font-semibold flex items-center gap-1"
-                  style={{ color: BLUE }}
+                  style={{ color: VIO }}
                   data-testid="link-view-all-studies"
                 >
                   View All <ArrowRight className="w-3 h-3" />
@@ -389,7 +386,7 @@ export default function Dashboard() {
                 <BarChart3 className="w-8 h-8 mx-auto mb-3" style={{ color: N500 }} />
                 <p className="text-sm font-semibold mb-1" style={{ color: VDK }}>No studies yet</p>
                 <p className="text-xs mb-4" style={{ color: N500 }}>Launch your first brief to start collecting consumer insights.</p>
-                <button onClick={() => setLocation("/portal/launch")} data-testid="button-launch-first-brief" className="text-sm font-semibold px-5 py-2 text-white rounded-lg" style={{ background: BLUE }}>
+                <button onClick={() => setLocation("/portal/launch")} data-testid="button-launch-first-brief" className="text-sm font-semibold px-5 py-2 text-white rounded-lg" style={{ background: CORAL }}>
                   Launch a Brief
                 </button>
               </div>
@@ -402,50 +399,39 @@ export default function Dashboard() {
 }
 
 /* ── Journey Card ─────────────────────────────────────────── */
-function JourneyCard({ num, tag, question, subtitle, stat, accentColor, onClick, testId }: {
+function JourneyCard({ num, tag, question, subtitle, stat, gradient, onClick, testId }: {
   num: string; tag: string; question: string; subtitle: string; stat: string;
-  accentColor: string; onClick: () => void; testId: string;
+  gradient: string; onClick: () => void; testId: string;
 }) {
   return (
     <button
       onClick={onClick}
       data-testid={testId}
-      className="text-left w-full rounded-2xl p-5 relative overflow-hidden group hover-elevate"
-      style={{ ...CARD, minHeight: 180 }}
+      className="text-left w-full rounded-2xl p-5 relative overflow-hidden group"
+      style={{ background: gradient, minHeight: 180 }}
     >
-      {/* Thin top accent line */}
-      <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: accentColor }} />
+      {/* Subtle circle decoration */}
+      <div className="absolute bottom-0 right-0 w-40 h-40 rounded-full opacity-10" style={{ background: "#fff", transform: "translate(30%, 30%)" }} />
+      <div className="absolute top-6 right-6 w-24 h-24 rounded-full opacity-5" style={{ background: "#fff" }} />
 
       <div className="relative z-10">
         <div className="flex items-center gap-2 mb-3">
-          <div
-            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold font-mono"
-            style={{ background: accentColor, color: "#fff" }}
-          >
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold font-mono text-white" style={{ border: "2px solid rgba(255,255,255,0.5)" }}>
             {num}
           </div>
-          <span
-            className="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded"
-            style={{ background: "#F5F5F5", color: VDK }}
-          >
+          <span className="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.9)" }}>
             {tag}
           </span>
         </div>
-        <div className="font-serif text-2xl mb-1 leading-snug" style={{ color: VDK }}>{question}</div>
-        <div className="text-xs mb-4 leading-relaxed" style={{ color: N500 }}>{subtitle}</div>
+        <div className="font-serif text-2xl text-white mb-1 leading-snug">{question}</div>
+        <div className="text-xs mb-4 leading-relaxed" style={{ color: "rgba(255,255,255,0.7)" }}>{subtitle}</div>
         <div className="flex items-center justify-between">
-          <div
-            className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
-            style={{ background: "#F5F5F5", color: VDK }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: accentColor }} />
+          <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.2)", color: "#fff" }}>
+            <span className="w-1.5 h-1.5 rounded-full bg-white opacity-80" />
             {stat}
           </div>
-          <div
-            className="w-7 h-7 rounded-full flex items-center justify-center"
-            style={{ background: "#F5F5F5" }}
-          >
-            <ArrowRight className="w-3.5 h-3.5" style={{ color: VDK }} />
+          <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: "rgba(255,255,255,0.2)" }}>
+            <ArrowRight className="w-3.5 h-3.5 text-white" />
           </div>
         </div>
       </div>
@@ -471,8 +457,8 @@ function DonutStatCard({ num, label, sub, highlight, cta, color, onClick, testId
       <div className="text-center">
         <div className="text-sm font-semibold mb-0.5" style={{ color: VDK }}>{label}</div>
         <div className="text-xs mb-1" style={{ color: N500 }}>{sub}</div>
-        <div className="text-xs font-medium mb-2" style={{ color: N500 }}>{highlight}</div>
-        <span className="inline-block text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded" style={{ background: "#F5F5F5", color: VDK }}>
+        <div className="text-xs font-medium mb-2" style={{ color: color }}>{highlight}</div>
+        <span className="inline-block text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded" style={{ background: `${color}18`, color }}>
           {cta}
         </span>
       </div>
@@ -525,8 +511,8 @@ function PhasePreviewCard({ num, title, subtitle, color, onOpen, items }: {
 function StudyCard({ study, onClick }: { study: any; onClick: () => void }) {
   const typeBadge = (() => {
     const t = study.studyType?.toLowerCase() || "";
-    if (t.includes("pro")) return { label: "PRO",   bg: VIO_LT,  color: VIO };
-    return                        { label: "BASIC", bg: CYAN_LT, color: CYAN_DK };
+    if (t.includes("pro")) return { label: "PRO",   bg: "#EAE8FF", color: VIO };
+    return                        { label: "BASIC",  bg: "#DFF6FC", color: CYAN_DK };
   })();
 
   const isComplete = study.status?.toLowerCase().includes("complete");
@@ -594,7 +580,7 @@ function StudyCard({ study, onClick }: { study: any; onClick: () => void }) {
         <div className="px-4 py-4 grid grid-cols-3 gap-2 mt-auto">
           {bigMetrics.map(m => (
             <div key={m.label} className="text-center">
-              <div className="text-2xl font-bold font-mono leading-none" style={{ color: VDK }}>{m.val}%</div>
+              <div className="text-2xl font-bold font-mono leading-none" style={{ color: metricColor(m.val) }}>{m.val}%</div>
               <div className="text-[9px] font-bold tracking-widest mt-1.5" style={{ color: N500 }}>{m.label}</div>
             </div>
           ))}
@@ -602,7 +588,7 @@ function StudyCard({ study, onClick }: { study: any; onClick: () => void }) {
       ) : (
         <div className="px-4 py-4 flex items-center justify-between mt-auto">
           <span className="text-xs" style={{ color: N500 }}>Tap to view results</span>
-          <ArrowRight className="w-4 h-4" style={{ color: BLUE }} />
+          <ArrowRight className="w-4 h-4" style={{ color: VIO }} />
         </div>
       )}
     </button>

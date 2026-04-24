@@ -699,58 +699,58 @@ export default function PastResearch() {
         {((isPaidMember && (user?.companyId || isAdmin)) || (!isPaidMember && hasAnyResearch)) && (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <Card>
+              <Card className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950/30 dark:to-slate-900/20 border-slate-200 dark:border-slate-800">
                 <CardContent className="p-3">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">Study Benchmarks</p>
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">Study Benchmarks</p>
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">Idea</span>
-                      <span className="font-semibold text-foreground">75%</span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">75%</span>
                     </div>
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">Interest</span>
-                      <span className="font-semibold text-foreground">81%</span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">81%</span>
                     </div>
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">Commitment</span>
-                      <span className="font-semibold text-foreground">53%</span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">53%</span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border-blue-200 dark:border-blue-800">
                 <CardContent className="p-3 h-full flex items-center justify-center">
                   <div className="flex flex-col items-center text-center">
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-2">
-                      <Play className="w-5 h-5 text-muted-foreground" />
+                    <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center mb-2">
+                      <Play className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <p className="text-2xl font-bold text-foreground">{activeCount}</p>
-                    <p className="text-xs text-muted-foreground">Active Studies</p>
+                    <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{activeCount}</p>
+                    <p className="text-xs text-blue-600/80 dark:text-blue-400/80">Active Studies</p>
                   </div>
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20 border-green-200 dark:border-green-800">
                 <CardContent className="p-3 h-full flex items-center justify-center">
                   <div className="flex flex-col items-center text-center">
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-2">
-                      <CheckCircle2 className="w-5 h-5 text-muted-foreground" />
+                    <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center mb-2">
+                      <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
                     </div>
-                    <p className="text-2xl font-bold text-foreground">{completedCount}</p>
-                    <p className="text-xs text-muted-foreground">Completed</p>
+                    <p className="text-2xl font-bold text-green-700 dark:text-green-300">{completedCount}</p>
+                    <p className="text-xs text-green-600/80 dark:text-green-400/80">Completed</p>
                   </div>
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/20 border-purple-200 dark:border-purple-800">
                 <CardContent className="p-3 h-full flex items-center justify-center">
                   <div className="flex flex-col items-center text-center">
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-2">
-                      <FileText className="w-5 h-5 text-muted-foreground" />
+                    <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center mb-2">
+                      <FileText className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                     </div>
-                    <p className="text-2xl font-bold text-foreground">{totalItems}</p>
-                    <p className="text-xs text-muted-foreground">Total Research</p>
+                    <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">{totalItems}</p>
+                    <p className="text-xs text-purple-600/80 dark:text-purple-400/80">Total Research</p>
                   </div>
                 </CardContent>
               </Card>
@@ -1163,11 +1163,11 @@ export default function PastResearch() {
 
                               {/* Key Insights Section - Structured Summary */}
                               {report.topIdeaLabel && (
-                                <div className="bg-muted/50 border border-border rounded-md p-3">
+                                <div className="bg-green-50 dark:bg-green-900/20 rounded-md p-3">
                                   <div className="flex items-center justify-between mb-1">
-                                    <div className="text-xs font-medium text-muted-foreground">Top Performer</div>
+                                    <div className="text-xs font-medium text-green-700 dark:text-green-400">Top Performer</div>
                                     {report.topIdeaIdeaScore !== null && (
-                                      <div className="text-lg font-bold text-foreground">
+                                      <div className="text-lg font-bold text-green-700 dark:text-green-400">
                                         {report.topIdeaIdeaScore}%
                                       </div>
                                     )}
@@ -1183,11 +1183,11 @@ export default function PastResearch() {
                               )}
                               
                               {report.lowestIdeaLabel && (
-                                <div className="bg-muted/50 border border-border rounded-md p-3">
+                                <div className="bg-amber-50 dark:bg-amber-900/20 rounded-md p-3">
                                   <div className="flex items-center justify-between mb-1">
-                                    <div className="text-xs font-medium text-muted-foreground">Lowest Performer</div>
+                                    <div className="text-xs font-medium text-amber-700 dark:text-amber-400">Lowest Performer</div>
                                     {report.lowestIdeaIdeaScore !== null && (
-                                      <div className="text-lg font-bold text-foreground">
+                                      <div className="text-lg font-bold text-amber-700 dark:text-amber-400">
                                         {report.lowestIdeaIdeaScore}%
                                       </div>
                                     )}
@@ -1272,7 +1272,7 @@ export default function PastResearch() {
                               data-testid={`completed-study-row-${study.id}`}
                             >
                               <div className="flex-shrink-0">
-                                <CheckCircle2 className="w-5 h-5 text-muted-foreground" />
+                                <CheckCircle2 className="w-8 h-8 text-green-600" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -1339,9 +1339,9 @@ export default function PastResearch() {
                             >
                               <div className="flex-shrink-0">
                                 {report.status?.toLowerCase() === "completed" ? (
-                                  <CheckCircle2 className="w-5 h-5 text-muted-foreground" />
+                                  <CheckCircle2 className="w-8 h-8 text-green-600" />
                                 ) : (
-                                  <FileText className="w-5 h-5 text-muted-foreground" />
+                                  <FileText className="w-8 h-8 text-muted-foreground" />
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">

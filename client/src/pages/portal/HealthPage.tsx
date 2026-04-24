@@ -26,7 +26,6 @@ const CYAN     = "#4EC9E8";
 const CORAL    = "#E8503A";
 const CORAL_LT = "#FDECEA";
 const CREAM    = "#FFFFFF";
-const BLUE     = "#4860FA";
 
 const CARD: React.CSSProperties = {
   background: "#ffffff",
@@ -155,10 +154,10 @@ export default function HealthPage() {
   const mdwPoints    = histSlice.map(r => avg([r.topIdeaIdeaScore, r.topIdeaInterest, r.topIdeaCommitment]));
 
   const scoreHistory = [
-    { label: "Idea Score",   color: VDK, delta: deltaIdea     > 0 ? `+${deltaIdea}`   : String(deltaIdea),     deltaColor: deltaIdea     >= 0 ? SUCCESS : CORAL, points: ideaPoints  },
-    { label: "Interest",     color: VDK, delta: deltaInterest > 0 ? `+${deltaInterest}` : String(deltaInterest), deltaColor: deltaInterest >= 0 ? SUCCESS : CORAL, points: intPoints   },
-    { label: "Commitment",   color: VDK, delta: deltaCommit   > 0 ? `+${deltaCommit}`  : String(deltaCommit),   deltaColor: deltaCommit   >= 0 ? SUCCESS : CORAL, points: comPoints   },
-    { label: "MDW Overall",  color: VDK, delta: "Avg",         deltaColor: N400, points: mdwPoints   },
+    { label: "Idea Score",   color: "#2A9E5C", delta: deltaIdea     > 0 ? `+${deltaIdea}`   : String(deltaIdea),     deltaColor: deltaIdea     >= 0 ? SUCCESS : CORAL, points: ideaPoints  },
+    { label: "Interest",     color: "#5b50d9", delta: deltaInterest > 0 ? `+${deltaInterest}` : String(deltaInterest), deltaColor: deltaInterest >= 0 ? SUCCESS : CORAL, points: intPoints   },
+    { label: "Commitment",   color: "#E8503A", delta: deltaCommit   > 0 ? `+${deltaCommit}`  : String(deltaCommit),   deltaColor: deltaCommit   >= 0 ? SUCCESS : CORAL, points: comPoints   },
+    { label: "MDW Overall",  color: VIO,       delta: "Avg",         deltaColor: N400, points: mdwPoints   },
   ].filter(row => row.points.length > 0);
 
   /* Brand Pillars — derived from IIC averages */
@@ -167,19 +166,19 @@ export default function HealthPage() {
     return [
       {
         label: "Meaning", sub: "Brand resonance & purpose",
-        value: avgIdea, icon: MessageSquare, color: VDK, barColor: VDK,
+        value: avgIdea, icon: MessageSquare, color: "#3A2FBF", barColor: "#3A2FBF",
         tags: `Idea strength ${avgIdea}% · Top concept resonance`,
         isWeakest: avgIdea === minPillar,
       },
       {
         label: "Difference", sub: "Distinctiveness & uniqueness",
-        value: avgInterest, icon: Star, color: VDK, barColor: VDK,
+        value: avgInterest, icon: Star, color: "#E8503A", barColor: "#E8503A",
         tags: `Interest score ${avgInterest}% · Audience curiosity`,
         isWeakest: avgInterest === minPillar,
       },
       {
         label: "Worth", sub: "Perceived value & premium",
-        value: avgCommit, icon: DollarSign, color: VDK, barColor: VDK,
+        value: avgCommit, icon: DollarSign, color: "#2A9E5C", barColor: "#2A9E5C",
         tags: `Commitment ${avgCommit}% · Purchase intent driver`,
         isWeakest: avgCommit === minPillar,
       },
@@ -260,11 +259,11 @@ export default function HealthPage() {
     return t;
   }, [completed, avgIdea, avgInterest, avgCommit, deltaInterest, brandPillars]);
 
-  /* Score Cards config — flat surfaces with a small colored ring only */
+  /* Score Cards config */
   const scoreCards = [
-    { label: "IDEA SCORE",       value: avgIdea,     delta: deltaIdea,     icon: Clock,    ringColor: SUCCESS },
-    { label: "INTEREST SCORE",   value: avgInterest, delta: deltaInterest, icon: Eye,      ringColor: VIO     },
-    { label: "COMMITMENT SCORE", value: avgCommit,   delta: deltaCommit,   icon: Sparkles, ringColor: VIO     },
+    { label: "IDEA SCORE",       value: avgIdea,     delta: deltaIdea,     icon: Clock,    gradient: "linear-gradient(135deg, #2A9E5C 0%, #1e7a46 100%)", circleColor: "rgba(255,255,255,0.5)", circleBg: "rgba(255,255,255,0.15)" },
+    { label: "INTEREST SCORE",   value: avgInterest, delta: deltaInterest, icon: Eye,      gradient: "linear-gradient(135deg, #3A2FBF 0%, #5b50d9 100%)", circleColor: "rgba(255,255,255,0.5)", circleBg: "rgba(255,255,255,0.15)" },
+    { label: "COMMITMENT SCORE", value: avgCommit,   delta: deltaCommit,   icon: Sparkles, gradient: "linear-gradient(135deg, #E8503A 0%, #c23a26 50%, #b8360a 100%)", circleColor: "rgba(255,255,255,0.5)", circleBg: "rgba(255,255,255,0.15)" },
   ];
 
   const hasData = completed.length > 0;
@@ -273,19 +272,19 @@ export default function HealthPage() {
     <PortalLayout showPhaseTopbar={false}>
       <div className="flex flex-col w-full h-full" style={{ background: CREAM }}>
 
-        {/* ── Topbar — flat ── */}
-        <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: "#FFFFFF", borderBottom: `1px solid ${N200}` }}>
+        {/* ── Topbar ── */}
+        <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: VDK, borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1" style={{ background: "rgba(72,96,250,0.08)", color: BLUE, border: "1px solid rgba(72,96,250,0.18)", borderRadius: 6 }}>
+            <span className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1" style={{ background: "rgba(78,201,232,0.2)", color: CYAN, border: "1px solid rgba(78,201,232,0.4)", borderRadius: 6 }}>
               PHASE 04
             </span>
-            <h1 className="font-serif text-xl" style={{ color: VDK }}>Company</h1>
-            <span className="text-sm hidden sm:block" style={{ color: N500 }}>Track overall health across all studies</span>
+            <h1 className="font-serif text-xl text-white">Company</h1>
+            <span className="text-sm hidden sm:block" style={{ color: N400 }}>Track overall health across all studies</span>
           </div>
           <button
             onClick={() => setLocation("/portal/dashboard")}
             className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: "#F5F5F5", color: N500, border: `1px solid ${N200}` }}
+            style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}
             data-testid="button-close-health"
           >
             <X className="w-3.5 h-3.5" />
@@ -334,35 +333,34 @@ export default function HealthPage() {
             {/* ── Data content ── */}
             {!isLoading && hasData && (
               <>
-                {/* ── 3 Score Cards — flat ── */}
+                {/* ── 3 Score Cards ── */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   {scoreCards.map((card, i) => {
                     const Icon = card.icon;
-                    const deltaColor = card.delta > 0 ? SUCCESS : card.delta < 0 ? CORAL : N400;
                     return (
-                      <div key={i} className="rounded-2xl p-5 relative overflow-hidden" style={CARD} data-testid={`health-score-card-${i}`}>
+                      <div key={i} className="rounded-2xl p-5 relative overflow-hidden" style={{ background: card.gradient }} data-testid={`health-score-card-${i}`}>
                         <div className="flex items-start justify-between mb-3">
                           <div>
-                            <div className="text-[10px] font-bold tracking-widest uppercase mb-2" style={{ color: N500 }}>{card.label}</div>
+                            <div className="text-[10px] font-bold tracking-widest uppercase text-white opacity-80 mb-2">{card.label}</div>
                             <div className="flex items-end gap-1">
-                              <span className="text-4xl font-bold" style={{ color: VDK }}>{card.value}</span>
-                              <span className="text-2xl font-bold mb-1" style={{ color: N400 }}>%</span>
+                              <span className="text-4xl font-bold text-white">{card.value}</span>
+                              <span className="text-2xl font-bold text-white opacity-80 mb-1">%</span>
                             </div>
                             <div className="flex items-center gap-1 mt-1">
-                              {card.delta > 0 ? <TrendingUp  className="w-3.5 h-3.5" style={{ color: deltaColor }} />
-                               : card.delta < 0 ? <TrendingDown className="w-3.5 h-3.5" style={{ color: deltaColor }} />
+                              {card.delta > 0 ? <TrendingUp  className="w-3.5 h-3.5 text-white opacity-80" />
+                               : card.delta < 0 ? <TrendingDown className="w-3.5 h-3.5 text-white opacity-80" />
                                : null}
-                              <span className="text-xs font-medium" style={{ color: deltaColor }}>
+                              <span className="text-xs font-medium text-white opacity-80">
                                 {completed.length >= 2
                                   ? `${card.delta > 0 ? `+${card.delta}` : card.delta} vs last study`
                                   : "First study baseline"}
                               </span>
                             </div>
                           </div>
-                          <CircleProgress value={card.value} size={56} strokeWidth={5} color={card.ringColor} bg="#F0EBE0" />
+                          <CircleProgress value={card.value} size={56} strokeWidth={5} color={card.circleColor} bg={card.circleBg} />
                         </div>
-                        <div className="absolute bottom-3 right-4 opacity-10">
-                          <Icon className="w-12 h-12" style={{ color: N400 }} />
+                        <div className="absolute bottom-3 right-4 opacity-15">
+                          <Icon className="w-16 h-16 text-white" />
                         </div>
                       </div>
                     );
@@ -440,7 +438,7 @@ export default function HealthPage() {
                         <Search className="w-4 h-4 text-white opacity-70" />
                         <span className="text-sm font-semibold text-white">Strategic Takeaways</span>
                       </div>
-                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.85)", border: "1px solid rgba(255,255,255,0.2)" }}>AI Generated</span>
+                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: VIO, color: "#fff" }}>AI Generated</span>
                     </div>
                     <div className="space-y-4">
                       {takeaways.map((t, i) => (

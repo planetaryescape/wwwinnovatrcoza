@@ -982,7 +982,7 @@ export default function AdminCompanyDetail() {
               
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Paid Seats</Label>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold text-primary">
                   {users.filter(u => u.isPaidSeat).length}
                 </div>
                 <p className="text-xs text-muted-foreground">

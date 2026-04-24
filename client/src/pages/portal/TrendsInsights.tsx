@@ -86,7 +86,7 @@ function getCoverImage(category: string, industry?: string, reportId?: number): 
 }
 
 const categoryColors: Record<string, { bg: string; text: string }> = {
-  insights: { bg: "bg-blue-50", text: "text-[#4860FA]" },
+  insights: { bg: "bg-blue-50", text: "text-[#5B6EF7]" },
   launch: { bg: "bg-orange-50", text: "text-orange-700" },
   inside: { bg: "bg-violet-50", text: "text-violet-700" },
   irl: { bg: "bg-rose-50", text: "text-rose-700" },
@@ -326,7 +326,7 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId, isPaidSeat, o
           {report.isNew && (
             <Badge 
               className="text-white text-xs font-medium px-2 py-1"
-              style={{ backgroundColor: '#4860FA' }}
+              style={{ backgroundColor: '#5B6EF7' }}
               data-testid={`badge-new-${report.id}`}
             >
               NEW
@@ -346,7 +346,7 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId, isPaidSeat, o
       
       <div className="p-4 flex flex-col flex-1">
         <h3 
-          className="font-serif text-xl leading-tight mb-2 text-foreground group-hover:text-[#4860FA] transition-colors line-clamp-2"
+          className="font-serif text-xl leading-tight mb-2 text-foreground group-hover:text-[#5B6EF7] transition-colors line-clamp-2"
           style={{ fontFamily: 'DM Serif Display, serif' }}
         >
           {report.title}
@@ -377,7 +377,7 @@ function ReportCard({ report, userTier, isLoggedIn, userCompanyId, isPaidSeat, o
           </span>
           <div 
             className="flex items-center gap-1 text-sm font-medium transition-colors flex-shrink-0"
-            style={{ color: isLocked ? 'var(--muted-foreground)' : '#4860FA' }}
+            style={{ color: isLocked ? 'var(--muted-foreground)' : '#5B6EF7' }}
           >
             <span>{ctaText}</span>
             {isLocked ? (
@@ -668,7 +668,7 @@ export default function TrendsInsights() {
               width: 64, height: 64, borderRadius: '50%',
               background: 'rgba(91,110,247,0.08)', marginBottom: 24,
             }}>
-              <TrendingUp size={32} color="#4860FA" />
+              <TrendingUp size={32} color="#5B6EF7" />
             </div>
             <h1
               data-testid="text-trends-gate-title"
@@ -707,7 +707,7 @@ export default function TrendsInsights() {
               "Personalised recommendations",
             ].map((feature) => (
               <div key={feature} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                <CheckCircle2 size={18} color="#4860FA" style={{ flexShrink: 0, marginTop: 2 }} />
+                <CheckCircle2 size={18} color="#5B6EF7" style={{ flexShrink: 0, marginTop: 2 }} />
                 <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: 14, color: 'rgba(29,29,31,0.7)' }}>{feature}</span>
               </div>
             ))}
@@ -867,13 +867,13 @@ export default function TrendsInsights() {
                     className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
                       isActive
                         ? cat.value === "all"
-                          ? "text-white border-[#4860FA]"
+                          ? "text-white border-[#5B6EF7]"
                           : colors
                             ? `${colors.bg} ${colors.text} border-current`
-                            : "bg-[#4860FA] text-white border-[#4860FA]"
+                            : "bg-[#5B6EF7] text-white border-[#5B6EF7]"
                         : "bg-transparent text-muted-foreground border-border hover:border-foreground/30"
                     }`}
-                    style={isActive && cat.value === "all" ? { backgroundColor: '#4860FA' } : undefined}
+                    style={isActive && cat.value === "all" ? { backgroundColor: '#5B6EF7' } : undefined}
                     data-testid={`pill-category-${cat.value.toLowerCase()}`}
                   >
                     {cat.label}
@@ -890,7 +890,7 @@ export default function TrendsInsights() {
                 placeholder="Search by title, topic, or tag..."
                 value={filters.search}
                 onChange={(e) => setFilters({ search: e.target.value })}
-                className="pl-10 h-10 rounded-full border-border focus:border-[#4860FA] focus:ring-[#4860FA]"
+                className="pl-10 h-10 rounded-full border-border focus:border-[#5B6EF7] focus:ring-[#5B6EF7]"
                 data-testid="input-search-reports"
               />
             </div>
@@ -947,7 +947,7 @@ export default function TrendsInsights() {
           {recommendedReports.length > 0 && user && (
             <div className="mb-10" data-testid="recommended-reports-section">
               <div className="flex items-center gap-2 mb-4">
-                <TrendingUp className="w-5 h-5 text-[#4860FA]" />
+                <TrendingUp className="w-5 h-5 text-[#5B6EF7]" />
                 <h2 className="text-xl font-semibold text-foreground" style={{ fontFamily: 'DM Serif Display, serif' }}>
                   Recommended for You
                 </h2>
@@ -1063,7 +1063,7 @@ export default function TrendsInsights() {
                 variant="outline"
                 size="lg"
                 onClick={() => setFilters({ showAll: true })}
-                className="rounded-full px-8 border-[#4860FA] text-[#4860FA] hover:bg-[#4860FA] hover:text-white"
+                className="rounded-full px-8 border-[#5B6EF7] text-[#5B6EF7] hover:bg-[#5B6EF7] hover:text-white"
                 data-testid="button-show-all"
               >
                 Show all reports
@@ -1078,7 +1078,7 @@ export default function TrendsInsights() {
                 variant="outline"
                 size="lg"
                 onClick={() => setFilters({ showAll: false })}
-                className="rounded-full px-8 border-[#4860FA] text-[#4860FA] hover:bg-[#4860FA] hover:text-white"
+                className="rounded-full px-8 border-[#5B6EF7] text-[#5B6EF7] hover:bg-[#5B6EF7] hover:text-white"
                 data-testid="button-show-less"
               >
                 Show less
@@ -1100,7 +1100,7 @@ export default function TrendsInsights() {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <MessageSquarePlus className="w-5 h-5 text-[#4860FA]" />
+              <MessageSquarePlus className="w-5 h-5 text-[#5B6EF7]" />
               Request a Report
             </DialogTitle>
             <DialogDescription>

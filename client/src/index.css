@@ -18,17 +18,17 @@
   --sidebar: 0 0% 96%;
   --sidebar-foreground: 0 0% 10%;
   --sidebar-border: 0 0% 92%;
-  /* Innovatr blue (#4860FA) — sampled from brand swatch */
-  --sidebar-primary: 232 95% 63%;
+  /* Innovatr blue (#5865F2) */
+  --sidebar-primary: 235 85% 62%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 0 0% 92%;
   --sidebar-accent-foreground: 0 0% 10%;
-  --sidebar-ring: 232 95% 63%;
+  --sidebar-ring: 235 85% 62%;
   --popover: 0 0% 94%;
   --popover-foreground: 0 0% 10%;
   --popover-border: 0 0% 88%;
-  /* Innovatr blue (#4860FA) — sampled from brand swatch */
-  --primary: 232 95% 63%;
+  /* Innovatr blue (#5865F2) */
+  --primary: 235 85% 62%;
   --primary-foreground: 0 0% 100%;
   --secondary: 0 0% 90%;
   --secondary-foreground: 0 0% 10%;
@@ -40,8 +40,8 @@
   --destructive: 0 84% 42%;
   --destructive-foreground: 0 84% 98%;
   --input: 0 0% 75%;
-  --ring: 232 95% 63%;
-  --chart-1: 232 95% 63%;
+  --ring: 235 85% 62%;
+  --chart-1: 235 85% 62%;
   --chart-2: 195 75% 35%;
   --chart-3: 25 80% 45%;
   --chart-4: 340 75% 40%;
@@ -105,17 +105,17 @@
   --sidebar: 0 0% 12%;
   --sidebar-foreground: 0 0% 95%;
   --sidebar-border: 0 0% 16%;
-  /* Innovatr blue (#4860FA) — sampled from brand swatch */
-  --sidebar-primary: 232 95% 63%;
+  /* Innovatr blue (#5865F2) */
+  --sidebar-primary: 235 85% 62%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 0 0% 16%;
   --sidebar-accent-foreground: 0 0% 95%;
-  --sidebar-ring: 232 95% 63%;
+  --sidebar-ring: 235 85% 62%;
   --popover: 0 0% 14%;
   --popover-foreground: 0 0% 95%;
   --popover-border: 0 0% 18%;
-  /* Innovatr blue (#4860FA) — sampled from brand swatch */
-  --primary: 232 95% 63%;
+  /* Innovatr blue (#5865F2) */
+  --primary: 235 85% 62%;
   --primary-foreground: 0 0% 100%;
   --secondary: 0 0% 18%;
   --secondary-foreground: 0 0% 95%;
@@ -126,8 +126,8 @@
   --destructive: 0 84% 45%;
   --destructive-foreground: 0 84% 98%;
   --input: 0 0% 30%;
-  --ring: 232 95% 63%;
-  --chart-1: 232 95% 63%;
+  --ring: 235 85% 62%;
+  --chart-1: 235 85% 62%;
   --chart-2: 195 80% 70%;
   --chart-3: 25 85% 65%;
   --chart-4: 340 80% 70%;
@@ -174,7 +174,7 @@
 :root {
   --ds-violet:    #3A2FBF;
   --ds-violet-dk: #1E1B3A;
-  --ds-violet-md: #4860FA;
+  --ds-violet-md: #5046D4;
   --ds-violet-lt: #EAE8FF;
   --ds-coral:     #E8503A;
   --ds-coral-dk:  #B53425;
