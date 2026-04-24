@@ -273,28 +273,41 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
             />
           </div>
 
-          {/* Company switcher (hidden in icon-only mode) */}
+          {/* Company switcher (hidden in icon-only mode). Read-only display when there's only one membership. */}
           {companyOptions.length > 0 && !isViewingAsCompany && (
             <div className="group-data-[collapsible=icon]:hidden">
-              <Select value={activeCompany?.id ?? ""} onValueChange={handleCompanyChange}>
-                <SelectTrigger
-                  className="h-auto w-full items-center gap-2 rounded-lg border-white/10 bg-white/[0.04] px-2.5 py-2 text-left text-xs text-white hover:bg-white/10 focus:ring-0 focus:ring-offset-0"
-                  data-testid="select-active-company"
+              {companyOptions.length === 1 ? (
+                <div
+                  className="flex h-auto w-full items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2 text-left text-xs text-white"
+                  data-testid="display-active-company"
                   aria-label="Active company"
                 >
                   <Building2 className="h-3.5 w-3.5 shrink-0" style={{ color: N400 }} />
                   <span className="min-w-0 flex-1 truncate text-xs font-medium text-white">
-                    {activeCompany?.name ?? "Select company"}
+                    {activeCompany?.name ?? companyOptions[0].name}
                   </span>
-                </SelectTrigger>
-                <SelectContent>
-                  {companyOptions.map((company) => (
-                    <SelectItem key={company.id} value={company.id}>
-                      {company.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                </div>
+              ) : (
+                <Select value={activeCompany?.id ?? ""} onValueChange={handleCompanyChange}>
+                  <SelectTrigger
+                    className="h-auto w-full items-center gap-2 rounded-lg border-white/10 bg-white/[0.04] px-2.5 py-2 text-left text-xs text-white hover:bg-white/10 focus:ring-0 focus:ring-offset-0"
+                    data-testid="select-active-company"
+                    aria-label="Active company"
+                  >
+                    <Building2 className="h-3.5 w-3.5 shrink-0" style={{ color: N400 }} />
+                    <span className="min-w-0 flex-1 truncate text-xs font-medium text-white">
+                      {activeCompany?.name ?? "Select company"}
+                    </span>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companyOptions.map((company) => (
+                      <SelectItem key={company.id} value={company.id}>
+                        {company.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           )}
 

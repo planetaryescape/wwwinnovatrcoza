@@ -162,13 +162,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (res.ok) {
           const dbUser = await res.json();
 
-          // If impersonation is active, don't overwrite the impersonated user
-          // Just verify the session is valid (admin is still logged in)
-          if (restoredImpersonation?.isImpersonating && restoredImpersonation.originalAdmin) {
-            // Session is valid - keep the impersonated user from localStorage
-            // The impersonated user was already set above from savedUser
+          const impersonationIsValid =
+            restoredImpersonation?.isImpersonating &&
+            restoredImpersonation.originalAdmin?.id === dbUser.id &&
+            dbUser.role === "ADMIN";
+
+          if (impersonationIsValid) {
+            // Session matches — keep the impersonated user from localStorage
           } else {
-            // No active impersonation - use the real session user
+            // Stale / mismatched / non-admin — clear impersonation and load the real user
+            if (restoredImpersonation?.isImpersonating) {
+              setImpersonation(defaultImpersonation);
+              localStorage.removeItem("innovatr_impersonation");
+            }
             applyAuthPayload(dbUser);
           }
         } else {
@@ -235,6 +241,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     const dbUser = await res.json();
     queryClient.clear();
+    // Clear any stale impersonation left over from a previous user in this browser
+    setImpersonation(defaultImpersonation);
+    localStorage.removeItem("innovatr_impersonation");
     applyAuthPayload(dbUser, email);
   };
 
@@ -345,101 +354,101 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const impersonateUser = async (userId: string) => {
-    if (!user?.isAdmin) return;
-    
-    try {
-      const res = await fetch(`/api/admin/users/${userId}`, {
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to fetch user");
-      
-      const targetUser = await res.json();
-      const tierMap: Record<string, UserTier> = {
-        STARTER: "starter",
-        GROWTH: "growth",
-        SCALE: "scale",
-        FREE: "free",
-      };
-      
-      const impersonatedUser: User = {
-        id: targetUser.id,
-        email: targetUser.email,
-        name: targetUser.name || targetUser.email.split("@")[0],
-        company: targetUser.company,
-        companyId: targetUser.companyId,
-        tier: tierMap[targetUser.membershipTier] || "free",
-        membershipTier: targetUser.membershipTier,
-        isAdmin: false,
-        isPaidSeat: targetUser.isPaidSeat ?? false,
-      };
-      
-      const newImpersonation: ImpersonationState = {
-        isImpersonating: true,
-        originalAdmin: user,
-        impersonatedUserId: userId,
-      };
-      
-      setUser(impersonatedUser);
-      setImpersonation(newImpersonation);
-      localStorage.setItem("innovatr_user", JSON.stringify(impersonatedUser));
-      localStorage.setItem("innovatr_impersonation", JSON.stringify(newImpersonation));
-      queryClient.clear();
-    } catch (error) {
-      console.error("Failed to impersonate user:", error);
+    // If currently impersonating, the originalAdmin is the real admin; fall back to current user
+    const adminUser = impersonation.isImpersonating ? impersonation.originalAdmin : user;
+    if (!adminUser?.isAdmin) {
+      throw new Error("Admin access required to impersonate a user");
     }
+
+    const res = await fetch(`/api/admin/users/${userId}`, {
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error("Failed to fetch user");
+
+    const targetUser = await res.json();
+    const tierMap: Record<string, UserTier> = {
+      STARTER: "starter",
+      GROWTH: "growth",
+      SCALE: "scale",
+      FREE: "free",
+    };
+
+    const impersonatedUser: User = {
+      id: targetUser.id,
+      email: targetUser.email,
+      name: targetUser.name || targetUser.email.split("@")[0],
+      company: targetUser.company,
+      companyId: targetUser.companyId,
+      tier: tierMap[targetUser.membershipTier] || "free",
+      membershipTier: targetUser.membershipTier,
+      isAdmin: false,
+      isPaidSeat: targetUser.isPaidSeat ?? false,
+    };
+
+    const newImpersonation: ImpersonationState = {
+      isImpersonating: true,
+      originalAdmin: adminUser,
+      impersonatedUserId: userId,
+    };
+
+    setUser(impersonatedUser);
+    setImpersonation(newImpersonation);
+    localStorage.setItem("innovatr_user", JSON.stringify(impersonatedUser));
+    localStorage.setItem("innovatr_impersonation", JSON.stringify(newImpersonation));
+    queryClient.clear();
   };
 
   const impersonateCompany = async (companyId: string) => {
-    if (!user?.isAdmin) return;
-    
-    try {
-      const companyRes = await fetch("/api/admin/session-company", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ companyId }),
-      });
-      if (!companyRes.ok) throw new Error("Failed to fetch company");
-      
-      const payload = await companyRes.json();
-      const company = payload.activeCompany;
-      if (!company) throw new Error("Failed to set company context");
-
-      const tierMap: Record<string, UserTier> = {
-        STARTER: "starter",
-        GROWTH: "growth",
-        SCALE: "scale",
-        FREE: "free",
-      };
-      
-      const companyViewUser: User = {
-        id: `company_${companyId}`,
-        email: `admin@${company.domain || 'company.com'}`,
-        name: company.name,
-        company: company.name,
-        companyId: companyId,
-        tier: tierMap[company.tier] || "free",
-        membershipTier: company.tier,
-        isAdmin: false,
-        isPaidSeat: ["STARTER", "GROWTH", "SCALE"].includes(company.tier), // Reflect actual company paid status
-      };
-      
-      const newImpersonation: ImpersonationState = {
-        isImpersonating: true,
-        originalAdmin: user,
-        impersonatedCompanyId: companyId,
-      };
-      
-      setUser(companyViewUser);
-      setCompany(company);
-      setMemberships([]);
-      setImpersonation(newImpersonation);
-      localStorage.setItem("innovatr_user", JSON.stringify(companyViewUser));
-      localStorage.setItem("innovatr_impersonation", JSON.stringify(newImpersonation));
-      queryClient.clear();
-    } catch (error) {
-      console.error("Failed to impersonate company:", error);
+    // If already impersonating, originalAdmin holds the real admin; otherwise the current user is the admin
+    const adminUser = impersonation.isImpersonating ? impersonation.originalAdmin : user;
+    if (!adminUser?.isAdmin) {
+      throw new Error("Admin access required to view as company");
     }
+
+    const companyRes = await fetch("/api/admin/session-company", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ companyId }),
+    });
+    if (!companyRes.ok) throw new Error("Failed to fetch company");
+
+    const payload = await companyRes.json();
+    const company = payload.activeCompany;
+    if (!company) throw new Error("Failed to set company context");
+
+    const tierMap: Record<string, UserTier> = {
+      STARTER: "starter",
+      GROWTH: "growth",
+      SCALE: "scale",
+      FREE: "free",
+    };
+
+    const companyViewUser: User = {
+      id: `company_${companyId}`,
+      email: `admin@${company.domain || 'company.com'}`,
+      name: company.name,
+      company: company.name,
+      companyId: companyId,
+      tier: tierMap[company.tier] || "free",
+      membershipTier: company.tier,
+      isAdmin: false,
+      isPaidSeat: ["STARTER", "GROWTH", "SCALE"].includes(company.tier),
+    };
+
+    const newImpersonation: ImpersonationState = {
+      isImpersonating: true,
+      originalAdmin: adminUser,
+      impersonatedCompanyId: companyId,
+    };
+
+    setUser(companyViewUser);
+    setCompany(company);
+    setMemberships([]);
+    setImpersonation(newImpersonation);
+    localStorage.setItem("innovatr_user", JSON.stringify(companyViewUser));
+    localStorage.setItem("innovatr_impersonation", JSON.stringify(newImpersonation));
+    queryClient.clear();
   };
 
   const exitImpersonation = async () => {
