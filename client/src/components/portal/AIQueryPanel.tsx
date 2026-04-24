@@ -125,13 +125,13 @@ function AIResponseCard({ response }: { response: AIResponse }) {
       {/* Summary */}
       <div
         className="rounded-md px-4 py-3"
-        style={{ background: `linear-gradient(135deg, ${VDK} 0%, #2D2660 100%)` }}
+        style={{ background: "#FAFAF8", border: `1px solid ${N200}` }}
       >
         <div className="flex items-center gap-1.5 mb-2">
-          <Lightbulb className="w-3.5 h-3.5 text-amber-300" />
-          <span className="text-[10px] font-bold uppercase tracking-widest text-amber-300">Summary</span>
+          <Lightbulb className="w-3.5 h-3.5" style={{ color: CORAL }} />
+          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: VDK }}>Summary</span>
         </div>
-        <p className="text-sm leading-relaxed text-white/90">{response.summary}</p>
+        <p className="text-sm leading-relaxed" style={{ color: VDK }}>{response.summary}</p>
       </div>
 
       {/* Key findings */}
@@ -317,7 +317,7 @@ export default function AIQueryPanel({
           <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}99)` }}
+              style={{ background: accentColor }}
             >
               <Sparkles className="w-5 h-5 text-white" />
             </div>

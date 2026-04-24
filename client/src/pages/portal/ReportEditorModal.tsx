@@ -985,11 +985,11 @@ export default function ReportEditorModal({
             {(formData.category === "Inside" || formData.series === "Inside") && (
               <div className="space-y-2">
                 <Label>Method Tags</Label>
-                <div className="grid grid-cols-3 gap-1.5 max-h-32 overflow-y-auto p-2 border rounded-md bg-violet-50 dark:bg-violet-900/20">
+                <div className="grid grid-cols-3 gap-1.5 max-h-32 overflow-y-auto p-2 border rounded-md bg-muted/40">
                   {METHOD_TAGS.map(tag => (
                     <div 
                       key={tag}
-                      className="flex items-center gap-1.5 cursor-pointer hover:bg-violet-100 dark:hover:bg-violet-800/30 p-1 rounded"
+                      className="flex items-center gap-1.5 cursor-pointer hover:bg-muted p-1 rounded"
                       onClick={() => handleMethodTagToggle(tag)}
                     >
                       <Checkbox

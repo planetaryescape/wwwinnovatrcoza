@@ -393,22 +393,22 @@ export default function AdminBriefs() {
                 <div className="text-sm text-muted-foreground">Total Briefs</div>
               </CardContent>
             </Card>
-            <Card className="bg-blue-50 dark:bg-blue-900/20">
+            <Card className="bg-muted/50">
               <CardContent className="p-4">
-                <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">{stats.new}</div>
-                <div className="text-sm text-blue-600 dark:text-blue-500">New</div>
+                <div className="text-2xl font-bold">{stats.new}</div>
+                <div className="text-sm text-muted-foreground">New</div>
               </CardContent>
             </Card>
-            <Card className="bg-yellow-50 dark:bg-yellow-900/20">
+            <Card className="bg-muted/50">
               <CardContent className="p-4">
-                <div className="text-2xl font-bold text-yellow-700 dark:text-yellow-400">{stats.inProgress}</div>
-                <div className="text-sm text-yellow-600 dark:text-yellow-500">In Progress</div>
+                <div className="text-2xl font-bold">{stats.inProgress}</div>
+                <div className="text-sm text-muted-foreground">In Progress</div>
               </CardContent>
             </Card>
-            <Card className="bg-green-50 dark:bg-green-900/20">
+            <Card className="bg-muted/50">
               <CardContent className="p-4">
-                <div className="text-2xl font-bold text-green-700 dark:text-green-400">{stats.completed}</div>
-                <div className="text-sm text-green-600 dark:text-green-500">Completed</div>
+                <div className="text-2xl font-bold">{stats.completed}</div>
+                <div className="text-sm text-muted-foreground">Completed</div>
               </CardContent>
             </Card>
           </div>
@@ -560,8 +560,8 @@ export default function AdminBriefs() {
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4" data-testid="pipeline-view">
               {[
                 { status: "new", label: "New", color: "border-blue-400", bgColor: "bg-blue-50 dark:bg-blue-900/20" },
-                { status: "in_progress", label: "In Progress", color: "border-yellow-400", bgColor: "bg-yellow-50 dark:bg-yellow-900/20" },
-                { status: "completed", label: "Completed", color: "border-green-400", bgColor: "bg-green-50 dark:bg-green-900/20" },
+                { status: "in_progress", label: "In Progress", color: "border-border", bgColor: "bg-muted/50" },
+                { status: "completed", label: "Completed", color: "border-border", bgColor: "bg-muted/50" },
                 { status: "on_hold", label: "On Hold", color: "border-orange-400", bgColor: "bg-orange-50 dark:bg-orange-900/20" },
                 { status: "cancelled", label: "Cancelled", color: "border-red-400", bgColor: "bg-red-50 dark:bg-red-900/20" },
               ].map((column) => {
@@ -1048,12 +1048,12 @@ export default function AdminBriefs() {
                       </div>
 
                       {linkedStudy.status === "AUDIENCE_LIVE" && (
-                        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                          <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                        <div className="p-3 bg-muted/50 border rounded-lg">
+                          <div className="flex items-center gap-2 text-foreground">
                             <Play className="h-4 w-4" />
                             <span className="text-sm font-medium">24-hour countdown active</span>
                           </div>
-                          <p className="text-xs text-green-600/80 dark:text-green-400/80 mt-1">
+                          <p className="text-xs text-muted-foreground mt-1">
                             Client can see the countdown timer in their My Research dashboard
                           </p>
                         </div>

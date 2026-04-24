@@ -284,25 +284,25 @@ export default function AdminSubscriptions() {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-muted/50 rounded-lg">
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold text-foreground">
                 {subscriptions.filter((s) => s.status === "active").length}
               </p>
               <p className="text-sm text-muted-foreground">Active</p>
             </div>
             <div className="text-center p-4 bg-muted/50 rounded-lg">
-              <p className="text-2xl font-bold text-yellow-600">
+              <p className="text-2xl font-bold text-foreground">
                 {subscriptions.filter((s) => s.status === "paused").length}
               </p>
               <p className="text-sm text-muted-foreground">Paused</p>
             </div>
             <div className="text-center p-4 bg-muted/50 rounded-lg">
-              <p className="text-2xl font-bold text-red-600">
+              <p className="text-2xl font-bold text-foreground">
                 {subscriptions.filter((s) => s.status === "cancelled").length}
               </p>
               <p className="text-sm text-muted-foreground">Cancelled</p>
             </div>
             <div className="text-center p-4 bg-muted/50 rounded-lg">
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-2xl font-bold text-foreground">
                 {subscriptions.filter((s) => s.status === "completed").length}
               </p>
               <p className="text-sm text-muted-foreground">Completed</p>

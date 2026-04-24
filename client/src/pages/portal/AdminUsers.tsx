@@ -355,8 +355,8 @@ export default function AdminUsers() {
         <Card className="bg-white border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-violet-50">
-                <TrendingUp className="w-5 h-5 text-violet-700" />
+              <div className="p-2 rounded-lg bg-muted">
+                <TrendingUp className="w-5 h-5 text-foreground" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{stats.growth}</p>
@@ -368,8 +368,8 @@ export default function AdminUsers() {
         <Card className="bg-white border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-amber-50">
-                <Crown className="w-5 h-5 text-amber-700" />
+              <div className="p-2 rounded-lg bg-muted">
+                <Crown className="w-5 h-5 text-foreground" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{stats.scale}</p>
@@ -381,8 +381,8 @@ export default function AdminUsers() {
         <Card className="bg-white border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-50">
-                <Zap className="w-5 h-5 text-green-700" />
+              <div className="p-2 rounded-lg bg-muted">
+                <Zap className="w-5 h-5 text-foreground" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{stats.active}</p>

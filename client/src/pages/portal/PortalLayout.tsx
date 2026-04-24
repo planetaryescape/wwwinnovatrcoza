@@ -30,16 +30,22 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { MobilePortalNav } from "@/components/portal/MobilePortalNav";
+import innovatrLogo from "@assets/Innovatr_Logo_1776727312503.png";
 
 /* ── Innovatr Design System tokens ─────────────────────── */
 const VDK   = "#1E1B3A";
 const CORAL  = "#E8503A";
+const BLUE   = "#4860FA";
 const N300   = "#C9B99A";
 const N400   = "#9C9AB0";
+const N500   = "#8A7260";
+const N600   = "#6B5744";
 const SUCCESS = "#2A9E5C";
 
-const EXPLORE_COLOR = "#3A2FBF";
-const TEST_COLOR    = SUCCESS;
+/* Phase identity colors (small dots/chips/accent lines only — never decorative fills).
+   Cyan/amber/green are reserved for status badges, so Test uses brand violet, not green. */
+const EXPLORE_COLOR = BLUE;
+const TEST_COLOR    = "#3A2FBF";
 const ACT_COLOR     = CORAL;
 const HEALTH_COLOR  = "#4EC9E8";
 
@@ -177,12 +183,12 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
           className="flex items-center gap-2.5 min-w-0"
           data-testid="link-sidebar-logo"
         >
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-serif text-base flex-shrink-0"
-            style={{ background: CORAL }}
-          >
-            I
-          </div>
+          <img
+            src={innovatrLogo}
+            alt="Innovatr"
+            className="w-8 h-8 object-contain flex-shrink-0"
+            data-testid="img-sidebar-logo"
+          />
           {!isCompact && (
             <span className="font-serif text-base text-white tracking-wide truncate">Innovatr</span>
           )}
@@ -367,18 +373,18 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
             </div>
           )}
 
-          {/* Phase topbar — gradient */}
+          {/* Phase topbar — flat light treatment */}
           {showPhaseTopbar && (
             <header
               className="h-12 px-4 flex items-center justify-between flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+              style={{ background: "#FFFFFF", borderBottom: "1px solid hsl(var(--border))" }}
             >
               <div className="flex items-center">
                 {/* Hamburger for mobile */}
                 {isMobile && (
                   <button
                     className="mr-2 w-8 h-8 flex items-center justify-center rounded-md"
-                    style={{ color: "rgba(255,255,255,0.7)" }}
+                    style={{ color: N500 }}
                     onClick={() => setMobileDrawerOpen(true)}
                     data-testid="button-mobile-menu"
                     aria-label="Open menu"
@@ -401,18 +407,18 @@ export default function PortalLayout({ children, showPhaseTopbar = true }: Porta
                   <button
                     onClick={() => setSearchOpen(true)}
                     className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs min-w-[160px]"
-                    style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", color: N400 }}
+                    style={{ background: "#F5F5F5", border: "1px solid hsl(var(--border))", color: N500 }}
                     data-testid="input-search"
                   >
                     <Search className="w-3.5 h-3.5" />
                     <span>Search anything…</span>
-                    <kbd className="ml-auto rounded px-1 text-[10px] font-mono" style={{ background: "rgba(255,255,255,0.1)", color: N300, border: "1px solid rgba(255,255,255,0.12)" }}>⌘K</kbd>
+                    <kbd className="ml-auto rounded px-1 text-[10px] font-mono" style={{ background: "#FFFFFF", color: N600, border: "1px solid hsl(var(--border))" }}>⌘K</kbd>
                   </button>
                 )}
                 {isMobile && (
                   <button
                     className="w-8 h-8 flex items-center justify-center rounded-md"
-                    style={{ color: "rgba(255,255,255,0.7)" }}
+                    style={{ color: N500 }}
                     onClick={() => setSearchOpen(true)}
                     data-testid="input-search"
                     aria-label="Search"
@@ -582,18 +588,18 @@ function PhaseTab({ num, label, color, isActive, onClick }: {
       onClick={onClick}
       className="flex items-center gap-1.5 px-3.5 h-12 text-sm font-medium transition-colors border-b-2"
       style={{
-        color: isActive ? "#ffffff" : "rgba(255,255,255,0.55)",
+        color: isActive ? VDK : N500,
         borderBottomColor: isActive ? color : "transparent",
       }}
-      onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.85)"; }}
-      onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.55)"; }}
+      onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = VDK; }}
+      onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = N500; }}
     >
       <span
         className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[9px] font-bold"
         style={
           isActive
             ? { background: color, color: "#fff" }
-            : { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.45)" }
+            : { background: "#F0EBE0", color: N500 }
         }
       >
         {num}

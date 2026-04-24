@@ -732,8 +732,8 @@ export default function AdminReports() {
         <Card className="bg-white border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-50">
-                <Eye className="w-5 h-5 text-green-700" />
+              <div className="p-2 rounded-lg bg-muted">
+                <Eye className="w-5 h-5 text-muted-foreground" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{stats.published}</p>
@@ -751,8 +751,8 @@ export default function AdminReports() {
         >
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-amber-50">
-                <Clock className="w-5 h-5 text-amber-700" />
+              <div className="p-2 rounded-lg bg-muted">
+                <Clock className="w-5 h-5 text-muted-foreground" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{stats.scheduled}</p>
@@ -1124,7 +1124,7 @@ export default function AdminReports() {
           { key: "inside", label: "Inside", icon: Mail, color: "text-[#0033A0]", bgColor: "bg-[#0033A0]/10" },
           { key: "insights", label: "Insights", icon: BarChart3, color: "text-violet-600", bgColor: "bg-violet-100" },
           { key: "launch", label: "Launch", icon: Rocket, color: "text-orange-600", bgColor: "bg-orange-100" },
-          { key: "irl", label: "IRL", icon: Users, color: "text-emerald-600", bgColor: "bg-emerald-100" },
+          { key: "irl", label: "IRL", icon: Users, color: "text-slate-600", bgColor: "bg-slate-100" },
         ];
         const attachmentIcons: Record<string, { icon: typeof Video; label: string }> = {
           video: { icon: Video, label: "Video" },

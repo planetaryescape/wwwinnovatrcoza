@@ -49,7 +49,7 @@ function getCoverImage(category: string): string {
 }
 
 const categoryColors: Record<string, { bg: string; text: string }> = {
-  insights: { bg: "bg-blue-50", text: "text-[#5B6EF7]" },
+  insights: { bg: "bg-blue-50", text: "text-[#4860FA]" },
   launch: { bg: "bg-orange-50", text: "text-orange-700" },
   inside: { bg: "bg-violet-50", text: "text-violet-700" },
   irl: { bg: "bg-rose-50", text: "text-rose-700" },
@@ -174,7 +174,7 @@ function RelatedReportCard({ report }: { report: Report }) {
             {report.category}
           </Badge>
           <h4 
-            className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-[#5B6EF7] transition-colors"
+            className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-[#4860FA] transition-colors"
             style={{ fontFamily: 'DM Serif Display, serif' }}
           >
             {report.title}
@@ -201,13 +201,13 @@ function AccessPaywall({
   const getIcon = () => {
     switch (accessResult.reason) {
       case "not_logged_in":
-        return <LogIn className="w-8 h-8 text-[#5B6EF7]" />;
+        return <LogIn className="w-8 h-8 text-[#4860FA]" />;
       case "tier_required":
-        return <Crown className="w-8 h-8 text-[#5B6EF7]" />;
+        return <Crown className="w-8 h-8 text-[#4860FA]" />;
       case "credits_required":
-        return <CreditCard className="w-8 h-8 text-[#5B6EF7]" />;
+        return <CreditCard className="w-8 h-8 text-[#4860FA]" />;
       default:
-        return <Lock className="w-8 h-8 text-[#5B6EF7]" />;
+        return <Lock className="w-8 h-8 text-[#4860FA]" />;
     }
   };
 
@@ -218,7 +218,7 @@ function AccessPaywall({
           <Button 
             onClick={onLogin}
             className="rounded-full"
-            style={{ backgroundColor: '#5B6EF7' }}
+            style={{ backgroundColor: '#4860FA' }}
             data-testid="button-login-access"
           >
             <LogIn className="w-4 h-4 mr-2" />
@@ -230,7 +230,7 @@ function AccessPaywall({
           <Button 
             onClick={onUpgrade}
             className="rounded-full"
-            style={{ backgroundColor: '#5B6EF7' }}
+            style={{ backgroundColor: '#4860FA' }}
             data-testid="button-upgrade-tier"
           >
             <Crown className="w-4 h-4 mr-2" />
@@ -243,7 +243,7 @@ function AccessPaywall({
             <Button 
               onClick={onPurchaseCredits}
               className="rounded-full"
-              style={{ backgroundColor: '#5B6EF7' }}
+              style={{ backgroundColor: '#4860FA' }}
               data-testid="button-purchase-credits"
             >
               <CreditCard className="w-4 h-4 mr-2" />
@@ -252,7 +252,7 @@ function AccessPaywall({
             <Button 
               variant="outline"
               onClick={onUpgrade}
-              className="rounded-full border-[#5B6EF7] text-[#5B6EF7]"
+              className="rounded-full border-[#4860FA] text-[#4860FA]"
               data-testid="button-upgrade-for-credits"
             >
               <Crown className="w-4 h-4 mr-2" />
@@ -266,9 +266,9 @@ function AccessPaywall({
   };
 
   return (
-    <Card className="border-2 border-[#5B6EF7]/20 bg-gradient-to-br from-blue-50 to-white">
+    <Card className="border-2 border-[#4860FA]/20 bg-gradient-to-br from-blue-50 to-white">
       <CardContent className="p-8 text-center">
-        <div className="w-16 h-16 rounded-full bg-[#5B6EF7]/10 flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 rounded-full bg-[#4860FA]/10 flex items-center justify-center mx-auto mb-4">
           {getIcon()}
         </div>
         <h3 
@@ -463,7 +463,7 @@ export default function InsightDetail() {
       <InsightPageWrapper isAuthenticated={isAuthenticated}>
         <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="flex items-center gap-3">
-            <Loader2 className="w-6 h-6 animate-spin text-[#5B6EF7]" />
+            <Loader2 className="w-6 h-6 animate-spin text-[#4860FA]" />
             <span className="text-muted-foreground">Loading report...</span>
           </div>
         </div>
@@ -488,7 +488,7 @@ export default function InsightDetail() {
             <Button 
               onClick={() => setLocation("/portal/trends")} 
               className="rounded-full"
-              style={{ backgroundColor: '#5B6EF7' }}
+              style={{ backgroundColor: '#4860FA' }}
               data-testid="button-back-library"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -583,7 +583,7 @@ export default function InsightDetail() {
                 {report.isNew && (
                   <Badge 
                     className="text-white text-xs font-medium px-2 py-1"
-                    style={{ backgroundColor: '#5B6EF7' }}
+                    style={{ backgroundColor: '#4860FA' }}
                   >
                     NEW
                   </Badge>
@@ -640,7 +640,7 @@ export default function InsightDetail() {
             <div className="mb-8">
               <button
                 onClick={scrollToDownload}
-                className="inline-flex items-center gap-1.5 text-[#5B6EF7] hover:text-[#4958d6] text-sm font-medium transition-colors"
+                className="inline-flex items-center gap-1.5 text-[#4860FA] hover:text-[#4958d6] text-sm font-medium transition-colors"
                 data-testid="button-jump-to-report"
               >
                 <FileText className="w-4 h-4" />
@@ -669,7 +669,7 @@ export default function InsightDetail() {
                         <ul className="space-y-2">
                           {section.body.split('\n').filter(l => l.trim()).map((line, i) => (
                             <li key={i} className="flex items-start gap-2.5 text-gray-700">
-                              <CheckCircle2 className="w-5 h-5 text-[#5B6EF7] flex-shrink-0 mt-0.5" />
+                              <CheckCircle2 className="w-5 h-5 text-[#4860FA] flex-shrink-0 mt-0.5" />
                               <span>{line.trim()}</span>
                             </li>
                           ))}
@@ -692,17 +692,17 @@ export default function InsightDetail() {
                   ))}
 
                   {report.content.closingLine && (
-                    <p className="text-lg text-gray-900 font-medium italic border-l-4 border-[#5B6EF7] pl-4 mt-8">
+                    <p className="text-lg text-gray-900 font-medium italic border-l-4 border-[#4860FA] pl-4 mt-8">
                       {report.content.closingLine}
                     </p>
                   )}
                 </article>
               )}
 
-              <Card className="border-2 border-[#5B6EF7]/20 bg-gradient-to-br from-blue-50 to-white" id="report-download">
+              <Card className="border-2 border-[#4860FA]/20 bg-gradient-to-br from-blue-50 to-white" id="report-download">
                 <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 rounded-full bg-[#5B6EF7]/10 flex items-center justify-center mx-auto mb-4">
-                    <Lock className="w-8 h-8 text-[#5B6EF7]" />
+                  <div className="w-16 h-16 rounded-full bg-[#4860FA]/10 flex items-center justify-center mx-auto mb-4">
+                    <Lock className="w-8 h-8 text-[#4860FA]" />
                   </div>
                   <h3 
                     className="text-xl font-bold mb-2 text-gray-900"
@@ -719,7 +719,7 @@ export default function InsightDetail() {
                       <Button 
                         onClick={handleLogin}
                         className="rounded-full"
-                        style={{ backgroundColor: '#5B6EF7' }}
+                        style={{ backgroundColor: '#4860FA' }}
                         data-testid="button-login-access"
                       >
                         <LogIn className="w-4 h-4 mr-2" />
@@ -730,7 +730,7 @@ export default function InsightDetail() {
                           Or email{' '}
                           <a 
                             href={`mailto:${report.content.ctaEmail}`} 
-                            className="text-[#5B6EF7] hover:underline"
+                            className="text-[#4860FA] hover:underline"
                             data-testid="link-cta-email"
                           >
                             {report.content.ctaEmail}
@@ -743,7 +743,7 @@ export default function InsightDetail() {
                       <Button 
                         onClick={handleUpgrade}
                         className="rounded-full"
-                        style={{ backgroundColor: '#5B6EF7' }}
+                        style={{ backgroundColor: '#4860FA' }}
                         data-testid="button-upgrade-tier"
                       >
                         <Crown className="w-4 h-4 mr-2" />
@@ -754,7 +754,7 @@ export default function InsightDetail() {
                           Or email{' '}
                           <a 
                             href={`mailto:${report.content.ctaEmail}`} 
-                            className="text-[#5B6EF7] hover:underline"
+                            className="text-[#4860FA] hover:underline"
                             data-testid="link-cta-email"
                           >
                             {report.content.ctaEmail}
@@ -787,7 +787,7 @@ export default function InsightDetail() {
                         <ul className="space-y-2">
                           {section.body.split('\n').filter(l => l.trim()).map((line, i) => (
                             <li key={i} className="flex items-start gap-2.5 text-gray-700">
-                              <CheckCircle2 className="w-5 h-5 text-[#5B6EF7] flex-shrink-0 mt-0.5" />
+                              <CheckCircle2 className="w-5 h-5 text-[#4860FA] flex-shrink-0 mt-0.5" />
                               <span>{line.trim()}</span>
                             </li>
                           ))}
@@ -810,7 +810,7 @@ export default function InsightDetail() {
                   ))}
 
                   {report.content.closingLine && (
-                    <p className="text-lg text-gray-900 font-medium italic border-l-4 border-[#5B6EF7] pl-4 mt-8 mb-8">
+                    <p className="text-lg text-gray-900 font-medium italic border-l-4 border-[#4860FA] pl-4 mt-8 mb-8">
                       {report.content.closingLine}
                     </p>
                   )}
@@ -857,7 +857,7 @@ export default function InsightDetail() {
                         size="lg"
                         onClick={handleDownload}
                         className="rounded-full"
-                        style={{ backgroundColor: '#5B6EF7' }}
+                        style={{ backgroundColor: '#4860FA' }}
                         data-testid="button-download-footer"
                       >
                         <Download className="w-4 h-4 mr-2" />
@@ -869,7 +869,7 @@ export default function InsightDetail() {
                         size="lg"
                         onClick={() => window.open(report.dashboardLink!, '_blank')}
                         variant="outline"
-                        className="rounded-full border-[#5B6EF7] text-[#5B6EF7] hover:bg-[#5B6EF7]/10"
+                        className="rounded-full border-[#4860FA] text-[#4860FA] hover:bg-[#4860FA]/10"
                         data-testid="button-open-dashboard"
                       >
                         <ExternalLink className="w-4 h-4 mr-2" />
@@ -882,7 +882,7 @@ export default function InsightDetail() {
                       Or email{' '}
                       <a 
                         href={`mailto:${report.content.ctaEmail}`} 
-                        className="text-[#5B6EF7] hover:underline"
+                        className="text-[#4860FA] hover:underline"
                       >
                         {report.content.ctaEmail}
                       </a>
@@ -958,7 +958,7 @@ export default function InsightDetail() {
               <Button
                 variant="outline"
                 onClick={() => setLocation("/portal/trends")}
-                className="rounded-full border-[#5B6EF7] text-[#5B6EF7] hover:bg-[#5B6EF7] hover:text-white"
+                className="rounded-full border-[#4860FA] text-[#4860FA] hover:bg-[#4860FA] hover:text-white"
                 data-testid="button-back-footer"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
@@ -999,7 +999,7 @@ export default function InsightDetail() {
         {showBackToTop && (
           <button
             onClick={scrollToTop}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-[#5B6EF7] text-white rounded-full shadow-lg hover:bg-[#4958d6] transition-all duration-300 md:px-4 md:py-2"
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-[#4860FA] text-white rounded-full shadow-lg hover:bg-[#4958d6] transition-all duration-300 md:px-4 md:py-2"
             aria-label="Back to top"
             data-testid="button-back-to-top"
           >

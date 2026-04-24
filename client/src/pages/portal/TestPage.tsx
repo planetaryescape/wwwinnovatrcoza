@@ -34,7 +34,8 @@ const AMBER_LT = "#FEF6D6";
 const CYAN_DK  = "#1A8FAD";
 const CYAN_LT  = "#DFF6FC";
 const CREAM    = "#FFFFFF";
-const TEST_COLOR = SUCCESS;
+const BLUE     = "#4860FA";
+const TEST_COLOR = BLUE;
 
 const CARD: React.CSSProperties = {
   background: "#ffffff",
@@ -539,28 +540,28 @@ export default function TestPage() {
     <PortalLayout showPhaseTopbar={false}>
       <div className="flex flex-col w-full h-full" style={{ background: CREAM }}>
 
-        {/* Phase topbar */}
-        <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: "linear-gradient(135deg, #201B3C 0%, #2E2760 100%)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        {/* Phase topbar — flat */}
+        <div className="flex items-center justify-between flex-shrink-0 px-5" style={{ minHeight: 52, background: "#FFFFFF", borderBottom: `1px solid ${N200}` }}>
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1" style={{ background: "rgba(42,158,92,0.2)", color: "#86EFAC", border: "1px solid rgba(42,158,92,0.4)", borderRadius: 6 }}>
+            <span className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1" style={{ background: "rgba(72,96,250,0.08)", color: BLUE, border: "1px solid rgba(72,96,250,0.18)", borderRadius: 6 }}>
               PHASE 02
             </span>
-            <h1 className="font-serif text-xl text-white">Test</h1>
-            <span className="text-sm hidden sm:block" style={{ color: N400 }}>Put your ideas in front of real consumers.</span>
+            <h1 className="font-serif text-xl" style={{ color: VDK }}>Test</h1>
+            <span className="text-sm hidden sm:block" style={{ color: N500 }}>Put your ideas in front of real consumers.</span>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => { setActiveTab("brief"); setBriefMode("choose"); }}
               data-testid="button-launch-brief"
               className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg"
-              style={{ background: TEST_COLOR, borderRadius: 8 }}
+              style={{ background: BLUE, borderRadius: 8 }}
             >
               Launch a Brief
             </button>
             <button
               onClick={() => setLocation("/portal/dashboard")}
               className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
-              style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.7)" }}
+              style={{ background: "#F5F5F5", color: N500, border: `1px solid ${N200}` }}
               data-testid="button-close-test"
             >
               <X className="w-3.5 h-3.5" />
@@ -606,8 +607,8 @@ export default function TestPage() {
                         className="text-left rounded-2xl p-5 transition-all hover:shadow-md"
                         style={{ background: "#fff", border: `2px solid ${N200}` }}
                       >
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: SUC_LT }}>
-                          <FileText className="w-5 h-5" style={{ color: TEST_COLOR }} />
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: "rgba(72,96,250,0.10)" }}>
+                          <FileText className="w-5 h-5" style={{ color: BLUE }} />
                         </div>
                         <div className="text-sm font-semibold mb-1" style={{ color: VDK }}>Standard Brief Form</div>
                         <div className="text-xs leading-relaxed" style={{ color: N500 }}>Fill out the full structured brief form — objectives, audience, concepts, billing and review in one flow.</div>
@@ -693,7 +694,7 @@ export default function TestPage() {
                               data-testid={`study-type-${card.id}`}
                               className="border-2 rounded-xl p-4 text-left transition-all"
                               style={selectedStudyType === card.id
-                                ? { borderColor: TEST_COLOR, background: SUC_LT }
+                                ? { borderColor: BLUE, background: "rgba(72,96,250,0.06)" }
                                 : { borderColor: N200, background: "#fff" }
                               }
                             >
@@ -869,7 +870,7 @@ export default function TestPage() {
                                   onClick={() => setStudyTypeAI(card.id)}
                                   data-testid={`ai-study-type-${card.id}`}
                                   className="border-2 rounded-xl p-4 text-left transition-all"
-                                  style={studyTypeAI === card.id ? { borderColor: TEST_COLOR, background: SUC_LT } : { borderColor: N200, background: "#fff" }}
+                                  style={studyTypeAI === card.id ? { borderColor: BLUE, background: "rgba(72,96,250,0.06)" } : { borderColor: N200, background: "#fff" }}
                                 >
                                   <div className="text-sm font-semibold mb-1" style={{ color: VDK }}>{card.name}</div>
                                   <div className="text-xs mb-2 leading-relaxed" style={{ color: N500 }}>{card.desc}</div>
@@ -1096,7 +1097,7 @@ export default function TestPage() {
                     <BarChart2 className="w-10 h-10 mx-auto mb-3" style={{ color: N400 }} />
                     <div className="text-sm font-semibold mb-1" style={{ color: VDK }}>No studies yet</div>
                     <div className="text-xs mb-4" style={{ color: N500 }}>Launch your first brief to see study results here.</div>
-                    <button onClick={() => setActiveTab("brief")} className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg" style={{ background: SUCCESS, borderRadius: 8 }}>
+                    <button onClick={() => setActiveTab("brief")} className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg" style={{ background: BLUE, borderRadius: 8 }}>
                       Launch a Brief
                     </button>
                   </div>
@@ -1205,19 +1206,13 @@ export default function TestPage() {
                       {/* Metrics grid */}
                       <div className="grid grid-cols-3" style={{ borderTop: `1px solid ${N200}` }}>
                         {study.metrics.map((m, i) => {
-                          const mc = mColor(m.val, m.signal);
                           const sm = signalMeta(m.signal, m.val);
-                          const tileBg = mc === SUCCESS
-                            ? "linear-gradient(135deg, rgba(42,158,92,0.06) 0%, rgba(42,158,92,0.02) 100%)"
-                            : mc === AMBER_DK
-                            ? "linear-gradient(135deg, rgba(184,145,26,0.07) 0%, rgba(184,145,26,0.02) 100%)"
-                            : "linear-gradient(135deg, rgba(232,80,58,0.07) 0%, rgba(232,80,58,0.02) 100%)";
                           return (
-                            <div key={m.label} className="py-4 px-5 text-center" style={{ background: tileBg, borderRight: i < study.metrics.length - 1 ? `1px solid ${N200}` : "none", borderBottom: i < 3 ? `1px solid ${N200}` : "none" }}>
-                              <div className="text-[28px] font-bold font-mono leading-none mb-0.5" style={{ color: mc }}>{m.val}%</div>
+                            <div key={m.label} className="py-4 px-5 text-center" style={{ background: "#fff", borderRight: i < study.metrics.length - 1 ? `1px solid ${N200}` : "none", borderBottom: i < 3 ? `1px solid ${N200}` : "none" }}>
+                              <div className="text-[28px] font-bold font-mono leading-none mb-0.5" style={{ color: VDK }}>{m.val}%</div>
                               <div className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: N500 }}>{m.label}</div>
                               {sm && (
-                                <div className="text-[10px] font-semibold" style={{ color: sm.color }}>{sm.arrow} {m.signal}</div>
+                                <div className="inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: sm.bg, color: sm.color }}>{sm.arrow} {m.signal}</div>
                               )}
                             </div>
                           );
@@ -1258,7 +1253,7 @@ export default function TestPage() {
                           <button
                             onClick={() => { setActiveTab("assistant"); setSelectedAssistStudy(study.id); }}
                             className="text-xs font-semibold px-4 py-1.5 text-white rounded-lg flex items-center gap-1.5"
-                            style={{ background: CORAL, borderRadius: 8 }}
+                            style={{ background: BLUE, borderRadius: 8 }}
                             data-testid={`button-act-study-${study.id}`}
                           >
                             <Sparkles className="w-3 h-3" /> Analyse in Act
@@ -1412,8 +1407,11 @@ export default function TestPage() {
                       <div className="text-xs font-bold mb-1.5" style={{ color: VDK }}>Key Takeout</div>
                       <p className="text-xs leading-relaxed" style={{ color: N500 }}>{assistantData.keyTakeout}</p>
                     </div>
-                    <div className="rounded-xl p-3" style={{ background: AMBER_LT, border: `1px solid ${AMBER_DK}22` }}>
-                      <div className="text-xs font-bold mb-1" style={{ color: AMBER_DK }}>Watch Signal</div>
+                    <div className="rounded-xl p-3" style={{ background: "#FAFAF8", border: `1px solid ${N200}` }}>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: AMBER_DK }} />
+                        <div className="text-xs font-bold" style={{ color: VDK }}>Watch Signal</div>
+                      </div>
                       <p className="text-xs leading-relaxed" style={{ color: N500 }}>{assistantData.watchSignal}</p>
                     </div>
                   </div>

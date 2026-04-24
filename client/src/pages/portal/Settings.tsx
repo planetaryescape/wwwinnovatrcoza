@@ -289,9 +289,9 @@ export default function Settings() {
         </div>
 
         {isViewingAsCompany && (
-          <Alert className="bg-amber-50 border-amber-200">
+          <Alert>
             <AlertTriangle className="w-4 h-4 text-amber-600" />
-            <AlertDescription className="text-amber-800">
+            <AlertDescription>
               You are currently viewing as a company. Settings changes are disabled during impersonation mode.
             </AlertDescription>
           </Alert>
@@ -576,7 +576,7 @@ export default function Settings() {
                       <AlertTriangle className="w-4 h-4 text-amber-500" />
                       <span className="text-xs text-muted-foreground">Never Logged In</span>
                     </div>
-                    <p className="text-2xl font-bold text-amber-600">{adminStats?.neverLoggedIn ?? "..."}</p>
+                    <p className="text-2xl font-bold">{adminStats?.neverLoggedIn ?? "..."}</p>
                   </div>
                   <div className="p-4 rounded-lg border" data-testid="stat-report-views">
                     <div className="flex items-center gap-2 mb-1">
